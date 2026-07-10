@@ -34,6 +34,13 @@ def load_runs(runs_root):
 
 
 def cell_key(run):
+    """A cell is uniquely identified by its config NAME (two configs can
+    share dataset/backbone/stem but differ in stem_kwargs/calibration --
+    grouping on parsed fields would silently average different variants)."""
+    return run["name"]
+
+
+def cell_fields(run):
     cfg = run["config"]
     return (cfg["dataset"], cfg.get("subset_pct") or 100, cfg["backbone"], cfg["stem"])
 
@@ -57,9 +64,11 @@ def aggregate_accuracy(runs):
         fm, fs = mean_std([r["final_test_acc"] for r in group])
         bm, bs = mean_std([r["best_test_acc"] for r in group])
         acc = group[0]["accounting"]
+        dataset, subset, backbone, stem = cell_fields(group[0])
         rows.append({
-            "dataset": key[0], "subset_pct": key[1], "backbone": key[2],
-            "stem": key[3], "seeds": len(group),
+            "cell": key,
+            "dataset": dataset, "subset_pct": subset, "backbone": backbone,
+            "stem": stem, "seeds": len(group),
             "final_top1": fmt_pm(fm, fs), "best_top1": fmt_pm(bm, bs),
             "params_M": f"{acc['params_trainable'] / 1e6:.2f}",
             "fixed_filter_params": acc["params_stem_fixed_filters"],
@@ -92,19 +101,24 @@ def aggregate_robustness(runs):
 
     rows = []
     for key in sorted(per_cell):
-        dataset, subset, backbone, stem = key
-        base_key = (dataset, subset, backbone, "none")
+        dataset, subset, backbone, stem = cell_fields(cells[key][0])
         errs = per_cell[key]
         mean_err = float(np.mean(list(errs.values())))
+        # baseline: the stem="none" cell with matching dataset/subset/backbone
+        base = None
+        for other, group in cells.items():
+            if cell_fields(group[0]) == (dataset, subset, backbone, "none"):
+                base = per_cell[other]
+                break
         mce = None
-        if base_key in per_cell:
-            base = per_cell[base_key]
+        if base:
             ces = [errs[c] / base[c] for c in errs if base.get(c)]
             mce = float(np.mean(ces)) if ces else None
         clean = np.mean(
             [r["robustness"]["clean_error"] for r in cells[key]]
         )
         rows.append({
+            "cell": key,
             "dataset": dataset, "subset_pct": subset, "backbone": backbone,
             "stem": stem, "seeds": len(cells[key]),
             "clean_err": f"{clean * 100:.2f}",
