@@ -1,0 +1,315 @@
+"""MomentStem: fixed orthogonal-moment filter bank prepended to a CNN backbone.
+
+Ported from the MomentsNeRF encoder (~/projects/momentsnerf), with no
+PixelNeRF dependencies. See PORTING.md for a line-by-line account of what was
+ported faithfully and what was changed (and why).
+
+Two filter families:
+
+* Gabor bank -- 9 kernels generated with the exact formula of
+  ``GaborNet.GaborConv2d.calculate_weights`` (Meshgini et al. parameter
+  scheme), drawn once with a fixed committed seed and frozen.
+* Zernike bank -- 15 kernels, one per polynomial j=0..14 of the table in
+  ``zernet.layers.ComplexZernikeFunction`` (ported verbatim, including its
+  deviations from the standard OSA table -- see PORTING.md), evaluated on the
+  unit disk (pixels with rho > 1 are zeroed) and L2-normalised.
+
+Modes:
+
+* ``sum``    -- output stays 3-channel: dense 3->3 Gabor conv (the 9 responses
+  are summed into 3 channels, exactly the original "sum" variant), followed by
+  a depthwise conv with the mean Zernike kernel. Keeps the pretrained-stem
+  input contract.
+* ``concat`` -- output is ``[identity RGB (3) | Gabor (9) | Zernike (15)]``
+  = 27 channels. The Gabor part is the original grouped-conv concat variant
+  (channel 3i+o holds input channel i's o-th Gabor response); the identity
+  passthrough and the Zernike channels generalise it (the MomentsNeRF concat
+  variant was Gabor-only).
+
+All moment kernels are registered as BUFFERS (zero trainable parameters)
+unless ``trainable=True`` (the ``gabor-learn`` control).
+"""
+
+import math
+
+import torch
+import torch.nn.functional as F
+from torch import nn
+
+# Committed constants: every run of the study uses this exact filter bank.
+GABOR_SEED = 1234
+GABOR_DELTA = 1e-3  # small addition to avoid division by zero (ported)
+
+
+def gabor_kernel(freq, theta, sigma, psi, kernel_size):
+    """Single Gabor kernel, exact port of GaborConv2d.calculate_weights.
+
+    Grid construction is ported verbatim: x0 = ceil(k/2) and
+    linspace(-x0 + 1, x0, k), which for odd k is the symmetric integer grid
+    shifted so it spans [-(k//2), k//2 + 1]; kept as-is for faithfulness.
+    """
+    x0 = math.ceil(kernel_size / 2)
+    y, x = torch.meshgrid(
+        torch.linspace(-x0 + 1, x0 + 0, kernel_size, dtype=torch.float64),
+        torch.linspace(-x0 + 1, x0 + 0, kernel_size, dtype=torch.float64),
+        indexing="ij",
+    )
+    rotx = x * math.cos(theta) + y * math.sin(theta)
+    roty = -x * math.sin(theta) + y * math.cos(theta)
+    g = torch.exp(-0.5 * ((rotx ** 2 + roty ** 2) / (sigma + GABOR_DELTA) ** 2))
+    g = g * torch.cos(freq * rotx + psi)
+    g = g / (2 * math.pi * sigma ** 2)
+    return g.to(torch.float32)
+
+
+def gabor_bank(n_out=3, n_in=3, kernel_size=11, seed=GABOR_SEED):
+    """Bank of n_out*n_in Gabor kernels, shape (n_out, n_in, k, k).
+
+    Parameter scheme ported from GaborConv2d.__init__ (Meshgini et al.):
+    freq = (pi/2) * sqrt(2)^(-n), n ~ U{0..4}; theta = m*pi/8, m ~ U{0..7};
+    sigma = pi/freq; psi ~ U[0, pi). Drawn once from a fixed committed seed --
+    the bank is a constant of the study, not a random variable.
+    """
+    gen = torch.Generator().manual_seed(seed)
+    n = torch.randint(0, 5, (n_out, n_in), generator=gen)
+    m = torch.randint(0, 8, (n_out, n_in), generator=gen)
+    psi = math.pi * torch.rand(n_out, n_in, generator=gen)
+    freq = (math.pi / 2) * math.sqrt(2) ** (-n.to(torch.float64))
+    theta = (math.pi / 8) * m.to(torch.float64)
+    sigma = math.pi / freq
+
+    bank = torch.stack(
+        [
+            torch.stack(
+                [
+                    gabor_kernel(
+                        freq[i, j].item(),
+                        theta[i, j].item(),
+                        sigma[i, j].item(),
+                        psi[i, j].item(),
+                        kernel_size,
+                    )
+                    for j in range(n_in)
+                ]
+            )
+            for i in range(n_out)
+        ]
+    )
+    return bank
+
+
+def zernike_polynomial(j, x, y):
+    """Zernike polynomial j evaluated at cartesian coords, j in 0..14.
+
+    Verbatim port of the polynomial table in
+    zernet.layers.ComplexZernikeFunction.forward (see PORTING.md for where
+    that table deviates from the standard OSA/Wikipedia indexing).
+    """
+    if j == 0:
+        return torch.ones_like(x)
+    if j == 1:
+        return x
+    if j == 2:
+        return y
+    if j == 3:  # oblique astigmatism
+        return 2.0 * x * y
+    if j == 4:  # defocus (as ported: no 2r^2 - 1 normalisation)
+        return x ** 2 + y ** 2
+    if j == 5:  # vertical astigmatism
+        return x ** 2 - y ** 2
+    r = torch.sqrt(x ** 2 + y ** 2)
+    t = torch.atan2(y, x)
+    if j == 6:  # vertical trefoil
+        return r ** 3 * torch.sin(3.0 * t)
+    if j == 7:  # vertical coma (as ported)
+        return 3.0 * r ** 3 * torch.sin(3.0 * t)
+    if j == 8:  # horizontal coma (as ported)
+        return 3.0 * r ** 3 * torch.cos(3.0 * t)
+    if j == 9:  # oblique trefoil
+        return r ** 3 * torch.cos(3.0 * t)
+    if j == 10:  # oblique quadrafoil
+        return 2.0 * r ** 4 * torch.sin(4.0 * t)
+    if j == 11:  # oblique secondary astigmatism
+        return 2.0 * (4.0 * r ** 4 - 3.0 * r ** 2) * torch.sin(2.0 * t)
+    if j == 12:  # primary spherical
+        return 6.0 * r ** 4 - 6.0 * r ** 2 + torch.ones_like(r)
+    if j == 13:  # vertical secondary astigmatism
+        return 2.0 * (4.0 * r ** 4 - 3.0 * r ** 2) * torch.cos(2.0 * t)
+    if j == 14:  # vertical quadrafoil
+        return 2.0 * r ** 4 * torch.cos(4.0 * t)
+    raise ValueError(f"Zernike index {j} out of range 0..14")
+
+
+N_ZERNIKE = 15
+
+
+def zernike_bank(kernel_size=11):
+    """15 fixed Zernike kernels on the unit disk, shape (15, k, k).
+
+    Pixels are tiled over [-1, 1]^2, values outside the unit disk are zeroed,
+    and each kernel is L2-normalised so the 15 responses have comparable
+    magnitude (the polynomials themselves have wildly different norms).
+    """
+    coords = torch.linspace(-1.0, 1.0, kernel_size, dtype=torch.float64)
+    y, x = torch.meshgrid(coords, coords, indexing="ij")
+    disk = (x ** 2 + y ** 2 <= 1.0).to(torch.float64)
+    kernels = []
+    for j in range(N_ZERNIKE):
+        k = zernike_polynomial(j, x, y) * disk
+        k = k / k.norm().clamp_min(1e-12)
+        kernels.append(k.to(torch.float32))
+    return torch.stack(kernels)
+
+
+class MomentStem(nn.Module):
+    """Fixed Gabor+Zernike filter stem. See module docstring.
+
+    :param mode "sum" (3-channel output) or "concat" (identity+gabor+zernike)
+    :param init "moments" for the real filter bank, "random" for the
+        random-fixed control: same architecture, same per-kernel L2 norms,
+        i.i.d. Gaussian filters (isolates moment STRUCTURE from fixedness).
+    :param trainable if True, filters are nn.Parameters instead of buffers
+        (the gabor-learn control: moment-initialised but free to train).
+    :param seed seed for init="random" draws (the moment bank itself always
+        uses the committed GABOR_SEED and is not affected).
+    """
+
+    def __init__(
+        self,
+        mode="concat",
+        in_channels=3,
+        kernel_size=11,
+        use_gabor=True,
+        use_zernike=True,
+        include_identity=True,
+        init="moments",
+        trainable=False,
+        seed=0,
+    ):
+        super().__init__()
+        if mode not in ("sum", "concat"):
+            raise ValueError(f"mode must be 'sum' or 'concat', got {mode!r}")
+        if init not in ("moments", "random"):
+            raise ValueError(f"init must be 'moments' or 'random', got {init!r}")
+        if not (use_gabor or use_zernike):
+            raise ValueError("at least one of use_gabor/use_zernike required")
+        if kernel_size % 2 != 1:
+            raise ValueError("kernel_size must be odd (same-padding contract)")
+
+        self.mode = mode
+        self.in_channels = in_channels
+        self.kernel_size = kernel_size
+        self.use_gabor = use_gabor
+        self.use_zernike = use_zernike
+        self.include_identity = include_identity and mode == "concat"
+        self.trainable = trainable
+        self.padding = kernel_size // 2
+
+        gabor_w = zernike_w = None
+        if use_gabor:
+            # K[o, i] = o-th Gabor response of input channel i.
+            bank = gabor_bank(in_channels, in_channels, kernel_size)
+            if mode == "sum":
+                # Dense conv: out[o] = sum_i K[o,i] * x_i -- the original
+                # GaborConv2d(3, 3) "sum" variant.
+                gabor_w = bank
+            else:
+                # Grouped conv (groups=in_channels): channel 3i+o holds input
+                # i's o-th response -- the original 9-channel concat variant.
+                gabor_w = torch.stack(
+                    [bank[o, i] for i in range(in_channels) for o in range(in_channels)]
+                ).unsqueeze(1)
+
+        if use_zernike:
+            zbank = zernike_bank(kernel_size)  # (15, k, k)
+            if mode == "sum":
+                # Depthwise conv with the mean Zernike kernel: each channel's
+                # 15 responses averaged back into that channel.
+                zernike_w = zbank.mean(dim=0, keepdim=True).repeat(in_channels, 1, 1)
+                zernike_w = zernike_w.unsqueeze(1)  # (C, 1, k, k)
+            else:
+                # Each Z_j applied to the channel mean -> 15 output channels.
+                zernike_w = (
+                    zbank.unsqueeze(1).repeat(1, in_channels, 1, 1) / in_channels
+                )
+
+        if init == "random":
+            gen = torch.Generator().manual_seed(seed)
+            gabor_w = self._randomize(gabor_w, gen)
+            zernike_w = self._randomize(zernike_w, gen)
+
+        self._register("gabor_weight", gabor_w)
+        self._register("zernike_weight", zernike_w)
+
+        n_gabor = 0
+        n_zernike = 0
+        if use_gabor:
+            n_gabor = in_channels if mode == "sum" else in_channels * in_channels
+        if use_zernike:
+            n_zernike = in_channels if mode == "sum" else N_ZERNIKE
+        if mode == "sum":
+            self.out_channels = in_channels
+        else:
+            self.out_channels = (
+                (in_channels if self.include_identity else 0) + n_gabor + n_zernike
+            )
+
+    @staticmethod
+    def _randomize(weight, gen):
+        """Gaussian filters with the same shape and per-kernel L2 norm."""
+        if weight is None:
+            return None
+        rand = torch.randn(weight.shape, generator=gen)
+        norms = weight.flatten(2).norm(dim=2, keepdim=True).unsqueeze(-1)
+        rand_norms = rand.flatten(2).norm(dim=2, keepdim=True).unsqueeze(-1)
+        return rand / rand_norms.clamp_min(1e-12) * norms
+
+    def _register(self, name, tensor):
+        if tensor is None:
+            setattr(self, name, None)
+        elif self.trainable:
+            setattr(self, name, nn.Parameter(tensor.clone()))
+        else:
+            self.register_buffer(name, tensor)
+
+    def filter_numel(self):
+        """Total elements in the moment filters (the 'effective parameter'
+        overhead a learned stem must match; buffers are invisible to
+        parameter counters)."""
+        total = 0
+        for w in (self.gabor_weight, self.zernike_weight):
+            if w is not None:
+                total += w.numel()
+        return total
+
+    def forward(self, x):
+        if x.dim() != 4 or x.shape[1] != self.in_channels:
+            raise ValueError(
+                f"expected (B, {self.in_channels}, H, W) input, got {tuple(x.shape)}"
+            )
+        if self.mode == "sum":
+            if self.gabor_weight is not None:
+                x = F.conv2d(x, self.gabor_weight, padding=self.padding)
+            if self.zernike_weight is not None:
+                x = F.conv2d(
+                    x, self.zernike_weight, padding=self.padding, groups=self.in_channels
+                )
+            return x
+        parts = []
+        if self.include_identity:
+            parts.append(x)
+        if self.gabor_weight is not None:
+            parts.append(
+                F.conv2d(x, self.gabor_weight, padding=self.padding, groups=self.in_channels)
+            )
+        if self.zernike_weight is not None:
+            parts.append(F.conv2d(x, self.zernike_weight, padding=self.padding))
+        return torch.cat(parts, dim=1)
+
+    def extra_repr(self):
+        return (
+            f"mode={self.mode}, out_channels={self.out_channels}, "
+            f"kernel_size={self.kernel_size}, gabor={self.use_gabor}, "
+            f"zernike={self.use_zernike}, identity={self.include_identity}, "
+            f"trainable={self.trainable}"
+        )

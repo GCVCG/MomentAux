@@ -1,0 +1,14 @@
+name: cifar100_resnet34_learned_10pct
+dataset: cifar100
+subset_pct: 10
+backbone: resnet34
+stem: learned
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 8
+small_input: true
+pretrained: false
+stem_kernel_size: 11

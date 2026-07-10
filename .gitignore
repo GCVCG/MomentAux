@@ -1,0 +1,12 @@
+# data & artifacts (subset JSONs under data/subsets/ ARE committed)
+data/*
+!data/subsets/
+runs/
+results/
+slurm/logs/
+
+__pycache__/
+*.pyc
+.pytest_cache/
+*.pt
+*.egg-info/

@@ -1,0 +1,141 @@
+"""Datasets, transforms, and FIXED label subsets.
+
+Subset protocol: the {1,5,10,25}% CIFAR-100 subsets are stratified, drawn once
+with a committed seed, and stored as JSON index files under data/subsets/ in
+the repo. Every stem variant trains on the identical indices; train.py refuses
+to run a subset cell without the committed file.
+"""
+
+import json
+import os
+
+import numpy as np
+import torch
+from torch.utils.data import Dataset, Subset
+from torchvision import datasets, transforms
+
+SUBSET_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "subsets")
+SUBSET_SEED = 0
+
+STATS = {
+    "cifar100": ((0.5071, 0.4865, 0.4409), (0.2673, 0.2564, 0.2762)),
+    "cifar10": ((0.4914, 0.4822, 0.4465), (0.2470, 0.2435, 0.2616)),
+    "stl10": ((0.4467, 0.4398, 0.4066), (0.2603, 0.2566, 0.2713)),
+}
+
+NUM_CLASSES = {"cifar100": 100, "cifar10": 10, "stl10": 10}
+IMAGE_SIZE = {"cifar100": 32, "cifar10": 32, "stl10": 96}
+
+# The 15 standard CIFAR-C corruptions of Hendrycks & Dietterich (ICLR 2019).
+CIFAR_C_CORRUPTIONS = (
+    "gaussian_noise", "shot_noise", "impulse_noise",
+    "defocus_blur", "glass_blur", "motion_blur", "zoom_blur",
+    "snow", "frost", "fog", "brightness",
+    "contrast", "elastic_transform", "pixelate", "jpeg_compression",
+)
+
+
+def build_transforms(dataset, train):
+    """Standard crop+flip only (recipe v1: minimal and identical for all)."""
+    mean, std = STATS[dataset]
+    normalize = [transforms.ToTensor(), transforms.Normalize(mean, std)]
+    if not train:
+        return transforms.Compose(normalize)
+    size = IMAGE_SIZE[dataset]
+    pad = size // 8  # 4 px at 32, 12 px at 96
+    return transforms.Compose(
+        [transforms.RandomCrop(size, padding=pad), transforms.RandomHorizontalFlip()]
+        + normalize
+    )
+
+
+def make_subset_indices(labels, pct, seed=SUBSET_SEED):
+    """Deterministic stratified subset: for each class, a seeded permutation
+    of its indices, truncated to pct%. Same (labels, pct, seed) -> identical
+    indices on every machine and run."""
+    labels = np.asarray(labels)
+    indices = []
+    for c in sorted(np.unique(labels)):
+        cls_idx = np.flatnonzero(labels == c)
+        n = int(round(len(cls_idx) * pct / 100.0))
+        if n < 1:
+            raise ValueError(f"pct={pct} leaves zero samples for class {c}")
+        rs = np.random.RandomState(seed * 100003 + int(c))
+        indices.extend(cls_idx[rs.permutation(len(cls_idx))][:n].tolist())
+    return sorted(int(i) for i in indices)
+
+
+def subset_path(dataset, pct):
+    return os.path.join(SUBSET_DIR, f"{dataset}_{pct}pct.json")
+
+
+def load_subset_indices(dataset, pct):
+    path = subset_path(dataset, pct)
+    if not os.path.exists(path):
+        raise FileNotFoundError(
+            f"Committed subset file missing: {path}. "
+            "Run scripts/make_subsets.py once and commit the result -- "
+            "subsets must be identical for every stem."
+        )
+    with open(path) as f:
+        payload = json.load(f)
+    assert payload["dataset"] == dataset and payload["pct"] == pct
+    return payload["indices"]
+
+
+def build_dataset(dataset, data_root, train, subset_pct=None, download=True):
+    tf = build_transforms(dataset, train)
+    if dataset == "cifar100":
+        ds = datasets.CIFAR100(data_root, train=train, transform=tf, download=download)
+    elif dataset == "cifar10":
+        ds = datasets.CIFAR10(data_root, train=train, transform=tf, download=download)
+    elif dataset == "stl10":
+        split = "train" if train else "test"
+        ds = datasets.STL10(data_root, split=split, transform=tf, download=download)
+    else:
+        raise ValueError(f"unknown dataset {dataset!r}")
+    if subset_pct is not None and subset_pct != 100:
+        if not train:
+            raise ValueError("subsets apply to the train split only")
+        ds = Subset(ds, load_subset_indices(dataset, subset_pct))
+    return ds
+
+
+class CIFARCorrupted(Dataset):
+    """CIFAR-10-C / CIFAR-100-C (Hendrycks & Dietterich, ICLR 2019).
+
+    Expects the Zenodo layout: <root>/<corruption>.npy of shape
+    (50000, 32, 32, 3) uint8 HWC -- 10000 test images x severities 1..5
+    stacked -- plus labels.npy.
+    """
+
+    def __init__(self, root, corruption, severity, dataset="cifar100"):
+        if not 1 <= severity <= 5:
+            raise ValueError("severity must be in 1..5")
+        images = np.load(os.path.join(root, f"{corruption}.npy"), mmap_mode="r")
+        labels = np.load(os.path.join(root, "labels.npy"))
+        assert len(images) % 5 == 0 and len(images) == len(labels), (
+            "CIFAR-C file must stack 5 severities of equal size"
+        )
+        n_per = len(images) // 5
+        lo, hi = (severity - 1) * n_per, severity * n_per
+        self.images = images[lo:hi]
+        self.labels = labels[lo:hi].astype(np.int64)
+        assert self.images.shape[1:] == (32, 32, 3), (
+            f"expected HWC uint8 CIFAR-C layout, got {self.images.shape}"
+        )
+        mean, std = STATS[dataset]
+        self.mean = torch.tensor(mean).view(3, 1, 1)
+        self.std = torch.tensor(std).view(3, 1, 1)
+
+    def __len__(self):
+        return len(self.labels)
+
+    def __getitem__(self, i):
+        img = np.asarray(self.images[i])  # HWC uint8
+        # Explicit HWC -> CHW via permute (never reshape!) + content checks.
+        x = torch.from_numpy(img.copy())
+        assert x.shape == (32, 32, 3)
+        x = x.permute(2, 0, 1).contiguous().float() / 255.0
+        x = (x - self.mean) / self.std
+        return x, int(self.labels[i])
