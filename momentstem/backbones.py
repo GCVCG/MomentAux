@@ -70,7 +70,10 @@ def count_params_flops(model, image_size=32, batch_size=1):
     from fvcore.nn import FlopCountAnalysis
 
     model = model.eval()
-    x = torch.zeros(batch_size, model.stem.in_channels, image_size, image_size)
+    device = next(model.parameters()).device
+    x = torch.zeros(
+        batch_size, model.stem.in_channels, image_size, image_size, device=device
+    )
     def _analyse(module):
         fca = FlopCountAnalysis(module, x)
         fca.unsupported_ops_warnings(False)
