@@ -56,7 +56,9 @@ def main():
         cfg["backbone"], cfg["stem"], num_classes=num_classes,
         small_input=cfg.get("small_input", True), pretrained=False,
         stem_kernel_size=cfg.get("stem_kernel_size", 11), stem_seed=final["seed"],
+        stem_kwargs=cfg.get("stem_kwargs"),
     )
+    # calibrated filter scales, if any, are restored from the checkpoint
     state = torch.load(os.path.join(args.run_dir, args.checkpoint),
                        map_location="cpu", weights_only=True)
     model.load_state_dict(state)

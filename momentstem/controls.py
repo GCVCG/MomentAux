@@ -78,22 +78,29 @@ STEM_NAMES = (
 )
 
 
-def build_stem(name, in_channels=3, kernel_size=11, seed=0):
+def build_stem(name, in_channels=3, kernel_size=11, seed=0, **stem_kwargs):
     """Build a stem by registry name.
 
     :param seed only used by ``random-fixed`` (a fresh filter draw per
         training seed, so results average over draws). The moment banks
         themselves are constants (committed seed) regardless.
+    :param stem_kwargs extra MomentStem options for ablations (use_gabor,
+        use_zernike, include_identity, gabor_bank_type, ...); forwarded to
+        every MomentStem-based stem so controls stay architecture-matched.
     """
     if name == "none":
         return IdentityStem(in_channels)
     if name == "moments-sum":
-        return MomentStem(mode="sum", in_channels=in_channels, kernel_size=kernel_size)
+        return MomentStem(
+            mode="sum", in_channels=in_channels, kernel_size=kernel_size, **stem_kwargs
+        )
     if name == "moments-cat":
-        return MomentStem(mode="concat", in_channels=in_channels, kernel_size=kernel_size)
+        return MomentStem(
+            mode="concat", in_channels=in_channels, kernel_size=kernel_size, **stem_kwargs
+        )
     if name == "learned":
         reference = MomentStem(
-            mode="concat", in_channels=in_channels, kernel_size=kernel_size
+            mode="concat", in_channels=in_channels, kernel_size=kernel_size, **stem_kwargs
         )
         return LearnedStem(in_channels, out_channels=reference.out_channels)
     if name == "random-fixed":
@@ -103,6 +110,7 @@ def build_stem(name, in_channels=3, kernel_size=11, seed=0):
             kernel_size=kernel_size,
             init="random",
             seed=seed,
+            **stem_kwargs,
         )
     if name == "gabor-learn":
         return MomentStem(
@@ -110,5 +118,6 @@ def build_stem(name, in_channels=3, kernel_size=11, seed=0):
             in_channels=in_channels,
             kernel_size=kernel_size,
             trainable=True,
+            **stem_kwargs,
         )
     raise ValueError(f"unknown stem {name!r}; choose from {STEM_NAMES}")

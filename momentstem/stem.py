@@ -98,6 +98,28 @@ def gabor_bank(n_out=3, n_in=3, kernel_size=11, seed=GABOR_SEED):
     return bank
 
 
+def gabor_bank_grid(n_out=3, n_in=3, kernel_size=11):
+    """Deterministic, collision-free Gabor bank (ablation alternative to the
+    ported random draw, which produces duplicate (freq, theta) combos --
+    measured max pairwise |cos| = 0.67 for the committed seed).
+
+    Slot s = o*n_in + i gets: orientation s * pi / (n_out*n_in) (evenly
+    spaced), frequency cycling over 3 octaves with o, phase alternating
+    even (bar) / odd (edge), sigma = pi/freq as in the ported scheme.
+    """
+    freqs = [math.pi / 2, math.pi / (2 * math.sqrt(2)), math.pi / 4]
+    n_slots = n_out * n_in
+    bank = torch.empty(n_out, n_in, kernel_size, kernel_size)
+    for o in range(n_out):
+        for i in range(n_in):
+            s = o * n_in + i
+            freq = freqs[o % len(freqs)]
+            theta = s * math.pi / n_slots
+            psi = 0.0 if s % 2 == 0 else math.pi / 2
+            bank[o, i] = gabor_kernel(freq, theta, math.pi / freq, psi, kernel_size)
+    return bank
+
+
 def zernike_polynomial(j, x, y):
     """Zernike polynomial j evaluated at cartesian coords, j in 0..14.
 
@@ -121,10 +143,14 @@ def zernike_polynomial(j, x, y):
     t = torch.atan2(y, x)
     if j == 6:  # vertical trefoil
         return r ** 3 * torch.sin(3.0 * t)
-    if j == 7:  # vertical coma (as ported)
-        return 3.0 * r ** 3 * torch.sin(3.0 * t)
-    if j == 8:  # horizontal coma (as ported)
-        return 3.0 * r ** 3 * torch.cos(3.0 * t)
+    if j == 7:  # vertical coma (standard OSA form; the momentsnerf table had
+        # 3r^3 sin(3t) here, an exact scalar multiple of j=6 -- after L2
+        # normalisation that made kernels 6/7 (and 8/9) IDENTICAL. The
+        # original Zernike stage never executed (see PORTING.md), so the
+        # correct formula is used rather than the duplicated one.
+        return (3.0 * r ** 3 - 2.0 * r) * torch.sin(t)
+    if j == 8:  # horizontal coma (standard OSA form, same reasoning)
+        return (3.0 * r ** 3 - 2.0 * r) * torch.cos(t)
     if j == 9:  # oblique trefoil
         return r ** 3 * torch.cos(3.0 * t)
     if j == 10:  # oblique quadrafoil
@@ -172,6 +198,8 @@ class MomentStem(nn.Module):
         (the gabor-learn control: moment-initialised but free to train).
     :param seed seed for init="random" draws (the moment bank itself always
         uses the committed GABOR_SEED and is not affected).
+    :param gabor_bank_type "random" (ported momentsnerf scheme) or "grid"
+        (deterministic collision-free bank, see gabor_bank_grid).
     """
 
     def __init__(
@@ -185,6 +213,7 @@ class MomentStem(nn.Module):
         init="moments",
         trainable=False,
         seed=0,
+        gabor_bank_type="random",
     ):
         super().__init__()
         if mode not in ("sum", "concat"):
@@ -195,6 +224,8 @@ class MomentStem(nn.Module):
             raise ValueError("at least one of use_gabor/use_zernike required")
         if kernel_size % 2 != 1:
             raise ValueError("kernel_size must be odd (same-padding contract)")
+        if gabor_bank_type not in ("random", "grid"):
+            raise ValueError(f"unknown gabor_bank_type {gabor_bank_type!r}")
 
         self.mode = mode
         self.in_channels = in_channels
@@ -203,12 +234,16 @@ class MomentStem(nn.Module):
         self.use_zernike = use_zernike
         self.include_identity = include_identity and mode == "concat"
         self.trainable = trainable
+        self.gabor_bank_type = gabor_bank_type
         self.padding = kernel_size // 2
 
         gabor_w = zernike_w = None
         if use_gabor:
             # K[o, i] = o-th Gabor response of input channel i.
-            bank = gabor_bank(in_channels, in_channels, kernel_size)
+            if gabor_bank_type == "grid":
+                bank = gabor_bank_grid(in_channels, in_channels, kernel_size)
+            else:
+                bank = gabor_bank(in_channels, in_channels, kernel_size)
             if mode == "sum":
                 # Dense conv: out[o] = sum_i K[o,i] * x_i -- the original
                 # GaborConv2d(3, 3) "sum" variant.
@@ -271,6 +306,46 @@ class MomentStem(nn.Module):
             setattr(self, name, nn.Parameter(tensor.clone()))
         else:
             self.register_buffer(name, tensor)
+
+    @torch.no_grad()
+    def calibrate(self, x):
+        """Response calibration: rescale each fixed filter so its output
+        channel has unit standard deviation on the calibration batch.
+
+        Motivation (measured on CIFAR-100): uncalibrated concat output
+        channels span a 145x std range (identity ~1.1, Gabor 0.04-0.09,
+        Zernike 0.5-5.7), so at init conv1 barely sees the Gabor channels
+        and is dominated by the low-pass Zernike ones. Calibration is a
+        deterministic one-shot transform of the committed bank -- given the
+        same batch it always produces the same scales; they live in the
+        weight tensors and therefore in checkpoints. Identity channels are
+        untouched. Applies equally to init="random" (fair control).
+        """
+        eps = 1e-8
+        if self.gabor_weight is not None:
+            if self.mode == "sum":
+                out = F.conv2d(x, self.gabor_weight, padding=self.padding)
+            else:
+                out = F.conv2d(
+                    x, self.gabor_weight, padding=self.padding, groups=self.in_channels
+                )
+            std = out.std(dim=(0, 2, 3)).clamp_min(eps)
+            self.gabor_weight /= std.view(-1, 1, 1, 1)
+        if self.zernike_weight is not None:
+            if self.mode == "sum":
+                # sequential: zernike sees the (calibrated) gabor output
+                base = x
+                if self.gabor_weight is not None:
+                    base = F.conv2d(base, self.gabor_weight, padding=self.padding)
+                out = F.conv2d(
+                    base, self.zernike_weight, padding=self.padding,
+                    groups=self.in_channels,
+                )
+            else:
+                out = F.conv2d(x, self.zernike_weight, padding=self.padding)
+            std = out.std(dim=(0, 2, 3)).clamp_min(eps)
+            self.zernike_weight /= std.view(-1, 1, 1, 1)
+        return self
 
     def filter_numel(self):
         """Total elements in the moment filters (the 'effective parameter'

@@ -10,11 +10,16 @@ import torch
 from momentstem.stem import GABOR_SEED, gabor_bank, gabor_kernel, zernike_bank
 
 # Committed fingerprints of the exact banks used by every run (kernel_size=11,
-# GABOR_SEED=1234). Recorded at repo creation.
+# GABOR_SEED=1234). Zernike constants re-pinned 2026-07-10 after correcting
+# the j=7/8 coma formulas (the ported table made them exact duplicates of
+# j=6/9 -- see PORTING.md); the sum is unchanged because both old and new
+# kernels are odd functions summing to zero.
 GABOR_SUM = -0.0577797294
 GABOR_ABSMEAN = 0.0037828626
 ZERNIKE_SUM = 16.7257347107
-ZERNIKE_ABSMEAN = 0.0563285500
+ZERNIKE_ABSMEAN = 0.0570115298
+GRID_GABOR_SUM = -0.0143144000
+GRID_GABOR_ABSMEAN = 0.0039181341
 
 
 def test_gabor_bank_fingerprint():
@@ -40,6 +45,30 @@ def test_zernike_kernels_unit_norm_and_disk_masked():
     y, x = torch.meshgrid(coords, coords, indexing="ij")
     outside = (x ** 2 + y ** 2) > 1.0
     assert (z[:, outside] == 0).all(), "values outside the unit disk must be zero"
+
+
+def test_zernike_bank_has_no_duplicate_kernels():
+    """The ported table made j=7 a multiple of j=6 and j=8 of j=9; after L2
+    normalisation those were bitwise-identical channels. Must never regress."""
+    z = zernike_bank().flatten(1)
+    zn = z / z.norm(dim=1, keepdim=True)
+    cos = zn @ zn.T - torch.eye(15)
+    assert cos.abs().max() < 0.99, f"near-duplicate kernels: max |cos| {cos.abs().max():.4f}"
+
+
+def test_grid_gabor_bank_fingerprint_and_diversity():
+    from momentstem.stem import gabor_bank_grid
+
+    g = gabor_bank_grid()
+    assert g.shape == (3, 3, 11, 11)
+    assert g.sum().item() == pytest.approx(GRID_GABOR_SUM, abs=1e-6)
+    assert g.abs().mean().item() == pytest.approx(GRID_GABOR_ABSMEAN, abs=1e-8)
+    flat = g.reshape(9, -1)
+    fn = flat / flat.norm(dim=1, keepdim=True)
+    cos = fn @ fn.T - torch.eye(9)
+    # the ported random bank hits 0.67 for the committed seed; grid must stay
+    # decisively more diverse
+    assert cos.abs().max() < 0.5
 
 
 def test_gabor_kernel_formula_reference():

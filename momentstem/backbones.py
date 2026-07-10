@@ -36,14 +36,18 @@ def build_model(
     pretrained=False,
     stem_kernel_size=11,
     stem_seed=0,
+    stem_kwargs=None,
 ):
     """Build stem + backbone for one experimental cell.
 
     :param small_input apply CIFAR-style ResNet surgery (3x3 stride-1 conv1,
         no first maxpool). Required for 32x32; we use it for 96x96 STL-10 too
         so the recipe is identical. Only implemented for ResNets.
+    :param stem_kwargs extra MomentStem ablation options (see build_stem).
     """
-    stem = build_stem(stem_name, kernel_size=stem_kernel_size, seed=stem_seed)
+    stem = build_stem(
+        stem_name, kernel_size=stem_kernel_size, seed=stem_seed, **(stem_kwargs or {})
+    )
     net = timm.create_model(
         backbone,
         pretrained=pretrained,

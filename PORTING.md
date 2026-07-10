@@ -74,7 +74,30 @@ Source: `~/projects/momentsnerf` (PixelNeRF fork), specifically
    RGB conv1 weights to initialise the widened conv1. We train from scratch
    (`pretrained: false` in v1 configs), and with the CIFAR stem surgery
    conv1 is replaced anyway; the tiling trick is therefore not ported.
-7. **Dropped entirely:** `index()`/latent grid-sampling, feature-pyramid
+7. **Zernike j=7/8 corrected to standard OSA coma (2026-07-10).** The ported
+   table had j=7 = 3r^3 sin(3t) = 3x j=6 and j=8 = 3r^3 cos(3t) = 3x j=9;
+   after per-kernel L2 normalisation those pairs are bitwise IDENTICAL
+   kernels -- measured cos = 1.000000 -- so the "15-kernel" bank had only 13
+   distinct channels. Since the original Zernike stage never executed (point
+   3), the duplicated formulas carry no fidelity value; j=7/8 now use the
+   standard (3r^3-2r) sin/cos(t) coma. Bank fingerprints re-pinned;
+   duplicate-freeness is a permanent test.
+8. **Response calibration (optional, `stem_calibrate: true`).** Measured on
+   CIFAR-100, the raw concat output channels span a 145x std range (identity
+   ~1.1, Gabor 0.04-0.09, Zernike 0.5-5.7): at init the backbone barely sees
+   the Gabor channels and is dominated by low-pass Zernike ones.
+   `MomentStem.calibrate(batch)` rescales each fixed filter once so its
+   response has unit std on a deterministic committed batch (first 1024
+   train images, eval transform, image statistics only -- no label leakage).
+   The stem stays parameter-free; scales are baked into the buffers and
+   travel with checkpoints. Applied identically to the random-fixed control.
+9. **Grid Gabor bank (optional, `gabor_bank_type: grid`).** The ported
+   random parameter draw produces near-duplicate kernels for the committed
+   seed (max pairwise |cos| = 0.67, two collision pairs). The `grid` bank
+   places 9 evenly-spaced orientations x 3 octave frequencies x alternating
+   even/odd phase deterministically (max |cos| = 0.37). Both are pinned by
+   fingerprints; which one the headline uses is decided by ablation.
+10. **Dropped entirely:** `index()`/latent grid-sampling, feature-pyramid
    upsampling, `latent_scaling`, custom `ConvEncoder`, and every other
    PixelNeRF coupling. The stem is a pure `nn.Module`: `(B,3,H,W) ->
    (B,out_channels,H,W)`.

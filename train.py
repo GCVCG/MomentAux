@@ -127,7 +127,15 @@ def main():
         pretrained=cfg.get("pretrained", False),
         stem_kernel_size=cfg.get("stem_kernel_size", 11),
         stem_seed=args.seed,
+        stem_kwargs=cfg.get("stem_kwargs"),
     ).to(device)
+    if cfg.get("stem_calibrate", False) and hasattr(model.stem, "calibrate"):
+        # Deterministic calibration batch: first N train images in index
+        # order, eval transform (no augmentation) -- identical for every
+        # stem, subset, and seed of a dataset.
+        calib = data_mod.calibration_batch(cfg["dataset"], args.data_root).to(device)
+        model.stem.calibrate(calib)
+        print(f"stem calibrated on {calib.shape[0]} images")
     accounting = count_params_flops(model, image_size=image_size)
     print(f"[{name} seed{args.seed}] {json.dumps(accounting)}")
 

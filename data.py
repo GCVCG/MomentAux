@@ -101,6 +101,23 @@ def build_dataset(dataset, data_root, train, subset_pct=None, download=True):
     return ds
 
 
+def calibration_batch(dataset, data_root, n=1024):
+    """Deterministic batch for stem response calibration: the first n train
+    images in index order, eval transform (no augmentation). Identical for
+    every stem, subset, and seed of a dataset; uses image statistics only
+    (no labels), so it leaks nothing into the low-label protocol."""
+    tf = build_transforms(dataset, train=False)
+    if dataset == "cifar100":
+        ds = datasets.CIFAR100(data_root, train=True, transform=tf, download=False)
+    elif dataset == "cifar10":
+        ds = datasets.CIFAR10(data_root, train=True, transform=tf, download=False)
+    elif dataset == "stl10":
+        ds = datasets.STL10(data_root, split="train", transform=tf, download=False)
+    else:
+        raise ValueError(f"unknown dataset {dataset!r}")
+    return torch.stack([ds[i][0] for i in range(min(n, len(ds)))])
+
+
 class CIFARCorrupted(Dataset):
     """CIFAR-10-C / CIFAR-100-C (Hendrycks & Dietterich, ICLR 2019).
 
