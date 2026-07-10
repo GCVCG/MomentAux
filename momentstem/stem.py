@@ -200,6 +200,10 @@ class MomentStem(nn.Module):
         uses the committed GABOR_SEED and is not affected).
     :param gabor_bank_type "random" (ported momentsnerf scheme) or "grid"
         (deterministic collision-free bank, see gabor_bank_grid).
+    :param zernike_indices which Zernike polynomials (0..14) to keep, e.g.
+        [1, 2, 3, 7, 11] for the top conv1-usage earners measured on the
+        full-data ablation (tilts, oblique astigmatism, vertical coma,
+        oblique secondary astigmatism). None = all 15.
     """
 
     def __init__(
@@ -214,6 +218,7 @@ class MomentStem(nn.Module):
         trainable=False,
         seed=0,
         gabor_bank_type="random",
+        zernike_indices=None,
     ):
         super().__init__()
         if mode not in ("sum", "concat"):
@@ -236,6 +241,18 @@ class MomentStem(nn.Module):
         self.trainable = trainable
         self.gabor_bank_type = gabor_bank_type
         self.padding = kernel_size // 2
+        if zernike_indices is None:
+            zernike_indices = list(range(N_ZERNIKE))
+        if not all(0 <= j < N_ZERNIKE for j in zernike_indices) or len(
+            set(zernike_indices)
+        ) != len(zernike_indices):
+            raise ValueError(f"invalid zernike_indices {zernike_indices!r}")
+        self.zernike_indices = list(zernike_indices)
+        self.n_zernike = len(self.zernike_indices) if use_zernike else 0
+        self.n_gabor = (
+            (in_channels if mode == "sum" else in_channels * in_channels)
+            if use_gabor else 0
+        )
 
         gabor_w = zernike_w = None
         if use_gabor:
@@ -256,7 +273,7 @@ class MomentStem(nn.Module):
                 ).unsqueeze(1)
 
         if use_zernike:
-            zbank = zernike_bank(kernel_size)  # (15, k, k)
+            zbank = zernike_bank(kernel_size)[self.zernike_indices]  # (n, k, k)
             if mode == "sum":
                 # Depthwise conv with the mean Zernike kernel: each channel's
                 # 15 responses averaged back into that channel.
@@ -276,17 +293,13 @@ class MomentStem(nn.Module):
         self._register("gabor_weight", gabor_w)
         self._register("zernike_weight", zernike_w)
 
-        n_gabor = 0
-        n_zernike = 0
-        if use_gabor:
-            n_gabor = in_channels if mode == "sum" else in_channels * in_channels
-        if use_zernike:
-            n_zernike = in_channels if mode == "sum" else N_ZERNIKE
         if mode == "sum":
             self.out_channels = in_channels
         else:
             self.out_channels = (
-                (in_channels if self.include_identity else 0) + n_gabor + n_zernike
+                (in_channels if self.include_identity else 0)
+                + self.n_gabor
+                + self.n_zernike
             )
 
     @staticmethod

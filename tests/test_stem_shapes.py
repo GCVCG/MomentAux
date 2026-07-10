@@ -41,6 +41,22 @@ def test_concat_channel_count_matches_config_flags():
         assert stem(torch.randn(1, 3, 32, 32)).shape[1] == expect
 
 
+def test_zernike_indices_pruning():
+    from momentstem.stem import zernike_bank
+
+    keep = [1, 2, 3, 7, 11]
+    stem = MomentStem(mode="concat", zernike_indices=keep)
+    assert stem.out_channels == 3 + 9 + len(keep) == 17
+    assert stem(torch.randn(1, 3, 32, 32)).shape[1] == 17
+    # pruned weights are exactly the selected kernels (applied to channel mean)
+    full = zernike_bank(11)[keep]
+    assert torch.allclose(stem.zernike_weight, full.unsqueeze(1).repeat(1, 3, 1, 1) / 3)
+    with pytest.raises(ValueError):
+        MomentStem(zernike_indices=[0, 0, 1])  # duplicates rejected
+    with pytest.raises(ValueError):
+        MomentStem(zernike_indices=[15])  # out of range
+
+
 def test_concat_identity_channels_are_exact_passthrough():
     stem = MomentStem(mode="concat", include_identity=True)
     x = torch.randn(2, 3, 32, 32)

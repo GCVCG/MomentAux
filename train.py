@@ -29,7 +29,6 @@ from torchmetrics.classification import MulticlassAccuracy
 
 import data as data_mod
 from momentstem import MomentStem, build_model, count_params_flops
-from momentstem.stem import N_ZERNIKE
 
 RECIPE = {
     "epochs": 200,
@@ -96,8 +95,8 @@ def conv1_group_norms(model):
     groups, lo = {}, 0
     for name, width in (
         ("identity", stem.in_channels if stem.include_identity else 0),
-        ("gabor", stem.in_channels * stem.in_channels if stem.use_gabor else 0),
-        ("zernike", N_ZERNIKE if stem.use_zernike else 0),
+        ("gabor", stem.n_gabor),
+        ("zernike", stem.n_zernike),
     ):
         if width:
             groups[name] = per_in[lo:lo + width].mean().item()
