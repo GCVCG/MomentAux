@@ -28,7 +28,8 @@ from torch.utils.data import DataLoader
 from torchmetrics.classification import MulticlassAccuracy
 
 import data as data_mod
-from momentstem import build_model, count_params_flops
+from momentstem import MomentStem, build_model, count_params_flops
+from momentstem.stem import N_ZERNIKE
 
 RECIPE = {
     "epochs": 200,
@@ -77,6 +78,31 @@ def build_loaders(cfg, seed, data_root):
         pin_memory=True,
     )
     return train_loader, test_loader
+
+
+@torch.no_grad()
+def conv1_group_norms(model):
+    """Visibility into whether the backbone is USING the stem: L2 norm of
+    conv1's weights per input-channel group (identity / gabor / zernike).
+    This metric caught the v1 scale bug -- conv1 shrank its gabor weights
+    below init while growing identity 3x. Empty for non-moment stems."""
+    stem = model.stem
+    if not isinstance(stem, MomentStem) or stem.mode != "concat":
+        return {}
+    conv1 = getattr(model.net, "conv1", None)
+    if conv1 is None:
+        return {}
+    per_in = conv1.weight.detach().permute(1, 0, 2, 3).flatten(1).norm(dim=1)
+    groups, lo = {}, 0
+    for name, width in (
+        ("identity", stem.in_channels if stem.include_identity else 0),
+        ("gabor", stem.in_channels * stem.in_channels if stem.use_gabor else 0),
+        ("zernike", N_ZERNIKE if stem.use_zernike else 0),
+    ):
+        if width:
+            groups[name] = per_in[lo:lo + width].mean().item()
+            lo += width
+    return groups
 
 
 @torch.no_grad()
@@ -154,7 +180,11 @@ def main():
     csv_path = os.path.join(out_dir, "metrics.csv")
     csv_file = open(csv_path, "w", newline="")
     writer = csv.writer(csv_file)
-    writer.writerow(["epoch", "train_loss", "train_acc", "test_acc", "lr", "epoch_seconds"])
+    norm_cols = ["conv1_identity", "conv1_gabor", "conv1_zernike"]
+    writer.writerow(
+        ["epoch", "train_loss", "train_acc", "test_acc", "lr", "epoch_seconds"]
+        + norm_cols
+    )
 
     best_acc, t_start = 0.0, time.time()
     train_metric = MulticlassAccuracy(num_classes=num_classes, average="micro").to(device)
@@ -179,9 +209,12 @@ def main():
 
         test_acc = evaluate(model, test_loader, device, num_classes)
         train_acc = train_metric.compute().item()
+        norms = conv1_group_norms(model)
         writer.writerow(
             [epoch, f"{loss_sum / max(n_batches, 1):.6f}", f"{train_acc:.6f}",
              f"{test_acc:.6f}", f"{lr_now:.6f}", f"{time.time() - t0:.1f}"]
+            + [f"{norms[g]:.4f}" if g in norms else ""
+               for g in ("identity", "gabor", "zernike")]
         )
         csv_file.flush()
         if test_acc > best_acc:
