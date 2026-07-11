@@ -15,7 +15,7 @@ from torchvision import datasets
 
 from data import SUBSET_DIR, SUBSET_SEED, make_subset_indices, subset_path
 
-PCTS = (1, 5, 10, 25)
+PCTS = (1, 2, 3, 5, 7, 10, 15, 25)
 
 
 def main():
