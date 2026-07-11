@@ -236,6 +236,7 @@ def main():
         "wall_seconds": time.time() - t_start,
         "torch_version": torch.__version__,
         "device": str(device),
+        "gpu_name": torch.cuda.get_device_name(device) if device.type == "cuda" else None,
         "amp": use_amp,
     }
     with open(os.path.join(out_dir, "final.json"), "w") as f:
