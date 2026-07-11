@@ -58,7 +58,10 @@ def main():
         stem_kernel_size=cfg.get("stem_kernel_size", 11), stem_seed=final["seed"],
         stem_kwargs=cfg.get("stem_kwargs"),
     )
-    # calibrated filter scales, if any, are restored from the checkpoint
+    # Calibrated filter scales are restored from the checkpoint; ZCA runs
+    # additionally register fused buffers, which must exist before loading.
+    if cfg.get("stem_calibrate") == "zca":
+        model.stem._ensure_fused_buffers()
     state = torch.load(os.path.join(args.run_dir, args.checkpoint),
                        map_location="cpu", weights_only=True)
     model.load_state_dict(state)

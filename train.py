@@ -157,10 +157,14 @@ def main():
     if cfg.get("stem_calibrate", False) and hasattr(model.stem, "calibrate"):
         # Deterministic calibration batch: first N train images in index
         # order, eval transform (no augmentation) -- identical for every
-        # stem, subset, and seed of a dataset.
+        # stem, subset, and seed of a dataset. stem_calibrate: true -> per-
+        # channel std; "zca" -> fixed whitening (calibration v2).
         calib = data_mod.calibration_batch(cfg["dataset"], args.data_root).to(device)
-        model.stem.calibrate(calib)
-        print(f"stem calibrated on {calib.shape[0]} images")
+        if cfg["stem_calibrate"] == "zca":
+            model.stem.calibrate_zca(calib)
+        else:
+            model.stem.calibrate(calib)
+        print(f"stem calibrated ({cfg['stem_calibrate']}) on {calib.shape[0]} images")
     accounting = count_params_flops(model, image_size=image_size)
     print(f"[{name} seed{args.seed}] {json.dumps(accounting)}")
 

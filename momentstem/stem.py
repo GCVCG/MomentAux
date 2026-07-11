@@ -321,6 +321,72 @@ class MomentStem(nn.Module):
             self.register_buffer(name, tensor)
 
     @torch.no_grad()
+    def calibrate_zca(self, x, eps=1e-5):
+        """Calibration v2: fixed ZCA whitening of the stem output, folded
+        into the kernels (concat mode only).
+
+        Motivation (measured on CIFAR-100, gabor-only stem after std
+        calibration): the 12-channel output has effective rank 7.7 -- gabor
+        responses correlate with RGB up to |r|=0.66 and the covariance
+        spectrum spans 60:1. Collinear stem channels are exactly what
+        SGD+weight-decay re-allocates between SLOWLY, which is the measured
+        failure mode at 10%% data (conv1 cannot shed the prior within the
+        step budget; at 100%% it can). ZCA removes the collinearity while
+        preserving all information (invertible linear map).
+
+        Implementation: the whole stem (identity passthrough + moment
+        convs) is materialised as ONE dense conv T (C_out, C_in, k, k);
+        the whitening matrix W and mean mu of the stem response on the
+        calibration batch are folded as fused_weight = W @ T,
+        fused_bias = -W @ mu. Deterministic given the batch; the fused
+        tensors are buffers and travel with checkpoints. Applies equally
+        to init="random" (fair control)."""
+        if self.mode != "concat":
+            raise ValueError("calibrate_zca supports concat mode only")
+        if self.trainable:
+            raise ValueError("calibrate_zca is for fixed stems only")
+        self.calibrate(x)
+
+        k, cin, cout = self.kernel_size, self.in_channels, self.out_channels
+        T = torch.zeros(cout, cin, k, k, dtype=x.dtype, device=x.device)
+        row = 0
+        if self.include_identity:
+            for c in range(cin):
+                T[c, c, k // 2, k // 2] = 1.0
+            row = cin
+        if self.gabor_weight is not None:
+            # grouped conv channel (cin*i + o) filters input i only
+            for i in range(cin):
+                for o in range(cin):
+                    T[row + cin * i + o, i] = self.gabor_weight[cin * i + o, 0]
+            row += self.n_gabor
+        if self.zernike_weight is not None:
+            T[row:row + self.n_zernike] = self.zernike_weight
+
+        out = self.forward(x)
+        f = out.permute(1, 0, 2, 3).flatten(1)
+        mu = f.mean(dim=1)
+        fc = f - mu.unsqueeze(1)
+        cov = (fc @ fc.T) / fc.shape[1]
+        U, S, _ = torch.linalg.svd(cov)
+        W = U @ torch.diag(1.0 / torch.sqrt(S + eps)) @ U.T
+
+        self.register_buffer("fused_weight", torch.einsum("cd,dikl->cikl", W, T))
+        self.register_buffer("fused_bias", -W @ mu)
+        return self
+
+    def _ensure_fused_buffers(self):
+        """Create empty fused buffers so a ZCA checkpoint can be loaded into
+        a freshly built stem without re-running calibration."""
+        if getattr(self, "fused_weight", None) is None:
+            k = self.kernel_size
+            self.register_buffer(
+                "fused_weight",
+                torch.zeros(self.out_channels, self.in_channels, k, k),
+            )
+            self.register_buffer("fused_bias", torch.zeros(self.out_channels))
+
+    @torch.no_grad()
     def calibrate(self, x):
         """Response calibration: rescale each fixed filter so its output
         channel has unit standard deviation on the calibration batch.
@@ -374,6 +440,10 @@ class MomentStem(nn.Module):
         if x.dim() != 4 or x.shape[1] != self.in_channels:
             raise ValueError(
                 f"expected (B, {self.in_channels}, H, W) input, got {tuple(x.shape)}"
+            )
+        if getattr(self, "fused_weight", None) is not None:
+            return F.conv2d(
+                x, self.fused_weight, bias=self.fused_bias, padding=self.padding
             )
         if self.mode == "sum":
             if self.gabor_weight is not None:
