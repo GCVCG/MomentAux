@@ -71,6 +71,36 @@ def test_grid_gabor_bank_fingerprint_and_diversity():
     assert cos.abs().max() < 0.5
 
 
+def test_pyramid_and_luma_bank_fingerprints():
+    from momentstem.stem import gabor_bank_luma, gabor_bank_pyramid
+
+    p = gabor_bank_pyramid()
+    assert p.shape == (3, 3, 11, 11)
+    assert p.sum().item() == pytest.approx(0.0236303322, abs=1e-6)
+    assert p.abs().mean().item() == pytest.approx(0.0039229356, abs=1e-8)
+    l = gabor_bank_luma()
+    assert l.shape == (16, 11, 11)
+    assert l.sum().item() == pytest.approx(0.0252580792, abs=1e-6)
+    assert l.abs().mean().item() == pytest.approx(0.0042592874, abs=1e-8)
+
+
+def test_luma_stem_shapes_and_calibration():
+    import torch
+
+    from momentstem import MomentStem
+
+    stem = MomentStem(mode="concat", use_zernike=False, gabor_bank_type="luma")
+    assert stem.out_channels == 3 + 16
+    x = torch.randn(2, 3, 32, 32)
+    out = stem(x)
+    assert out.shape == (2, 19, 32, 32)
+    assert torch.equal(out[:, :3], x)
+    assert sum(p.numel() for p in stem.parameters()) == 0
+    stem.calibrate(x)
+    std = stem(x).std(dim=(0, 2, 3))
+    assert torch.allclose(std[3:], torch.ones(16), atol=1e-3)
+
+
 def test_gabor_kernel_formula_reference():
     """Independent re-evaluation of the ported Gabor formula at one point,
     against a hand-computed value (guards against grid or rotation drift)."""

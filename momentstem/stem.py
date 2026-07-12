@@ -120,6 +120,41 @@ def gabor_bank_grid(n_out=3, n_in=3, kernel_size=11):
     return bank
 
 
+def gabor_bank_pyramid(n_out=3, n_in=3, kernel_size=11):
+    """Systematic multi-scale pyramid (design-space variant): each input
+    channel gets one kernel per scale octave (freq pi/2, pi/2sqrt2, pi/4;
+    sigma = pi/f as ported), orientations spread so the 9 kernels cover
+    3 scales x 9 distinct orientations, phases alternating even/odd."""
+    freqs = [math.pi / 2, math.pi / (2 * math.sqrt(2)), math.pi / 4]
+    bank = torch.empty(n_out, n_in, kernel_size, kernel_size)
+    for o in range(n_out):
+        for i in range(n_in):
+            s = o * n_in + i
+            freq = freqs[o % len(freqs)]
+            theta = i * math.pi / n_in + o * math.pi / (n_out * n_in)
+            psi = 0.0 if (o + i) % 2 == 0 else math.pi / 2
+            bank[o, i] = gabor_kernel(freq, theta, math.pi / freq, psi, kernel_size)
+    return bank
+
+
+LUMA_WEIGHTS = (0.299, 0.587, 0.114)  # ITU-R BT.601
+
+
+def gabor_bank_luma(kernel_size=11):
+    """16-kernel quadrature bank for the luminance channel (design-space
+    variant): 4 orientations x 2 scale octaves x 2 phases (even bar + odd
+    edge), the classic V1 energy-model layout. Decouples bank size from the
+    3-per-RGB-channel constraint of the grouped design."""
+    kernels = []
+    for f in (math.pi / 2, math.pi / (2 * math.sqrt(2))):
+        for o in range(4):
+            for psi in (0.0, math.pi / 2):
+                kernels.append(
+                    gabor_kernel(f, o * math.pi / 4, math.pi / f, psi, kernel_size)
+                )
+    return torch.stack(kernels)  # (16, k, k)
+
+
 def zernike_polynomial(j, x, y):
     """Zernike polynomial j evaluated at cartesian coords, j in 0..14.
 
@@ -229,8 +264,10 @@ class MomentStem(nn.Module):
             raise ValueError("at least one of use_gabor/use_zernike required")
         if kernel_size % 2 != 1:
             raise ValueError("kernel_size must be odd (same-padding contract)")
-        if gabor_bank_type not in ("random", "grid"):
+        if gabor_bank_type not in ("random", "grid", "pyramid", "luma"):
             raise ValueError(f"unknown gabor_bank_type {gabor_bank_type!r}")
+        if gabor_bank_type == "luma" and mode != "concat":
+            raise ValueError("luma bank supports concat mode only")
 
         self.mode = mode
         self.in_channels = in_channels
@@ -249,16 +286,25 @@ class MomentStem(nn.Module):
             raise ValueError(f"invalid zernike_indices {zernike_indices!r}")
         self.zernike_indices = list(zernike_indices)
         self.n_zernike = len(self.zernike_indices) if use_zernike else 0
-        self.n_gabor = (
-            (in_channels if mode == "sum" else in_channels * in_channels)
-            if use_gabor else 0
-        )
+        if not use_gabor:
+            self.n_gabor = 0
+        elif gabor_bank_type == "luma":
+            self.n_gabor = 16
+        else:
+            self.n_gabor = in_channels if mode == "sum" else in_channels * in_channels
+        # grouped conv for per-RGB-channel banks; dense for the luma bank
+        self.gabor_groups = 1 if gabor_bank_type == "luma" else in_channels
 
         gabor_w = zernike_w = None
-        if use_gabor:
+        if use_gabor and gabor_bank_type == "luma":
+            luma = torch.tensor(LUMA_WEIGHTS).view(1, in_channels, 1, 1)
+            gabor_w = gabor_bank_luma(kernel_size).unsqueeze(1) * luma
+        elif use_gabor:
             # K[o, i] = o-th Gabor response of input channel i.
             if gabor_bank_type == "grid":
                 bank = gabor_bank_grid(in_channels, in_channels, kernel_size)
+            elif gabor_bank_type == "pyramid":
+                bank = gabor_bank_pyramid(in_channels, in_channels, kernel_size)
             else:
                 bank = gabor_bank(in_channels, in_channels, kernel_size)
             if mode == "sum":
@@ -355,10 +401,14 @@ class MomentStem(nn.Module):
                 T[c, c, k // 2, k // 2] = 1.0
             row = cin
         if self.gabor_weight is not None:
-            # grouped conv channel (cin*i + o) filters input i only
-            for i in range(cin):
-                for o in range(cin):
-                    T[row + cin * i + o, i] = self.gabor_weight[cin * i + o, 0]
+            if self.gabor_groups == 1:
+                # dense bank (luma): weights already (n, cin, k, k)
+                T[row:row + self.n_gabor] = self.gabor_weight
+            else:
+                # grouped conv channel (cin*i + o) filters input i only
+                for i in range(cin):
+                    for o in range(cin):
+                        T[row + cin * i + o, i] = self.gabor_weight[cin * i + o, 0]
             row += self.n_gabor
         if self.zernike_weight is not None:
             T[row:row + self.n_zernike] = self.zernike_weight
@@ -406,7 +456,7 @@ class MomentStem(nn.Module):
                 out = F.conv2d(x, self.gabor_weight, padding=self.padding)
             else:
                 out = F.conv2d(
-                    x, self.gabor_weight, padding=self.padding, groups=self.in_channels
+                    x, self.gabor_weight, padding=self.padding, groups=self.gabor_groups
                 )
             std = out.std(dim=(0, 2, 3)).clamp_min(eps)
             self.gabor_weight /= std.view(-1, 1, 1, 1)
@@ -458,7 +508,7 @@ class MomentStem(nn.Module):
             parts.append(x)
         if self.gabor_weight is not None:
             parts.append(
-                F.conv2d(x, self.gabor_weight, padding=self.padding, groups=self.in_channels)
+                F.conv2d(x, self.gabor_weight, padding=self.padding, groups=self.gabor_groups)
             )
         if self.zernike_weight is not None:
             parts.append(F.conv2d(x, self.zernike_weight, padding=self.padding))
