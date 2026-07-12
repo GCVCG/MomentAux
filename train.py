@@ -153,6 +153,7 @@ def main():
         stem_kernel_size=cfg.get("stem_kernel_size", 11),
         stem_seed=args.seed,
         stem_kwargs=cfg.get("stem_kwargs"),
+        head_pool=cfg.get("head_pool"),
     ).to(device)
     if cfg.get("stem_calibrate", False) and hasattr(model.stem, "calibrate"):
         # Deterministic calibration batch: first N train images in index

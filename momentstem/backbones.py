@@ -37,6 +37,7 @@ def build_model(
     stem_kernel_size=11,
     stem_seed=0,
     stem_kwargs=None,
+    head_pool=None,
 ):
     """Build stem + backbone for one experimental cell.
 
@@ -44,6 +45,9 @@ def build_model(
         no first maxpool). Required for 32x32; we use it for 96x96 STL-10 too
         so the recipe is identical. Only implemented for ResNets.
     :param stem_kwargs extra MomentStem ablation options (see build_stem).
+    :param head_pool replace GAP with MultiMaskPool, e.g.
+        {"type": "zernike"|"random"|"learned", "J": 8, "hw": 4}; the linear
+        head widens to features*J accordingly (see pooling.py).
     """
     stem = build_stem(
         stem_name, kernel_size=stem_kernel_size, seed=stem_seed, **(stem_kwargs or {})
@@ -65,6 +69,20 @@ def build_model(
             padding=1, bias=False,
         )
         net.maxpool = nn.Identity()
+    if head_pool:
+        from .pooling import MultiMaskPool
+
+        if backbone not in RESNETS:
+            raise ValueError("head_pool only implemented for ResNets")
+        pool = MultiMaskPool(
+            mask_type=head_pool.get("type", "random"),
+            hw=head_pool.get("hw", 4),
+            J=head_pool.get("J", 8),
+            seed=head_pool.get("seed", 0),
+        )
+        in_feats = net.fc.in_features
+        net.global_pool = pool
+        net.fc = nn.Linear(in_feats * pool.J, num_classes)
     return StemmedModel(stem, net)
 
 
