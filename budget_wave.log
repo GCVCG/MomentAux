@@ -1,0 +1,6 @@
+=== diag10e800_none seed 0 ===
+[diag10e800_none seed0] {"params_trainable": 11220132, "params_stem_trainable": 0, "params_stem_fixed_filters": 0, "flops_total": 556705792, "flops_stem": 0, "flops_image_size": 32}
+epoch 1/800 loss 4.4651 train 0.0353 test 0.0508
+epoch 2/800 loss 4.1654 train 0.0647 test 0.0623
+epoch 3/800 loss 4.0184 train 0.0839 test 0.0889
+epoch 4/800 loss 3.9031 train 0.0944 test 0.0855
