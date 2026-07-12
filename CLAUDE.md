@@ -46,7 +46,10 @@ ported vs corrected and why.
 - Falsified mechanisms (documented negatives, keep them dead): channel-scale
   imbalance (fixed by calibration, that was v1's real bug), ZCA/collinearity
   (calibrate_zca exists, didn't help), step budget (deficit persists at
-  800 epochs).
+  800 epochs), prior-as-init (gabor-learn loses the low-data gain entirely
+  AND deepens the mid-data deficit), prior-as-warmup (stem_unfreeze_epoch
+  at the overtake point changes nothing: -1.18/-2.38 vs fixed -1.40/-2.37
+  at 10/15%). The benefit is constitutively tied to fixedness + low data.
 - Surviving account: prior-shaped features commit during the high-LR phase;
   beneficial when data can't estimate RGB statistics (≤5%), costly at
   10–25%, harmless at 100%. conv1 usage ratio (logged per epoch in
