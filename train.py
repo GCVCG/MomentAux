@@ -168,9 +168,24 @@ def main():
     accounting = count_params_flops(model, image_size=image_size)
     print(f"[{name} seed{args.seed}] {json.dumps(accounting)}")
 
+    # stem_unfreeze_epoch: train with the stem FROZEN (prior-as-warmup)
+    # until this epoch, then let its filters train. Requires a trainable
+    # stem (stem: gabor-learn). The frozen params sit in the optimizer from
+    # the start with requires_grad=False (SGD skips grad-less params), so
+    # the cosine schedule stays intact when they wake up.
+    unfreeze_at = cfg.get("stem_unfreeze_epoch")
+    if unfreeze_at is not None:
+        stem_params = list(model.stem.parameters())
+        if not stem_params:
+            raise ValueError("stem_unfreeze_epoch needs a trainable stem (gabor-learn)")
+        for p in stem_params:
+            p.requires_grad = False
+        print(f"stem frozen until epoch {unfreeze_at}")
+
     train_loader, test_loader = build_loaders(cfg, args.seed, args.data_root)
     optimizer = torch.optim.SGD(
-        [p for p in model.parameters() if p.requires_grad],
+        list(model.parameters()) if unfreeze_at is not None
+        else [p for p in model.parameters() if p.requires_grad],
         lr=cfg["lr"],
         momentum=cfg["momentum"],
         weight_decay=cfg["weight_decay"],
@@ -192,6 +207,10 @@ def main():
     best_acc, t_start = 0.0, time.time()
     train_metric = MulticlassAccuracy(num_classes=num_classes, average="micro").to(device)
     for epoch in range(cfg["epochs"]):
+        if unfreeze_at is not None and epoch == unfreeze_at:
+            for p in model.stem.parameters():
+                p.requires_grad = True
+            print(f"stem unfrozen at epoch {epoch}")
         model.train()
         train_metric.reset()
         loss_sum, n_batches, t0 = 0.0, 0, time.time()
