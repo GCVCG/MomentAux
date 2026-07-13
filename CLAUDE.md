@@ -64,9 +64,18 @@ ported vs corrected and why.
   agnostic to linear-vs-nonlinear and to which invariance: any fixed
   pre-committed extra channel costs accuracy at 10%+. Strongly supports the
   pure-low-data-statistics-estimation account. steerable/invariants
-  (principled refinements of the two worst types) built + tested but NOT
-  run — the band killed their family. Low-data probe (≤5%) in progress to
-  check if any energy feature keeps the low-data win.
+  (principled refinements) built + tested; not run at the band.
+- BUT energy-magnitude is a NEW LOW-DATA CHAMPION (3 seeds, tight σ):
+  Δ vs baseline +2.55@1%, +3.34@5% — beats BOTH Gabor stems at both points
+  (prev best k11 +1.35@1%, k5 +2.35@5%). Phase-invariant complex-Gabor
+  quadrature energy is a better low-data prior than oriented edges. Still
+  −1.74@10% (a low-data specialist, not a band fix). rotinv also net-positive
+  at low data (+0.97@1%, +0.45@5%) then collapses (−5.64@10%); structure
+  ~null (+0.47@1%, −0.27@5%). Magnitude full envelope (2/3/7/15/25/100%)
+  running to map its crossover. Two-regime champion question reopens:
+  energy-magnitude for MAX low-data accuracy vs k5 for never-lose-across-
+  scales. steerable (richer rotinv) now worth a low-data run.
+  Configs: enmag_/enrot_/enstr_/enste_/eninv_*pct.yaml.
 - Falsified mechanisms (documented negatives, keep them dead): channel-scale
   imbalance (fixed by calibration, that was v1's real bug), ZCA/collinearity
   (calibrate_zca exists, didn't help), step budget (deficit persists at
