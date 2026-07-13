@@ -127,6 +127,34 @@ def test_energy_kernel_fingerprints():
     assert gx.sum().abs().item() < 1e-6, "gradient kernels must be zero-sum"
     assert win.sum().item() == pytest.approx(3.0, abs=1e-6), "each window sums to one"
 
+    from momentstem.energy import _STEER_FREQS, _STEER_ORIENTS
+    se, so = quadrature_bank(_STEER_FREQS, _STEER_ORIENTS, 11)
+    assert se.shape == (24, 1, 11, 11)
+    assert se.sum().item() == pytest.approx(-0.0543976501, abs=1e-6)
+    assert so.abs().mean().item() == pytest.approx(0.0038967307, abs=1e-8)
+
+
+def test_energy_stem_rotation_invariance():
+    """rotinv/steerable/invariants must be (approximately) invariant to a 90-deg
+    rotation of the input -- the property that is supposed to survive past 5%.
+    'magnitude' is orientation-SELECTIVE and must NOT be invariant (guards
+    against accidentally pooling it away)."""
+    from momentstem import EnergyStem
+
+    x = torch.randn(4, 3, 32, 32)
+    xr = torch.rot90(x, 1, dims=(2, 3))
+    for ft, tol in (("rotinv", 0.02), ("steerable", 0.02), ("invariants", 1e-4)):
+        stem = EnergyStem(feature_type=ft).calibrate(x)
+        e0 = stem._energy(stem._luma(x)).mean(dim=(0, 2, 3))
+        er = stem._energy(stem._luma(xr)).mean(dim=(0, 2, 3))
+        drift = (e0 - er).abs().max().item() / (e0.abs().max().item() + 1e-8)
+        assert drift < tol, f"{ft}: not rotation-invariant (drift {drift:.4f})"
+    mag = EnergyStem(feature_type="magnitude").calibrate(x)
+    e0 = mag._energy(mag._luma(x)).mean(dim=(0, 2, 3))
+    er = mag._energy(mag._luma(xr)).mean(dim=(0, 2, 3))
+    assert (e0 - er).abs().max().item() / (e0.abs().max().item() + 1e-8) > 0.05, \
+        "magnitude must stay orientation-selective (not invariant)"
+
 
 def test_energy_stem_contracts():
     """RGB passthrough, zero trainable params, and unit-std calibration for
@@ -135,7 +163,8 @@ def test_energy_stem_contracts():
     from momentstem.energy import ENERGY_TYPES
 
     x = torch.randn(3, 3, 32, 32)
-    expected_ch = {"magnitude": 11, "rotinv": 11, "structure": 12}
+    expected_ch = {"magnitude": 11, "rotinv": 11, "structure": 12,
+                   "steerable": 12, "invariants": 12}
     for ft in ENERGY_TYPES:
         stem = EnergyStem(feature_type=ft)
         out = stem(x)

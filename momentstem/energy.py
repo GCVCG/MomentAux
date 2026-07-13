@@ -24,6 +24,15 @@ Feature types (all operate on BT.601 luminance, RGB identity passed through):
 * ``structure`` -- second-order structure tensor: locally-averaged gradient
   products J11=<Ix^2>, J22=<Iy^2>, J12=<Ix Iy> at 3 gradient scales = 9
   channels. A genuinely higher-order (co-occurrence) statistic.
+* ``steerable`` -- angular-harmonic energy (principled rotation invariance):
+  magnitude of the first 3 Fourier harmonics |c_0|,|c_1|,|c_2| of the
+  orientation-energy profile at 3 scales = 9 channels. Rotation-invariant like
+  ``rotinv`` but retains the SHAPE of the orientation distribution (isotropic
+  vs oriented vs cross), strictly richer than mean/max pooling.
+* ``invariants`` -- structure-tensor eigen-invariants (principled 2nd order):
+  the two eigenvalues lambda1>=lambda2 (complete rotation-invariant 2nd-order
+  content) and coherence (lambda1-lambda2)/(lambda1+lambda2) at 3 scales = 9
+  channels. The rotation-invariant refinement of ``structure``.
 
 All kernels are BUFFERS (zero trainable parameters). ``calibrate`` sets a fixed
 per-channel gain buffer so every energy channel has unit std on the committed
@@ -39,7 +48,7 @@ from torch import nn
 
 from .stem import LUMA_WEIGHTS, gabor_kernel
 
-ENERGY_TYPES = ("magnitude", "rotinv", "structure")
+ENERGY_TYPES = ("magnitude", "rotinv", "structure", "steerable", "invariants")
 _ENERGY_EPS = 1e-6
 
 # Committed layouts (constants of the study, like the Gabor bank seed).
@@ -49,6 +58,9 @@ _ROT_FREQS = (math.pi / 2, math.pi / (2 * math.sqrt(2)),
               math.pi / 4, math.pi / (4 * math.sqrt(2)))           # 4 octaves
 _ROT_ORIENTS = 6                                                   # pooled away
 _STRUCT_SIGMAS = (1.0, 1.6, 2.5)                                   # 3 gradient scales
+_STEER_FREQS = (math.pi / 2, math.pi / (2 * math.sqrt(2)), math.pi / 4)  # 3 octaves
+_STEER_ORIENTS = 8                                                 # for angular FFT
+_STEER_HARMONICS = 3                                              # |c_0|, |c_1|, |c_2|
 
 
 def quadrature_bank(freqs, n_orient, kernel_size):
@@ -119,7 +131,21 @@ class EnergyStem(nn.Module):
             self.register_buffer("odd", odd)
             self.n_scale, self.n_orient = len(_ROT_FREQS), _ROT_ORIENTS
             n_energy = self.n_scale * 2  # mean + max pooled over orientation
-        else:  # structure
+        elif feature_type == "steerable":
+            even, odd = quadrature_bank(_STEER_FREQS, _STEER_ORIENTS, kernel_size)
+            self.register_buffer("even", even)
+            self.register_buffer("odd", odd)
+            self.n_scale, self.n_orient = len(_STEER_FREQS), _STEER_ORIENTS
+            self.n_harm = _STEER_HARMONICS
+            # angular-harmonic weights: orientation is pi-periodic, so harmonic k
+            # uses angle 2*k*theta (theta = j*pi/n_orient). Buffers so forward is
+            # allocation-free and the layout is a committed constant.
+            thetas = torch.arange(self.n_orient, dtype=torch.float32) * math.pi / self.n_orient
+            ks = torch.arange(self.n_harm, dtype=torch.float32).view(-1, 1)
+            self.register_buffer("harm_cos", torch.cos(2.0 * ks * thetas))  # (H, O)
+            self.register_buffer("harm_sin", torch.sin(2.0 * ks * thetas))
+            n_energy = self.n_scale * self.n_harm
+        else:  # structure or invariants (both from the structure tensor)
             gx, gy, win = [], [], []
             for s in _STRUCT_SIGMAS:
                 dx, dy, g = gaussian_derivative_kernels(s, kernel_size)
@@ -127,7 +153,7 @@ class EnergyStem(nn.Module):
             self.register_buffer("grad_x", torch.cat(gx))   # (S,1,k,k)
             self.register_buffer("grad_y", torch.cat(gy))
             self.register_buffer("window", torch.cat(win))
-            n_energy = len(_STRUCT_SIGMAS) * 3              # J11, J22, J12 per scale
+            n_energy = len(_STRUCT_SIGMAS) * 3              # 3 outputs per scale
 
         self.n_energy = n_energy
         self.out_channels = in_channels + n_energy
@@ -150,16 +176,37 @@ class EnergyStem(nn.Module):
             energy = energy.view(B, self.n_scale, self.n_orient, H, W)
             pooled = torch.cat([energy.mean(dim=2), energy.amax(dim=2)], dim=1)
             return pooled
-        # structure tensor
+        if self.feature_type == "steerable":
+            e = F.conv2d(luma, self.even, padding=self.padding)
+            o = F.conv2d(luma, self.odd, padding=self.padding)
+            energy = torch.sqrt(e ** 2 + o ** 2 + _ENERGY_EPS)
+            B, _, H, W = energy.shape
+            energy = energy.view(B, self.n_scale, self.n_orient, H, W)
+            # angular Fourier magnitude per harmonic: |sum_o energy * e^{i 2k theta_o}|
+            # einsum over orientation with the committed cos/sin weight tables.
+            real = torch.einsum("bsoyx,ko->bksyx", energy, self.harm_cos)
+            imag = torch.einsum("bsoyx,ko->bksyx", energy, self.harm_sin)
+            mag = torch.sqrt(real ** 2 + imag ** 2 + _ENERGY_EPS)  # (B, K, n_scale, H, W)
+            return mag.reshape(B, self.n_harm * self.n_scale, H, W)
+        # structure tensor (structure: raw components; invariants: eigen-invariants)
         ix = F.conv2d(luma, self.grad_x, padding=self.padding)
         iy = F.conv2d(luma, self.grad_y, padding=self.padding)
         s = self.window.shape[0]
         comps = []
         for k in range(s):
             w = self.window[k:k + 1]
-            comps.append(F.conv2d(ix[:, k:k + 1] ** 2, w, padding=self.padding))
-            comps.append(F.conv2d(iy[:, k:k + 1] ** 2, w, padding=self.padding))
-            comps.append(F.conv2d(ix[:, k:k + 1] * iy[:, k:k + 1], w, padding=self.padding))
+            j11 = F.conv2d(ix[:, k:k + 1] ** 2, w, padding=self.padding)
+            j22 = F.conv2d(iy[:, k:k + 1] ** 2, w, padding=self.padding)
+            j12 = F.conv2d(ix[:, k:k + 1] * iy[:, k:k + 1], w, padding=self.padding)
+            if self.feature_type == "structure":
+                comps += [j11, j22, j12]
+            else:  # invariants: eigenvalues + coherence
+                tr = j11 + j22
+                disc = torch.sqrt((j11 - j22) ** 2 + 4.0 * j12 ** 2 + _ENERGY_EPS)
+                lam1 = 0.5 * (tr + disc)
+                lam2 = 0.5 * (tr - disc)
+                coherence = disc / (tr + _ENERGY_EPS)
+                comps += [lam1, lam2, coherence]
         return torch.cat(comps, dim=1)
 
     @torch.no_grad()
