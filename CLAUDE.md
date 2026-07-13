@@ -71,11 +71,18 @@ ported vs corrected and why.
   quadrature energy is a better low-data prior than oriented edges. Still
   −1.74@10% (a low-data specialist, not a band fix). rotinv also net-positive
   at low data (+0.97@1%, +0.45@5%) then collapses (−5.64@10%); structure
-  ~null (+0.47@1%, −0.27@5%). Magnitude full envelope (2/3/7/15/25/100%)
-  running to map its crossover. Two-regime champion question reopens:
-  energy-magnitude for MAX low-data accuracy vs k5 for never-lose-across-
-  scales. steerable (richer rotinv) now worth a low-data run.
-  Configs: enmag_/enrot_/enstr_/enste_/eninv_*pct.yaml.
+  ~null (+0.47@1%, −0.27@5%). Magnitude FULL envelope now mapped (3 seeds;
+  100% 2 seeds): Δ vs baseline +2.55@1%, +3.53@2%, +2.99@3%, +3.34@5%,
+  +0.78@7%, −1.74@10%, −4.76@15%, −7.34@25%, −3.89@100%. Beats BOTH Gabor
+  stems at 1–5%; k5 retakes at 7%. KEY: unlike the linear stems, magnitude
+  does NOT wash to ~0 at 100% — it stays −3.89 (phase-invariance permanently
+  discards raw signal), and its band penalty grows far faster (−7.34@25%).
+  A sharp ≤5% specialist, harmful everywhere above. (100% only 2 seeds,
+  ±1.70 — large cost confirmed, exact value not nailed.)
+  THREE-REGIME champion map: energy-magnitude best ≤5% (max low-data acc),
+  k5 best 7–25% (never-lose all-rounder), k11 ~wash at 100%. steerable
+  (richer rotinv) worth a low-data-only run. Configs: enmag_/enrot_/enstr_/
+  enste_/eninv_*pct.yaml.
 - Falsified mechanisms (documented negatives, keep them dead): channel-scale
   imbalance (fixed by calibration, that was v1's real bug), ZCA/collinearity
   (calibrate_zca exists, didn't help), step budget (deficit persists at
