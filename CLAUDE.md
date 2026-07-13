@@ -45,7 +45,7 @@ ported vs corrected and why.
   - k11 Δ vs baseline: +1.3@1%, +1.8@2%, +1.9@3%, +1.9@5%, +0.6@7%,
     −1.4@10%, −2.4@15%, −1.6@25%, ~0@100%.
   - k5 (`stem_kernel_size: 5`, 225 fixed weights) Δ: +0.8@1%, +1.0@2%,
-    +1.5@3%, +2.4@5%, +1.4@7%, −0.1@10%, −0.9@15%, ~0@100% (25% pending).
+    +1.5@3%, +2.4@5%, +1.4@7%, −0.1@10%, −0.9@15%, −0.8@25%, ~0@100%.
   k11 wins at 1–3% (coarser prior), k5 wins at 5–15% and nearly erases
   the mid-data penalty band. Champion re-pin (single k5 vs per-regime
   choice) awaits user decision. k7 is not the midpoint — it's worse than
