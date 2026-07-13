@@ -1,0 +1,197 @@
+"""EnergyStem: fixed NONLINEAR moment features prepended to a CNN backbone.
+
+Motivation (2026-07-13, from the k5/k11 envelope). The linear MomentStem gives
+orientation-SELECTIVE first-order Gabor responses -- exactly what a CNN's conv1
+learns first on its own. That is why the benefit collapses after ~5% data: once
+the network can estimate those filters itself, the fixed copies are redundant
+and merely constrain the high-LR commitment phase (the mid-data penalty band).
+
+To leave an impact PAST 5% a fixed prior must encode something the mid-data
+network does NOT spontaneously recover. These three feature types each break the
+"redundant oriented edge" mould, and all are NONLINEAR (magnitude / pooling /
+products), so they cannot be a single fixed conv -- hence a separate module from
+the strictly-linear MomentStem (whose calibration and ZCA fusion assume one
+equivalent conv).
+
+Feature types (all operate on BT.601 luminance, RGB identity passed through):
+
+* ``magnitude`` -- complex-Gabor quadrature energy sqrt(even^2 + odd^2): the
+  phase-invariant "complex cell" step above conv1's simple-cell filters.
+  4 orientations x 2 scale octaves = 8 channels.
+* ``rotinv``    -- rotation-invariant energy: quadrature energy pooled (mean and
+  max) over 6 orientations at each of 4 scales = 8 channels. Injects an
+  invariance the flip-only augmentation never teaches at any data scale.
+* ``structure`` -- second-order structure tensor: locally-averaged gradient
+  products J11=<Ix^2>, J22=<Iy^2>, J12=<Ix Iy> at 3 gradient scales = 9
+  channels. A genuinely higher-order (co-occurrence) statistic.
+
+All kernels are BUFFERS (zero trainable parameters). ``calibrate`` sets a fixed
+per-channel gain buffer so every energy channel has unit std on the committed
+calibration batch (the nonlinearity means the scale cannot be folded into the
+kernels the way MomentStem.calibrate does, so it is a separate multiplier).
+"""
+
+import math
+
+import torch
+import torch.nn.functional as F
+from torch import nn
+
+from .stem import LUMA_WEIGHTS, gabor_kernel
+
+ENERGY_TYPES = ("magnitude", "rotinv", "structure")
+_ENERGY_EPS = 1e-6
+
+# Committed layouts (constants of the study, like the Gabor bank seed).
+_MAG_FREQS = (math.pi / 2, math.pi / (2 * math.sqrt(2)))          # 2 octaves
+_MAG_ORIENTS = 4                                                   # 0, pi/4, pi/2, 3pi/4
+_ROT_FREQS = (math.pi / 2, math.pi / (2 * math.sqrt(2)),
+              math.pi / 4, math.pi / (4 * math.sqrt(2)))           # 4 octaves
+_ROT_ORIENTS = 6                                                   # pooled away
+_STRUCT_SIGMAS = (1.0, 1.6, 2.5)                                   # 3 gradient scales
+
+
+def quadrature_bank(freqs, n_orient, kernel_size):
+    """Even/odd Gabor quadrature pairs, one per (scale, orientation).
+
+    Returns (even, odd), each (n_scale*n_orient, 1, k, k), ordered scale-major
+    then orientation-major so the caller can reshape to (n_scale, n_orient)."""
+    even, odd = [], []
+    for f in freqs:
+        for o in range(n_orient):
+            theta = o * math.pi / n_orient
+            sigma = math.pi / f
+            even.append(gabor_kernel(f, theta, sigma, 0.0, kernel_size))
+            odd.append(gabor_kernel(f, theta, sigma, math.pi / 2, kernel_size))
+    even = torch.stack(even).unsqueeze(1)
+    odd = torch.stack(odd).unsqueeze(1)
+    return even, odd
+
+
+def gaussian_derivative_kernels(sigma, kernel_size):
+    """Derivative-of-Gaussian dx, dy (each (1,1,k,k)) and the Gaussian
+    integration window (1,1,k,k), all at scale sigma. Gradient kernels are
+    zero-sum (odd); the window sums to one."""
+    r = kernel_size // 2
+    c = torch.arange(-r, r + 1, dtype=torch.float64)
+    y, x = torch.meshgrid(c, c, indexing="ij")
+    g = torch.exp(-(x ** 2 + y ** 2) / (2.0 * sigma ** 2))
+    g = g / g.sum()
+    gx = -(x / sigma ** 2) * g
+    gy = -(y / sigma ** 2) * g
+    return (
+        gx.to(torch.float32)[None, None],
+        gy.to(torch.float32)[None, None],
+        g.to(torch.float32)[None, None],
+    )
+
+
+class EnergyStem(nn.Module):
+    """Fixed nonlinear energy stem. See module docstring.
+
+    :param feature_type one of ENERGY_TYPES.
+    :param kernel_size odd support for the quadrature / gradient kernels.
+    """
+
+    def __init__(self, feature_type="magnitude", in_channels=3, kernel_size=11):
+        super().__init__()
+        if feature_type not in ENERGY_TYPES:
+            raise ValueError(f"feature_type must be one of {ENERGY_TYPES}")
+        if in_channels != 3:
+            raise ValueError("EnergyStem operates on BT.601 luma; needs 3 input channels")
+        if kernel_size % 2 != 1:
+            raise ValueError("kernel_size must be odd (same-padding contract)")
+
+        self.feature_type = feature_type
+        self.in_channels = in_channels
+        self.kernel_size = kernel_size
+        self.padding = kernel_size // 2
+        self.register_buffer("luma_w", torch.tensor(LUMA_WEIGHTS).view(1, in_channels, 1, 1))
+
+        if feature_type == "magnitude":
+            even, odd = quadrature_bank(_MAG_FREQS, _MAG_ORIENTS, kernel_size)
+            self.register_buffer("even", even)
+            self.register_buffer("odd", odd)
+            n_energy = len(_MAG_FREQS) * _MAG_ORIENTS
+        elif feature_type == "rotinv":
+            even, odd = quadrature_bank(_ROT_FREQS, _ROT_ORIENTS, kernel_size)
+            self.register_buffer("even", even)
+            self.register_buffer("odd", odd)
+            self.n_scale, self.n_orient = len(_ROT_FREQS), _ROT_ORIENTS
+            n_energy = self.n_scale * 2  # mean + max pooled over orientation
+        else:  # structure
+            gx, gy, win = [], [], []
+            for s in _STRUCT_SIGMAS:
+                dx, dy, g = gaussian_derivative_kernels(s, kernel_size)
+                gx.append(dx); gy.append(dy); win.append(g)
+            self.register_buffer("grad_x", torch.cat(gx))   # (S,1,k,k)
+            self.register_buffer("grad_y", torch.cat(gy))
+            self.register_buffer("window", torch.cat(win))
+            n_energy = len(_STRUCT_SIGMAS) * 3              # J11, J22, J12 per scale
+
+        self.n_energy = n_energy
+        self.out_channels = in_channels + n_energy
+        self.register_buffer("calib_scale", torch.ones(n_energy))
+
+    def _luma(self, x):
+        return (x * self.luma_w).sum(dim=1, keepdim=True)
+
+    def _energy(self, luma):
+        """Raw (pre-calibration) energy channels (B, n_energy, H, W)."""
+        if self.feature_type == "magnitude":
+            e = F.conv2d(luma, self.even, padding=self.padding)
+            o = F.conv2d(luma, self.odd, padding=self.padding)
+            return torch.sqrt(e ** 2 + o ** 2 + _ENERGY_EPS)
+        if self.feature_type == "rotinv":
+            e = F.conv2d(luma, self.even, padding=self.padding)
+            o = F.conv2d(luma, self.odd, padding=self.padding)
+            energy = torch.sqrt(e ** 2 + o ** 2 + _ENERGY_EPS)
+            B, _, H, W = energy.shape
+            energy = energy.view(B, self.n_scale, self.n_orient, H, W)
+            pooled = torch.cat([energy.mean(dim=2), energy.amax(dim=2)], dim=1)
+            return pooled
+        # structure tensor
+        ix = F.conv2d(luma, self.grad_x, padding=self.padding)
+        iy = F.conv2d(luma, self.grad_y, padding=self.padding)
+        s = self.window.shape[0]
+        comps = []
+        for k in range(s):
+            w = self.window[k:k + 1]
+            comps.append(F.conv2d(ix[:, k:k + 1] ** 2, w, padding=self.padding))
+            comps.append(F.conv2d(iy[:, k:k + 1] ** 2, w, padding=self.padding))
+            comps.append(F.conv2d(ix[:, k:k + 1] * iy[:, k:k + 1], w, padding=self.padding))
+        return torch.cat(comps, dim=1)
+
+    @torch.no_grad()
+    def calibrate(self, x):
+        """Set per-channel gain so each energy channel has unit std on the
+        calibration batch. Identity RGB channels are untouched. Deterministic
+        given the batch; the gain lives in a buffer and travels with checkpoints."""
+        e = self._energy(self._luma(x))
+        std = e.std(dim=(0, 2, 3)).clamp_min(1e-8)
+        self.calib_scale.copy_(1.0 / std)
+        return self
+
+    def filter_numel(self):
+        """Fixed-filter elements (the 'effective parameter' overhead; buffers
+        are invisible to parameter counters). Matches MomentStem's contract."""
+        total = 0
+        for name in ("even", "odd", "grad_x", "grad_y", "window"):
+            w = getattr(self, name, None)
+            if w is not None:
+                total += w.numel()
+        return total
+
+    def forward(self, x):
+        if x.dim() != 4 or x.shape[1] != self.in_channels:
+            raise ValueError(
+                f"expected (B, {self.in_channels}, H, W) input, got {tuple(x.shape)}"
+            )
+        e = self._energy(self._luma(x)) * self.calib_scale.view(1, -1, 1, 1)
+        return torch.cat([x, e], dim=1)
+
+    def extra_repr(self):
+        return (
+            f"feature_type={self.feature_type}, out_channels={self.out_channels}, "
+            f"kernel_size={self.kernel_size}, n_energy={self.n_energy}"
+        )

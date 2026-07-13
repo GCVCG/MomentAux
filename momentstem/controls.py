@@ -21,6 +21,7 @@ Stem registry (one name per experimental cell):
 import torch.nn.functional as F
 from torch import nn
 
+from .energy import EnergyStem
 from .stem import MomentStem
 
 
@@ -75,6 +76,9 @@ STEM_NAMES = (
     "learned",
     "random-fixed",
     "gabor-learn",
+    "energy-magnitude",
+    "energy-rotinv",
+    "energy-structure",
 )
 
 
@@ -118,6 +122,13 @@ def build_stem(name, in_channels=3, kernel_size=11, seed=0, **stem_kwargs):
             in_channels=in_channels,
             kernel_size=kernel_size,
             trainable=True,
+            **stem_kwargs,
+        )
+    if name.startswith("energy-"):
+        return EnergyStem(
+            feature_type=name.split("-", 1)[1],
+            in_channels=in_channels,
+            kernel_size=kernel_size,
             **stem_kwargs,
         )
     raise ValueError(f"unknown stem {name!r}; choose from {STEM_NAMES}")

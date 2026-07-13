@@ -101,6 +101,52 @@ def test_luma_stem_shapes_and_calibration():
     assert torch.allclose(std[3:], torch.ones(16), atol=1e-3)
 
 
+def test_energy_kernel_fingerprints():
+    """Pins for the nonlinear EnergyStem kernels (magnitude/rotinv/structure).
+    Additive banks -- no existing run uses them -- but they are constants of the
+    study and must not drift."""
+    from momentstem.energy import (
+        _MAG_FREQS, _MAG_ORIENTS, _ROT_FREQS, _ROT_ORIENTS, _STRUCT_SIGMAS,
+        gaussian_derivative_kernels, quadrature_bank,
+    )
+
+    me, mo = quadrature_bank(_MAG_FREQS, _MAG_ORIENTS, 11)
+    assert me.shape == (8, 1, 11, 11) and mo.shape == (8, 1, 11, 11)
+    assert me.sum().item() == pytest.approx(0.0334119499, abs=1e-6)
+    assert mo.abs().mean().item() == pytest.approx(0.0042306492, abs=1e-8)
+
+    re, ro = quadrature_bank(_ROT_FREQS, _ROT_ORIENTS, 11)
+    assert re.shape == (24, 1, 11, 11)
+    assert re.sum().item() == pytest.approx(0.2056152672, abs=1e-6)
+    assert ro.abs().mean().item() == pytest.approx(0.0034957058, abs=1e-8)
+
+    gx = torch.cat([gaussian_derivative_kernels(s, 11)[0] for s in _STRUCT_SIGMAS])
+    win = torch.cat([gaussian_derivative_kernels(s, 11)[2] for s in _STRUCT_SIGMAS])
+    assert gx.shape == (3, 1, 11, 11)
+    assert gx.abs().mean().item() == pytest.approx(0.0041429861, abs=1e-8)
+    assert gx.sum().abs().item() < 1e-6, "gradient kernels must be zero-sum"
+    assert win.sum().item() == pytest.approx(3.0, abs=1e-6), "each window sums to one"
+
+
+def test_energy_stem_contracts():
+    """RGB passthrough, zero trainable params, and unit-std calibration for
+    every energy feature type."""
+    from momentstem import EnergyStem
+    from momentstem.energy import ENERGY_TYPES
+
+    x = torch.randn(3, 3, 32, 32)
+    expected_ch = {"magnitude": 11, "rotinv": 11, "structure": 12}
+    for ft in ENERGY_TYPES:
+        stem = EnergyStem(feature_type=ft)
+        out = stem(x)
+        assert out.shape[1] == stem.out_channels == expected_ch[ft]
+        assert torch.equal(out[:, :3], x), f"{ft}: identity passthrough broken"
+        assert sum(p.numel() for p in stem.parameters()) == 0, f"{ft}: not fixed"
+        stem.calibrate(x)
+        std = stem(x).std(dim=(0, 2, 3))[3:]
+        assert torch.allclose(std, torch.ones_like(std), atol=1e-3), f"{ft}: calib"
+
+
 def test_gabor_kernel_formula_reference():
     """Independent re-evaluation of the ported Gabor formula at one point,
     against a hand-computed value (guards against grid or rotation drift)."""

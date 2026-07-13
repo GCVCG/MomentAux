@@ -109,7 +109,10 @@ def count_params_flops(model, image_size=32, batch_size=1):
         p.numel() for p in model.stem.parameters() if p.requires_grad
     )
     fixed_filters = (
-        model.stem.filter_numel() if isinstance(model.stem, MomentStem) and not model.stem.trainable else 0
+        model.stem.filter_numel()
+        if hasattr(model.stem, "filter_numel")
+        and not getattr(model.stem, "trainable", False)
+        else 0
     )
     return {
         "params_trainable": trainable,
