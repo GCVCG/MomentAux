@@ -154,18 +154,24 @@ def main():
         stem_seed=args.seed,
         stem_kwargs=cfg.get("stem_kwargs"),
         head_pool=cfg.get("head_pool"),
+        moment_aux=cfg.get("moment_aux"),
     ).to(device)
-    if cfg.get("stem_calibrate", False) and hasattr(model.stem, "calibrate"):
+    if cfg.get("stem_calibrate", False):
         # Deterministic calibration batch: first N train images in index
         # order, eval transform (no augmentation) -- identical for every
         # stem, subset, and seed of a dataset. stem_calibrate: true -> per-
-        # channel std; "zca" -> fixed whitening (calibration v2).
+        # channel std; "zca" -> fixed whitening (calibration v2). For a
+        # moment_aux model the target moments are calibrated instead.
         calib = data_mod.calibration_batch(cfg["dataset"], args.data_root).to(device)
-        if cfg["stem_calibrate"] == "zca":
-            model.stem.calibrate_zca(calib)
-        else:
-            model.stem.calibrate(calib)
-        print(f"stem calibrated ({cfg['stem_calibrate']}) on {calib.shape[0]} images")
+        if cfg.get("moment_aux") and hasattr(model, "calibrate"):
+            model.calibrate(calib)
+            print(f"moment-aux target calibrated on {calib.shape[0]} images")
+        elif hasattr(model.stem, "calibrate"):
+            if cfg["stem_calibrate"] == "zca":
+                model.stem.calibrate_zca(calib)
+            else:
+                model.stem.calibrate(calib)
+            print(f"stem calibrated ({cfg['stem_calibrate']}) on {calib.shape[0]} images")
     accounting = count_params_flops(model, image_size=image_size)
     print(f"[{name} seed{args.seed}] {json.dumps(accounting)}")
 
@@ -222,6 +228,11 @@ def main():
             with torch.amp.autocast("cuda", enabled=use_amp):
                 logits = model(x)
                 loss = criterion(logits, y)
+                # moment-aux prior: soft MSE regression of an intermediate
+                # feature onto the fixed moment maps (deployed path unchanged).
+                aux = getattr(model, "last_aux", None)
+                if aux is not None:
+                    loss = loss + model.aux_weight * aux
             scaler.scale(loss).backward()
             scaler.step(optimizer)
             scaler.update()

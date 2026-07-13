@@ -38,6 +38,7 @@ def build_model(
     stem_seed=0,
     stem_kwargs=None,
     head_pool=None,
+    moment_aux=None,
 ):
     """Build stem + backbone for one experimental cell.
 
@@ -48,6 +49,11 @@ def build_model(
     :param head_pool replace GAP with MultiMaskPool, e.g.
         {"type": "zernike"|"random"|"learned", "J": 8, "hw": 4}; the linear
         head widens to features*J accordingly (see pooling.py).
+    :param moment_aux use the moments as a training-only auxiliary prior on a
+        VANILLA backbone (deployed path has no moment channels). Dict e.g.
+        {"stem": "energy-magnitude", "tap": "layer3", "weight": 0.1,
+         "kernel_size": 11, "stem_kwargs": {...}}. Requires stem_name "none".
+        See aux.py. Mutually exclusive with head_pool.
     """
     stem = build_stem(
         stem_name, kernel_size=stem_kernel_size, seed=stem_seed, **(stem_kwargs or {})
@@ -83,6 +89,25 @@ def build_model(
         in_feats = net.fc.in_features
         net.global_pool = pool
         net.fc = nn.Linear(in_feats * pool.J, num_classes)
+    if moment_aux:
+        from .aux import MomentAuxModel
+
+        if head_pool:
+            raise ValueError("moment_aux and head_pool are mutually exclusive")
+        if stem_name != "none":
+            raise ValueError("moment_aux requires a vanilla backbone (stem 'none')")
+        target = build_stem(
+            moment_aux["stem"],
+            kernel_size=moment_aux.get("kernel_size", 11),
+            seed=stem_seed,
+            **(moment_aux.get("stem_kwargs") or {}),
+        )
+        return MomentAuxModel(
+            net,
+            target,
+            tap=moment_aux.get("tap", "layer3"),
+            aux_weight=moment_aux.get("weight", 0.1),
+        )
     return StemmedModel(stem, net)
 
 
