@@ -54,6 +54,19 @@ ported vs corrected and why.
   bank at 5%, worse at 10%; MultiMaskPool readout (Zernike/random/learned
   masks) fails end-to-end under the frozen recipe despite +0.4–1.5 in
   linear probes — Zernike is dead at every placement tried (stem, readout).
+- "Make them work AFTER 5%" — FALSIFIED for fixed nonlinear features
+  (momentstem/energy.py, EnergyStem). Hypothesis: a prior encoding what the
+  mid-data net can't self-learn (phase/rotation invariance, 2nd-order stats)
+  could survive the penalty band. 10% band (3 seeds): magnitude −1.74,
+  rotinv −5.64, structure −5.20 vs baseline — ALL worse than the linear k11
+  Gabor stem (−1.40), the invariant/2nd-order ones catastrophically so
+  (they discard raw signal the net wants at mid-data). The penalty band is
+  agnostic to linear-vs-nonlinear and to which invariance: any fixed
+  pre-committed extra channel costs accuracy at 10%+. Strongly supports the
+  pure-low-data-statistics-estimation account. steerable/invariants
+  (principled refinements of the two worst types) built + tested but NOT
+  run — the band killed their family. Low-data probe (≤5%) in progress to
+  check if any energy feature keeps the low-data win.
 - Falsified mechanisms (documented negatives, keep them dead): channel-scale
   imbalance (fixed by calibration, that was v1's real bug), ZCA/collinearity
   (calibrate_zca exists, didn't help), step budget (deficit persists at
