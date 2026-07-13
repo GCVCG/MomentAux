@@ -36,13 +36,24 @@ ported vs corrected and why.
 - CIFAR-100-C lives at data/CIFAR-100-C (local) and
   /mnt/beegfs/amughrabi/data/CIFAR-100-C (turing).
 
-## State of findings (2026-07-11)
+## State of findings (2026-07-13)
 
-- Champion variant "MomentStem-G": RGB passthrough + 9 calibrated Gabor
+- Champion family "MomentStem-G": RGB passthrough + 9 calibrated Gabor
   kernels, 12ch, zero trainable params (`stem: moments-cat`,
   `stem_calibrate: true`, `stem_kwargs: {use_zernike: false}`).
-- Δ vs baseline (r18, CIFAR-100, 3 seeds, single device): +1.3@1%, +1.8@2%,
-  +1.9@3%, +1.9@5%, +0.6@7%, −1.4@10%, −2.4@15%, −1.6@25%, ~0@100%.
+  KERNEL SIZE IS A REGIME KNOB (full envelopes, 3 seeds/cell):
+  - k11 Δ vs baseline: +1.3@1%, +1.8@2%, +1.9@3%, +1.9@5%, +0.6@7%,
+    −1.4@10%, −2.4@15%, −1.6@25%, ~0@100%.
+  - k5 (`stem_kernel_size: 5`, 225 fixed weights) Δ: +0.8@1%, +1.0@2%,
+    +1.5@3%, +2.4@5%, +1.4@7%, −0.1@10%, −0.9@15%, ~0@100% (25% pending).
+  k11 wins at 1–3% (coarser prior), k5 wins at 5–15% and nearly erases
+  the mid-data penalty band. Champion re-pin (single k5 vs per-regime
+  choice) awaits user decision. k7 is not the midpoint — it's worse than
+  both at 10% (39.31).
+- Design space closed: pyramid/luma banks no better than the random k11
+  bank at 5%, worse at 10%; MultiMaskPool readout (Zernike/random/learned
+  masks) fails end-to-end under the frozen recipe despite +0.4–1.5 in
+  linear probes — Zernike is dead at every placement tried (stem, readout).
 - Falsified mechanisms (documented negatives, keep them dead): channel-scale
   imbalance (fixed by calibration, that was v1's real bug), ZCA/collinearity
   (calibrate_zca exists, didn't help), step budget (deficit persists at
