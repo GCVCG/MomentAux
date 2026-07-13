@@ -80,9 +80,16 @@ ported vs corrected and why.
   A sharp ≤5% specialist, harmful everywhere above. (100% only 2 seeds,
   ±1.70 — large cost confirmed, exact value not nailed.)
   THREE-REGIME champion map: energy-magnitude best ≤5% (max low-data acc),
-  k5 best 7–25% (never-lose all-rounder), k11 ~wash at 100%. steerable
-  (richer rotinv) worth a low-data-only run. Configs: enmag_/enrot_/enstr_/
-  enste_/eninv_*pct.yaml.
+  k5 best 7–25% (never-lose all-rounder), k11 ~wash at 100%.
+- steerable (angular-harmonic energy, principled rotinv) RUN at low data
+  (3 seeds): Δ +1.87@1%, +1.69@2%, +1.81@3%, +1.50@5%, −1.05@7%, −4.82@10%.
+  Beats its crude rotinv form (+0.97@1%→+1.87) and beats the Gabor stems at
+  1%, but LOSES to magnitude at every point (mag +2.55/+3.53/+2.99/+3.34)
+  and crosses negative earlier (−1.05@7% vs mag +0.78). Verdict: rotation-
+  invariance is a genuine low-data prior but phase-invariant energy is
+  strictly better. magnitude is the confirmed low-data champion; invariants
+  (structure-tensor eigen, refines the NULL structure type) not worth running.
+  Configs: enmag_/enrot_/enstr_/enste_/eninv_*pct.yaml.
 - Falsified mechanisms (documented negatives, keep them dead): channel-scale
   imbalance (fixed by calibration, that was v1's real bug), ZCA/collinearity
   (calibrate_zca exists, didn't help), step budget (deficit persists at
