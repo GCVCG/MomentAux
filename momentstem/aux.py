@@ -31,10 +31,11 @@ class MomentAuxModel(nn.Module):
     :param net a backbone already built for 3-channel input (stem "none").
     :param moment_stem a fixed stem whose output is [identity | moment maps];
         only the moment maps (channels past ``in_channels``) are the target.
-    :param tap name of the backbone submodule whose output is regressed onto
-        the (spatially pooled) moment maps.
-    :param aux_weight lambda; the raw MSE is stored on ``last_aux`` and the
-        training loop adds ``aux_weight * last_aux`` to cross-entropy.
+    :param tap name (or list of names) of backbone submodule(s) whose output is
+        regressed onto the (spatially pooled) moment maps. Multiple taps = the
+        prior shapes features at several depths; losses are averaged.
+    :param aux_weight lambda; the raw (tap-averaged) MSE is stored on
+        ``last_aux`` and the training loop adds ``aux_weight * last_aux`` to CE.
     """
 
     def __init__(self, net, moment_stem, tap="layer3", aux_weight=0.1):
@@ -42,28 +43,34 @@ class MomentAuxModel(nn.Module):
         self.net = net
         self.stem = IdentityStem(moment_stem.in_channels)  # deployed path is identity
         self.moment_stem = moment_stem
-        self.tap = tap
+        self.taps = [tap] if isinstance(tap, str) else list(tap)
         self.aux_weight = aux_weight
         self.n_identity = moment_stem.in_channels
         self.n_moment = moment_stem.out_channels - self.n_identity
         self.last_aux = None
 
         modules = dict(net.named_modules())
-        if tap not in modules:
-            raise ValueError(f"tap {tap!r} not in backbone; have e.g. layer1..layer4")
-        self._feat = None
-        modules[tap].register_forward_hook(self._capture)
+        self._feats = {}
+        for t in self.taps:
+            if t not in modules:
+                raise ValueError(f"tap {t!r} not in backbone; have e.g. layer1..layer4")
+            modules[t].register_forward_hook(self._capture_factory(t))
 
-        # probe tap channel count (size-independent) to size the aux head
+        # probe tap channel counts (size-independent) to size one head per tap
         was_training = net.training
         net.eval()
         with torch.no_grad():
             net(torch.zeros(1, self.n_identity, 32, 32))
         net.train(was_training)
-        self.aux_head = nn.Conv2d(self._feat.shape[1], self.n_moment, kernel_size=1)
+        self.aux_heads = nn.ModuleDict({
+            t: nn.Conv2d(self._feats[t].shape[1], self.n_moment, kernel_size=1)
+            for t in self.taps
+        })
 
-    def _capture(self, module, inp, out):
-        self._feat = out
+    def _capture_factory(self, name):
+        def hook(module, inp, out):
+            self._feats[name] = out
+        return hook
 
     def calibrate(self, x):
         """Calibrate the fixed moment target so its channels are unit-std on the
@@ -73,20 +80,23 @@ class MomentAuxModel(nn.Module):
         return self
 
     def forward(self, x):
-        self._feat = None
+        self._feats = {}
         logits = self.net(x)
         if self.training:
             with torch.no_grad():
-                target = self.moment_stem(x)[:, self.n_identity:]
-                target = F.adaptive_avg_pool2d(target, self._feat.shape[-2:])
-            pred = self.aux_head(self._feat)
-            self.last_aux = F.mse_loss(pred, target)
+                moments = self.moment_stem(x)[:, self.n_identity:]
+            losses = []
+            for t in self.taps:
+                feat = self._feats[t]
+                target = F.adaptive_avg_pool2d(moments, feat.shape[-2:])
+                losses.append(F.mse_loss(self.aux_heads[t](feat), target))
+            self.last_aux = torch.stack(losses).mean()
         else:
             self.last_aux = None
         return logits
 
     def extra_repr(self):
         return (
-            f"tap={self.tap}, n_moment={self.n_moment}, aux_weight={self.aux_weight}, "
+            f"taps={self.taps}, n_moment={self.n_moment}, aux_weight={self.aux_weight}, "
             f"deployed=vanilla({self.n_identity}ch)"
         )

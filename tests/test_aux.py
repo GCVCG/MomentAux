@@ -38,7 +38,7 @@ def test_aux_loss_present_in_train_and_trains_features_only():
     # the fixed moment target receives no gradient
     assert all(p.grad is None for p in m.moment_stem.parameters())
     # the aux head does (it shapes the backbone features)
-    assert m.aux_head.weight.grad is not None
+    assert m.aux_heads["layer3"].weight.grad is not None
 
 
 def test_target_channel_count_matches_stem():
@@ -47,7 +47,7 @@ def test_target_channel_count_matches_stem():
         m = build_model("resnet18", "none", num_classes=10,
                         moment_aux={"stem": target, **kw})
         assert m.n_moment == n
-        assert m.aux_head.out_channels == n
+        assert m.aux_heads["layer3"].out_channels == n
 
 
 def test_moment_aux_rejects_forward_path_combos():
@@ -55,3 +55,18 @@ def test_moment_aux_rejects_forward_path_combos():
     with pytest.raises(ValueError):
         build_model("resnet18", "moments-cat", num_classes=10,
                     moment_aux={"stem": "energy-magnitude"})  # needs stem 'none'
+
+
+def test_multi_layer_aux_taps():
+    """A list of taps builds one head per layer and averages their losses."""
+    m = build_model("resnet18", "none", num_classes=10,
+                    moment_aux={"stem": "energy-magnitude",
+                                "tap": ["layer2", "layer3", "layer4"], "weight": 0.3})
+    assert set(m.aux_heads.keys()) == {"layer2", "layer3", "layer4"}
+    m.calibrate(torch.randn(8, 3, 32, 32))
+    m.train()
+    m(torch.randn(2, 3, 32, 32))
+    assert m.last_aux is not None and m.last_aux.item() >= 0
+    # heads are sized to each tap's channel width (256/512 for r18 layer3/4)
+    assert m.aux_heads["layer3"].in_channels == 256
+    assert m.aux_heads["layer4"].in_channels == 512
