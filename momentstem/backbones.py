@@ -90,18 +90,28 @@ def build_model(
         net.global_pool = pool
         net.fc = nn.Linear(in_feats * pool.J, num_classes)
     if moment_aux:
-        from .aux import MomentAuxModel
+        from .aux import HOGTarget, MomentAuxModel, MomentTarget, TeacherTarget
 
         if head_pool:
             raise ValueError("moment_aux and head_pool are mutually exclusive")
         if stem_name != "none":
             raise ValueError("moment_aux requires a vanilla backbone (stem 'none')")
-        target = build_stem(
-            moment_aux["stem"],
-            kernel_size=moment_aux.get("kernel_size", 11),
-            seed=stem_seed,
-            **(moment_aux.get("stem_kwargs") or {}),
-        )
+        # target kind: a teacher checkpoint (FitNets control), HOG (MaskFeat
+        # control), or the fixed moment/energy stem (the method, default).
+        if moment_aux.get("teacher"):
+            target = TeacherTarget(
+                moment_aux["teacher"], tap=moment_aux.get("tap", "layer3"),
+                backbone=backbone, num_classes=num_classes,
+            )
+        elif moment_aux.get("hog"):
+            target = HOGTarget(n_bins=moment_aux.get("hog_bins", 9))
+        else:
+            target = MomentTarget(build_stem(
+                moment_aux["stem"],
+                kernel_size=moment_aux.get("kernel_size", 11),
+                seed=stem_seed,
+                **(moment_aux.get("stem_kwargs") or {}),
+            ))
         return MomentAuxModel(
             net,
             target,

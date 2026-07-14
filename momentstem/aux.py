@@ -1,55 +1,169 @@
-"""Moment auxiliary prior: use the fixed moments WITHOUT putting them in the
+"""Auxiliary-prior training: use a fixed target WITHOUT putting it in the
 deployed forward path, so the benefit scales with data instead of imposing the
 mid-data penalty band.
 
 Rationale (2026-07-14). Every forward-path placement of a fixed moment channel
 (stem input, readout mask) helps only at <=5% data and NECESSARILY costs
 accuracy once data can estimate features itself: conv1 commits to the fixed
-channel during the high-LR phase and cannot back out (pruning doesn't recover,
-warmup/unfreeze do nothing, learnable-from-init loses the gain). The moments
-occupy input bandwidth abundant data wants for better features.
+channel during the high-LR phase and cannot back out. The moments occupy input
+bandwidth abundant data wants for better features.
 
 MomentAuxModel breaks that. The deployed network is a VANILLA ResNet -- RGB in,
-logits out, no moment channels, zero inference overhead. During training only,
-a small head taps an intermediate layer and is regressed onto the fixed moment
-feature maps of the input (MSE, weight lambda, added to cross-entropy). The
-moments SHAPE the representation instead of OCCUPYING the input: a soft prior
-that abundant data can override. Expected to help at low data and go slack
-(harmless) at high data -- i.e. scale with data.
+logits out, no extra channels, zero inference overhead. During training only, a
+small head taps an intermediate layer and is regressed onto a FIXED target map
+(MSE or cosine, weight lambda, added to cross-entropy). The target SHAPES the
+representation instead of OCCUPYING the input: a soft prior that abundant data
+can override -- so it scales with data.
+
+Target producers (all expose ``.out_channels`` and ``forward(x) -> (B,C,h,w)``,
+optional ``.calibrate(x)``):
+* ``MomentTarget``  -- the fixed moment/energy maps (the method).
+* ``TeacherTarget`` -- a frozen pretrained backbone's intermediate features
+  (the FitNets/distillation control: is a LEARNED target better than the fixed
+  hand-crafted one, at the cost of training a whole teacher?).
+* ``HOGTarget``     -- Histogram-of-Oriented-Gradients cells (the MaskFeat
+  control: does the specific MOMENT descriptor matter vs. generic HOG?).
 """
+
+import math
 
 import torch
 import torch.nn.functional as F
 from torch import nn
 
 from .controls import IdentityStem
+from .stem import LUMA_WEIGHTS
+
+
+class MomentTarget(nn.Module):
+    """Wraps a fixed stem; produces only its moment/energy maps (drops the
+    identity passthrough)."""
+
+    def __init__(self, stem):
+        super().__init__()
+        self.stem = stem
+        self._n_identity = stem.in_channels
+        self.out_channels = stem.out_channels - stem.in_channels
+
+    def calibrate(self, x):
+        if hasattr(self.stem, "calibrate"):
+            self.stem.calibrate(x)
+        return self
+
+    def forward(self, x):
+        return self.stem(x)[:, self._n_identity:]
+
+
+class TeacherTarget(nn.Module):
+    """Frozen pretrained backbone; produces its features at ``tap`` (the
+    FitNets-style learned target). Standardized per-channel on the calibration
+    batch so the MSE is comparably scaled to the moment target."""
+
+    def __init__(self, ckpt_path, tap="layer3", backbone="resnet18", num_classes=100):
+        super().__init__()
+        from .backbones import build_model
+
+        model = build_model(backbone, "none", num_classes=num_classes)
+        sd = torch.load(ckpt_path, map_location="cpu")
+        model.load_state_dict(sd)
+        self.net = model.net
+        for p in self.net.parameters():
+            p.requires_grad = False
+        self.net.eval()
+        self.tap = tap
+        self._feat = None
+        dict(self.net.named_modules())[tap].register_forward_hook(self._cap)
+        with torch.no_grad():
+            self.net(torch.zeros(1, 3, 32, 32))
+        c = self._feat.shape[1]
+        self.out_channels = c
+        self.register_buffer("mean", torch.zeros(c))
+        self.register_buffer("std", torch.ones(c))
+
+    def _cap(self, module, inp, out):
+        self._feat = out
+
+    def train(self, mode=True):  # teacher stays in eval (frozen BN)
+        super().train(mode)
+        self.net.eval()
+        return self
+
+    @torch.no_grad()
+    def calibrate(self, x):
+        self._feat = None
+        self.net(x)
+        f = self._feat
+        self.mean.copy_(f.mean(dim=(0, 2, 3)))
+        self.std.copy_(f.std(dim=(0, 2, 3)).clamp_min(1e-6))
+        return self
+
+    def forward(self, x):
+        self._feat = None
+        self.net(x)
+        return (self._feat - self.mean.view(1, -1, 1, 1)) / self.std.view(1, -1, 1, 1)
+
+
+class HOGTarget(nn.Module):
+    """Fixed Histogram-of-Oriented-Gradients cell descriptor (unsigned
+    orientation in [0, pi)), soft-binned and gradient-magnitude weighted. The
+    MaskFeat-style hand-crafted control."""
+
+    def __init__(self, n_bins=9):
+        super().__init__()
+        self.n_bins = n_bins
+        self.out_channels = n_bins
+        self.register_buffer("luma_w", torch.tensor(LUMA_WEIGHTS).view(1, 3, 1, 1))
+        kx = torch.tensor([[-1., 0., 1.], [-2., 0., 2.], [-1., 0., 1.]])
+        self.register_buffer("kx", kx.view(1, 1, 3, 3))
+        self.register_buffer("ky", kx.t().contiguous().view(1, 1, 3, 3))
+        self.register_buffer("centers", torch.arange(n_bins).float() * math.pi / n_bins)
+        self.register_buffer("calib_scale", torch.ones(n_bins))
+
+    def _hog(self, x):
+        luma = (x * self.luma_w).sum(dim=1, keepdim=True)
+        gx = F.conv2d(luma, self.kx, padding=1)
+        gy = F.conv2d(luma, self.ky, padding=1)
+        mag = torch.sqrt(gx ** 2 + gy ** 2 + 1e-6)          # (B,1,H,W)
+        theta = torch.atan2(gy, gx) % math.pi               # (B,1,H,W) in [0,pi)
+        bw = math.pi / self.n_bins
+        d = (theta - self.centers.view(1, -1, 1, 1)).abs()  # (B,n_bins,H,W)
+        d = torch.minimum(d, math.pi - d)                   # circular distance
+        w = (1.0 - d / bw).clamp_min(0.0)                   # triangular soft-bin
+        return w * mag
+
+    @torch.no_grad()
+    def calibrate(self, x):
+        h = self._hog(x)
+        self.calib_scale.copy_(1.0 / h.std(dim=(0, 2, 3)).clamp_min(1e-8))
+        return self
+
+    def forward(self, x):
+        return self._hog(x) * self.calib_scale.view(1, -1, 1, 1)
 
 
 class MomentAuxModel(nn.Module):
-    """Vanilla backbone + training-only moment-prediction auxiliary head.
+    """Vanilla backbone + training-only target-prediction auxiliary head(s).
 
     :param net a backbone already built for 3-channel input (stem "none").
-    :param moment_stem a fixed stem whose output is [identity | moment maps];
-        only the moment maps (channels past ``in_channels``) are the target.
-    :param tap name (or list of names) of backbone submodule(s) whose output is
-        regressed onto the (spatially pooled) moment maps. Multiple taps = the
-        prior shapes features at several depths; losses are averaged.
-    :param aux_weight lambda; the raw (tap-averaged) MSE is stored on
-        ``last_aux`` and the training loop adds ``aux_weight * last_aux`` to CE.
+    :param target a fixed target producer (MomentTarget / TeacherTarget /
+        HOGTarget): ``forward(x) -> (B,C,h,w)``, ``.out_channels``.
+    :param tap name (or list) of backbone submodule(s) whose output is regressed
+        onto the (spatially pooled) target maps; multiple taps are averaged.
+    :param aux_weight lambda; raw (tap-averaged) loss stored on ``last_aux``.
+    :param loss_form "mse" or "cosine" (scale-free per-location).
     """
 
-    def __init__(self, net, moment_stem, tap="layer3", aux_weight=0.1, loss_form="mse"):
+    def __init__(self, net, target, tap="layer3", aux_weight=0.1, loss_form="mse"):
         super().__init__()
         if loss_form not in ("mse", "cosine"):
             raise ValueError(f"loss_form must be 'mse' or 'cosine', got {loss_form!r}")
         self.net = net
-        self.stem = IdentityStem(moment_stem.in_channels)  # deployed path is identity
-        self.moment_stem = moment_stem
+        self.stem = IdentityStem(3)  # deployed path is identity (vanilla backbone)
+        self.target = target
         self.taps = [tap] if isinstance(tap, str) else list(tap)
         self.aux_weight = aux_weight
         self.loss_form = loss_form
-        self.n_identity = moment_stem.in_channels
-        self.n_moment = moment_stem.out_channels - self.n_identity
+        self.n_moment = target.out_channels
         self.last_aux = None
 
         modules = dict(net.named_modules())
@@ -59,11 +173,10 @@ class MomentAuxModel(nn.Module):
                 raise ValueError(f"tap {t!r} not in backbone; have e.g. layer1..layer4")
             modules[t].register_forward_hook(self._capture_factory(t))
 
-        # probe tap channel counts (size-independent) to size one head per tap
         was_training = net.training
         net.eval()
         with torch.no_grad():
-            net(torch.zeros(1, self.n_identity, 32, 32))
+            net(torch.zeros(1, 3, 32, 32))
         net.train(was_training)
         self.aux_heads = nn.ModuleDict({
             t: nn.Conv2d(self._feats[t].shape[1], self.n_moment, kernel_size=1)
@@ -76,10 +189,8 @@ class MomentAuxModel(nn.Module):
         return hook
 
     def calibrate(self, x):
-        """Calibrate the fixed moment target so its channels are unit-std on the
-        committed batch -- keeps the MSE well-scaled across moment channels."""
-        if hasattr(self.moment_stem, "calibrate"):
-            self.moment_stem.calibrate(x)
+        if hasattr(self.target, "calibrate"):
+            self.target.calibrate(x)
         return self
 
     def forward(self, x):
@@ -87,14 +198,13 @@ class MomentAuxModel(nn.Module):
         logits = self.net(x)
         if self.training:
             with torch.no_grad():
-                moments = self.moment_stem(x)[:, self.n_identity:]
+                tgt = self.target(x)
             losses = []
             for t in self.taps:
                 feat = self._feats[t]
-                target = F.adaptive_avg_pool2d(moments, feat.shape[-2:])
+                target = F.adaptive_avg_pool2d(tgt, feat.shape[-2:])
                 pred = self.aux_heads[t](feat)
                 if self.loss_form == "cosine":
-                    # per-location cosine over the moment-channel dim (scale-free)
                     losses.append((1.0 - F.cosine_similarity(pred, target, dim=1)).mean())
                 else:
                     losses.append(F.mse_loss(pred, target))
@@ -105,6 +215,6 @@ class MomentAuxModel(nn.Module):
 
     def extra_repr(self):
         return (
-            f"taps={self.taps}, n_moment={self.n_moment}, aux_weight={self.aux_weight}, "
-            f"deployed=vanilla({self.n_identity}ch)"
+            f"taps={self.taps}, target={type(self.target).__name__}, "
+            f"n_moment={self.n_moment}, aux_weight={self.aux_weight}, deployed=vanilla(3ch)"
         )

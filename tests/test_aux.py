@@ -35,8 +35,8 @@ def test_aux_loss_present_in_train_and_trains_features_only():
     assert m.last_aux is not None and m.last_aux.item() >= 0
     (torch.nn.functional.cross_entropy(logits, torch.randint(0, 100, (4,)))
      + m.aux_weight * m.last_aux).backward()
-    # the fixed moment target receives no gradient
-    assert all(p.grad is None for p in m.moment_stem.parameters())
+    # the fixed target receives no gradient
+    assert all(p.grad is None for p in m.target.parameters())
     # the aux head does (it shapes the backbone features)
     assert m.aux_heads["layer3"].weight.grad is not None
 
@@ -71,6 +71,38 @@ def test_moment_aux_rejects_forward_path_combos():
     with pytest.raises(ValueError):
         build_model("resnet18", "moments-cat", num_classes=10,
                     moment_aux={"stem": "energy-magnitude"})  # needs stem 'none'
+
+
+def test_hog_target_control():
+    m = build_model("resnet18", "none", num_classes=10,
+                    moment_aux={"hog": True, "hog_bins": 9, "weight": 0.3})
+    from momentstem.aux import HOGTarget
+    assert isinstance(m.target, HOGTarget) and m.n_moment == 9
+    m.calibrate(torch.randn(8, 3, 32, 32))
+    m.train()
+    m(torch.randn(2, 3, 32, 32))
+    assert m.last_aux is not None and m.last_aux.item() >= 0
+    assert sum(p.numel() for p in m.target.parameters()) == 0  # HOG is fixed
+
+
+def test_teacher_target_control(tmp_path):
+    # a frozen teacher = a saved vanilla backbone; its features are the target
+    teacher = build_model("resnet18", "none", num_classes=10)
+    ckpt = tmp_path / "teacher.pt"
+    torch.save(teacher.state_dict(), ckpt)
+    m = build_model("resnet18", "none", num_classes=10,
+                    moment_aux={"teacher": str(ckpt), "tap": "layer3", "weight": 0.3})
+    from momentstem.aux import TeacherTarget
+    assert isinstance(m.target, TeacherTarget) and m.n_moment == 256  # r18 layer3
+    m.calibrate(torch.randn(8, 3, 32, 32))
+    m.train()
+    # teacher must stay frozen + in eval even when the student is in train mode
+    assert not m.target.net.training
+    m(torch.randn(2, 3, 32, 32))
+    assert m.last_aux is not None
+    loss = m.last_aux
+    loss.backward()
+    assert all(p.grad is None for p in m.target.net.parameters())
 
 
 def test_multi_layer_aux_taps():
