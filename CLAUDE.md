@@ -43,15 +43,30 @@ ported vs corrected and why.
   identical FLOPs to baseline, +0 inference params); during training only, an
   aux head taps layer3 and is regressed (MSE·λ + CE) onto the fixed magnitude
   moment maps. This is the FIRST placement that SCALES WITH DATA — positive at
-  EVERY scale (λ=0.1, magnitude target, 3 seeds): Δ +1.49@5%, +1.47@10%,
-  +0.69@25%, +0.14@100%. Turns the penalty band POSITIVE where every forward-
-  path stem lost (fwd-path best @10% was k5 −0.09; @25% k5 −0.77). λ sweep
-  @10% monotone: +0.95@λ.05, +1.47@λ.10, +2.81@λ.30 (±0.04). λ-ceiling wave
-  (0.3/0.5/1.0 × {10,100%}) running to pick λ and confirm high-data safety
-  before the full envelope. Configs: auxmag_*pct_l{05,10,30,50,100}.yaml.
+  EVERY scale. CHAMPION λ=0.3 (magnitude target, layer3), FULL envelope
+  (3 seeds): Δ +0.81@1%, +1.13@2%, +1.76@3%, +3.31@5%, +3.19@7%, +2.81@10%,
+  +2.24@15%, +0.46@25%, +0.00@100%. Positive everywhere, peak in the 5–10%
+  band, exactly neutral at 100%. Beats the BEST forward-path stem at 5–25%
+  (e.g. @10% aux +2.81 vs k5 −0.09; @15% +2.24 vs −0.87). Only extreme low
+  data (1–3%) still favors the forward-path magnitude specialist (+2.5/+3.5).
+  λ knee: gain peaks λ≈0.5 (@10% +3.33), high-data safety holds through λ=0.3
+  (+0.00@100%), breaks after (−0.36@100% at λ=0.5).
+  STRUCTURE CONTROL (decisive): aux target = random-fixed maps gives ≈0
+  (+0.01@5%, +0.14@10%) vs magnitude +3.31/+2.81 → moment gain +3.30/+2.67.
+  So it is the MOMENT STRUCTURE, not "any aux regression / deep supervision".
+  DESIGN SWEEP @10%: tap layer2 +2.83 ≈ layer3 +2.81; layer4 +0.92 (too late);
+  multi-layer [2,3,4] +2.85 (no gain over layer3); gabor-k5 target −0.24
+  (oriented edges are a BAD aux target — phase-invariant magnitude far better).
+  → current config (layer3, magnitude, λ=0.3) is near-optimal on tap+target.
   KEY INSIGHT: forward-path moments are a hard constraint (penalty band);
   aux-loss moments are a soft prior that shapes features without occupying
   input bandwidth, so abundant data overrides them instead of paying for them.
+  Nearest prior art (deep research): Bhattarai 2023 (joint HOG aux, but
+  segmentation), MaskFeat (HOG target, but SSL pretraining), FitNets/Mostajabi
+  (intermediate-feature regression, but LEARNED targets). Novel intersection:
+  fixed hand-crafted MOMENT target × joint aux+CE from scratch × vanilla deploy
+  × provably scales. TODO controls: learned-teacher (FitNets) + HOG targets;
+  ciFAIR-100 re-eval of low-data points; cross-backbone/dataset.
 - Champion family "MomentStem-G" (forward-path, superseded as the scaling
   answer but still the low-data accuracy leaders): RGB passthrough + 9
   calibrated Gabor
