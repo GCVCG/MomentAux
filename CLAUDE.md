@@ -36,9 +36,25 @@ ported vs corrected and why.
 - CIFAR-100-C lives at data/CIFAR-100-C (local) and
   /mnt/beegfs/amughrabi/data/CIFAR-100-C (turing).
 
-## State of findings (2026-07-13)
+## State of findings (2026-07-14)
 
-- Champion family "MomentStem-G": RGB passthrough + 9 calibrated Gabor
+- BREAKTHROUGH — MomentAux: moments as a SOFT TRAINING PRIOR on a vanilla
+  backbone (momentstem/aux.py). Deployed model is a plain ResNet (RGB→logits,
+  identical FLOPs to baseline, +0 inference params); during training only, an
+  aux head taps layer3 and is regressed (MSE·λ + CE) onto the fixed magnitude
+  moment maps. This is the FIRST placement that SCALES WITH DATA — positive at
+  EVERY scale (λ=0.1, magnitude target, 3 seeds): Δ +1.49@5%, +1.47@10%,
+  +0.69@25%, +0.14@100%. Turns the penalty band POSITIVE where every forward-
+  path stem lost (fwd-path best @10% was k5 −0.09; @25% k5 −0.77). λ sweep
+  @10% monotone: +0.95@λ.05, +1.47@λ.10, +2.81@λ.30 (±0.04). λ-ceiling wave
+  (0.3/0.5/1.0 × {10,100%}) running to pick λ and confirm high-data safety
+  before the full envelope. Configs: auxmag_*pct_l{05,10,30,50,100}.yaml.
+  KEY INSIGHT: forward-path moments are a hard constraint (penalty band);
+  aux-loss moments are a soft prior that shapes features without occupying
+  input bandwidth, so abundant data overrides them instead of paying for them.
+- Champion family "MomentStem-G" (forward-path, superseded as the scaling
+  answer but still the low-data accuracy leaders): RGB passthrough + 9
+  calibrated Gabor
   kernels, 12ch, zero trainable params (`stem: moments-cat`,
   `stem_calibrate: true`, `stem_kwargs: {use_zernike: false}`).
   KERNEL SIZE IS A REGIME KNOB (full envelopes, 3 seeds/cell):
