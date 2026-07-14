@@ -107,6 +107,7 @@ def build_model(
             target,
             tap=moment_aux.get("tap", "layer3"),
             aux_weight=moment_aux.get("weight", 0.1),
+            loss_form=moment_aux.get("loss", "mse"),
         )
     return StemmedModel(stem, net)
 

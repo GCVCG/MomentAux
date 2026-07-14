@@ -50,6 +50,22 @@ def test_target_channel_count_matches_stem():
         assert m.aux_heads["layer3"].out_channels == n
 
 
+def test_cosine_loss_form():
+    m = build_model("resnet18", "none", num_classes=10,
+                    moment_aux={"stem": "energy-magnitude", "loss": "cosine", "weight": 0.3})
+    assert m.loss_form == "cosine"
+    m.calibrate(torch.randn(8, 3, 32, 32))
+    m.train()
+    m(torch.randn(2, 3, 32, 32))
+    assert m.last_aux is not None and 0.0 <= m.last_aux.item() <= 2.0
+
+
+def test_invariance_features_as_aux_targets():
+    for t in ("energy-rotinv", "energy-structure", "energy-steerable", "energy-invariants"):
+        m = build_model("resnet18", "none", num_classes=10, moment_aux={"stem": t})
+        assert m.n_moment == m.aux_heads["layer3"].out_channels > 0
+
+
 def test_moment_aux_rejects_forward_path_combos():
     import pytest
     with pytest.raises(ValueError):

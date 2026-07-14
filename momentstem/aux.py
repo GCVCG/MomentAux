@@ -38,13 +38,16 @@ class MomentAuxModel(nn.Module):
         ``last_aux`` and the training loop adds ``aux_weight * last_aux`` to CE.
     """
 
-    def __init__(self, net, moment_stem, tap="layer3", aux_weight=0.1):
+    def __init__(self, net, moment_stem, tap="layer3", aux_weight=0.1, loss_form="mse"):
         super().__init__()
+        if loss_form not in ("mse", "cosine"):
+            raise ValueError(f"loss_form must be 'mse' or 'cosine', got {loss_form!r}")
         self.net = net
         self.stem = IdentityStem(moment_stem.in_channels)  # deployed path is identity
         self.moment_stem = moment_stem
         self.taps = [tap] if isinstance(tap, str) else list(tap)
         self.aux_weight = aux_weight
+        self.loss_form = loss_form
         self.n_identity = moment_stem.in_channels
         self.n_moment = moment_stem.out_channels - self.n_identity
         self.last_aux = None
@@ -89,7 +92,12 @@ class MomentAuxModel(nn.Module):
             for t in self.taps:
                 feat = self._feats[t]
                 target = F.adaptive_avg_pool2d(moments, feat.shape[-2:])
-                losses.append(F.mse_loss(self.aux_heads[t](feat), target))
+                pred = self.aux_heads[t](feat)
+                if self.loss_form == "cosine":
+                    # per-location cosine over the moment-channel dim (scale-free)
+                    losses.append((1.0 - F.cosine_similarity(pred, target, dim=1)).mean())
+                else:
+                    losses.append(F.mse_loss(pred, target))
             self.last_aux = torch.stack(losses).mean()
         else:
             self.last_aux = None

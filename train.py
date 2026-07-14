@@ -17,6 +17,7 @@ No external services required to reproduce anything.
 import argparse
 import csv
 import json
+import math
 import os
 import random
 import time
@@ -211,9 +212,31 @@ def main():
         + norm_cols
     )
 
+    # Optional moment-aux lambda SCHEDULE: start strong (prior dominates when
+    # the net can't estimate features) and decay (let cross-entropy take over) --
+    # the "washes out with data" mechanism inside one run. weight -> weight_final
+    # over epochs; default const (weight_final = weight) so fixed-lambda cells
+    # are unchanged.
+    aux_cfg = cfg.get("moment_aux") or {}
+    aux_w0 = aux_cfg.get("weight", 0.1)
+    aux_wT = aux_cfg.get("weight_final", aux_w0)
+    aux_sched = aux_cfg.get("weight_schedule", "const")
+
+    def aux_lambda(epoch):
+        if aux_sched == "const":
+            return aux_w0
+        frac = epoch / max(cfg["epochs"] - 1, 1)
+        if aux_sched == "linear":
+            return aux_w0 + (aux_wT - aux_w0) * frac
+        if aux_sched == "cosine":
+            return aux_wT + 0.5 * (aux_w0 - aux_wT) * (1 + math.cos(math.pi * frac))
+        raise ValueError(f"unknown weight_schedule {aux_sched!r}")
+
     best_acc, t_start = 0.0, time.time()
     train_metric = MulticlassAccuracy(num_classes=num_classes, average="micro").to(device)
     for epoch in range(cfg["epochs"]):
+        if cfg.get("moment_aux") and hasattr(model, "aux_weight"):
+            model.aux_weight = aux_lambda(epoch)
         if unfreeze_at is not None and epoch == unfreeze_at:
             for p in model.stem.parameters():
                 p.requires_grad = True
