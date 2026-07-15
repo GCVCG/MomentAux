@@ -57,7 +57,35 @@ ported vs corrected and why.
   DESIGN SWEEP @10%: tap layer2 +2.83 ≈ layer3 +2.81; layer4 +0.92 (too late);
   multi-layer [2,3,4] +2.85 (no gain over layer3); gabor-k5 target −0.24
   (oriented edges are a BAD aux target — phase-invariant magnitude far better).
-  → current config (layer3, magnitude, λ=0.3) is near-optimal on tap+target.
+  → tap=layer3 and target=magnitude are SETTLED.
+  TARGET SWEEP @10% (all energy families as aux targets, λ=0.3): magnitude
+  +2.81 > structure +1.78 > steerable +1.01 > rotinv +0.84 > gabor −0.24 >
+  invariants −2.97. The aux setting RESCUES features that were catastrophic
+  forward-path (rotinv −5.64→+0.84, structure −5.20→+1.78) but magnitude still
+  wins decisively. Best aux target = a MILD, INFO-PRESERVING nonlinearity;
+  raw edges and heavily-processed invariants are bad targets.
+  LOSS FORM: MSE ≫ cosine (@10% +2.81 vs +0.46; @2% +1.13 vs −0.01). The
+  magnitude scale of the moment maps matters — cosine discards it. SETTLED.
+  λ IS A DATA-REGIME KNOB (as kernel size was forward-path). Low data wants a
+  MUCH stronger prior (no high-data over-reg risk there): @2% λ.3 +1.13,
+  λ.5 +2.13, λ1.0 +2.63, λ2.0 +3.26 (≈ the forward-path specialist's +3.53).
+  λ SCHEDULE (cosine 1.0→0.1) IS THE NEW BEST CONFIG — beats fixed λ=0.3
+  everywhere low/mid: +2.41@2% (vs +1.13), +3.80@3% (vs +1.76; also BEATS the
+  forward-path specialist's +2.99 — first low-data win), +3.64@10% (vs +2.81);
+  costs only −0.19@100% (within seed noise ±0.31). Strong prior early, decayed
+  late = "prior dominates early, data takes over" realized inside one run.
+  Full schedule envelope + weight_final tuning (→0) to restore exact 100%
+  neutrality: RUNNING.
+  DEFENSIBILITY CONTROLS (all λ=0.3, vs magnitude +3.31@5% / +2.81@10%):
+  - random-fixed target: +0.01@5%, +0.14@10% → NOT "any aux signal".
+  - learned teacher / FitNets (frozen same-data backbone's layer3 features):
+    −0.36@5%, +0.16@10% → NOT "just distillation"; a LEARNED target that costs
+    a whole extra model does ~NOTHING while the free hand-crafted moment gives
+    +3.3/+2.8.
+  - HOG target (MaskFeat's descriptor): +1.22@5%, +1.37@10% → hand-crafted
+    descriptors do help, but the MOMENT is ~2x better.
+  → The moment structure is unambiguously the source of the gain, and
+  phase-invariant energy specifically is the right descriptor.
   KEY INSIGHT: forward-path moments are a hard constraint (penalty band);
   aux-loss moments are a soft prior that shapes features without occupying
   input bandwidth, so abundant data overrides them instead of paying for them.
