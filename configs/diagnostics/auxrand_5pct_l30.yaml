@@ -1,0 +1,20 @@
+name: auxrand_5pct_l30
+dataset: cifar100
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 8
+small_input: true
+pretrained: false
+subset_pct: 5
+stem: none
+stem_calibrate: true
+moment_aux:
+  stem: random-fixed
+  tap: layer3
+  weight: 0.3
+  stem_kwargs:
+    use_zernike: false

@@ -69,13 +69,22 @@ ported vs corrected and why.
   λ IS A DATA-REGIME KNOB (as kernel size was forward-path). Low data wants a
   MUCH stronger prior (no high-data over-reg risk there): @2% λ.3 +1.13,
   λ.5 +2.13, λ1.0 +2.63, λ2.0 +3.26 (≈ the forward-path specialist's +3.53).
-  λ SCHEDULE (cosine 1.0→0.1) IS THE NEW BEST CONFIG — beats fixed λ=0.3
-  everywhere low/mid: +2.41@2% (vs +1.13), +3.80@3% (vs +1.76; also BEATS the
-  forward-path specialist's +2.99 — first low-data win), +3.64@10% (vs +2.81);
-  costs only −0.19@100% (within seed noise ±0.31). Strong prior early, decayed
-  late = "prior dominates early, data takes over" realized inside one run.
-  Full schedule envelope + weight_final tuning (→0) to restore exact 100%
-  neutrality: RUNNING.
+  *** CHAMPION (2026-07-15): cosine λ SCHEDULE 1.0→0.0, magnitude target,
+  tap layer3, MSE. ("prior dominates early, data takes over" inside one run;
+  λ reaching EXACTLY 0 makes late training pure CE, so 100% neutrality is
+  structural, not tuned.) FULL envelope (3 seeds), Δ vs baseline:
+    1% +1.49 | 2% +2.50 | 3% +3.68 | 5% +5.30 | 7% +4.87 | 10% +4.14 |
+    15% +2.55 | 25% +0.25 | 100% +0.08
+  Positive at EVERY scale; peak +5.30@5%. Beats aux-fixed-λ=0.3 everywhere
+  except 25% (+0.25 vs +0.46, tie-ish). vs BEST forward-path stem: champion
+  WINS 3–15% decisively (@10% +4.14 vs −0.09; @7% +4.87 vs +1.44; @5% +5.30
+  vs +3.34) and ties at 100%. CROSSOVER ~3%: below it the HARD input prior
+  still wins (1% +2.55, 2% +3.53 fwd-path vs +1.49/+2.50 champion) — at
+  extreme scarcity you want the prior strong THROUGHOUT, and the schedule's
+  decay costs you (fixed λ=2.0 @2% gives +3.26 > schedule's +2.50).
+  weight_final tuning: →0.0 dominates →0.1 (@10% +4.14 vs +3.64; @100% +0.08
+  vs −0.19; @5% +5.30 ≈ +5.31; @3% +3.68 ≈ +3.80). UNTESTED: a higher
+  schedule START (e.g. 2.0→0.0) to try to win 1–2% too.
   DEFENSIBILITY CONTROLS (all λ=0.3, vs magnitude +3.31@5% / +2.81@10%):
   - random-fixed target: +0.01@5%, +0.14@10% → NOT "any aux signal".
   - learned teacher / FitNets (frozen same-data backbone's layer3 features):
