@@ -45,20 +45,64 @@ ported vs corrected and why.
                                            on ANY dataset; beats C100's +5.30)
     5% 69.05±0.17 → 73.46±0.19  = +4.41
    10% 80.71±0.98 → 81.80±0.19  = +1.09
-  DEPTH AXIS — CIFAR-100 @10%, λ0=1.0, 3 seeds: R18 +4.14±0.27, R34 +3.95±0.22
-  (λ transfers across depth untouched). R50 λ0=1.0 −0.67±2.59 (UNSTABLE, see
-  degeneracy below); R50 λ0=0.3 +2.42±0.28 (stable). So the exception is
-  BLOCK TYPE (bottleneck), not depth.
-- *** THE PREDICTIVE LAW: gain tracks THE DEFICIT THE DATA LEAVES, not the data
-  FRACTION. C10@10% (baseline 80.71 — net already solved the low-level feature
-  problem) gives only +1.09, though "10%" is the peak band on C100 (+4.14,
-  baseline ~41). Gain rises monotonically as baseline accuracy falls, ACROSS
-  datasets with different class counts and per-class counts. This was stated as
-  a FALSIFIABLE PREDICTION BEFORE the C10 cells ran and HELD at all 3 points —
-  it is the redundancy account's first out-of-sample confirmation, not a fit.
-  Corollary (also held): C10@1% is 50 img/class = 10x richer per class than
-  C100@1% (5/class), so it sits in the "schedule works" regime, not C100's
-  "prior must never relax" regime — read PER-CLASS COUNT, not percentage.
+  BACKBONE AXIS — CIFAR-100 @10%, ONE config λ0=1.0 + head_norm, 3 seeds:
+    R18 44.49±1.04 vs 40.18 = +4.31 | R34 44.06±0.27 vs 40.11 = +3.95 (no hn)
+    R50 44.58±0.32 vs 40.65 = +3.93 (hn REQUIRED)
+  *** UNIVERSAL λ: one λ0=1.0 gives +3.9..+4.3 on ALL THREE backbones — spread
+  inside seed noise, NO per-family retuning. The old R50 exception was BLOCK
+  TYPE (bottleneck), not depth, and head_norm CLOSES it.
+  head_norm is not a stability patch, it RECOVERS gain: R50 λ0=0.3 (the tuned
+  fallback) only reached +2.42 — weakening the prior suppressed the collapse AND
+  the signal. Per-seed proof it is systematic, not a rare bad seed: R50 no-hn
+  {41.22, 36.37, 42.35} → hn {44.45, 44.95, 44.35}. The BEST no-hn seed is BELOW
+  the WORST hn seed; σ 3.18 → 0.32 (10x). Every seed was being taxed.
+  OPEN: head_norm on R18 is mean-neutral (+4.31 vs +4.14) but σ 0.33 → 1.04
+  (~10x variance ratio; F(2,2) needs ~19x, so NOT establishable from 3 seeds).
+  Run 3 more R18+hn seeds before claiming head_norm is a safe ALWAYS-ON default;
+  until then it is a bottleneck-specific fix that happens to be free on R18.
+- *** RETRACTED (2026-07-16) — "gain tracks THE DEFICIT THE DATA LEAVES, not the
+  data fraction". I committed this as a law; it is FALSE and the retraction is
+  itself informative. Two independent failures:
+  (a) NOT MONOTONE — C100 falsifies it alone. @1% the baseline is 8.90 (the
+  LARGEST deficit in the study, 89 pts of headroom) and the gain is +1.49, the
+  SMALLEST non-zero gain in the envelope. The curve is UNIMODAL, peak at 5%.
+  Below 25 img/class a BIGGER deficit gives a SMALLER gain — the exact opposite.
+  Holds with best-per-regime λ0 too (1% λ0=2.0 → +1.91 < 5% +5.30), so it is
+  NOT a λ artifact.
+  (b) NO CROSS-DATASET x-AXIS — and it is STRUCTURALLY UNIDENTIFIABLE, not a
+  missing variable. C10 and C100 are BOTH EXACTLY 50,000 images, so a given %
+  fixes total images AND (frozen recipe, drop_last=True) total STEPS, while
+  per-class count differs by exactly 10x. Matching per-class count NECESSARILY
+  unmatches total data/steps by 10x. You cannot match both from this pair.
+  The pair I built the claim on (C100@10% vs C10@1%: baseline 40.18 vs 39.35,
+  both 50 img/class, +4.14 vs +6.61) differs 7800 vs 600 STEPS — 13x. I
+  presented a compute-mismatched pair as a controlled comparison.
+- STEP COUNT is a first-order confound in EVERY cross-fraction claim: the frozen
+  recipe ties steps to data (1% = 600 steps, 10% = 7800, 100% = 78000). Same 10%
+  data at 800 epochs (diag10e800_none) = 45.49 vs 40.18 at 200 — training longer
+  buys +5.31, MORE than the method's whole effect at that cell (+4.14). Δ per
+  cell is still valid (baseline gets identical steps); the SHAPE of Δ vs "data"
+  is really Δ vs "data AND compute jointly".
+  Corollary: sub-1% CIFAR-10 cells are IMPOSSIBLE under the frozen recipe —
+  0.5% = 250 imgs = 1 batch/epoch = 200 steps; 0.1% = 50 imgs = 0 batches
+  (drop_last=True) = empty loader, would not train at all.
+- WHAT SURVIVES the retraction (state it THIS narrowly):
+  (a) RIGHT FLANK ONLY: gain decays to ~0 as data becomes sufficient. Holds on
+  both datasets. The one prediction that genuinely held — C10@10% would give a
+  SMALL gain (+1.09) despite "10%" being C100's peak band, where percentage
+  alone predicted ~+4 — was a right-flank call. Real, but one correct call was
+  over-generalized into a two-sided law.
+  (b) MATCHED-% IS THE CLEAN COMPARISON (identical images, steps, recipe; only
+  class granularity differs): C100 peaks at 5%, C10 peaks at ≤1%. At matched
+  data AND compute, the 100-class task needs MORE data before the prior pays off
+  than the 10-class task. First confound-free cross-dataset statement we have.
+- *** NEXT INSTRUMENT — CIFAR-100 → its 20 SUPERCLASSES. The only design that
+  breaks the confound: IDENTICAL images, identical steps, 20 classes not 100, so
+  per-class count moves (x5) with total data held EXACTLY fixed. @5% = 2500 imgs
+  / 3800 steps / 125-per-class vs C100@5% = 2500 imgs / 3800 steps / 25-per-class.
+  FORK (cannot come out ambiguous): if gain follows PER-CLASS COUNT it should
+  collapse to ~0 (like C100@25%, 125/cls, +0.25); if it follows TOTAL DATA/COMPUTE
+  it should stay ~+5.30. One cell, same cost as any 5% run.
 - *** MECHANISM TRACED — the aux SCALE DEGENERACY (this is why R50 broke).
   ‖W·f − t‖² is INVARIANT under (f → f/c, W → c·W): SGD can minimise the aux by
   COLLAPSING the tapped features and INFLATING the head, learning nothing.
@@ -99,6 +143,30 @@ ported vs corrected and why.
   multi-layer [2,3,4] +2.85 (no gain over layer3); gabor-k5 target −0.24
   (oriented edges are a BAD aux target — phase-invariant magnitude far better).
   → tap=layer3 and target=magnitude are SETTLED.
+  *** TAP DEPTH IS **NOT** A REGIME KNOB (2026-07-16) — the first knob in this
+  study that isn't. TAP SWEEP @1% (λ0=2.0, 3 seeds, baseline 8.90): layer1
+  10.77±0.29 = +1.87 | layer2 10.55±0.09 = +1.65 | layer3 10.81±0.09 = +1.91.
+  layer3 is BEST at 1% just as at 10%; the whole spread is ~seed noise, and
+  layer1 (earliest possible tap, full 32x32, target unpooled) does NOTHING.
+  So the optimum does NOT move with data regime: a broad plateau layer1≈layer2≈
+  layer3 with layer4 the only cliff, at BOTH ends of the range. Contrast kernel
+  size (forward-path) and λ0 (aux), which ARE regime knobs.
+  NOTE ON THE REASONING: "SETTLED" above was originally concluded from a SINGLE
+  regime (10%) in a study whose recurring finding is that nothing is settled from
+  one regime — bad justification that happened to reach the right answer. It has
+  now survived its first out-of-regime test on evidence.
+  CONSEQUENCE: the LEFT-FLANK COLLAPSE IS REAL, not a tap-depth artifact. The
+  hypothesis "@1% layer3 is too late, the data can't estimate even early layers"
+  is FALSIFIED — tapping at layer1 recovers nothing. Surviving account: at 5
+  img/class the CLASSIFIER, not the features, is the bottleneck (5 examples
+  cannot define a boundary however good the representation), which explains both
+  why tap depth is irrelevant there AND why the forward-path stem still wins
+  (+2.55 vs aux +1.91): it changes what the CLASSIFIER SEES rather than only
+  shaping intermediate features.
+  TEST FOR IT (cheap, checkpoints exist — runs/*/best.pt): linear-probe the 1%
+  aux model and the 1% baseline ON THE FULL TRAIN SET. If aux features probe
+  BETTER while 1% accuracy barely moves, the features WERE improved and the
+  classifier couldn't exploit them → converts the left flank into a mechanism.
   TARGET SWEEP @10% (all energy families as aux targets, λ=0.3): magnitude
   +2.81 > structure +1.78 > steerable +1.01 > rotinv +0.84 > gabor −0.24 >
   invariants −2.97. The aux setting RESCUES features that were catastrophic
