@@ -1,1 +1,5 @@
 STL_START stl_none_10pct_seed0
+epoch 200/200 loss 0.0308 train 1.0000 test 0.4310
+done: final 0.4310 best 0.4354 -> ./runs/stl_none_10pct/seed0
+STL_DONE stl_none_10pct_seed0
+STL_START stl_none_10pct_seed1

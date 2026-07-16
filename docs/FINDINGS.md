@@ -176,6 +176,34 @@ forward-path (rotinv −5.64→+0.84), and the best aux target is a **mild,
 info-preserving nonlinearity** — raw edges and heavily-processed invariants are
 both bad. — **SETTLED**
 
+**Q4.6 — Are the low-data gains just memorised train/test duplicates?**
+CIFAR-100's test set contains ~9% near-duplicates of training images
+(927/10000). Every headline cell lives at 1-5% data, so this is a question any
+reviewer will ask. ciFAIR (Barz & Denzler 2020) replaces exactly those images,
+keeping labels and order -- a drop-in swap needing NO retraining.
+**A: No. The gain survives deduplication essentially untouched.**
+
+| cell | CIFAR | ciFAIR | drop |
+|---|---|---|---|
+| baseline @1% | 9.07 | 8.43 | -0.65 |
+| aux @1% | 10.95 | 10.10 | -0.85 |
+| baseline @5% | 25.31 | 23.26 | -2.05 |
+| aux @5% | 30.72 | 28.63 | -2.09 |
+| baseline @10% | 40.44 | 37.86 | -2.58 |
+| aux @100% | 78.74 | 75.98 | -2.76 |
+
+**Delta @5%: +5.41 -> +5.37. Delta @1%: +1.88 -> +1.67.** Both cells eat the
+identical contamination, so it cancels in the delta.
+Two predictions stated BEFORE running, both held: (i) the delta barely moves;
+(ii) the ABSOLUTE drop GROWS with data (-0.65@1% -> -2.76@100%), because the
+contamination is against the FULL train set -- at 1% only 500 training images
+exist, so most duplicate sources are not in the subset at all. The penalty
+therefore falls hardest on the high-data cells, which is where we claim
+NEUTRALITY rather than gains. -- **SETTLED**
+*(baseline @100%/@25% ciFAIR pending re-run: the first attempt read
+`ablf_none/seed2` WHILE IT WAS STILL TRAINING and reported 70.39+/-14.03 for a
+cell that is 78.43+/-0.07. Never evaluate a run dir a wave is writing to.)*
+
 **Q4.5 — Is the FEATURE gain (not just accuracy) also the moments' doing?**
 The probe (§7) shows aux improves features +4.70@1%. But any aux regression is a
 regulariser — a random target might do the same. Requires a random target at
@@ -221,9 +249,18 @@ no-hn {41.22, **36.37**, 42.35} → hn {44.45, 44.95, 44.35}. **The best no-hn s
 is below the worst hn seed**; σ 3.18 → 0.32. — **SETTLED**
 
 **Q6.4 — Is `head_norm` a safe always-on default?**
-Mean-neutral on R18 (+4.31 vs +4.14) but σ 0.33 → 1.04 (~10× variance ratio;
-F(2,2) needs ~19×, so not establishable from 3 seeds). Until resolved it is a
-bottleneck-specific fix that happens to be free on R18. — **OPEN** (seeds 3–5 running)
+**A: Yes.** At 3 seeds it looked mean-neutral but with σ 0.33 → 1.04, which was
+not resolvable (F(2,2) needs ~19×). At **6 seeds**: **+4.27 ±0.70** vs +4.14
+±0.33 — mean unchanged (0.13, deep inside noise) and σ regressed 1.04 → 0.70.
+F = 4.32 on df(5,2), nowhere near significance, so there is **no evidence that
+`head_norm` destabilises R18**; the 3-seed σ was an artifact of seed0 (43.36)
+landing low in a small sample (seeds 3-5: 44.29 / 44.83 / 44.14).
+Seeds: 43.36, 44.70, 45.40, 44.29, 44.83, 44.14.
+**The config is now ONE LINE for every backbone**: λ0=1.0, cosine→0, magnitude
+target, tap layer3, MSE, head_norm on. Free on R18/R34; the difference between
++3.93 and −0.67±3.18 on R50. — **SETTLED**
+*Lesson: a σ estimated from 3 seeds is nearly uninformative. Do not read one as
+a finding in either direction.*
 
 **Q6.5 — Across DATASET (CIFAR-10, champion transplanted verbatim)?**
 **A: Yes.** 1%: 39.35 → 45.96 (**+6.61**, the largest gain on any dataset);
@@ -394,8 +431,13 @@ but segmentation); **MaskFeat** (HOG target — but SSL pretraining);
 | # | question | status |
 |---|---|---|
 | Q4.5 | random target at matched λ0 — is the FEATURE gain the moments? | running |
-| Q6.4 | R18 `head_norm` σ — safe always-on default? | running |
-| Q6.6 | STL-10 96×96 — resolution transfer | running |
+| Q6.6 | STL-10 96×96 — resolution transfer (matched to cifar10@1% but for res) | running |
 | Q6.7 | superclass fork — per-class count vs total data/compute | running |
 | Q7.3 | shots dose-response — does the gap grow with head labels? | running |
-| — | ciFAIR-100 re-eval of low-data points (train/test duplicate contamination) | not started |
+| Q0.3 | **H3 re-opened**: CIFAR-C was only ever run on forward-path stems. `eval_robustness.py` never passed `moment_aux`, so aux checkpoints could not even load — the aux method has NEVER been tested under corruption. | running |
+| Q6.8 | **ConvNeXt** — first non-ResNet. Every backbone so far is a ResNet and the tap is a ResNet name. | running |
+| Q10.2 | **combo**: forward-path stem AND aux at 1–2%, the one regime we lose. Never tried — `MomentAuxModel` hardcoded IdentityStem, so it was unrepresentable. | running |
+| — | CIFAR-10 full 9-point envelope (was 3 points vs CIFAR-100's 9) | running |
+| — | Tiny-ImageNet 1/5/10% — first non-CIFAR pixels (200 cls, 64×64, 100k) | running |
+| — | per-regime λ0 curves on CIFAR-10 / TIN (currently fixed-λ0 transplants) | not started |
+| — | Tiny-ImageNet 25/100% (156k steps at 100%) | not started |

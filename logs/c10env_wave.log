@@ -1,0 +1,9 @@
+C10ENV_START c10_none_2pct_seed0
+epoch 200/200 loss 0.0021 train 1.0000 test 0.5234
+done: final 0.5234 best 0.5248 -> ./runs/c10_none_2pct/seed0
+C10ENV_DONE c10_none_2pct_seed0
+C10ENV_START c10_none_2pct_seed1
+epoch 200/200 loss 0.0020 train 1.0000 test 0.5168
+done: final 0.5168 best 0.5195 -> ./runs/c10_none_2pct/seed1
+C10ENV_DONE c10_none_2pct_seed1
+C10ENV_START c10_none_2pct_seed2

@@ -1,1 +1,9 @@
 RANDCTRL_START seed0
+epoch 200/200 loss 0.0222 train 1.0000 test 0.0955
+done: final 0.0955 best 0.0957 -> ./runs/auxrand_1pct_sched2/seed0
+RANDCTRL_DONE seed0
+RANDCTRL_START seed1
+epoch 200/200 loss 0.0226 train 1.0000 test 0.0949
+done: final 0.0949 best 0.0967 -> ./runs/auxrand_1pct_sched2/seed1
+RANDCTRL_DONE seed1
+RANDCTRL_START seed2

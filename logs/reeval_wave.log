@@ -1,0 +1,39 @@
+CIFAIR_RESULT abl1_none CIFAR 9.07+/-0.08  ciFAIR 8.43+/-0.11  drop +0.65  (3 seeds) -> runs/abl1_none/cifair.json
+CIFAIR_RESULT auxmag_1pct_sched2 CIFAR 10.95+/-0.10  ciFAIR 10.10+/-0.08  drop +0.85  (3 seeds) -> runs/auxmag_1pct_sched2/cifair.json
+CIFAIR_RESULT abl5_none CIFAR 25.31+/-0.60  ciFAIR 23.26+/-0.53  drop +2.05  (3 seeds) -> runs/abl5_none/cifair.json
+CIFAIR_RESULT auxmag_5pct_sched0 CIFAR 30.72+/-0.28  ciFAIR 28.63+/-0.23  drop +2.09  (3 seeds) -> runs/auxmag_5pct_sched0/cifair.json
+CIFAIR_RESULT abl10_none CIFAR 40.44+/-0.42  ciFAIR 37.86+/-0.40  drop +2.58  (3 seeds) -> runs/abl10_none/cifair.json
+Traceback (most recent call last):
+NameError: name '_head_key' is not defined
+CIFAIR_RESULT ablf_none CIFAR 70.39+/-14.03  ciFAIR 67.65+/-13.79  drop +2.74  (3 seeds) -> runs/ablf_none/cifair.json
+CIFAIR_RESULT auxmag_100pct_sched01 CIFAR 78.74+/-0.05  ciFAIR 75.98+/-0.11  drop +2.76  (3 seeds) -> runs/auxmag_100pct_sched01/cifair.json
+CIFAIR_PHASE_DONE
+ROBUST_CELL_DONE abl5_none
+ROBUST_START auxmag_5pct_sched0_seed0
+clean err 0.6960 -> runs/auxmag_5pct_sched0/seed0/robustness.json
+ROBUST_START auxmag_5pct_sched0_seed1
+clean err 0.6919 -> runs/auxmag_5pct_sched0/seed1/robustness.json
+ROBUST_START auxmag_5pct_sched0_seed2
+clean err 0.6962 -> runs/auxmag_5pct_sched0/seed2/robustness.json
+ROBUST_CELL_DONE auxmag_5pct_sched0
+ROBUST_START abl10_none_seed0
+clean err 0.5956 -> runs/abl10_none/seed0/robustness.json
+ROBUST_START abl10_none_seed1
+clean err 0.6045 -> runs/abl10_none/seed1/robustness.json
+ROBUST_START abl10_none_seed2
+clean err 0.5945 -> runs/abl10_none/seed2/robustness.json
+ROBUST_CELL_DONE abl10_none
+ROBUST_START auxmag_10pct_sched0_seed1
+clean err 0.5530 -> runs/auxmag_10pct_sched0/seed1/robustness.json
+ROBUST_START auxmag_10pct_sched0_seed2
+clean err 0.5593 -> runs/auxmag_10pct_sched0/seed2/robustness.json
+ROBUST_CELL_DONE auxmag_10pct_sched0
+ROBUST_CELL_DONE ablf_none
+ROBUST_START auxmag_100pct_sched01_seed0
+clean err 0.2144 -> runs/auxmag_100pct_sched01/seed0/robustness.json
+ROBUST_START auxmag_100pct_sched01_seed1
+clean err 0.2120 -> runs/auxmag_100pct_sched01/seed1/robustness.json
+ROBUST_START auxmag_100pct_sched01_seed2
+clean err 0.2135 -> runs/auxmag_100pct_sched01/seed2/robustness.json
+ROBUST_CELL_DONE auxmag_100pct_sched01
+REEVAL_COMPLETE

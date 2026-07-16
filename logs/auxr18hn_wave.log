@@ -3,3 +3,11 @@ epoch 200/200 loss 0.0058 train 0.9998 test 0.4429
 done: final 0.4429 best 0.4435 -> ./runs/r18_aux_10pct_hn/seed3
 R18HN_DONE seed3
 R18HN_START seed4
+epoch 200/200 loss 0.0062 train 1.0000 test 0.4483
+done: final 0.4483 best 0.4496 -> ./runs/r18_aux_10pct_hn/seed4
+R18HN_DONE seed4
+R18HN_START seed5
+epoch 200/200 loss 0.0057 train 1.0000 test 0.4414
+done: final 0.4414 best 0.4421 -> ./runs/r18_aux_10pct_hn/seed5
+R18HN_DONE seed5
+R18HN_COMPLETE

@@ -1,0 +1,5 @@
+TIN_START tin_none_1pct_seed0
+epoch 200/200 loss 0.0187 train 1.0000 test 0.0555
+done: final 0.0555 best 0.0568 -> ./runs/tin_none_1pct/seed0
+TIN_DONE tin_none_1pct_seed0
+TIN_START tin_none_1pct_seed1
