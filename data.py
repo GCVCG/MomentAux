@@ -19,12 +19,23 @@ SUBSET_SEED = 0
 
 STATS = {
     "cifar100": ((0.5071, 0.4865, 0.4409), (0.2673, 0.2564, 0.2762)),
+    "cifar100super": ((0.5071, 0.4865, 0.4409), (0.2673, 0.2564, 0.2762)),
     "cifar10": ((0.4914, 0.4822, 0.4465), (0.2470, 0.2435, 0.2616)),
     "stl10": ((0.4467, 0.4398, 0.4066), (0.2603, 0.2566, 0.2713)),
 }
 
-NUM_CLASSES = {"cifar100": 100, "cifar10": 10, "stl10": 10}
-IMAGE_SIZE = {"cifar100": 32, "cifar10": 32, "stl10": 96}
+NUM_CLASSES = {"cifar100": 100, "cifar100super": 20, "cifar10": 10, "stl10": 10}
+IMAGE_SIZE = {"cifar100": 32, "cifar100super": 32, "cifar10": 32, "stl10": 96}
+
+# cifar100super is CIFAR-100's IMAGES with its 20 official coarse labels, and it
+# deliberately reuses CIFAR-100's COMMITTED subset indices (data/subsets/
+# cifar100_*.json). That is the whole point: at a given pct the two datasets see
+# byte-identical images, the same count, and the same number of optimizer steps,
+# so ONLY per-class count changes (x5: a 100-fine-class-stratified subset gives
+# exactly 5 fine classes x n per coarse class). It is the one design that breaks
+# the CIFAR-10-vs-CIFAR-100 confound -- both of those are 50,000 images, so
+# matching per-class count there NECESSARILY unmatches total data/steps by 10x.
+SUBSET_ALIAS = {"cifar100super": "cifar100"}
 
 # The 15 standard CIFAR-C corruptions of Hendrycks & Dietterich (ICLR 2019).
 CIFAR_C_CORRUPTIONS = (
@@ -66,10 +77,11 @@ def make_subset_indices(labels, pct, seed=SUBSET_SEED):
 
 
 def subset_path(dataset, pct):
-    return os.path.join(SUBSET_DIR, f"{dataset}_{pct}pct.json")
+    return os.path.join(SUBSET_DIR, f"{SUBSET_ALIAS.get(dataset, dataset)}_{pct}pct.json")
 
 
 def load_subset_indices(dataset, pct):
+    dataset = SUBSET_ALIAS.get(dataset, dataset)
     path = subset_path(dataset, pct)
     if not os.path.exists(path):
         raise FileNotFoundError(
@@ -83,10 +95,47 @@ def load_subset_indices(dataset, pct):
     return payload["indices"]
 
 
+def cifar100_coarse_labels(data_root, train):
+    """CIFAR-100's 20 official coarse labels, in dataset order.
+
+    torchvision's CIFAR100 exposes only ``fine_labels``, so read the raw pickle
+    it already downloaded. Returns (coarse, fine); ``fine`` is returned so the
+    caller can assert the ordering matches torchvision's ``targets``.
+    """
+    import pickle
+
+    path = os.path.join(data_root, "cifar-100-python", "train" if train else "test")
+    with open(path, "rb") as f:
+        d = pickle.load(f, encoding="latin1")
+    return d["coarse_labels"], d["fine_labels"]
+
+
+class Relabelled(Dataset):
+    """Same images, different label map (see SUBSET_ALIAS note above)."""
+
+    def __init__(self, ds, targets):
+        if len(targets) != len(ds):
+            raise ValueError(f"{len(targets)} targets for {len(ds)} images")
+        self.ds = ds
+        self.targets = list(targets)
+
+    def __len__(self):
+        return len(self.ds)
+
+    def __getitem__(self, i):
+        return self.ds[i][0], self.targets[i]
+
+
 def build_dataset(dataset, data_root, train, subset_pct=None, download=True):
     tf = build_transforms(dataset, train)
     if dataset == "cifar100":
         ds = datasets.CIFAR100(data_root, train=train, transform=tf, download=download)
+    elif dataset == "cifar100super":
+        ds = datasets.CIFAR100(data_root, train=train, transform=tf, download=download)
+        coarse, fine = cifar100_coarse_labels(data_root, train)
+        if list(ds.targets) != list(fine):
+            raise RuntimeError("coarse-label pickle order != torchvision targets")
+        ds = Relabelled(ds, coarse)
     elif dataset == "cifar10":
         ds = datasets.CIFAR10(data_root, train=train, transform=tf, download=download)
     elif dataset == "stl10":
@@ -107,7 +156,7 @@ def calibration_batch(dataset, data_root, n=1024):
     every stem, subset, and seed of a dataset; uses image statistics only
     (no labels), so it leaks nothing into the low-label protocol."""
     tf = build_transforms(dataset, train=False)
-    if dataset == "cifar100":
+    if dataset in ("cifar100", "cifar100super"):  # labels unused; same images
         ds = datasets.CIFAR100(data_root, train=True, transform=tf, download=False)
     elif dataset == "cifar10":
         ds = datasets.CIFAR10(data_root, train=True, transform=tf, download=False)
