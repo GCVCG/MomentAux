@@ -6,7 +6,7 @@ batch_size: 128
 lr: 0.1
 weight_decay: 0.0005
 momentum: 0.9
-num_workers: 8
+num_workers: 2
 small_input: true
 pretrained: false
 subset_pct: 2
