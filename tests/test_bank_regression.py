@@ -134,26 +134,45 @@ def test_energy_kernel_fingerprints():
     assert so.abs().mean().item() == pytest.approx(0.0038967307, abs=1e-8)
 
 
+def _rotation_drift(stem, x):
+    """Relative change in per-channel mean energy under a 90-deg input rotation."""
+    e0 = stem._energy(stem._luma(x)).mean(dim=(0, 2, 3))
+    er = stem._energy(stem._luma(torch.rot90(x, 1, dims=(2, 3)))).mean(dim=(0, 2, 3))
+    return (e0 - er).abs().max().item() / (e0.abs().max().item() + 1e-8)
+
+
 def test_energy_stem_rotation_invariance():
     """rotinv/steerable/invariants must be (approximately) invariant to a 90-deg
     rotation of the input -- the property that is supposed to survive past 5%.
-    'magnitude' is orientation-SELECTIVE and must NOT be invariant (guards
-    against accidentally pooling it away)."""
+    'magnitude' and 'structure' are orientation-SELECTIVE and must NOT be
+    invariant (guards against accidentally pooling the orientation away).
+
+    THE STIMULUS MUST BE ORIENTED. This probed torch.randn until 2026-07-16,
+    which is isotropic in expectation: the spatially-averaged energy of an
+    orientation-selective bank is then nearly unchanged by rotation, so the
+    selectivity assertion was comparing finite-sample noise (drift ~0.04-0.07,
+    varying by draw) against a 0.05 threshold sitting inside that noise -- an
+    unseeded test that failed ~1 run in 10. A grating gives an orientation-
+    selective bank something to actually be selective about, and separates the
+    two families by ~20x instead of ~1.4x:
+        grating -> selective 0.94-0.98, invariant 0.0000
+        randn   -> selective 0.03-0.07, invariant 0.0000-0.0045
+    The banks themselves are unchanged; only the probe stimulus is.
+    """
     from momentstem import EnergyStem
 
-    x = torch.randn(4, 3, 32, 32)
-    xr = torch.rot90(x, 1, dims=(2, 3))
-    for ft, tol in (("rotinv", 0.02), ("steerable", 0.02), ("invariants", 1e-4)):
-        stem = EnergyStem(feature_type=ft).calibrate(x)
-        e0 = stem._energy(stem._luma(x)).mean(dim=(0, 2, 3))
-        er = stem._energy(stem._luma(xr)).mean(dim=(0, 2, 3))
-        drift = (e0 - er).abs().max().item() / (e0.abs().max().item() + 1e-8)
-        assert drift < tol, f"{ft}: not rotation-invariant (drift {drift:.4f})"
-    mag = EnergyStem(feature_type="magnitude").calibrate(x)
-    e0 = mag._energy(mag._luma(x)).mean(dim=(0, 2, 3))
-    er = mag._energy(mag._luma(xr)).mean(dim=(0, 2, 3))
-    assert (e0 - er).abs().max().item() / (e0.abs().max().item() + 1e-8) > 0.05, \
-        "magnitude must stay orientation-selective (not invariant)"
+    torch.manual_seed(0)
+    # horizontal grating: rotating it 90 deg genuinely swaps which oriented
+    # filters fire, which is the property under test.
+    rows = torch.linspace(0, 6 * math.pi, 32).view(1, 1, 32, 1)
+    x = torch.sin(rows).expand(2, 3, 32, 32).contiguous()
+
+    for ft in ("rotinv", "steerable", "invariants"):
+        drift = _rotation_drift(EnergyStem(feature_type=ft), x)
+        assert drift < 0.02, f"{ft}: not rotation-invariant (drift {drift:.4f})"
+    for ft in ("magnitude", "structure"):
+        drift = _rotation_drift(EnergyStem(feature_type=ft), x)
+        assert drift > 0.5, f"{ft}: must stay orientation-selective (drift {drift:.4f})"
 
 
 def test_energy_stem_contracts():
