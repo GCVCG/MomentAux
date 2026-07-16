@@ -42,10 +42,29 @@ ported vs corrected and why.
 - GENERALIZATION (2026-07-16). The champion (λ0=1.0 cosine→0, magnitude target,
   tap layer3, MSE) transplants with NO retuning across dataset and depth.
   DATASET AXIS — CIFAR-10, ResNet-18, 3 seeds, champion config verbatim:
-    1% 39.35±0.26 → 45.96±0.18  = +6.61   (largest gain the method has produced
-                                           on ANY dataset; beats C100's +5.30)
-    5% 69.05±0.17 → 73.46±0.19  = +4.41
-   10% 80.71±0.98 → 81.80±0.19  = +1.09
+    1% 39.35±0.26 → 45.96±0.18  = +6.61 ±0.18  (the 1–2% band holds the largest
+    2% 51.34±1.20 → 58.49±0.16  = +7.14 ±0.70   gains the method has produced on
+    5% 69.05±0.17 → 73.46±0.19  = +4.41 ±0.15   ANY dataset; both beat C100's
+   10% 80.71±0.98 → 81.80±0.19  = +1.09 ±0.57   peak of +5.30)
+  (±  on Δ = SEM of the difference of two 3-seed means, not the seed σ.)
+  *** "C10 peaks at ≤1%" IS WITHDRAWN (2026-07-17) — and do NOT replace it with
+  "peaks at 2%". Filling in 2% made it NOMINALLY the higher cell (+7.14 vs
+  +6.61) but the difference is +0.53 ± 0.72 = 0.73σ: NOT DISTINGUISHABLE. The
+  1–2% band is one FLAT PLATEAU at +6.6..+7.1; which point is the summit is
+  UNRESOLVED. The σ comes entirely from the c10_none_2pct BASELINE (±1.20,
+  seeds 52.48/51.95/50.20 — one low seed); the aux cell is ±0.16.
+  This is the SAME failure mode as the retracted law and the 100% cell: a
+  difference read off 3 seeds whose σ cannot support it. Caught BEFORE it was
+  committed this time, which is the only reason it is not a fourth retraction.
+  CONSEQUENCE FOR THE SYNTHESIS — the prediction "C10's true peak is 0.5%, so
+  +6.61@1% is the RISING LIMB not the summit" is NOT supported, and is
+  nominally CONTRADICTED. Above the claimed ~25 img/class threshold mechanism
+  (a) alone should govern (less data → more gain), so 1% (50/cls) ought to
+  BEAT 2% (100/cls). It does not. Either (b) is GRADED and still biting at
+  50–100/cls, or the plateau is real. UNDERPOWERED — do not adjudicate at 3
+  seeds. Deepening both cells to ~10 seeds is cheap (600 / 1400 steps) and is
+  the way to settle it; until then state ONLY "gain plateaus across 1–2%, then
+  decays (+4.41@5%, +1.09@10%)".
   BACKBONE AXIS — CIFAR-100 @10%, ONE config λ0=1.0 + head_norm, 3 seeds:
     R18 44.49±1.04 vs 40.18 = +4.31 | R34 44.06±0.27 vs 40.11 = +3.95 (no hn)
     R50 44.58±0.32 vs 40.65 = +3.93 (hn REQUIRED)
@@ -98,9 +117,13 @@ ported vs corrected and why.
   alone predicted ~+4 — was a right-flank call. Real, but one correct call was
   over-generalized into a two-sided law.
   (b) MATCHED-% IS THE CLEAN COMPARISON (identical images, steps, recipe; only
-  class granularity differs): C100 peaks at 5%, C10 peaks at ≤1%. At matched
-  data AND compute, the 100-class task needs MORE data before the prior pays off
-  than the 10-class task. First confound-free cross-dataset statement we have.
+  class granularity differs): C100 peaks at 5%; C10 is ALREADY AT ITS PLATEAU
+  by 1–2% and decaying by 5%. At matched data AND compute, the 100-class task
+  needs MORE data before the prior pays off than the 10-class task. First
+  confound-free cross-dataset statement we have, and it SURVIVES the peak-
+  location withdrawal above: it only needs C10's plateau to sit LEFT of C100's,
+  which holds however 1% vs 2% resolves (C10 is already decaying at 5%, where
+  C100 peaks). Do NOT restate it as "C10 peaks at ≤1%".
 - *** SUPERCLASS FORK ANSWERED (2026-07-16) — GAIN FOLLOWS TOTAL DATA/COMPUTE,
   NOT PER-CLASS COUNT. cifar100super = CIFAR-100's IMAGES + its 20 coarse labels,
   reusing C100's committed subset indices (byte-identical images, identical steps,
@@ -124,9 +147,46 @@ ported vs corrected and why.
   Explains the UNIMODAL curve peaking near 25 img/class, and predicts C10's true
   peak is 0.5% (25/cls) — unrunnable under the frozen recipe (250 imgs = 1
   batch/epoch), so +6.61@1% is the RISING LIMB, not the summit.
-  LIVE PREDICTIONS (recorded before the runs land): tin@1% = 1000 imgs / 5-per-cls
-  → should be SUPPRESSED ~+1.5 DESPITE 2x C100@1%'s images (if it lands ~+5, (b)
-  is WRONG); stl@10% = 500 imgs / 50-per-cls / 600 steps → should be ~+6.6.
+  *** tin@1% PREDICTION HELD (2026-07-17) — mechanism (b) SURVIVES its first
+  out-of-family falsification test, on a dataset the synthesis was not built on
+  (Tiny-ImageNet, 200 classes, 64x64). Predicted IN ADVANCE and in writing:
+  "SUPPRESSED ~+1.5 DESPITE 2x C100@1%'s images; if it lands ~+5, (b) is WRONG".
+  LANDED: 5.22±0.32 → 6.95 = +1.73 (aux is 1 seed so far; seeds 1-2 running).
+  2x the images and 2.3x the steps of C100@1% bought ~nothing, because per-class
+  stayed at 5. NOT the ~+5 that would have killed it.
+  *** THE MATCHED TRIPLE (2026-07-17) — the strongest evidence for (b) yet, and
+  the MIRROR IMAGE of the superclass pair. All three cells have IDENTICAL total
+  images (1000) and IDENTICAL steps (1400 = 7 batches x 200), same champion
+  λ0=1.0 config; ONLY per-class count differs:
+      100 img/cls  (C10@2%,   10-way)  51.34 → 58.49  = +7.15 ±0.70
+       10 img/cls  (C100@2%, 100-way)  14.17 → 16.67  = +2.50 ±0.16
+        5 img/cls  (tin@1%,  200-way)   5.22 →  6.95  = +1.73 ±0.18 (1 seed)
+  MONOTONE in per-class count at perfectly fixed data AND compute. The
+  C10-vs-C100 leg is **6.5σ** (+4.65 ±0.72) — not a noise story. (tin leg
+  +0.77 ±0.24 pending its remaining seeds.)
+  WHY THIS IS NOT A CONTRADICTION of "gain follows total data/compute, NOT
+  per-class count" (the superclass result): the two pin down DIFFERENT flanks.
+    superclass pair: same per-class (125), 23x different gain → per-class ALONE
+      does not determine gain.
+    this triple:     same data+compute (1000/1400), 4.1x different gain →
+      data+compute ALONE does not determine gain either.
+  Together they prove BOTH factors are real and NEITHER suffices — which is
+  exactly the two-mechanism synthesis, now with a decisive experiment per side.
+  RECONCILED BY THE ~25 img/cls THRESHOLD, which both datasets now support:
+    at 2500 imgs, EVERY cell is at/above 25/cls (25/125/250) → all realized, and
+      the spread is flat-ish: C100@5% +5.30, super@5% +5.84, C10@5% +4.41.
+    at 1000 imgs, the cells STRADDLE it (5/10/100) → steep: +1.73/+2.50/+7.15.
+  So per-class count matters ENORMOUSLY at 1000 imgs and BARELY at 2500 — which
+  is what a threshold predicts, and is why neither factor alone ever fit.
+  CAVEAT — DO NOT over-read the triple: at fixed total data, per-class count and
+  CLASS COUNT are PERFECTLY anti-correlated (1000/10=100, 1000/100=10,
+  1000/200=5), so this triple CANNOT separate "5 examples can't define a
+  boundary" from "200-way is simply a harder task". tin also differs in
+  RESOLUTION (64x64). What breaks that tie is the superclass cell: at 2500 imgs,
+  20-way (super, +5.84) vs 100-way (C100, +5.30) — 5x different class count,
+  SAME gain. So class count per se is NOT the driver at that scale.
+  LIVE PREDICTION STILL OPEN: stl@10% = 500 imgs / 50-per-cls / 600 steps →
+  should be ~+6.6 (tests whether 96x96 resolution changes anything).
 - ciFAIR-100 (2026-07-16) — the low-data gains are NOT memorised train/test
   duplicates. CIFAR-100's test set has 927/10000 near-duplicates of train images;
   ciFAIR replaces exactly those. The Δ is stable at every point:

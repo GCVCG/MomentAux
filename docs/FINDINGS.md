@@ -332,21 +332,67 @@ different gain. So granularity matters, but ONLY at the bottom. The account that
 fits every cell:
   (a) **The prior's FEATURE benefit tracks TOTAL DATA/COMPUTE** — how much the
       data cannot teach by itself. Governs the RIGHT flank: as data suffices the
-      prior goes redundant (+0.25@25%, +0.24@100%).
+      prior goes redundant (+0.25@25%, +0.15@100% — neutral, see Q3.1).
   (b) **REALISING it needs >=~25 img/class** so the classifier can define a
       boundary. Governs the LEFT flank. Measured independently by the probe
       (Q7.2): realization 41% at 5/cls vs 84% at 25/cls.
-This is why the curve is UNIMODAL with its peak near 25 img/class, and it
-predicts CIFAR-10's true peak is at 0.5% (25/cls) — unrunnable under the frozen
-recipe (250 imgs = 1 batch/epoch, Q9.3), so +6.61@1% is on the rising limb, not
-the summit.
-**LIVE PREDICTIONS (recorded before the runs land):**
+This is why the curve is UNIMODAL with its peak near 25 img/class.
+**LIVE PREDICTIONS (recorded before the runs landed):**
   - **tin @1%** = 1000 imgs / 1400 steps / **5 per class** -> below the
     threshold -> should be SUPPRESSED (~+1.5) like C100@1%, DESPITE having 2x
     the images of C100@1%. If it lands ~+5, (b) is WRONG.
   - **stl @10%** = 500 imgs / 600 steps / 50 per class -> matches C10@1% on
     every axis but resolution -> should land near **+6.6**.
-— **OPEN** (falsifiable; tin/stl running)
+
+**Q6.9a — did tin@1% hold? YES (2026-07-17).** 5.22±0.32 -> 6.95 = **+1.73**
+(aux 1 seed so far; seeds 1-2 running). Squarely in the predicted suppressed
+band, nowhere near the +5 that would have falsified (b). 2x the images and 2.3x
+the steps of C100@1% bought ~nothing because per-class stayed at 5. This is (b)'s
+first out-of-family test — Tiny-ImageNet (200 classes, 64x64) is not a dataset
+the synthesis was built on. — **CONFIRMED (1 seed; 3-seed confirmation pending)**
+
+**Q6.9b — THE MATCHED TRIPLE: the decisive evidence for (b).** All three cells
+have IDENTICAL total images (1000) and IDENTICAL steps (1400), same champion
+λ0=1.0 config; only per-class count differs:
+
+| cell | per class | ways | baseline | aux | Δ |
+|---|---|---|---|---|---|
+| C10@2%  | 100 | 10  | 51.34±1.20 | 58.49±0.16 | **+7.15 ±0.70** |
+| C100@2% | 10  | 100 | 14.17±0.15 | 16.67±0.23 | **+2.50 ±0.16** |
+| tin@1%  | 5   | 200 | 5.22±0.32  | 6.95 (1 seed) | **+1.73 ±0.18** |
+
+Monotone in per-class count at perfectly fixed data AND compute. The
+C10-vs-C100 leg is **6.5σ** (+4.65 ±0.72). This is the MIRROR IMAGE of Q6.7:
+that pair showed per-class ALONE doesn't determine gain (same per-class, 23x
+different gain); this triple shows data+compute ALONE doesn't either (same
+data+compute, 4.1x different gain). Together: **both factors are real, neither
+suffices** — which is exactly the two-mechanism account, now with one decisive
+experiment per flank.
+**Reconciled by the ~25 img/cls threshold**, which both datasets now support:
+at 2500 imgs every cell is at/above 25/cls (25/125/250) so all are realized and
+the spread is flat (+5.30/+5.84/+4.41); at 1000 imgs the cells straddle it
+(5/10/100) so the spread is steep (+1.73/+2.50/+7.15). Per-class count matters
+enormously at 1000 imgs and barely at 2500 — what a threshold predicts, and why
+neither factor alone ever fit the whole envelope.
+**CAVEAT — do not over-read it.** At fixed total data, per-class count and CLASS
+COUNT are perfectly anti-correlated (1000/10=100, 1000/100=10, 1000/200=5), so
+the triple CANNOT separate "5 examples can't define a boundary" from "200-way is
+a harder task"; tin also differs in resolution. What breaks the tie is Q6.7: at
+2500 imgs, 20-way (+5.84) vs 100-way (+5.30) — 5x different class count, same
+gain. So class count per se is not the driver at that scale.
+— **CONFIRMED** (C10-vs-C100 leg 6.5σ; tin leg pending seeds)
+
+**Q6.9c — is (b) a cliff or a ramp? UNRESOLVED, and the synthesis's own
+prediction is nominally CONTRADICTED (2026-07-17).** Q6.9 predicted C10's summit
+is at 0.5% (25/cls) and that "+6.61@1% is on the rising limb". Above the
+threshold only (a) should govern (less data -> more gain), so C10@1% (50/cls)
+ought to BEAT C10@2% (100/cls). Filling in 2% gives the reverse, nominally:
++7.15 vs +6.61. But the difference is **+0.53 ± 0.72 = 0.73σ — not
+distinguishable**, so it adjudicates nothing in either direction. Either (b) is
+GRADED and still biting at 50–100/cls, or the 1–2% band is a genuine plateau.
+Resolving it needs ~10 seeds/cell (the σ is driven by the c10_none_2pct
+baseline, ±1.20 from seeds 52.48/51.95/50.20). Until then the rising-limb claim
+is **WITHDRAWN, not replaced**. See Q9.4. — **OPEN**
 
 ---
 
@@ -466,9 +512,27 @@ but the *shape* of Δ vs "data" is really Δ vs "data AND compute jointly".
 
 **What survives (matched-%).** At matched percentage the comparison IS clean
 (identical images, steps, recipe; only granularity differs): CIFAR-100 peaks at
-5%, CIFAR-10 at ≤1%. **At matched data AND compute, the 100-class task needs more
-data before the prior pays off than the 10-class task.** First confound-free
-cross-dataset statement we have.
+5%; CIFAR-10 is already at its plateau by 1–2% and decaying by 5%. **At matched
+data AND compute, the 100-class task needs more data before the prior pays off
+than the 10-class task.** First confound-free cross-dataset statement we have,
+and it survives Q9.4: it needs only CIFAR-10's plateau to sit LEFT of
+CIFAR-100's, which holds however 1% vs 2% resolves.
+
+**Q9.4 — "CIFAR-10 peaks at ≤1%" — WITHDRAWN (2026-07-17), and NOT replaced
+with "peaks at 2%".** Filling in the 2% cell made it nominally the higher of the
+two (+7.15 vs +6.61), which would have made "≤1%" a fourth retraction. It is not,
+because the difference is **+0.53 ± 0.72 = 0.73σ** — the two are not
+distinguishable. The 1–2% band is one flat plateau at +6.6..+7.1 and *which point
+is the summit is unknown*. The σ comes entirely from the `c10_none_2pct`
+baseline (±1.20; seeds 52.48/51.95/50.20 — one low seed), not from the aux cell
+(±0.16).
+**This is the same failure mode as Q9.1 (the retracted law), Q3.1 (the 100%
+cell), and Q6.4 (the head_norm σ): a difference read off 3 seeds whose σ cannot
+carry it.** The only thing different this time is that it was caught *before*
+being written down. The standing lesson — *a σ from 2–3 seeds is nearly
+uninformative in EITHER direction* — has now cost us four claims; treat any
+3-seed difference under ~2σ as unmeasured, including ones that flatter the
+method. — **WITHDRAWN** (resolvable: ~10 seeds on the 1% and 2% cells)
 
 ---
 
@@ -505,5 +569,7 @@ but segmentation); **MaskFeat** (HOG target — but SSL pretraining);
 | Q10.2 | **combo**: forward-path stem AND aux at 1–2%, the one regime we lose. Never tried — `MomentAuxModel` hardcoded IdentityStem, so it was unrepresentable. | running |
 | — | CIFAR-10 full 9-point envelope (was 3 points vs CIFAR-100's 9) | running |
 | — | Tiny-ImageNet 1/5/10% — first non-CIFAR pixels (200 cls, 64×64, 100k) | running |
+| Q9.4 | **~10 seeds on c10 1%/2%** — settles Q6.9c (is (b) a cliff at 25/cls or a ramp still biting at 50–100?). Cheap (600/1400 steps) but needs the wave queue to drain first: at load 113 these same cells took 44 min/seed vs 5.4 at low load. | queued |
+| Q6.9d | **tin20** — 1000 imgs / 1400 steps drawn from **20** of tin's 200 classes → 50/cls, 20-way, still 64×64. Isolates the triple's confound: same dataset, resolution, images, steps as tin@1%, only granularity moves (5→50/cls). If Δ jumps +1.73 → ~+6, the bottom-flank suppression is granularity, not resolution or dataset. | not started |
 | — | per-regime λ0 curves on CIFAR-10 / TIN (currently fixed-λ0 transplants) | not started |
 | — | Tiny-ImageNet 25/100% (156k steps at 100%) | not started |
