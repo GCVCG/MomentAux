@@ -27,7 +27,8 @@ ported vs corrected and why.
 
 - All experiments run on the LOCAL RTX 3090 (user decision 2026-07-11;
   don't wait for the cluster). Long runs: detach with `setsid nohup`,
-  write a `*_wave.log` in repo root, end with a `*_COMPLETE` marker line.
+  write a `logs/*_wave.log` (PID to `logs/*.pid`), end with a `*_COMPLETE`
+  marker line. All wave logs live in `logs/` — never the repo root.
 - turing cluster (`ssh amughrabi@turing.ub.edu`): repo mirror at
   /mnt/beegfs/amughrabi/projects/MomentsCNNEncoder, venv at
   /mnt/beegfs/amughrabi/envs/momentstem. GPU jobs need

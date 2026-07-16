@@ -1,0 +1,33 @@
+AUXTAP_START auxmag_1pct_sched2_tap1_seed0
+epoch 199/200 loss 0.0237 train 1.0000 test 0.1068
+epoch 200/200 loss 0.0229 train 1.0000 test 0.1077
+done: final 0.1077 best 0.1093 -> ./runs/auxmag_1pct_sched2_tap1/seed0
+AUXTAP_DONE auxmag_1pct_sched2_tap1_seed0
+AUXTAP_START auxmag_1pct_sched2_tap1_seed1
+epoch 199/200 loss 0.0231 train 1.0000 test 0.1107
+epoch 200/200 loss 0.0227 train 1.0000 test 0.1106
+done: final 0.1106 best 0.1120 -> ./runs/auxmag_1pct_sched2_tap1/seed1
+AUXTAP_DONE auxmag_1pct_sched2_tap1_seed1
+AUXTAP_START auxmag_1pct_sched2_tap1_seed2
+epoch 199/200 loss 0.0201 train 1.0000 test 0.1046
+epoch 200/200 loss 0.0201 train 1.0000 test 0.1048
+done: final 0.1048 best 0.1060 -> ./runs/auxmag_1pct_sched2_tap1/seed2
+AUXTAP_DONE auxmag_1pct_sched2_tap1_seed2
+AUXTAP_CELL_DONE auxmag_1pct_sched2_tap1
+AUXTAP_START auxmag_1pct_sched2_tap2_seed0
+epoch 199/200 loss 0.0261 train 1.0000 test 0.1054
+epoch 200/200 loss 0.0246 train 1.0000 test 0.1060
+done: final 0.1060 best 0.1075 -> ./runs/auxmag_1pct_sched2_tap2/seed0
+AUXTAP_DONE auxmag_1pct_sched2_tap2_seed0
+AUXTAP_START auxmag_1pct_sched2_tap2_seed1
+epoch 199/200 loss 0.0255 train 1.0000 test 0.1049
+epoch 200/200 loss 0.0254 train 1.0000 test 0.1045
+done: final 0.1045 best 0.1056 -> ./runs/auxmag_1pct_sched2_tap2/seed1
+AUXTAP_DONE auxmag_1pct_sched2_tap2_seed1
+AUXTAP_START auxmag_1pct_sched2_tap2_seed2
+epoch 199/200 loss 0.0245 train 1.0000 test 0.1067
+epoch 200/200 loss 0.0220 train 1.0000 test 0.1060
+done: final 0.1060 best 0.1081 -> ./runs/auxmag_1pct_sched2_tap2/seed2
+AUXTAP_DONE auxmag_1pct_sched2_tap2_seed2
+AUXTAP_CELL_DONE auxmag_1pct_sched2_tap2
+AUXTAP_COMPLETE

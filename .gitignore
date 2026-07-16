@@ -4,6 +4,7 @@ data/*
 runs/
 results/
 slurm/logs/
+logs/*.pid
 
 __pycache__/
 *.pyc
