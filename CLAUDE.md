@@ -57,10 +57,14 @@ ported vs corrected and why.
   the signal. Per-seed proof it is systematic, not a rare bad seed: R50 no-hn
   {41.22, 36.37, 42.35} → hn {44.45, 44.95, 44.35}. The BEST no-hn seed is BELOW
   the WORST hn seed; σ 3.18 → 0.32 (10x). Every seed was being taxed.
-  OPEN: head_norm on R18 is mean-neutral (+4.31 vs +4.14) but σ 0.33 → 1.04
-  (~10x variance ratio; F(2,2) needs ~19x, so NOT establishable from 3 seeds).
-  Run 3 more R18+hn seeds before claiming head_norm is a safe ALWAYS-ON default;
-  until then it is a bottleneck-specific fix that happens to be free on R18.
+  *** head_norm IS A SAFE ALWAYS-ON DEFAULT (SETTLED 2026-07-16, 6 seeds). At 3
+  seeds it looked mean-neutral but σ 0.33 → 1.04, unresolvable. At 6 seeds R18+hn
+  = 44.45±0.70 (Δ +4.27) vs +4.14±0.33: mean unchanged, and σ REGRESSED 1.04 →
+  0.70. F=4.32 on df(5,2), nowhere near significance. The 3-seed σ was one seed
+  (43.36) landing low. Seeds: 43.36, 44.70, 45.40, 44.29, 44.83, 44.14.
+  => ONE CONFIG FOR EVERY BACKBONE: λ0=1.0 cosine→0, magnitude, tap layer3, MSE,
+  head_norm ON. Free on R18/R34; the difference between +3.93 and −0.67±3.18 on R50.
+  LESSON: a σ from 2-3 seeds is nearly uninformative in EITHER direction.
 - *** RETRACTED (2026-07-16) — "gain tracks THE DEFICIT THE DATA LEAVES, not the
   data fraction". I committed this as a law; it is FALSE and the retraction is
   itself informative. Two independent failures:
@@ -97,13 +101,40 @@ ported vs corrected and why.
   class granularity differs): C100 peaks at 5%, C10 peaks at ≤1%. At matched
   data AND compute, the 100-class task needs MORE data before the prior pays off
   than the 10-class task. First confound-free cross-dataset statement we have.
-- *** NEXT INSTRUMENT — CIFAR-100 → its 20 SUPERCLASSES. The only design that
-  breaks the confound: IDENTICAL images, identical steps, 20 classes not 100, so
-  per-class count moves (x5) with total data held EXACTLY fixed. @5% = 2500 imgs
-  / 3800 steps / 125-per-class vs C100@5% = 2500 imgs / 3800 steps / 25-per-class.
-  FORK (cannot come out ambiguous): if gain follows PER-CLASS COUNT it should
-  collapse to ~0 (like C100@25%, 125/cls, +0.25); if it follows TOTAL DATA/COMPUTE
-  it should stay ~+5.30. One cell, same cost as any 5% run.
+- *** SUPERCLASS FORK ANSWERED (2026-07-16) — GAIN FOLLOWS TOTAL DATA/COMPUTE,
+  NOT PER-CLASS COUNT. cifar100super = CIFAR-100's IMAGES + its 20 coarse labels,
+  reusing C100's committed subset indices (byte-identical images, identical steps,
+  per-class x5). Fork stated in ADVANCE: ~+0.25 (per-class) vs ~+5.30 (data/compute).
+  RESULT @5% (3 seeds): 42.66±0.68 → 48.51±0.40 = **+5.84**. Unambiguous.
+  DECISIVE PAIR — same per-class count, 23x different gain:
+    super@5%  2500 imgs / 3800 steps / 125-per-cls → +5.84
+    C100@25% 12500 imgs / 19400 steps / 125-per-cls → +0.25
+  Same data+compute, 5x different per-class → SAME gain:
+    C10@5% (250/cls) +4.41 | super@5% (125/cls) +5.84 | C100@5% (25/cls) +5.30
+- *** THE SYNTHESIS (2026-07-16) — TWO MECHANISMS, ONE PER FLANK. One cell
+  refuses to fit the above: at 500 imgs / 600 steps, C10@1% = +6.61 (50/cls) but
+  C100@1% = +1.49 (5/cls) — IDENTICAL data AND compute, 4.4x different gain. So
+  granularity matters, but ONLY at the bottom. The account that fits every cell:
+  (a) the prior's FEATURE benefit tracks TOTAL DATA/COMPUTE (how much the data
+      cannot teach itself) → governs the RIGHT flank: prior goes redundant
+      (+0.25@25%, +0.15@100%);
+  (b) REALISING it needs >=~25 img/class so the classifier can define a boundary
+      → governs the LEFT flank. Measured INDEPENDENTLY by the linear probe:
+      realization 41% at 5/cls vs 84% at 25/cls.
+  Explains the UNIMODAL curve peaking near 25 img/class, and predicts C10's true
+  peak is 0.5% (25/cls) — unrunnable under the frozen recipe (250 imgs = 1
+  batch/epoch), so +6.61@1% is the RISING LIMB, not the summit.
+  LIVE PREDICTIONS (recorded before the runs land): tin@1% = 1000 imgs / 5-per-cls
+  → should be SUPPRESSED ~+1.5 DESPITE 2x C100@1%'s images (if it lands ~+5, (b)
+  is WRONG); stl@10% = 500 imgs / 50-per-cls / 600 steps → should be ~+6.6.
+- ciFAIR-100 (2026-07-16) — the low-data gains are NOT memorised train/test
+  duplicates. CIFAR-100's test set has 927/10000 near-duplicates of train images;
+  ciFAIR replaces exactly those. The Δ is stable at every point:
+    Δ CIFAR → ciFAIR:  1% +1.88→+1.68 | 5% +5.40→+5.36 | 10% +4.10→+4.15 |
+                     100% +0.18→+0.28
+  Both cells eat identical contamination, so it cancels. The ABSOLUTE drop grows
+  with data (−0.65@1% → −2.86@100%) because contamination is against the FULL
+  train set — at 1% most duplicate sources are not even in the 500-image subset.
 - *** MECHANISM TRACED — the aux SCALE DEGENERACY (this is why R50 broke).
   ‖W·f − t‖² is INVARIANT under (f → f/c, W → c·W): SGD can minimise the aux by
   COLLAPSING the tapped features and INFLATING the head, learning nothing.
