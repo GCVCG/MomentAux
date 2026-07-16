@@ -164,10 +164,35 @@ ported vs corrected and why.
   why tap depth is irrelevant there AND why the forward-path stem still wins
   (+2.55 vs aux +1.91): it changes what the CLASSIFIER SEES rather than only
   shaping intermediate features.
-  TEST FOR IT (cheap, checkpoints exist — runs/*/best.pt): linear-probe the 1%
-  aux model and the 1% baseline ON THE FULL TRAIN SET. If aux features probe
-  BETTER while 1% accuracy barely moves, the features WERE improved and the
-  classifier couldn't exploit them → converts the left flank into a mechanism.
+  *** CONFIRMED BY LINEAR PROBE (2026-07-16, analysis/linear_probe.py). Probing
+  the FROZEN penultimate features on the FULL train set (removes the classifier's
+  data bottleneck, so only feature quality is measured), 3 seeds:
+    @1%  baseline  8.90 e2e → probe 26.81±0.24
+         aux λ0=2.0 10.81 (+1.91) → probe 31.51±0.37  (features +4.70)
+         aux λ0=1.0 10.39 (+1.49) → probe 30.68±0.64  (features +3.87)
+         aux tap1   10.77 (+1.87) → probe 31.74±0.13  (features +4.93)
+         aux tap2   10.55 (+1.65) → probe 30.98±0.53  (features +4.17)
+    @5%  baseline 25.23 e2e → probe 37.02±0.30
+         aux λ0=1.0 30.53 (+5.30) → probe 43.33±0.54  (features +6.31)
+  *** THE PRIOR IMPROVES FEATURES AT BOTH SCALES BY COMPARABLE AMOUNTS
+  (+4.70@1% vs +6.31@5%). What differs is REALIZATION:
+    @5%: 5.30 realized / 6.31 available = 84%
+    @1%: 1.91 realized / 4.70 available = 41%
+  So the LEFT FLANK IS NOT THE PRIOR FAILING — it is the CLASSIFIER failing to
+  cash it in. At 5 img/class the moment prior does ~3/4 of the feature work it
+  does at 25 img/class and <half of it reaches the logits.
+  Cross-checks that this is real, not a story: (i) the probe TRACKS ACCURACY
+  monotonically (λ0=2.0 > λ0=1.0 on BOTH probe and e2e); (ii) it INDEPENDENTLY
+  REPRODUCES the tap null (tap1≈tap2≈tap3 on features, as on accuracy); (iii) it
+  explains WHY tapping earlier couldn't help — there was never a feature deficit
+  to fix (@1% features are already +4.70 better).
+  CAVEATS: the probe trains its head on 50k labels the cell never saw → it is a
+  DIAGNOSTIC, NEVER a headline cell. The baseline's own 8.90→26.81 gap is not a
+  finding (any head with 100x labels does better); the finding is the aux-vs-
+  baseline DELTA under identical probing.
+  ACTIONABLE: @1% there is +4.70 of feature gain sitting UNCLAIMED. Anything
+  that relieves the CLASSIFIER bottleneck (not a better prior) should cash more
+  of it in. The left flank is an opportunity, not a ceiling.
   TARGET SWEEP @10% (all energy families as aux targets, λ=0.3): magnitude
   +2.81 > structure +1.78 > steerable +1.01 > rotinv +0.84 > gabor −0.24 >
   invariants −2.97. The aux setting RESCUES features that were catastrophic
