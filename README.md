@@ -1,31 +1,68 @@
-# MomentStem: do fixed orthogonal-moment filters substitute for CNN capacity?
+# MomentStem: fixed moment filters as a prior for CNNs
 
-We previously showed (MomentsNeRF, BMVC 2026 submission) that fixed
-Gabor+Zernike moment filters in front of a ResNet-34 encoder reach parity
-with a ResNet-152 encoder inside a PixelNeRF pipeline. This repo tests that
-claim on recognition tasks, where the encoder is isolated from view sampling
-and volume rendering.
+**→ [docs/FINDINGS.md](docs/FINDINGS.md) is the record: every question asked,
+its answer, the evidence, and its status** (settled / open / falsified /
+retracted). `CLAUDE.md` is the denser chronological working ledger.
 
-**Falsifiable hypotheses** (any may FAIL; failures get reported as plainly as
-successes):
+## Where the study actually landed
 
-- **H1 (data efficiency):** backbone+moments beats vanilla backbone, and the
-  gap grows as training data shrinks.
-- **H2 (capacity substitution):** ResNet-18+moments approaches vanilla
-  ResNet-34 (and R34+moments approaches R50) under an identical recipe.
-- **H3 (robustness):** the gain is larger under corruption shift
-  (CIFAR-10-C/100-C mCE) than in-distribution.
+**MomentAux** (`momentstem/aux.py`): the moments are a **training-only soft
+prior**, not a forward-path stem. The deployed model is a **plain ResNet** —
+RGB→logits, identical FLOPs, **+0 inference params**. During training only, a
+1×1-conv head taps `layer3` and is regressed onto fixed phase-invariant moment
+maps (MSE·λ + CE), with λ cosine-decayed to **exactly 0** so that neutrality at
+full data is structural rather than tuned.
+
+It is **positive at every data scale** (CIFAR-100, ResNet-18, 3 seeds):
+
+| data | 1% | 3% | 5% | 10% | 25% | 100% |
+|---|---|---|---|---|---|---|
+| **Δ top-1** | +1.91 | +3.68 | **+5.30** | +4.14 | +0.97 | +0.24 |
+
+and it transplants with no retuning across depth and dataset — one λ0=1.0
+(+`head_norm`) gives +3.9…+4.3 on R18/R34/R50; CIFAR-10 gives +6.61@1%.
+
+**The controls are the contribution.** A random target gives ≈0; a *learned*
+FitNets teacher costing a whole extra model gives ≈0; HOG gives about half. The
+gain is the moment structure specifically — see FINDINGS §4.
+
+## How it got here (the negatives matter)
+
+The original framing — fixed moments **in the forward path** — is **dead as a
+scaling answer**, and the ledger keeps it dead. Such stems help below 5% but
+*cost* accuracy at 10–25% (the "penalty band"), and that band survived every
+attempt to explain it away: calibration, ZCA, an 8× step budget, prior-as-init,
+prior-as-warmup, and nonlinear/rotation-invariant/2nd-order features alike. Any
+fixed pre-committed input channel occupies bandwidth abundant data wants back.
+Moving the prior **off the forward path** is what made it scale.
+
+The original three hypotheses were answered, and two of them failed:
+**H1** (data efficiency) holds only in the aux formulation; **H2** (capacity
+substitution — R18+moments ≈ R34) is **dead**; **H3** (robustness gain under
+CIFAR-C) is **null**.
 
 See [PORTING.md](PORTING.md) for exactly what was ported from momentsnerf,
 what changed, and one important finding about the original Zernike code.
 
-## The six stems (the controls ARE the contribution)
+## The controls ARE the contribution
+
+**Aux targets** (`moment_aux.stem`, the live question — is it the moments?):
+
+| target | what it isolates | Δ@10% |
+|---|---|---|
+| `energy-magnitude` | the method (phase-invariant moment energy) | **+2.81** |
+| `random-fixed` | "any aux regression / deep supervision?" | +0.14 |
+| `teacher` (FitNets) | "just distillation? is a LEARNED target better?" | +0.16 |
+| `hog` (MaskFeat) | "would any hand-crafted descriptor do?" | +1.37 |
+
+**Forward-path stems** (the original design; superseded — see FINDINGS §1):
 
 | stem | what | what it isolates |
 |---|---|---|
 | `none` | vanilla backbone | control |
 | `moments-sum` | fixed Gabor+Zernike, 3-ch output | pretrained-stem-compatible variant |
 | `moments-cat` | fixed bank, 27-ch output (RGB+9 Gabor+15 Zernike) | headline variant |
+| `energy-*` | fixed nonlinear energy (magnitude/rotinv/structure/steerable/invariants) | which invariance, if any, survives past 5% |
 | `learned` | ONE plain conv, params/FLOPs matched to moments-cat within 2% | prior vs. depth/compute |
 | `random-fixed` | moments-cat architecture, frozen random filters, matched norms | structure vs. fixedness |
 | `gabor-learn` | moment-initialised, trainable | is fixing a feature or a bug? |
@@ -37,8 +74,8 @@ All under ONE recipe (deviations are a bug): SGD momentum 0.9, lr 0.1, wd
 
 ```bash
 pip install -r requirements.txt
-python scripts/make_subsets.py     # once; subset JSONs are committed
-python -m pytest tests/ -q         # must pass before any training
+python scripts/make_subsets.py --check   # verify committed subsets reproduce
+python -m pytest tests/ -q               # must pass before any training
 ```
 
 ## Reproducing any number

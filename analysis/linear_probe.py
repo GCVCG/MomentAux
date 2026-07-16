@@ -72,6 +72,19 @@ def extract(model, loader, device):
     return torch.cat(feats), torch.cat(ys)
 
 
+def shots_subset(y, per_class, seed=0):
+    """Indices of a stratified `per_class`-shot subset (deterministic)."""
+    import numpy as np
+
+    ynp = y.numpy() if hasattr(y, "numpy") else np.asarray(y)
+    out = []
+    for c in np.unique(ynp):
+        idx = np.flatnonzero(ynp == c)
+        rs = np.random.RandomState(seed * 100003 + int(c))
+        out.extend(idx[rs.permutation(len(idx))][:per_class].tolist())
+    return sorted(out)
+
+
 def probe(train_f, train_y, test_f, test_y, num_classes, device, max_iter=200):
     """Multinomial logistic regression on frozen, standardized features.
     Identical hyper-parameters for every cell -- only the features differ."""
@@ -106,6 +119,11 @@ def main():
     ap.add_argument("--config", required=True)
     ap.add_argument("--data-root", default="./data")
     ap.add_argument("--ckpt", default="best.pt")
+    ap.add_argument("--shots", default=None,
+                    help="comma-separated labels-per-class to refit the head on, "
+                         "e.g. '5,10,25,50,100,500'. Measures how much of a "
+                         "feature gain a classifier with N labels can actually "
+                         "cash in. Omit to probe on the full train set only.")
     args = ap.parse_args()
 
     with open(args.config) as f:
@@ -141,9 +159,22 @@ def main():
         trf, trY = extract(model, tr_loader, device)
         tef, teY = extract(model, te_loader, device)
         tr_acc, te_acc = probe(trf, trY, tef, teY, num_classes, device)
+        rec = {"seed": seed_dir, "probe_train": tr_acc, "probe_test": te_acc}
         print(f"{os.path.basename(args.run)} {seed_dir}: "
               f"probe train {tr_acc*100:.2f}  test {te_acc*100:.2f}", flush=True)
-        out.append({"seed": seed_dir, "probe_train": tr_acc, "probe_test": te_acc})
+
+        if args.shots:
+            # Same frozen features, head refit on progressively more labels.
+            # The whole point: if a feature gain is real but unrealisable at
+            # 5 shots, the gap vs baseline must GROW with shots.
+            rec["shots"] = {}
+            for k in (int(s) for s in args.shots.split(",")):
+                sel = shots_subset(trY, k)
+                _, acc = probe(trf[sel], trY[sel], tef, teY, num_classes, device)
+                rec["shots"][k] = acc
+                print(f"    {k:>4} shots/class (n={len(sel):>5}): test {acc*100:.2f}",
+                      flush=True)
+        out.append(rec)
 
     path = os.path.join(args.run, "linear_probe.json")
     with open(path, "w") as f:
