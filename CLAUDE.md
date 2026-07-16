@@ -36,8 +36,49 @@ ported vs corrected and why.
 - CIFAR-100-C lives at data/CIFAR-100-C (local) and
   /mnt/beegfs/amughrabi/data/CIFAR-100-C (turing).
 
-## State of findings (2026-07-14)
+## State of findings (2026-07-16)
 
+- GENERALIZATION (2026-07-16). The champion (λ0=1.0 cosine→0, magnitude target,
+  tap layer3, MSE) transplants with NO retuning across dataset and depth.
+  DATASET AXIS — CIFAR-10, ResNet-18, 3 seeds, champion config verbatim:
+    1% 39.35±0.26 → 45.96±0.18  = +6.61   (largest gain the method has produced
+                                           on ANY dataset; beats C100's +5.30)
+    5% 69.05±0.17 → 73.46±0.19  = +4.41
+   10% 80.71±0.98 → 81.80±0.19  = +1.09
+  DEPTH AXIS — CIFAR-100 @10%, λ0=1.0, 3 seeds: R18 +4.14±0.27, R34 +3.95±0.22
+  (λ transfers across depth untouched). R50 λ0=1.0 −0.67±2.59 (UNSTABLE, see
+  degeneracy below); R50 λ0=0.3 +2.42±0.28 (stable). So the exception is
+  BLOCK TYPE (bottleneck), not depth.
+- *** THE PREDICTIVE LAW: gain tracks THE DEFICIT THE DATA LEAVES, not the data
+  FRACTION. C10@10% (baseline 80.71 — net already solved the low-level feature
+  problem) gives only +1.09, though "10%" is the peak band on C100 (+4.14,
+  baseline ~41). Gain rises monotonically as baseline accuracy falls, ACROSS
+  datasets with different class counts and per-class counts. This was stated as
+  a FALSIFIABLE PREDICTION BEFORE the C10 cells ran and HELD at all 3 points —
+  it is the redundancy account's first out-of-sample confirmation, not a fit.
+  Corollary (also held): C10@1% is 50 img/class = 10x richer per class than
+  C100@1% (5/class), so it sits in the "schedule works" regime, not C100's
+  "prior must never relax" regime — read PER-CLASS COUNT, not percentage.
+- *** MECHANISM TRACED — the aux SCALE DEGENERACY (this is why R50 broke).
+  ‖W·f − t‖² is INVARIANT under (f → f/c, W → c·W): SGD can minimise the aux by
+  COLLAPSING the tapped features and INFLATING the head, learning nothing.
+  Measured (trace() probe, 300 steps): R50 λ0=1.0 → layer3 std 0.596→0.051
+  (12x collapse), ‖W_aux‖ 1.64→11.2 (7x), CE STALLS AT CHANCE 4.605 for 200+
+  steps. Healthy comparators: R18 λ0=1.0 (L3 0.59→0.40, W→3.05, CE→3.32);
+  R50 λ0=0.3 (L3 0.60→0.51, W→2.24, CE→3.52). Bottleneck blocks are more
+  collapsible (1x1 projections), hence the R50-only failure.
+  TWO FIXES DERIVED FROM THE MECHANISM (both work): (a) head_norm — project
+  ‖W‖ back to its init after every step, removing the degenerate direction
+  (CE 3.54, L3 0.287); (b) cosine loss — scale-free (CE 3.57, L3 0.585, NO
+  collapse). Derived only AFTER three blind guesses failed (below).
+- FALSIFIED FIXES for the R50 instability (keep them dead — all three were
+  guesses made before tracing, and tracing is what actually solved it):
+  (a) magnitude/GradNorm balancing — NO-OP; aux magnitudes are already
+  identical across backbones, so there was nothing to balance.
+  (b) fp32 / disabling AMP — WORSE, not better (NaN@epoch 6 vs @27). Not a
+  precision bug.
+  (c) BatchNorm on the tap — MUCH worse (NaN@21): BN DIVIDES BY the collapsed
+  0.04 std, so it is a 25x AMPLIFIER of the exact pathology, not a cure.
 - BREAKTHROUGH — MomentAux: moments as a SOFT TRAINING PRIOR on a vanilla
   backbone (momentstem/aux.py). Deployed model is a plain ResNet (RGB→logits,
   identical FLOPs to baseline, +0 inference params); during training only, an
