@@ -1,0 +1,21 @@
+# DIAGNOSTIC (deviates from the frozen recipe -- never mix into a headline table).
+# ConvNeXt under the frozen SGD lr=0.1 recipe does not train: 19% TRAIN acc after
+# 200 epochs vs ResNet-18's 100% by epoch 99. The frozen recipe is implicitly a
+# ResNet recipe. AdamW lr=4e-3/wd=0.05 is what ConvNeXt is designed for. Baseline
+# and aux share this recipe, so the DELTA is valid; the absolute numbers are NOT
+# comparable to the ResNet cells.
+name: diagcnxadamw_none_10pct
+dataset: cifar100
+backbone: convnext_tiny
+optimizer: adamw
+epochs: 200
+batch_size: 128
+lr: 0.004
+weight_decay: 0.05
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 10
+stem: none
+stem_calibrate: true

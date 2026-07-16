@@ -191,13 +191,31 @@ def main():
         print(f"stem frozen until epoch {unfreeze_at}")
 
     train_loader, test_loader = build_loaders(cfg, args.seed, args.data_root)
-    optimizer = torch.optim.SGD(
-        list(model.parameters()) if unfreeze_at is not None
-        else [p for p in model.parameters() if p.requires_grad],
-        lr=cfg["lr"],
-        momentum=cfg["momentum"],
-        weight_decay=cfg["weight_decay"],
-    )
+    params = (list(model.parameters()) if unfreeze_at is not None
+              else [p for p in model.parameters() if p.requires_grad])
+    # THE RECIPE IS SGD. `optimizer: adamw` exists ONLY because the frozen recipe
+    # is implicitly a RESNET recipe and does not transfer off that family:
+    # ConvNeXt under SGD lr=0.1 never fits the train set (19% train acc after 200
+    # epochs, loss 6.38 -> 3.31, vs ResNet-18 at 100% by epoch 99), so a Δ
+    # measured there says nothing about the method. A cell using this MUST be
+    # named diag* and MUST NEVER enter a headline table (see CLAUDE.md).
+    opt_name = cfg.get("optimizer", "sgd").lower()
+    if opt_name == "sgd":
+        optimizer = torch.optim.SGD(
+            params, lr=cfg["lr"], momentum=cfg["momentum"],
+            weight_decay=cfg["weight_decay"],
+        )
+    elif opt_name == "adamw":
+        if not cfg["name"].startswith("diag"):
+            raise ValueError(
+                f"optimizer: adamw deviates from the frozen recipe, so the cell "
+                f"name must start with 'diag' (got {cfg['name']!r}). See CLAUDE.md."
+            )
+        optimizer = torch.optim.AdamW(
+            params, lr=cfg["lr"], weight_decay=cfg["weight_decay"],
+        )
+    else:
+        raise ValueError(f"optimizer must be 'sgd' or 'adamw', got {opt_name!r}")
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=cfg["epochs"])
     criterion = torch.nn.CrossEntropyLoss()
     use_amp = device.type == "cuda" and not args.no_amp
