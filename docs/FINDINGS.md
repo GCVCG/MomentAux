@@ -121,11 +121,24 @@ tap layer3, MSE), best-per-regime λ0, Δ vs baseline:
 
 | data | 1% | 2% | 3% | 5% | 7% | 10% | 15% | 25% | 100% |
 |---|---|---|---|---|---|---|---|---|---|
-| **Δ** | +1.91 | +3.14 | +3.68 | **+5.30** | +4.87 | +4.14 | +2.94 | +0.97 | +0.24 |
+| **Δ** | +1.91 | +3.14 | +3.68 | **+5.30** | +4.87 | +4.14 | +2.94 | +0.97 | +0.15 |
 | λ0 | 2.0 | 2.0 | 1.0 | 1.0 | 1.0 | 1.0 | 0.3 | 0.3 | 0.1 |
 
 Beats the best forward-path stem decisively at 3–15% (@10%: +4.14 vs −0.09) and
 ties at 100%. — **SETTLED**
+
+**CORRECTION (2026-07-16) — "POSITIVE AT EVERY SCALE" OVERSTATED THE 100% CELL.**
+The ledger claimed **+0.24 (±0.10, ~2.4σ — small but real)** at 100%. That rested
+on a **2-seed** baseline (78.43±0.07). With the third seed the baseline is
+**78.52±0.16**, aux is 78.67±0.12, so:
+**Δ = +0.15, combined σ ≈ 0.20 → 0.77σ — INDISTINGUISHABLE FROM ZERO.**
+This does NOT damage the method: **neutrality at full data is exactly what the
+structural λ→0 argument (Q3.2) predicts**, and +0.15±0.20 is a clean neutral.
+What dies is the specific claim of a REAL POSITIVE at 100%. Say "positive at
+every scale up to 25%, and neutral at 100% by construction" — not "positive
+everywhere".
+*Second time in one day a σ from 2-3 seeds nearly became a finding (cf. Q6.4).
+Treat any 2-seed cell as provisional, especially when it anchors a claim.*
 
 **Q3.2 — Must λ decay, and to what?**
 **A: Always cosine-decay λ to EXACTLY 0.** That is what makes high-data

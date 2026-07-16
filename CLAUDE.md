@@ -224,8 +224,15 @@ ported vs corrected and why.
   (exactly as kernel size was forward-path). Best-per-regime (3 seeds):
     1% λ0=2.0 +1.91 | 2% λ0=2.0 +3.14 | 3% λ0=1.0 +3.68 | 5% λ0=1.0 +5.30 |
     7% λ0=1.0 +4.87 | 10% λ0=1.0 +4.14 | 15% λ0=0.3 +2.94 | 25% λ0=0.3 +0.97 |
-    100% λ0=0.1 +0.24 (±0.10, ~2.4σ — small but real)
-  POSITIVE AT EVERY SCALE. λ0 must be matched to the regime: a single λ0=1.0
+    100% λ0=0.1 +0.15 (0.77σ — NOT distinguishable from zero; see correction)
+  *** CORRECTED 2026-07-16: this cell was "+0.24 (±0.10, ~2.4σ — small but
+  real)" on a 2-SEED baseline (78.43±0.07). Third seed -> baseline 78.52±0.16,
+  aux 78.67±0.12, so Δ=+0.15 at 0.77σ. NEUTRAL, not positive. The method is
+  unharmed — neutrality at full data is what the structural λ→0 schedule
+  PREDICTS — but do NOT say "positive at every scale"; say "positive up to 25%,
+  neutral at 100% by construction".
+  POSITIVE AT EVERY SCALE UP TO 25% (100% is neutral, see above).
+  λ0 must be matched to the regime: a single λ0=1.0
   is best only at 3–10%; it UNDERSHOOTS at 1–2% (2.0 start: +2.50→+3.14@2%)
   and OVERSHOOTS at 15–100% (0.3 start: +2.55→+2.94@15%, +0.25→+0.97@25%;
   0.1 start @100%: +0.08→+0.24).
