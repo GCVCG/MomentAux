@@ -65,16 +65,30 @@ def build_model(
         in_chans=stem.out_channels,
     )
     if small_input:
-        if backbone not in RESNETS:
-            raise ValueError(
-                f"small_input surgery only implemented for {RESNETS}, got {backbone}"
+        if backbone in RESNETS:
+            conv1 = net.conv1
+            net.conv1 = nn.Conv2d(
+                stem.out_channels, conv1.out_channels, kernel_size=3, stride=1,
+                padding=1, bias=False,
             )
-        conv1 = net.conv1
-        net.conv1 = nn.Conv2d(
-            stem.out_channels, conv1.out_channels, kernel_size=3, stride=1,
-            padding=1, bias=False,
-        )
-        net.maxpool = nn.Identity()
+            net.maxpool = nn.Identity()
+        elif backbone.startswith("convnext"):
+            # ConvNeXt's patchify stem (4x4 stride 4) would take 32x32 -> 8x8
+            # BEFORE any block runs, leaving the stages at 8/4/2/1. Replacing it
+            # with 3x3 stride 1 makes the stage resolutions mirror the ResNet
+            # CIFAR surgery (32/16/8/4), so `stages.2` is the direct analogue of
+            # `layer3` -- same spatial size, same depth fraction. The stem's
+            # LayerNorm2d is kept.
+            old = net.stem[0]
+            net.stem[0] = nn.Conv2d(
+                stem.out_channels, old.out_channels, kernel_size=3, stride=1,
+                padding=1,
+            )
+        else:
+            raise ValueError(
+                f"small_input surgery implemented for {RESNETS} and convnext_*, "
+                f"got {backbone}"
+            )
     if head_pool:
         from .pooling import MultiMaskPool
 
@@ -94,8 +108,14 @@ def build_model(
 
         if head_pool:
             raise ValueError("moment_aux and head_pool are mutually exclusive")
-        if stem_name != "none":
-            raise ValueError("moment_aux requires a vanilla backbone (stem 'none')")
+        if stem_name != "none" and not moment_aux.get("allow_forward_stem"):
+            raise ValueError(
+                "moment_aux requires a vanilla backbone (stem 'none'); the +0-"
+                "inference-param deploy is the method's point. To deliberately "
+                "put moments in BOTH the forward path and the aux loss (the 1-2% "
+                "combination experiment), set moment_aux.allow_forward_stem: true "
+                "-- and note the deployed model is then NOT vanilla."
+            )
         # target kind: a teacher checkpoint (FitNets control), HOG (MaskFeat
         # control), or the fixed moment/energy stem (the method, default).
         if moment_aux.get("teacher"):
@@ -119,6 +139,7 @@ def build_model(
             aux_weight=moment_aux.get("weight", 0.1),
             loss_form=moment_aux.get("loss", "mse"),
             head_norm=moment_aux.get("head_norm", False),
+            stem=stem if moment_aux.get("allow_forward_stem") else None,
         )
     return StemmedModel(stem, net)
 

@@ -105,6 +105,54 @@ def test_teacher_target_control(tmp_path):
     assert all(p.grad is None for p in m.target.net.parameters())
 
 
+def test_aux_on_convnext_nested_tap_name():
+    """Non-ResNet backbone + a DOTTED tap name. ModuleDict keys cannot contain
+    '.', so 'stages.2' must be mapped to a legal key -- this used to raise."""
+    m = build_model("convnext_tiny", "none", num_classes=10, small_input=True,
+                    moment_aux={"stem": "energy-magnitude", "tap": "stages.2",
+                                "weight": 1.0, "head_norm": True})
+    assert list(m.aux_heads.keys()) == ["stages__2"]
+    m.calibrate(torch.randn(8, 3, 32, 32))
+    m.train()
+    x = torch.randn(2, 3, 32, 32)
+    logits = m(x)
+    assert m._feats["stages.2"].shape[-2:] == (8, 8)  # mirrors resnet layer3
+    (torch.nn.functional.cross_entropy(logits, torch.randint(0, 10, (2,)))
+     + m.last_aux).backward()
+    m.project_heads()
+    m.eval()
+    with torch.no_grad():  # deployed path is the bare ConvNeXt
+        assert torch.allclose(m(x), m.net(x), atol=1e-5)
+
+
+def test_forward_stem_plus_aux_requires_explicit_optin():
+    """The vanilla-deploy property (+0 inference params) is the method's point,
+    so combining a forward-path stem with the aux loss must be opted into."""
+    import pytest
+
+    with pytest.raises(ValueError, match="allow_forward_stem"):
+        build_model("resnet18", "moments-cat", num_classes=10,
+                    stem_kwargs={"use_zernike": False},
+                    moment_aux={"stem": "energy-magnitude", "weight": 1.0})
+
+    m = build_model("resnet18", "moments-cat", num_classes=10,
+                    stem_kwargs={"use_zernike": False},
+                    moment_aux={"stem": "energy-magnitude", "weight": 1.0,
+                                "allow_forward_stem": True})
+    # the stem is now REALLY in the forward path (12ch: RGB + 9 gabor)
+    assert m.stem.out_channels == 12 and m.net.conv1.in_channels == 12
+    m.calibrate(torch.randn(8, 3, 32, 32))
+    m.train()
+    x = torch.randn(2, 3, 32, 32)
+    logits = m(x)
+    assert m.last_aux is not None
+    (torch.nn.functional.cross_entropy(logits, torch.randint(0, 10, (2,)))
+     + m.last_aux).backward()
+    m.eval()
+    with torch.no_grad():  # deployed path now INCLUDES the stem -- not vanilla
+        assert torch.allclose(m(x), m.net(m.stem(x)), atol=1e-5)
+
+
 def test_multi_layer_aux_taps():
     """A list of taps builds one head per layer and averages their losses."""
     m = build_model("resnet18", "none", num_classes=10,

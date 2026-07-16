@@ -52,11 +52,16 @@ def main():
     num_classes = data_mod.NUM_CLASSES[dataset]
 
     device = torch.device(args.device)
+    # moment_aux MUST be passed: an aux run's checkpoint carries aux_heads.*
+    # (and target buffers), so building a vanilla model here would fail to load
+    # it. The aux head is inert at eval -- forward() is the plain backbone --
+    # so this measures exactly the deployed model.
     model = build_model(
         cfg["backbone"], cfg["stem"], num_classes=num_classes,
         small_input=cfg.get("small_input", True), pretrained=False,
         stem_kernel_size=cfg.get("stem_kernel_size", 11), stem_seed=final["seed"],
         stem_kwargs=cfg.get("stem_kwargs"),
+        moment_aux=cfg.get("moment_aux"),
     )
     # Calibrated filter scales are restored from the checkpoint; ZCA runs
     # additionally register fused buffers, which must exist before loading.

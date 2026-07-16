@@ -141,6 +141,13 @@ class HOGTarget(nn.Module):
         return self._hog(x) * self.calib_scale.view(1, -1, 1, 1)
 
 
+def _head_key(tap):
+    """ModuleDict keys cannot contain '.', but tap names can (ConvNeXt's are
+    'stages.2'). Flat ResNet names like 'layer3' are unaffected, so checkpoints
+    and tests written against them keep working."""
+    return tap.replace(".", "__")
+
+
 class MomentAuxModel(nn.Module):
     """Vanilla backbone + training-only target-prediction auxiliary head(s).
 
@@ -154,7 +161,7 @@ class MomentAuxModel(nn.Module):
     """
 
     def __init__(self, net, target, tap="layer3", aux_weight=0.1, loss_form="mse",
-                 head_norm=False):
+                 head_norm=False, stem=None):
         """:param head_norm project each aux head back to its initial weight norm
         after every optimizer step. The aux objective ||W.f - t||^2 is INVARIANT
         under (f -> f/c, W -> c.W), so SGD can minimise it by COLLAPSING the
@@ -162,12 +169,22 @@ class MomentAuxModel(nn.Module):
         lambda=1.0: layer3 std 0.596 -> 0.051 (12x) while ||W|| 1.64 -> 11.2
         (7x), aux falls, and CE STALLS AT CHANCE. Fixing ||W|| removes that
         degenerate direction: the only way to reduce the aux is to make the
-        features genuinely predictive."""
+        features genuinely predictive.
+
+        :param stem normally None -> IdentityStem, i.e. the deployed path is a
+        VANILLA backbone, which is the method's whole selling point (+0 inference
+        params). Passing a real stem puts moments BOTH in the forward path and in
+        the aux loss; that FORFEITS the vanilla-deploy property and exists only
+        for the 1-2% combination experiment (forward-path magnitude still beats
+        aux there: +2.55/+3.53 vs +1.91/+3.14, and the two act through different
+        mechanisms -- a hard input constraint vs a soft feature prior -- so they
+        may be additive). It must be opted into explicitly; see build_model."""
         super().__init__()
         if loss_form not in ("mse", "cosine"):
             raise ValueError(f"loss_form must be 'mse' or 'cosine', got {loss_form!r}")
         self.net = net
-        self.stem = IdentityStem(3)  # deployed path is identity (vanilla backbone)
+        # deployed path: identity by default (vanilla backbone), see :param stem
+        self.stem = stem if stem is not None else IdentityStem(3)
         self.target = target
         self.taps = [tap] if isinstance(tap, str) else list(tap)
         self.aux_weight = aux_weight
@@ -179,21 +196,26 @@ class MomentAuxModel(nn.Module):
         self._feats = {}
         for t in self.taps:
             if t not in modules:
-                raise ValueError(f"tap {t!r} not in backbone; have e.g. layer1..layer4")
+                raise ValueError(
+                    f"tap {t!r} not in backbone; have e.g. layer1..layer4 "
+                    f"(ResNet) or stages.0..stages.3 (ConvNeXt)"
+                )
             modules[t].register_forward_hook(self._capture_factory(t))
 
         was_training = net.training
         net.eval()
-        with torch.no_grad():
-            net(torch.zeros(1, 3, 32, 32))
+        with torch.no_grad():  # via self.stem: the net's in_chans follows it
+            net(self.stem(torch.zeros(1, 3, 32, 32)))
         net.train(was_training)
         self.aux_heads = nn.ModuleDict({
-            t: nn.Conv2d(self._feats[t].shape[1], self.n_moment, kernel_size=1)
+            _head_key(t): nn.Conv2d(self._feats[t].shape[1], self.n_moment, kernel_size=1)
             for t in self.taps
         })
         self.head_norm = head_norm
         # committed init norms; project_heads() restores these after each step
-        self._head_norm0 = {t: float(self.aux_heads[t].weight.norm()) for t in self.taps}
+        self._head_norm0 = {
+            t: float(self.aux_heads[_head_key(t)].weight.norm()) for t in self.taps
+        }
 
     @torch.no_grad()
     def project_heads(self):
@@ -202,7 +224,7 @@ class MomentAuxModel(nn.Module):
         if not self.head_norm:
             return
         for t in self.taps:
-            w = self.aux_heads[t].weight
+            w = self.aux_heads[_head_key(t)].weight
             w.mul_(self._head_norm0[t] / w.norm().clamp_min(1e-8))
 
     def _capture_factory(self, name):
@@ -217,15 +239,16 @@ class MomentAuxModel(nn.Module):
 
     def forward(self, x):
         self._feats = {}
-        logits = self.net(x)
+        logits = self.net(self.stem(x))
         if self.training:
+            # target reads the RAW image, never the stemmed tensor
             with torch.no_grad():
                 tgt = self.target(x)
             losses = []
             for t in self.taps:
                 feat = self._feats[t]
                 target = F.adaptive_avg_pool2d(tgt, feat.shape[-2:])
-                pred = self.aux_heads[t](feat)
+                pred = self.aux_heads[_head_key(t)](feat)
                 if self.loss_form == "cosine":
                     losses.append((1.0 - F.cosine_similarity(pred, target, dim=1)).mean())
                 else:

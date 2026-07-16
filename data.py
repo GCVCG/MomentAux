@@ -113,6 +113,48 @@ def cifar100_coarse_labels(data_root, train):
     return d["coarse_labels"], d["fine_labels"]
 
 
+class CiFAIRTest(Dataset):
+    """ciFAIR-100 test set (Barz & Denzler 2020, arXiv:1902.00423).
+
+    CIFAR-100's test set with the ~9% of images that DUPLICATE training images
+    replaced by fresh ones (927/10000 here); labels and order are unchanged, so
+    it is a drop-in swap. Its only job is to answer "how much of a low-data
+    result rests on train/test duplication?" -- a question any reviewer asks of
+    a paper whose headline cells live at 1-5% data.
+
+    Note the contamination is against the FULL train set, so at 1% (500 imgs)
+    most duplicate sources are not even in the training subset -- expect the
+    effect to be smaller at low data, and smaller still on the aux-vs-baseline
+    DELTA, since both cells eat the identical contamination.
+    """
+
+    def __init__(self, data_root, transform=None):
+        import pickle
+
+        path = os.path.join(data_root, "ciFAIR-100", "test")
+        if not os.path.exists(path):
+            raise FileNotFoundError(
+                f"{path} missing. Get it once with:\n  cd data && curl -sLO "
+                "https://github.com/cvjena/cifair/releases/download/v1.0/"
+                "ciFAIR-100.zip && unzip -q ciFAIR-100.zip"
+            )
+        with open(path, "rb") as f:
+            d = pickle.load(f, encoding="latin1")
+        # same layout as CIFAR's pickle: (N, 3072) flat CHW -> HWC uint8 for PIL
+        self.data = np.asarray(d["data"]).reshape(-1, 3, 32, 32).transpose(0, 2, 3, 1)
+        self.targets = list(d["fine_labels"])
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.targets)
+
+    def __getitem__(self, i):
+        from PIL import Image
+
+        img = Image.fromarray(self.data[i])
+        return (self.transform(img) if self.transform else img), self.targets[i]
+
+
 class TinyImageNetVal(Dataset):
     """Tiny-ImageNet's val split: images are flat under val/images/ with labels
     in val_annotations.txt, so ImageFolder cannot read it directly.
