@@ -1,0 +1,7 @@
+PROBE_RESULT auxmag_1pct_sched2 test 31.51+/-0.37 over 3 seeds -> runs/auxmag_1pct_sched2/linear_probe.json
+PROBE_RESULT auxmag_1pct_sched2_tap1 test 31.74+/-0.13 over 3 seeds -> runs/auxmag_1pct_sched2_tap1/linear_probe.json
+PROBE_RESULT auxmag_1pct_sched2_tap2 test 30.98+/-0.53 over 3 seeds -> runs/auxmag_1pct_sched2_tap2/linear_probe.json
+PROBE_RESULT auxmag_1pct_sched0 test 30.68+/-0.64 over 3 seeds -> runs/auxmag_1pct_sched0/linear_probe.json
+PROBE_RESULT abl5_none test 37.02+/-0.30 over 3 seeds -> runs/abl5_none/linear_probe.json
+PROBE_RESULT auxmag_5pct_sched0 test 43.33+/-0.54 over 3 seeds -> runs/auxmag_5pct_sched0/linear_probe.json
+PROBE_COMPLETE

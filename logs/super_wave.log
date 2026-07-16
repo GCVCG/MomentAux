@@ -1,0 +1,5 @@
+SUPER_START super5_none_seed0
+epoch 200/200 loss 0.0024 train 1.0000 test 0.4188
+done: final 0.4188 best 0.4212 -> ./runs/super5_none/seed0
+SUPER_DONE super5_none_seed0
+SUPER_START super5_none_seed1

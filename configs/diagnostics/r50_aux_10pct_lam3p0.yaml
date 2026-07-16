@@ -1,0 +1,24 @@
+name: r50_aux_10pct_lam3p0
+dataset: cifar100
+backbone: resnet50
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 8
+small_input: true
+pretrained: false
+subset_pct: 10
+stem: none
+stem_calibrate: true
+# lambda_start = 3.0 -- NaNs at epoch 0 (the scale degeneracy, see FINDINGS Q8.1).
+# Kept as a documented negative; no run dir exists. NOTE the suffix convention
+# collides across families: auxmag_*_l30 is lambda 0.30, r50_aux_10pct_l03 is
+# lambda 0.3. This cell is named lam3p0 so it cannot be misread as 0.3.
+moment_aux:
+  stem: energy-magnitude
+  tap: layer3
+  weight: 3.0
+  weight_final: 0.0
+  weight_schedule: cosine

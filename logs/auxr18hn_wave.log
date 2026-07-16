@@ -1,0 +1,5 @@
+R18HN_START seed3
+epoch 200/200 loss 0.0058 train 0.9998 test 0.4429
+done: final 0.4429 best 0.4435 -> ./runs/r18_aux_10pct_hn/seed3
+R18HN_DONE seed3
+R18HN_START seed4

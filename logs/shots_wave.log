@@ -1,0 +1,97 @@
+SHOTS_START abl1_none
+       5 shots/class (n=  500): test 8.89
+      10 shots/class (n= 1000): test 10.51
+      25 shots/class (n= 2500): test 13.86
+      50 shots/class (n= 5000): test 15.81
+     100 shots/class (n=10000): test 19.29
+     250 shots/class (n=25000): test 24.03
+     500 shots/class (n=50000): test 26.60
+       5 shots/class (n=  500): test 8.98
+      10 shots/class (n= 1000): test 10.95
+      25 shots/class (n= 2500): test 13.99
+      50 shots/class (n= 5000): test 15.88
+     100 shots/class (n=10000): test 19.39
+     250 shots/class (n=25000): test 24.48
+     500 shots/class (n=50000): test 27.00
+       5 shots/class (n=  500): test 9.19
+      10 shots/class (n= 1000): test 11.34
+      25 shots/class (n= 2500): test 13.93
+      50 shots/class (n= 5000): test 16.04
+     100 shots/class (n=10000): test 19.48
+     250 shots/class (n=25000): test 24.01
+     500 shots/class (n=50000): test 26.80
+PROBE_RESULT abl1_none test 26.80+/-0.22 over 3 seeds -> runs/abl1_none/linear_probe.json
+SHOTS_CELL_DONE abl1_none
+SHOTS_START auxmag_1pct_sched2
+       5 shots/class (n=  500): test 11.32
+      10 shots/class (n= 1000): test 13.51
+      25 shots/class (n= 2500): test 17.12
+      50 shots/class (n= 5000): test 19.42
+     100 shots/class (n=10000): test 23.11
+     250 shots/class (n=25000): test 28.22
+     500 shots/class (n=50000): test 31.93
+       5 shots/class (n=  500): test 10.84
+      10 shots/class (n= 1000): test 14.08
+      25 shots/class (n= 2500): test 16.83
+      50 shots/class (n= 5000): test 18.92
+     100 shots/class (n=10000): test 22.63
+     250 shots/class (n=25000): test 28.10
+     500 shots/class (n=50000): test 31.39
+       5 shots/class (n=  500): test 11.13
+      10 shots/class (n= 1000): test 13.82
+      25 shots/class (n= 2500): test 16.90
+      50 shots/class (n= 5000): test 19.46
+     100 shots/class (n=10000): test 23.67
+     250 shots/class (n=25000): test 28.57
+     500 shots/class (n=50000): test 31.21
+PROBE_RESULT auxmag_1pct_sched2 test 31.50+/-0.34 over 3 seeds -> runs/auxmag_1pct_sched2/linear_probe.json
+SHOTS_CELL_DONE auxmag_1pct_sched2
+SHOTS_START abl5_none
+       5 shots/class (n=  500): test 23.13
+      10 shots/class (n= 1000): test 24.42
+      25 shots/class (n= 2500): test 24.91
+      50 shots/class (n= 5000): test 25.44
+     100 shots/class (n=10000): test 28.10
+     250 shots/class (n=25000): test 33.82
+     500 shots/class (n=50000): test 36.80
+       5 shots/class (n=  500): test 23.13
+      10 shots/class (n= 1000): test 24.28
+      25 shots/class (n= 2500): test 24.60
+      50 shots/class (n= 5000): test 25.01
+     100 shots/class (n=10000): test 28.27
+     250 shots/class (n=25000): test 33.85
+     500 shots/class (n=50000): test 36.92
+       5 shots/class (n=  500): test 24.36
+      10 shots/class (n= 1000): test 25.53
+      25 shots/class (n= 2500): test 25.86
+      50 shots/class (n= 5000): test 26.24
+     100 shots/class (n=10000): test 28.75
+     250 shots/class (n=25000): test 34.16
+     500 shots/class (n=50000): test 37.34
+PROBE_RESULT abl5_none test 37.00+/-0.28 over 3 seeds -> runs/abl5_none/linear_probe.json
+SHOTS_CELL_DONE abl5_none
+SHOTS_START auxmag_5pct_sched0
+       5 shots/class (n=  500): test 28.43
+      10 shots/class (n= 1000): test 29.34
+      25 shots/class (n= 2500): test 30.04
+      50 shots/class (n= 5000): test 30.55
+     100 shots/class (n=10000): test 33.44
+     250 shots/class (n=25000): test 38.45
+     500 shots/class (n=50000): test 42.78
+       5 shots/class (n=  500): test 28.94
+      10 shots/class (n= 1000): test 30.44
+      25 shots/class (n= 2500): test 30.68
+      50 shots/class (n= 5000): test 32.29
+     100 shots/class (n=10000): test 34.86
+     250 shots/class (n=25000): test 40.30
+     500 shots/class (n=50000): test 43.37
+       5 shots/class (n=  500): test 28.64
+      10 shots/class (n= 1000): test 29.80
+      25 shots/class (n= 2500): test 30.58
+      50 shots/class (n= 5000): test 31.39
+     100 shots/class (n=10000): test 34.46
+     250 shots/class (n=25000): test 40.05
+     500 shots/class (n=50000): test 43.86
+PROBE_RESULT auxmag_5pct_sched0 test 43.36+/-0.52 over 3 seeds -> runs/auxmag_5pct_sched0/linear_probe.json
+SHOTS_CELL_DONE auxmag_5pct_sched0
+SHOTS_COMPLETE
