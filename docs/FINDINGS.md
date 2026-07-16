@@ -294,11 +294,46 @@ prior describes much finer structure. A large shortfall would mean filter size
 is a resolution knob and k11 was implicitly tuned to CIFAR's scale. — **OPEN**
 
 **Q6.7 — Does the gain depend on CLASS GRANULARITY or on TOTAL DATA/COMPUTE?**
-Undecidable from CIFAR-10-vs-100 (see Q9.2). `cifar100super` — CIFAR-100's
+Undecidable from CIFAR-10-vs-100 (Q9.2), so `cifar100super` was built: CIFAR-100's
 images with its 20 official coarse labels, reusing CIFAR-100's committed subset
-indices — holds images and steps byte-identical and moves per-class count ×5.
-Fork: ~0 if it follows per-class count (125/cls ≈ C100@25%, +0.25); ~+5.30 if it
-follows total data/compute. — **OPEN**
+indices, holding images+steps byte-identical while per-class count moves x5.
+Fork stated in advance: ~+0.25 if gain follows per-class count; ~+5.30 if it
+follows total data/compute.
+**A: TOTAL DATA/COMPUTE. Decisive.** super5_none 42.66±0.68 -> super5_aux
+48.51±0.40 = **+5.84** (3 seeds).
+
+Same PER-CLASS count, 23x different gain:
+| cell | images | steps | per-class | Δ |
+|---|---|---|---|---|
+| super @5% | 2500 | 3800 | 125 | **+5.84** |
+| C100 @25% | 12500 | 19400 | 125 | **+0.25** |
+
+Same DATA+COMPUTE, 5x different per-class -> same gain:
+C10@5% (250/cls) +4.41 | super@5% (125/cls) +5.84 | C100@5% (25/cls) +5.30.
+— **SETTLED**
+
+**Q6.9 — THE SYNTHESIS: two mechanisms, one at each flank.**
+One cell refuses to fit Q6.7: at 500 imgs / 600 steps, C10@1% gives +6.61
+(50/cls) but C100@1% gives +1.49 (5/cls) — identical data AND compute, 4.4x
+different gain. So granularity matters, but ONLY at the bottom. The account that
+fits every cell:
+  (a) **The prior's FEATURE benefit tracks TOTAL DATA/COMPUTE** — how much the
+      data cannot teach by itself. Governs the RIGHT flank: as data suffices the
+      prior goes redundant (+0.25@25%, +0.24@100%).
+  (b) **REALISING it needs >=~25 img/class** so the classifier can define a
+      boundary. Governs the LEFT flank. Measured independently by the probe
+      (Q7.2): realization 41% at 5/cls vs 84% at 25/cls.
+This is why the curve is UNIMODAL with its peak near 25 img/class, and it
+predicts CIFAR-10's true peak is at 0.5% (25/cls) — unrunnable under the frozen
+recipe (250 imgs = 1 batch/epoch, Q9.3), so +6.61@1% is on the rising limb, not
+the summit.
+**LIVE PREDICTIONS (recorded before the runs land):**
+  - **tin @1%** = 1000 imgs / 1400 steps / **5 per class** -> below the
+    threshold -> should be SUPPRESSED (~+1.5) like C100@1%, DESPITE having 2x
+    the images of C100@1%. If it lands ~+5, (b) is WRONG.
+  - **stl @10%** = 500 imgs / 600 steps / 50 per class -> matches C10@1% on
+    every axis but resolution -> should land near **+6.6**.
+— **OPEN** (falsifiable; tin/stl running)
 
 ---
 
@@ -451,7 +486,6 @@ but segmentation); **MaskFeat** (HOG target — but SSL pretraining);
 | # | question | status |
 |---|---|---|
 | Q6.6 | STL-10 96×96 — resolution transfer (matched to cifar10@1% but for res) | running |
-| Q6.7 | superclass fork — per-class count vs total data/compute | running |
 | Q7.3 | shots dose-response — does the gap grow with head labels? | running |
 | Q0.3 | **H3 re-opened**: CIFAR-C was only ever run on forward-path stems. `eval_robustness.py` never passed `moment_aux`, so aux checkpoints could not even load — the aux method has NEVER been tested under corruption. | running |
 | Q6.8 | **ConvNeXt** — first non-ResNet. Every backbone so far is a ResNet and the tap is a ResNet name. | running |
