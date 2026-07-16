@@ -205,10 +205,30 @@ NEUTRALITY rather than gains. -- **SETTLED**
 cell that is 78.43+/-0.07. Never evaluate a run dir a wave is writing to.)*
 
 **Q4.5 — Is the FEATURE gain (not just accuracy) also the moments' doing?**
-The probe (§7) shows aux improves features +4.70@1%. But any aux regression is a
-regulariser — a random target might do the same. Requires a random target at
-*matched* λ0=2.0 cosine→0; the existing random control is λ=0.3 constant, so
-comparing them would confound target-type with λ-schedule. — **OPEN** (`auxrand_1pct_sched2`)
+The probe (§7) shows aux improves features +4.71@1%, but ANY aux regression is a
+regulariser, so a random target might do the same. Needed a random target at
+*matched* λ0=2.0 cosine→0 (`auxrand_1pct_sched2`): the pre-existing random
+control is λ=0.3 CONSTANT, so comparing it would confound target-type with
+λ-schedule.
+**A: Yes — magnitude gives 3.9x the feature gain of a random target.**
+
+| @1%, matched λ0=2.0 | end-to-end | Δ | probe (features) | Δ |
+|---|---|---|---|---|
+| baseline | 8.90 ±0.09 | — | 26.80 ±0.22 | — |
+| aux, **random** target | 9.48 ±0.07 | +0.58 | 28.00 ±0.41 | **+1.20** |
+| aux, **magnitude** target | 10.81 ±0.09 | +1.90 | 31.50 ±0.34 | **+4.71** |
+
+**But random is NOT zero, and that is a new fact.** A random fixed target does
+improve features (+1.20, ~1/4 of the moment effect); it simply fails to reach
+the logits (+0.58 e2e). The end-to-end controls (+0.14@10%, +0.01@5%) invited
+the reading that a random target does NOTHING — it does not. The correct
+statement is: any aux regression is a WEAK feature regulariser; the moment
+structure is ~4x stronger and is what actually cashes in.
+**It also independently reproduces the classifier bottleneck (Q7.2):**
+realization at 1% is 1.90/4.71 = **40%** (magnitude) and 0.58/1.20 = **48%**
+(random). Both cash <half of what they build — as predicted, since the
+bottleneck is the 5-img/class classifier and is indifferent to WHY the features
+improved. — **SETTLED**
 
 ---
 
@@ -315,7 +335,7 @@ feature deficit for an earlier tap to fix.
 DIAGNOSTIC, never a headline cell. The baseline's own 8.90→26.81 gap is not a
 finding (any head with 100× labels does better); the finding is the aux-vs-
 baseline delta under identical probing. Also note Q1.12: probe gains have failed
-to survive end-to-end before in this very study. — **SETTLED** (pending Q4.5)
+to survive end-to-end before in this very study. — **SETTLED** (control: Q4.5)
 
 **Q7.3 — Does the aux-vs-baseline gap GROW with the head's label count?**
 The claim in Q7.2 rests on two points (41% vs 84%). The sharp version: refit the
@@ -430,7 +450,6 @@ but segmentation); **MaskFeat** (HOG target — but SSL pretraining);
 
 | # | question | status |
 |---|---|---|
-| Q4.5 | random target at matched λ0 — is the FEATURE gain the moments? | running |
 | Q6.6 | STL-10 96×96 — resolution transfer (matched to cifar10@1% but for res) | running |
 | Q6.7 | superclass fork — per-class count vs total data/compute | running |
 | Q7.3 | shots dose-response — does the gap grow with head labels? | running |
