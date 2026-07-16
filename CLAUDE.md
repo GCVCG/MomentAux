@@ -36,6 +36,26 @@ ported vs corrected and why.
   the H200 is reserved for the user's other work.** Max 2 running jobs.
 - CIFAR-100-C lives at data/CIFAR-100-C (local) and
   /mnt/beegfs/amughrabi/data/CIFAR-100-C (turing).
+- **`num_workers` IS PART OF THE REPRODUCIBILITY CONTRACT** (verified 2026-07-17,
+  not assumed). Data ORDER is worker-count-independent (the sampler draws from
+  `generator=gen` in the main process), but AUGMENTATION IS NOT: PyTorch seeds
+  each worker's torch RNG to `base_seed + worker_id`, and RandomCrop/
+  RandomHorizontalFlip draw from it. Measured nw=8 vs nw=2, same seed: labels
+  identical in every batch; pixels identical for batches 0..nw-1 then diverge
+  from batch index == nw onward (round-robin hands batch i to worker i, so the
+  first nw batches match trivially — a 2-batch test shows a FALSE match, which
+  is exactly the mistake to avoid here).
+  CONSEQUENCE: changing num_workers re-draws the augmentation stream. This is
+  UNBIASED (still crop+flip from the same distribution — it acts like a
+  different augmentation seed), so a Δ across a worker-count boundary is valid,
+  but seeds are NOT paired across it and the cell is NOT byte-reproducible.
+  RULE: keep num_workers constant WITHIN a cell; never change it on a cell that
+  already has completed seeds. (Known crossing: c10_none_2pct is nw=8 while
+  c10_aux_2pct is nw=2 — Δ valid, exact reproduction needs the recorded value.
+  Every run's num_workers is stored in its final.json `config`.)
+  Contention is real and worth managing: at load 113 (16 cores, 76 workers) the
+  same cells ran 44 min/seed vs 5.4 min/seed at low load — ~5x. These jobs are
+  DATALOADER-bound, not GPU-bound; nw=2 with a few concurrent runs beats nw=8.
 
 ## State of findings (2026-07-16)
 
