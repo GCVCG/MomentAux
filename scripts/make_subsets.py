@@ -30,10 +30,15 @@ from data import SUBSET_DIR, SUBSET_SEED, make_subset_indices, subset_path
 # drop_last=True, 10% = 500 imgs = 3 batches/epoch = 600 steps -- which exactly
 # matches cifar10 @1% (500 imgs, 50/class, 600 steps), making the pair a clean
 # resolution-only comparison (32x32 vs 96x96).
+# Tiny-ImageNet: 100k train / 200 classes / 500 per class at 64x64. Same
+# fractions as the CIFAR pair so the envelopes line up point-for-point; note
+# tin @1% = 5 img/class exactly like cifar100 @1%, but with 2x the classes and
+# 2x the images (1000 vs 500) -- another angle on the granularity confound.
 PCTS = {
     "cifar100": (1, 2, 3, 5, 7, 10, 15, 25),
     "cifar10": (1, 2, 3, 5, 7, 10, 15, 25),
     "stl10": (10, 20, 50),
+    "tin": (1, 2, 3, 5, 7, 10, 15, 25),
 }
 
 
@@ -44,6 +49,12 @@ def get_labels(dataset, data_root):
         return datasets.CIFAR10(data_root, train=True, download=True).targets
     if dataset == "stl10":
         return datasets.STL10(data_root, split="train", download=True).labels
+    if dataset == "tin":
+        import os
+
+        from data import tin_root
+
+        return datasets.ImageFolder(os.path.join(tin_root(data_root), "train")).targets
     raise ValueError(f"unknown dataset {dataset!r}")
 
 

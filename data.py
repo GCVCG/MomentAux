@@ -22,10 +22,13 @@ STATS = {
     "cifar100super": ((0.5071, 0.4865, 0.4409), (0.2673, 0.2564, 0.2762)),
     "cifar10": ((0.4914, 0.4822, 0.4465), (0.2470, 0.2435, 0.2616)),
     "stl10": ((0.4467, 0.4398, 0.4066), (0.2603, 0.2566, 0.2713)),
+    "tin": ((0.4802, 0.4481, 0.3975), (0.2770, 0.2691, 0.2821)),
 }
 
-NUM_CLASSES = {"cifar100": 100, "cifar100super": 20, "cifar10": 10, "stl10": 10}
-IMAGE_SIZE = {"cifar100": 32, "cifar100super": 32, "cifar10": 32, "stl10": 96}
+NUM_CLASSES = {"cifar100": 100, "cifar100super": 20, "cifar10": 10, "stl10": 10,
+               "tin": 200}
+IMAGE_SIZE = {"cifar100": 32, "cifar100super": 32, "cifar10": 32, "stl10": 96,
+              "tin": 64}
 
 # cifar100super is CIFAR-100's IMAGES with its 20 official coarse labels, and it
 # deliberately reuses CIFAR-100's COMMITTED subset indices (data/subsets/
@@ -110,6 +113,47 @@ def cifar100_coarse_labels(data_root, train):
     return d["coarse_labels"], d["fine_labels"]
 
 
+class TinyImageNetVal(Dataset):
+    """Tiny-ImageNet's val split: images are flat under val/images/ with labels
+    in val_annotations.txt, so ImageFolder cannot read it directly.
+
+    Class indices are sorted(wnids) -- identical to what ImageFolder derives for
+    the train split, so train and val agree. (If they didn't, val accuracy would
+    be a silent permutation of the truth.)
+    """
+
+    def __init__(self, root, transform=None):
+        from torchvision.datasets.folder import default_loader
+
+        wnids = sorted(
+            d for d in os.listdir(os.path.join(root, "train"))
+            if os.path.isdir(os.path.join(root, "train", d))
+        )
+        self.class_to_idx = {w: i for i, w in enumerate(wnids)}
+        self.loader = default_loader  # converts to RGB (TIN has grayscale files)
+        self.transform = transform
+        self.samples = []
+        with open(os.path.join(root, "val", "val_annotations.txt")) as f:
+            for line in f:
+                fn, wnid = line.split("\t")[:2]
+                self.samples.append(
+                    (os.path.join(root, "val", "images", fn), self.class_to_idx[wnid])
+                )
+        self.targets = [t for _, t in self.samples]
+
+    def __len__(self):
+        return len(self.samples)
+
+    def __getitem__(self, i):
+        path, y = self.samples[i]
+        img = self.loader(path)
+        return (self.transform(img) if self.transform else img), y
+
+
+def tin_root(data_root):
+    return os.path.join(data_root, "tiny-imagenet-200")
+
+
 class Relabelled(Dataset):
     """Same images, different label map (see SUBSET_ALIAS note above)."""
 
@@ -141,6 +185,19 @@ def build_dataset(dataset, data_root, train, subset_pct=None, download=True):
     elif dataset == "stl10":
         split = "train" if train else "test"
         ds = datasets.STL10(data_root, split=split, transform=tf, download=download)
+    elif dataset == "tin":
+        root = tin_root(data_root)
+        if not os.path.isdir(root):
+            raise FileNotFoundError(
+                f"{root} missing. Tiny-ImageNet has no torchvision downloader; get it "
+                "once with:\n  cd data && wget http://cs231n.stanford.edu/"
+                "tiny-imagenet-200.zip && unzip -q tiny-imagenet-200.zip"
+            )
+        ds = (
+            datasets.ImageFolder(os.path.join(root, "train"), transform=tf)
+            if train
+            else TinyImageNetVal(root, transform=tf)
+        )
     else:
         raise ValueError(f"unknown dataset {dataset!r}")
     if subset_pct is not None and subset_pct != 100:
@@ -162,6 +219,8 @@ def calibration_batch(dataset, data_root, n=1024):
         ds = datasets.CIFAR10(data_root, train=True, transform=tf, download=False)
     elif dataset == "stl10":
         ds = datasets.STL10(data_root, split="train", transform=tf, download=False)
+    elif dataset == "tin":
+        ds = datasets.ImageFolder(os.path.join(tin_root(data_root), "train"), transform=tf)
     else:
         raise ValueError(f"unknown dataset {dataset!r}")
     return torch.stack([ds[i][0] for i in range(min(n, len(ds)))])
