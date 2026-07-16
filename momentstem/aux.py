@@ -153,7 +153,16 @@ class MomentAuxModel(nn.Module):
     :param loss_form "mse" or "cosine" (scale-free per-location).
     """
 
-    def __init__(self, net, target, tap="layer3", aux_weight=0.1, loss_form="mse"):
+    def __init__(self, net, target, tap="layer3", aux_weight=0.1, loss_form="mse",
+                 head_norm=False):
+        """:param head_norm project each aux head back to its initial weight norm
+        after every optimizer step. The aux objective ||W.f - t||^2 is INVARIANT
+        under (f -> f/c, W -> c.W), so SGD can minimise it by COLLAPSING the
+        tapped features and inflating the head -- measured on ResNet-50 at
+        lambda=1.0: layer3 std 0.596 -> 0.051 (12x) while ||W|| 1.64 -> 11.2
+        (7x), aux falls, and CE STALLS AT CHANCE. Fixing ||W|| removes that
+        degenerate direction: the only way to reduce the aux is to make the
+        features genuinely predictive."""
         super().__init__()
         if loss_form not in ("mse", "cosine"):
             raise ValueError(f"loss_form must be 'mse' or 'cosine', got {loss_form!r}")
@@ -182,6 +191,19 @@ class MomentAuxModel(nn.Module):
             t: nn.Conv2d(self._feats[t].shape[1], self.n_moment, kernel_size=1)
             for t in self.taps
         })
+        self.head_norm = head_norm
+        # committed init norms; project_heads() restores these after each step
+        self._head_norm0 = {t: float(self.aux_heads[t].weight.norm()) for t in self.taps}
+
+    @torch.no_grad()
+    def project_heads(self):
+        """Restore each aux head's weight norm (call after optimizer.step()).
+        No-op unless head_norm=True. See __init__ for why this matters."""
+        if not self.head_norm:
+            return
+        for t in self.taps:
+            w = self.aux_heads[t].weight
+            w.mul_(self._head_norm0[t] / w.norm().clamp_min(1e-8))
 
     def _capture_factory(self, name):
         def hook(module, inp, out):

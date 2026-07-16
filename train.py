@@ -259,6 +259,10 @@ def main():
             scaler.scale(loss).backward()
             scaler.step(optimizer)
             scaler.update()
+            # moment-aux: block the scale degeneracy (see aux.py) by restoring
+            # the aux head's weight norm after each step.
+            if hasattr(model, "project_heads"):
+                model.project_heads()
             loss_sum += loss.item()
             n_batches += 1
             train_metric.update(logits.detach(), y)
