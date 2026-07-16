@@ -83,8 +83,23 @@ ported vs corrected and why.
   extreme scarcity you want the prior strong THROUGHOUT, and the schedule's
   decay costs you (fixed λ=2.0 @2% gives +3.26 > schedule's +2.50).
   weight_final tuning: →0.0 dominates →0.1 (@10% +4.14 vs +3.64; @100% +0.08
-  vs −0.19; @5% +5.30 ≈ +5.31; @3% +3.68 ≈ +3.80). UNTESTED: a higher
-  schedule START (e.g. 2.0→0.0) to try to win 1–2% too.
+  vs −0.19; @5% +5.30 ≈ +5.31; @3% +3.68 ≈ +3.80).
+  *** FINAL RULE (2026-07-15): ALWAYS cosine-decay λ to EXACTLY 0 (that is what
+  makes high-data neutrality structural); the λ_START is the DATA-REGIME KNOB
+  (exactly as kernel size was forward-path). Best-per-regime (3 seeds):
+    1% λ0=2.0 +1.91 | 2% λ0=2.0 +3.14 | 3% λ0=1.0 +3.68 | 5% λ0=1.0 +5.30 |
+    7% λ0=1.0 +4.87 | 10% λ0=1.0 +4.14 | 15% λ0=0.3 +2.94 | 25% λ0=0.3 +0.97 |
+    100% λ0=0.1 +0.24 (±0.10, ~2.4σ — small but real)
+  POSITIVE AT EVERY SCALE. λ0 must be matched to the regime: a single λ0=1.0
+  is best only at 3–10%; it UNDERSHOOTS at 1–2% (2.0 start: +2.50→+3.14@2%)
+  and OVERSHOOTS at 15–100% (0.3 start: +2.55→+2.94@15%, +0.25→+0.97@25%;
+  0.1 start @100%: +0.08→+0.24).
+  λ HAS AN INTERIOR OPTIMUM PER REGIME, not a monotone "smaller at scale":
+  @25% constant λ 0.02 −0.47 | 0.05 +0.11 | 0.10 +0.69 | 0.30 +0.46 — a
+  TOO-WEAK aux is WORSE THAN NONE (competing gradient, no payoff).
+  Gentle SCHEDULE beats best constant λ at high data (@25% +0.97 vs +0.69).
+  1–2% REMAINS the forward-path magnitude stem's (+2.55/+3.53 vs +1.91/+3.14):
+  at extreme scarcity a prior that never relaxes beats any decaying one.
   DEFENSIBILITY CONTROLS (all λ=0.3, vs magnitude +3.31@5% / +2.81@10%):
   - random-fixed target: +0.01@5%, +0.14@10% → NOT "any aux signal".
   - learned teacher / FitNets (frozen same-data backbone's layer3 features):
