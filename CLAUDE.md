@@ -290,9 +290,13 @@ ported vs corrected and why.
   *** tin@10% LANDED IN BAND (2026-07-17, 3 seeds): 33.60±0.27 → 35.24±0.38 =
   +1.65 ±0.27 vs original band +1.5..+2.2 (0.6σ below the conditional floor).
   TIN ENVELOPE COMPLETE AND FLAT: +1.60@1% / +2.13@5% / +1.65@10% — never
-  above +2.2 at any scale, exactly as falling-G(tin) predicts. tin@10% probes
-  queued (11th/12th sign-law cells, baseline right AT the crossing: law says
-  readout(33.6) ≈ 0 ± 0.5).
+  above +2.2 at any scale, exactly as falling-G(tin) predicts.
+  *** tin@10% PROBED (2026-07-17): G=+1.70, readout(33.60) = **−0.06** vs the
+  advance demand "≈ 0 ± 0.5 at the crossing" — the sharpest sign-law hit yet.
+  SIGN LAW NOW 11/11; crossing pinned to baseline ∈ [33.6, 39.4]. G(tin)
+  monotone falling: 4.33@1000 -> 2.67@5000 -> 1.70@10000 (band said 1.8-2.4;
+  landed a hair below). tin is simply a LOW-G DATASET; its readout behaves
+  exactly like every other dataset's.
   C10@100%: baseline 95.28±0.28 done; aux running (last envelope cell).
   FOLLOW-UP WAVE LAUNCHED (GPU drained, 2026-07-17): stl@20% pair (1000 imgs /
   100-per-cls — second dataset at the 1000-img rung's top; PREDICTION
