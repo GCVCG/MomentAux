@@ -269,8 +269,22 @@ ported vs corrected and why.
   "LABELS PER CLASS" WAS A PROXY for baseline height — that is why it looked
   universal on C100/tin and then failed to transfer.
   REVISED LAW: Δe2e = G(pixels, images) + readout(task performance).
-  REMAINING PREDICTIONS (revised law, recorded before results): super@2%
-  +4.3..+5.0 (dataset-effect ~+2.5 still excluded-able); tin@10% +1.5..+2.2.
+  *** super@2% LANDED IN BAND (2026-07-17): 29.84±0.08 -> 34.93±0.34 =
+  +5.08 ±0.20 vs predicted +4.3..+5.0. DATASET-EFFECT BRANCH DEAD (13σ).
+  Relabeling alone (10->50/cls, byte-identical pixels) bought +2.58. Granularity
+  pattern complete: +0.61 @500 imgs, +2.58 @1000, ~0 @2500+ (readout saturated).
+  TENSION: baseline 29.84 < the ~30-35 crossing => law wants readout<=0 =>
+  needs G(1000)≈5.1-5.5, steeper than interpolation. super2 probes running.
+  ALSO LANDED: C10@25% = −0.83±0.20 (predicted −0.5..0 — overshoot confirmed,
+  slightly beyond band; second negative C10 cell). stl@50% 3-seed = +3.18±0.32
+  vs C10@5% mirror +4.41 (3.5σ: G(stl) falls faster with data than G(C10); the
+  500-img pair matched component-wise, the 2500-img pair splits).
+  ConvNeXt-tiny+AdamW (DIAG ONLY): 23.31±1.26 -> 34.09±0.16 = +10.77±0.74
+  (2 aux seeds) — largest gain in the study, first non-ResNet + non-SGD. The
+  baseline is underfit (23 vs R18's 40) — read as "prior rescues underfit
+  modern backbone", NOT a headline row. tin@10% baseline 33.60±0.27 (predicted
+  28-30 — at the crossing); aux running, prediction +1.5..+2.2 conditional now
+  ~+1.8..+2.9 given the higher baseline.
   *** Q7.3 SETTLED (2026-07-17): shots dose-response. e2e realizes EXACTLY what
   a same-label-budget LBFGS probe realizes (e2e +1.91 ≈ 5-shot gap +2.08; e2e
   +5.30 ≈ 25-shot gap +5.31). Left flank = label scarcity at readout, NOT an

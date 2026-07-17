@@ -583,6 +583,36 @@ IN-FLIGHT PREDICTIONS UNDER THE REVISED LAW (recorded before results):
   tin@10% (baseline ~28–30, G(tin,10k) ~1.8–2.4): **+1.5..+2.2**.
 — **OPEN (super@2% and tin@10% are the next falsification tests)**
 
+**Q6.9i — super@2% LANDED IN BAND: +5.08 ±0.20 (2026-07-17). THE DATASET-EFFECT
+BRANCH IS DEAD (13σ).** 29.84±0.08 → 34.93±0.34, vs the revised-law band
++4.3..+5.0 recorded in Q6.9h (at its top edge). On byte-identical pixels and
+identical steps, relabeling 100-way→20-way (10→50 per class) bought **+2.58**
+over C100@2%'s +2.50 — granularity/readout is REAL and large at 1000 imgs,
+completing the pattern from Q6.9g (+0.61 at 500 imgs, modest) and Q6.7
+(nothing at 2500+, where readout has saturated on both sides).
+ONE NUMBER LEFT UNEXPLAINED: baseline 29.84 sits below the ~30–35% readout
+crossing, so the law wants readout ≤ 0 here, which forces G(C100-pixels,
+1000 imgs, coarse) ≈ 5.1–5.5 — steeper than the 500→2500 interpolation
+(4.07→5.44). Either G rises steeply below ~1000 imgs, or the 20-way crossing
+sits lower (~28%). The super2 probes (running) decompose it directly.
+Scorecard of the other predictions that landed simultaneously:
+  - C10@25% = **−0.83 ±0.20** vs predicted −0.5..0 — direction and mechanism
+    right (λ0=1.0 overshoot deep in sufficiency), magnitude slightly beyond
+    the band. Second negative C10 cell; the λ0=0.3 rescue prediction stands.
+  - stl@50% (3 seeds) = **+3.18 ±0.32** vs its C10@5% mirror +4.41 ±0.15 —
+    3.5σ apart at matched 2500 imgs / 250-per-cls / 10-way. No law violation
+    (G is dataset-dependent), but note the 500-img C10↔stl match was
+    component-wise perfect while the 2500-img pair splits: G(stl) falls faster
+    with data than G(C10). Probe pair queued if it matters later.
+  - ConvNeXt-tiny + AdamW (diag-only): baseline 23.31±1.26 → aux 34.09±0.16 =
+    **+10.77 ±0.74 (2 aux seeds, 3rd running)** — the largest gain measured in
+    the study, first non-ResNet backbone, first non-SGD optimizer. The
+    baseline is badly underfit (23% where R18-SGD gets 40.18), so read it as
+    "the prior rescues an underfit modern backbone", not as a headline row;
+    it does establish the mechanism is not ResNet- or SGD-specific.
+— **fork CLOSED (granularity real, dataset-effect dead); G-vs-crossing tension
+OPEN pending super2 probes**
+
 ---
 
 ## 7. Mechanism — why the curve has the shape it has
