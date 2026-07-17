@@ -297,7 +297,17 @@ ported vs corrected and why.
   monotone falling: 4.33@1000 -> 2.67@5000 -> 1.70@10000 (band said 1.8-2.4;
   landed a hair below). tin is simply a LOW-G DATASET; its readout behaves
   exactly like every other dataset's.
-  C10@100%: baseline 95.28±0.28 done; aux running (last envelope cell).
+  *** C10 ENVELOPE COMPLETE (2026-07-17, champion λ0=1.0 verbatim, 3 seeds):
+    1% +6.62 | 2% +7.14 | 3% +5.38 | 5% +4.41 | 7% +2.21 | 10% +1.09 |
+    15% −0.66 | 25% −0.83 | 100% −0.26±0.18
+  Shape: positive 1-10%, crosses zero at 10-15%, dips negative at 15-25%, then
+  RECOVERS toward zero at 100% (−0.26, within noise of neutral). The recovery
+  fits the overshoot account: at 15-25% there are too few post-decay steps to
+  undo the early λ=1.0 shaping; at 100% (78k steps, most after λ≈0) the damage
+  washes out. NOTE this is λ0=1.0 verbatim — C100's 100% neutrality headline
+  used λ0=0.1; the matched C100 λ0=1.0-sched cell gave +0.08. On C10 the
+  champion is NEVER positive above 10%: per-regime λ0 (0.3 at 15%+) is not
+  optional on easy datasets.
   FOLLOW-UP WAVE LAUNCHED (GPU drained, 2026-07-17): stl@20% pair (1000 imgs /
   100-per-cls — second dataset at the 1000-img rung's top; PREDICTION
   RECORDED: +5.5..+7.0, vs C10@2%'s +7.14); c10_aux_15pct_l03 (λ0=0.3 rescue,
