@@ -441,6 +441,45 @@ RIGHT FLANK — no single covariate collapses the datasets: at 5000 imgs Δ =
 steps, baseline acc, nor headroom orders all four. Redundancy onset is
 task-specific. The left flank is where the universal structure lives. — **OPEN**
 
+**Q6.9f — FORK (ii) RESOLVED BY THE PROBE (2026-07-17): REALIZATION IS
+UNIVERSAL; THE FEATURE GAIN IS DATASET-DEPENDENT.** Decomposing Δ_e2e =
+R(realization) × G(feature gain, full-label probe gap), 3 seeds throughout:
+
+| cell | /cls | imgs | G (probe gap) | Δ e2e | R = Δ/G |
+|---|---|---|---|---|---|
+| C100@1% | 5 | 500 | +3.88 ±0.39 | +1.48 | **38%** |
+| tin@1%  | 5 | 1000 | +4.33 ±0.30 | +1.60 | **37%** |
+| C100@5% | 25 | 2500 | +6.35 ±0.34 | +5.30 | **83%** |
+| tin@5%  | 25 | 5000 | +2.67 ±0.25 | +2.13 | **80%** |
+
+**R matches across datasets to within noise at BOTH per-class counts** — the
+realization curve R(per-class) is universal (mechanism (b) confirmed, now on
+two datasets), while G varies ~2.4× with dataset at 5% (the prior improves tin
+features far less than C100's). So the correct law is
+    Δ(cell) = R(labels per class) × G(dataset, images),
+with R universal and G task-specific. "The threshold does not transfer" (Q6.9e
+item 1) is hereby REFINED: what failed to transfer was never realization — it
+was G. tin@5% = 80% × 2.67 = +2.14 (measured +2.13). tin@1% has +2.7 pts of
+feature gain sitting unclaimed (G +4.33, realized +1.60), like C100@1%.
+G is NOT monotone in data and its shape is dataset-specific: C100 rises
+3.88@500 → 6.35@2500; tin falls 4.33@1000 → 2.67@5000. The e2e peak location
+is set by where G peaks (R saturates early).
+**SHARPENED PREDICTIONS (v2, recorded 2026-07-17 from the tin probes, BEFORE
+any super1/super2/tin@10% result; supersede Q6.9e's naive v1 numbers):**
+  - R(50) ≈ 88–95% (from the R curve shape; three measurements incoming:
+    C100@10%, C10@1%, stl@10% probes are queued). Implied G if R(50)=0.90:
+    G(C100@10%) ≈ 4.6, G(C10@1%) ≈ 7.3, G(stl@10%) ≈ 6.6.
+  - super@1% = R(25) × G(C100-pixels, 500 imgs) ≈ 0.82 × 3.9 ≈ **+2.5..+3.8**
+    (v1 said ~+5 — that conflated G growth with R growth; G at 500 imgs is only
+    ~3.9). Dataset-effect branch still predicts ~+1.5. Separation ~4σ.
+  - super@2% = R(50) × G(C100, 1000) ≈ 0.9 × 4.5..5 ≈ **+4.0..+4.7** (v1 ~+6).
+    Dataset-effect branch ~+2.5.
+  - tin@10% = R(50) × G(tin, 10000). G(tin) is falling (4.33→2.67 over
+    1000→5000), extrapolate 1.8..2.4 → Δ ≈ **+1.7..+2.2**. NOTE: the Q6.9e v1
+    fork mislabeled ~+2 as the "tin-cap" branch — under the resolved model, +2
+    CONFIRMS universal-R × falling-G(tin); only ~+4 would now surprise.
+— **RESOLVED (R universal; G dataset-dependent); v2 predictions OPEN**
+
 ---
 
 ## 7. Mechanism — why the curve has the shape it has

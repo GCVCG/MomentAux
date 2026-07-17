@@ -226,14 +226,22 @@ ported vs corrected and why.
   RIGHT FLANK: no single covariate collapses datasets (at 5000 imgs: +1.09 C10 /
   +2.13 tin / +3.19 super / +4.14 C100; neither %, imgs, baseline, nor headroom
   orders all four). Redundancy onset is task-specific.
-  DECIDING TESTS RUNNING (predictions recorded in FINDINGS Q6.9e BEFORE launch):
-    super@1%/@2% — C100's committed subsets, coarse labels: byte-identical
-      pixels, only granularity moves (5->25, 10->50 per cls). Granularity-
-      governs => ~+5/+6; dataset-effect => ~+1.5/+2.5. ~10σ apart.
-    probe2 wave — decomposes tin@5% into feature-gain x realization (fork:
-      big gap + low realization => thresholds scale with task difficulty;
-      small gap => prior itself weak on tin, (a) is dataset-dependent).
-    tin@10% (50/cls) — graded-universal-realization => ~+4; tin-cap => ~+2.
+  *** THE FORK RESOLVED BY THE PROBE (2026-07-17, FINDINGS Q6.9f): REALIZATION
+  IS UNIVERSAL, THE FEATURE GAIN IS DATASET-DEPENDENT. Decomposing Δ = R x G
+  (R = e2e/probe-gap, G = full-label probe gap):
+    5/cls:  R = 38% (C100@1%, G +3.88) vs 37% (tin@1%, G +4.33)
+    25/cls: R = 83% (C100@5%, G +6.35) vs 80% (tin@5%, G +2.67)
+  R matches across datasets AT BOTH COUNTS; G varies 2.4x at 5%. The law:
+  Δ = R(labels/cls) x G(dataset, images), R universal, G task-specific.
+  tin@5% = 0.80 x 2.67 = +2.14 (measured +2.13) — realization was never broken
+  on tin; the prior just provides less there. G is NON-MONOTONE in data and
+  dataset-specific in shape: C100 3.88@500 -> 6.35@2500; tin 4.33@1000 ->
+  2.67@5000. The e2e peak sits where G peaks (R saturates early).
+  STILL RUNNING, v2 predictions recorded BEFORE results (FINDINGS Q6.9f):
+    super@1% => +2.5..+3.8 (=R(25)xG(C100,500); v1's ~+5 conflated G with R);
+    super@2% => +4.0..+4.7; dataset-effect branch predicts +1.5/+2.5.
+    tin@10% => +1.7..+2.2 (R(50)~0.9 x falling G(tin)); +4 would now SURPRISE.
+    R(50) => 88-95% on all three of C100@10%/C10@1%/stl@10% (probes queued).
   *** Q7.3 SETTLED (2026-07-17): shots dose-response. e2e realizes EXACTLY what
   a same-label-budget LBFGS probe realizes (e2e +1.91 ≈ 5-shot gap +2.08; e2e
   +5.30 ≈ 25-shot gap +5.31). Left flank = label scarcity at readout, NOT an
