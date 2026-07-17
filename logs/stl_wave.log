@@ -3,3 +3,51 @@ epoch 200/200 loss 0.0308 train 1.0000 test 0.4310
 done: final 0.4310 best 0.4354 -> ./runs/stl_none_10pct/seed0
 STL_DONE stl_none_10pct_seed0
 STL_START stl_none_10pct_seed1
+epoch 200/200 loss 0.0410 train 1.0000 test 0.4084
+done: final 0.4084 best 0.4091 -> ./runs/stl_none_10pct/seed1
+STL_DONE stl_none_10pct_seed1
+STL_START stl_none_10pct_seed2
+epoch 200/200 loss 0.0292 train 1.0000 test 0.4081
+done: final 0.4081 best 0.4092 -> ./runs/stl_none_10pct/seed2
+STL_DONE stl_none_10pct_seed2
+STL_CELL_DONE stl_none_10pct
+STL_START stl_aux_10pct_seed0
+epoch 200/200 loss 0.0196 train 1.0000 test 0.4759
+done: final 0.4759 best 0.4761 -> ./runs/stl_aux_10pct/seed0
+STL_DONE stl_aux_10pct_seed0
+STL_START stl_aux_10pct_seed1
+epoch 200/200 loss 0.0183 train 1.0000 test 0.4688
+done: final 0.4688 best 0.4716 -> ./runs/stl_aux_10pct/seed1
+STL_DONE stl_aux_10pct_seed1
+STL_START stl_aux_10pct_seed2
+epoch 200/200 loss 0.0152 train 1.0000 test 0.4806
+done: final 0.4806 best 0.4815 -> ./runs/stl_aux_10pct/seed2
+STL_DONE stl_aux_10pct_seed2
+STL_CELL_DONE stl_aux_10pct
+STL_START stl_none_50pct_seed0
+epoch 200/200 loss 0.0028 train 1.0000 test 0.7265
+done: final 0.7265 best 0.7289 -> ./runs/stl_none_50pct/seed0
+STL_DONE stl_none_50pct_seed0
+STL_START stl_none_50pct_seed1
+epoch 200/200 loss 0.0024 train 1.0000 test 0.7361
+done: final 0.7361 best 0.7393 -> ./runs/stl_none_50pct/seed1
+STL_DONE stl_none_50pct_seed1
+STL_START stl_none_50pct_seed2
+epoch 200/200 loss 0.0024 train 1.0000 test 0.7339
+done: final 0.7339 best 0.7359 -> ./runs/stl_none_50pct/seed2
+STL_DONE stl_none_50pct_seed2
+STL_CELL_DONE stl_none_50pct
+STL_START stl_aux_50pct_seed0
+epoch 200/200 loss 0.0024 train 1.0000 test 0.7664
+done: final 0.7664 best 0.7680 -> ./runs/stl_aux_50pct/seed0
+STL_DONE stl_aux_50pct_seed0
+STL_START stl_aux_50pct_seed1
+epoch 200/200 loss 0.0025 train 1.0000 test 0.7620
+done: final 0.7620 best 0.7636 -> ./runs/stl_aux_50pct/seed1
+STL_DONE stl_aux_50pct_seed1
+STL_START stl_aux_50pct_seed2
+epoch 200/200 loss 0.0026 train 1.0000 test 0.7634
+done: final 0.7634 best 0.7655 -> ./runs/stl_aux_50pct/seed2
+STL_DONE stl_aux_50pct_seed2
+STL_CELL_DONE stl_aux_50pct
+STL_COMPLETE

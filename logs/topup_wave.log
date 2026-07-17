@@ -3,3 +3,7 @@ TOPUP_START abl25_none_seed2
 FileNotFoundError: [Errno 2] No such file or directory: 'configs/ablations_full/abl25_none.yaml'
 TOPUP_DONE abl25_none_seed2
 TOPUP_START ablf_none_seed2
+epoch 200/200 loss 0.0085 train 0.9998 test 0.7869
+done: final 0.7869 best 0.7871 -> ./runs/ablf_none/seed2
+TOPUP_DONE ablf_none_seed2
+TOPUP_COMPLETE

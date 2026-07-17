@@ -1,0 +1,4 @@
+REPAIR_OK cifair_auxmag_10pct (attempt 1)
+CIFAIR_RESULT auxmag_10pct_sched0 CIFAR 44.54+/-0.29  ciFAIR 42.02+/-0.26  drop +2.53  (3 seeds) -> runs/auxmag_10pct_sched0/cifair.json
+REPAIR_OK cnx_none_seed0 (attempt 1)
+REPAIR_COMPLETE

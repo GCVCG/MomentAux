@@ -1,0 +1,27 @@
+CNXADAMW_START diagcnxadamw_none_10pct_seed0
+epoch 200/200 loss 0.0005 train 1.0000 test 0.2469
+done: final 0.2469 best 0.2480 -> ./runs/diagcnxadamw_none_10pct/seed0
+CNXADAMW_DONE diagcnxadamw_none_10pct_seed0
+CNXADAMW_START diagcnxadamw_none_10pct_seed1
+epoch 200/200 loss 0.0006 train 1.0000 test 0.2222
+done: final 0.2222 best 0.2242 -> ./runs/diagcnxadamw_none_10pct/seed1
+CNXADAMW_DONE diagcnxadamw_none_10pct_seed1
+CNXADAMW_START diagcnxadamw_none_10pct_seed2
+epoch 200/200 loss 0.0007 train 0.9998 test 0.2303
+done: final 0.2303 best 0.2328 -> ./runs/diagcnxadamw_none_10pct/seed2
+CNXADAMW_DONE diagcnxadamw_none_10pct_seed2
+CNXADAMW_CELL_DONE diagcnxadamw_none_10pct
+CNXADAMW_START diagcnxadamw_aux_10pct_seed0
+epoch 200/200 loss 0.0005 train 1.0000 test 0.3420
+done: final 0.3420 best 0.3448 -> ./runs/diagcnxadamw_aux_10pct/seed0
+CNXADAMW_DONE diagcnxadamw_aux_10pct_seed0
+CNXADAMW_START diagcnxadamw_aux_10pct_seed1
+epoch 200/200 loss 0.0007 train 0.9998 test 0.3397
+done: final 0.3397 best 0.3399 -> ./runs/diagcnxadamw_aux_10pct/seed1
+CNXADAMW_DONE diagcnxadamw_aux_10pct_seed1
+CNXADAMW_START diagcnxadamw_aux_10pct_seed2
+epoch 200/200 loss 0.0006 train 0.9998 test 0.3348
+done: final 0.3348 best 0.3350 -> ./runs/diagcnxadamw_aux_10pct/seed2
+CNXADAMW_DONE diagcnxadamw_aux_10pct_seed2
+CNXADAMW_CELL_DONE diagcnxadamw_aux_10pct
+CNXADAMW_COMPLETE

@@ -3,3 +3,80 @@ epoch 200/200 loss 0.0187 train 1.0000 test 0.0555
 done: final 0.0555 best 0.0568 -> ./runs/tin_none_1pct/seed0
 TIN_DONE tin_none_1pct_seed0
 TIN_START tin_none_1pct_seed1
+epoch 200/200 loss 0.0197 train 1.0000 test 0.0520
+done: final 0.0520 best 0.0523 -> ./runs/tin_none_1pct/seed1
+TIN_DONE tin_none_1pct_seed1
+TIN_START tin_none_1pct_seed2
+epoch 200/200 loss 0.0206 train 1.0000 test 0.0491
+done: final 0.0491 best 0.0504 -> ./runs/tin_none_1pct/seed2
+TIN_DONE tin_none_1pct_seed2
+TIN_CELL_DONE tin_none_1pct
+TIN_START tin_aux_1pct_seed0
+epoch 200/200 loss 0.0184 train 1.0000 test 0.0695
+done: final 0.0695 best 0.0708 -> ./runs/tin_aux_1pct/seed0
+TIN_DONE tin_aux_1pct_seed0
+TIN_START tin_aux_1pct_seed1
+epoch 200/200 loss 0.0185 train 1.0000 test 0.0666
+done: final 0.0666 best 0.0687 -> ./runs/tin_aux_1pct/seed1
+TIN_DONE tin_aux_1pct_seed1
+TIN_START tin_aux_1pct_seed2
+epoch 200/200 loss 0.0185 train 1.0000 test 0.0685
+done: final 0.0685 best 0.0686 -> ./runs/tin_aux_1pct/seed2
+TIN_DONE tin_aux_1pct_seed2
+TIN_CELL_DONE tin_aux_1pct
+TIN_PCT_DONE 1
+TIN_START tin_none_5pct_seed0
+epoch 200/200 loss 0.0124 train 1.0000 test 0.2112
+done: final 0.2112 best 0.2145 -> ./runs/tin_none_5pct/seed0
+TIN_DONE tin_none_5pct_seed0
+TIN_START tin_none_5pct_seed1
+epoch 200/200 loss 0.0125 train 1.0000 test 0.2119
+done: final 0.2119 best 0.2135 -> ./runs/tin_none_5pct/seed1
+TIN_DONE tin_none_5pct_seed1
+TIN_START tin_none_5pct_seed2
+epoch 200/200 loss 0.0109 train 1.0000 test 0.2083
+done: final 0.2083 best 0.2114 -> ./runs/tin_none_5pct/seed2
+TIN_DONE tin_none_5pct_seed2
+TIN_CELL_DONE tin_none_5pct
+TIN_START tin_aux_5pct_seed0
+epoch 200/200 loss 0.0112 train 1.0000 test 0.2324
+done: final 0.2324 best 0.2333 -> ./runs/tin_aux_5pct/seed0
+TIN_DONE tin_aux_5pct_seed0
+TIN_START tin_aux_5pct_seed1
+epoch 200/200 loss 0.0123 train 1.0000 test 0.2339
+done: final 0.2339 best 0.2354 -> ./runs/tin_aux_5pct/seed1
+TIN_DONE tin_aux_5pct_seed1
+TIN_START tin_aux_5pct_seed2
+epoch 200/200 loss 0.0120 train 1.0000 test 0.2290
+done: final 0.2290 best 0.2296 -> ./runs/tin_aux_5pct/seed2
+TIN_DONE tin_aux_5pct_seed2
+TIN_CELL_DONE tin_aux_5pct
+TIN_PCT_DONE 5
+TIN_START tin_none_10pct_seed0
+epoch 200/200 loss 0.0104 train 1.0000 test 0.3328
+done: final 0.3328 best 0.3372 -> ./runs/tin_none_10pct/seed0
+TIN_DONE tin_none_10pct_seed0
+TIN_START tin_none_10pct_seed1
+epoch 200/200 loss 0.0120 train 1.0000 test 0.3376
+done: final 0.3376 best 0.3376 -> ./runs/tin_none_10pct/seed1
+TIN_DONE tin_none_10pct_seed1
+TIN_START tin_none_10pct_seed2
+epoch 200/200 loss 0.0104 train 1.0000 test 0.3375
+done: final 0.3375 best 0.3398 -> ./runs/tin_none_10pct/seed2
+TIN_DONE tin_none_10pct_seed2
+TIN_CELL_DONE tin_none_10pct
+TIN_START tin_aux_10pct_seed0
+epoch 200/200 loss 0.0119 train 1.0000 test 0.3557
+done: final 0.3557 best 0.3571 -> ./runs/tin_aux_10pct/seed0
+TIN_DONE tin_aux_10pct_seed0
+TIN_START tin_aux_10pct_seed1
+epoch 200/200 loss 0.0116 train 1.0000 test 0.3533
+done: final 0.3533 best 0.3538 -> ./runs/tin_aux_10pct/seed1
+TIN_DONE tin_aux_10pct_seed1
+TIN_START tin_aux_10pct_seed2
+epoch 200/200 loss 0.0112 train 1.0000 test 0.3483
+done: final 0.3483 best 0.3506 -> ./runs/tin_aux_10pct/seed2
+TIN_DONE tin_aux_10pct_seed2
+TIN_CELL_DONE tin_aux_10pct
+TIN_PCT_DONE 10
+TIN_COMPLETE

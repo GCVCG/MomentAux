@@ -7,3 +7,147 @@ epoch 200/200 loss 0.0020 train 1.0000 test 0.5168
 done: final 0.5168 best 0.5195 -> ./runs/c10_none_2pct/seed1
 C10ENV_DONE c10_none_2pct_seed1
 C10ENV_START c10_none_2pct_seed2
+epoch 200/200 loss 0.0022 train 1.0000 test 0.5001
+done: final 0.5001 best 0.5020 -> ./runs/c10_none_2pct/seed2
+C10ENV_DONE c10_none_2pct_seed2
+C10ENV_CELL_DONE c10_none_2pct
+C10ENV_START c10_aux_2pct_seed0
+epoch 200/200 loss 0.0023 train 1.0000 test 0.5830
+done: final 0.5830 best 0.5857 -> ./runs/c10_aux_2pct/seed0
+C10ENV_DONE c10_aux_2pct_seed0
+C10ENV_START c10_aux_2pct_seed1
+epoch 200/200 loss 0.0025 train 1.0000 test 0.5861
+done: final 0.5861 best 0.5888 -> ./runs/c10_aux_2pct/seed1
+C10ENV_DONE c10_aux_2pct_seed1
+C10ENV_START c10_aux_2pct_seed2
+epoch 200/200 loss 0.0024 train 1.0000 test 0.5855
+done: final 0.5855 best 0.5882 -> ./runs/c10_aux_2pct/seed2
+C10ENV_DONE c10_aux_2pct_seed2
+C10ENV_CELL_DONE c10_aux_2pct
+C10ENV_PCT_DONE 2
+C10ENV_START c10_none_3pct_seed0
+epoch 200/200 loss 0.0021 train 1.0000 test 0.6025
+done: final 0.6025 best 0.6030 -> ./runs/c10_none_3pct/seed0
+C10ENV_DONE c10_none_3pct_seed0
+C10ENV_START c10_none_3pct_seed1
+epoch 200/200 loss 0.0016 train 1.0000 test 0.5899
+done: final 0.5899 best 0.5922 -> ./runs/c10_none_3pct/seed1
+C10ENV_DONE c10_none_3pct_seed1
+C10ENV_START c10_none_3pct_seed2
+epoch 200/200 loss 0.0020 train 1.0000 test 0.6115
+done: final 0.6115 best 0.6134 -> ./runs/c10_none_3pct/seed2
+C10ENV_DONE c10_none_3pct_seed2
+C10ENV_CELL_DONE c10_none_3pct
+C10ENV_START c10_aux_3pct_seed0
+epoch 200/200 loss 0.0022 train 1.0000 test 0.6520
+done: final 0.6520 best 0.6539 -> ./runs/c10_aux_3pct/seed0
+C10ENV_DONE c10_aux_3pct_seed0
+C10ENV_START c10_aux_3pct_seed1
+epoch 200/200 loss 0.0017 train 1.0000 test 0.6567
+done: final 0.6567 best 0.6582 -> ./runs/c10_aux_3pct/seed1
+C10ENV_DONE c10_aux_3pct_seed1
+C10ENV_START c10_aux_3pct_seed2
+epoch 200/200 loss 0.0018 train 1.0000 test 0.6566
+done: final 0.6566 best 0.6592 -> ./runs/c10_aux_3pct/seed2
+C10ENV_DONE c10_aux_3pct_seed2
+C10ENV_CELL_DONE c10_aux_3pct
+C10ENV_PCT_DONE 3
+C10ENV_START c10_none_7pct_seed0
+epoch 200/200 loss 0.0014 train 1.0000 test 0.7572
+done: final 0.7572 best 0.7583 -> ./runs/c10_none_7pct/seed0
+C10ENV_DONE c10_none_7pct_seed0
+C10ENV_START c10_none_7pct_seed1
+epoch 200/200 loss 0.0017 train 1.0000 test 0.7448
+done: final 0.7448 best 0.7463 -> ./runs/c10_none_7pct/seed1
+C10ENV_DONE c10_none_7pct_seed1
+C10ENV_START c10_none_7pct_seed2
+epoch 200/200 loss 0.0013 train 1.0000 test 0.7547
+done: final 0.7547 best 0.7577 -> ./runs/c10_none_7pct/seed2
+C10ENV_DONE c10_none_7pct_seed2
+C10ENV_CELL_DONE c10_none_7pct
+C10ENV_START c10_aux_7pct_seed0
+epoch 200/200 loss 0.0015 train 1.0000 test 0.7733
+done: final 0.7733 best 0.7748 -> ./runs/c10_aux_7pct/seed0
+C10ENV_DONE c10_aux_7pct_seed0
+C10ENV_START c10_aux_7pct_seed1
+epoch 200/200 loss 0.0018 train 1.0000 test 0.7718
+done: final 0.7718 best 0.7744 -> ./runs/c10_aux_7pct/seed1
+C10ENV_DONE c10_aux_7pct_seed1
+C10ENV_START c10_aux_7pct_seed2
+epoch 200/200 loss 0.0014 train 1.0000 test 0.7778
+done: final 0.7778 best 0.7784 -> ./runs/c10_aux_7pct/seed2
+C10ENV_DONE c10_aux_7pct_seed2
+C10ENV_CELL_DONE c10_aux_7pct
+C10ENV_PCT_DONE 7
+C10ENV_START c10_none_15pct_seed0
+epoch 200/200 loss 0.0014 train 1.0000 test 0.8591
+done: final 0.8591 best 0.8598 -> ./runs/c10_none_15pct/seed0
+C10ENV_DONE c10_none_15pct_seed0
+C10ENV_START c10_none_15pct_seed1
+epoch 200/200 loss 0.0013 train 1.0000 test 0.8577
+done: final 0.8577 best 0.8598 -> ./runs/c10_none_15pct/seed1
+C10ENV_DONE c10_none_15pct_seed1
+C10ENV_START c10_none_15pct_seed2
+epoch 200/200 loss 0.0013 train 1.0000 test 0.8527
+done: final 0.8527 best 0.8540 -> ./runs/c10_none_15pct/seed2
+C10ENV_DONE c10_none_15pct_seed2
+C10ENV_CELL_DONE c10_none_15pct
+C10ENV_START c10_aux_15pct_seed0
+epoch 200/200 loss 0.0014 train 1.0000 test 0.8512
+done: final 0.8512 best 0.8523 -> ./runs/c10_aux_15pct/seed0
+C10ENV_DONE c10_aux_15pct_seed0
+C10ENV_START c10_aux_15pct_seed1
+epoch 200/200 loss 0.0014 train 1.0000 test 0.8479
+done: final 0.8479 best 0.8495 -> ./runs/c10_aux_15pct/seed1
+C10ENV_DONE c10_aux_15pct_seed1
+C10ENV_START c10_aux_15pct_seed2
+epoch 200/200 loss 0.0013 train 1.0000 test 0.8506
+done: final 0.8506 best 0.8509 -> ./runs/c10_aux_15pct/seed2
+C10ENV_DONE c10_aux_15pct_seed2
+C10ENV_CELL_DONE c10_aux_15pct
+C10ENV_PCT_DONE 15
+C10ENV_START c10_none_25pct_seed0
+epoch 200/200 loss 0.0014 train 0.9999 test 0.8900
+done: final 0.8900 best 0.8912 -> ./runs/c10_none_25pct/seed0
+C10ENV_DONE c10_none_25pct_seed0
+C10ENV_START c10_none_25pct_seed1
+epoch 200/200 loss 0.0012 train 1.0000 test 0.8936
+done: final 0.8936 best 0.8940 -> ./runs/c10_none_25pct/seed1
+C10ENV_DONE c10_none_25pct_seed1
+C10ENV_START c10_none_25pct_seed2
+epoch 200/200 loss 0.0012 train 1.0000 test 0.8943
+done: final 0.8943 best 0.8957 -> ./runs/c10_none_25pct/seed2
+C10ENV_DONE c10_none_25pct_seed2
+C10ENV_CELL_DONE c10_none_25pct
+C10ENV_START c10_aux_25pct_seed0
+epoch 200/200 loss 0.0013 train 1.0000 test 0.8819
+done: final 0.8819 best 0.8840 -> ./runs/c10_aux_25pct/seed0
+C10ENV_DONE c10_aux_25pct_seed0
+C10ENV_START c10_aux_25pct_seed1
+epoch 200/200 loss 0.0012 train 1.0000 test 0.8840
+done: final 0.8840 best 0.8843 -> ./runs/c10_aux_25pct/seed1
+C10ENV_DONE c10_aux_25pct_seed1
+C10ENV_START c10_aux_25pct_seed2
+epoch 200/200 loss 0.0013 train 1.0000 test 0.8871
+done: final 0.8871 best 0.8884 -> ./runs/c10_aux_25pct/seed2
+C10ENV_DONE c10_aux_25pct_seed2
+C10ENV_CELL_DONE c10_aux_25pct
+C10ENV_PCT_DONE 25
+C10ENV_START c10_none_100pct_seed0
+epoch 200/200 loss 0.0015 train 0.9999 test 0.9547
+done: final 0.9547 best 0.9553 -> ./runs/c10_none_100pct/seed0
+C10ENV_DONE c10_none_100pct_seed0
+C10ENV_START c10_none_100pct_seed1
+epoch 200/200 loss 0.0015 train 0.9999 test 0.9496
+done: final 0.9496 best 0.9499 -> ./runs/c10_none_100pct/seed1
+C10ENV_DONE c10_none_100pct_seed1
+C10ENV_START c10_none_100pct_seed2
+epoch 200/200 loss 0.0015 train 0.9999 test 0.9540
+done: final 0.9540 best 0.9541 -> ./runs/c10_none_100pct/seed2
+C10ENV_DONE c10_none_100pct_seed2
+C10ENV_CELL_DONE c10_none_100pct
+C10ENV_START c10_aux_100pct_seed0
+epoch 200/200 loss 0.0016 train 0.9999 test 0.9486
+done: final 0.9486 best 0.9490 -> ./runs/c10_aux_100pct/seed0
+C10ENV_DONE c10_aux_100pct_seed0
+C10ENV_START c10_aux_100pct_seed1

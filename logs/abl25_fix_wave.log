@@ -1,0 +1,6 @@
+ABL25FIX_START seed2
+epoch 200/200 loss 0.0067 train 1.0000 test 0.6152
+done: final 0.6152 best 0.6156 -> ./runs/abl25_none/seed2
+ABL25FIX_TRAIN_OK
+CIFAIR_RESULT abl25_none CIFAR 61.60+/-0.52  ciFAIR 58.37+/-0.63  drop +3.23  (3 seeds) -> runs/abl25_none/cifair.json
+ABL25FIX_COMPLETE

@@ -1,0 +1,265 @@
+PROBE2_START tin_none_1pct
+tin_none_1pct seed0: probe train 26.27  test 19.53
+       5 shots/class (n= 1000): test 5.46
+      10 shots/class (n= 2000): test 7.07
+      25 shots/class (n= 5000): test 8.98
+      50 shots/class (n=10000): test 11.91
+     100 shots/class (n=20000): test 14.90
+     250 shots/class (n=50000): test 18.19
+     500 shots/class (n=100000): test 19.52
+tin_none_1pct seed1: probe train 25.51  test 18.80
+       5 shots/class (n= 1000): test 5.14
+      10 shots/class (n= 2000): test 6.30
+      25 shots/class (n= 5000): test 8.81
+      50 shots/class (n=10000): test 11.02
+     100 shots/class (n=20000): test 14.05
+     250 shots/class (n=50000): test 17.34
+     500 shots/class (n=100000): test 18.79
+tin_none_1pct seed2: probe train 25.38  test 18.71
+       5 shots/class (n= 1000): test 5.05
+      10 shots/class (n= 2000): test 6.58
+      25 shots/class (n= 5000): test 8.69
+      50 shots/class (n=10000): test 11.18
+     100 shots/class (n=20000): test 13.59
+     250 shots/class (n=50000): test 17.08
+     500 shots/class (n=100000): test 18.67
+PROBE_RESULT tin_none_1pct test 19.01+/-0.45 over 3 seeds -> runs/tin_none_1pct/linear_probe.json
+PROBE2_DONE tin_none_1pct
+PROBE2_START tin_aux_1pct
+tin_aux_1pct seed0: probe train 30.84  test 23.63
+       5 shots/class (n= 1000): test 6.98
+      10 shots/class (n= 2000): test 8.29
+      25 shots/class (n= 5000): test 11.49
+      50 shots/class (n=10000): test 14.51
+     100 shots/class (n=20000): test 18.01
+     250 shots/class (n=50000): test 21.83
+     500 shots/class (n=100000): test 23.63
+tin_aux_1pct seed1: probe train 30.54  test 23.19
+       5 shots/class (n= 1000): test 6.61
+      10 shots/class (n= 2000): test 8.42
+      25 shots/class (n= 5000): test 11.86
+      50 shots/class (n=10000): test 15.03
+     100 shots/class (n=20000): test 18.40
+     250 shots/class (n=50000): test 21.50
+     500 shots/class (n=100000): test 23.15
+tin_aux_1pct seed2: probe train 30.69  test 23.20
+       5 shots/class (n= 1000): test 6.91
+      10 shots/class (n= 2000): test 8.30
+      25 shots/class (n= 5000): test 11.28
+      50 shots/class (n=10000): test 14.31
+     100 shots/class (n=20000): test 17.76
+     250 shots/class (n=50000): test 21.61
+     500 shots/class (n=100000): test 23.21
+PROBE_RESULT tin_aux_1pct test 23.34+/-0.25 over 3 seeds -> runs/tin_aux_1pct/linear_probe.json
+PROBE2_DONE tin_aux_1pct
+PROBE2_START tin_none_5pct
+tin_none_5pct seed0: probe train 44.79  test 31.87
+       5 shots/class (n= 1000): test 20.01
+      10 shots/class (n= 2000): test 20.42
+      25 shots/class (n= 5000): test 20.88
+      50 shots/class (n=10000): test 20.92
+     100 shots/class (n=20000): test 24.17
+     250 shots/class (n=50000): test 29.20
+     500 shots/class (n=100000): test 31.84
+tin_none_5pct seed1: probe train 44.56  test 32.34
+       5 shots/class (n= 1000): test 20.18
+      10 shots/class (n= 2000): test 20.37
+      25 shots/class (n= 5000): test 20.96
+      50 shots/class (n=10000): test 21.19
+     100 shots/class (n=20000): test 24.51
+     250 shots/class (n=50000): test 29.24
+     500 shots/class (n=100000): test 32.29
+tin_none_5pct seed2: probe train 44.84  test 31.88
+       5 shots/class (n= 1000): test 20.02
+      10 shots/class (n= 2000): test 20.40
+      25 shots/class (n= 5000): test 20.52
+      50 shots/class (n=10000): test 20.83
+     100 shots/class (n=20000): test 24.18
+     250 shots/class (n=50000): test 29.06
+     500 shots/class (n=100000): test 31.83
+PROBE_RESULT tin_none_5pct test 32.03+/-0.27 over 3 seeds -> runs/tin_none_5pct/linear_probe.json
+PROBE2_DONE tin_none_5pct
+PROBE2_START tin_aux_5pct
+tin_aux_5pct seed0: probe train 47.36  test 34.85
+       5 shots/class (n= 1000): test 22.45
+      10 shots/class (n= 2000): test 22.92
+      25 shots/class (n= 5000): test 22.95
+      50 shots/class (n=10000): test 23.80
+     100 shots/class (n=20000): test 26.88
+     250 shots/class (n=50000): test 31.87
+     500 shots/class (n=100000): test 34.86
+tin_aux_5pct seed1: probe train 47.17  test 34.93
+       5 shots/class (n= 1000): test 22.17
+      10 shots/class (n= 2000): test 22.84
+      25 shots/class (n= 5000): test 23.05
+      50 shots/class (n=10000): test 23.22
+     100 shots/class (n=20000): test 26.69
+     250 shots/class (n=50000): test 32.74
+     500 shots/class (n=100000): test 34.93
+tin_aux_5pct seed2: probe train 47.03  test 34.31
+       5 shots/class (n= 1000): test 22.20
+      10 shots/class (n= 2000): test 22.38
+      25 shots/class (n= 5000): test 22.74
+      50 shots/class (n=10000): test 22.75
+     100 shots/class (n=20000): test 26.25
+     250 shots/class (n=50000): test 31.21
+     500 shots/class (n=100000): test 34.27
+PROBE_RESULT tin_aux_5pct test 34.70+/-0.34 over 3 seeds -> runs/tin_aux_5pct/linear_probe.json
+PROBE2_DONE tin_aux_5pct
+PROBE2_START abl10_none
+abl10_none seed0: probe train 65.36  test 47.89
+       5 shots/class (n=  500): test 39.17
+      10 shots/class (n= 1000): test 40.02
+      25 shots/class (n= 2500): test 40.08
+      50 shots/class (n= 5000): test 40.12
+     100 shots/class (n=10000): test 40.00
+     250 shots/class (n=25000): test 44.54
+     500 shots/class (n=50000): test 47.92
+abl10_none seed1: probe train 65.86  test 47.83
+       5 shots/class (n=  500): test 38.41
+      10 shots/class (n= 1000): test 38.94
+      25 shots/class (n= 2500): test 39.40
+      50 shots/class (n= 5000): test 39.57
+     100 shots/class (n=10000): test 39.74
+     250 shots/class (n=25000): test 44.24
+     500 shots/class (n=50000): test 47.88
+abl10_none seed2: probe train 65.38  test 48.30
+       5 shots/class (n=  500): test 39.77
+      10 shots/class (n= 1000): test 40.16
+      25 shots/class (n= 2500): test 40.39
+      50 shots/class (n= 5000): test 40.59
+     100 shots/class (n=10000): test 40.96
+     250 shots/class (n=25000): test 45.07
+     500 shots/class (n=50000): test 48.36
+PROBE_RESULT abl10_none test 48.01+/-0.26 over 3 seeds -> runs/abl10_none/linear_probe.json
+PROBE2_DONE abl10_none
+PROBE2_START auxmag_10pct_sched0
+auxmag_10pct_sched0 seed0: probe train 68.34  test 51.60
+       5 shots/class (n=  500): test 43.25
+      10 shots/class (n= 1000): test 43.82
+      25 shots/class (n= 2500): test 44.14
+      50 shots/class (n= 5000): test 44.19
+     100 shots/class (n=10000): test 44.17
+     250 shots/class (n=25000): test 48.77
+     500 shots/class (n=50000): test 51.61
+auxmag_10pct_sched0 seed1: probe train 68.59  test 52.08
+       5 shots/class (n=  500): test 44.04
+      10 shots/class (n= 1000): test 44.47
+      25 shots/class (n= 2500): test 44.62
+      50 shots/class (n= 5000): test 44.70
+     100 shots/class (n=10000): test 43.91
+     250 shots/class (n=25000): test 49.41
+     500 shots/class (n=50000): test 52.08
+auxmag_10pct_sched0 seed2: probe train 67.73  test 51.32
+       5 shots/class (n=  500): test 43.47
+      10 shots/class (n= 1000): test 43.54
+      25 shots/class (n= 2500): test 43.87
+      50 shots/class (n= 5000): test 44.05
+     100 shots/class (n=10000): test 42.89
+     250 shots/class (n=25000): test 48.44
+     500 shots/class (n=50000): test 51.35
+PROBE_RESULT auxmag_10pct_sched0 test 51.67+/-0.38 over 3 seeds -> runs/auxmag_10pct_sched0/linear_probe.json
+PROBE2_DONE auxmag_10pct_sched0
+PROBE2_START c10_none_1pct
+c10_none_1pct seed0: probe train 57.27  test 54.18
+       5 shots/class (n=   50): test 38.31
+      10 shots/class (n=  100): test 38.78
+      25 shots/class (n=  250): test 39.64
+      50 shots/class (n=  500): test 39.56
+     100 shots/class (n= 1000): test 39.85
+     250 shots/class (n= 2500): test 42.11
+     500 shots/class (n= 5000): test 44.67
+c10_none_1pct seed1: probe train 57.94  test 53.95
+       5 shots/class (n=   50): test 37.38
+      10 shots/class (n=  100): test 38.05
+      25 shots/class (n=  250): test 38.64
+      50 shots/class (n=  500): test 39.10
+     100 shots/class (n= 1000): test 40.99
+     250 shots/class (n= 2500): test 42.15
+     500 shots/class (n= 5000): test 45.65
+c10_none_1pct seed2: probe train 57.57  test 53.86
+       5 shots/class (n=   50): test 37.50
+      10 shots/class (n=  100): test 38.83
+      25 shots/class (n=  250): test 39.39
+      50 shots/class (n=  500): test 39.69
+     100 shots/class (n= 1000): test 41.07
+     250 shots/class (n= 2500): test 40.98
+     500 shots/class (n= 5000): test 44.73
+PROBE_RESULT c10_none_1pct test 54.00+/-0.17 over 3 seeds -> runs/c10_none_1pct/linear_probe.json
+PROBE2_DONE c10_none_1pct
+PROBE2_START c10_aux_1pct
+c10_aux_1pct seed0: probe train 62.49  test 59.05
+       5 shots/class (n=   50): test 44.33
+      10 shots/class (n=  100): test 45.02
+      25 shots/class (n=  250): test 45.81
+      50 shots/class (n=  500): test 45.95
+     100 shots/class (n= 1000): test 46.01
+     250 shots/class (n= 2500): test 46.86
+     500 shots/class (n= 5000): test 50.65
+c10_aux_1pct seed1: probe train 62.79  test 58.34
+       5 shots/class (n=   50): test 44.09
+      10 shots/class (n=  100): test 45.22
+      25 shots/class (n=  250): test 45.61
+      50 shots/class (n=  500): test 45.56
+     100 shots/class (n= 1000): test 46.39
+     250 shots/class (n= 2500): test 46.80
+     500 shots/class (n= 5000): test 50.12
+c10_aux_1pct seed2: probe train 62.73  test 59.04
+       5 shots/class (n=   50): test 44.20
+      10 shots/class (n=  100): test 45.34
+      25 shots/class (n=  250): test 45.87
+      50 shots/class (n=  500): test 46.43
+     100 shots/class (n= 1000): test 46.48
+     250 shots/class (n= 2500): test 46.79
+     500 shots/class (n= 5000): test 50.24
+PROBE_RESULT c10_aux_1pct test 58.81+/-0.41 over 3 seeds -> runs/c10_aux_1pct/linear_probe.json
+PROBE2_DONE c10_aux_1pct
+PROBE2_START stl_none_10pct
+stl_none_10pct seed0: probe train 78.76  test 53.98
+       5 shots/class (n=   50): test 38.61
+      10 shots/class (n=  100): test 41.41
+      25 shots/class (n=  250): test 42.76
+      50 shots/class (n=  500): test 43.26
+     100 shots/class (n= 1000): test 44.48
+     250 shots/class (n= 2500): test 49.30
+stl_none_10pct seed1: probe train 77.60  test 52.53
+       5 shots/class (n=   50): test 37.34
+      10 shots/class (n=  100): test 39.69
+      25 shots/class (n=  250): test 40.43
+      50 shots/class (n=  500): test 40.66
+     100 shots/class (n= 1000): test 42.13
+     250 shots/class (n= 2500): test 46.79
+stl_none_10pct seed2: probe train 77.50  test 53.09
+       5 shots/class (n=   50): test 37.49
+      10 shots/class (n=  100): test 40.51
+      25 shots/class (n=  250): test 41.54
+      50 shots/class (n=  500): test 41.05
+     100 shots/class (n= 1000): test 43.20
+     250 shots/class (n= 2500): test 47.53
+PROBE_RESULT stl_none_10pct test 53.20+/-0.73 over 3 seeds -> runs/stl_none_10pct/linear_probe.json
+PROBE2_DONE stl_none_10pct
+PROBE2_START stl_aux_10pct
+stl_aux_10pct seed0: probe train 82.82  test 58.05
+       5 shots/class (n=   50): test 44.25
+      10 shots/class (n=  100): test 46.53
+      25 shots/class (n=  250): test 47.33
+      50 shots/class (n=  500): test 47.71
+     100 shots/class (n= 1000): test 49.10
+     250 shots/class (n= 2500): test 53.85
+stl_aux_10pct seed1: probe train 83.16  test 56.83
+       5 shots/class (n=   50): test 43.84
+      10 shots/class (n=  100): test 46.40
+      25 shots/class (n=  250): test 47.36
+      50 shots/class (n=  500): test 47.38
+     100 shots/class (n= 1000): test 49.51
+     250 shots/class (n= 2500): test 53.81
+stl_aux_10pct seed2: probe train 82.76  test 58.80
+       5 shots/class (n=   50): test 45.28
+      10 shots/class (n=  100): test 47.11
+      25 shots/class (n=  250): test 48.21
+      50 shots/class (n=  500): test 48.18
+     100 shots/class (n= 1000): test 50.51
+     250 shots/class (n= 2500): test 54.54
+PROBE_RESULT stl_aux_10pct test 57.89+/-1.00 over 3 seeds -> runs/stl_aux_10pct/linear_probe.json
+PROBE2_DONE stl_aux_10pct
+PROBE2_COMPLETE

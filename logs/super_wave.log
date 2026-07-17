@@ -12,3 +12,42 @@ done: final 0.4297 best 0.4307 -> ./runs/super5_none/seed2
 SUPER_DONE super5_none_seed2
 SUPER_CELL_DONE super5_none
 SUPER_START super5_aux_seed0
+epoch 200/200 loss 0.0023 train 1.0000 test 0.4806
+done: final 0.4806 best 0.4829 -> ./runs/super5_aux/seed0
+SUPER_DONE super5_aux_seed0
+SUPER_START super5_aux_seed1
+epoch 200/200 loss 0.0021 train 1.0000 test 0.4865
+done: final 0.4865 best 0.4870 -> ./runs/super5_aux/seed1
+SUPER_DONE super5_aux_seed1
+SUPER_START super5_aux_seed2
+epoch 200/200 loss 0.0023 train 1.0000 test 0.4881
+done: final 0.4881 best 0.4912 -> ./runs/super5_aux/seed2
+SUPER_DONE super5_aux_seed2
+SUPER_CELL_DONE super5_aux
+SUPER_START super10_none_seed0
+epoch 200/200 loss 0.0029 train 1.0000 test 0.5622
+done: final 0.5622 best 0.5642 -> ./runs/super10_none/seed0
+SUPER_DONE super10_none_seed0
+SUPER_START super10_none_seed1
+epoch 200/200 loss 0.0028 train 1.0000 test 0.5630
+done: final 0.5630 best 0.5646 -> ./runs/super10_none/seed1
+SUPER_DONE super10_none_seed1
+SUPER_START super10_none_seed2
+epoch 200/200 loss 0.0026 train 1.0000 test 0.5591
+done: final 0.5591 best 0.5611 -> ./runs/super10_none/seed2
+SUPER_DONE super10_none_seed2
+SUPER_CELL_DONE super10_none
+SUPER_START super10_aux_seed0
+epoch 200/200 loss 0.0025 train 1.0000 test 0.5950
+done: final 0.5950 best 0.5970 -> ./runs/super10_aux/seed0
+SUPER_DONE super10_aux_seed0
+SUPER_START super10_aux_seed1
+epoch 200/200 loss 0.0025 train 1.0000 test 0.5892
+done: final 0.5892 best 0.5910 -> ./runs/super10_aux/seed1
+SUPER_DONE super10_aux_seed1
+SUPER_START super10_aux_seed2
+epoch 200/200 loss 0.0025 train 1.0000 test 0.5959
+done: final 0.5959 best 0.5980 -> ./runs/super10_aux/seed2
+SUPER_DONE super10_aux_seed2
+SUPER_CELL_DONE super10_aux
+SUPER_COMPLETE

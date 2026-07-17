@@ -1,0 +1,78 @@
+FOLLOWUP_PROBE_START tin_none_10pct
+tin_none_10pct seed0: probe train 54.91  test 39.50
+       5 shots/class (n= 1000): test 32.98
+      10 shots/class (n= 2000): test 32.97
+      25 shots/class (n= 5000): test 33.12
+      50 shots/class (n=10000): test 33.27
+     100 shots/class (n=20000): test 31.36
+     250 shots/class (n=50000): test 36.86
+tin_none_10pct seed1: probe train 55.33  test 39.85
+       5 shots/class (n= 1000): test 32.74
+      10 shots/class (n= 2000): test 32.61
+      25 shots/class (n= 5000): test 32.94
+      50 shots/class (n=10000): test 33.09
+     100 shots/class (n=20000): test 32.11
+     250 shots/class (n=50000): test 37.70
+tin_none_10pct seed2: probe train 55.41  test 40.46
+       5 shots/class (n= 1000): test 32.49
+      10 shots/class (n= 2000): test 33.02
+      25 shots/class (n= 5000): test 33.49
+      50 shots/class (n=10000): test 33.60
+     100 shots/class (n=20000): test 32.43
+     250 shots/class (n=50000): test 37.86
+PROBE_RESULT tin_none_10pct test 39.94+/-0.49 over 3 seeds -> runs/tin_none_10pct/linear_probe.json
+FOLLOWUP_PROBE_DONE tin_none_10pct
+FOLLOWUP_PROBE_START tin_aux_10pct
+tin_aux_10pct seed0: probe train 56.76  test 41.53
+       5 shots/class (n= 1000): test 34.68
+      10 shots/class (n= 2000): test 34.95
+      25 shots/class (n= 5000): test 34.88
+      50 shots/class (n=10000): test 35.03
+     100 shots/class (n=20000): test 33.37
+     250 shots/class (n=50000): test 38.51
+tin_aux_10pct seed1: probe train 56.81  test 41.75
+       5 shots/class (n= 1000): test 34.11
+      10 shots/class (n= 2000): test 34.39
+      25 shots/class (n= 5000): test 34.72
+      50 shots/class (n=10000): test 34.87
+     100 shots/class (n=20000): test 33.30
+     250 shots/class (n=50000): test 38.47
+tin_aux_10pct seed2: probe train 56.87  test 41.63
+       5 shots/class (n= 1000): test 34.05
+      10 shots/class (n= 2000): test 34.41
+      25 shots/class (n= 5000): test 34.59
+      50 shots/class (n=10000): test 34.81
+     100 shots/class (n=20000): test 32.80
+     250 shots/class (n=50000): test 39.06
+PROBE_RESULT tin_aux_10pct test 41.64+/-0.11 over 3 seeds -> runs/tin_aux_10pct/linear_probe.json
+FOLLOWUP_PROBE_DONE tin_aux_10pct
+FOLLOWUP_START stl_none_20pct_seed0
+[stl_none_20pct seed0] {"params_trainable": 11173962, "params_stem_trainable": 0, "params_stem_fixed_filters": 0, "flops_total": 5009896448, "flops_stem": 0, "flops_image_size": 96}
+epoch 1/200 loss 2.2026 train 0.1696 test 0.2190
+epoch 2/200 loss 2.0450 train 0.2589 test 0.2251
+epoch 3/200 loss 2.0022 train 0.2522 test 0.2542
+epoch 4/200 loss 2.0108 train 0.2545 test 0.2701
+epoch 5/200 loss 1.9570 train 0.2522 test 0.2504
+epoch 6/200 loss 1.8791 train 0.2846 test 0.2716
+epoch 7/200 loss 2.0035 train 0.2545 test 0.2690
+epoch 8/200 loss 1.8869 train 0.2946 test 0.2669
+epoch 9/200 loss 1.8124 train 0.3203 test 0.2434
+epoch 10/200 loss 1.7930 train 0.3013 test 0.2955
+epoch 11/200 loss 1.7102 train 0.3583 test 0.2599
+epoch 12/200 loss 1.7068 train 0.3650 test 0.2461
+epoch 13/200 loss 1.6334 train 0.3717 test 0.3224
+epoch 14/200 loss 1.6622 train 0.3583 test 0.3175
+epoch 15/200 loss 1.6581 train 0.3560 test 0.2805
+epoch 16/200 loss 1.6015 train 0.3862 test 0.3180
+epoch 17/200 loss 1.5592 train 0.3962 test 0.2459
+epoch 18/200 loss 1.6589 train 0.3393 test 0.3356
+epoch 19/200 loss 1.5574 train 0.3862 test 0.3275
+epoch 20/200 loss 1.5439 train 0.3996 test 0.2975
+epoch 21/200 loss 1.5187 train 0.3895 test 0.3011
+epoch 22/200 loss 1.4915 train 0.4174 test 0.3681
+epoch 23/200 loss 1.4493 train 0.4196 test 0.3614
+epoch 24/200 loss 1.4415 train 0.4632 test 0.3709
+epoch 25/200 loss 1.4168 train 0.4576 test 0.3623
+epoch 26/200 loss 1.4422 train 0.4308 test 0.3261
+epoch 27/200 loss 1.4310 train 0.4442 test 0.3234
+epoch 28/200 loss 1.4151 train 0.4397 test 0.3517
