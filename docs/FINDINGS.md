@@ -604,12 +604,13 @@ Scorecard of the other predictions that landed simultaneously:
     (G is dataset-dependent), but note the 500-img C10↔stl match was
     component-wise perfect while the 2500-img pair splits: G(stl) falls faster
     with data than G(C10). Probe pair queued if it matters later.
-  - ConvNeXt-tiny + AdamW (diag-only): baseline 23.31±1.26 → aux 34.09±0.16 =
-    **+10.77 ±0.74 (2 aux seeds, 3rd running)** — the largest gain measured in
-    the study, first non-ResNet backbone, first non-SGD optimizer. The
-    baseline is badly underfit (23% where R18-SGD gets 40.18), so read it as
-    "the prior rescues an underfit modern backbone", not as a headline row;
-    it does establish the mechanism is not ResNet- or SGD-specific.
+  - ConvNeXt-tiny + AdamW (diag-only, FINAL 3 seeds): baseline 23.31±1.26 →
+    aux 33.88±0.37 = **+10.57 ±0.76** — the largest gain measured in the
+    study, first non-ResNet backbone, first non-SGD optimizer. The baseline
+    is badly underfit (23% where R18-SGD gets 40.18), so read it as "the
+    prior rescues an underfit modern backbone", not as a headline row; it
+    does establish the mechanism is not ResNet- or SGD-specific. Baseline σ
+    1.26 vs aux σ 0.37 — the variance-reduction pattern at its most extreme.
 — **fork CLOSED (granularity real, dataset-effect dead); G-vs-crossing tension
 OPEN pending super2 probes**
 

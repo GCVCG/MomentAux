@@ -282,10 +282,11 @@ ported vs corrected and why.
   slightly beyond band; second negative C10 cell). stl@50% 3-seed = +3.18±0.32
   vs C10@5% mirror +4.41 (3.5σ: G(stl) falls faster with data than G(C10); the
   500-img pair matched component-wise, the 2500-img pair splits).
-  ConvNeXt-tiny+AdamW (DIAG ONLY): 23.31±1.26 -> 34.09±0.16 = +10.77±0.74
-  (2 aux seeds) — largest gain in the study, first non-ResNet + non-SGD. The
+  ConvNeXt-tiny+AdamW (DIAG ONLY, FINAL 3 seeds): 23.31±1.26 -> 33.88±0.37 =
+  +10.57 ±0.76 — largest gain in the study, first non-ResNet + non-SGD. The
   baseline is underfit (23 vs R18's 40) — read as "prior rescues underfit
-  modern backbone", NOT a headline row. tin@10% baseline 33.60±0.27 (predicted
+  modern backbone", NOT a headline row. Note baseline σ 1.26 vs aux σ 0.37:
+  the variance-reduction pattern again, at its most extreme. tin@10% baseline 33.60±0.27 (predicted
   28-30 — at the crossing); aux running, prediction +1.5..+2.2 conditional now
   ~+1.8..+2.9 given the higher baseline.
   *** Q7.3 SETTLED (2026-07-17): shots dose-response. e2e realizes EXACTLY what
