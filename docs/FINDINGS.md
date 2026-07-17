@@ -480,6 +480,50 @@ any super1/super2/tin@10% result; supersede Q6.9e's naive v1 numbers):**
     CONFIRMS universal-R × falling-G(tin); only ~+4 would now surprise.
 — **RESOLVED (R universal; G dataset-dependent); v2 predictions OPEN**
 
+**AMENDED same day — the 50/cls probes BREAK the multiplicative form and fix
+it into an ADDITIVE one.** All three R(50) measurements came in AT OR ABOVE
+100%: C100@10% 113%, C10@1% 137%, stl@10% 126%. The v2 band "R(50) = 88–95%"
+was WRONG, and with it the implied-G numbers (predicted 4.6/7.3/6.6, measured
+3.66/4.81/4.70 — all derived through the wrong form). What replaces it, with
+every probed pair (Δe2e = G + readout):
+
+| cell | /cls | imgs | G | readout | Δe2e |
+|---|---|---|---|---|---|
+| C100@1% | 5 | 500 | +3.88 | −2.40 | +1.48 |
+| tin@1%  | 5 | 1000 | +4.33 | −2.73 | +1.60 |
+| C100@5% | 25 | 2500 | +6.35 | −1.06 | +5.30 |
+| tin@5%  | 25 | 5000 | +2.67 | −0.54 | +2.13 |
+| C100@10% | 50 | 5000 | +3.66 | **+0.48** | +4.14 |
+| C10@1%  | 50 | 500 | +4.81 | **+1.80** | +6.62 |
+| stl@10% | 50 | 500 | +4.70 | **+1.23** | +5.92 |
+
+The readout term is MONOTONE in labels/class and CROSSES ZERO between 25 and
+50: below, scarce labels leave feature gains unrealized (the left flank);
+above, the e2e cell realizes MORE than its frozen-probe gap — aux features are
+genuinely EASIER TO READ with few labels (self-realization at C10@1%: baseline
+cashes 72.9% of its own probe ceiling, aux 78.2%). Same property Q7.3 saw from
+the other side ("@5%-gains are 81% visible to a 5-shot head"). So the aux prior
+confers TWO benefits: better features (G) and more label-efficient readout
+(the positive term at ≥50/cls).
+THREE STRUCTURAL CONFIRMATIONS: (i) the C10↔stl transplant holds
+COMPONENT-WISE at matched 500 imgs / 50 cls — G 4.81 vs 4.70, readout +1.80 vs
++1.23 — not just in aggregate; (ii) G on C100 traces 3.88@500 → 6.35@2500 →
+3.66@5000: G peaks exactly where the e2e envelope peaks (5%), so the envelope
+shape IS the feature-gain curve; (iii) the universal-R statement at 5 and 25
+/cls stands unchanged (38/37%, 83/80%).
+CAVEAT: stl's "full-label" probe head is 500/cls (STL-10 has only 5k labeled
+train images), vs 5000/cls (C10) and 500/cls (C100/tin per class varies) — G is
+relative to each dataset's own probe ceiling.
+PREDICTION BOOKKEEPING (against the super/tin cells still running): the sharp
+fork vs the dataset-effect branch is UNCHANGED (super@1% ≈ +3 vs ≈ +1.5;
+super@2% ≥ +4 vs ≈ +2.5). But the additive form shifts super@2% up to
+~+5.0..+6.0 (G@1000 interpolates 3.9..6.4, readout ~+0.5..+1) — record BOTH
+bands; and tin@10% is NO LONGER a sharp discriminator: additive predicts
++2.3..+3.4 (G(tin,10k)~1.8..2.4 + readout ~+0.5..+1) vs the old tin-cap ~+2 —
+overlapping bands. Its value is now G/readout measurement (probe it when it
+lands), not hypothesis selection. — **AMENDED; super cells remain the decisive
+fork**
+
 ---
 
 ## 7. Mechanism — why the curve has the shape it has

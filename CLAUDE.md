@@ -237,11 +237,23 @@ ported vs corrected and why.
   on tin; the prior just provides less there. G is NON-MONOTONE in data and
   dataset-specific in shape: C100 3.88@500 -> 6.35@2500; tin 4.33@1000 ->
   2.67@5000. The e2e peak sits where G peaks (R saturates early).
-  STILL RUNNING, v2 predictions recorded BEFORE results (FINDINGS Q6.9f):
-    super@1% => +2.5..+3.8 (=R(25)xG(C100,500); v1's ~+5 conflated G with R);
-    super@2% => +4.0..+4.7; dataset-effect branch predicts +1.5/+2.5.
-    tin@10% => +1.7..+2.2 (R(50)~0.9 x falling G(tin)); +4 would now SURPRISE.
-    R(50) => 88-95% on all three of C100@10%/C10@1%/stl@10% (probes queued).
+  *** AMENDED same day (all 10 probes done): the 50/cls probes BREAK the
+  multiplicative form — R(50) measured 113%/137%/126% (C100@10%/C10@1%/stl@10%),
+  the "88-95%" band was WRONG. Correct form is ADDITIVE: Δe2e = G + readout(k),
+  readout MONOTONE in labels/cls and crossing zero between 25 and 50:
+    5/cls: −2.40,−2.73 | 25/cls: −1.06,−0.54 | 50/cls: +0.48,+1.80,+1.23.
+  Positive readout at ≥50/cls means aux features are EASIER TO READ with few
+  labels (self-realization C10@1%: base 72.9% vs aux 78.2% of own probe
+  ceiling) — the prior confers BOTH better features (G) AND more label-
+  efficient readout. Q7.3's "gains are linearly shallow" is the same property.
+  Component-wise transplant: C10@1% vs stl@10% at matched 500/50cls — G 4.81
+  vs 4.70, readout +1.80 vs +1.23. G(C100): 3.88@500 -> 6.35@2500 -> 3.66@5000
+  — G PEAKS AT 5%, exactly where the e2e envelope peaks: the envelope shape IS
+  the feature-gain curve. Universal-R at 5/25 cls stands (38/37%, 83/80%).
+  PREDICTIONS FOR CELLS STILL RUNNING: super@1% ≈ +3 (fork vs ~+1.5 dataset-
+  effect, UNCHANGED and decisive); super@2% multiplicative band +4.0..4.7,
+  additive band +5.0..6.0 (record both) vs ~+2.5; tin@10% now +2.3..+3.4
+  additive — NO LONGER a sharp discriminator, probe it for G/readout instead.
   *** Q7.3 SETTLED (2026-07-17): shots dose-response. e2e realizes EXACTLY what
   a same-label-budget LBFGS probe realizes (e2e +1.91 ≈ 5-shot gap +2.08; e2e
   +5.30 ≈ 25-shot gap +5.31). Left flank = label scarcity at readout, NOT an
