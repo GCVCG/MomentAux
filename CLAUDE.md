@@ -308,12 +308,25 @@ ported vs corrected and why.
   used λ0=0.1; the matched C100 λ0=1.0-sched cell gave +0.08. On C10 the
   champion is NEVER positive above 10%: per-regime λ0 (0.3 at 15%+) is not
   optional on easy datasets.
-  FOLLOW-UP WAVE LAUNCHED (GPU drained, 2026-07-17): stl@20% pair (1000 imgs /
-  100-per-cls — second dataset at the 1000-img rung's top; PREDICTION
-  RECORDED: +5.5..+7.0, vs C10@2%'s +7.14); c10_aux_15pct_l03 (λ0=0.3 rescue,
-  prediction +0.3..+1.0); Q9.4 deepening to 10 seeds on all four c10 1%/2%
-  cells (settles plateau-vs-peak; powers the variance test, p=0.073 at 3v3).
-  num_workers preserved per cell (audited: none_1/aux_1/none_2 nw=8, aux_2 nw=2).
+  *** TWO PREDICTIONS MISSED (2026-07-17), same root cause — extrapolating
+  unmeasured G curves:
+  (1) stl@20% = +4.36 ±0.56 vs predicted +5.5..+7.0. The C10@2% mirror
+      (+7.14) is now 3.1σ away: at 1000 imgs / 100-per-cls the C10<->stl
+      transplant SPLITS, though it was component-wise perfect at 500 imgs.
+      Same pattern as the 2500-img split (stl@50% +3.18 vs C10@5% +4.41):
+      G(stl) FALLS with data from 500 imgs on, while G(C10) rises 500->1000.
+      G shape is dataset-specific and cannot be extrapolated — the same error
+      as the super2 interpolation, repeated. Estimated G(stl,1000) ≈ 3.1-3.4
+      (falling from 4.70@500) vs G(C10,1000) ≈ 5.6.
+  (2) c10@15% λ0=0.3 rescue = −0.13 ±0.29 vs predicted +0.3..+1.0. The rescue
+      restored NEUTRALITY, not gain (champion λ0=1.0: −0.66). The prediction
+      anchored on C100@15%'s +2.94 — but C10@15% (baseline 85.65) is past
+      G(C10)'s zero: weakening λ0 removes the shaping COST, and there is no
+      feature gain left to unlock. LESSON: per-regime λ0 protects from harm
+      but cannot manufacture gain past G's zero-crossing.
+  Q9.4 deepening to 10 seeds running (settles plateau-vs-peak; powers the
+  variance test, p=0.073 at 3v3). num_workers preserved per cell (audited:
+  none_1/aux_1/none_2 nw=8, aux_2 nw=2).
   *** Q7.3 SETTLED (2026-07-17): shots dose-response. e2e realizes EXACTLY what
   a same-label-budget LBFGS probe realizes (e2e +1.91 ≈ 5-shot gap +2.08; e2e
   +5.30 ≈ 25-shot gap +5.31). Left flank = label scarcity at readout, NOT an
