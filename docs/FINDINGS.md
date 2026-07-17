@@ -524,6 +524,30 @@ overlapping bands. Its value is now G/readout measurement (probe it when it
 lands), not hypothesis selection. — **AMENDED; super cells remain the decisive
 fork**
 
+**Q6.9g — super@1% LANDED BETWEEN THE BRANCHES (2026-07-17): +2.09 ±0.40.**
+Baseline 22.50±0.63 → aux 24.59±0.31 (3 seeds each). Scored against the
+recorded branches: 2.5σ BELOW additive-granularity (+3.1), 1.5σ ABOVE
+dataset-effect (+1.5) — the intermediate outcome the original ±10σ design
+could not produce, made possible because the additive amendment narrowed the
+granularity band. Against C100@1% (byte-identical pixels, fine labels, +1.48):
+coarsening 5→25/cls moved Δ by **+0.61 ±0.42** — a granularity effect that
+looks real but is MODEST, roughly a fifth of what the original threshold story
+implied. NEITHER branch survives intact:
+  - "realization unlocks at 25/cls" over-predicts (would need ≈+3.1 here);
+  - "pure dataset effect, granularity irrelevant" under-predicts by 1.5σ.
+THE SUSPECT ASSUMPTION, now measurable: the additive prediction transplanted
+G = 3.88 measured under 100-way FINE CE onto 20-way COARSE training. If coarse
+CE shapes features differently (less pressure toward fine distinctions → the
+aux target overlaps more with what CE already teaches), G_coarse < G_fine and
+the whole shortfall is in G, not readout. probe3 wave RUNNING on the super1
+and super5 pairs; super2 pair will be probed when it lands. If G_coarse ≈ 2.9
+with readout ≈ −0.8, the additive law survives with G label-space-DEPENDENT;
+if G_coarse ≈ 3.9 with readout ≈ −1.8, the readout curve is not universal
+across label spaces. super@2% branches restated BEFORE it lands:
+multiplicative +4.0..4.7, additive +5.0..6.0, dataset-effect ~+2.5, and — if
+the coarse-CE G-shrink seen here persists — an intermediate ~+3..3.5.
+— **OPEN (probes + super@2% deciding)**
+
 ---
 
 ## 7. Mechanism — why the curve has the shape it has

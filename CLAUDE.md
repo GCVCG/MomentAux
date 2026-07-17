@@ -250,10 +250,18 @@ ported vs corrected and why.
   vs 4.70, readout +1.80 vs +1.23. G(C100): 3.88@500 -> 6.35@2500 -> 3.66@5000
   — G PEAKS AT 5%, exactly where the e2e envelope peaks: the envelope shape IS
   the feature-gain curve. Universal-R at 5/25 cls stands (38/37%, 83/80%).
-  PREDICTIONS FOR CELLS STILL RUNNING: super@1% ≈ +3 (fork vs ~+1.5 dataset-
-  effect, UNCHANGED and decisive); super@2% multiplicative band +4.0..4.7,
-  additive band +5.0..6.0 (record both) vs ~+2.5; tin@10% now +2.3..+3.4
-  additive — NO LONGER a sharp discriminator, probe it for G/readout instead.
+  *** super@1% LANDED BETWEEN THE BRANCHES (2026-07-17): 22.50±0.63 →
+  24.59±0.31 = +2.09 ±0.40. 2.5σ below additive-granularity (+3.1), 1.5σ above
+  dataset-effect (+1.5). vs C100@1% (+1.48, byte-identical pixels): coarsening
+  5->25/cls bought +0.61 ±0.42 — granularity effect REAL-LOOKING BUT MODEST,
+  ~1/5 of the original threshold story. Suspect assumption now measurable:
+  G=3.88 was measured under 100-way FINE CE and transplanted to 20-way coarse
+  training; if coarse CE makes the aux target more redundant, G_coarse < 3.88
+  and the shortfall is G's, not readout's. probe3 wave measuring G_coarse on
+  super1/super5 pairs (super2 on landing).
+  REMAINING PREDICTIONS: super@2% mult +4.0..4.7 / additive +5.0..6.0 /
+  dataset-effect ~+2.5 / coarse-G-shrink ~+3..3.5. tin@10% +2.3..+3.4
+  (measurement, not discriminator — probe on landing).
   *** Q7.3 SETTLED (2026-07-17): shots dose-response. e2e realizes EXACTLY what
   a same-label-budget LBFGS probe realizes (e2e +1.91 ≈ 5-shot gap +2.08; e2e
   +5.30 ≈ 25-shot gap +5.31). Left flank = label scarcity at readout, NOT an
