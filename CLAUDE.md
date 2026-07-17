@@ -286,9 +286,20 @@ ported vs corrected and why.
   +10.57 ±0.76 — largest gain in the study, first non-ResNet + non-SGD. The
   baseline is underfit (23 vs R18's 40) — read as "prior rescues underfit
   modern backbone", NOT a headline row. Note baseline σ 1.26 vs aux σ 0.37:
-  the variance-reduction pattern again, at its most extreme. tin@10% baseline 33.60±0.27 (predicted
-  28-30 — at the crossing); aux running, prediction +1.5..+2.2 conditional now
-  ~+1.8..+2.9 given the higher baseline.
+  the variance-reduction pattern again, at its most extreme.
+  *** tin@10% LANDED IN BAND (2026-07-17, 3 seeds): 33.60±0.27 → 35.24±0.38 =
+  +1.65 ±0.27 vs original band +1.5..+2.2 (0.6σ below the conditional floor).
+  TIN ENVELOPE COMPLETE AND FLAT: +1.60@1% / +2.13@5% / +1.65@10% — never
+  above +2.2 at any scale, exactly as falling-G(tin) predicts. tin@10% probes
+  queued (11th/12th sign-law cells, baseline right AT the crossing: law says
+  readout(33.6) ≈ 0 ± 0.5).
+  C10@100%: baseline 95.28±0.28 done; aux running (last envelope cell).
+  FOLLOW-UP WAVE LAUNCHED (GPU drained, 2026-07-17): stl@20% pair (1000 imgs /
+  100-per-cls — second dataset at the 1000-img rung's top; PREDICTION
+  RECORDED: +5.5..+7.0, vs C10@2%'s +7.14); c10_aux_15pct_l03 (λ0=0.3 rescue,
+  prediction +0.3..+1.0); Q9.4 deepening to 10 seeds on all four c10 1%/2%
+  cells (settles plateau-vs-peak; powers the variance test, p=0.073 at 3v3).
+  num_workers preserved per cell (audited: none_1/aux_1/none_2 nw=8, aux_2 nw=2).
   *** Q7.3 SETTLED (2026-07-17): shots dose-response. e2e realizes EXACTLY what
   a same-label-budget LBFGS probe realizes (e2e +1.91 ≈ 5-shot gap +2.08; e2e
   +5.30 ≈ 25-shot gap +5.31). Left flank = label scarcity at readout, NOT an
