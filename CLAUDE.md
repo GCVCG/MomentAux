@@ -167,13 +167,14 @@ ported vs corrected and why.
   Explains the UNIMODAL curve peaking near 25 img/class, and predicts C10's true
   peak is 0.5% (25/cls) — unrunnable under the frozen recipe (250 imgs = 1
   batch/epoch), so +6.61@1% is the RISING LIMB, not the summit.
-  *** tin@1% PREDICTION HELD (2026-07-17) — mechanism (b) SURVIVES its first
-  out-of-family falsification test, on a dataset the synthesis was not built on
-  (Tiny-ImageNet, 200 classes, 64x64). Predicted IN ADVANCE and in writing:
-  "SUPPRESSED ~+1.5 DESPITE 2x C100@1%'s images; if it lands ~+5, (b) is WRONG".
-  LANDED: 5.22±0.32 → 6.95 = +1.73 (aux is 1 seed so far; seeds 1-2 running).
-  2x the images and 2.3x the steps of C100@1% bought ~nothing, because per-class
-  stayed at 5. NOT the ~+5 that would have killed it.
+  *** tin@1% PREDICTION HELD NUMERICALLY (2026-07-17, final 3 seeds: 5.22±0.32
+  → 6.82±0.15 = +1.60 ±0.20) — predicted in advance: "SUPPRESSED ~+1.5 DESPITE
+  2x C100@1%'s images; if it lands ~+5, (b) is WRONG". Landed 0.5σ from the
+  prediction, 16σ from the falsifier. BUT the confirmation is likely HOLLOW —
+  see the DATASET-CONTROL CRISIS below: tin gives small gains at EVERY per-class
+  count measured, so "suppressed because 5/cls" is not yet distinguishable from
+  "tin is a low-gain dataset". The prediction hit the right number for possibly
+  the wrong reason. Do NOT cite tin@1% alone as evidence for (b).
   *** THE MATCHED TRIPLE (2026-07-17) — the strongest evidence for (b) yet, and
   the MIRROR IMAGE of the superclass pair. All three cells have IDENTICAL total
   images (1000) and IDENTICAL steps (1400 = 7 batches x 200), same champion
@@ -198,15 +199,59 @@ ported vs corrected and why.
     at 1000 imgs, the cells STRADDLE it (5/10/100) → steep: +1.73/+2.50/+7.15.
   So per-class count matters ENORMOUSLY at 1000 imgs and BARELY at 2500 — which
   is what a threshold predicts, and is why neither factor alone ever fit.
-  CAVEAT — DO NOT over-read the triple: at fixed total data, per-class count and
-  CLASS COUNT are PERFECTLY anti-correlated (1000/10=100, 1000/100=10,
-  1000/200=5), so this triple CANNOT separate "5 examples can't define a
-  boundary" from "200-way is simply a harder task". tin also differs in
-  RESOLUTION (64x64). What breaks that tie is the superclass cell: at 2500 imgs,
-  20-way (super, +5.84) vs 100-way (C100, +5.30) — 5x different class count,
-  SAME gain. So class count per se is NOT the driver at that scale.
-  LIVE PREDICTION STILL OPEN: stl@10% = 500 imgs / 50-per-cls / 600 steps →
-  should be ~+6.6 (tests whether 96x96 resolution changes anything).
+  CAVEAT ESCALATED TO A CONFOUND (2026-07-17) — the triple is NOT decisive
+  after all; see the DATASET-CONTROL CRISIS below. At FIXED per-class count,
+  changing only the dataset moves Δ by 6.0-8.1σ, so the triple's three datasets
+  confound per-class count with dataset identity. Q6.9b's monotonicity is real
+  as DATA but its attribution to per-class count was an over-read — same error
+  class as the retracted law.
+  *** stl@10% PREDICTION HELD (2026-07-17, 3 seeds): 41.58±1.31 → 47.51±0.60 =
+  +5.92 ±0.83 vs predicted ~+6.6, within noise of C10@1%'s +6.62. RESOLUTION IS
+  IRRELEVANT to the prior (3x linear res, ImageNet content; k11's coverage
+  fraction does not matter). stl@50% (=C10@5% mirror, 250/cls/2500 imgs): +3.42
+  at 1 seed, tracking C10@5%'s +4.41. Kills every "kernel scale must match
+  object scale" account.
+  *** THE DATASET-CONTROL CRISIS (2026-07-17) — the tin envelope broke the
+  threshold story:
+  (1) ~25 img/cls does NOT transfer: crossing 5->25/cls buys +3.81 on C100
+      (+1.48->+5.30) but +0.53 on tin (+1.60->+2.13). tin@5% vs C100@5%, both
+      25/cls: 8.1σ apart.
+  (2) At fixed per-class, dataset identity moves Δ: 50/cls C10@1% +6.62 vs
+      C100@10% +4.14 (6.0σ); 25/cls C100@5% +5.30 vs tin@5% +2.13 (8.1σ).
+  WHAT SURVIVES — the left flank transplants PERFECTLY at matched per-class AND
+  matched images: 5/cls gives +1.48 (C100@1%) vs +1.60 (tin@1%) across 2x
+  images/classes/resolution — a universal ~+1.5 floor; 50/cls at 500 imgs gives
+  +6.62 (C10) vs +5.92 (stl) across 3x resolution. Something per-class-like is
+  real; the FIXED-COUNT threshold is what died.
+  RIGHT FLANK: no single covariate collapses datasets (at 5000 imgs: +1.09 C10 /
+  +2.13 tin / +3.19 super / +4.14 C100; neither %, imgs, baseline, nor headroom
+  orders all four). Redundancy onset is task-specific.
+  DECIDING TESTS RUNNING (predictions recorded in FINDINGS Q6.9e BEFORE launch):
+    super@1%/@2% — C100's committed subsets, coarse labels: byte-identical
+      pixels, only granularity moves (5->25, 10->50 per cls). Granularity-
+      governs => ~+5/+6; dataset-effect => ~+1.5/+2.5. ~10σ apart.
+    probe2 wave — decomposes tin@5% into feature-gain x realization (fork:
+      big gap + low realization => thresholds scale with task difficulty;
+      small gap => prior itself weak on tin, (a) is dataset-dependent).
+    tin@10% (50/cls) — graded-universal-realization => ~+4; tin-cap => ~+2.
+  *** Q7.3 SETTLED (2026-07-17): shots dose-response. e2e realizes EXACTLY what
+  a same-label-budget LBFGS probe realizes (e2e +1.91 ≈ 5-shot gap +2.08; e2e
+  +5.30 ≈ 25-shot gap +5.31). Left flank = label scarcity at readout, NOT an
+  optimization failure. And R(k) is not universal: @5%-features' gain is 81%
+  visible to a 5-shot head; @1%-features' gain needs hundreds of labels.
+  *** COMBO ANSWERED NEGATIVE (2026-07-17): fwd stem + aux at C100 1-2% =
+  +1.73/+2.98 — ≈ aux alone (+1.90/+3.14), 2.9σ WORSE than fwd stem alone
+  (+2.54/+3.52) @1%. NOT additive; the aux constraint is redundant when the
+  moments are already in the input. aux.py's "may be additive" is falsified.
+  *** C10@15% = −0.66 ±0.22 (3σ) — the champion's FIRST negative cell. The
+  zero-crossing is DATASET-DEPENDENT (C100 crosses ~25%, C10 between 10-15%).
+  "Positive up to 25%" is a C100 statement. λ->0 makes END-of-training pure CE
+  but does NOT guarantee neutrality — early-phase shaping can still cost at
+  sufficiency. PREDICTIONS RECORDED: C10@15% λ0=0.3 => +0.3..+1.0; C10@25%
+  λ0=1.0 (running) => −0.5..0.
+  SEED-VARIANCE NOTE: aux cells' σ < baseline σ in 12/18 pairs; exact sign-flip
+  test on 3v3 pairs p=0.073 — SUGGESTIVE ONLY, do not claim. Q9.4's 10-seed
+  cells will power it properly.
 - ciFAIR-100 (2026-07-16) — the low-data gains are NOT memorised train/test
   duplicates. CIFAR-100's test set has 927/10000 near-duplicates of train images;
   ciFAIR replaces exactly those. The Δ is stable at every point:

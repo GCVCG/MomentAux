@@ -300,11 +300,15 @@ a finding in either direction.*
 5%: 69.05 → 73.46 (+4.41); 10%: 80.71 → 81.80 (+1.09). — **SETTLED**
 
 **Q6.6 — Across RESOLUTION (STL-10, 96×96)?**
-STL-10 @10% is 500 imgs / 50-per-class / 600 steps — **identical to CIFAR-10 @1%
-on every axis except resolution**. CIFAR-10 @1% gave +6.61. Reason to doubt a
-match: k11 covers 34% of a 32×32 image but only 11.5% of a 96×96 one, so the
-prior describes much finer structure. A large shortfall would mean filter size
-is a resolution knob and k11 was implicitly tuned to CIFAR's scale. — **OPEN**
+**A: YES — resolution is irrelevant to the prior (2026-07-17).** STL-10 @10% is
+500 imgs / 50-per-class / 600 steps — **identical to CIFAR-10 @1% on every axis
+except resolution**. Predicted ~+6.6 in advance; reason to doubt it: k11 covers
+34% of a 32×32 image but only 11.5% of a 96×96 one. LANDED: 41.58±1.31 →
+47.51±0.60 = **+5.92 ±0.83** (3 seeds), within noise of CIFAR-10@1%'s +6.62
+±0.18. Filter size is NOT a resolution knob; the prediction held on a dataset
+with 3× the linear resolution and ImageNet-derived content. (stl@50% = 2500
+imgs / 250-per-cls, the C10@5% mirror: +3.42 at 1 seed so far, vs C10@5%'s
++4.41 — same story at mid-data, pending seeds.) — **SETTLED**
 
 **Q6.7 — Does the gain depend on CLASS GRANULARITY or on TOTAL DATA/COMPUTE?**
 Undecidable from CIFAR-10-vs-100 (Q9.2), so `cifar100super` was built: CIFAR-100's
@@ -394,6 +398,49 @@ Resolving it needs ~10 seeds/cell (the σ is driven by the c10_none_2pct
 baseline, ±1.20 from seeds 52.48/51.95/50.20). Until then the rising-limb claim
 is **WITHDRAWN, not replaced**. See Q9.4. — **OPEN**
 
+**Q6.9e — DOES THE PER-CLASS MECHANISM SURVIVE DATASET CONTROLS? The current
+crisis (2026-07-17).** Filling in the tin envelope broke two things at once:
+(1) **The ~25 img/cls threshold does NOT transfer.** Crossing 5→25 img/cls buys
+    **+3.81** on C100 (+1.48→+5.30) but only **+0.53** on tin (+1.60→+2.13).
+    tin@5% (25/cls) vs C100@5% (25/cls): +2.13 vs +5.30 — 8.1σ apart at the
+    SAME per-class count.
+(2) **The matched triple (Q6.9b) is CONFOUNDED by dataset identity.** At FIXED
+    per-class count, changing only the dataset moves Δ by +2.48 (6.0σ, 50/cls:
+    C10@1% vs C100@10%) and +3.17 (8.1σ, 25/cls: C100@5% vs tin@5%). The triple
+    spans three datasets, so "monotone in per-class" cannot be attributed to
+    per-class count from that design. Q6.9b's caveat was too mild: this is the
+    same class of error as Q9.1 (a confounded comparison read as controlled).
+WHAT SURVIVES UNTOUCHED — the left flank transplants PERFECTLY at matched
+per-class AND matched images:
+    5/cls:  C100@1% +1.48 ±0.12  vs  tin@1% +1.60 ±0.20   (0.5σ apart, despite
+            2× images, 2× classes, 2× resolution — a universal ~+1.5 floor)
+    50/cls: C10@1%  +6.62 ±0.18  vs  stl@10% +5.92 ±0.83  (0.8σ, despite 3×
+            resolution and ImageNet content)
+  So SOMETHING per-class-like governs the left flank; what fails is only the
+  claim that a fixed count (~25) unlocks it dataset-independently.
+THE FORK, with both tests RUNNING and predictions recorded in advance:
+  (i) super@1% / super@2% (launched 2026-07-17) — C100's committed 1%/2% subsets
+      with 20 coarse labels: BYTE-IDENTICAL pixels, identical steps; only
+      granularity moves (5→25/cls at 1%, 10→50/cls at 2%). The only per-class
+      manipulation possible BELOW the claimed threshold with dataset held fixed
+      (super@5%/@10% sit above it at 125/250 per cls and tested nothing).
+      PREDICTED: if granularity governs, super@1% ≈ +5 and super@2% ≈ +5.5..6.5;
+      if the left flank is a dataset effect, both stay at C100's +1.5/+2.5.
+      ~10σ between the outcomes; no result survives both hypotheses.
+  (ii) probe decomposition of tin (probe2 wave, running) — splits tin@5%'s small
+      +2.13 into feature gain × realization using Q7.3's machinery.
+      PREDICTED: if tin's full-probe feature gap ≈ +6 (like C100@5%'s +6.35)
+      with e2e only +2.13, REALIZATION is broken at 25/cls on tin → per-class
+      thresholds scale with task difficulty (200 fine-grained classes need more
+      examples per boundary). If the feature gap itself is ≈ +2.5, the PRIOR is
+      weak on tin content → mechanism (a) is dataset-dependent, (b) survives.
+  (iii) tin@10% (50/cls, running): graded-universal-realization predicts ≈ +4
+      (matching C100@10% at 50/cls); a tin-specific cap predicts ≈ +2.
+RIGHT FLANK — no single covariate collapses the datasets: at 5000 imgs Δ =
++1.09 (C10) / +2.13 (tin) / +3.19 (super) / +4.14 (C100); neither %, images,
+steps, baseline acc, nor headroom orders all four. Redundancy onset is
+task-specific. The left flank is where the universal structure lives. — **OPEN**
+
 ---
 
 ## 7. Mechanism — why the curve has the shape it has
@@ -432,12 +479,29 @@ baseline delta under identical probing. Also note Q1.12: probe gains have failed
 to survive end-to-end before in this very study. — **SETTLED** (control: Q4.5)
 
 **Q7.3 — Does the aux-vs-baseline gap GROW with the head's label count?**
-The claim in Q7.2 rests on two points (41% vs 84%). The sharp version: refit the
-head on the *same frozen features* with 5→500 labels/class. If the bottleneck is
-the classifier's labels, the gap must grow. Protocol validated: probing the 1%
-baseline at 5 labels/class gives **8.97**, reproducing its end-to-end **8.90**.
-If instead the gap is flat, "available gain" is the wrong framing and the left
-flank is a real ceiling. — **OPEN**
+**A: YES at 1%, and the dose-response quantifies the whole left flank
+(2026-07-17).** Refit the head on the *same frozen features* with k labels/class
+(3 seeds each):
+
+| head labels/cls | @1% gap (feat. trained 5/cls) | @5% gap (feat. trained 25/cls) |
+|---|---|---|
+| 5    | +2.08 ±0.17 | +5.13 ±0.44 |
+| 25   | +3.02 ±0.10 | +5.31 ±0.43 |
+| 100  | +3.75 ±0.31 | +5.88 ±0.47 |
+| 500  | +4.71 ±0.25 | +6.32 ±0.35 |
+| full | +4.71 ±0.23 | +6.35 ±0.34 |
+| **e2e (own labels)** | **+1.91** | **+5.30** |
+
+Two findings. (1) **The e2e classifier realizes exactly what an optimal linear
+readout with the same label budget realizes**: e2e +1.91 ≈ the 5-shot probe gap
++2.08 (41% vs 44% of full); e2e +5.30 ≈ the 25-shot gap +5.31 (83% vs 84%).
+So the left flank is NOT "SGD/CE fails to find the features" — a same-budget
+LBFGS probe does no better. It is label scarcity at readout, full stop.
+(2) **R(k) is not a universal curve**: the @5%-trained features' gain is already
+81% visible to a 5-shot head, while the @1%-trained features' gain needs
+hundreds of labels to cash. Feature gains earned at higher data are "linearly
+shallow"; those earned at extreme scarcity are spread in directions a small
+head cannot exploit. — **SETTLED**
 
 **Q7.4 — Surviving account of the whole curve.**
 Prior-shaped features commit during the high-LR phase. Beneficial when data
@@ -545,6 +609,38 @@ decaying one; fixed λ=2.0 @2% (+3.26) also beats the schedule (+2.50).
 Crossover ≈3%. Consistent with Q7.2: the forward-path stem changes what the
 classifier *sees*, rather than only shaping intermediate features. — **SETTLED**
 
+**Q10.2 — Do the forward-path stem and the aux COMBINE at 1–2%?**
+**A: NO — the combo is strictly worse than the forward-path stem alone
+(2026-07-17).** combo = energy-magnitude stem in the forward path AND as the
+aux target (λ0=2.0 schedule), the "they act through different mechanisms so
+they may be additive" hypothesis from aux.py's docstring. CIFAR-100, 3 seeds:
+
+| | @1% | @2% |
+|---|---|---|
+| forward-path stem alone | **+2.54 ±0.15** | **+3.52 ±0.28** |
+| best aux alone (λ0=2.0) | +1.90 ±0.07 | +3.14 ±0.21 |
+| combo | +1.73 ±0.23 | +2.98 ±0.15 |
+
+Combo ≈ aux alone (the stem adds nothing once the aux is present) and is 2.9σ
+WORSE than the stem alone @1%. Not additive — the aux constrains layer3 to
+predict maps that are now directly present in the input, a redundant constraint
+that only taxes CE. The hypothesis is falsified; the two mechanisms overlap
+rather than compose. Vanilla-deploy remains intact as the method's story (the
+combo forfeits it for a loss). — **SETTLED (negative)**
+
+**Q10.3 — The champion config's zero-crossing is DATASET-DEPENDENT.**
+CIFAR-10 @15% = **−0.66 ±0.22** (3σ negative) under champion λ0=1.0 — the first
+negative cell in any champion envelope. "Positive up to 25%, neutral at 100%"
+is a CIFAR-100 statement; on CIFAR-10 the crossing is between 10% and 15%.
+Consistent with λ0 being a data-regime knob (C100@15% prefers λ0=0.3: +2.94 vs
++2.55; @25% +0.97 vs +0.25): C10's curve sits ~5× left of C100's, so C10@15%
+(750/cls, baseline 85.7) is deep in overshoot. IMPORTANT NUANCE: λ→0 makes the
+END of training pure CE but does NOT guarantee neutrality — the high-LR-phase
+shaping can still cost when data is sufficient. Neutrality at C100@100% is an
+empirical fact of that cell, not a structural theorem.
+PREDICTION (recorded 2026-07-17, before any run): C10@15% at λ0=0.3 lands
++0.3..+1.0; C10@25% at λ0=1.0 (running) lands −0.5..0. — **OPEN**
+
 ---
 
 ## 11. Prior art (deep research, 2026-07-14)
@@ -562,14 +658,19 @@ but segmentation); **MaskFeat** (HOG target — but SSL pretraining);
 
 | # | question | status |
 |---|---|---|
-| Q6.6 | STL-10 96×96 — resolution transfer (matched to cifar10@1% but for res) | running |
-| Q7.3 | shots dose-response — does the gap grow with head labels? | running |
+| Q6.9e | **super@1%/@2%** — dataset-controlled granularity below the threshold (byte-identical pixels, coarse labels). THE fork; predictions on record | **running** |
+| Q6.9e | **probe decomposition of tin** (+ R(k) anchors on C100@10%, C10@1%, stl@10%) — feature gain vs realization | **running** |
+| Q6.9e | **tin@10%** — 50/cls on tin: graded-universal-R says ≈+4, tin-cap says ≈+2 | **running** |
 | Q0.3 | **H3 re-opened**: CIFAR-C was only ever run on forward-path stems. `eval_robustness.py` never passed `moment_aux`, so aux checkpoints could not even load — the aux method has NEVER been tested under corruption. | running |
-| Q6.8 | **ConvNeXt** — first non-ResNet. Every backbone so far is a ResNet and the tap is a ResNet name. | running |
-| Q10.2 | **combo**: forward-path stem AND aux at 1–2%, the one regime we lose. Never tried — `MomentAuxModel` hardcoded IdentityStem, so it was unrepresentable. | running |
-| — | CIFAR-10 full 9-point envelope (was 3 points vs CIFAR-100's 9) | running |
-| — | Tiny-ImageNet 1/5/10% — first non-CIFAR pixels (200 cls, 64×64, 100k) | running |
-| Q9.4 | **~10 seeds on c10 1%/2%** — settles Q6.9c (is (b) a cliff at 25/cls or a ramp still biting at 50–100?). Cheap (600/1400 steps) but needs the wave queue to drain first: at load 113 these same cells took 44 min/seed vs 5.4 at low load. | queued |
-| Q6.9d | **tin20** — 1000 imgs / 1400 steps drawn from **20** of tin's 200 classes → 50/cls, 20-way, still 64×64. Isolates the triple's confound: same dataset, resolution, images, steps as tin@1%, only granularity moves (5→50/cls). If Δ jumps +1.73 → ~+6, the bottom-flank suppression is granularity, not resolution or dataset. | not started |
+| Q6.8 | **ConvNeXt under AdamW** (diag-only) — first non-ResNet; SGD cells void (recipe is a ResNet recipe; SGD aux collapsed to chance) | running |
+| — | CIFAR-10 envelope tail: 25% aux (prediction −0.5..0), 100% pair | running |
+| Q9.4 | **~10 seeds on c10 1%/2%** — settles Q6.9c (cliff vs ramp) AND powers the variance-reduction claim (exact test currently p=0.073, suggestive). Cheap (600/1400 steps); wait for queue drain. | queued |
+| Q6.9d | **tin20** — 1000 imgs / 1400 steps drawn from **20** of tin's 200 classes → 50/cls, 20-way, still 64×64. The within-tin granularity test (mirror of super@2%). If Δ jumps +1.60 → ~+6, granularity governs on tin too; if ~+2, tin is capped dataset-specifically. Needs a committed subset + 20-class wrapper. | queued |
+| Q10.3 | **λ0=0.3 rescue at C10@15%/25%** — prediction on record: +0.3..+1.0 at 15%. Tests whether λ0 transplants by REGIME POSITION rather than percentage. | queued |
+| — | **stl@20%** = 1000 imgs / 100-per-cls / 1400 steps — fourth dataset on the 1000-img rung (matched to C10@2%'s 100/cls: predict ≈+7 if per-class governs). The rung then spans 5/10/50(super2)/100 per cls at fixed data+compute. | queued |
 | — | per-regime λ0 curves on CIFAR-10 / TIN (currently fixed-λ0 transplants) | not started |
 | — | Tiny-ImageNet 25/100% (156k steps at 100%) | not started |
+
+Settled this cycle: Q6.6 (stl, +5.92, prediction held), Q7.3 (dose-response:
+e2e ≈ same-budget probe), Q10.2 (combo, negative), Q10.3 first half (C10@15%
+−0.66: champion crossing is dataset-dependent).

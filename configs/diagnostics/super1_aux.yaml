@@ -1,0 +1,26 @@
+# Dataset-CONTROLLED test of synthesis mechanism (b), BELOW the claimed ~25
+# img/class threshold. Reuses CIFAR-100's committed 1% subset indices
+# (SUBSET_ALIAS), so the pixels are BYTE-IDENTICAL to abl1_none and the step
+# count is identical -- only label granularity differs (20 coarse vs 100 fine).
+# super@5%/@10% could never test (b): both sit ABOVE the threshold (125/250 per
+# class). See docs/FINDINGS.md Q6.9e.
+name: super1_aux
+dataset: cifar100super
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 1
+stem: none
+stem_calibrate: true
+moment_aux:
+  stem: energy-magnitude
+  tap: layer3
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine
