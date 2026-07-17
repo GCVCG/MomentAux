@@ -273,8 +273,11 @@ ported vs corrected and why.
   +5.08 ±0.20 vs predicted +4.3..+5.0. DATASET-EFFECT BRANCH DEAD (13σ).
   Relabeling alone (10->50/cls, byte-identical pixels) bought +2.58. Granularity
   pattern complete: +0.61 @500 imgs, +2.58 @1000, ~0 @2500+ (readout saturated).
-  TENSION: baseline 29.84 < the ~30-35 crossing => law wants readout<=0 =>
-  needs G(1000)≈5.1-5.5, steeper than interpolation. super2 probes running.
+  TENSION RESOLVED same day by the super2 probes: G(1000)=+5.33 (steep rise
+  500->1000 then flat: 4.07/5.33/5.44 — the interpolation was the error),
+  readout(29.84)=−0.25 (mildly negative, as the sign law requires). 10/10
+  probed cells fit the sign law; crossing pinned to base ∈ [29.8, 39.4],
+  likely just above 30.
   ALSO LANDED: C10@25% = −0.83±0.20 (predicted −0.5..0 — overshoot confirmed,
   slightly beyond band; second negative C10 cell). stl@50% 3-seed = +3.18±0.32
   vs C10@5% mirror +4.41 (3.5σ: G(stl) falls faster with data than G(C10); the

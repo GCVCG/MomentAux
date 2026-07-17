@@ -613,6 +613,14 @@ Scorecard of the other predictions that landed simultaneously:
 — **fork CLOSED (granularity real, dataset-effect dead); G-vs-crossing tension
 OPEN pending super2 probes**
 
+**TENSION RESOLVED same day: G = +5.33, readout = −0.25.** Both halves land on
+the law's side. G(C100-pixels, coarse CE) traces **4.07@500 → 5.33@1000 →
+5.44@2500** — G rises steeply from 500→1000 images then flattens; the linear
+interpolation was the error, not the law. And readout(29.84) = −0.25: mildly
+negative exactly as the sign law requires below the crossing. **All 10 probed
+cells now fit the sign law**, and the crossing is pinned to baseline ∈
+[29.8, 39.4] — with −0.25 at 29.8, it sits just above 30. — **SETTLED**
+
 ---
 
 ## 7. Mechanism — why the curve has the shape it has
