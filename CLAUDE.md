@@ -259,9 +259,18 @@ ported vs corrected and why.
   training; if coarse CE makes the aux target more redundant, G_coarse < 3.88
   and the shortfall is G's, not readout's. probe3 wave measuring G_coarse on
   super1/super5 pairs (super2 on landing).
-  REMAINING PREDICTIONS: super@2% mult +4.0..4.7 / additive +5.0..6.0 /
-  dataset-effect ~+2.5 / coarse-G-shrink ~+3..3.5. tin@10% +2.3..+3.4
-  (measurement, not discriminator — probe on landing).
+  *** SUPER PROBES ANSWERED IT (2026-07-17, FINDINGS Q6.9h): G IS LABEL-SPACE-
+  INVARIANT (coarse vs fine on identical pixels: 4.07 vs 3.88 @500 imgs; 5.44
+  vs 6.35 @2500, 1.8σ) — G is a property of (pixels, images, aux config) only.
+  The READOUT term follows TASK PERFORMANCE, not label budget: sign flips at
+  baseline ≈ 30-35% in EVERY label space (9/9 probed cells: negative below
+  base ~25, positive above ~39). Within-space it rises with per-class
+  (20-way: −1.98@25 → +0.40@125) but the crossing count is space-dependent.
+  "LABELS PER CLASS" WAS A PROXY for baseline height — that is why it looked
+  universal on C100/tin and then failed to transfer.
+  REVISED LAW: Δe2e = G(pixels, images) + readout(task performance).
+  REMAINING PREDICTIONS (revised law, recorded before results): super@2%
+  +4.3..+5.0 (dataset-effect ~+2.5 still excluded-able); tin@10% +1.5..+2.2.
   *** Q7.3 SETTLED (2026-07-17): shots dose-response. e2e realizes EXACTLY what
   a same-label-budget LBFGS probe realizes (e2e +1.91 ≈ 5-shot gap +2.08; e2e
   +5.30 ≈ 25-shot gap +5.31). Left flank = label scarcity at readout, NOT an

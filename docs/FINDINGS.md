@@ -548,6 +548,41 @@ multiplicative +4.0..4.7, additive +5.0..6.0, dataset-effect ~+2.5, and — if
 the coarse-CE G-shrink seen here persists — an intermediate ~+3..3.5.
 — **OPEN (probes + super@2% deciding)**
 
+**Q6.9h — THE SUPER PROBES ANSWER THE FORK-WITHIN-THE-FORK (2026-07-17): G IS
+LABEL-SPACE-INVARIANT; THE READOUT TERM FOLLOWS TASK PERFORMANCE, NOT LABEL
+BUDGET.** Decomposing the coarse-label cells (same C100 pixels):
+
+| | G_coarse | G_fine (same pixels) | readout | Δe2e |
+|---|---|---|---|---|
+| @500 imgs (25/cls) | +4.07 | +3.88 (C100@1%) | −1.98 | +2.09 |
+| @2500 imgs (125/cls) | +5.44 | +6.35 (C100@5%) | +0.40 | +5.84 |
+
+(1) **G is (approximately) label-space-invariant**: +0.19 ±0.5 apart at 500
+imgs; −0.91 ±0.50 (1.8σ, mild shrink at most) at 2500. The aux prior shapes
+features nearly identically whatever CE task runs alongside — G is a property
+of (pixels, images, aux config). This kills the "coarse CE shrinks G"
+explanation of Q6.9g's intermediate result.
+(2) **Within a label space, readout rises monotonically with per-class count**
+(20-way: −1.98@25 → +0.40@125), but the zero-crossing count is SPACE-DEPENDENT
+(100-way: 25–50/cls; 20-way: ~25–125; 10-way: below 50).
+(3) **The covariate that lines up all 9 probed cells: BASELINE ACCURACY.**
+Readout is negative in every cell with baseline < ~25% and positive in every
+cell with baseline > ~39% — the sign flips at base ≈ 30–35% in every label
+space measured. Readout is a property of HOW WELL THE TASK IS LEARNED (how
+good the e2e head itself is), not of the label budget per se. SIGN LAW ONLY:
+magnitude below the crossing has residual structure (super1 −1.98 vs tin@5%
+−0.54 at similar baselines).
+REVISED LAW: Δe2e = G(pixels, images) + readout(task performance), with G
+label-space-invariant and non-monotone in images, readout sign-governed by
+baseline height. "Labels per class" was a PROXY: it correlated with baseline
+height inside each dataset's envelope, which is why it looked universal on
+C100/tin and then failed to transfer.
+IN-FLIGHT PREDICTIONS UNDER THE REVISED LAW (recorded before results):
+  super@2% (baseline ~35–38, G interp 4.3–4.7): **+4.3..+5.0** (supersedes the
+    four earlier bands; dataset-effect ~+2.5 remains excluded-able);
+  tin@10% (baseline ~28–30, G(tin,10k) ~1.8–2.4): **+1.5..+2.2**.
+— **OPEN (super@2% and tin@10% are the next falsification tests)**
+
 ---
 
 ## 7. Mechanism — why the curve has the shape it has
