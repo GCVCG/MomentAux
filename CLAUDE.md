@@ -57,6 +57,36 @@ ported vs corrected and why.
   same cells ran 44 min/seed vs 5.4 min/seed at low load — ~5x. These jobs are
   DATALOADER-bound, not GPU-bound; nw=2 with a few concurrent runs beats nw=8.
 
+## Active campaign (2026-07-18, user-approved "run the whole needed experiments")
+
+- xspace wave (running): Phase B tin20+tin@1% deepening to 10 seeds, Phase C
+  tin 2x2 crossing. Phase A (C100 crossing) answered: FULL INVARIANCE.
+- frontier2 wave (running, cheap->expensive): tin@2% pair+probes; tin20b
+  (disjoint class draw, the tin20 control) pair+probes; c10_aux_10pct_l03 +
+  tin_aux_5pct_l20 (per-regime lambda vs the law); diagvit pair (ViT-tiny,
+  FIRST ATTENTION BACKBONE, AdamW diag, tap blocks.8 with the new token->
+  spatial adapter in aux.py); then tin@25% and tin@100% LAST (the 100% pair
+  is ~a week of GPU and can be killed without collateral).
+- PREDICTIONS RECORDED BEFORE RESULTS (no-unmeasured-G rule respected):
+    tin@2%: envelope-based +1.3..+2.3 (G at 2000 is unmeasured -- the probe
+      afterward measures it; no G-based number).
+    tin20b: granularity account => +3.0..+5.0 (tin20's +4.07 within noise);
+      a materially different value means tin20's class DRAW mattered.
+    c10_aux_10pct_l03: +0.3..+1.1 and NOT above champion's +1.09 -- G(C10,
+      5000)=0.65 is measured and exhausted; per-regime lambda cannot
+      manufacture gain past G's ceiling (the C10@15% rescue lesson).
+    tin_aux_5pct_l20: +2.2..+3.3 (C100 low-baseline precedent: lambda0=2.0
+      beats 1.0 below the crossing).
+    diagvit: qualitative only -- underfit baseline (<=30) => ConvNeXt-like
+      rescue (+5..+12); well-trained baseline => champion-like (+3..+5).
+    tin@25%/100%: qualitative only (G unmeasured): envelope stays flat
+      (<=+2.2); 100% ~ neutral (+-0.5).
+- H3-for-aux ANSWERED from existing robustness.json (2026-07-18): CIFAR-100-C
+  mCE delta -2.87@5% / -2.56@10% / +0.02@100% vs clean gains -5.3/-4.1/-0.3
+  (err): corruption robustness TRACKS the clean gain (~55-60% of it), no
+  extra benefit, no cost, neutral at 100%. Same verdict as forward-path H3.
+- aggregate.py regenerated (results/summary.md|tex current).
+
 ## State of findings (2026-07-16)
 
 - GENERALIZATION (2026-07-16). The champion (λ0=1.0 cosine→0, magnitude target,

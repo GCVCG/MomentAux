@@ -166,3 +166,26 @@ def test_multi_layer_aux_taps():
     # heads are sized to each tap's channel width (256/512 for r18 layer3/4)
     assert m.aux_heads["layer3"].in_channels == 256
     assert m.aux_heads["layer4"].in_channels == 512
+
+
+def test_aux_on_vit_token_tap():
+    """First attention backbone: the tap yields (B, N, C) tokens, which the
+    adapter must fold back to (B, C, 8, 8) -- cls token dropped -- for both
+    head sizing and the pooled target. Deployed path stays the bare ViT."""
+    m = build_model("vit_tiny", "none", num_classes=10, small_input=True,
+                    moment_aux={"stem": "energy-magnitude", "tap": "blocks.8",
+                                "weight": 1.0, "head_norm": True})
+    from momentstem.aux import _to_spatial
+    m.calibrate(torch.randn(8, 3, 32, 32))
+    m.train()
+    x = torch.randn(2, 3, 32, 32)
+    logits = m(x)
+    raw = m._feats["blocks.8"]
+    assert raw.dim() == 3 and raw.shape[1] == 65  # cls + 8x8
+    assert _to_spatial(raw).shape == (2, 192, 8, 8)
+    (torch.nn.functional.cross_entropy(logits, torch.randint(0, 10, (2,)))
+     + m.last_aux).backward()
+    m.project_heads()
+    m.eval()
+    with torch.no_grad():
+        assert torch.allclose(m(x), m.net(x), atol=1e-5)

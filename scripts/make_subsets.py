@@ -43,6 +43,7 @@ PCTS = {
     # 10% -> 1000 imgs / 50 per class / 1400 steps, the within-tin granularity
     # mirror of tin@1% (1000 imgs / 5 per class).
     "tin20": (10,),
+    "tin20b": (10,),
 }
 
 
@@ -59,14 +60,15 @@ def get_labels(dataset, data_root):
         from data import tin_root
 
         return datasets.ImageFolder(os.path.join(tin_root(data_root), "train")).targets
-    if dataset == "tin20":
+    if dataset in ("tin20", "tin20b"):
         import os
 
-        from data import tin20_filter, tin_root
+        from data import tin20_filter, tin20_wnids, tin20b_wnids, tin_root
 
         root = tin_root(data_root)
         base = datasets.ImageFolder(os.path.join(root, "train")).targets
-        _, new_targets = tin20_filter(base, root)
+        wn = tin20_wnids(root) if dataset == "tin20" else tin20b_wnids(root)
+        _, new_targets = tin20_filter(base, root, keep_wnids=wn)
         return new_targets
     raise ValueError(f"unknown dataset {dataset!r}")
 

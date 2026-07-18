@@ -141,6 +141,21 @@ class HOGTarget(nn.Module):
         return self._hog(x) * self.calib_scale.view(1, -1, 1, 1)
 
 
+def _to_spatial(feat):
+    """Transformer taps yield (B, N, C) token tensors; the aux head and the
+    pooled target need (B, C, H, W). Drop the cls token when present and fold
+    the rest back onto their grid. Conv features pass through untouched."""
+    if feat.dim() != 3:
+        return feat
+    b, n, c = feat.shape
+    side = int(math.isqrt(n - 1)) if int(math.isqrt(n - 1)) ** 2 == n - 1 else int(math.isqrt(n))
+    if side * side == n - 1:          # leading cls token
+        feat = feat[:, 1:]
+    elif side * side != n:
+        raise ValueError(f"token count {n} is not a grid (+cls)")
+    return feat.transpose(1, 2).reshape(b, c, side, side)
+
+
 def _head_key(tap):
     """ModuleDict keys cannot contain '.', but tap names can (ConvNeXt's are
     'stages.2'). Flat ResNet names like 'layer3' are unaffected, so checkpoints
@@ -208,7 +223,9 @@ class MomentAuxModel(nn.Module):
             net(self.stem(torch.zeros(1, 3, 32, 32)))
         net.train(was_training)
         self.aux_heads = nn.ModuleDict({
-            _head_key(t): nn.Conv2d(self._feats[t].shape[1], self.n_moment, kernel_size=1)
+            _head_key(t): nn.Conv2d(
+                _to_spatial(self._feats[t]).shape[1], self.n_moment, kernel_size=1
+            )
             for t in self.taps
         })
         self.head_norm = head_norm
@@ -246,7 +263,7 @@ class MomentAuxModel(nn.Module):
                 tgt = self.target(x)
             losses = []
             for t in self.taps:
-                feat = self._feats[t]
+                feat = _to_spatial(self._feats[t])
                 target = F.adaptive_avg_pool2d(tgt, feat.shape[-2:])
                 pred = self.aux_heads[_head_key(t)](feat)
                 if self.loss_form == "cosine":

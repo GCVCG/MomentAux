@@ -26,12 +26,13 @@ STATS = {
     # tin20 keeps tin's normalization so the pixel pipeline is IDENTICAL --
     # the whole point is that only the label space changes.
     "tin20": ((0.4802, 0.4481, 0.3975), (0.2770, 0.2691, 0.2821)),
+    "tin20b": ((0.4802, 0.4481, 0.3975), (0.2770, 0.2691, 0.2821)),
 }
 
 NUM_CLASSES = {"cifar100": 100, "cifar100super": 20, "cifar10": 10, "stl10": 10,
-               "tin": 200, "tin20": 20}
+               "tin": 200, "tin20": 20, "tin20b": 20}
 IMAGE_SIZE = {"cifar100": 32, "cifar100super": 32, "cifar10": 32, "stl10": 96,
-              "tin": 64, "tin20": 64}
+              "tin": 64, "tin20": 64, "tin20b": 64}
 
 # cifar100super is CIFAR-100's IMAGES with its 20 official coarse labels, and it
 # deliberately reuses CIFAR-100's COMMITTED subset indices (data/subsets/
@@ -199,6 +200,14 @@ def tin_root(data_root):
     return os.path.join(data_root, "tiny-imagenet-200")
 
 
+def _tin_wnid_slice(root, offset):
+    wnids = sorted(
+        d for d in os.listdir(os.path.join(root, "train"))
+        if os.path.isdir(os.path.join(root, "train", d))
+    )
+    return wnids[offset::10]
+
+
 def tin20_wnids(root):
     """The 20 classes of tin20: every 10th of the 200 sorted wnids. Purely
     positional -- deterministic, spread across the sorted list, and immune to
@@ -206,18 +215,22 @@ def tin20_wnids(root):
     within Tiny-ImageNet (5 img/cls 200-way at 1000 imgs vs 50 img/cls 20-way
     at the same image count): the within-tin mirror of cifar100super.
     """
-    wnids = sorted(
-        d for d in os.listdir(os.path.join(root, "train"))
-        if os.path.isdir(os.path.join(root, "train", d))
-    )
-    return wnids[::10]
+    return _tin_wnid_slice(root, 0)
 
 
-def tin20_filter(ds_targets, root):
+def tin20b_wnids(root):
+    """tin20's class-draw control: a DISJOINT positional slice (offset 5). If
+    tin20's +4.07 were a property of its particular 20 classes rather than of
+    granularity, tin20b should differ materially."""
+    return _tin_wnid_slice(root, 5)
+
+
+def tin20_filter(ds_targets, root, keep_wnids=None):
     """(keep_indices, new_targets): positions of the 20 kept classes in a
     200-class tin split, and their 0..19 relabels. Shared by build_dataset and
     make_subsets so the two can never disagree about what tin20 contains."""
-    keep_wnids = tin20_wnids(root)
+    if keep_wnids is None:
+        keep_wnids = tin20_wnids(root)
     all_wnids = sorted(
         d for d in os.listdir(os.path.join(root, "train"))
         if os.path.isdir(os.path.join(root, "train", d))
@@ -271,14 +284,15 @@ def build_dataset(dataset, data_root, train, subset_pct=None, download=True):
             if train
             else TinyImageNetVal(root, transform=tf)
         )
-    elif dataset == "tin20":
+    elif dataset in ("tin20", "tin20b"):
         root = tin_root(data_root)
         base = (
             datasets.ImageFolder(os.path.join(root, "train"), transform=tf)
             if train
             else TinyImageNetVal(root, transform=tf)
         )
-        keep, new_targets = tin20_filter(base.targets, root)
+        wn = tin20_wnids(root) if dataset == "tin20" else tin20b_wnids(root)
+        keep, new_targets = tin20_filter(base.targets, root, keep_wnids=wn)
         ds = Relabelled(Subset(base, keep), new_targets)
     else:
         raise ValueError(f"unknown dataset {dataset!r}")
@@ -301,8 +315,8 @@ def calibration_batch(dataset, data_root, n=1024):
         ds = datasets.CIFAR10(data_root, train=True, transform=tf, download=False)
     elif dataset == "stl10":
         ds = datasets.STL10(data_root, split="train", transform=tf, download=False)
-    elif dataset in ("tin", "tin20"):
-        # tin20 calibrates on FULL tin deliberately (labels unused): the aux
+    elif dataset in ("tin", "tin20", "tin20b"):
+        # tin20/tin20b calibrate on FULL tin deliberately (labels unused): the aux
         # target pipeline stays byte-identical to tin@1%'s, which is the whole
         # point of the within-tin granularity control. Mirrors cifar100super
         # calibrating on cifar100's images.

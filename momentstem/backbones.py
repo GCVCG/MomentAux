@@ -15,7 +15,7 @@ from .controls import build_stem
 from .stem import MomentStem
 
 RESNETS = ("resnet18", "resnet34", "resnet50")
-BACKBONES = RESNETS + ("convnext_tiny",)
+BACKBONES = RESNETS + ("convnext_tiny", "vit_tiny")
 
 
 class StemmedModel(nn.Module):
@@ -58,13 +58,29 @@ def build_model(
     stem = build_stem(
         stem_name, kernel_size=stem_kernel_size, seed=stem_seed, **(stem_kwargs or {})
     )
-    net = timm.create_model(
-        backbone,
-        pretrained=pretrained,
-        num_classes=num_classes,
-        in_chans=stem.out_channels,
-    )
-    if small_input:
+    if backbone == "vit_tiny":
+        # ViT's small-input "surgery" happens at construction: 32x32 with
+        # patch 4 gives an 8x8 token grid, so blocks.8 (of 12) mirrors the
+        # ResNet layer3 tap in both spatial size and depth fraction. Aux taps
+        # on token tensors are reshaped to (B,C,8,8) by aux._to_spatial.
+        if not small_input:
+            raise ValueError("vit_tiny is only wired for small inputs (32x32)")
+        net = timm.create_model(
+            "vit_tiny_patch16_224",
+            pretrained=pretrained,
+            num_classes=num_classes,
+            in_chans=stem.out_channels,
+            img_size=32,
+            patch_size=4,
+        )
+    else:
+        net = timm.create_model(
+            backbone,
+            pretrained=pretrained,
+            num_classes=num_classes,
+            in_chans=stem.out_channels,
+        )
+    if small_input and backbone != "vit_tiny":
         if backbone in RESNETS:
             conv1 = net.conv1
             net.conv1 = nn.Conv2d(
