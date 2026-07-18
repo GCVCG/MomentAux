@@ -45,3 +45,18 @@ def test_committed_subset_is_balanced_at_50_per_class():
     t = np.asarray(tr.targets)[idx]
     assert len(idx) == len(set(idx)) == 1000
     assert np.bincount(t).tolist() == [50] * 20  # 1400 steps, tin@1%'s twin
+
+
+@needs_tin
+def test_calibration_batch_covers_tin20_and_matches_tin():
+    """calibration_batch has its own dataset dispatch, so a new dataset can
+    train-crash despite build_dataset working (this exact bug shipped once).
+    tin20 must calibrate, and on the SAME images as tin -- the aux target
+    pipeline is deliberately byte-identical to tin@1%'s."""
+    import torch
+
+    from data import calibration_batch
+
+    a = calibration_batch("tin", "./data", n=64)
+    b = calibration_batch("tin20", "./data", n=64)
+    assert torch.equal(a, b)

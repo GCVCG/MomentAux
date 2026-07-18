@@ -301,7 +301,11 @@ def calibration_batch(dataset, data_root, n=1024):
         ds = datasets.CIFAR10(data_root, train=True, transform=tf, download=False)
     elif dataset == "stl10":
         ds = datasets.STL10(data_root, split="train", transform=tf, download=False)
-    elif dataset == "tin":
+    elif dataset in ("tin", "tin20"):
+        # tin20 calibrates on FULL tin deliberately (labels unused): the aux
+        # target pipeline stays byte-identical to tin@1%'s, which is the whole
+        # point of the within-tin granularity control. Mirrors cifar100super
+        # calibrating on cifar100's images.
         ds = datasets.ImageFolder(os.path.join(tin_root(data_root), "train"), transform=tf)
     else:
         raise ValueError(f"unknown dataset {dataset!r}")
