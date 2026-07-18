@@ -23,12 +23,15 @@ STATS = {
     "cifar10": ((0.4914, 0.4822, 0.4465), (0.2470, 0.2435, 0.2616)),
     "stl10": ((0.4467, 0.4398, 0.4066), (0.2603, 0.2566, 0.2713)),
     "tin": ((0.4802, 0.4481, 0.3975), (0.2770, 0.2691, 0.2821)),
+    # tin20 keeps tin's normalization so the pixel pipeline is IDENTICAL --
+    # the whole point is that only the label space changes.
+    "tin20": ((0.4802, 0.4481, 0.3975), (0.2770, 0.2691, 0.2821)),
 }
 
 NUM_CLASSES = {"cifar100": 100, "cifar100super": 20, "cifar10": 10, "stl10": 10,
-               "tin": 200}
+               "tin": 200, "tin20": 20}
 IMAGE_SIZE = {"cifar100": 32, "cifar100super": 32, "cifar10": 32, "stl10": 96,
-              "tin": 64}
+              "tin": 64, "tin20": 64}
 
 # cifar100super is CIFAR-100's IMAGES with its 20 official coarse labels, and it
 # deliberately reuses CIFAR-100's COMMITTED subset indices (data/subsets/
@@ -196,6 +199,34 @@ def tin_root(data_root):
     return os.path.join(data_root, "tiny-imagenet-200")
 
 
+def tin20_wnids(root):
+    """The 20 classes of tin20: every 10th of the 200 sorted wnids. Purely
+    positional -- deterministic, spread across the sorted list, and immune to
+    cherry-picking accusations. tin20 exists to move ONLY label granularity
+    within Tiny-ImageNet (5 img/cls 200-way at 1000 imgs vs 50 img/cls 20-way
+    at the same image count): the within-tin mirror of cifar100super.
+    """
+    wnids = sorted(
+        d for d in os.listdir(os.path.join(root, "train"))
+        if os.path.isdir(os.path.join(root, "train", d))
+    )
+    return wnids[::10]
+
+
+def tin20_filter(ds_targets, root):
+    """(keep_indices, new_targets): positions of the 20 kept classes in a
+    200-class tin split, and their 0..19 relabels. Shared by build_dataset and
+    make_subsets so the two can never disagree about what tin20 contains."""
+    keep_wnids = tin20_wnids(root)
+    all_wnids = sorted(
+        d for d in os.listdir(os.path.join(root, "train"))
+        if os.path.isdir(os.path.join(root, "train", d))
+    )
+    old_idx = {all_wnids.index(w): new for new, w in enumerate(keep_wnids)}
+    keep = [i for i, t in enumerate(ds_targets) if t in old_idx]
+    return keep, [old_idx[ds_targets[i]] for i in keep]
+
+
 class Relabelled(Dataset):
     """Same images, different label map (see SUBSET_ALIAS note above)."""
 
@@ -240,6 +271,15 @@ def build_dataset(dataset, data_root, train, subset_pct=None, download=True):
             if train
             else TinyImageNetVal(root, transform=tf)
         )
+    elif dataset == "tin20":
+        root = tin_root(data_root)
+        base = (
+            datasets.ImageFolder(os.path.join(root, "train"), transform=tf)
+            if train
+            else TinyImageNetVal(root, transform=tf)
+        )
+        keep, new_targets = tin20_filter(base.targets, root)
+        ds = Relabelled(Subset(base, keep), new_targets)
     else:
         raise ValueError(f"unknown dataset {dataset!r}")
     if subset_pct is not None and subset_pct != 100:

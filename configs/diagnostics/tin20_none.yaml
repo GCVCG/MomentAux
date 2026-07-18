@@ -1,0 +1,18 @@
+# tin20 = 20 of tin's 200 classes (every 10th sorted wnid), 10% subset ->
+# 1000 imgs / 50-per-class / 1400 steps: the WITHIN-TIN granularity mirror of
+# tin@1% (1000 imgs / 5-per-class / 1400 steps, same resolution, same pixel
+# pipeline). FINDINGS Q6.9d.
+name: tin20_none
+dataset: tin20
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 10
+stem: none
+stem_calibrate: true
