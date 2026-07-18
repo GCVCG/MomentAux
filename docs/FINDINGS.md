@@ -622,6 +622,33 @@ negative exactly as the sign law requires below the crossing. **All 10 probed
 cells now fit the sign law**, and the crossing is pinned to baseline ∈
 [29.8, 39.4] — with −0.25 at 29.8, it sits just above 30. — **SETTLED**
 
+**Q6.9d — tin20: IS TIN'S FLAT ENVELOPE A GRANULARITY ARTIFACT? YES
+(2026-07-18).** The within-tin control: 20 of tin's 200 classes (every 10th
+sorted wnid), 1000 imgs / 50-per-cls / 1400 steps / 20-way, still 64×64,
+calibration byte-identical to tin@1%'s. Branches recorded in advance from
+measured quantities: **+3.8..+5.5** if granularity governs (G(tin,1000)=4.33
++ a 50/cls readout), **~+2** if tin is a low-G *pixel* property.
+LANDED (3 seeds): 41.47±1.50 → 45.53±0.50 = **+4.07 ±0.92** — in band, 2.2σ
+from the pixel-property branch. DEEPENED TO 10 SEEDS (xspace Phase B):
+40.69±1.00 → 46.11±0.82 = **+5.42 ±0.41** — the effect STRENGTHENED with
+power (the 3-seed baseline's seed 0 = 43.20 was the outlier; the aux cell is
+stable at ~46). Still inside the granularity band, now at its top; the gap
+vs tin@1%'s +1.60 is **8.4σ**. Moving ONLY the label space multiplies tin's
+gain by 3.4x.
+PROBED (3 seeds): G(tin20-pixels, 1000) = +5.23 ±0.90 vs G(tin,1000) =
+4.33 ±0.30 — the e2e gain is G-driven; whether that 0.9-point G shift is
+real is exactly what the tin 2×2 (Phase C, 10 seeds) decides. readout =
+−1.16 ±1.29 at 3 seeds: too noisy to score; Phase C re-measures it.
+CONSEQUENCE: "tin is a low-G dataset" is WRONG as a pixel statement — the
+200-way label space, not the pixels, suppressed tin's envelope. G measured
+under a fine label space is not the pixels' G ceiling; the law's G term is
+G(pixels, images, LABEL SPACE). Note the caveat vs super: tin20's images
+are a class SUBSET of tin's (not byte-identical pixels), so on tin the
+label-space and pixel-population accounts stay entangled — the C100 2×2
+(Phase A: full invariance, all four corners 3.4–4.1) already rules out
+probe-space artifacts, so a surviving tin shift means 200-way/5-per-cls
+TRAINING or pixel population. — **ANSWERED (mechanism pending Phase C)**
+
 ---
 
 ## 7. Mechanism — why the curve has the shape it has
@@ -839,19 +866,19 @@ but segmentation); **MaskFeat** (HOG target — but SSL pretraining);
 
 | # | question | status |
 |---|---|---|
-| Q6.9e | **super@1%/@2%** — dataset-controlled granularity below the threshold (byte-identical pixels, coarse labels). THE fork; predictions on record | **running** |
-| Q6.9e | **probe decomposition of tin** (+ R(k) anchors on C100@10%, C10@1%, stl@10%) — feature gain vs realization | **running** |
-| Q6.9e | **tin@10%** — 50/cls on tin: graded-universal-R says ≈+4, tin-cap says ≈+2 | **running** |
-| Q0.3 | **H3 re-opened**: CIFAR-C was only ever run on forward-path stems. `eval_robustness.py` never passed `moment_aux`, so aux checkpoints could not even load — the aux method has NEVER been tested under corruption. | running |
-| Q6.8 | **ConvNeXt under AdamW** (diag-only) — first non-ResNet; SGD cells void (recipe is a ResNet recipe; SGD aux collapsed to chance) | running |
-| — | CIFAR-10 envelope tail: 25% aux (prediction −0.5..0), 100% pair | running |
-| Q9.4 | **~10 seeds on c10 1%/2%** — settles Q6.9c (cliff vs ramp) AND powers the variance-reduction claim (exact test currently p=0.073, suggestive). Cheap (600/1400 steps); wait for queue drain. | queued |
-| Q6.9d | **tin20** — 1000 imgs / 1400 steps drawn from **20** of tin's 200 classes → 50/cls, 20-way, still 64×64. The within-tin granularity test (mirror of super@2%). If Δ jumps +1.60 → ~+6, granularity governs on tin too; if ~+2, tin is capped dataset-specifically. Needs a committed subset + 20-class wrapper. | queued |
-| Q10.3 | **λ0=0.3 rescue at C10@15%/25%** — prediction on record: +0.3..+1.0 at 15%. Tests whether λ0 transplants by REGIME POSITION rather than percentage. | queued |
-| — | **stl@20%** = 1000 imgs / 100-per-cls / 1400 steps — fourth dataset on the 1000-img rung (matched to C10@2%'s 100/cls: predict ≈+7 if per-class governs). The rung then spans 5/10/50(super2)/100 per cls at fixed data+compute. | queued |
-| — | per-regime λ0 curves on CIFAR-10 / TIN (currently fixed-λ0 transplants) | not started |
-| — | Tiny-ImageNet 25/100% (156k steps at 100%) | not started |
+| — | **tin 2×2 crossing at 10 seeds** (xspace Phase C) — Phase A (C100, byte-identical pixels) answered FULL INVARIANCE, so a surviving tin20-vs-tin G shift is 200-way/5-per-cls TRAINING or pixel population, not a probe artifact. Hypotheses on record (H-invariance / H-probe-stick / H-training). | **running** |
+| — | **tin@1% pair to 10 seeds** (xspace Phase B; tin20 half done: +5.42±0.41) | **running** |
+| — | **tin@2% pair + probes** — fills G(tin) between 1000 and 5000 imgs; envelope band +1.3..+2.3 on record | **running** |
+| — | **tin20b** — DISJOINT 20-class draw (wnids[5::10]), the class-draw control for tin20; band +3.0..+5.0 on record | queued (frontier2) |
+| Q10.3 | **c10_aux_10pct_l03** (+0.3..+1.1, NOT above champion — G(C10,5000)=0.65 is exhausted) and **tin_aux_5pct_l20** (+2.2..+3.3) — per-regime λ0 vs the law | queued (frontier2) |
+| Q6.8 | **diagvit** — ViT-tiny + AdamW, FIRST ATTENTION BACKBONE (token→spatial adapter); qualitative bands only | queued (frontier2) |
+| — | **tin@25% / tin@100%** — envelope tail (qualitative: flat ≤+2.2; 100% ≈ neutral). The 100% pair is ~a week of GPU, runs LAST, killable without collateral. | queued (frontier2) |
+| — | the write-up: envelope → decomposition → G curves → sign law → granularity controls → crossing | not started |
 
-Settled this cycle: Q6.6 (stl, +5.92, prediction held), Q7.3 (dose-response:
-e2e ≈ same-budget probe), Q10.2 (combo, negative), Q10.3 first half (C10@15%
-−0.66: champion crossing is dataset-dependent).
+Settled earlier cycles: Q6.6 (stl, +5.92, held), Q7.3 (dose-response), Q10.2
+(combo, negative), Q10.3 first half (C10@15% −0.66), Q6.9e (crisis → probe
+resolution), Q6.9f/g/h/i (the law: Δe2e = G + readout), Q0.3 (H3-for-aux:
+robustness tracks clean gain, mCE −2.87/−2.56/+0.02), Q6.8 first half
+(ConvNeXt +10.57), C10 tail (25% −0.83, 100% −0.26), Q9.4 (1–2% flat plateau
+at 10 seeds; variance-reduction claim answered NEGATIVE at 10v10), Q6.9d
+(tin20: granularity artifact, +5.42±0.41 at 10 seeds).

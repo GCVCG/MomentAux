@@ -350,6 +350,12 @@ ported vs corrected and why.
   **+4.07 ±0.92** — in band, 2.5x the largest gain tin ever produced (+2.13),
   2.2σ from the pixel-property branch. Moving ONLY the label space took tin
   from +1.60 to +4.07.
+  *** DEEPENED TO 10 SEEDS (2026-07-18, xspace Phase B): 40.69±1.00 ->
+  46.11±0.82 = **+5.42 ±0.41** — STRENGTHENED, not regressed. The 3-seed
+  baseline's high seed (43.20, seed 0) was the outlier; 7 new baseline seeds
+  all landed 39.7-41.1 while the aux cell stayed ~46. Still in the +3.8..+5.5
+  granularity band (now at its TOP); the gap vs tin@1%'s +1.60 is 8.4σ.
+  tin20 is now the 3.4x loud version of tin's suppression, not 2.5x.
   PROBED: G(tin20-pixels, 1000) = +5.23 ±0.90 ≈ G(tin, 1000) = 4.33 ±0.30 —
   G is class-subset-invariant within noise; the e2e gain is G-driven exactly
   as the branch requires. readout = −1.16 ±1.29: TOO NOISY to score against
