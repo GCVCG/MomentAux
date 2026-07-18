@@ -335,6 +335,31 @@ ported vs corrected and why.
   200-way and 20-way on tin (4.33 vs 5.23 at matched images, 0.9σ — weak
   evidence, needs seeds; the e2e gap +1.60 vs +4.07 at 2.6σ is the loud
   version).
+  *** 2x2 TRAIN-SPACE x PROBE-SPACE CROSSING LAUNCHED (2026-07-18, xspace
+  wave) — user decision: resolve WHERE label-space invariance breaks. The
+  tin20-vs-tin G comparison (5.23 vs 4.33, 0.9σ) confounds three things:
+  training label space, probe label space, and (on tin) pixel population.
+  DESIGN: probe BOTH checkpoint sets under BOTH label spaces.
+    Phase A (C100 pixels, BYTE-IDENTICAL images — no pixel confound):
+      {abl1, super1} ckpts x {cifar100 100-way, cifar100super 20-way} probes.
+      NOTE this also patches a hole in Q6.9h: the original "invariance" showed
+      G_finetrained-fineprobed ≈ G_coarsetrained-coarseprobed — it never
+      crossed them, so training-space and probe-space effects could cancel.
+    Phase B: deepen tin20 + tin@1% cells to 10 seeds (probe σ 1.50 at 3).
+    Phase C: tin 2x2 at 10 seeds.
+  KNOWN CORNERS: G_200(tin@1%ckpt)=4.33±0.30, G_20(tin20ckpt)=5.23±0.90,
+  G_fine(abl1ckpt)=3.88, G_coarse(super1ckpt)=4.07.
+  HYPOTHESES RECORDED IN ADVANCE:
+    H-invariance (Q6.9h fully right): all four G's agree within noise at
+      matched pixels — C100 crossing lands 3.8-4.1 in all cells; tin shift
+      was noise/pixels.
+    H-probe-stick: G depends on the PROBE space — off-diagonal cells move
+      toward the probe space's diagonal value (e.g. G_200(tin20ckpt) ≈ 4.3).
+    H-training: G is a property of the CHECKPOINTS — each ckpt set carries
+      its G across probe spaces (G_200(tin20ckpt) ≈ 5.2, G_20(tin@1%ckpt)
+      ≈ 4.3). On tin this is still training-space-OR-pixel-population
+      (entangled by design); the C100 crossing has no such entanglement, so
+      Phase A cleanly separates H-probe-stick from H-training.
   *** PROBE-CEILING RULE (2026-07-18): the Δ = G + readout decomposition is
   trustworthy ONLY while the probe holds far more labeled data than the cell.
   stl's probe has just 5000 imgs (500/cls); at stl@50% the baseline's probe

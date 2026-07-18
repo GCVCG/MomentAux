@@ -124,12 +124,25 @@ def main():
                          "e.g. '5,10,25,50,100,500'. Measures how much of a "
                          "feature gain a classifier with N labels can actually "
                          "cash in. Omit to probe on the full train set only.")
+    ap.add_argument("--probe-dataset", default=None,
+                    help="probe the checkpoints' FEATURES under a different "
+                         "dataset/label space than they were trained on (the "
+                         "MODEL is still built from --config so the state_dict "
+                         "loads; features are label-free, so any dataset with "
+                         "the same input size works). Used for the 2x2 "
+                         "train-space x probe-space crossing that separates "
+                         "'training label space changed the features' from "
+                         "'the probe label space changed the measuring stick'. "
+                         "Output goes to linear_probe_<probe-dataset>.json, "
+                         "never clobbering the default probe.")
     args = ap.parse_args()
 
     with open(args.config) as f:
         cfg = yaml.safe_load(f)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    ds_name = cfg["dataset"]
+    ds_name = args.probe_dataset or cfg["dataset"]
+    if data_mod.IMAGE_SIZE[ds_name] != data_mod.IMAGE_SIZE[cfg["dataset"]]:
+        raise ValueError(f"probe dataset {ds_name!r} image size != model's")
     num_classes = data_mod.NUM_CLASSES[ds_name]
 
     # FULL train split (no subset_pct) with the eval transform: we are measuring
@@ -147,7 +160,8 @@ def main():
         if not os.path.exists(ckpt):
             continue
         model = build_model(
-            cfg["backbone"], cfg.get("stem", "none"), num_classes=num_classes,
+            cfg["backbone"], cfg.get("stem", "none"),
+            num_classes=data_mod.NUM_CLASSES[cfg["dataset"]],
             small_input=cfg.get("small_input", True),
             stem_kernel_size=cfg.get("stem_kernel_size", 11),
             stem_kwargs=cfg.get("stem_kwargs"),
@@ -176,7 +190,9 @@ def main():
                       flush=True)
         out.append(rec)
 
-    path = os.path.join(args.run, "linear_probe.json")
+    fname = ("linear_probe.json" if args.probe_dataset is None
+             else f"linear_probe_{args.probe_dataset}.json")
+    path = os.path.join(args.run, fname)
     with open(path, "w") as f:
         json.dump({"config": args.config, "ckpt": args.ckpt, "results": out}, f, indent=2)
     if out:
