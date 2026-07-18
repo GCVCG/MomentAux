@@ -349,6 +349,18 @@ ported vs corrected and why.
     Phase C: tin 2x2 at 10 seeds.
   KNOWN CORNERS: G_200(tin@1%ckpt)=4.33±0.30, G_20(tin20ckpt)=5.23±0.90,
   G_fine(abl1ckpt)=3.88, G_coarse(super1ckpt)=4.07.
+  *** PHASE A ANSWERED — H-INVARIANCE WINS ON C100 (2026-07-18). The full
+  2x2 on byte-identical pixels (G = aux-minus-baseline probe gap, 3 seeds):
+                        fine probe        coarse probe
+    fine-trained          +3.88 ±0.39       +3.71 ±0.31
+    coarse-trained        +3.37 ±0.34       +4.07 ±0.51
+  All four corners in 3.4-4.1, pairwise within ~1σ; interaction +0.87 ±0.79
+  (1.1σ, n.s.). NO probe-stick effect, NO training-space effect: on C100
+  pixels G is fully invariant to both label spaces (100<->20-way), and the
+  Q6.9h hole (diagonal-only comparison) is patched by the crossing.
+  CONSEQUENCE: if the tin 2x2 at 10 seeds preserves the 5.23-vs-4.33 shift,
+  it is NOT a label-space artifact — it is either 200-way/5-per-cls TRAINING
+  specifically, or tin20's different PIXEL POPULATION.
   HYPOTHESES RECORDED IN ADVANCE:
     H-invariance (Q6.9h fully right): all four G's agree within noise at
       matched pixels — C100 crossing lands 3.8-4.1 in all cells; tin shift
