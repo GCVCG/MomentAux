@@ -324,9 +324,20 @@ ported vs corrected and why.
       G(C10)'s zero: weakening λ0 removes the shaping COST, and there is no
       feature gain left to unlock. LESSON: per-regime λ0 protects from harm
       but cannot manufacture gain past G's zero-crossing.
-  Q9.4 deepening to 10 seeds running (settles plateau-vs-peak; powers the
-  variance test, p=0.073 at 3v3). num_workers preserved per cell (audited:
-  none_1/aux_1/none_2 nw=8, aux_2 nw=2).
+  *** Q9.4 SETTLED (2026-07-18, 10 seeds/cell): THE 1-2% BAND IS A FLAT
+  PLATEAU. Δ(1%)=+6.37±0.15, Δ(2%)=+6.66±0.27; difference +0.29±0.31 = 0.95σ,
+  95% CI [−0.31,+0.89] — any summit is bounded below ~1 point. Both deltas
+  SHRANK from their 3-seed values (+6.62→+6.37, +7.14→+6.66): regression to
+  the mean, exactly as the 3-seed warning predicted. Headline C10 1-2% cells
+  now cite the 10-seed numbers.
+  *** VARIANCE-REDUCTION ANSWERED NEGATIVE (2026-07-18, 10v10): at 1% the
+  direction REVERSES (aux σ 0.38 > baseline 0.28, F=0.55); at 2% F=2.56 vs
+  critical ~4.03 — not significant. The 3-seed pooled pattern (12/18 pairs,
+  p=0.073) DOES NOT REPLICATE when powered. What remains real: the prior
+  rescues INSTABILITY (R50 no-hn σ 3.18→0.32, ConvNeXt 1.26→0.37, the 2pct
+  baseline's low seed) — a statement about failure modes, not routine seed
+  noise. Do not claim variance reduction as a method property.
+  num_workers preserved per cell (audited: none_1/aux_1/none_2 nw=8, aux_2 nw=2).
   *** Q7.3 SETTLED (2026-07-17): shots dose-response. e2e realizes EXACTLY what
   a same-label-budget LBFGS probe realizes (e2e +1.91 ≈ 5-shot gap +2.08; e2e
   +5.30 ≈ 25-shot gap +5.31). Left flank = label scarcity at readout, NOT an
