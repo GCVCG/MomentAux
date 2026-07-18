@@ -311,19 +311,30 @@ ported vs corrected and why.
   +1.80@39.4 -> +1.14@51.7 -> +0.44@69.1 -> +0.44@80.7 — positive throughout,
   DECAYING toward zero with sufficiency, not growing. Sign law now 15 clean
   cells, zero violations.
-  *** tin20 LAUNCHED (2026-07-18) — the within-tin granularity control
-  (FINDINGS Q6.9d): 20 of tin's 200 classes (every 10th sorted wnid), 10%
-  subset -> 1000 imgs / 50-per-cls / 1400 steps / 20-way at 64x64 — matched to
-  tin@1% (1000 imgs / 5-per-cls) on everything but granularity, the mirror of
-  the super@2% design that closed the fork on C100 pixels.
-  PREDICTION RECORDED BEFORE THE RUNS, from MEASURED quantities only:
-  G(tin-pixels, 1000 imgs) = 4.33 (measured on tin@1%; caveat: tin20's pixel
-  population is the 20-class subset, so G may shift), readout(base) per the
-  sign law. If baseline lands 30-45, predict Δ ≈ +3.8..+5.5 — which would be
-  BY FAR the largest tin gain (every tin cell so far ≤ +2.13) and would prove
-  tin's flat envelope is a GRANULARITY artifact, not a pixel property. If it
-  lands ≈ +2 again, G is NOT class-subset-invariant and the "low-G dataset"
-  framing survives as a pixel-content property.
+  *** tin20 ANSWERED — TIN'S FLAT ENVELOPE IS A GRANULARITY ARTIFACT
+  (2026-07-18, FINDINGS Q6.9d). The within-tin control: 20 of tin's 200
+  classes (every 10th sorted wnid), 1000 imgs / 50-per-cls / 1400 steps /
+  20-way at 64x64, calibration byte-identical to tin@1%'s. Predicted from
+  measured quantities BEFORE the runs: +3.8..+5.5 if granularity governs, ~+2
+  if tin is a low-G pixel property. LANDED: 41.47±1.50 -> 45.53±0.50 =
+  **+4.07 ±0.92** — in band, 2.5x the largest gain tin ever produced (+2.13),
+  2.2σ from the pixel-property branch. Moving ONLY the label space took tin
+  from +1.60 to +4.07.
+  PROBED: G(tin20-pixels, 1000) = +5.23 ±0.90 ≈ G(tin, 1000) = 4.33 ±0.30 —
+  G is class-subset-invariant within noise; the e2e gain is G-driven exactly
+  as the branch requires. readout = −1.16 ±1.29: TOO NOISY to score against
+  the sign law (3-seed σ 1.50 on both the aux probe and baseline e2e); not
+  counted for or against. NOTE vs super: tin20's images DIFFER from tin@1%'s
+  (class subset), unlike super's byte-identical pixels — the control is
+  dataset/resolution/pipeline-matched, not image-matched.
+  CONSEQUENCE: "tin is a low-G dataset" is WRONG as a pixel statement — the
+  200-WAY LABEL SPACE, not the pixels, suppressed tin's envelope. G measured
+  under a fine label space is NOT the pixels' G ceiling. The law's G term is
+  G(pixels, images, LABEL SPACE) after all — label-space-invariance (Q6.9h)
+  held between 100-way fine and 20-way coarse on C100, but breaks between
+  200-way and 20-way on tin (4.33 vs 5.23 at matched images, 0.9σ — weak
+  evidence, needs seeds; the e2e gap +1.60 vs +4.07 at 2.6σ is the loud
+  version).
   *** PROBE-CEILING RULE (2026-07-18): the Δ = G + readout decomposition is
   trustworthy ONLY while the probe holds far more labeled data than the cell.
   stl's probe has just 5000 imgs (500/cls); at stl@50% the baseline's probe
