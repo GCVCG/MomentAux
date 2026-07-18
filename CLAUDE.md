@@ -105,11 +105,28 @@ ported vs corrected and why.
       HELD: per-regime λ0 cannot beat G's ceiling; G(C10,5000)=0.65 is
       exhausted by EITHER λ0. (Nominal Δ>G again — readout positive at
       base 80.7, consistent with the mapped positive branch +0.44@80.7.)
-    tin_aux_5pct_l20: 2/3 seeds at +1.87 — TRENDING BELOW band (+2.2..+3.3)
-      and below champion's +2.13: the C100 "λ0=2.0 below the crossing"
-      precedent may NOT transplant to tin. Score when seed 2 lands.
-    xspace Phase B: tin@1% baseline deepened 5.22->5.30±0.22 (n10); aux at
-      7/10 seeds, partial Δ +1.50 (3-seed value was +1.60).
+    tin_aux_5pct_l20: FINAL **+1.90 ±0.12** (21.05 -> 22.95±0.08) — MISSED
+      LOW (band +2.2..+3.3), ≤ champion's +2.13 (1.4σ below, n.s.). The
+      C100 "λ0=2.0 wins below the crossing" precedent does NOT transplant
+      to tin. Third straight demonstration that the λ0 knob cannot push Δ
+      past what G supplies (C10@15% rescue, c10_l03, now tin_l20).
+    diagvit: **+13.26 ±0.33** (16.47±0.50 -> 29.74±0.29, C100@10%) — the
+      LARGEST GAIN IN THE STUDY, first attention backbone. Qualitative
+      prediction (underfit baseline => ConvNeXt-like rescue) CONFIRMED,
+      nominal value just above the +5..+12 band. ViT-tiny from scratch at
+      5000 imgs is exactly the underfit regime (base 16.5 vs R18's 40.2);
+      the prior rescues it even harder than ConvNeXt (+10.57). σ pattern
+      again: baseline 0.50 -> aux 0.29. NOT a headline row (AdamW diag).
+      Mechanism is now demonstrated on conv-SGD, conv-AdamW, and
+      attention-AdamW.
+    tin@1% DEEPENED to 10 seeds (xspace Phase B): 5.30±0.22 -> 6.80±0.19 =
+      **+1.49 ±0.09** (3-seed said +1.60±0.20 — mild regression to mean,
+      same story). The 5/cls universal floor stands: C100@1% +1.48, tin@1%
+      +1.49.
+    tin@25%: baseline 49.19±0.21 done; aux 2/3 seeds, partial Δ +0.02 —
+      tracking NEUTRAL, inside the qualitative "flat ≤+2.2" band and
+      consistent with G(tin) falling through ~1 at 25k images. Score when
+      seed 2 lands.
 - H3-for-aux ANSWERED from existing robustness.json (2026-07-18): CIFAR-100-C
   mCE delta -2.87@5% / -2.56@10% / +0.02@100% vs clean gains -5.3/-4.1/-0.3
   (err): corruption robustness TRACKS the clean gain (~55-60% of it), no
@@ -437,6 +454,43 @@ ported vs corrected and why.
       ≈ 4.3). On tin this is still training-space-OR-pixel-population
       (entangled by design); the C100 crossing has no such entanglement, so
       Phase A cleanly separates H-probe-stick from H-training.
+  *** PHASE B+C ANSWERED — BOTH EFFECTS ARE REAL ON TIN, AND THEY CANCEL ON
+  THE DIAGONAL (2026-07-18, 10 seeds every corner, xspace COMPLETE):
+                        200-way probe     20-way probe
+    tin@1%-trained        +4.20 ±0.15       +6.64 ±0.47
+    tin20-trained         +3.08 ±0.16       +4.50 ±0.58
+    probe-space effect (20-way − 200-way): +1.93 ±0.39 = 5.0σ
+    ckpt-set effect (tin@1% − tin20):      +1.63 ±0.39 = 4.2σ
+    interaction: +1.02 ±0.78 (1.3σ, n.s.)
+  NO recorded hypothesis wins outright: H-invariance is FALSIFIED on tin
+  (two ~5σ main effects) yet the DIAGONAL is invariant (4.20 vs 4.50, 0.5σ)
+  — the two effects OPPOSE and cancel there, which is precisely the
+  cancellation hole the crossing was built to catch (on tin it is real; on
+  C100 Phase A showed no effects at all). The 3-seed "5.23 vs 4.33 G shift"
+  is GONE at 10 seeds: G_20(tin20ckpt) settled to 4.50±0.58.
+  CONSEQUENCES:
+  (1) THE GRANULARITY EFFECT ON e2e IS A READOUT EFFECT, NOT A G EFFECT.
+      At matched images (1000), diagonal G is matched (4.20 vs 4.50) while
+      Δe2e differs 3.6x (+1.49 vs +5.42). The difference is carried by
+      readout: −2.71 at base 5.30 (tin@1%) vs +0.92 at base 40.69 (tin20)
+      — both signs exactly as the sign law requires (18 clean cells now).
+      Relabeling tin 200-way -> 20-way moved Δ by moving the BASELINE
+      through the readout crossing, not by changing feature gain. "tin is
+      a low-G dataset" dies COMPLETELY: G(tin,1000)≈4.2-4.5 ≈ C100's 5.33
+      ballpark; the flat tin envelope = falling G right flank + readout
+      penalty at 200-way baselines.
+  (2) MEASURED G IS NOT PROBE-SPACE-INVARIANT ON TIN (it was on C100):
+      coarse 20-way probes report ~+1.9 MORE aux-vs-baseline gap than
+      200-way probes on the SAME checkpoints. G numbers are comparable
+      ONLY within a fixed probe space; cross-dataset G comparisons keep
+      their probe spaces attached (all recorded G curves are same-space,
+      so the curves stand).
+  (3) The ckpt-set effect (+1.63: tin@1%-trained pairs carry more G under
+      EITHER probe) stays entangled between training label space and pixel
+      population by design. tin20b's 3-seed G=2.37 vs tin20's 10-seed 4.50
+      (2.6σ) hints the pixel DRAW moves measured G while e2e stays put
+      (+5.27 vs +5.42, 0.2σ) — 3-seed probe, not adjudicated; do not build
+      on it without deepening tin20b's probes.
   *** PROBE-CEILING RULE (2026-07-18): the Δ = G + readout decomposition is
   trustworthy ONLY while the probe holds far more labeled data than the cell.
   stl's probe has just 5000 imgs (500/cls); at stl@50% the baseline's probe

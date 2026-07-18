@@ -649,6 +649,38 @@ label-space and pixel-population accounts stay entangled — the C100 2×2
 probe-space artifacts, so a surviving tin shift means 200-way/5-per-cls
 TRAINING or pixel population. — **ANSWERED (mechanism pending Phase C)**
 
+**Q6.9j — THE TIN 2×2 CROSSING: BOTH EFFECTS REAL, CANCELING ON THE
+DIAGONAL; THE GRANULARITY EFFECT IS A READOUT EFFECT (2026-07-18, 10 seeds
+per corner).** G = aux-minus-baseline probe gap:
+
+|  | 200-way probe | 20-way probe |
+|---|---|---|
+| tin@1%-trained | +4.20 ±0.15 | +6.64 ±0.47 |
+| tin20-trained | +3.08 ±0.16 | +4.50 ±0.58 |
+
+Probe-space main effect +1.93 ±0.39 (5.0σ); checkpoint-set main effect
++1.63 ±0.39 (4.2σ); interaction n.s. (1.3σ). No pre-registered hypothesis
+wins outright: H-invariance is falsified on tin (it held fully on C100 —
+Phase A), yet the *diagonal* is invariant (4.20 vs 4.50, 0.5σ) because the
+two effects oppose and cancel there — exactly the cancellation hole the
+crossing was designed to catch. The 3-seed "G(tin20)=5.23 vs G(tin)=4.33"
+shift was noise; at 10 seeds G_20(tin20ckpts) = 4.50.
+THE HEADLINE: at matched images and matched diagonal G, Δe2e differs 3.6×
+(+1.49 vs +5.42) — the entire granularity effect on tin is carried by the
+READOUT term (−2.71 at base 5.30 vs +0.92 at base 40.69, both signs as the
+sign law requires; 18 clean cells). Relabeling 200→20-way moved the gain by
+moving the *baseline* through the readout crossing, not by changing feature
+gain. "tin is a low-G dataset" is fully dead: G(tin,1000) ≈ 4.2–4.5, the
+same ballpark as C100.
+CAVEATS: (i) measured G is probe-space-dependent on tin (coarse probes
+read ~+1.9 more gap on the same checkpoints) — G comparisons are valid only
+within a fixed probe space; every recorded G curve is same-space, so the
+curves stand. (ii) The checkpoint-set effect stays entangled between
+training label space and pixel population by design; tin20b's 3-seed probe
+(G=2.37 vs tin20's 4.50, 2.6σ, while e2e agrees at 0.2σ) hints the pixel
+draw moves measured G — not adjudicated, needs deeper tin20b probes before
+building on it. — **ANSWERED**
+
 ---
 
 ## 7. Mechanism — why the curve has the shape it has
@@ -866,19 +898,20 @@ but segmentation); **MaskFeat** (HOG target — but SSL pretraining);
 
 | # | question | status |
 |---|---|---|
-| — | **tin 2×2 crossing at 10 seeds** (xspace Phase C) — Phase A (C100, byte-identical pixels) answered FULL INVARIANCE, so a surviving tin20-vs-tin G shift is 200-way/5-per-cls TRAINING or pixel population, not a probe artifact. Hypotheses on record (H-invariance / H-probe-stick / H-training). | **running** |
-| — | **tin@1% pair to 10 seeds** (xspace Phase B; tin20 half done: +5.42±0.41) | **running** |
-| — | **tin@2% pair + probes** — fills G(tin) between 1000 and 5000 imgs; envelope band +1.3..+2.3 on record | **running** |
-| — | **tin20b** — DISJOINT 20-class draw (wnids[5::10]), the class-draw control for tin20; band +3.0..+5.0 on record | queued (frontier2) |
-| Q10.3 | **c10_aux_10pct_l03** (+0.3..+1.1, NOT above champion — G(C10,5000)=0.65 is exhausted) and **tin_aux_5pct_l20** (+2.2..+3.3) — per-regime λ0 vs the law | queued (frontier2) |
-| Q6.8 | **diagvit** — ViT-tiny + AdamW, FIRST ATTENTION BACKBONE (token→spatial adapter); qualitative bands only | queued (frontier2) |
-| — | **tin@25% / tin@100%** — envelope tail (qualitative: flat ≤+2.2; 100% ≈ neutral). The 100% pair is ~a week of GPU, runs LAST, killable without collateral. | queued (frontier2) |
+| — | **tin@25%** — aux seed 2 in flight; partial Δ +0.02, tracking neutral (band: flat ≤+2.2) | **running** |
+| — | **tin@100% pair** — qualitative: ≈ neutral ±0.5. ~A WEEK of GPU, runs LAST, killable without collateral. | queued (frontier2) |
+| — | **tin20b probe deepening** — G(tin20b)=2.37±0.59 @3 seeds vs G(tin20)=4.50±0.58 @10 seeds (2.6σ) while e2e agrees (0.2σ): does the pixel DRAW move measured G? Cheap (probes only). | not started |
 | — | the write-up: envelope → decomposition → G curves → sign law → granularity controls → crossing | not started |
 
 Settled earlier cycles: Q6.6 (stl, +5.92, held), Q7.3 (dose-response), Q10.2
-(combo, negative), Q10.3 first half (C10@15% −0.66), Q6.9e (crisis → probe
-resolution), Q6.9f/g/h/i (the law: Δe2e = G + readout), Q0.3 (H3-for-aux:
-robustness tracks clean gain, mCE −2.87/−2.56/+0.02), Q6.8 first half
-(ConvNeXt +10.57), C10 tail (25% −0.83, 100% −0.26), Q9.4 (1–2% flat plateau
-at 10 seeds; variance-reduction claim answered NEGATIVE at 10v10), Q6.9d
-(tin20: granularity artifact, +5.42±0.41 at 10 seeds).
+(combo, negative), Q10.3 (per-regime λ0 cannot beat G's ceiling: C10@15%
+rescue −0.13, c10_l03 +1.10 = champion, tin_l20 +1.90 MISSED band), Q6.9e
+(crisis → probe resolution), Q6.9f/g/h/i (the law: Δe2e = G + readout),
+Q0.3 (H3-for-aux: robustness tracks clean gain), Q6.8 (ConvNeXt +10.57;
+ViT-tiny +13.26 — largest gain in study, first attention backbone), C10
+tail (25% −0.83, 100% −0.26), Q9.4 (1–2% flat plateau at 10 seeds;
+variance-reduction NEGATIVE at 10v10), Q6.9d (tin20 granularity artifact,
++5.42±0.41 at 10 seeds; tin20b disjoint-draw control +5.27±0.66), Q6.9j
+(tin 2×2: granularity = readout effect; diagonal G invariant), tin envelope
+1.49/1.81/2.13/1.65 at 1/2/5/10% with G(tin,2000)=3.47 completing the
+falling curve.
