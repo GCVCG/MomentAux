@@ -81,6 +81,35 @@ ported vs corrected and why.
       rescue (+5..+12); well-trained baseline => champion-like (+3..+5).
     tin@25%/100%: qualitative only (G unmeasured): envelope stays flat
       (<=+2.2); 100% ~ neutral (+-0.5).
+- LANDINGS SCORED (2026-07-18, later same day):
+    tin@2%: **+1.81 ±0.19** (9.56±0.11 -> 11.37±0.31) — IN BAND (+1.3..+2.3).
+      G(tin,2000) = **+3.47 ±0.24** — slots exactly into the monotone-falling
+      G(tin) curve: 4.33@1000 -> 3.47@2000 -> 2.67@5000 -> 1.70@10000.
+      readout(base 9.56) = −1.66, negative far below the crossing: SIGN LAW
+      16th clean cell. tin envelope now 1.60/1.81/2.13/1.65 at 1/2/5/10% —
+      flat, exactly as falling-G predicts.
+    tin20b: **+5.27 ±0.66** (43.83±0.84 -> 49.10±0.78) — 0.2σ from tin20's
+      10-seed +5.42±0.41: the CLASS DRAW IS IRRELEVANT, granularity account
+      CONFIRMED on a disjoint draw. (Nominally 0.27 above the recorded band
+      top +5.0, but the band was anchored on tin20's 3-seed +4.07, which
+      itself moved to +5.42 — both draws agree with each other.)
+      *** TENSION TO WATCH: G(tin20b,1000) = +2.37 ±0.59 vs G(tin20) =
+      +5.23 ±0.90 — 2.7σ apart while the e2e deltas are 0.2σ apart. Either
+      one probe measurement is off (both are 3-seed, tin20's σ 0.90) or the
+      G/readout SPLIT differs between draws while the sum matches — which
+      would be a coincidence the law does not predict. Phase C re-probes
+      tin20 at 10 seeds and adjudicates. readout(tin20b) = +2.90 at base
+      43.83: sign correct (17th cell), magnitude pending the tension.
+    c10_aux_10pct_l03: **+1.10 ±0.57** (80.71 -> 81.81±0.15) — IN BAND
+      (+0.3..+1.1, at top edge) and =champion's +1.09 exactly. PREDICTION
+      HELD: per-regime λ0 cannot beat G's ceiling; G(C10,5000)=0.65 is
+      exhausted by EITHER λ0. (Nominal Δ>G again — readout positive at
+      base 80.7, consistent with the mapped positive branch +0.44@80.7.)
+    tin_aux_5pct_l20: 2/3 seeds at +1.87 — TRENDING BELOW band (+2.2..+3.3)
+      and below champion's +2.13: the C100 "λ0=2.0 below the crossing"
+      precedent may NOT transplant to tin. Score when seed 2 lands.
+    xspace Phase B: tin@1% baseline deepened 5.22->5.30±0.22 (n10); aux at
+      7/10 seeds, partial Δ +1.50 (3-seed value was +1.60).
 - H3-for-aux ANSWERED from existing robustness.json (2026-07-18): CIFAR-100-C
   mCE delta -2.87@5% / -2.56@10% / +0.02@100% vs clean gains -5.3/-4.1/-0.3
   (err): corruption robustness TRACKS the clean gain (~55-60% of it), no
