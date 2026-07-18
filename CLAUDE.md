@@ -297,6 +297,27 @@ ported vs corrected and why.
   monotone falling: 4.33@1000 -> 2.67@5000 -> 1.70@10000 (band said 1.8-2.4;
   landed a hair below). tin is simply a LOW-G DATASET; its readout behaves
   exactly like every other dataset's.
+  *** G CURVES COMPLETED (2026-07-18, probe4 wave, all four datasets):
+    G(C10):  4.81@500  5.52@1000  3.97@2500  0.65@5000 — peaks at 1000 (2%)
+    G(stl):  4.70@500  4.98@1000  3.20@2500
+    G(C100): 3.88@500  5.33@1000c 5.44@2500c/6.35f  3.66@5000
+    G(tin):  4.33@1000 2.67@5000  1.70@10000
+  In EVERY dataset the e2e envelope peak sits at the G peak — the envelope
+  shape IS the feature-gain curve (readout saturates/flattens early). The two
+  recorded G estimates from the miss post-mortem: G(C10,1000)~5.6 HIT (5.52);
+  G(stl,1000)~3.1-3.4 MISSED (4.98) — so the stl@20% e2e shortfall was the
+  READOUT term, not G.
+  READOUT POSITIVE BRANCH MAPPED on ceiling-free C10 (50k-image probe):
+  +1.80@39.4 -> +1.14@51.7 -> +0.44@69.1 -> +0.44@80.7 — positive throughout,
+  DECAYING toward zero with sufficiency, not growing. Sign law now 15 clean
+  cells, zero violations.
+  *** PROBE-CEILING RULE (2026-07-18): the Δ = G + readout decomposition is
+  trustworthy ONLY while the probe holds far more labeled data than the cell.
+  stl's probe has just 5000 imgs (500/cls); at stl@50% the baseline's probe
+  uplift is +0.28 — the cell has ~reached its own probe ceiling and 'readout'
+  loses meaning (stl@20% −0.62±0.84, stl@50% −0.02 are EXCLUDED as
+  measurements, not counterexamples). CIFAR/tin probes (50k/100k) are safe at
+  every % measured.
   *** C10 ENVELOPE COMPLETE (2026-07-17, champion λ0=1.0 verbatim, 3 seeds):
     1% +6.62 | 2% +7.14 | 3% +5.38 | 5% +4.41 | 7% +2.21 | 10% +1.09 |
     15% −0.66 | 25% −0.83 | 100% −0.26±0.18
