@@ -4,6 +4,13 @@
 its answer, the evidence, and its status** (settled / open / falsified /
 retracted). `CLAUDE.md` is the denser chronological working ledger.
 
+**Documentation** (all render directly on GitHub, mermaid included):
+[docs/index.md](docs/index.md) — overview & headline results ·
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — architecture + measurement
+diagrams · [docs/VISUALS.md](docs/VISUALS.md) — the observability figures,
+explained and embedded · `analysis/audit_law.py` — machine-verifies every
+number in the law table from raw run files.
+
 ## Where the study actually landed
 
 **MomentAux** (`momentstem/aux.py`): the moments are a **training-only soft
@@ -17,10 +24,10 @@ It is **positive at every data scale** (CIFAR-100, ResNet-18, 3 seeds):
 
 | data | 1% | 3% | 5% | 10% | 25% | 100% |
 |---|---|---|---|---|---|---|
-| **Δ top-1** | +1.91 | +3.68 | **+5.30** | +4.14 | +0.97 | +0.24 |
+| **Δ top-1** | +1.91 | +3.68 | **+5.30** | +4.14 | +0.97 | +0.15 (n.s., neutral) |
 
 and it transplants with no retuning across depth and dataset — one λ0=1.0
-(+`head_norm`) gives +3.9…+4.3 on R18/R34/R50; CIFAR-10 gives +6.61@1%.
+(+`head_norm`) gives +3.9…+4.3 on R18/R34/R50; CIFAR-10 gives +6.37@1% / +6.66@2% (10 seeds).
 
 **The controls are the contribution.** A random target gives ≈0; a *learned*
 FitNets teacher costing a whole extra model gives ≈0; HOG gives about half. The
