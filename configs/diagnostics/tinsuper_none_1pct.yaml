@@ -1,0 +1,19 @@
+# tinsuper = tin's IMAGES (tin@1%'s committed subset, byte-identical pixels,
+# all 200 fine classes present at 5/cls) relabeled to 20 coarse groups
+# (sorted-wnid // 10) -> 50 per coarse class. The byte-identical-pixel
+# granularity control on tin, disentangling the 2x2's ckpt-set effect
+# (label space) from tin20's pixel-population change. FINDINGS Q6.9j.
+name: tinsuper_none_1pct
+dataset: tinsuper
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 1
+stem: none
+stem_calibrate: true

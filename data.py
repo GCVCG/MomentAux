@@ -27,12 +27,17 @@ STATS = {
     # the whole point is that only the label space changes.
     "tin20": ((0.4802, 0.4481, 0.3975), (0.2770, 0.2691, 0.2821)),
     "tin20b": ((0.4802, 0.4481, 0.3975), (0.2770, 0.2691, 0.2821)),
+    # tinsuper: tin's IMAGES (all 200 classes) with 20 coarse labels
+    # (sorted-wnid index // 10) -- the byte-identical-pixel granularity
+    # control on tin, mirroring cifar100super. Groups are positional, not
+    # semantic: the granularity/readout account needs only label COUNT.
+    "tinsuper": ((0.4802, 0.4481, 0.3975), (0.2770, 0.2691, 0.2821)),
 }
 
 NUM_CLASSES = {"cifar100": 100, "cifar100super": 20, "cifar10": 10, "stl10": 10,
-               "tin": 200, "tin20": 20, "tin20b": 20}
+               "tin": 200, "tin20": 20, "tin20b": 20, "tinsuper": 20}
 IMAGE_SIZE = {"cifar100": 32, "cifar100super": 32, "cifar10": 32, "stl10": 96,
-              "tin": 64, "tin20": 64, "tin20b": 64}
+              "tin": 64, "tin20": 64, "tin20b": 64, "tinsuper": 64}
 
 # cifar100super is CIFAR-100's IMAGES with its 20 official coarse labels, and it
 # deliberately reuses CIFAR-100's COMMITTED subset indices (data/subsets/
@@ -42,7 +47,7 @@ IMAGE_SIZE = {"cifar100": 32, "cifar100super": 32, "cifar10": 32, "stl10": 96,
 # exactly 5 fine classes x n per coarse class). It is the one design that breaks
 # the CIFAR-10-vs-CIFAR-100 confound -- both of those are 50,000 images, so
 # matching per-class count there NECESSARILY unmatches total data/steps by 10x.
-SUBSET_ALIAS = {"cifar100super": "cifar100"}
+SUBSET_ALIAS = {"cifar100super": "cifar100", "tinsuper": "tin"}
 
 # The 15 standard CIFAR-C corruptions of Hendrycks & Dietterich (ICLR 2019).
 CIFAR_C_CORRUPTIONS = (
@@ -294,6 +299,19 @@ def build_dataset(dataset, data_root, train, subset_pct=None, download=True):
         wn = tin20_wnids(root) if dataset == "tin20" else tin20b_wnids(root)
         keep, new_targets = tin20_filter(base.targets, root, keep_wnids=wn)
         ds = Relabelled(Subset(base, keep), new_targets)
+    elif dataset == "tinsuper":
+        # tin's images and index order untouched; only the label map changes.
+        # ImageFolder and TinyImageNetVal both index classes by sorted(wnids),
+        # so fine_idx // 10 groups 10 consecutive sorted wnids per coarse
+        # class -- deterministic, and tin20's classes (wnids[::10]) are one
+        # representative per block.
+        root = tin_root(data_root)
+        base = (
+            datasets.ImageFolder(os.path.join(root, "train"), transform=tf)
+            if train
+            else TinyImageNetVal(root, transform=tf)
+        )
+        ds = Relabelled(base, [t // 10 for t in base.targets])
     else:
         raise ValueError(f"unknown dataset {dataset!r}")
     if subset_pct is not None and subset_pct != 100:
@@ -315,8 +333,8 @@ def calibration_batch(dataset, data_root, n=1024):
         ds = datasets.CIFAR10(data_root, train=True, transform=tf, download=False)
     elif dataset == "stl10":
         ds = datasets.STL10(data_root, split="train", transform=tf, download=False)
-    elif dataset in ("tin", "tin20", "tin20b"):
-        # tin20/tin20b calibrate on FULL tin deliberately (labels unused): the aux
+    elif dataset in ("tin", "tin20", "tin20b", "tinsuper"):
+        # tin20/tin20b/tinsuper calibrate on FULL tin deliberately (labels unused): the aux
         # target pipeline stays byte-identical to tin@1%'s, which is the whole
         # point of the within-tin granularity control. Mirrors cifar100super
         # calibrating on cifar100's images.

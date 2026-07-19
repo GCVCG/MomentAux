@@ -519,6 +519,32 @@ ported vs corrected and why.
       inside the qualitative band (flat ≤+2.2). The tin envelope right
       flank reaches zero by 25k images, exactly as falling G(tin) predicts:
       +1.49/+1.81/+2.13/+1.65/+0.10 at 1/2/5/10/25%.
+- LEVELS REANALYSIS of the 2x2 (2026-07-19, from existing probe JSONs):
+  under the common 200-way stick, the ckpt-set effect is a BASELINE effect:
+  base 19.27 (tin@1%-trained) vs 23.71/23.98 (tin20/tin20b-trained) while
+  aux-under-fine 23.46 ≈ base-under-coarse 23.71 — the prior almost exactly
+  closes the weak-supervision deficit ("the prior substitutes for
+  supervision"). But 20-way-trained ckpts saw only 20 classes' PIXELS:
+  label space and pixel population still entangled on tin. C100's crossing
+  (training space does nothing on byte-identical pixels) suggests PIXELS.
+- tinsuper LAUNCHED (2026-07-19): tin's images relabeled sorted-wnid//10 ->
+  20 coarse groups; tin@1%'s COMMITTED SUBSET via SUBSET_ALIAS (byte-
+  identical pixels, all 200 fine classes at 5/cls = 50/coarse-cls, 1400
+  steps). The tin mirror of cifar100super; disentangles the ckpt-set effect.
+  PREDICTIONS RECORDED IN ADVANCE:
+    PRIMARY FORK — G_200(tinsuper ckpts) on the common 200-way stick:
+      H-pixels (C100's training-space-invariance transplants; pixel
+        population carried the ckpt effect): ≈ 4.2 (tin@1%'s value).
+      H-label-space (training label space carried it): ≈ 2.5-3.1
+        (tin20/tin20b's value).
+    e2e: BOTH branches predict a granularity boost over tin@1%'s +1.49 via
+      readout (baseline moves toward/past the crossing); band +2.5..+6.5,
+      wide because G_20 on these ckpts is unmeasured in tinsuper's own
+      coarse space. Any Δ >= +2.5 = relabeling-alone reproduces the
+      granularity effect on byte-identical tin pixels (mirror of super@2%'s
+      +2.58); Δ ~ +1.5 would instead say tin20's pixel POPULATION, not its
+      label space, carried the e2e granularity effect — which would
+      contradict the readout account and be a major surprise.
   *** PROBE-CEILING RULE (2026-07-18): the Δ = G + readout decomposition is
   trustworthy ONLY while the probe holds far more labeled data than the cell.
   stl's probe has just 5000 imgs (500/cls); at stl@50% the baseline's probe
