@@ -491,6 +491,34 @@ ported vs corrected and why.
       (2.6σ) hints the pixel DRAW moves measured G while e2e stays put
       (+5.27 vs +5.42, 0.2σ) — 3-seed probe, not adjudicated; do not build
       on it without deepening tin20b's probes.
+  *** FOLLOWUP2 WAVE ANSWERED BOTH LOOSE ENDS (2026-07-19):
+  (A) PROBE-BUDGET CONTROL — the probe-space effect SURVIVES, STRENGTHENED.
+      Suspected confound: the 200-way probe trains on 100k images vs the
+      20-way probe's 10k. Measured via --shots on all four corners: G_200
+      RISES with probe budget (2.56@25 -> 3.06@50 -> 3.43@100 -> 3.99@250
+      -> 4.19@500/cls on tin@1% ckpts), so at MATCHED 10k total the gap
+      WIDENS: G_200@50/cls=3.06±0.17 vs G_20=6.70±0.45 = 7.6σ (tin20 ckpts:
+      3.4σ). The budget confound worked in the OPPOSITE direction — coarse
+      probes genuinely read more aux-vs-baseline gap on tin; the Q6.9j
+      label-space interpretation stands, now confound-controlled. Mechanistic
+      corollary: the FINE probe is label-hungry — the feature gap is fully
+      visible to a 20-way probe at 25/cls but needs 500/cls to saturate the
+      200-way probe. Same shape as the e2e readout penalty at fine spaces.
+  (B) TIN20B DEEPENED TO 10 SEEDS — THE G TENSION WAS 3-SEED NOISE. e2e
+      +4.85±0.38 (vs tin20 +5.42±0.41, 1.0σ); G_20 = 3.94±0.42 (vs tin20
+      4.58±0.60, 0.9σ — the 3-seed 2.37-vs-5.23 gap is GONE); readout +0.91
+      at base 44.16 vs tin20's +0.84 at 40.69 — the two disjoint draws now
+      agree on EVERY quantity: e2e, G, and readout (sign law 19th cell).
+      Class draw is irrelevant, full stop; "pixel draw moves measured G" is
+      dead. New off-diagonal G_200(tin20b)=2.54±0.17: the ckpt-set effect
+      REPLICATES on the b draw (vs G_200(tin@1%ckpts)=4.19: 7.3σ) — fine-
+      TRAINED checkpoint pairs carry a larger measured gap under either
+      probe, on two independent class draws. (tin20-vs-tin20b within-space
+      2.3σ — borderline, noted, not built on.)
+    tin@25% FINAL: **+0.10 ±0.28** (49.19±0.21 -> 49.29±0.44) — NEUTRAL,
+      inside the qualitative band (flat ≤+2.2). The tin envelope right
+      flank reaches zero by 25k images, exactly as falling G(tin) predicts:
+      +1.49/+1.81/+2.13/+1.65/+0.10 at 1/2/5/10/25%.
   *** PROBE-CEILING RULE (2026-07-18): the Δ = G + readout decomposition is
   trustworthy ONLY while the probe holds far more labeled data than the cell.
   stl's probe has just 5000 imgs (500/cls); at stl@50% the baseline's probe

@@ -681,6 +681,26 @@ training label space and pixel population by design; tin20b's 3-seed probe
 draw moves measured G — not adjudicated, needs deeper tin20b probes before
 building on it. — **ANSWERED**
 
+**Q6.9j FOLLOW-UP — BOTH CAVEATS CLOSED (2026-07-19, followup2 wave).**
+(i) The probe-space effect is NOT a probe-budget artifact. The 200-way
+probe trains on 100k images vs the 20-way's 10k — a real asymmetry (C100's
+crossing, which showed no effect, had matched 50k/50k). Shots curves on all
+four corners: G_200 RISES with probe budget (+2.56@25/cls → +4.19@500/cls),
+so at a MATCHED 10k-image budget the probe-space gap *widens* to 7.6σ
+(tin@1% ckpts: G_200@50/cls = +3.06±0.17 vs G_20 = +6.70±0.45). Controlling
+the confound strengthened the effect. Corollary: the fine probe is
+label-hungry — the aux feature gap is fully visible to a 20-way head at
+25 labels/class but needs 500/class to saturate a 200-way head; the same
+shape as the e2e readout penalty in fine label spaces.
+(ii) The tin20b G tension was 3-seed noise. At 10v10 the disjoint draws
+agree on every quantity: Δe2e +4.85±0.38 vs +5.42±0.41 (1.0σ), G_20
++3.94±0.42 vs +4.58±0.60 (0.9σ), readout +0.91 vs +0.84 (sign law, 19th
+clean cell). The class draw is irrelevant, full stop. New off-diagonal:
+G_200(tin20b) = +2.54±0.17 — the checkpoint-set effect replicates on the
+b draw (vs G_200(tin@1% ckpts) = +4.19, 7.3σ): fine-trained checkpoint
+pairs carry a larger measured gap under either probe, on two independent
+class draws. — **SETTLED**
+
 ---
 
 ## 7. Mechanism — why the curve has the shape it has
@@ -898,10 +918,8 @@ but segmentation); **MaskFeat** (HOG target — but SSL pretraining);
 
 | # | question | status |
 |---|---|---|
-| — | **tin@25%** — aux seed 2 in flight; partial Δ +0.02, tracking neutral (band: flat ≤+2.2) | **running** |
-| — | **tin@100% pair** — qualitative: ≈ neutral ±0.5. ~A WEEK of GPU, runs LAST, killable without collateral. | queued (frontier2) |
-| — | **tin20b probe deepening** — G(tin20b)=2.37±0.59 @3 seeds vs G(tin20)=4.50±0.58 @10 seeds (2.6σ) while e2e agrees (0.2σ): does the pixel DRAW move measured G? Cheap (probes only). | not started |
-| — | the write-up: envelope → decomposition → G curves → sign law → granularity controls → crossing | not started |
+| — | **tin@100% pair** — qualitative: ≈ neutral ±0.5. ~20h on the 3090 (baseline seed 2 in flight). | **running** |
+| — | the write-up: envelope → decomposition → G curves → sign law → granularity controls → crossing → budget control | not started |
 
 Settled earlier cycles: Q6.6 (stl, +5.92, held), Q7.3 (dose-response), Q10.2
 (combo, negative), Q10.3 (per-regime λ0 cannot beat G's ceiling: C10@15%
@@ -911,7 +929,8 @@ Q0.3 (H3-for-aux: robustness tracks clean gain), Q6.8 (ConvNeXt +10.57;
 ViT-tiny +13.26 — largest gain in study, first attention backbone), C10
 tail (25% −0.83, 100% −0.26), Q9.4 (1–2% flat plateau at 10 seeds;
 variance-reduction NEGATIVE at 10v10), Q6.9d (tin20 granularity artifact,
-+5.42±0.41 at 10 seeds; tin20b disjoint-draw control +5.27±0.66), Q6.9j
-(tin 2×2: granularity = readout effect; diagonal G invariant), tin envelope
-1.49/1.81/2.13/1.65 at 1/2/5/10% with G(tin,2000)=3.47 completing the
-falling curve.
++5.42±0.41 at 10 seeds; tin20b disjoint-draw control +4.85±0.38 at 10v10 —
+draws agree on e2e, G, AND readout), Q6.9j (tin 2×2: granularity = readout
+effect; diagonal G invariant; probe-space effect survives the budget
+control at 7.6σ), tin envelope 1.49/1.81/2.13/1.65/0.10 at 1/2/5/10/25%
+with G(tin,2000)=3.47 completing the falling curve.
