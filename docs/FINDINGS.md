@@ -701,6 +701,42 @@ b draw (vs G_200(tin@1% ckpts) = +4.19, 7.3σ): fine-trained checkpoint
 pairs carry a larger measured gap under either probe, on two independent
 class draws. — **SETTLED**
 
+**Q6.9k — tinsuper: THE FORK RESOLVED — TRAINING LABEL SPACE, NOT PIXEL
+POPULATION, CARRIES THE CKPT-SET EFFECT; AND AN ARBITRARY COARSENING BUYS
+NO e2e GAIN (2026-07-19).** tin's images relabeled sorted-wnid//10 into 20
+positional coarse groups, reusing tin@1%'s committed subset via
+SUBSET_ALIAS — byte-identical pixels, all 200 fine classes at 5/cls =
+50/coarse-cls, 1400 steps. Predictions recorded in advance (CLAUDE.md).
+
+THE FORK (hit cleanly): **G_200(tinsuper ckpts) = +2.55 ±0.41** on the
+common 200-way stick — 0.0σ from tin20b (+2.54), 1.2σ from tin20 (+3.08),
+**3.8σ from the H-pixels branch (≈4.2)**. On byte-identical pixels,
+training with 20-way coarse CE instead of 200-way fine CE cuts the
+measured gap from 4.19 to 2.55. The checkpoint-set effect is a TRAINING
+LABEL SPACE effect: the prior does the most feature work exactly where
+supervision is weakest per class (5/cls, 200-way). C100's training-space
+invariance does NOT transplant to tin — the H-pixels branch leaned on it
+and lost.
+
+THE e2e MISS THAT CONFIRMS THE LAW: **+1.01 ±0.17** (14.08±0.29 →
+15.09±0.06) vs recorded band +2.5..+6.5 — below even the ~+1.5 surprise
+branch. Post-mortem: the band assumed relabeling raises the baseline
+toward the readout crossing, as SEMANTIC coarsening did (tin20 base 40.7,
+super base 29.8). The positional groups are visually incoherent, so the
+baseline stayed at 14.08, far below the crossing — and there the law
+predicts no boost: readout(14.08) = −0.36 (sign law, 20th clean cell) and
+G_20own(+1.37) + readout(−0.36) = +1.01 exactly. So "label COUNT alone
+buys the granularity gain" is FALSIFIED by a cell engineered to have few
+classes but low task performance; the readout term follows TASK
+PERFORMANCE, which is precisely the revised law (Q6.9h). The granularity
+gains of tin20/super were real but rode on coarsening that made the task
+genuinely easier.
+
+CAVEAT: tinsuper (arbitrary groups) vs tin20 (semantic wnids) differ by
+1.2σ in G_200 (2.55 vs 3.08) — semantic coherence may matter mildly
+within coarse-trained checkpoints; not adjudicated, not built on.
+— **ANSWERED**
+
 ---
 
 ## 7. Mechanism — why the curve has the shape it has

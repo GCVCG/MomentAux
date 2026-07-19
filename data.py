@@ -30,7 +30,9 @@ STATS = {
     # tinsuper: tin's IMAGES (all 200 classes) with 20 coarse labels
     # (sorted-wnid index // 10) -- the byte-identical-pixel granularity
     # control on tin, mirroring cifar100super. Groups are positional, not
-    # semantic: the granularity/readout account needs only label COUNT.
+    # semantic. OUTCOME (Q6.9k): the incoherent groups keep the baseline
+    # low (14.08), so no readout boost -- label COUNT alone buys nothing;
+    # what matters is baseline task performance, as the sign law says.
     "tinsuper": ((0.4802, 0.4481, 0.3975), (0.2770, 0.2691, 0.2821)),
 }
 

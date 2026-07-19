@@ -545,6 +545,37 @@ ported vs corrected and why.
       +2.58); Δ ~ +1.5 would instead say tin20's pixel POPULATION, not its
       label space, carried the e2e granularity effect — which would
       contradict the readout account and be a major surprise.
+  *** tinsuper LANDED (2026-07-19) — FORK ANSWERED: THE TRAINING LABEL
+  SPACE, NOT THE PIXEL POPULATION, CARRIES THE CKPT-SET EFFECT; AND THE
+  e2e BAND MISSED IN THE MOST INSTRUCTIVE WAY POSSIBLE.
+    THE FORK (primary, hit cleanly): G_200(tinsuper ckpts) = **+2.55
+    ±0.41** — 0.0σ from tin20b's 2.54, 1.2σ from tin20's 3.08, 3.8σ from
+    the H-pixels branch (4.2). On BYTE-IDENTICAL pixels, switching the
+    training loss from 200-way fine CE to 20-way coarse CE (even an
+    ARBITRARY coarse partition) cuts the measured aux-vs-baseline gap
+    from 4.19 to 2.55. The "prior substitutes for supervision" account is
+    now label-space-based, not pixel-based: fine-grained weak supervision
+    (5/cls, 200-way) is where the prior has the most feature work to do.
+    ALSO: C100's training-space invariance does NOT transplant to tin —
+    the H-pixels prediction leaned on it and lost.
+    e2e: **+1.01 ±0.17** (14.08±0.29 -> 15.09±0.06) — MISSED the
+    +2.5..+6.5 band, BELOW even the ~+1.5 "surprise" branch. Post-mortem:
+    the band assumed relabeling raises the baseline toward the crossing
+    (as semantic coarsening did: tin20 base 40.7, super base 29.8). The
+    POSITIONAL groups are visually incoherent, so the baseline stayed at
+    14.08 — far below the crossing — and the law then PREDICTS no boost:
+    readout(14.08) = −0.36 (mildly negative, sign law 20th clean cell),
+    and G_20own(+1.37) + readout(−0.36) = +1.01 EXACTLY. So the miss
+    falsifies "label COUNT alone buys the granularity gain" (my data.py
+    comment said this — wrong) and confirms the revised law's actual
+    form the hard way: a cell ENGINEERED to have few classes but low
+    task performance gets NO readout boost. Granularity helps e2e only
+    insofar as it raises baseline task performance.
+    CAVEAT for the fork: tinsuper's coarse groups are arbitrary while
+    tin20's are semantic (real wnids) — G_200 2.55 vs 3.08 (1.2σ) hints
+    semantic coherence may matter a little within coarse-trained; not
+    adjudicated. The fine-vs-coarse main effect (4.19 vs 2.5-3.1) is 3.8σ+
+    and stands regardless.
   *** PROBE-CEILING RULE (2026-07-18): the Δ = G + readout decomposition is
   trustworthy ONLY while the probe holds far more labeled data than the cell.
   stl's probe has just 5000 imgs (500/cls); at stl@50% the baseline's probe
