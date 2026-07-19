@@ -380,6 +380,14 @@ ported vs corrected and why.
     G(tin):  4.33@1000 2.67@5000  1.70@10000
   In EVERY dataset the e2e envelope peak sits at the G peak — the envelope
   shape IS the feature-gain curve (readout saturates/flattens early). The two
+  *** CORRECTED BY THE AUDIT (2026-07-19, analysis/audit_law.py): "every
+  dataset" was an overclaim — it holds on C10 (both peak @2%) and C100 (both
+  @5%) where readout is flat across the curve, but NOT on tin: with the
+  completed curves, G(tin) peaks at 1% (4.19) while the envelope peaks at 5%
+  (+2.13), because the left-flank readout penalty spans 2.6 points
+  (−2.69@1% -> −0.05@10%) and opposes falling G. Correct statement: envelope
+  peak = G peak WHERE readout is ~flat; on tin the flat envelope is falling
+  G x rising readout. Δ = G + readout needs no correction — the shorthand did.
   recorded G estimates from the miss post-mortem: G(C10,1000)~5.6 HIT (5.52);
   G(stl,1000)~3.1-3.4 MISSED (4.98) — so the stl@20% e2e shortfall was the
   READOUT term, not G.
