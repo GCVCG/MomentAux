@@ -535,6 +535,20 @@ ported vs corrected and why.
   supervision"). But 20-way-trained ckpts saw only 20 classes' PIXELS:
   label space and pixel population still entangled on tin. C100's crossing
   (training space does nothing on byte-identical pixels) suggests PIXELS.
+- auxmag3 LAUNCHED (2026-07-19, user asked "why wouldn't a wider bank add
+  value?" -> the one non-redundant widening gets its test): energy-magnitude3
+  = the committed 8-pair bank + ONE LOWER OCTAVE (sigma=4, k=17 so the
+  envelope fits), 12 pairs, orientations unchanged (extra orientations are
+  near-linear combinations -- only the octave is a new direction). Run on tin
+  (64x64 makes the octave physically meaningful), champion config otherwise.
+  Bank pinned in test_bank_regression (additive; committed banks untouched).
+  PREDICTIONS RECORDED IN ADVANCE (redundancy account = no added value):
+    auxmag3_tin_1pct: +1.3..+1.7 (champion +1.49 +-0.09; shared baseline)
+    auxmag3_tin_5pct: +1.8..+2.4 (champion +2.13 +-0.18)
+    G_200(auxmag3@1% ckpts) ~ 4.2 (champion's 4.19). FALSIFIER: e2e >= +0.5
+    above champion on either cell, or G >= 5.0 -- either says the new octave
+    carries supervisory value the 2-octave bank misses, reopening the
+    bank-design axis.
 - tinsuper LAUNCHED (2026-07-19): tin's images relabeled sorted-wnid//10 ->
   20 coarse groups; tin@1%'s COMMITTED SUBSET via SUBSET_ALIAS (byte-
   identical pixels, all 200 fine classes at 5/cls = 50/coarse-cls, 1400

@@ -133,6 +133,15 @@ def test_energy_kernel_fingerprints():
     assert se.sum().item() == pytest.approx(-0.0543976501, abs=1e-6)
     assert so.abs().mean().item() == pytest.approx(0.0038967307, abs=1e-8)
 
+    # magnitude3 (2026-07-19): committed bank + one lower octave, pinned at
+    # its intended kernel_size=17 (sigma=4 envelope needs the +-8 px window).
+    from momentstem.energy import _MAG3_FREQS
+    m3e, m3o = quadrature_bank(_MAG3_FREQS, _MAG_ORIENTS, 17)
+    assert m3e.shape == (12, 1, 17, 17) and m3o.shape == (12, 1, 17, 17)
+    assert m3e[:8].shape == (8, 1, 17, 17)  # first 8 pairs = committed layout at k17
+    assert m3e.sum().item() == pytest.approx(0.0736529008, abs=1e-6)
+    assert m3o.abs().mean().item() == pytest.approx(0.0019418814, abs=1e-8)
+
 
 def _rotation_drift(stem, x):
     """Relative change in per-channel mean energy under a 90-deg input rotation."""
@@ -182,7 +191,7 @@ def test_energy_stem_contracts():
     from momentstem.energy import ENERGY_TYPES
 
     x = torch.randn(3, 3, 32, 32)
-    expected_ch = {"magnitude": 11, "rotinv": 11, "structure": 12,
+    expected_ch = {"magnitude": 11, "magnitude3": 15, "rotinv": 11, "structure": 12,
                    "steerable": 12, "invariants": 12}
     for ft in ENERGY_TYPES:
         stem = EnergyStem(feature_type=ft)

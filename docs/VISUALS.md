@@ -37,20 +37,29 @@ teachers, random maps).
 
 ![tin@1% heatmaps](viz/heatmaps_tin_aux_1pct.png)
 
-**How to read it.** Each row is one test image. Columns: the input; the
-moment-magnitude target (channel mean, pooled to the tap resolution); the
-**baseline** model's layer3 energy (channel-mean absolute activation); the
-**aux** model's layer3 energy. Each map is min–max normalized — compare
-*spatial structure*, not absolute brightness.
+**How to read it.** Rows are **advantage cases**: test images the aux model
+classifies correctly and the baseline gets wrong (chosen deterministically —
+first such cases in test order). Columns: the input with its **true label**;
+the moment-magnitude target (channel mean, pooled to the tap resolution);
+the **baseline** model's layer3 energy with its prediction (✗) and its
+Pearson correlation r against the target map; the **aux** model's layer3
+energy with its prediction (✓) and r. Maps are min–max normalized — compare
+spatial structure, and use the r values for the quantitative comparison.
 
-**What it shows.** The aux model's layer3 adopts the target's spatial
-structure — energy concentrates where the image has oriented local contrast
-(object boundaries, texture), while the baseline's maps are diffuse or
-dominated by background. This is the mechanism of the auxiliary loss made
-visible: the 1×1 head can only predict the target well if the tapped
-features *contain* it, so SGD shapes them toward it. It is also why the
-feature gain G exists at scarcity: at 5 images/class the CE gradient alone
-cannot teach layer3 where object structure lives; the prior can.
+**What it shows.** The suptitle carries the headline number, measured over
+512 test images: **mean r(layer3, target) = −0.04 baseline vs +0.49 aux**
+(tin@1%). The aux model's layer3 still tracks the moment target at test
+time — *after* the aux head is discarded — while the baseline's energy is
+uncorrelated with it. Per-row: in the flagpole case the aux map follows the
+pole and wings at r=+0.88 (baseline +0.51, predicts "goose"). This is the
+mechanism of the auxiliary loss made visible: the 1×1 head can only predict
+the target if the tapped features contain it, so SGD shapes them toward it —
+and the shaping persists. It is also why the feature gain G exists at
+scarcity: at 5 images/class the CE gradient alone cannot teach layer3 where
+object structure lives; the prior can.
+
+Alignment across the three visualized pairs (baseline → aux):
+tin@1% **−0.04 → +0.49** · C100@5% **+0.22 → +0.53** · tin20 **+0.19 → +0.58**.
 
 Same figure for the champion's peak cell and the granularity control:
 
@@ -98,7 +107,9 @@ like in feature space.
 
 **How to read it.** For GAP→fc ResNets, CAM is exact: the map is the
 classifier weight vector of the *predicted* class applied to the final
-feature maps, upsampled over the input. Bright = evidence for the prediction.
+feature maps, upsampled over the input. Bright = evidence for the
+prediction. Rows are the same advantage cases as §2 (aux ✓ / baseline ✗),
+each panel labeled with that model's prediction.
 
 ![C100@5% CAM](viz/cam_auxmag_5pct_sched0.png)
 ![tin20 CAM](viz/cam_tin20_aux.png)

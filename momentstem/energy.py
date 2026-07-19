@@ -48,12 +48,22 @@ from torch import nn
 
 from .stem import LUMA_WEIGHTS, gabor_kernel
 
-ENERGY_TYPES = ("magnitude", "rotinv", "structure", "steerable", "invariants")
+ENERGY_TYPES = ("magnitude", "magnitude3", "rotinv", "structure", "steerable",
+                "invariants")
 _ENERGY_EPS = 1e-6
 
 # Committed layouts (constants of the study, like the Gabor bank seed).
 _MAG_FREQS = (math.pi / 2, math.pi / (2 * math.sqrt(2)))          # 2 octaves
 _MAG_ORIENTS = 4                                                   # 0, pi/4, pi/2, 3pi/4
+# magnitude3: the committed bank PLUS one lower octave (sigma = pi/f = 4 px).
+# Exists to answer "does a WIDER bank add aux value?" (2026-07-19): the extra
+# octave sees spatial structure the k11 2-octave bank cannot, physically
+# meaningful only at 64x64 -- run with kernel_size >= 17 so the sigma=4
+# envelope fits (+-8 px = 2 sigma). Orientation count deliberately unchanged:
+# extra orientations are near-linear combinations of the existing four
+# (angular bandwidth ~30-45 deg), so they add regression rows without adding
+# constraint -- the octave is the only non-redundant direction.
+_MAG3_FREQS = (math.pi / 2, math.pi / (2 * math.sqrt(2)), math.pi / 4)
 _ROT_FREQS = (math.pi / 2, math.pi / (2 * math.sqrt(2)),
               math.pi / 4, math.pi / (4 * math.sqrt(2)))           # 4 octaves
 _ROT_ORIENTS = 6                                                   # pooled away
@@ -125,6 +135,11 @@ class EnergyStem(nn.Module):
             self.register_buffer("even", even)
             self.register_buffer("odd", odd)
             n_energy = len(_MAG_FREQS) * _MAG_ORIENTS
+        elif feature_type == "magnitude3":
+            even, odd = quadrature_bank(_MAG3_FREQS, _MAG_ORIENTS, kernel_size)
+            self.register_buffer("even", even)
+            self.register_buffer("odd", odd)
+            n_energy = len(_MAG3_FREQS) * _MAG_ORIENTS
         elif feature_type == "rotinv":
             even, odd = quadrature_bank(_ROT_FREQS, _ROT_ORIENTS, kernel_size)
             self.register_buffer("even", even)
@@ -164,7 +179,7 @@ class EnergyStem(nn.Module):
 
     def _energy(self, luma):
         """Raw (pre-calibration) energy channels (B, n_energy, H, W)."""
-        if self.feature_type == "magnitude":
+        if self.feature_type in ("magnitude", "magnitude3"):
             e = F.conv2d(luma, self.even, padding=self.padding)
             o = F.conv2d(luma, self.odd, padding=self.padding)
             return torch.sqrt(e ** 2 + o ** 2 + _ENERGY_EPS)

@@ -83,6 +83,70 @@ def penultimate(model, loader, device):
     return torch.cat(feats).numpy(), torch.cat(ys).numpy()
 
 
+def class_names(dataset, ds, data_root="./data"):
+    """Best-effort human labels. CIFAR: torchvision .classes. tin/tinsuper:
+    wnid -> words via tiny-imagenet's words.txt. Else None -> 'class N'."""
+    if hasattr(ds, "classes") and ds.classes:
+        return list(ds.classes)
+    if dataset in ("tin", "tinsuper"):
+        root = os.path.join(data_root, "tiny-imagenet-200")
+        try:
+            words = {}
+            with open(os.path.join(root, "words.txt")) as f:
+                for line in f:
+                    wnid, names = line.rstrip("\n").split("\t")[:2]
+                    words[wnid] = names.split(",")[0]
+            wnids = sorted(d for d in os.listdir(os.path.join(root, "train"))
+                           if os.path.isdir(os.path.join(root, "train", d)))
+            fine = [words.get(w, w) for w in wnids]
+            if dataset == "tinsuper":
+                return [f"group {g} ({fine[g*10]},..)" for g in range(20)]
+            return fine
+        except OSError:
+            return None
+    return None
+
+
+@torch.no_grad()
+def predictions(model, loader, device):
+    preds = []
+    for x, _ in loader:
+        x = x.to(device)
+        f = model.net.forward_features(model.stem(x))
+        preds.append(model.net.get_classifier()(model.net.global_pool(f)).argmax(1).cpu())
+    return torch.cat(preds).numpy()
+
+
+def _corr(a, b):
+    """Pearson r between two flattened maps."""
+    a = a.flatten().float(); b = b.flatten().float()
+    a = a - a.mean(); b = b - b.mean()
+    return float((a * b).sum() / (a.norm() * b.norm() + 1e-9))
+
+
+@torch.no_grad()
+def target_alignment(base, aux, test_ds, device, n=512):
+    """Mean Pearson r between the layer3 channel-mean energy map and the
+    moment target's channel-mean map, over n test images. THE quantitative
+    claim behind the heatmap figure: how much of the target's spatial
+    structure do the tapped features carry?"""
+    feats, hooks = {}, []
+    for tag, m in (("base", base), ("aux", aux)):
+        hooks.append(dict(m.net.named_modules())["layer3"].register_forward_hook(
+            lambda _m, _i, o, tag=tag: feats.__setitem__(tag, o)))
+    rs = {"base": [], "aux": []}
+    for i0 in range(0, n, 128):
+        xs = torch.stack([test_ds[i][0] for i in range(i0, min(i0 + 128, n))]).to(device)
+        base.net(base.stem(xs)); aux.net(aux.stem(xs))
+        tgt = F.adaptive_avg_pool2d(aux.target(xs), feats["aux"].shape[-2:]).mean(1)
+        for tag in ("base", "aux"):
+            emap = feats[tag].abs().mean(1)
+            rs[tag] += [_corr(emap[j].cpu(), tgt[j].cpu()) for j in range(len(xs))]
+    for h in hooks:
+        h.remove()
+    return {t: sum(v) / len(v) for t, v in rs.items()}
+
+
 def denorm(x, dataset):
     mean, std = data_mod.STATS[dataset]
     img = x.cpu() * torch.tensor(std).view(3, 1, 1) + torch.tensor(mean).view(3, 1, 1)
@@ -121,77 +185,121 @@ def fig_tsne(models, loader, device, out, cell, n_classes):
 
 
 @torch.no_grad()
-def fig_heatmaps(models, test_ds, device, out, cell, dataset, n_images=4):
+def fig_heatmaps(models, test_ds, device, out, cell, dataset, loader,
+                 names=None, n_images=4):
+    """Rows are ADVANTAGE CASES: test images the aux model classifies
+    correctly and the baseline gets wrong (first n such, deterministic).
+    Each map panel is annotated with its Pearson r against the target map;
+    the suptitle carries the test-set-wide mean alignment for both models."""
     (bname, (base, _)), (aname, (aux, acfg)) = models.items()
     if not hasattr(aux, "target"):
         raise RuntimeError(f"{aname} is not a MomentAux model")
-    # capture layer3 on both models
-    feats = {}
-    hooks = []
+
+    ys = np.asarray(getattr(test_ds, "targets"))
+    pb = predictions(base, loader, device)
+    pa = predictions(aux, loader, device)
+    adv = np.flatnonzero((pa == ys) & (pb != ys))[:n_images]
+    if len(adv) < n_images:                       # fallback: first images
+        adv = np.arange(n_images)
+    align = target_alignment(base, aux, test_ds, device)
+
+    feats, hooks = {}, []
     for tag, m in (("base", base), ("aux", aux)):
-        mod = dict(m.net.named_modules())["layer3"]
-        hooks.append(mod.register_forward_hook(
+        hooks.append(dict(m.net.named_modules())["layer3"].register_forward_hook(
             lambda _m, _i, o, tag=tag: feats.__setitem__(tag, o)))
-    xs = torch.stack([test_ds[i][0] for i in range(n_images)]).to(device)
+    xs = torch.stack([test_ds[int(i)][0] for i in adv]).to(device)
     base.net(base.stem(xs))
     aux.net(aux.stem(xs))
-    tgt = aux.target(xs)                                   # (B, 9, H, W)
-    tgt = F.adaptive_avg_pool2d(tgt, feats["aux"].shape[-2:])
+    tgt = F.adaptive_avg_pool2d(aux.target(xs), feats["aux"].shape[-2:])
     for h in hooks:
         h.remove()
 
-    cols = ["input", "moment target (ch. mean)", "baseline layer3 energy",
-            "aux layer3 energy"]
-    fig, axes = plt.subplots(n_images, 4, figsize=(10.5, 2.6 * n_images))
-    for r in range(n_images):
-        maps = [None, tgt[r].mean(0), feats["base"][r].abs().mean(0),
-                feats["aux"][r].abs().mean(0)]
+    def nm(c):
+        return names[c] if names else f"class {c}"
+
+    cols = ["input (true label)", "moment target", "baseline layer3", "aux layer3"]
+    fig, axes = plt.subplots(len(adv), 4, figsize=(11.5, 2.9 * len(adv)))
+    axes = np.atleast_2d(axes)
+    for r, idx in enumerate(adv):
+        t = tgt[r].mean(0).cpu()
+        maps = {2: feats["base"][r].abs().mean(0).cpu(),
+                3: feats["aux"][r].abs().mean(0).cpu()}
         for c in range(4):
             ax = axes[r, c]
             if c == 0:
                 ax.imshow(denorm(xs[r], dataset))
-            else:
-                m = maps[c].float().cpu().numpy()
+                ax.set_xlabel(nm(int(ys[idx])), fontsize=8)
+            elif c == 1:
+                m = t.numpy()
                 ax.imshow((m - m.min()) / (m.ptp() + 1e-9), cmap="magma")
+            else:
+                m = maps[c].float().numpy()
+                ax.imshow((m - m.min()) / (m.ptp() + 1e-9), cmap="magma")
+                r_t = _corr(maps[c], t)
+                pred = pb[idx] if c == 2 else pa[idx]
+                ok = "\u2713" if pred == ys[idx] else "\u2717"
+                ax.set_xlabel(f"pred: {nm(int(pred))} {ok}   r(target)={r_t:+.2f}",
+                              fontsize=8)
             ax.set_xticks([]), ax.set_yticks([])
             if r == 0:
                 ax.set_title(cols[c], fontsize=9)
-    fig.suptitle(f"{cell}: what the aux head pulls layer3 toward")
+    fig.suptitle(
+        f"{cell} — rows: aux RIGHT / baseline WRONG.  Test-set mean alignment "
+        f"r(layer3, target): baseline {align['base']:+.3f}  vs  aux "
+        f"{align['aux']:+.3f}", fontsize=10)
     fig.tight_layout()
     fig.savefig(os.path.join(out, f"heatmaps_{cell}.png"), dpi=150)
     plt.close(fig)
+    return align
 
 
 @torch.no_grad()
-def fig_cam(models, test_ds, device, out, cell, dataset, n_images=4):
-    """GAP->fc ResNets make CAM exact: cam_c = sum_k w[c,k] * feat_k(h,w)."""
-    xs = torch.stack([test_ds[i][0] for i in range(n_images)]).to(device)
-    fig, axes = plt.subplots(n_images, 3, figsize=(8, 2.6 * n_images))
-    cols = ["input", "baseline CAM", "aux CAM"]
-    for col, (name, (model, cfg)) in enumerate(models.items(), start=1):
-        fmap = model.net.forward_features(model.stem(xs))   # (B, C, h, w)
-        logits = model.net.get_classifier()(
-            model.net.global_pool(fmap))
-        pred = logits.argmax(1)
-        w = model.net.get_classifier().weight               # (n_cls, C)
+def fig_cam(models, test_ds, device, out, cell, dataset, loader,
+            names=None, n_images=4):
+    """CAM overlays on the same ADVANTAGE CASES (aux right, baseline wrong),
+    each panel labeled with that model's prediction."""
+    ys = np.asarray(getattr(test_ds, "targets"))
+    items = list(models.items())
+    pb = predictions(items[0][1][0], loader, device)
+    pa = predictions(items[1][1][0], loader, device)
+    adv = np.flatnonzero((pa == ys) & (pb != ys))[:n_images]
+    if len(adv) < n_images:
+        adv = np.arange(n_images)
+    xs = torch.stack([test_ds[int(i)][0] for i in adv]).to(device)
+
+    def nm(c):
+        return names[c] if names else f"class {c}"
+
+    fig, axes = plt.subplots(len(adv), 3, figsize=(9, 2.9 * len(adv)))
+    axes = np.atleast_2d(axes)
+    cols = ["input (true label)", "baseline CAM", "aux CAM"]
+    for col, (name, (model, cfg)) in enumerate(items, start=1):
+        fmap = model.net.forward_features(model.stem(xs))
+        pred = model.net.get_classifier()(model.net.global_pool(fmap)).argmax(1)
+        w = model.net.get_classifier().weight
         cam = torch.einsum("bchw,bc->bhw", fmap, w[pred])
-        for r in range(n_images):
+        for r, idx in enumerate(adv):
             m = cam[r].float().cpu().numpy()
             m = (m - m.min()) / (m.ptp() + 1e-9)
             m = np.array(torch.nn.functional.interpolate(
                 torch.tensor(m)[None, None], size=xs.shape[-2:],
                 mode="bilinear", align_corners=False)[0, 0])
-            axes[r, col].imshow(denorm(xs[r], dataset))
-            axes[r, col].imshow(m, cmap="magma", alpha=0.5)
-            axes[r, col].set_xticks([]), axes[r, col].set_yticks([])
+            ax = axes[r, col]
+            ax.imshow(denorm(xs[r], dataset))
+            ax.imshow(m, cmap="magma", alpha=0.5)
+            p = int(pred[r]); ok = "\u2713" if p == ys[idx] else "\u2717"
+            ax.set_xlabel(f"pred: {nm(p)} {ok}", fontsize=8)
+            ax.set_xticks([]), ax.set_yticks([])
             if r == 0:
-                axes[r, col].set_title(cols[col], fontsize=9)
-    for r in range(n_images):
-        axes[r, 0].imshow(denorm(xs[r], dataset))
-        axes[r, 0].set_xticks([]), axes[r, 0].set_yticks([])
+                ax.set_title(cols[col], fontsize=9)
+    for r, idx in enumerate(adv):
+        ax = axes[r, 0]
+        ax.imshow(denorm(xs[r], dataset))
+        ax.set_xlabel(nm(int(ys[idx])), fontsize=8)
+        ax.set_xticks([]), ax.set_yticks([])
         if r == 0:
-            axes[r, 0].set_title(cols[0], fontsize=9)
-    fig.suptitle(f"{cell}: class-activation maps (predicted class)")
+            ax.set_title(cols[0], fontsize=9)
+    fig.suptitle(f"{cell}: CAMs on aux-right / baseline-wrong cases", fontsize=10)
     fig.tight_layout()
     fig.savefig(os.path.join(out, f"cam_{cell}.png"), dpi=150)
     plt.close(fig)
@@ -247,10 +355,14 @@ def main():
     loader = DataLoader(test_ds, batch_size=512, num_workers=2, shuffle=False)
 
     cell = aux_cell
+    names = class_names(dataset, test_ds, args.data_root)
     fig_bank(args.out)
     fig_tsne(models, loader, device, args.out, cell, args.n_classes)
-    fig_heatmaps(models, test_ds, device, args.out, cell, dataset)
-    fig_cam(models, test_ds, device, args.out, cell, dataset)
+    align = fig_heatmaps(models, test_ds, device, args.out, cell, dataset,
+                         loader, names=names)
+    fig_cam(models, test_ds, device, args.out, cell, dataset, loader, names=names)
+    print(f"ALIGNMENT {cell}: baseline {align['base']:+.3f} aux {align['aux']:+.3f}",
+          flush=True)
     print(f"VIZ_DONE {cell} -> {args.out}", flush=True)
 
 
