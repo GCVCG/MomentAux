@@ -66,7 +66,17 @@ def extract(model, loader, device):
         x = x.to(device, non_blocking=True)
         with torch.autocast("cuda", enabled=device.type == "cuda"):
             f = model.net.forward_features(model.stem(x))
-            f = model.net.global_pool(f)
+            gp = model.net.global_pool
+            if callable(gp):
+                f = gp(f)
+            elif gp == "token":  # timm ViT: global_pool is a STRING; the
+                # penultimate feature is the CLS token (+ fc_norm, Identity
+                # unless pool='avg'), mirroring timm's forward_head.
+                f = model.net.fc_norm(f[:, 0])
+            elif gp == "avg":
+                f = model.net.fc_norm(f.mean(1))
+            else:
+                raise ValueError(f"unhandled global_pool {gp!r}")
         feats.append(f.float().cpu())
         ys.append(y)
     return torch.cat(feats), torch.cat(ys)
@@ -165,6 +175,7 @@ def main():
             small_input=cfg.get("small_input", True),
             stem_kernel_size=cfg.get("stem_kernel_size", 11),
             stem_kwargs=cfg.get("stem_kwargs"),
+            head=cfg.get("head"),
             moment_aux=cfg.get("moment_aux"),
         ).to(device)
         model.load_state_dict(torch.load(ckpt, map_location=device))

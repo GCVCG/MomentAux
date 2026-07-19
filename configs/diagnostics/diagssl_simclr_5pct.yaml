@@ -1,0 +1,19 @@
+# SimCLR-init control (matched-images, SSL-FAVORING 2x compute): abl5_none
+# verbatim, initialized from a 200-epoch SimCLR pretrain on the SAME
+# committed 5% subset images (scripts/simclr_pretrain.py). Comparators on
+# record: baseline 25.23, champion aux 30.53 (at ~1.02x baseline compute).
+name: diagssl_simclr_5pct
+dataset: cifar100
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 8
+small_input: true
+pretrained: false
+stem_kernel_size: 11
+subset_pct: 5
+stem: none
+init_from: runs/simclr_pre_5pct/seed{seed}/pretrain.pt

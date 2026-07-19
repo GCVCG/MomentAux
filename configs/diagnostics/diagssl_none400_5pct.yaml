@@ -1,0 +1,17 @@
+# Compute control for the SimCLR comparison: the SAME 2x budget given to
+# plain supervised training (400 epochs). Without this, any SSL gain is
+# confounded with its 2x step count (the diag10e800 lesson).
+name: diagssl_none400_5pct
+dataset: cifar100
+backbone: resnet18
+epochs: 400
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 8
+small_input: true
+pretrained: false
+stem_kernel_size: 11
+subset_pct: 5
+stem: none

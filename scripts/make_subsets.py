@@ -44,6 +44,10 @@ PCTS = {
     # mirror of tin@1% (1000 imgs / 5 per class).
     "tin20": (10,),
     "tin20b": (10,),
+    # CUB-200-2011: 5994 train imgs / 200 classes / ~30 per class. 100% is
+    # ALREADY the low-label fine-grained regime (30/cls, 46 batches x 200 =
+    # 9200 steps); 25% (~7-8/cls, 2200 steps) probes the deep left flank.
+    "cub": (25,),
 }
 
 
@@ -70,6 +74,10 @@ def get_labels(dataset, data_root):
         wn = tin20_wnids(root) if dataset == "tin20" else tin20b_wnids(root)
         _, new_targets = tin20_filter(base, root, keep_wnids=wn)
         return new_targets
+    if dataset == "cub":
+        from data import CUB200
+
+        return CUB200(data_root, train=True).targets
     raise ValueError(f"unknown dataset {dataset!r}")
 
 

@@ -34,12 +34,20 @@ STATS = {
     # low (14.08), so no readout boost -- label COUNT alone buys nothing;
     # what matters is baseline task performance, as the sign law says.
     "tinsuper": ((0.4802, 0.4481, 0.3975), (0.2770, 0.2691, 0.2821)),
+    # CUB-200-2011 at 64x64 (squash-resize; see CUB200): the first GENUINELY
+    # fine-grained dataset (200 bird species, ~30 train img/cls at 100%) --
+    # the "prior substitutes for fine-grained weak supervision" test.
+    # Stats computed 2026-07-20 on the 5994-image train split at 64x64 after
+    # the squash-resize (per-pixel mean/std over all images), then pinned.
+    "cub": ((0.4857, 0.4995, 0.4324), (0.2159, 0.2112, 0.2509)),
 }
 
 NUM_CLASSES = {"cifar100": 100, "cifar100super": 20, "cifar10": 10, "stl10": 10,
-               "tin": 200, "tin20": 20, "tin20b": 20, "tinsuper": 20}
+               "tin": 200, "tin20": 20, "tin20b": 20, "tinsuper": 20,
+               "cub": 200}
 IMAGE_SIZE = {"cifar100": 32, "cifar100super": 32, "cifar10": 32, "stl10": 96,
-              "tin": 64, "tin20": 64, "tin20b": 64, "tinsuper": 64}
+              "tin": 64, "tin20": 64, "tin20b": 64, "tinsuper": 64,
+              "cub": 64}
 
 # cifar100super is CIFAR-100's IMAGES with its 20 official coarse labels, and it
 # deliberately reuses CIFAR-100's COMMITTED subset indices (data/subsets/
@@ -203,6 +211,59 @@ class TinyImageNetVal(Dataset):
         return (self.transform(img) if self.transform else img), y
 
 
+class CUB200(Dataset):
+    """CUB-200-2011 (Wah et al. 2011) at 64x64: 200 bird species, 5994 train /
+    5794 test images, ~30 train images per class -- a NATURALLY low-label,
+    genuinely fine-grained task (tin20/tinsuper showed fine-grained weak
+    supervision is where the prior does the most feature work).
+
+    Images are squash-resized to 64x64 (BILINEAR) BEFORE the standard
+    crop+flip transform so the pipeline downstream of the resize is byte-
+    identical to tin's (RandomCrop(64, padding=8) + flip). Squash rather than
+    shortest-side+center-crop keeps the whole bird in frame; the choice is
+    fixed and identical for every cell, so it cancels in every Δ.
+
+    Expects <data_root>/CUB_200_2011/{images/, images.txt,
+    image_class_labels.txt, train_test_split.txt} (the official tgz layout).
+    """
+
+    def __init__(self, data_root, train, transform=None):
+        from PIL import Image
+
+        self.root = os.path.join(data_root, "CUB_200_2011")
+        if not os.path.isdir(self.root):
+            raise FileNotFoundError(
+                f"{self.root} missing. Get it once with:\n  cd data && wget "
+                "https://data.caltech.edu/records/65de6-vp158/files/"
+                "CUB_200_2011.tgz && tar xzf CUB_200_2011.tgz"
+            )
+        self.transform = transform
+        self._Image = Image
+
+        def read_pairs(name):
+            with open(os.path.join(self.root, name)) as f:
+                return [line.split() for line in f if line.strip()]
+
+        paths = {i: p for i, p in read_pairs("images.txt")}
+        labels = {i: int(c) - 1 for i, c in read_pairs("image_class_labels.txt")}
+        is_train = {i: t == "1" for i, t in read_pairs("train_test_split.txt")}
+        ids = sorted((i for i in paths if is_train[i] == train), key=int)
+        self.samples = [
+            (os.path.join(self.root, "images", paths[i]), labels[i]) for i in ids
+        ]
+        self.targets = [t for _, t in self.samples]
+
+    def __len__(self):
+        return len(self.samples)
+
+    def __getitem__(self, i):
+        path, y = self.samples[i]
+        img = self._Image.open(path).convert("RGB").resize(
+            (64, 64), self._Image.BILINEAR
+        )
+        return (self.transform(img) if self.transform else img), y
+
+
 def tin_root(data_root):
     return os.path.join(data_root, "tiny-imagenet-200")
 
@@ -314,6 +375,8 @@ def build_dataset(dataset, data_root, train, subset_pct=None, download=True):
             else TinyImageNetVal(root, transform=tf)
         )
         ds = Relabelled(base, [t // 10 for t in base.targets])
+    elif dataset == "cub":
+        ds = CUB200(data_root, train=train, transform=tf)
     else:
         raise ValueError(f"unknown dataset {dataset!r}")
     if subset_pct is not None and subset_pct != 100:
@@ -341,6 +404,8 @@ def calibration_batch(dataset, data_root, n=1024):
         # point of the within-tin granularity control. Mirrors cifar100super
         # calibrating on cifar100's images.
         ds = datasets.ImageFolder(os.path.join(tin_root(data_root), "train"), transform=tf)
+    elif dataset == "cub":
+        ds = CUB200(data_root, train=True, transform=tf)
     else:
         raise ValueError(f"unknown dataset {dataset!r}")
     return torch.stack([ds[i][0] for i in range(min(n, len(ds)))])

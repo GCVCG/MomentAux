@@ -1,0 +1,24 @@
+# CUB-200-2011 @25% -- first genuinely FINE-GRAINED dataset (200 bird
+# species, ~30 train img/cls at 100%): the 'prior substitutes for fine-
+# grained weak supervision' test (tin20/tinsuper finding). Champion config
+# verbatim (64px pipeline identical to tin's after the squash-resize).
+name: cub_aux_25pct
+dataset: cub
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 4
+small_input: true
+pretrained: false
+subset_pct: 25
+stem: none
+stem_calibrate: true
+moment_aux:
+  stem: energy-magnitude
+  tap: layer3
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine

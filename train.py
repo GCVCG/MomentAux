@@ -155,8 +155,30 @@ def main():
         stem_seed=args.seed,
         stem_kwargs=cfg.get("stem_kwargs"),
         head_pool=cfg.get("head_pool"),
+        head=cfg.get("head"),
         moment_aux=cfg.get("moment_aux"),
     ).to(device)
+    # A non-linear classifier head is an ARCHITECTURE deviation from the
+    # frozen recipe's implicit plain-linear readout: diag-only, same rule
+    # as adamw below.
+    if cfg.get("head") and not cfg["name"].startswith("diag"):
+        raise ValueError("head: requires a diag* config name (never headline)")
+    # init_from: load a pretrained state_dict (e.g. scripts/simclr_pretrain)
+    # before training. "{seed}" in the path is filled with this run's seed so
+    # pretrain and supervised stay paired. strict=False: the pretrain ckpt
+    # omits the classifier (and any aux heads) by construction. Changing the
+    # INIT deviates from the frozen recipe -> diag-only.
+    init_from = cfg.get("init_from")
+    if init_from:
+        if not cfg["name"].startswith("diag"):
+            raise ValueError("init_from requires a diag* config name")
+        path = init_from.format(seed=args.seed)
+        sd = torch.load(path, map_location=device)
+        missing, unexpected = model.load_state_dict(sd, strict=False)
+        if unexpected:
+            raise ValueError(f"init_from {path}: unexpected keys {unexpected[:5]}")
+        print(f"init_from {path}: {len(sd)} tensors, "
+              f"{len(missing)} left at fresh init")
     if cfg.get("stem_calibrate", False):
         # Deterministic calibration batch: first N train images in index
         # order, eval transform (no augmentation) -- identical for every

@@ -7,15 +7,40 @@ the standard CIFAR stem surgery -- conv1 becomes 3x3/stride 1 and the first
 maxpool is removed -- identically for every stem variant.
 """
 
+import math
+
 import timm
 import torch
 from torch import nn
+from torch.nn import functional as F
 
 from .controls import build_stem
 from .stem import MomentStem
 
 RESNETS = ("resnet18", "resnet34", "resnet50")
 BACKBONES = RESNETS + ("convnext_tiny", "vit_tiny")
+
+
+class CosineClassifier(nn.Module):
+    """Cosine-similarity classifier (Gidaris & Komodakis 2018): logits =
+    s * cos(theta) between L2-normalized features and class weights; drop-in
+    replacement for the final nn.Linear. This is the left-flank READOUT
+    experiment: at 5 img/class a linear head must estimate direction AND
+    magnitude+bias of every class vector from 5 examples; cosine removes the
+    magnitude/bias degrees of freedom, which is the standard few-shot remedy.
+    s is learnable (init 16, the common value for ~100-way)."""
+
+    def __init__(self, in_features, num_classes, scale=16.0):
+        super().__init__()
+        self.in_features = in_features
+        self.weight = nn.Parameter(torch.empty(num_classes, in_features))
+        nn.init.kaiming_uniform_(self.weight, a=math.sqrt(5))
+        self.scale = nn.Parameter(torch.tensor(float(scale)))
+
+    def forward(self, x):
+        return self.scale * F.linear(
+            F.normalize(x, dim=-1), F.normalize(self.weight, dim=-1)
+        )
 
 
 class StemmedModel(nn.Module):
@@ -38,6 +63,7 @@ def build_model(
     stem_seed=0,
     stem_kwargs=None,
     head_pool=None,
+    head=None,
     moment_aux=None,
 ):
     """Build stem + backbone for one experimental cell.
@@ -119,6 +145,17 @@ def build_model(
         in_feats = net.fc.in_features
         net.global_pool = pool
         net.fc = nn.Linear(in_feats * pool.J, num_classes)
+    if head:
+        # Replace the linear classifier. Happens BEFORE the moment_aux wrap so
+        # aux cells get the same head as their baselines; MomentAuxModel never
+        # touches net.fc, only its own aux heads.
+        if head != "cosine":
+            raise ValueError(f"unknown head '{head}' (only 'cosine' exists)")
+        if backbone not in RESNETS:
+            raise ValueError("head: cosine only implemented for ResNets")
+        if head_pool:
+            raise ValueError("head and head_pool are mutually exclusive")
+        net.fc = CosineClassifier(net.fc.in_features, num_classes)
     if moment_aux:
         from .aux import HOGTarget, MomentAuxModel, MomentTarget, TeacherTarget
 

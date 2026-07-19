@@ -30,10 +30,15 @@ ported vs corrected and why.
   write a `logs/*_wave.log` (PID to `logs/*.pid`), end with a `*_COMPLETE`
   marker line. All wave logs live in `logs/` — never the repo root.
 - turing cluster (`ssh amughrabi@turing.ub.edu`): repo mirror at
-  /mnt/beegfs/amughrabi/projects/MomentsCNNEncoder, venv at
+  /mnt/beegfs/amughrabi/projects/MomentsCNNEncoder (rsync copy, NOT a git
+  repo — sync code with rsync, pull run results back the same way), venv at
   /mnt/beegfs/amughrabi/envs/momentstem. GPU jobs need
-  `--partition=gpu --qos=gpu` (default QOS has zero GPUs). **H100 only —
-  the H200 is reserved for the user's other work.** Max 2 running jobs.
+  `--partition=gpu --qos=gpu` (default QOS has zero GPUs). Max 2 running
+  jobs (= one per GPU). **2026-07-19 user decision: the next-steps campaign
+  runs on turing using BOTH GPUs (H100 + H200)** — this supersedes the old
+  "H200 reserved" rule for this campaign. Wave sbatch scripts pin the venv
+  python explicitly (submission-env-independent); markers/logs follow the
+  local conventions but live in slurm/logs/.
 - CIFAR-100-C lives at data/CIFAR-100-C (local) and
   /mnt/beegfs/amughrabi/data/CIFAR-100-C (turing).
 - **`num_workers` IS PART OF THE REPRODUCIBILITY CONTRACT** (verified 2026-07-17,
@@ -132,6 +137,112 @@ ported vs corrected and why.
   (err): corruption robustness TRACKS the clean gain (~55-60% of it), no
   extra benefit, no cost, neutral at 100%. Same verdict as forward-path H3.
 - aggregate.py regenerated (results/summary.md|tex current).
+
+## Turing campaign (2026-07-19, user-approved "all points deserve
+## investigation, use turing, both GPUs")
+
+- Four thrusts approved: (1) left-flank readout experiments, (2) diagvit
+  envelope, (3) fine-grained transplant (CUB-200 class), (4) SSL matched-
+  compute comparison. (1)+(2) launched first (code-ready); (3)+(4) queued
+  behind them (need dataset/SSL scaffolding).
+- NEW CODE: `head: cosine` config option (CosineClassifier in backbones.py,
+  Gidaris-style s*cos(theta), learnable s init 16, ResNets only, diag-only
+  guard in train.py; linear_probe.py plumbs it for ckpt loading — probe
+  extraction itself never touches fc). Smoke-tested; full suite 101 passed.
+- diagcos wave (H200): parent cells VERBATIM + head:cosine, both pair
+  members get the head — diagcos_c100_{none,aux}_1pct (parents abl1_none /
+  auxmag_1pct_sched0) and diagcos_tin_{none,aux}_1pct. 3 seeds + full-label
+  probes.
+  PREDICTIONS RECORDED IN ADVANCE: the study's own evidence (Q7.3 —
+  e2e realizes exactly what a same-budget LINEAR probe realizes; tap sweep —
+  the left flank is label-information-limited, not architecture-limited)
+  predicts the NULL: Δ_cos ≈ Δ_linear.
+    diagcos_c100_1pct: Δ +1.1..+1.9 (linear-head champion +1.49).
+    diagcos_tin_1pct:  Δ +1.1..+1.9 (linear-head champion +1.49±0.09).
+    G on cosine-head ckpts ≈ unchanged (C100@500 ~3.9, tin@1000 ~4.2-4.5):
+      the head shapes readout, not features.
+  FALSIFIER: Δ ≥ +2.5 on either dataset => head expressivity IS part of the
+  left-flank penalty, reopening the readout-design axis (NCM/prototype heads,
+  and the "+4.7 unclaimed feature gain" becomes partially cashable). A big
+  move in G would instead say the cosine constraint changed FEATURE learning
+  (feature-norm regularization) — a different, also-interesting outcome.
+- diagvit wave (H100): diagvit_{none,aux}_{1,5,25}pct on C100 (10% already
+  measured: +13.26±0.33, base 16.47). 3 seeds + probes. AdamW => diag-only.
+  PREDICTIONS (qualitative — G(vit) unmeasured, no G-based numbers):
+    @5%: large rescue, Δ ≥ +8 (baseline deep-underfit).
+    @1%: positive but SUPPRESSED vs 5%/10% (sign law: readout negative at
+      very low baselines; all vit baselines sit below the ~30 crossing, so
+      Δ < G everywhere, suppression strongest at 1%).
+    @25%: positive; smaller than +13.26 iff the baseline rises materially
+      above 16.5 (Δ should fall monotonically as baseline underfit-ness
+      shrinks). If base@25% stays ≤ ~25, the rescue may stay ≥ +10.
+    Probes: G(vit) expected LARGER than R18's G at matched cells (part of
+      the rescue is a feature deficit attention cannot self-learn here).
+  FALSIFIER for "the same law governs attention": readout = Δ − G coming out
+  POSITIVE at baselines far below 30 (conv sign law would not transfer).
+- *** HEAD-FORMS ANSWERED AT THE PROBE LEVEL (2026-07-20, local wave,
+  analysis/head_forms.py, all seeds, 5 draws/seed): THE READOUT PENALTY IS
+  LABEL-INFORMATION, NOT HEAD EXPRESSIVITY. Matched 5/cls budget on frozen
+  ckpt features, aux-vs-baseline gap by head form:
+    C100@1%: linear +1.74±0.05 | cosine +1.57±0.05 | ncm +1.47±0.09
+    tin@1%:  linear +1.48±0.06 | cosine +1.49±0.05 | ncm +1.50±0.04
+  The GAP is head-form-INVARIANT (tin exactly so; C100 spread ~0.27, small).
+  Cosine/NCM lift ABSOLUTE accuracy ~+0.3-0.6 on BOTH members (a generic
+  few-shot head effect) but read the SAME aux gap — few-shot head tricks do
+  not unlock the unclaimed feature gain. STRONG PRIOR that the e2e diagcos
+  cells land at the null (Δ_cos ≈ Δ_linear), as predicted in advance.
+- tin@100% LANDED (2026-07-20, frontier2 COMPLETE): 66.17±0.25 ->
+  65.75±0.58 = **−0.42 ±0.36** — inside the qualitative band (~neutral
+  ±0.5), 1.2σ from zero. THE TIN ENVELOPE IS CLOSED: +1.49/+1.81/+2.13/
+  +1.65/+0.10/−0.42 at 1/2/5/10/25/100% — falling G(tin) all the way to a
+  mildly-negative full-data cell (mirrors C10@100% −0.26: λ0=1.0 verbatim
+  above the crossing; per-regime λ0 would likely restore exact neutrality,
+  same as C10's story — not worth the GPU to confirm).
+- *** diagvit@10% PROBED (2026-07-20, local; linear_probe.py gained a ViT
+  extraction path — timm ViT global_pool is the STRING "token", CLS token +
+  fc_norm): G(vit, C100@10%) = **+14.85 ±0.53** (probe 24.87±0.87 ->
+  39.72±0.29) — ~2.3x the largest conv G ever measured (6.35). Implied
+  readout = +13.26 − 14.85 = **−1.59** at base 16.47: NEGATIVE below the
+  ~30 crossing, exactly as the conv-derived sign law requires (21st clean
+  cell, first attention cell). The ViT rescue is a G effect: attention at
+  this scale has a huge feature deficit the prior fills. The running
+  diagvit wave tests this across 1/5/25%.
+- PHASE 2 QUEUED (2026-07-20, submitted as PENDING behind the running
+  waves; MaxSubmitPU=128 so queuing ahead is allowed, MaxJobsPU=2 enforces
+  one-per-GPU). Both use --gres=gpu:1 (whichever GPU frees first).
+  NEW INFRA: data.py CUB200 loader (CUB-200-2011 @64px squash-resize,
+  5994/5794 split, stats pinned from the train split, subsets extended —
+  data/subsets/cub_25pct.json committed, 1594 imgs ~8/cls);
+  scripts/simclr_pretrain.py (NT-Xent, two-view, subset-images-only);
+  train.py `init_from` (diag-only, {seed}-templated, strict=False minus
+  classifier). All smoke-tested; suite 101 green after changes.
+  cub wave (slurm/cub_wave.sbatch): cub_{none,aux}_{25,100}pct, champion
+  verbatim, 3 seeds + probes. PREDICTIONS RECORDED IN ADVANCE (G(cub)
+  unmeasured -> banded by tin/tinsuper precedent):
+    cub@100% (30/cls, ~9200 steps): Δ +1.5..+4.5 — fine-grained weak
+      supervision is where the prior does its most feature work (tin20/
+      tinsuper ckpt-set effect), but 6k images sits on the falling-G right
+      flank. Baseline guess (NOT a prediction): ~15-25.
+    cub@25% (~8/cls): Δ +0.5..+2.0 (near the universal ~+1.5 5-per-cls
+      floor; readout penalty deep on the left flank).
+    FALSIFIERS: Δ(100%) ≥ +5 => fine-grained tasks carry genuinely richer
+      G than any 64px dataset measured (reopens the fine-grained axis as a
+      headline direction); Δ(100%) ≤ 0 => the fine-grained hypothesis dies.
+    PROBE CAVEAT recorded now: at cub@100% probe labels == cell labels, so
+    the G/readout SPLIT is not interpretable there (probe-ceiling rule);
+    the aux-vs-base probe gap under identical probing still is.
+  ssl wave (slurm/ssl_wave.sbatch): per seed SimCLR 200ep pretrain on the
+  committed 5% subset images -> frozen recipe from that init
+  (diagssl_simclr_5pct); plus diagssl_none400_5pct = 400-epoch plain
+  baseline (the 2x-compute control; step-count confound lesson).
+  PREDICTIONS RECORDED IN ADVANCE:
+    diagssl_simclr_5pct: 26..28.5 (above baseline 25.23, BELOW champion
+      30.53 despite 2x compute — SimCLR is data-starved at 2500 imgs).
+    diagssl_none400_5pct: ~27-29 (diag10e800 precedent: longer training
+      alone buys points) — the SSL init must beat THIS, not the 200ep
+      baseline, to claim any SSL-specific value.
+    FALSIFIER: diagssl_simclr_5pct ≥ 30.5 => SSL matches the prior at 2x
+      compute and the "cheapest prior" positioning needs rewording.
 
 ## State of findings (2026-07-16)
 
