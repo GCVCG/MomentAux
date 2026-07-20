@@ -803,6 +803,25 @@ ported vs corrected and why.
     any bank re-pin. The committed 8-pair bank stays the headline bank —
     a re-pin would invalidate every existing run and needs the user's
     explicit decision.
+- OCTAVE-MECHANISM WAVE LAUNCHED (2026-07-20, user-approved, local 3090):
+  three cells that turn the adjudicated auxmag3 excess (+0.49, 4.4σ) into a
+  mechanism-tested finding. PREDICTIONS RECORDED IN ADVANCE:
+    auxmag3_tin_10pct (octave persistence on the falling flank): if the
+      octave keeps supplying fresh feature content, excess vs champion
+      (+1.65±0.27) of +0.3..+0.7; if its value was 5k-specific, 0±0.3.
+      Secondary: G probe vs champion's G(tin,10000)=1.70.
+    auxmag3_c100_5pct (NEGATIVE CONTROL, 32px): the resolution account says
+      the sigma=4 envelope adds nothing at 32px — Δ within ±0.4 of the
+      champion's +5.30. FALSIFIER: excess ≥ +0.5 at 32px kills the "new
+      resolvable frequency" mechanism (the excess would then be about
+      target statistics, not image content).
+    auxmag6o_tin_5pct (WIDTH-MATCHED control, 12ch from 6 orientations x 2
+      committed octaves, k11, no new frequencies): redundancy account says
+      Δ ≈ champion's +2.15 (band +1.85..+2.45), NOT auxmag3's +2.64.
+      FALSIFIER: excess ≥ +0.5 => target WIDTH, not the octave, drives the
+      auxmag3 excess — would gut the octave interpretation.
+  All three: 3 seeds + G probes; banks pinned additively (magnitude6o in
+  test_bank_regression); suite 101 green.
 - LEVELS REANALYSIS of the 2x2 (2026-07-19, from existing probe JSONs):
   under the common 200-way stick, the ckpt-set effect is a BASELINE effect:
   base 19.27 (tin@1%-trained) vs 23.71/23.98 (tin20/tin20b-trained) while

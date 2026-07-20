@@ -1,0 +1,24 @@
+# NEGATIVE CONTROL for the octave mechanism (2026-07-20): at 32px the sigma=4
+# envelope cannot resolve new spatial structure, so the resolution account
+# predicts NO excess over the champion's +5.30. Shares abl5_none.
+name: auxmag3_c100_5pct
+dataset: cifar100
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 8
+small_input: true
+pretrained: false
+subset_pct: 5
+stem: none
+stem_calibrate: true
+moment_aux:
+  stem: energy-magnitude3
+  kernel_size: 17
+  tap: layer3
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine
