@@ -243,6 +243,31 @@ ported vs corrected and why.
       baseline, to claim any SSL-specific value.
     FALSIFIER: diagssl_simclr_5pct ≥ 30.5 => SSL matches the prior at 2x
       compute and the "cheapest prior" positioning needs rewording.
+- tinsem wave QUEUED (2026-07-20, user: "no reason not to queue it" — the
+  Q6.9j semantic-vs-arbitrary caveat gets its adjudication). tinsem =
+  tinsuper with ONLY the block-of-10 sort key changed: WordNet hypernym-
+  path order (scripts/make_tin_semantic_order.py, committed in
+  data/subsets/tin_semantic_order.json — groups audit as coherent: vehicles,
+  dogs+cats, insects, food...) vs lexicographic wnid. Byte-identical pixels,
+  identical 20x50 structure at tin@1%'s committed subset. 10 seeds;
+  tinsuper DEEPENED 3->10 in the same wave (power-matched reference);
+  probes in both spaces.
+  PREDICTIONS RECORDED IN ADVANCE:
+    PRIMARY FORK — G_200(tinsem ckpts) on the common 200-way stick:
+      H-semantic (coherence carries the tin20-vs-tinsuper G_200 gap):
+        ≈ 3.0-3.1 (tin20/tin20b's band), above tinsuper's 2.55.
+      H-arbitrary (sort key irrelevant): ≈ 2.55 (tinsuper's value); the
+        3.08-vs-2.55 hint was noise or tin20's pixel population.
+    BOTH branches: G_200(tinsem) stays WELL below tin@1%'s 4.19 (the
+      fine-vs-coarse main effect, 3.8σ+, must persist). If it lands ~4.2
+      the coarse-training G cut itself was an artifact — major surprise.
+    e2e: baseline should rise well above tinsuper's 14.08 (semantically
+      coherent groups are learnable; if base stays ~14 the semantic sort
+      failed to create visual coherence and the fork is void — audit).
+      Δe2e is NOT independently predicted: the law demands Δ = G_20own +
+      readout(base), with readout sign set by base vs the ~30 crossing
+      (tinsuper hit this identity exactly; tinsem must too — 21st/22nd
+      clean cells).
 
 ## State of findings (2026-07-16)
 
@@ -638,6 +663,29 @@ ported vs corrected and why.
       inside the qualitative band (flat ≤+2.2). The tin envelope right
       flank reaches zero by 25k images, exactly as falling G(tin) predicts:
       +1.49/+1.81/+2.13/+1.65/+0.10 at 1/2/5/10/25%.
+- *** tin@100% LANDED — THE CAMPAIGN IS COMPLETE (2026-07-19, frontier2
+  COMPLETE marker): 66.17±0.25 -> 65.75±0.58 = **−0.42 ±0.36** — inside the
+  qualitative band (neutral ±0.5), 1.2σ from zero, mirroring C10@100%'s
+  −0.26 (champion λ0=1.0 verbatim; per-regime λ0=0.1 would likely restore
+  exact neutrality as on C100 — not worth the GPU). THE TIN ENVELOPE IS
+  CLOSED: +1.49/+1.81/+2.13/+1.65/+0.10/−0.42 at 1/2/5/10/25/100% — falling
+  G(tin) all the way down, left flank readout-suppressed. Every cell of the
+  user-approved remaining-experiments program has now landed and been scored
+  against its pre-registered band.
+- auxmag3 SCORED (2026-07-19, both cells + probes, 3 seeds):
+    @1%: +1.63 ±0.09 — IN BAND (+1.3..+1.7), 1.1σ from champion's +1.49:
+      no added value, exactly as the redundancy account predicted.
+      G = 4.52 ±0.18 vs champion 4.19 (1.9σ, below the G>=5.0 falsifier).
+    @5%: **+2.72 ±0.19 — NOMINALLY ABOVE the band (+1.8..+2.4) and past the
+      e2e falsifier** (+0.59 ±0.26 above champion = 2.3σ). BUT the G probe
+      shows NO feature-level difference (2.83 vs 2.67, 0.6σ) — an e2e excess
+      with flat G would have to be a readout effect the bank should not
+      touch, so 3-seed noise is the leading account (the study's oldest
+      lesson). NOT ADJUDICATED: deepening BOTH 5% aux cells to 10 seeds
+      (auxmag3deep wave, launched immediately — GPU freed by frontier2).
+      If +0.59 survives 10v10 (~5σ at that power), the octave DOES carry
+      value at mid-data and the bank-design axis reopens; if it shrinks,
+      the redundancy account stands everywhere.
 - LEVELS REANALYSIS of the 2x2 (2026-07-19, from existing probe JSONs):
   under the common 200-way stick, the ckpt-set effect is a BASELINE effect:
   base 19.27 (tin@1%-trained) vs 23.71/23.98 (tin20/tin20b-trained) while
