@@ -344,6 +344,23 @@ ported vs corrected and why.
     any bank re-pin. The committed 8-pair bank stays the headline bank —
     a re-pin would invalidate every existing run and needs the user's
     explicit decision.
+- *** SSL2 LANDED (2026-07-20, wave COMPLETE 0h50) — REDUNDANCY CONFIRMED
+  AS ACTIVE INTERFERENCE, AND THE FRONTIER PINNED:
+    diagssl_simclr50_5pct: **30.81 ±0.23** — IN BAND (30..34), a statistical
+      TIE with champion 30.53 at 1.25x compute. The champion's unique niche
+      is compute budgets < ~1.25x; from there up SSL matches then wins.
+    diagssl_simclraux_5pct: **32.90 ±0.42** — MISSED LOW (band 34.4+0..+1.5):
+      the aux prior COSTS an SSL-initialized run −1.51 ±0.31, and its probe
+      is 0.70 lower (feature-level component). Mirrors the fwd-combo lesson:
+      once features are shaped (here by SimCLR), early λ0=1.0 shaping only
+      taxes. RECOMMENDATION ON RECORD: aux XOR SSL, never both.
+    Probes: G(simclr ckpts vs abl5_none ckpts) = **+9.0** — IN the +9..+12
+      feature-side band (≫ champion's 6.35). SSL's win is the SAME currency
+      as the prior's G — it fills the same feature deficit, more of it —
+      which is WHY they do not stack. Law check on the first non-aux
+      intervention: Δ +9.18 ≈ G +9.02, readout +0.16 ±0.3 (≈0; nominally
+      above the negative branch expected at base 25.2 — noted, not scored:
+      the sign law was derived on aux cells only).
 - tinsem wave QUEUED (2026-07-20, user: "no reason not to queue it" — the
   Q6.9j semantic-vs-arbitrary caveat gets its adjudication). tinsem =
   tinsuper with ONLY the block-of-10 sort key changed: WordNet hypernym-
