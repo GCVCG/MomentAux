@@ -1,0 +1,18 @@
+# Near-matched-compute SSL point (1.25x): 50-epoch SimCLR pretrain + the
+# frozen 200-epoch recipe. Locates where SSL's 2x-compute win (34.41)
+# turns on along the compute axis.
+name: diagssl_simclr50_5pct
+dataset: cifar100
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 8
+small_input: true
+pretrained: false
+stem_kernel_size: 11
+subset_pct: 5
+stem: none
+init_from: runs/simclr_pre50_5pct/seed{seed}/pretrain.pt

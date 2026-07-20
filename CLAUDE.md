@@ -243,6 +243,72 @@ ported vs corrected and why.
       baseline, to claim any SSL-specific value.
     FALSIFIER: diagssl_simclr_5pct ≥ 30.5 => SSL matches the prior at 2x
       compute and the "cheapest prior" positioning needs rewording.
+- *** DIAGCOS LANDED (2026-07-20, wave COMPLETE, 6h48): THE E2E NULL
+  CONFIRMED ON C100, AND TIN CAME IN BELOW EVEN THE NULL.
+    diagcos_c100_1pct: Δ_cos = **+1.60 ±0.17** — IN BAND (+1.1..+1.9),
+      0.6σ from linear champion +1.49. Exactly the predicted null.
+    diagcos_tin_1pct:  Δ_cos = **+0.92 ±0.15** — MISSED LOW (band
+      +1.1..+1.9): ~3σ BELOW the linear champion +1.49±0.09. Baseline
+      identical to linear's (5.30 = 5.30); the cosine head cost the AUX
+      cell ~0.6. G probes say features are unchanged (C100 3.25±0.18 vs
+      3.88±0.39; tin 4.27±0.26 vs 4.19-4.33 — dead on), so the loss is a
+      READOUT-level training effect at 200-way/5-shot, not a feature one.
+  VERDICT: head expressivity buys nothing anywhere (head_forms predicted
+  this) and e2e cosine training slightly HURTS at fine label spaces. The
+  readout-design axis is now closed from both ends: the left-flank
+  unclaimed gain is label-information-limited, full stop.
+- *** DIAGVIT ENVELOPE LANDED (2026-07-20, wave COMPLETE, 2h23; probes
+  included). Full pairs + G at every point (3 seeds):
+    @1%:  6.44±0.19 ->  7.80±0.21 = **+1.35 ±0.16** | G +5.89±0.75,
+      readout −4.54 @ base 6.4
+    @5%: 12.25±0.83 -> 21.60±0.51 = **+9.35 ±0.56** | G +13.17±0.54,
+      readout −3.82 @ base 12.3  (band "Δ ≥ +8" HIT)
+    @10% (prior): +13.26±0.33 | G +14.85±0.53, readout −1.59 @ 16.5
+    @25%: 28.50±0.63 -> 42.17±0.57 = **+13.67 ±0.49** | G +14.03±0.29,
+      readout −0.36 @ base 28.5
+  @1% suppressed as predicted; @25% MISSED the soft "Δ falls as base
+  rises" call — because G(vit) does NOT fall: 5.89/13.17/14.85/14.03 at
+  0.5/2.5/5/12.5k imgs, a rising-then-plateau curve ~14-15 with NO right
+  flank through 25%. Same error class as ever: extrapolating an unmeasured
+  G. THE LAW ITSELF IS PERFECT ON ATTENTION: Δ = G + readout holds at all
+  four points, readout monotone (−4.54/−3.82/−1.59/−0.36), negative below
+  the ~30 crossing everywhere — sign law now 25 clean cells, 5 on ViT.
+  ViT-tiny's feature deficit is HUGE and constant-ish (~14) across 2.5-12.5k
+  images: the prior is worth ~2.3x more to attention-at-small-scale than to
+  any conv backbone measured.
+- *** SSL WAVE LANDED — THE FALSIFIER FIRED (2026-07-20, wave COMPLETE,
+  0h58). diagssl_simclr_5pct = **34.41 ±0.17** (seeds 34.56/34.22/34.45)
+  vs predicted 26..28.5 — blew through the ≥30.5 falsifier: SimCLR
+  pretrain on the SAME 2500 subset images + frozen recipe BEATS the
+  champion aux (30.53) by **+3.9** at 2x compute. The compute control
+  diagssl_none400_5pct = **27.34 ±0.25** landed IN its band (27-29):
+  plain 2x compute buys +2.1, so the SSL-specific value is **+7.1**.
+  Frontier at C100@5%: baseline 25.23 (1x) < none400 27.34 (2x) <
+  champion aux 30.53 (~1.02x) < simclr-init 34.41 (2x).
+  CONSEQUENCE (per the recorded falsifier): the "cheapest prior"
+  POSITIONING NEEDS REWORDING — MomentAux's claim narrows to its
+  ~zero marginal cost (+2% compute vs +100%) and possible orthogonality;
+  it is NOT the accuracy frontier at 2x. What survives untouched: every
+  within-recipe finding (the law, G curves, sign law) — none of them
+  claimed SSL-superiority. OPEN QUESTIONS -> ssl2 wave (queued):
+  is the prior REDUNDANT with SimCLR features (combo cell), and does
+  SSL's win survive at near-matched compute (50ep pretrain)?
+  ssl2 wave PREDICTIONS RECORDED IN ADVANCE:
+    diagssl_simclraux_5pct (simclr init + champion aux, 2.02x): the
+      fwd-combo precedent and "prior substitutes for supervision" both
+      predict REDUNDANCY: 34.4 + (+0..+1.5) over simclr-init alone.
+      FALSIFIER: ≥ +2.5 over 34.41 => the two priors stack (moment
+      structure carries information SimCLR cannot learn from 2500 imgs)
+      — would reopen aux-on-SSL as a headline direction.
+    diagssl_simclr50_5pct (1.25x): 30..34 (SSL gains are front-loaded);
+      the frontier question is whether it clears champion 30.53 at near-
+      matched compute. Below 30.5 => the champion keeps a genuine
+      low-overhead niche; above => SSL dominates from ~1.25x on.
+    Probes (G under identical probing vs abl5_none ckpts): if SimCLR's
+      +9.2 is FEATURE-side, G(simclr ckpts) ≈ +9..+12 (≫ champion's
+      6.35); the law then demands readout(base 34.4) ≈ +0.5..+1.5
+      (positive branch, decaying). A small G with big Δ would violate
+      the law and be the bigger news.
 - tinsem wave QUEUED (2026-07-20, user: "no reason not to queue it" — the
   Q6.9j semantic-vs-arbitrary caveat gets its adjudication). tinsem =
   tinsuper with ONLY the block-of-10 sort key changed: WordNet hypernym-
