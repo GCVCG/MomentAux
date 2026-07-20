@@ -787,6 +787,22 @@ ported vs corrected and why.
       If +0.59 survives 10v10 (~5σ at that power), the octave DOES carry
       value at mid-data and the bank-design axis reopens; if it shrinks,
       the redundancy account stands everywhere.
+- *** AUXMAG3 DEEPENING ADJUDICATED — THE OCTAVE EXCESS IS REAL (2026-07-20,
+  local 10v10 vs the 3-seed tension recorded 2026-07-19):
+    tin@5% champion (10 seeds): 23.20±0.30 = Δ +2.15 (3-seed +2.13 held)
+    auxmag3   (10 seeds):       23.68±0.19 = Δ +2.64
+    auxmag3 − champion = **+0.49 ±0.11 = 4.4σ** — the 3-seed nominal
+    excess (+0.59, 2.3σ) SURVIVED power. G probes agree in direction:
+    35.05±0.38 vs 34.69±0.32 (10-seed probes, +0.36 ±0.16, 2.3σ).
+    VERDICT: the extra LOW OCTAVE (sigma=4/k=17) carries real supervisory
+    value at tin@5% — right at the recorded falsifier boundary (≥+0.5),
+    and this time the feature-level probe moves WITH e2e (unlike the
+    3-seed read). THE BANK-DESIGN AXIS REOPENS, scoped: octaves (new
+    frequency content), not orientations (near-linear combos), are the
+    direction; worth one follow-up (auxmag3 on tin@10%/C100@5%) before
+    any bank re-pin. The committed 8-pair bank stays the headline bank —
+    a re-pin would invalidate every existing run and needs the user's
+    explicit decision.
 - LEVELS REANALYSIS of the 2x2 (2026-07-19, from existing probe JSONs):
   under the common 200-way stick, the ckpt-set effect is a BASELINE effect:
   base 19.27 (tin@1%-trained) vs 23.71/23.98 (tin20/tin20b-trained) while
