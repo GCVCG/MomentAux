@@ -309,6 +309,41 @@ ported vs corrected and why.
       6.35); the law then demands readout(base 34.4) ≈ +0.5..+1.5
       (positive branch, decaying). A small G with big Δ would violate
       the law and be the bigger news.
+- *** CUB WAVE LANDED — BOTH CELLS IN BAND, FINE-GRAINED HYPOTHESIS
+  SURVIVES MODESTLY (2026-07-20, wave COMPLETE 12h, probes included):
+    cub@25% (~8/cls): 5.57±0.14 -> 6.13±0.18 = **+0.56 ±0.13** — IN BAND
+      (+0.5..+2.0, bottom edge). G = +0.85±0.26; readout = −0.29 at base
+      5.6 — negative deep below the crossing, sign law 26th clean cell.
+      Deep-left-flank suppression exactly as the law predicts.
+    cub@100% (30/cls, 6k imgs): 44.32±0.68 -> 47.06±0.57 = **+2.74 ±0.51**
+      — IN BAND (+1.5..+4.5); NEITHER falsifier fired (not ≥+5, not ≤0).
+      Probe gap +3.03±0.65 ≈ Δ. The pre-recorded PROBE CAVEAT applies:
+      probe labels == cell labels at 100%, so the G/readout split is NOT
+      interpretable here (readout −0.29 nominal, excluded per the
+      probe-ceiling rule; the aux-vs-base gap under identical probing
+      stands).
+    READING: at ~matched image count, fine-grained CUB@100% (+2.74, 6k
+    imgs) sits a bit above tin@5% (+2.13, 5k) — fine-grained weak
+    supervision helps somewhat, but is NOT a qualitatively richer-G regime.
+    The fine-grained axis stays a solid transplant result, not a headline
+    direction. FIRST NON-64px-native dataset (squash-resized), fifth
+    dataset the champion transplants to verbatim-positive.
+- *** AUXMAG3 DEEPENING ADJUDICATED — THE OCTAVE EXCESS IS REAL (2026-07-20,
+  local 10v10 vs the 3-seed tension recorded 2026-07-19):
+    tin@5% champion (10 seeds): 23.20±0.30 = Δ +2.15 (3-seed +2.13 held)
+    auxmag3   (10 seeds):       23.68±0.19 = Δ +2.64
+    auxmag3 − champion = **+0.49 ±0.11 = 4.4σ** — the 3-seed nominal
+    excess (+0.59, 2.3σ) SURVIVED power. G probes agree in direction:
+    35.05±0.38 vs 34.69±0.32 (10-seed probes, +0.36 ±0.16, 2.3σ).
+    VERDICT: the extra LOW OCTAVE (sigma=4/k=17) carries real supervisory
+    value at tin@5% — right at the recorded falsifier boundary (≥+0.5),
+    and this time the feature-level probe moves WITH e2e (unlike the
+    3-seed read). THE BANK-DESIGN AXIS REOPENS, scoped: octaves (new
+    frequency content), not orientations (near-linear combos), are the
+    direction; worth one follow-up (auxmag3 on tin@10%/C100@5%) before
+    any bank re-pin. The committed 8-pair bank stays the headline bank —
+    a re-pin would invalidate every existing run and needs the user's
+    explicit decision.
 - tinsem wave QUEUED (2026-07-20, user: "no reason not to queue it" — the
   Q6.9j semantic-vs-arbitrary caveat gets its adjudication). tinsem =
   tinsuper with ONLY the block-of-10 sort key changed: WordNet hypernym-
