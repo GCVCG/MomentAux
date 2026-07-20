@@ -34,6 +34,14 @@ STATS = {
     # low (14.08), so no readout boost -- label COUNT alone buys nothing;
     # what matters is baseline task performance, as the sign law says.
     "tinsuper": ((0.4802, 0.4481, 0.3975), (0.2770, 0.2691, 0.2821)),
+    # tinsem: tinsuper's one-variable SEMANTIC control -- same images (tin@1%
+    # committed subset via SUBSET_ALIAS), same block-of-10 coarse construction,
+    # but blocks are taken in WordNet HYPERNYM-PATH order (committed in
+    # data/subsets/tin_semantic_order.json, scripts/make_tin_semantic_order.py)
+    # instead of lexicographic wnid order. Adjudicates the Q6.9j caveat:
+    # does semantic coherence of the coarse groups matter, at byte-identical
+    # pixels and identical label-count structure?
+    "tinsem": ((0.4802, 0.4481, 0.3975), (0.2770, 0.2691, 0.2821)),
     # CUB-200-2011 at 64x64 (squash-resize; see CUB200): the first GENUINELY
     # fine-grained dataset (200 bird species, ~30 train img/cls at 100%) --
     # the "prior substitutes for fine-grained weak supervision" test.
@@ -44,10 +52,10 @@ STATS = {
 
 NUM_CLASSES = {"cifar100": 100, "cifar100super": 20, "cifar10": 10, "stl10": 10,
                "tin": 200, "tin20": 20, "tin20b": 20, "tinsuper": 20,
-               "cub": 200}
+               "tinsem": 20, "cub": 200}
 IMAGE_SIZE = {"cifar100": 32, "cifar100super": 32, "cifar10": 32, "stl10": 96,
               "tin": 64, "tin20": 64, "tin20b": 64, "tinsuper": 64,
-              "cub": 64}
+              "tinsem": 64, "cub": 64}
 
 # cifar100super is CIFAR-100's IMAGES with its 20 official coarse labels, and it
 # deliberately reuses CIFAR-100's COMMITTED subset indices (data/subsets/
@@ -57,7 +65,7 @@ IMAGE_SIZE = {"cifar100": 32, "cifar100super": 32, "cifar10": 32, "stl10": 96,
 # exactly 5 fine classes x n per coarse class). It is the one design that breaks
 # the CIFAR-10-vs-CIFAR-100 confound -- both of those are 50,000 images, so
 # matching per-class count there NECESSARILY unmatches total data/steps by 10x.
-SUBSET_ALIAS = {"cifar100super": "cifar100", "tinsuper": "tin"}
+SUBSET_ALIAS = {"cifar100super": "cifar100", "tinsuper": "tin", "tinsem": "tin"}
 
 # The 15 standard CIFAR-C corruptions of Hendrycks & Dietterich (ICLR 2019).
 CIFAR_C_CORRUPTIONS = (
@@ -276,6 +284,24 @@ def _tin_wnid_slice(root, offset):
     return wnids[offset::10]
 
 
+def tin_semantic_coarse_map(root):
+    """fine_idx (sorted-wnid order, as ImageFolder assigns) -> tinsem coarse
+    label: the wnid's rank in the COMMITTED WordNet hypernym-path order
+    (data/subsets/tin_semantic_order.json) // 10. Mirrors tinsuper's
+    fine_idx // 10 with only the sort key changed."""
+    path = os.path.join(SUBSET_DIR, "tin_semantic_order.json")
+    with open(path) as f:
+        order = json.load(f)["order"]
+    all_wnids = sorted(
+        d for d in os.listdir(os.path.join(root, "train"))
+        if os.path.isdir(os.path.join(root, "train", d))
+    )
+    if sorted(order) != all_wnids:
+        raise RuntimeError("committed tin_semantic_order.json wnids != dataset's")
+    rank = {w: i for i, w in enumerate(order)}
+    return [rank[w] // 10 for w in all_wnids]
+
+
 def tin20_wnids(root):
     """The 20 classes of tin20: every 10th of the 200 sorted wnids. Purely
     positional -- deterministic, spread across the sorted list, and immune to
@@ -375,6 +401,17 @@ def build_dataset(dataset, data_root, train, subset_pct=None, download=True):
             else TinyImageNetVal(root, transform=tf)
         )
         ds = Relabelled(base, [t // 10 for t in base.targets])
+    elif dataset == "tinsem":
+        # tinsuper with the SEMANTIC sort key: same images and index order,
+        # coarse label = committed-hypernym-path rank // 10.
+        root = tin_root(data_root)
+        base = (
+            datasets.ImageFolder(os.path.join(root, "train"), transform=tf)
+            if train
+            else TinyImageNetVal(root, transform=tf)
+        )
+        cmap = tin_semantic_coarse_map(root)
+        ds = Relabelled(base, [cmap[t] for t in base.targets])
     elif dataset == "cub":
         ds = CUB200(data_root, train=train, transform=tf)
     else:
@@ -398,7 +435,7 @@ def calibration_batch(dataset, data_root, n=1024):
         ds = datasets.CIFAR10(data_root, train=True, transform=tf, download=False)
     elif dataset == "stl10":
         ds = datasets.STL10(data_root, split="train", transform=tf, download=False)
-    elif dataset in ("tin", "tin20", "tin20b", "tinsuper"):
+    elif dataset in ("tin", "tin20", "tin20b", "tinsuper", "tinsem"):
         # tin20/tin20b/tinsuper calibrate on FULL tin deliberately (labels unused): the aux
         # target pipeline stays byte-identical to tin@1%'s, which is the whole
         # point of the within-tin granularity control. Mirrors cifar100super

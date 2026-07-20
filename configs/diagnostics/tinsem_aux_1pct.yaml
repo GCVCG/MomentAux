@@ -1,0 +1,25 @@
+# tinsem = tinsuper's ONE-VARIABLE SEMANTIC CONTROL: identical images
+# (tin@1% committed subset, byte-identical), identical block-of-10 coarse
+# construction; ONLY the block sort key changes (WordNet hypernym-path
+# order vs lexicographic wnid). Adjudicates the Q6.9j semantic-coherence
+# caveat. See data/subsets/tin_semantic_order.json for the audit.
+name: tinsem_aux_1pct
+dataset: tinsem
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 1
+stem: none
+stem_calibrate: true
+moment_aux:
+  stem: energy-magnitude
+  tap: layer3
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine
