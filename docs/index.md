@@ -8,6 +8,10 @@ is positive at every data scale up to 25%, neutral at 100% by construction.
 
 ## Documentation
 
+- **[Glossary & definitions](GLOSSARY.md)** — every term of art defined
+  once: λ and its schedule, the Gabor quadrature bank and magnitude maps,
+  G, readout, the law, cells/pairs/envelopes, probes and their caveats,
+  the observability tool table.
 - **[Architecture & measurement framework](ARCHITECTURE.md)** — mermaid
   diagrams: the MomentAux train/deploy split, the forward-path stem, the
   Δ = G + readout decomposition, the label-space control family, and the

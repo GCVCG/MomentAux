@@ -247,9 +247,13 @@ def main():
     csv_file = open(csv_path, "w", newline="")
     writer = csv.writer(csv_file)
     norm_cols = ["conv1_identity", "conv1_gabor", "conv1_zernike"]
+    # ce_loss/aux_loss/lambda/tap_std (2026-07-20): loss decomposition and the
+    # tapped-feature std — the scale-collapse diagnostic from the R50 trace,
+    # now logged on every aux run. Empty for non-aux cells; older runs simply
+    # lack the columns (analysis/training_dynamics.py handles both).
     writer.writerow(
         ["epoch", "train_loss", "train_acc", "test_acc", "lr", "epoch_seconds"]
-        + norm_cols
+        + norm_cols + ["ce_loss", "aux_loss", "lambda", "tap_std"]
     )
 
     # Optional moment-aux lambda SCHEDULE: start strong (prior dominates when
@@ -284,6 +288,7 @@ def main():
         model.train()
         train_metric.reset()
         loss_sum, n_batches, t0 = 0.0, 0, time.time()
+        ce_sum, aux_sum, tapstd_sum = 0.0, 0.0, 0.0
         lr_now = optimizer.param_groups[0]["lr"]
         for x, y in train_loader:
             x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
@@ -291,11 +296,17 @@ def main():
             with torch.amp.autocast("cuda", enabled=use_amp):
                 logits = model(x)
                 loss = criterion(logits, y)
+                ce_sum += loss.item()
                 # moment-aux prior: soft MSE regression of an intermediate
                 # feature onto the fixed moment maps (deployed path unchanged).
                 aux = getattr(model, "last_aux", None)
                 if aux is not None:
                     loss = loss + model.aux_weight * aux
+                    aux_sum += aux.item()
+                    with torch.no_grad():
+                        tapstd_sum += float(
+                            model._feats[model.taps[0]].detach().float().std()
+                        )
             scaler.scale(loss).backward()
             scaler.step(optimizer)
             scaler.update()
@@ -311,11 +322,17 @@ def main():
         test_acc = evaluate(model, test_loader, device, num_classes)
         train_acc = train_metric.compute().item()
         norms = conv1_group_norms(model)
+        is_aux = cfg.get("moment_aux") and hasattr(model, "aux_weight")
         writer.writerow(
             [epoch, f"{loss_sum / max(n_batches, 1):.6f}", f"{train_acc:.6f}",
              f"{test_acc:.6f}", f"{lr_now:.6f}", f"{time.time() - t0:.1f}"]
             + [f"{norms[g]:.4f}" if g in norms else ""
                for g in ("identity", "gabor", "zernike")]
+            + ([f"{ce_sum / max(n_batches, 1):.6f}",
+                f"{aux_sum / max(n_batches, 1):.6f}",
+                f"{model.aux_weight:.6f}",
+                f"{tapstd_sum / max(n_batches, 1):.4f}"] if is_aux
+               else ["", "", "", ""])
         )
         csv_file.flush()
         if test_acc > best_acc:

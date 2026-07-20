@@ -83,27 +83,71 @@ def penultimate(model, loader, device):
     return torch.cat(feats).numpy(), torch.cat(ys).numpy()
 
 
+# Official CIFAR-100 coarse (superclass) names, in coarse-index order (the
+# pickle's alphabetical convention -- matches cifar100_coarse_labels).
+CIFAR100_COARSE = [
+    "aquatic mammals", "fish", "flowers", "food containers",
+    "fruit and vegetables", "household electrical devices",
+    "household furniture", "insects", "large carnivores",
+    "large man-made outdoor things", "large natural outdoor scenes",
+    "large omnivores and herbivores", "medium mammals",
+    "non-insect invertebrates", "people", "reptiles", "small mammals",
+    "trees", "vehicles 1", "vehicles 2",
+]
+
+
+def _tin_words(data_root):
+    """wnid -> first WordNet lemma, from tiny-imagenet's words.txt."""
+    root = os.path.join(data_root, "tiny-imagenet-200")
+    words = {}
+    with open(os.path.join(root, "words.txt")) as f:
+        for line in f:
+            wnid, names = line.rstrip("\n").split("\t")[:2]
+            words[wnid] = names.split(",")[0]
+    return root, words
+
+
 def class_names(dataset, ds, data_root="./data"):
-    """Best-effort human labels. CIFAR: torchvision .classes. tin/tinsuper:
-    wnid -> words via tiny-imagenet's words.txt. Else None -> 'class N'."""
+    """Human labels for EVERY dataset in the study (never fall back to bare
+    class indices in a committed figure). CIFAR: torchvision .classes;
+    cifar100super: the official 20 coarse names; tin family: wnid -> words
+    via tiny-imagenet's words.txt (in each variant's own label order);
+    cub: classes.txt species names."""
+    if dataset == "cifar100super":
+        return list(CIFAR100_COARSE)
     if hasattr(ds, "classes") and ds.classes:
         return list(ds.classes)
-    if dataset in ("tin", "tinsuper"):
-        root = os.path.join(data_root, "tiny-imagenet-200")
-        try:
-            words = {}
-            with open(os.path.join(root, "words.txt")) as f:
-                for line in f:
-                    wnid, names = line.rstrip("\n").split("\t")[:2]
-                    words[wnid] = names.split(",")[0]
+    try:
+        if dataset in ("tin", "tinsuper", "tinsem"):
+            root, words = _tin_words(data_root)
             wnids = sorted(d for d in os.listdir(os.path.join(root, "train"))
                            if os.path.isdir(os.path.join(root, "train", d)))
             fine = [words.get(w, w) for w in wnids]
             if dataset == "tinsuper":
-                return [f"group {g} ({fine[g*10]},..)" for g in range(20)]
+                return [f"group {g} ({fine[g*10]},{fine[g*10+1]},..)"
+                        for g in range(20)]
+            if dataset == "tinsem":
+                order = json.load(open(os.path.join(
+                    data_mod.SUBSET_DIR, "tin_semantic_order.json")))["order"]
+                sem = [words.get(w, w) for w in order]
+                return [f"group {g} ({sem[g*10]},{sem[g*10+1]},..)"
+                        for g in range(20)]
             return fine
-        except OSError:
-            return None
+        if dataset in ("tin20", "tin20b"):
+            root, words = _tin_words(data_root)
+            wn = (data_mod.tin20_wnids(root) if dataset == "tin20"
+                  else data_mod.tin20b_wnids(root))
+            return [words.get(w, w) for w in wn]
+        if dataset == "cub":
+            path = os.path.join(data_root, "CUB_200_2011", "classes.txt")
+            names = []
+            with open(path) as f:
+                for line in f:
+                    _, name = line.split()
+                    names.append(name.split(".", 1)[-1].replace("_", " "))
+            return names
+    except OSError:
+        return None
     return None
 
 
@@ -153,7 +197,7 @@ def denorm(x, dataset):
     return img.clamp(0, 1).permute(1, 2, 0).numpy()
 
 
-def fig_tsne(models, loader, device, out, cell, n_classes):
+def fig_tsne(models, loader, device, out, cell, n_classes, names=None):
     from sklearn.manifold import TSNE
     from sklearn.metrics import silhouette_score
 
@@ -168,8 +212,9 @@ def fig_tsne(models, loader, device, out, cell, n_classes):
                    random_state=0).fit_transform(feats[mask])
         for i, c in enumerate(keep_cls):
             m = ys[mask] == c
+            lbl = names[c] if names else f"class {c}"
             ax.scatter(emb[m, 0], emb[m, 1], s=7, color=OKABE_ITO[i],
-                       label=f"class {c}", linewidths=0)
+                       label=lbl, linewidths=0)
         kind = "aux" if cfg.get("moment_aux") else "baseline"
         ax.set_title(f"{kind}: silhouette (all classes, full dim) = {sil:.3f}")
         ax.set_xticks([]), ax.set_yticks([])
@@ -357,7 +402,7 @@ def main():
     cell = aux_cell
     names = class_names(dataset, test_ds, args.data_root)
     fig_bank(args.out)
-    fig_tsne(models, loader, device, args.out, cell, args.n_classes)
+    fig_tsne(models, loader, device, args.out, cell, args.n_classes, names=names)
     align = fig_heatmaps(models, test_ds, device, args.out, cell, dataset,
                          loader, names=names)
     fig_cam(models, test_ds, device, args.out, cell, dataset, loader, names=names)

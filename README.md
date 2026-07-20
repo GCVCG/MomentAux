@@ -6,10 +6,21 @@ retracted). `CLAUDE.md` is the denser chronological working ledger.
 
 **Documentation** (all render directly on GitHub, mermaid included):
 [docs/index.md](docs/index.md) — overview & headline results ·
+[docs/GLOSSARY.md](docs/GLOSSARY.md) — **every term defined** (λ, the Gabor
+magnitude maps, G, readout, cells, probes, waves...) ·
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — architecture + measurement
 diagrams · [docs/VISUALS.md](docs/VISUALS.md) — the observability figures,
 explained and embedded · `analysis/audit_law.py` — machine-verifies every
 number in the law table from raw run files.
+
+**Observability toolkit** (`analysis/`, all diagnostics): `linear_probe`
+(feature gain G, shot-limited, cross-label-space), `head_forms`
+(linear/cosine/NCM readouts at matched labels), `visualize_features`
+(bank, target-alignment heatmaps, t-SNE, CAMs), `per_class_delta`
+(which classes gain, by name, across seeds), `training_dynamics`
+(when the gap opens; λ/lr schedules; loss components; collapse check),
+`audit_law` (machine-checks the law table). See the
+[GLOSSARY tool table](docs/GLOSSARY.md#infrastructure--conventions).
 
 ## Where the study actually landed
 
