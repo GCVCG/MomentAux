@@ -147,6 +147,32 @@ meaning and is excluded.
 Falsified at 50 labels/class (R measured >100%) and replaced by the
 additive law above. Appears only in dated FINDINGS entries.
 
+**SSL (self-supervised learning).** Training on images with NO labels, by
+inventing a task the data grades itself. In this study SSL means one method:
+**SimCLR** (`scripts/simclr_pretrain.py`). Two randomly augmented views of
+the same image (crop / flip / color-jitter / grayscale) are pushed to have
+similar representations while views of different images are pushed apart
+(the contrastive **NT-Xent** loss). The pretrained weights then **initialize**
+an ordinary supervised run (`init_from` in train.py) under the frozen recipe.
+
+Why it is here: it is the obvious rival to a hand-crafted prior ("why not
+just pretrain?"). The comparison is deliberately SSL-favoring but honest --
+SimCLR pretrains on **exactly the committed subset images** the supervised
+cell sees (no outside data; only the labels are withheld), and a `none400`
+control (plain supervised training at the same doubled budget) separates
+"SSL helped" from "trained twice as long". Cost: SSL is a whole extra
+training phase (**~2x compute**); MomentAux is **~1.02x**.
+
+Result (C100 top-1): SimCLR-init beats the champion aux at every measured
+fraction -- 11.21 vs 10.35 @1%, 34.41 vs 30.51 @5%, 49.04 vs 44.03 @10% --
+with the margin GROWING as data grows. So MomentAux is not the accuracy
+frontier once 2x compute is affordable; its surviving claims are near-zero
+marginal cost, near-parity at 1%, and the attention regime. The two priors
+also do NOT stack: SimCLR-init + aux is *worse* than SimCLR-init alone
+(-1.51), and G(simclr) = +9.0 shows SSL fills the SAME feature deficit the
+moment prior fills, only more of it. Recommendation on record: **aux XOR
+SSL, never both**.
+
 **Granularity controls.** Datasets built to move *one* variable:
 `cifar100super` (CIFAR-100's images, official 20 coarse labels),
 `tin20`/`tin20b` (20 of tin's 200 classes, two disjoint draws),
