@@ -472,6 +472,51 @@ ported vs corrected and why.
   substitutes for what small ViTs cannot learn" now has a full envelope
   (1/5/10/25/100%) behind it.
 
+- *** ViT-ON-TIN LANDED — THE ATTENTION RESCUE TRANSFERS OFF 32px
+  (2026-07-21, vit2 COMPLETE 3h21, 3 seeds + probes; 64px, 200-way, staged):
+    diagvit_tin_10pct: 8.60±0.41 -> 17.75±0.18 = **+9.15 ±0.26**
+    G(vit, tin@10k) = **+12.39 ±0.43** (probe 13.76 -> 26.15)
+    readout = **−3.24** at base 8.6
+  R18 COMPARATOR at the SAME cell: Δ +1.65, G +1.70. So attention's feature
+  deficit at 64px/200-way is **7.3x** the conv deficit (12.39 vs 1.70) and
+  the prior fills it: +9.15 vs +1.65 e2e. PREDICTIONS BOTH HIT ("large
+  positive Δ"; "G(vit,tin) > G(R18,tin)=1.70" — by 25σ). The recorded
+  FALSIFIER for "same law on attention everywhere" (readout POSITIVE at a
+  sub-30 baseline on tin) did NOT fire: readout is −3.24 at base 8.6,
+  negative exactly as the conv-derived sign law demands. Sign law 30th
+  clean cell, 7th on attention, and the first on a non-32px input.
+  CONSEQUENCE: the ViT deficit is NOT a 32px-CIFAR artifact. Together with
+  diagvit@100% (+9.88 at FULL data), ViT-tiny-from-scratch is a
+  permanent-deficit backbone across data scale AND input scale.
+- *** SSL3 LANDED — MY "DATA-REGIME-BOUNDED SSL WIN" PREDICTION IS DEAD;
+  THE FALSIFIER FIRED AT EVERY FRACTION (2026-07-21, COMPLETE 0h53):
+      C100   baseline  champion-aux  SimCLR-init(2x)   SSL−aux   band
+      @1%      8.93       10.35        11.21 ±0.14      +0.85    8..11 (just over)
+      @2%     14.17       16.67        19.05 ±0.26      +2.38    15..18 (OVER)
+      @5%     25.36       30.51        34.41 ±0.17      +3.90    (prior wave)
+      @10%    40.28       44.03        49.04 ±0.32      +5.01    44..47 (OVER)
+  I predicted SimCLR would collapse below ~1000 images ("at 1% SimCLR ~
+  baseline or worse") and that the SSL frontier win was data-regime-bounded.
+  WRONG on both counts: SimCLR-init beats the champion aux at EVERY measured
+  fraction, missing 3 of 4 bands on the HIGH side. The recorded falsifier —
+  "SimCLR beats champion at 1% => aux's low-data niche narrows too" — fired.
+  WHAT IS ACTUALLY TRUE: the SSL margin over aux GROWS with data
+  (+0.85/+2.38/+3.90/+5.01 at 1/2/5/10%), i.e. aux's RELATIVE position is
+  best at extreme scarcity, converging toward parity at 1% — but never wins.
+  Both interventions peak near 5% over baseline (aux +5.15, SSL +9.05);
+  SSL is roughly 2x aux everywhere at 2x compute.
+  POSITIONING, STATED HONESTLY: MomentAux is NOT the accuracy frontier at
+  any measured C100 fraction once 2x compute is affordable. Its surviving
+  claims are (a) ~zero marginal cost (+2% compute, no pretraining stage,
+  no pipeline change), (b) near-parity with SSL at 1% (+0.85 apart), and
+  (c) the ATTENTION regime, where no SSL comparison exists yet and the
+  prior is worth +9..+10 at full data. Every within-recipe finding (the
+  law, G curves, sign law, all controls) is untouched — none of them ever
+  claimed SSL-superiority.
+  OPEN (not queued): SimCLR-init on ViT-tiny would test whether SSL also
+  dominates in the one regime where the prior is dramatic. That is now the
+  single most important positioning experiment left.
+
 ## State of findings (2026-07-16)
 
 - GENERALIZATION (2026-07-16). The champion (λ0=1.0 cosine→0, magnitude target,
