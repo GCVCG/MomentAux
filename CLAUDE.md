@@ -544,6 +544,69 @@ ported vs corrected and why.
     Probes: G(simclr-vit ckpts) tells whether any SSL gain here is the
       same feature currency as the prior's (as it was on conv, G=+9.0).
 
+- *** SSLVIT LANDED — THE ATTENTION REGIME IS THE METHOD'S REAL NICHE
+  (2026-07-21, COMPLETE 1h15, 3 seeds + probes). My band was 20..30 at 10%,
+  explicitly betting AGAINST the conv pattern transplanting (conv-verbatim
+  would have been ~34.7). LANDED 29.77 — IN BAND, and NEITHER falsifier
+  fired (not >=31, not <=17):
+      C100 (ViT-tiny)  baseline   aux-ViT   SimCLR-ViT(2x)   SSL−aux
+      @5%               12.25      21.60     20.34 ±0.72      **−1.26**
+      @10%              16.47      29.74     29.77 ±1.00      **+0.04**
+  On CONV, SimCLR beat the aux prior at EVERY fraction and the margin GREW
+  with data (+0.85/+2.38/+3.90/+5.01 at 1/2/5/10%). On ATTENTION that
+  pattern DIES: SSL merely TIES at 10% and LOSES at 5% — at 1/50th the
+  compute for the prior (~1.02x vs 2x).
+  FEATURE SIDE, the sharper statement: the moment prior produces MORE
+  feature gain than SimCLR on ViT at both fractions —
+    G(aux-ViT) 14.85 vs G(simclr-ViT) 13.46 @10%
+    G(aux-ViT) 13.17 vs G(simclr-ViT) 10.02 @5%
+  So on attention-at-small-scale the fixed spectral target is not merely
+  cheaper than contrastive pretraining, it is a BETTER source of the
+  features the backbone cannot self-learn. readout(simclr-ViT) = −0.16
+  @base 16.5 and −1.93 @base 12.2 — negative below the crossing, matching
+  the aux-derived sign law on a non-aux intervention.
+  POSITIONING AS IT NOW STANDS: conv => SSL wins if you can pay 2x;
+  attention => the prior matches/beats SSL at 2% of the cost. The ViT
+  direction is the headline.
+- *** WIDTHOCTAVE ADJUDICATED — IT IS TARGET **WIDTH**, NOT THE OCTAVE
+  (2026-07-21, COMPLETE 2h08, 10v10; tin staged to /dev/shm, 2.2s/epoch vs
+  ~17s on BeeGFS — the fast-path works):
+      tin_none_5pct      21.08±0.26 (n=10)
+      tin_aux_5pct       23.20±0.30   Δ +2.12 ±0.12   (8-pair champion bank)
+      auxmag3_tin_5pct   23.68±0.19   Δ +2.60 ±0.10   excess +0.49 ±0.11
+      auxmag6o_tin_5pct  23.50±0.34   Δ +2.43 ±0.14   excess +0.31 ±0.14
+    *** auxmag6o − auxmag3 = **−0.18 ±0.12 = 1.4σ** — NOT DISTINGUISHABLE.
+  The recorded falsifier for the width account (">2σ apart") did NOT fire.
+  Both routes to a 12-channel target — one EXTRA OCTAVE (new frequency
+  content) or TWO EXTRA ORIENTATIONS (no new frequency) — buy the same
+  ~+0.3..+0.5 at tin@5%. The octave is NOT special; TARGET WIDTH is the
+  driver. Combined with the clean 32px negative control (auxmag3 excess
+  +0.02 there), the scoped conclusion is: **at 64px a wider aux target buys
+  ~+0.4; at 32px width buys nothing** — i.e. the gain needs resolution to
+  put the extra channels to work, but not new frequency bands specifically.
+  CAVEAT recorded: auxmag3's own excess (+0.49, 4.9σ) is more clearly
+  nonzero than auxmag6o's (+0.31, 2.2σ); the DIFFERENCE is what is
+  adjudicated, and it is null. The committed 8-pair bank stays the headline
+  bank (a re-pin invalidates every existing run and needs an explicit
+  decision); "widen the target at >=64px" is now a documented, cheap option.
+- sslvit2 wave LAUNCHED (autonomous follow-up): completes the ViT-SSL
+  envelope at 1% and 25%, plus the ViT COMBO (SimCLR init + moment aux).
+  PREDICTIONS RECORDED IN ADVANCE:
+    diagsslvit_simclr_1pct: **6..9** (aux-ViT 7.80, base 6.44). 500 images
+      is far too few for contrastive learning on a backbone with no spatial
+      prior; expect SSL <= aux here, the widest aux margin of the envelope.
+    diagsslvit_simclr_25pct: **40..46** (aux-ViT 42.17, base 28.50). THE
+      decisive envelope point: on ViT the SSL−aux trend so far is
+      −1.26@5% -> +0.04@10%, so extrapolating the conv behaviour predicts
+      SSL OVERTAKES aux somewhere above 10%. If SSL lands >43.5 the ViT
+      advantage is itself data-bounded (aux wins only at <=10%); if it
+      lands <=42 the prior holds across the whole ViT envelope.
+    diagsslvitaux_10pct (combo, 2.02x): **29..32**. Conv precedent says the
+      two priors do NOT stack (aux costs an SSL-init run −1.51), and here
+      they fill the same deficit (G 13.5 vs 14.9). FALSIFIER: >=33 => they
+      DO stack on attention, contradicting the conv result and reopening
+      aux-on-SSL as a direction.
+
 ## State of findings (2026-07-16)
 
 - GENERALIZATION (2026-07-16). The champion (λ0=1.0 cosine→0, magnitude target,
