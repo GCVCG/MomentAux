@@ -431,6 +431,47 @@ ported vs corrected and why.
 - All 4 submitted; 2 run (MaxJobsPU=2), 2 queue (MaxSubmitPU=128). Fast C100
   waves land in hours; vit2@100% is the long pole (78k steps).
 
+- *** DEEPEN WAVE LANDED (2026-07-21, COMPLETE 2h08) — THE HEADLINE C100
+  NUMBERS SURVIVE POWER. 10 seeds/cell (local seeds 0-2 + turing 3-9 merged;
+  config pins num_workers so each seed's augmentation stream is machine-
+  independent — same cross-machine merge precedent as tinsuper):
+    C100@1%:  8.93±0.10 -> 10.35±0.21 = **+1.42 ±0.07**  (3-seed +1.49, −0.07)
+    C100@5%: 25.36±0.56 -> 30.51±0.39 = **+5.15 ±0.22**  (3-seed +5.30, −0.15)
+    C100@10%:40.28±0.57 -> 44.03±0.50 = **+3.75 ±0.24**  (3-seed +4.14, −0.39)
+  ALL THREE SHRANK, none by >0.5 (the recorded WATCH threshold). Direction
+  matches the C10 precedent exactly (+7.14->+6.66): 3-seed deltas are
+  slightly optimistic, regression-to-mean is real but small at these cells.
+  The envelope SHAPE is unchanged and the peak stays at 5%. Headline tables
+  should now cite the 10-seed values.
+  10-seed G/readout (turing probes): G 4.16/6.26/3.55 at 1/5/10%, readout
+  −2.76 @ base 8.9, −1.12 @ 25.4, +0.08 @ 40.3 — sign law holds at power,
+  crossing again bracketed just below ~40.
+- *** diagvit@100% LANDED — ViT-tiny IS A PERMANENT-DEFICIT BACKBONE
+  (2026-07-21, 3 seeds + probes): 50.61±0.51 -> 60.50±0.64 = **+9.88 ±0.47**,
+  G(vit,50k) = **+9.70 ±0.44**, readout = **+0.19** at base 50.6.
+  PREDICTION SCORING — the recorded dichotomy was MIS-SPECIFIED and I am
+  scoring it against myself: I wrote "if G finally falls (right flank), Δ
+  small (+1..+4); if G stays ~14, Δ still large (+10+)". G DID fall (14.0 ->
+  9.70) and Δ STAYED LARGE (+9.88). Both branches were wrong as stated
+  because they assumed G and readout move together; in fact G fell ~30%
+  while readout climbed from −0.36 (@25%) to +0.19, so Δ barely moved.
+  Baseline also came in at 50.6 vs the predicted 55-62 band.
+  WHAT IS TRUE: at FULL CIFAR-100 (50k images, 78k steps) ViT-tiny still
+  gains **+9.88** where EVERY conv backbone is neutral at 100% (C100 +0.15,
+  C10 −0.26, tin −0.42). The prior supplies something attention-at-this-
+  scale cannot self-learn even with all the data — the "permanent deficit"
+  conclusion holds, reached by a route I did not predict.
+  G(vit) curve complete: 5.89@0.5k, 13.17@2.5k, 14.85@5k, 14.03@12.5k,
+  9.70@50k — rise, plateau ~14, then a SHALLOW right flank (still 2x any
+  conv G ever measured at any scale). Law: Δ +9.88 = G +9.70 + readout
+  +0.19; positive readout at base 50.6, far above the ~30 crossing —
+  sign law 29th clean cell, 6th on attention.
+  CONSEQUENCE: the ViT direction is the strongest remaining headline
+  candidate. The natural next comparison is against heavy-augmentation
+  small-ViT recipes (DeiT-style), since "a fixed spectral target
+  substitutes for what small ViTs cannot learn" now has a full envelope
+  (1/5/10/25/100%) behind it.
+
 ## State of findings (2026-07-16)
 
 - GENERALIZATION (2026-07-16). The champion (λ0=1.0 cosine→0, magnitude target,
