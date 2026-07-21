@@ -177,6 +177,7 @@ def main():
             stem_kwargs=cfg.get("stem_kwargs"),
             head=cfg.get("head"),
             moment_aux=cfg.get("moment_aux"),
+            image_size=data_mod.IMAGE_SIZE[cfg["dataset"]],
         ).to(device)
         model.load_state_dict(torch.load(ckpt, map_location=device))
         model.eval()

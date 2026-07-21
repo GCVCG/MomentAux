@@ -157,6 +157,7 @@ def main():
         head_pool=cfg.get("head_pool"),
         head=cfg.get("head"),
         moment_aux=cfg.get("moment_aux"),
+        image_size=image_size,
     ).to(device)
     # A non-linear classifier head is an ARCHITECTURE deviation from the
     # frozen recipe's implicit plain-linear readout: diag-only, same rule

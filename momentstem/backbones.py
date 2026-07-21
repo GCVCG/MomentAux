@@ -65,6 +65,7 @@ def build_model(
     head_pool=None,
     head=None,
     moment_aux=None,
+    image_size=32,
 ):
     """Build stem + backbone for one experimental cell.
 
@@ -85,19 +86,22 @@ def build_model(
         stem_name, kernel_size=stem_kernel_size, seed=stem_seed, **(stem_kwargs or {})
     )
     if backbone == "vit_tiny":
-        # ViT's small-input "surgery" happens at construction: 32x32 with
-        # patch 4 gives an 8x8 token grid, so blocks.8 (of 12) mirrors the
-        # ResNet layer3 tap in both spatial size and depth fraction. Aux taps
-        # on token tensors are reshaped to (B,C,8,8) by aux._to_spatial.
+        # ViT's small-input "surgery" happens at construction: the patch size
+        # is scaled to image_size so the token grid is ALWAYS 8x8 (patch 4 at
+        # 32px, patch 8 at 64px). blocks.8 (of 12) then mirrors the ResNet
+        # layer3 tap in both spatial size and depth fraction on every dataset.
+        # Aux taps on token tensors are reshaped to (B,C,8,8) by _to_spatial.
         if not small_input:
-            raise ValueError("vit_tiny is only wired for small inputs (32x32)")
+            raise ValueError("vit_tiny is only wired for small inputs")
+        if image_size % 8 != 0:
+            raise ValueError(f"vit_tiny needs image_size % 8 == 0, got {image_size}")
         net = timm.create_model(
             "vit_tiny_patch16_224",
             pretrained=pretrained,
             num_classes=num_classes,
             in_chans=stem.out_channels,
-            img_size=32,
-            patch_size=4,
+            img_size=image_size,
+            patch_size=image_size // 8,
         )
     else:
         net = timm.create_model(
@@ -193,6 +197,7 @@ def build_model(
             loss_form=moment_aux.get("loss", "mse"),
             head_norm=moment_aux.get("head_norm", False),
             stem=stem if moment_aux.get("allow_forward_stem") else None,
+            image_size=image_size,
         )
     return StemmedModel(stem, net)
 

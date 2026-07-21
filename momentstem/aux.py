@@ -176,7 +176,7 @@ class MomentAuxModel(nn.Module):
     """
 
     def __init__(self, net, target, tap="layer3", aux_weight=0.1, loss_form="mse",
-                 head_norm=False, stem=None):
+                 head_norm=False, stem=None, image_size=32):
         """:param head_norm project each aux head back to its initial weight norm
         after every optimizer step. The aux objective ||W.f - t||^2 is INVARIANT
         under (f -> f/c, W -> c.W), so SGD can minimise it by COLLAPSING the
@@ -220,7 +220,7 @@ class MomentAuxModel(nn.Module):
         was_training = net.training
         net.eval()
         with torch.no_grad():  # via self.stem: the net's in_chans follows it
-            net(self.stem(torch.zeros(1, 3, 32, 32)))
+            net(self.stem(torch.zeros(1, 3, image_size, image_size)))
         net.train(was_training)
         self.aux_heads = nn.ModuleDict({
             _head_key(t): nn.Conv2d(

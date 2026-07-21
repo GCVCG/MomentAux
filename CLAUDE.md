@@ -387,6 +387,50 @@ ported vs corrected and why.
       (tinsuper hit this identity exactly; tinsem must too — 21st/22nd
       clean cells).
 
+## Post-campaign deepening (2026-07-21, user: "go with all points, use
+## turing, make sure training is fast")
+
+- FAST-PATH INFRA: tin cells are BeeGFS-small-file-IO-bound (~17s/epoch,
+  110k JPEGs). Fix: sbatch stages the 248MB tin ZIP -> /dev/shm (RAM tmpfs,
+  ~8s one-time unzip) and passes --data-root there. Byte-identical pixels,
+  same augmentation stream, subsets still read from the repo -> protocol-
+  neutral; tin then runs at CIFAR speed. C100 cells need no staging (single
+  in-memory pickle, ~0.6s/epoch). tin/train + probe both take --data-root.
+- NEW CODE: build_model gains image_size (vit patch scales image_size//8 so
+  the token grid is always 8x8: patch 4 @32px, patch 8 @64px); MomentAuxModel
+  shape-probe uses image_size not a hardcoded 32 (was the ViT-on-tin blocker).
+  Threaded through train.py + linear_probe.py. Suite 101 green; 32px ViT path
+  byte-unchanged.
+- deepen wave (H100, C100 fast): 1/5/10% champion PAIRS 3->10 seeds + 10-seed
+  probes (abl{1,5,10}_none, auxmag_{1,5,10}pct_sched0). No new prediction —
+  hardens headline numbers against the 3-seed-sigma risk (C10 precedent:
+  +7.14->+6.66 under power). WATCH: does any 3-seed Δ move >0.5 at power?
+- widthoctave wave (staged tin): auxmag6o_tin_5pct + tin_none_5pct 3->10;
+  DECISIVE 10v10 auxmag6o (width, no octave) vs auxmag3 (octave), both at 10.
+  PREDICTION: if the +0.46 auxmag6o excess (3-seed) SURVIVES ~= auxmag3's
+  +0.49, the driver is target WIDTH not the octave (bank-design axis = "more
+  channels", cheap); if it SHRINKS below +0.3, the octave is special after
+  all. FALSIFIER for width: auxmag6o − auxmag3 at 10v10 differs by >2σ.
+- ssl3 wave (H100, C100 fast): SimCLR-init at 1/2/10% vs baseline/champion.
+  PREDICTION: SimCLR gain over baseline SHRINKS as data falls (too few images
+  to contrast) — at 1% (500 imgs) SimCLR ~ baseline or worse, while champion
+  aux holds +1.5..+1.9; the SSL 2x-compute frontier win is DATA-REGIME-
+  BOUNDED (strong at 5-10%, gone at 1%). Bands: diagssl@10% 44..47 (vs champ
+  ~44, base 40.2); @2% 15..18 (vs champ 16.7); @1% 8..11 (vs champ 10.4,
+  base 8.9). FALSIFIER: SimCLR beats champion at 1% => SSL dominates even at
+  extreme scarcity, aux's low-data niche narrows too.
+- vit2 wave (mixed): (1) diagvit@100% C100 — does G(vit) FALL at 50k imgs?
+  PREDICTION: baseline now well-trained (~55-62, above the ~30 crossing), so
+  readout ~0+ and Δ = G; if G finally falls (right flank), Δ small (+1..+4);
+  if G stays ~14, Δ still large (+10+) — the latter would make ViT-tiny a
+  permanent-deficit backbone, unlike every conv. (2) diagvit on tin@10%
+  (64px, 200-way, staged): does the ViT rescue TRANSFER off 32px C100?
+  PREDICTION qualitative — large positive Δ (ViT-tiny underfits tin harder
+  than R18); G(vit,tin) > G(R18,tin)=1.70. FALSIFIER for "same law on
+  attention everywhere": readout positive at a sub-30 baseline on tin.
+- All 4 submitted; 2 run (MaxJobsPU=2), 2 queue (MaxSubmitPU=128). Fast C100
+  waves land in hours; vit2@100% is the long pole (78k steps).
+
 ## State of findings (2026-07-16)
 
 - GENERALIZATION (2026-07-16). The champion (λ0=1.0 cosine→0, magnitude target,
