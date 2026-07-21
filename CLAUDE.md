@@ -839,6 +839,52 @@ ported vs corrected and why.
       auxmag3 excess — would gut the octave interpretation.
   All three: 3 seeds + G probes; banks pinned additively (magnitude6o in
   test_bank_regression); suite 101 green.
+- *** TINSEM LANDED — H-ARBITRARY WINS; THE "SEMANTIC COHERENCE" HINT WAS
+  PROBE NOISE (2026-07-21, wave COMPLETE ~11h, 10 seeds every cell,
+  tinsuper deepened, both probe spaces):
+    e2e: tinsem 16.06±0.35 -> 18.04±0.29 = **+1.98 ±0.14** | tinsuper
+      (deepened, n=7 turing seeds) 14.11±0.24 -> 15.41±0.41 = +1.30 ±0.18.
+      Semantic sort raised the BASELINE +1.95 (~7σ; coherent groups are
+      learnable — the fork was NOT void) and Δ rose with it, exactly the
+      readout account.
+    PRIMARY FORK: G_200(tinsem ckpts) = **+2.87 ±0.14** vs G_200(tinsuper
+      deepened) = **+3.03 ±0.13** — IDENTICAL within noise (−0.16 ±0.19).
+      Neither recorded branch as stated: tinsuper's 3-seed 2.55±0.41 MOVED
+      to 3.03 at power, converging with tin20's 3.08 — so ALL coarse-
+      trained ckpts agree ≈2.9-3.1 and the semantic-vs-arbitrary G gap
+      NEVER EXISTED (3-seed probe noise, the study's oldest lesson, now
+      caught at the probe level). Semantic coherence of the coarse
+      partition does NOT change measured G.
+    Fine-vs-coarse main effect PERSISTS: 2.87/3.03 ≪ tin@1%'s 4.19 (≥6σ).
+    Law identity: tinsem readout = 1.98−2.58(G_20own) = −0.60 @ base 16.1;
+      tinsuper deepened = 1.30−2.11 = −0.81 @ 14.1 — both negative below
+      the crossing: sign law 27th and 28th clean cells.
+    Q6.9j is now fully closed: the coarse-training G cut is about label
+      SPACE (fine vs coarse), not about which coarse partition.
+- *** OCTAVE-MECHANISM WAVE LANDED (2026-07-21, local, 3 seeds/cell) —
+  THE RESOLUTION CONTROL IS CLEAN, THE WIDTH CONTROL MUDDIES THE OCTAVE
+  STORY; MECHANISM NOT FULLY ADJUDICATED:
+    auxmag3_c100_5pct (32px NEGATIVE CONTROL): Δ +5.32 ±0.46, excess vs
+      champion +5.30 = **+0.02** — dead zero, IN BAND (±0.4). The sigma=4
+      octave adds NOTHING at 32px: the "new resolvable frequency" account
+      survives its falsifier exactly.
+    auxmag3_tin_10pct (persistence): Δ +1.93 ±0.16, excess vs champion
+      +1.65±0.27 = **+0.28 ±0.31** — straddles the fork (persistence band
+      +0.3..+0.7 vs null 0±0.3): direction right, UNDERPOWERED, not
+      adjudicated.
+    auxmag6o_tin_5pct (WIDTH-MATCHED control, 12ch orientations, no new
+      octave): Δ +2.61 ±0.27, excess vs champion 10-seed +2.15 = **+0.46
+      ±0.29** — nominally ABOVE the +1.85..+2.45 band and at the ≥+0.5
+      falsifier edge: near-auxmag3-sized excess WITHOUT new frequency
+      content. Orientations were assumed near-redundant; at 3 seeds this
+      challenges octave-specificity.
+    NET READING: at 64px, WIDER aux targets (12ch) beat the 8-pair bank by
+      ~+0.3..+0.5 whether the width comes from an octave OR orientations;
+      at 32px width does nothing. Suggests the driver is target
+      dimensionality-at-resolution, not uniquely the low octave. BOTH tin
+      controls are 3-seed boundary reads — the auxmag3 lesson says deepen
+      before concluding: a 10v10 of auxmag6o vs auxmag3 at tin@5% is the
+      single decisive follow-up if the bank-design axis is pursued.
 - LEVELS REANALYSIS of the 2x2 (2026-07-19, from existing probe JSONs):
   under the common 200-way stick, the ckpt-set effect is a BASELINE effect:
   base 19.27 (tin@1%-trained) vs 23.71/23.98 (tin20/tin20b-trained) while
