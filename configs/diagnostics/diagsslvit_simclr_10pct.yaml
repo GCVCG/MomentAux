@@ -1,0 +1,25 @@
+# SimCLR-init on ViT-tiny (C100@10%) -- THE decisive positioning cell.
+# On conv, SimCLR at 2x compute beats the aux prior at every fraction.
+# ViT-tiny is the one regime where the prior is dramatic (+13.26@10%,
+# G=14.85). Does SSL also dominate there, or does the missing spatial
+# inductive bias cripple contrastive pretraining too? diagvit_none_10pct
+# verbatim + init from a 200ep SimCLR pretrain on the SAME subset images.
+# ViT-tiny from scratch @C100 10% -- first ATTENTION backbone (ConvNeXt was
+# the first non-ResNet but is still convolutional). AdamW because ViTs do not
+# train under the frozen SGD recipe; diag-only, never a headline row.
+name: diagsslvit_simclr_10pct
+dataset: cifar100
+backbone: vit_tiny
+optimizer: adamw
+epochs: 200
+batch_size: 128
+lr: 0.001
+weight_decay: 0.05
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 10
+stem: none
+stem_calibrate: true
+init_from: runs/simclr_pre_vit_10pct/seed{seed}/pretrain.pt

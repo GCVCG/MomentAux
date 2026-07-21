@@ -77,7 +77,9 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--data-root", default="./data")
     ap.add_argument("--epochs", type=int, default=200)
-    ap.add_argument("--lr", type=float, default=0.3)
+    ap.add_argument("--lr", type=float, default=0.3, help="SGD lr (conv)")
+    ap.add_argument("--adamw-lr", type=float, default=1e-3,
+                    help="AdamW lr, used when the cell's optimizer is adamw (ViT)")
     ap.add_argument("--temp", type=float, default=0.2)
     ap.add_argument("--proj-dim", type=int, default=128)
     args = ap.parse_args()
@@ -98,17 +100,36 @@ def main():
                         num_workers=cfg.get("num_workers", 4), drop_last=True,
                         generator=torch.Generator().manual_seed(args.seed))
 
-    model = build_model("resnet18", "none",
+    # Backbone follows the CELL's config so the pretrain and the supervised
+    # run share an architecture exactly (resnet18, vit_tiny, ...).
+    model = build_model(cfg["backbone"], "none",
                         num_classes=data_mod.NUM_CLASSES[cfg["dataset"]],
-                        small_input=cfg.get("small_input", True)).to(device)
-    feat_dim = model.net.fc.in_features
-    model.net.fc = nn.Sequential(
+                        small_input=cfg.get("small_input", True),
+                        image_size=data_mod.IMAGE_SIZE[cfg["dataset"]]).to(device)
+    # Swap the classifier for the SimCLR projection MLP. timm names it .fc on
+    # ResNets and .head on ViTs; forward_head applies pooling before it either
+    # way, so replacing it makes model(x) return the projection.
+    if hasattr(model.net, "fc"):
+        clf_attr, feat_dim = "fc", model.net.fc.in_features
+    elif hasattr(model.net, "head"):
+        clf_attr, feat_dim = "head", model.net.head.in_features
+    else:
+        raise ValueError(f"no classifier found on {cfg['backbone']}")
+    setattr(model.net, clf_attr, nn.Sequential(
         nn.Linear(feat_dim, feat_dim), nn.ReLU(inplace=True),
         nn.Linear(feat_dim, args.proj_dim),
-    ).to(device)
+    ).to(device))
 
-    opt = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=0.9,
-                          weight_decay=1e-4)
+    # Optimizer follows the cell's recipe: ViTs do not train under SGD lr=0.1
+    # (same reason the supervised diagvit cells use AdamW).
+    if cfg.get("optimizer", "sgd").lower() == "adamw":
+        opt = torch.optim.AdamW(model.parameters(), lr=args.adamw_lr,
+                                weight_decay=cfg.get("weight_decay", 0.05))
+        print(f"pretrain optimizer: adamw lr={args.adamw_lr}")
+    else:
+        opt = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=0.9,
+                              weight_decay=1e-4)
+        print(f"pretrain optimizer: sgd lr={args.lr}")
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=args.epochs)
     scaler = torch.amp.GradScaler("cuda", enabled=device.type == "cuda")
 
@@ -133,7 +154,7 @@ def main():
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     sd = {k: v for k, v in model.state_dict().items()
-          if not k.startswith("net.fc")}
+          if not k.startswith(f"net.{clf_attr}")}
     torch.save(sd, args.out)
     print(f"saved {len(sd)} tensors ({steps} steps) -> {args.out}")
 

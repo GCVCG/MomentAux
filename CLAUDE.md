@@ -517,6 +517,33 @@ ported vs corrected and why.
   dominates in the one regime where the prior is dramatic. That is now the
   single most important positioning experiment left.
 
+- sslvit wave LAUNCHED (2026-07-21, autonomous — user: "do the needed
+  experiments, no need to wait"): SimCLR-init on ViT-tiny at C100 5%/10%,
+  3 seeds + probes. THE decisive positioning cell: SSL beats the aux prior
+  at every conv fraction, but ViT-tiny is the one regime where the prior is
+  dramatic (+13.26@10%, G=14.85 = 2.3x any conv G). Does SSL dominate there
+  too? NEW CODE: scripts/simclr_pretrain.py is now backbone-agnostic
+  (classifier .fc/.head swap, AdamW when the cell's optimizer is adamw,
+  image_size threaded); smoke-tested — 150 tensors transfer, only the
+  classifier is left fresh.
+  PREDICTIONS RECORDED IN ADVANCE (and this time I am betting AGAINST the
+  conv pattern transplanting, having just been wrong the other way):
+    diagsslvit_simclr_10pct: **20..30** (above baseline 16.47, BELOW aux
+      29.74). Reasoning: ViT-tiny has no spatial inductive bias to
+      bootstrap from, so contrastive pretraining on 5000 images must LEARN
+      what the moment prior simply INJECTS. If the conv pattern instead
+      transplanted verbatim (SSL−aux ≈ +5), this cell would be ~34.7 —
+      explicitly outside my band, so the bet is falsifiable.
+    diagsslvit_simclr_5pct: **14..22** (baseline 12.25, aux 21.60).
+    FALSIFIER A (positioning closes): ≥ 31 at 10% => SSL dominates even in
+      the attention regime; MomentAux has NO accuracy niche left anywhere
+      and its claim narrows to pure cost (+2% vs +100% compute).
+    FALSIFIER B (strongest possible result for the method): ≤ 17 at 10%
+      (≈ baseline) => SimCLR genuinely FAILS on ViT-tiny at this scale,
+      and the prior's attention advantage is unique and unmatched by SSL.
+    Probes: G(simclr-vit ckpts) tells whether any SSL gain here is the
+      same feature currency as the prior's (as it was on conv, G=+9.0).
+
 ## State of findings (2026-07-16)
 
 - GENERALIZATION (2026-07-16). The champion (λ0=1.0 cosine→0, magnitude target,
