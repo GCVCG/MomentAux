@@ -163,12 +163,123 @@ def main():
         w = csv.DictWriter(f, fieldnames=list(rows[0]))
         w.writeheader()
         w.writerows(rows)
+    write_pivot(cells, baselines,
+                os.path.join(os.path.dirname(args.out) or ".",
+                             "results_by_portion.csv"))
     paired = sum(1 for r in rows if r["delta"] != "")
     withG = sum(1 for r in rows if r["G"] != "")
     print(f"wrote {args.out}: {len(rows)} cells "
           f"({paired} with a paired Delta, {withG} with G/readout) "
           f"from roots {roots}")
 
+
+
+# --------------------------------------------------------------------------
+# Pivot view: one row per CONFIGURATION, one column block per DATA PORTION.
+# The configuration key is every config field EXCEPT subset_pct, so a cell and
+# its 1/5/10/25/100% siblings collapse onto one row and the envelope reads
+# left-to-right. Baselines sort to the top of each (dataset, backbone) group
+# so a variant can be compared against its own baseline down the column.
+# --------------------------------------------------------------------------
+
+def config_key(cfg):
+    aux = cfgget(cfg, "moment_aux") or {}
+    return (
+        cfgget(cfg, "dataset"), cfgget(cfg, "backbone"),
+        (cfgget(cfg, "optimizer", "sgd") or "sgd").lower(),
+        cfgget(cfg, "epochs", 200), cfgget(cfg, "head") or "linear",
+        cfgget(cfg, "stem", "none") or "none",
+        cfgget(cfg, "stem_kernel_size", 11) if (cfgget(cfg, "stem") or "none") != "none" else "",
+        json.dumps(cfgget(cfg, "stem_kwargs") or {}, sort_keys=True),
+        aux.get("stem", ""), str(aux.get("tap", "")), str(aux.get("weight", "")),
+        str(aux.get("weight_final", "")), aux.get("loss", ""),
+        "init" if cfgget(cfg, "init_from") else "",
+        cfgget(cfg, "augment") or "",
+    )
+
+
+def config_label(cfg):
+    """Compact, unambiguous description of the configuration (fraction-free)."""
+    aux = cfgget(cfg, "moment_aux") or {}
+    stem = cfgget(cfg, "stem", "none") or "none"
+    bits = []
+    if aux:
+        tgt = str(aux.get("stem", "?")).replace("energy-", "")
+        tap = str(aux.get("tap", "?")).replace("layer", "L").replace("blocks.", "b")
+        lam0, lamf = aux.get("weight", "?"), aux.get("weight_final", None)
+        lam = f"L{lam0}>{lamf}" if lamf is not None and lamf != lam0 else f"L{lam0}"
+        extra = f",{aux['loss']}" if aux.get("loss") else ""
+        bits.append(f"aux({tgt}@{tap},{lam}{extra})")
+    if stem != "none":
+        bits.append(f"stem({stem},k{cfgget(cfg, 'stem_kernel_size', 11)})")
+    if cfgget(cfg, "init_from"):
+        bits.append("simclr-init")
+    if cfgget(cfg, "augment"):
+        bits.append(f"{cfgget(cfg,'augment')}-aug")
+    if cfgget(cfg, "head"):
+        bits.append(f"{cfgget(cfg,'head')}-head")
+    if not bits:
+        bits.append("BASELINE")
+    ep = cfgget(cfg, "epochs", 200)
+    tail = []
+    if (cfgget(cfg, "optimizer", "sgd") or "sgd").lower() != "sgd":
+        tail.append((cfgget(cfg, "optimizer") or "").lower())
+    if ep != 200:
+        tail.append(f"{ep}ep")
+    return " + ".join(bits) + (f"  [{','.join(tail)}]" if tail else "")
+
+
+def write_pivot(cells, baselines, out_path):
+    fams = {}
+    for cell, rec in cells.items():
+        cfg = rec["cfg"]
+        pct = cfgget(cfg, "subset_pct") or 100
+        accs = list(rec["seeds"].values())
+        k = config_key(cfg)
+        f = fams.setdefault(k, {"label": config_label(cfg),
+                                "dataset": cfgget(cfg, "dataset"),
+                                "backbone": cfgget(cfg, "backbone"),
+                                "is_baseline": is_baseline(cfg),
+                                "cells": {}, "by_pct": {}})
+        bcell = baselines.get(family_key(cfg))
+        delta = ""
+        if bcell and bcell != cell:
+            baccs = list(cells[bcell]["seeds"].values())
+            delta = st.mean(accs) - st.mean(baccs)
+        # keep the better-powered cell if two share a (config, pct)
+        prev = f["by_pct"].get(pct)
+        if prev is None or prev["n"] < len(accs):
+            f["by_pct"][pct] = {"acc": st.mean(accs),
+                                "std": st.stdev(accs) if len(accs) > 1 else 0.0,
+                                "n": len(accs), "delta": delta}
+            f["cells"][pct] = cell
+
+    pcts = sorted({p for f in fams.values() for p in f["by_pct"]})
+    header = (["config", "dataset", "backbone", "role"]
+              + [f"acc@{p}%" for p in pcts]
+              + [f"delta@{p}%" for p in pcts]
+              + [f"n@{p}%" for p in pcts] + ["cells"])
+    rows = []
+    for k, f in fams.items():
+        r = {"config": f["label"], "dataset": f["dataset"],
+             "backbone": f["backbone"],
+             "role": "baseline" if f["is_baseline"] else "variant"}
+        for p in pcts:
+            d = f["by_pct"].get(p)
+            r[f"acc@{p}%"] = fmt(d["acc"]) if d else ""
+            r[f"delta@{p}%"] = (fmt(d["delta"]) if d and d["delta"] != "" else "")
+            r[f"n@{p}%"] = d["n"] if d else ""
+        r["cells"] = " ".join(f["cells"][p] for p in sorted(f["cells"]))
+        rows.append(r)
+
+    rows.sort(key=lambda r: (str(r["dataset"]), str(r["backbone"]),
+                             0 if r["role"] == "baseline" else 1, r["config"]))
+    with open(out_path, "w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=header)
+        w.writeheader()
+        w.writerows(rows)
+    print(f"wrote {out_path}: {len(rows)} configurations x {len(pcts)} data portions "
+          f"({', '.join(str(p) + '%' for p in pcts)})")
 
 if __name__ == "__main__":
     main()
