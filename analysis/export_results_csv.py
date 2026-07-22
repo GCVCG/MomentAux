@@ -255,29 +255,45 @@ def write_pivot(cells, baselines, out_path):
             f["cells"][pct] = cell
 
     pcts = sorted({p for f in fams.values() for p in f["by_pct"]})
-    header = (["config", "dataset", "backbone", "role"]
-              + [f"acc@{p}%" for p in pcts]
-              + [f"delta@{p}%" for p in pcts]
-              + [f"n@{p}%" for p in pcts] + ["cells"])
-    rows = []
-    for k, f in fams.items():
-        r = {"config": f["label"], "dataset": f["dataset"],
-             "backbone": f["backbone"],
-             "role": "baseline" if f["is_baseline"] else "variant"}
-        for p in pcts:
-            d = f["by_pct"].get(p)
-            r[f"acc@{p}%"] = fmt(d["acc"]) if d else ""
-            r[f"delta@{p}%"] = (fmt(d["delta"]) if d and d["delta"] != "" else "")
-            r[f"n@{p}%"] = d["n"] if d else ""
-        r["cells"] = " ".join(f["cells"][p] for p in sorted(f["cells"]))
-        rows.append(r)
+    # TWO-ROW header: the metric name spans its block once (row 1) and the
+    # data portions repeat beneath it (row 2), instead of "acc@1%, acc@2%..."
+    lead = ["configuration", "dataset", "backbone", "role"]
+    groups = [("accuracy (test top-1 %)", "acc"),
+              ("delta vs own baseline (pts)", "delta"),
+              ("seeds", "n")]
+    row1 = [""] * len(lead)
+    row2 = list(lead)
+    for title, _ in groups:
+        row1 += [title] + [""] * (len(pcts) - 1)
+        row2 += [f"{p}%" for p in pcts]
+    row1 += [""]
+    row2 += ["cells"]
 
-    rows.sort(key=lambda r: (str(r["dataset"]), str(r["backbone"]),
-                             0 if r["role"] == "baseline" else 1, r["config"]))
+    body = []
+    for f in fams.values():
+        r = [f["label"], f["dataset"], f["backbone"],
+             "baseline" if f["is_baseline"] else "variant"]
+        for _, kind in groups:
+            for p in pcts:
+                d = f["by_pct"].get(p)
+                if not d:
+                    r.append("")
+                elif kind == "acc":
+                    r.append(fmt(d["acc"]))
+                elif kind == "delta":
+                    r.append(fmt(d["delta"]) if d["delta"] != "" else "")
+                else:
+                    r.append(d["n"])
+        r.append(" ".join(f["cells"][p] for p in sorted(f["cells"])))
+        body.append(r)
+    body.sort(key=lambda r: (str(r[1]), str(r[2]), 0 if r[3] == "baseline" else 1, r[0]))
+
     with open(out_path, "w", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=header)
-        w.writeheader()
-        w.writerows(rows)
+        w = csv.writer(fh)
+        w.writerow(row1)
+        w.writerow(row2)
+        w.writerows(body)
+    rows = body
     print(f"wrote {out_path}: {len(rows)} configurations x {len(pcts)} data portions "
           f"({', '.join(str(p) + '%' for p in pcts)})")
 

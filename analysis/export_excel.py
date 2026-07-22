@@ -49,6 +49,39 @@ def style_header(ws, widths=None, freeze="A2"):
         ws.column_dimensions[get_column_letter(i)].width = w
 
 
+
+def write_grouped(ws, groups, rows, widths, freeze):
+    """Two-level header: row 1 = group band (merged), row 2 = column names."""
+    cols = [c for _, cs in groups for c in cs]
+    ws.append([""] * len(cols))
+    ws.append(cols)
+    col = 1
+    for title, cs in groups:
+        if title:
+            ws.merge_cells(start_row=1, start_column=col, end_row=1,
+                           end_column=col + len(cs) - 1)
+            ws.cell(row=1, column=col, value=title)
+        else:
+            for i in range(len(cs)):
+                ws.merge_cells(start_row=1, start_column=col + i, end_row=2,
+                               end_column=col + i)
+                ws.cell(row=1, column=col + i, value=cs[i])
+        col += len(cs)
+    for d in rows:
+        ws.append([d.get(c) for c in cols])
+    for r in (1, 2):
+        for c in ws[r]:
+            c.fill, c.font = HEAD_FILL, HEAD_FONT
+            c.alignment = Alignment(horizontal="center", vertical="center",
+                                    wrap_text=True)
+    ws.freeze_panes = freeze
+    ws.auto_filter.ref = f"A2:{get_column_letter(len(cols))}{ws.max_row}"
+    ws.row_dimensions[1].height = 28
+    for i, w in enumerate(widths, start=1):
+        ws.column_dimensions[get_column_letter(i)].width = w
+    return cols
+
+
 def num(ws, row, col, value, fmt="0.00"):
     cell = ws.cell(row=row, column=col, value=value)
     if isinstance(value, (int, float)):
@@ -196,80 +229,118 @@ def main():
     pcts = sorted({p for f in fams.values() for p in f["by"]})
 
     ws = wb.create_sheet("By portion")
-    hdr = (["configuration", "dataset", "backbone", "role"]
-           + [f"acc@{p}%" for p in pcts] + [f"delta@{p}%" for p in pcts]
-           + [f"n@{p}%" for p in pcts] + ["cells"])
-    ws.append(hdr)
+    # TWO-LEVEL header: row 1 carries the metric name merged across its block,
+    # row 2 the data portions. Beats repeating "acc@1%, acc@2%, ...".
+    lead = ["configuration", "dataset", "backbone", "role"]
+    groups = [("ACCURACY  (test top-1 %)", "acc"),
+              ("DELTA  (vs own baseline, pts)", "delta"),
+              ("SEEDS", "n")]
+    ws.append([""] * (len(lead) + 3 * len(pcts) + 1))
+    ws.append(lead + [f"{p}%" for _ in groups for p in pcts] + ["cells"])
+    for i, name in enumerate(lead, start=1):          # id cols span both rows
+        ws.merge_cells(start_row=1, start_column=i, end_row=2, end_column=i)
+        ws.cell(row=1, column=i, value=name)
+    col = len(lead) + 1
+    for title, _ in groups:                            # metric spans its block
+        ws.merge_cells(start_row=1, start_column=col, end_row=1,
+                       end_column=col + len(pcts) - 1)
+        ws.cell(row=1, column=col, value=title)
+        col += len(pcts)
+    ws.merge_cells(start_row=1, start_column=col, end_row=2, end_column=col)
+    ws.cell(row=1, column=col, value="cells")
+
     frows = sorted(fams.values(), key=lambda f: (str(f["dataset"]), str(f["backbone"]),
                                                  0 if f["base"] else 1, f["label"]))
     for f in frows:
         r = [f["label"], f["dataset"], f["backbone"],
              "baseline" if f["base"] else "variant"]
-        r += [round(f["by"][p]["acc"], 2) if p in f["by"] else None for p in pcts]
-        r += [round(f["by"][p]["delta"], 2) if p in f["by"] and f["by"][p]["delta"] is not None else None for p in pcts]
-        r += [f["by"][p]["n"] if p in f["by"] else None for p in pcts]
-        r += [" ".join(f["cells"][p] for p in sorted(f["cells"]))]
+        for _, kind in groups:
+            for p in pcts:
+                d = f["by"].get(p)
+                if not d:
+                    r.append(None)
+                elif kind == "acc":
+                    r.append(round(d["acc"], 2))
+                elif kind == "delta":
+                    r.append(round(d["delta"], 2) if d["delta"] is not None else None)
+                else:
+                    r.append(d["n"])
+        r.append(" ".join(f["cells"][p] for p in sorted(f["cells"])))
         ws.append(r)
-    for row in ws.iter_rows(min_row=2):
+
+    for row in ws.iter_rows(min_row=3):
         if row[3].value == "baseline":
             for c in row:
                 c.fill = GROUP_FILL
                 c.font = Font(bold=True)
-    d0 = 5 + len(pcts)
+    d0 = len(lead) + len(pcts) + 1
     dl, dr = get_column_letter(d0), get_column_letter(d0 + len(pcts) - 1)
     ws.conditional_formatting.add(
-        f"{dl}2:{dr}{ws.max_row}",
+        f"{dl}3:{dr}{ws.max_row}",
         ColorScaleRule(start_type="num", start_value=-5, start_color="F8696B",
                        mid_type="num", mid_value=0, mid_color="FFFFFF",
                        end_type="num", end_value=8, end_color="63BE7B"))
-    style_header(ws, [46, 14, 14, 10] + [9] * (3 * len(pcts)) + [70], freeze="E2")
+    for r in (1, 2):
+        for c in ws[r]:
+            c.fill, c.font = HEAD_FILL, HEAD_FONT
+            c.alignment = Alignment(horizontal="center", vertical="center",
+                                    wrap_text=True)
+    ws.freeze_panes = "E3"
+    ws.auto_filter.ref = (f"A2:{get_column_letter(ws.max_column)}{ws.max_row}")
+    ws.row_dimensions[1].height = 30
+    for i, w in enumerate([46, 14, 14, 10] + [8] * (3 * len(pcts)) + [70], start=1):
+        ws.column_dimensions[get_column_letter(i)].width = w
 
     # ---- Sheet: All cells ------------------------------------------------
-    cols = ["cell", "config", "dataset", "backbone", "optimizer", "epochs",
-            "subset_pct", "n_images", "n_seeds", "acc_mean", "acc_std",
-            "probe_mean", "n_probe_seeds", "baseline_cell", "base_acc",
-            "delta", "delta_sem", "G", "readout", "is_headline"]
+    GROUPS = [
+        ("", ["cell", "config"]),
+        ("SETUP", ["dataset", "backbone", "optimizer", "epochs"]),
+        ("DATA", ["subset_pct", "n_images", "n_seeds"]),
+        ("RESULT", ["acc_mean", "acc_std", "probe_mean", "n_probe_seeds"]),
+        ("PAIRED COMPARISON  (vs own baseline)",
+         ["baseline_cell", "base_acc", "delta", "delta_sem", "G", "readout"]),
+        ("", ["is_headline"]),
+    ]
+    WIDTHS = [34, 40, 13, 13, 10, 8, 10, 10, 9, 10, 9, 11, 9, 26, 10, 9, 10, 9, 10, 11]
     ws = wb.create_sheet("All cells")
-    ws.append(cols)
-    for d in sorted(recs, key=lambda r: (str(r["dataset"]), str(r["backbone"]),
-                                         r["subset_pct"], r["cell"])):
-        ws.append([d[c] for c in cols])
+    cols = write_grouped(ws, GROUPS,
+                         sorted(recs, key=lambda r: (str(r["dataset"]), str(r["backbone"]),
+                                                     r["subset_pct"], r["cell"])),
+                         WIDTHS, "C3")
     di = cols.index("delta") + 1
     ws.conditional_formatting.add(
-        f"{get_column_letter(di)}2:{get_column_letter(di)}{ws.max_row}",
+        f"{get_column_letter(di)}3:{get_column_letter(di)}{ws.max_row}",
         ColorScaleRule(start_type="num", start_value=-5, start_color="F8696B",
                        mid_type="num", mid_value=0, mid_color="FFFFFF",
                        end_type="num", end_value=8, end_color="63BE7B"))
-    style_header(ws, [34, 40, 13, 13, 10, 8, 10, 10, 9, 10, 9, 11, 9, 26, 10,
-                      9, 10, 9, 10, 11], freeze="B2")
 
     # ---- Sheet: Law ------------------------------------------------------
     ws = wb.create_sheet("Law")
-    lcols = ["cell", "config", "dataset", "backbone", "subset_pct", "n_images",
-             "base_acc", "acc_mean", "delta", "delta_sem", "G", "readout",
-             "n_seeds", "is_headline"]
-    ws.append(lcols)
-    for d in sorted([r for r in recs if r["G"] is not None],
-                    key=lambda r: r["base_acc"]):
-        ws.append([d[c] for c in lcols])
-    ri = lcols.index("readout") + 1
+    LGROUPS = [
+        ("", ["cell", "config"]),
+        ("SETUP", ["dataset", "backbone", "subset_pct", "n_images"]),
+        ("DELTA = G + READOUT", ["base_acc", "acc_mean", "delta", "delta_sem",
+                                 "G", "readout"]),
+        ("", ["n_seeds", "is_headline"]),
+    ]
+    write_grouped(ws, LGROUPS,
+                  sorted([r for r in recs if r["G"] is not None],
+                         key=lambda r: r["base_acc"]),
+                  [34, 40, 13, 13, 10, 10, 10, 10, 9, 10, 9, 10, 9, 11], "C3")
+    ri = [c for _, cs in LGROUPS for c in cs].index("readout") + 1
     ws.conditional_formatting.add(
-        f"{get_column_letter(ri)}2:{get_column_letter(ri)}{ws.max_row}",
+        f"{get_column_letter(ri)}3:{get_column_letter(ri)}{ws.max_row}",
         ColorScaleRule(start_type="num", start_value=-4, start_color="F8696B",
                        mid_type="num", mid_value=0, mid_color="FFFFFF",
                        end_type="num", end_value=2, end_color="63BE7B"))
-    style_header(ws, [34, 40, 13, 13, 10, 10, 10, 10, 9, 10, 9, 10, 9, 11],
-                 freeze="C2")
 
     # ---- Sheet: Headline -------------------------------------------------
     ws = wb.create_sheet("Headline")
-    ws.append(cols)
-    for d in sorted([r for r in recs if r["is_headline"] == "yes"],
-                    key=lambda r: (str(r["dataset"]), str(r["backbone"]),
-                                   r["subset_pct"], r["cell"])):
-        ws.append([d[c] for c in cols])
-    style_header(ws, [34, 40, 13, 13, 10, 8, 10, 10, 9, 10, 9, 11, 9, 26, 10,
-                      9, 10, 9, 10, 11], freeze="B2")
+    write_grouped(ws, GROUPS,
+                  sorted([r for r in recs if r["is_headline"] == "yes"],
+                         key=lambda r: (str(r["dataset"]), str(r["backbone"]),
+                                        r["subset_pct"], r["cell"])),
+                  WIDTHS, "C3")
 
     stats = {"cells": len(recs), "configs": len(frows),
              "paired": sum(1 for r in recs if r["delta"] is not None),
