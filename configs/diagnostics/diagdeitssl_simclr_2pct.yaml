@@ -1,0 +1,26 @@
+# SimCLR-init ViT UNDER DeiT AUGMENTATION (C100@2%) -- the missing column
+# of the 2x3 {plain,deit} x {none,aux,simclr}. Every prior SSL-vs-aux
+# head-to-head was run under plain crop+flip, i.e. a recipe nobody would use
+# for a small ViT. The DeiT wave showed aux and augmentation STACK (different
+# currencies: structure vs nuisance-invariance). SimCLR's objective IS
+# invariance to an augmentation family, so it may instead be REDUNDANT with
+# heavy augmentation -- which would flip the head-to-head. Identical to
+# diagsslvit_simclr_2pct except for 'augment: deit'.
+# AdamW + augment => diag-only, never a headline row.
+name: diagdeitssl_simclr_2pct
+dataset: cifar100
+backbone: vit_tiny
+optimizer: adamw
+epochs: 200
+batch_size: 128
+lr: 0.001
+weight_decay: 0.05
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 2
+stem: none
+stem_calibrate: true
+augment: deit
+init_from: runs/simclr_pre_vit_2pct/seed{seed}/pretrain.pt

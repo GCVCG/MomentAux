@@ -1,0 +1,30 @@
+# TRIPLE COMBO (C100@10%): DeiT augmentation + SimCLR init + moment aux.
+# 'aux XOR SSL' was established WITHOUT augmentation (conv: aux costs an
+# SSL-init run -1.51; ViT: neutral). If augmentation genuinely trades in a
+# different currency, the three-way cell is where any residual stacking
+# would appear. FALSIFIER for 'aux XOR SSL holds under a modern recipe':
+# this cell beats BOTH diagdeitssl_simclr_10pct and diagdeit_aux_10pct.
+name: diagdeitsslaux_10pct
+dataset: cifar100
+backbone: vit_tiny
+optimizer: adamw
+epochs: 200
+batch_size: 128
+lr: 0.001
+weight_decay: 0.05
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 10
+stem: none
+stem_calibrate: true
+augment: deit
+init_from: runs/simclr_pre_vit_10pct/seed{seed}/pretrain.pt
+moment_aux:
+  stem: energy-magnitude
+  tap: blocks.8
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine
+  head_norm: true
