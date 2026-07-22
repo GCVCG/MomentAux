@@ -62,6 +62,22 @@ ported vs corrected and why.
   same cells ran 44 min/seed vs 5.4 min/seed at low load — ~5x. These jobs are
   DATALOADER-bound, not GPU-bound; nw=2 with a few concurrent runs beats nw=8.
 
+## USER DECISIONS (2026-07-22)
+
+- **BANK STAYS AT 8 PAIRS — NO RE-PIN.** The widthoctave adjudication showed a
+  wider 12-channel aux target buys ~+0.3..+0.5 at 64px (and exactly nothing at
+  32px: auxmag3 excess +0.02). User decision: "keep them 8, no need to re-pin
+  for now." So the committed 8-pair bank remains the headline bank, every
+  existing run stays valid, and tests/test_bank_regression.py fingerprints are
+  untouched. "Widen the target at >=64px" is documented as a cheap OPTION, not
+  the default. Do not reopen without an explicit new decision.
+- **CLUSTER SPLIT CONFIRMED**: turing runs the LIVE work (envelope completion,
+  new waves); BSC fills the missing numbers of the results grid, including the
+  1,467 already-closed-configuration runs. Unchanged from the 2026-07-22 split.
+- BSC password ROTATED 2026-07-22 (the old one had been pasted in plaintext).
+  New value in ~/.bsc_password (0600) on the local machine, never echoed to a
+  transcript; SSH key auth is what the automation actually uses.
+
 ## Active campaign (2026-07-18, user-approved "run the whole needed experiments")
 
 - xspace wave (running): Phase B tin20+tin@1% deepening to 10 seeds, Phase C
