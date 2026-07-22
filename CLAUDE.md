@@ -683,6 +683,40 @@ ported vs corrected and why.
       Δ_deit >= +8 at 10% (barely shrunk) => the prior injects structure
       augmentation cannot manufacture, and the two are additive.
 
+- *** DEIT WAVE LANDED — THE PRIOR AND HEAVY AUGMENTATION ARE STRONGLY
+  COMPLEMENTARY, NOT SUBSTITUTES. MY PREDICTION WAS WRONG IN EVERY Δ CELL
+  (2026-07-22, COMPLETE ~6h, 3 seeds + probes, C100/ViT-tiny):
+      pct   vit-base vit-aux  Δ_vit | deit-base deit-aux  Δ_deit | G_vit G_deit
+      1%      6.44    7.80   +1.35  |   6.48     9.68    +3.20  |  5.89  10.29
+      5%     12.25   21.60   +9.35  |  12.55    28.89   +16.34  | 13.17  21.35
+      10%    16.47   29.74  +13.26  |  20.28    41.29   +21.00  | 14.85  22.20
+      25%    28.50   42.17  +13.67  |  32.27    57.32   +25.05  | 14.03  23.05
+      100%   50.61   60.50   +9.88  |  61.39    75.25   +13.86  |  9.70  13.03
+  PREDICTION SCORING — baselines ALL IN BAND (I predicted deit-none 20..30
+  @10% -> 20.28; 58..68 @100% -> 61.39; 5..8 @1% -> 6.48). But every Δ
+  prediction MISSED HIGH: I said Δ_deit would SHRINK (+3..+10 @10%, 0..+6
+  @100%) on the reasoning that augmentation supplies part of what the prior
+  supplies. The OPPOSITE is true — Δ_deit is LARGER than Δ_vit at every
+  single fraction (+21.00 vs +13.26 @10%). FALSIFIER B fired (Δ_deit >= +8
+  @10%): the prior injects structure augmentation cannot manufacture.
+  THE DECISIVE PRE-REGISTERED COMPARISON — does augmentation ALONE reach the
+  prior's plain-ViT accuracy? NO, at every fraction up to 25%:
+      @1% 6.48 vs 7.80 | @5% 12.55 vs 21.60 | @10% 20.28 vs 29.74
+      @25% 32.27 vs 42.17 | @100% 61.39 vs 60.50 (aug alone finally edges it)
+  So the ViT claim does NOT collapse to a cost claim: below full data the
+  fixed spectral target beats the standard recipe outright, and ON TOP of
+  that recipe it still adds +13.9..+25.1.
+  FEATURE SIDE: G is BIGGER under augmentation (21-23 vs 13-15) — the prior's
+  feature gain grows when the nuisance-invariance is handled by augmentation.
+  CONTRAST WITH SSL, and this is the sharp point: aux + SimCLR do NOT stack
+  (combo neutral on ViT, −1.51 on conv) because SSL fills the SAME feature
+  deficit (G(simclr) ≈ G(aux)). aux + AUGMENTATION DO stack, strongly.
+  Augmentation teaches invariance to nuisance transforms; the moment prior
+  injects oriented-energy STRUCTURE. Different currencies, so they add.
+  RECOMMENDATION UPDATED: aux XOR SSL, but aux AND augmentation.
+  BEST ViT NUMBER IN THE STUDY: **75.25%** at C100@100% (DeiT-aug + prior)
+  vs 61.39 aug-only and 50.61 plain. This is now the headline ViT result.
+
 ## State of findings (2026-07-16)
 
 - GENERALIZATION (2026-07-16). The champion (λ0=1.0 cosine→0, magnitude target,
