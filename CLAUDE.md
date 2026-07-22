@@ -769,6 +769,28 @@ ported vs corrected and why.
   supervised stage changes), so this reuses fillvit's pretrains — ~27
   supervised runs, no new pretraining. Full envelope 1-100%, 3 seeds,
   decisive fractions (10/25) FIRST. Suite 101 green.
+  CAVEAT STATED UP FRONT: the pretrain uses SimCLR's OWN augmentations, so
+  this tests "does heavy SUPERVISED augmentation substitute for contrastive
+  pretraining", NOT "would SimCLR-under-DeiT-augs do better".
+- GATED FOLLOW-UP, code built and NOT launched (2026-07-22): scripts/
+  simclr_pretrain.py gained `--augment deit`, which strengthens the
+  CONTRASTIVE VIEWS with RandAugment + RandomErasing. Only those two DeiT
+  components transfer — Mixup/CutMix blend two images and make the NT-Xent
+  positive pair ambiguous, and label smoothing needs labels NT-Xent lacks —
+  so it is "stronger views", NOT "the DeiT recipe"; do not describe it as
+  the latter. Smoke-tested (6 -> 8 transform stages), suite 101 green.
+  WHY NOT LAUNCHED: unlike deitssl this needs NEW 2x-compute pretraining,
+  and its value is set by the deitssl outcome. DECISION RULE ON RECORD:
+    falsifier A fires (deit-ssl >= deit-aux) => DO NOT RUN, moot (SSL
+      already wins under augmentation; the live question becomes why the
+      prior stopped mattering).
+    band holds (deit-ssl below deit-aux) => RUN: "was SSL given its best
+      shot?" is then the main objection and only this cell answers it.
+    falsifier B fires (deit-ssl ~ deit-base) => RUN, urgently: a
+      near-total substitution result must be shown to survive a fairly
+      strengthened SimCLR.
+  Scope if triggered: decisive fractions 5/10/25 only, 3 seeds (9 pretrains
+  + 9 finetunes), NOT the full envelope.
 
 ## State of findings (2026-07-16)
 
