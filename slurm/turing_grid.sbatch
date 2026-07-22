@@ -10,21 +10,18 @@
 #
 # turing grid worker (2026-07-22) -- the hedge against BSC queue uncertainty.
 #
-# It consumes the SAME worklist as the BSC workers but from the BACK
-# (expensive -> cheap) while BSC consumes it from the FRONT (cheap ->
-# expensive). The two clusters therefore never touch the same task until they
-# meet in the middle, WITHOUT needing a shared lock across sites. turing's 2
-# GPUs are best spent on the few very long cells anyway: the 50%/100% columns
-# are only 20% of the runs but 63% of the compute.
-#
-# Stop both sides when (BSC counter + turing counter) reaches the task count.
+# It consumes worklist.turing -- a DISJOINT slice (scripts/split_worklist.py):
+# the LIVE cells at 50%/100%, most expensive first. turing's 2 GPUs have no
+# queue wait and a 48h walltime, which suits long runs; and per the 2026-07-22
+# decision they are NOT spent on configurations the ledger already closed
+# (those 1,467 runs go to BSC's 32 GPUs instead).
 
 set -uo pipefail
 REPO=/mnt/beegfs/amughrabi/projects/MomentsCNNEncoder
 PY=/mnt/beegfs/amughrabi/envs/momentstem/bin/python
 cd "$REPO"
 
-WORKLIST=$REPO/worklist.txt
+WORKLIST=$REPO/worklist.turing
 CTR=$REPO/queue.counter.turing        # counts DOWN from the end
 LOCK=$REPO/queue.lock.turing
 export OUT=$REPO/runs
@@ -49,10 +46,10 @@ DEADLINE=$(( $(date +%s) + 46*3600 ))
 
 while :; do
     [ "$(date +%s)" -ge "$DEADLINE" ] && { echo "deadline"; break; }
-    k=$(flock "$LOCK" bash -c "read -r v < '$CTR' 2>/dev/null || v=0;
+    i=$(flock "$LOCK" bash -c "read -r v < '$CTR' 2>/dev/null || v=0;
                                echo \$((v+1)) > '$CTR'; echo \$v")
-    i=$(( N - k ))
-    [ "$i" -lt 1 ] && { echo "queue drained from the back"; break; }
+    i=$((i+1))
+    [ "$i" -gt "$N" ] && { echo "turing queue drained"; break; }
     cmd=$(sed -n "${i}p" "$WORKLIST")
     [ -z "$cmd" ] && continue
     echo "TASK $i/$N :: ${cmd:0:110}"
