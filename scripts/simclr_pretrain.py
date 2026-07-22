@@ -44,18 +44,43 @@ class TwoCrop:
         return self.tf(img), self.tf(img)
 
 
-def simclr_transform(dataset):
+def simclr_transform(dataset, augment=None):
+    """The standard SimCLR view generator (crop/flip/jitter/grayscale).
+
+    :param augment "deit" ADDS the two DeiT components that are MEANINGFUL for
+        a contrastive objective -- RandAugment `rand-m9-mstd0.5-inc1` and
+        RandomErasing p=0.25 -- so the pretraining stage gets the same view
+        strength as the supervised stage in the deit cells. The other three
+        DeiT components are INAPPLICABLE and deliberately omitted: Mixup and
+        CutMix blend two images, which makes the NT-Xent positive pair
+        ambiguous, and label smoothing needs labels NT-Xent does not have.
+        So this is "stronger contrastive views", NOT "the DeiT recipe" -- do
+        not describe it as the latter.
+    """
     mean, std = data_mod.STATS[dataset]
     size = data_mod.IMAGE_SIZE[dataset]
-    return transforms.Compose([
+    base = [
         transforms.RandomResizedCrop(size, scale=(0.2, 1.0)),
         transforms.RandomHorizontalFlip(),
         transforms.RandomApply(
             [transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
         transforms.RandomGrayscale(p=0.2),
-        transforms.ToTensor(),
-        transforms.Normalize(mean, std),
-    ])
+    ]
+    normalize = [transforms.ToTensor(), transforms.Normalize(mean, std)]
+    if not augment:
+        return transforms.Compose(base + normalize)
+    if augment != "deit":
+        raise ValueError(f"unknown augment {augment!r} (only 'deit')")
+    from timm.data.auto_augment import rand_augment_transform
+    from timm.data.random_erasing import RandomErasing
+
+    aa = rand_augment_transform(
+        "rand-m9-mstd0.5-inc1",
+        {"translate_const": int(size * 0.45),
+         "img_mean": tuple(int(255 * m) for m in mean)},
+    )
+    erase = RandomErasing(probability=0.25, mode="pixel", device="cpu")
+    return transforms.Compose(base + [aa] + normalize + [erase])
 
 
 def nt_xent(z, temp):
@@ -80,6 +105,10 @@ def main():
     ap.add_argument("--lr", type=float, default=0.3, help="SGD lr (conv)")
     ap.add_argument("--adamw-lr", type=float, default=1e-3,
                     help="AdamW lr, used when the cell's optimizer is adamw (ViT)")
+    ap.add_argument("--augment", default=None, choices=[None, "deit"],
+                    help="'deit' strengthens the CONTRASTIVE VIEWS with "
+                         "RandAugment + RandomErasing (see simclr_transform); "
+                         "Mixup/CutMix/label-smoothing are inapplicable here")
     ap.add_argument("--temp", type=float, default=0.2)
     ap.add_argument("--proj-dim", type=int, default=128)
     args = ap.parse_args()
@@ -95,7 +124,7 @@ def main():
                                 subset_pct=cfg.get("subset_pct"))
     # Swap in the two-view SimCLR transform (Subset(CIFAR100) or CIFAR100).
     base = ds.dataset if hasattr(ds, "dataset") else ds
-    base.transform = TwoCrop(simclr_transform(cfg["dataset"]))
+    base.transform = TwoCrop(simclr_transform(cfg["dataset"], args.augment))
     loader = DataLoader(ds, batch_size=cfg.get("batch_size", 128), shuffle=True,
                         num_workers=cfg.get("num_workers", 4), drop_last=True,
                         generator=torch.Generator().manual_seed(args.seed))
