@@ -28,6 +28,7 @@ import glob
 import json
 import math
 import os
+import re
 import statistics as st
 
 TRAIN_SIZE = {"cifar100": 50000, "cifar100super": 50000, "cifar10": 50000,
@@ -60,17 +61,6 @@ def load_cells(roots):
 
 def cfgget(cfg, key, default=None):
     return cfg.get(key, default) if isinstance(cfg, dict) else default
-
-
-def family_key(cfg):
-    return (cfgget(cfg, "dataset"), cfgget(cfg, "subset_pct") or 100,
-            cfgget(cfg, "backbone"), (cfgget(cfg, "optimizer", "sgd") or "sgd").lower(),
-            cfgget(cfg, "epochs", 200), cfgget(cfg, "head") or "linear")
-
-
-def is_baseline(cfg):
-    return (not cfgget(cfg, "moment_aux") and not cfgget(cfg, "init_from")
-            and (cfgget(cfg, "stem", "none") or "none") == "none")
 
 
 def sem_of_diff(a, b):
@@ -183,49 +173,137 @@ def main():
 # --------------------------------------------------------------------------
 
 def config_key(cfg):
+    """Everything that defines the experimental condition EXCEPT the data
+    fraction, so a cell and its siblings at other fractions collapse onto one
+    pivot row.
+
+    2026-07-22 FIX: the earlier key omitted head_pool, stem_calibrate,
+    stem_unfreeze_epoch, aux head_norm, the aux TARGET KIND (moment / hog /
+    teacher) and the init_from path. That silently merged 15 distinct
+    (config, portion) slots -- e.g. the HOG control with the FitNets teacher
+    control, and the MultiMaskPool readouts with the plain baseline -- dropping
+    22 cells from the pivot. num_workers is deliberately NOT part of the key:
+    it affects the augmentation stream (see CLAUDE.md) but not which
+    experiment a cell IS.
+    """
+    return json.dumps(config_fields(cfg), sort_keys=True)
+
+
+def config_fields(cfg):
+    """Every field that defines the experimental condition except the data
+    fraction. INTERVENTION_FIELDS below are the things an experiment TESTS;
+    everything else must be matched between a cell and its baseline."""
     aux = cfgget(cfg, "moment_aux") or {}
-    return (
-        cfgget(cfg, "dataset"), cfgget(cfg, "backbone"),
-        (cfgget(cfg, "optimizer", "sgd") or "sgd").lower(),
-        cfgget(cfg, "epochs", 200), cfgget(cfg, "head") or "linear",
-        cfgget(cfg, "stem", "none") or "none",
-        cfgget(cfg, "stem_kernel_size", 11) if (cfgget(cfg, "stem") or "none") != "none" else "",
-        json.dumps(cfgget(cfg, "stem_kwargs") or {}, sort_keys=True),
-        aux.get("stem", ""), str(aux.get("tap", "")), str(aux.get("weight", "")),
-        str(aux.get("weight_final", "")), aux.get("loss", ""),
-        "init" if cfgget(cfg, "init_from") else "",
-        cfgget(cfg, "augment") or "",
-    )
+    kind = ("teacher" if aux.get("teacher") else
+            "hog" if aux.get("hog") else "moment" if aux else "")
+    stem = cfgget(cfg, "stem", "none") or "none"
+    # init_from embeds the data fraction (runs/simclr_pre_5pct/...), which would
+    # split ONE configuration into a separate family per fraction. Keep only the
+    # pretrain VARIANT tag, so simclr_pre / simclr_pre50 / simclr_pre_vit stay
+    # distinct while 1% and 5% of the same variant land on one row.
+    raw = str(cfgget(cfg, "init_from") or "")
+    init = ""
+    if raw:
+        d = raw.split("/")[1] if "/" in raw else raw
+        init = re.sub(r"_+\d+pct$", "", re.sub(r"__[a-z0-9]+_[a-z0-9]+_\d+pct$", "", d))
+    return {
+        "dataset": cfgget(cfg, "dataset"), "backbone": cfgget(cfg, "backbone"),
+        "optimizer": (cfgget(cfg, "optimizer", "sgd") or "sgd").lower(),
+        # train.py fills these from RECIPE when a config omits them, so a raw
+        # YAML and its stored final.json copy must normalise to the same key.
+        "epochs": cfgget(cfg, "epochs", 200),
+        "lr": cfgget(cfg, "lr", 0.1),
+        "weight_decay": cfgget(cfg, "weight_decay", 5e-4),
+        "momentum": cfgget(cfg, "momentum", 0.9),
+        "batch_size": cfgget(cfg, "batch_size", 128),
+        "small_input": cfgget(cfg, "small_input", True),
+        "pretrained": cfgget(cfg, "pretrained", False),
+        "stem": stem,
+        "stem_kernel_size": cfgget(cfg, "stem_kernel_size", 11) if stem != "none" else None,
+        "stem_kwargs": cfgget(cfg, "stem_kwargs") or {},
+        "stem_calibrate": cfgget(cfg, "stem_calibrate", False),
+        "stem_unfreeze_epoch": cfgget(cfg, "stem_unfreeze_epoch"),
+        "head": cfgget(cfg, "head") or "linear",
+        "head_pool": cfgget(cfg, "head_pool") or None,
+        "augment": cfgget(cfg, "augment") or None,
+        "init_from": init,
+        "aux_kind": kind,
+        "aux": {k: (str(v) if k in ("tap",) else v)
+                for k, v in sorted(aux.items()) if k != "teacher"},
+        "aux_teacher": bool(aux.get("teacher")),
+    }
+
+
+# What an experiment TESTS (so a baseline is the same cell with these cleared).
+# Everything NOT listed here -- optimizer, epochs, lr, head, augment, ... -- is
+# matched, so a DeiT-augmented aux cell pairs with the DeiT-augmented baseline
+# and never with the plain one.
+INTERVENTION_FIELDS = ("stem", "stem_kernel_size", "stem_kwargs",
+                       "stem_calibrate", "stem_unfreeze_epoch", "head_pool",
+                       "init_from", "aux_kind", "aux", "aux_teacher")
+
+
+def family_key(cfg):
+    f = config_fields(cfg)
+    for k in INTERVENTION_FIELDS:
+        f.pop(k, None)
+    f["subset_pct"] = cfgget(cfg, "subset_pct") or 100
+    return json.dumps(f, sort_keys=True)
+
+
+def is_baseline(cfg):
+    f = config_fields(cfg)
+    return (not f["aux_kind"] and not f["init_from"] and not f["head_pool"]
+            and f["stem"] == "none")
 
 
 def config_label(cfg):
-    """Compact, unambiguous description of the configuration (fraction-free)."""
+    """Compact, unambiguous description of the configuration (fraction-free).
+    Must distinguish every family config_key distinguishes."""
     aux = cfgget(cfg, "moment_aux") or {}
     stem = cfgget(cfg, "stem", "none") or "none"
     bits = []
     if aux:
-        tgt = str(aux.get("stem", "?")).replace("energy-", "")
-        tap = str(aux.get("tap", "?")).replace("layer", "L").replace("blocks.", "b")
+        if aux.get("teacher"):
+            head = "aux-TEACHER(fitnets)"
+        elif aux.get("hog"):
+            head = "aux-HOG"
+        else:
+            tgt = str(aux.get("stem", "?")).replace("energy-", "")
+            tap = str(aux.get("tap", "?")).replace("layer", "L").replace("blocks.", "b")
+            head = f"aux({tgt}@{tap}"
         lam0, lamf = aux.get("weight", "?"), aux.get("weight_final", None)
         lam = f"L{lam0}>{lamf}" if lamf is not None and lamf != lam0 else f"L{lam0}"
         extra = f",{aux['loss']}" if aux.get("loss") else ""
-        bits.append(f"aux({tgt}@{tap},{lam}{extra})")
+        hn = ",hn" if aux.get("head_norm") else ""
+        fwd = ",fwd-stem" if aux.get("allow_forward_stem") else ""
+        bits.append(head + ("," if head.startswith("aux(") else "(") + lam + extra + hn + fwd + ")")
     if stem != "none":
-        bits.append(f"stem({stem},k{cfgget(cfg, 'stem_kernel_size', 11)})")
+        cal = cfgget(cfg, "stem_calibrate", False)
+        caltag = ",zca" if cal == "zca" else ("" if cal else ",nocal")
+        uf = cfgget(cfg, "stem_unfreeze_epoch")
+        bits.append(f"stem({stem},k{cfgget(cfg, 'stem_kernel_size', 11)}{caltag}"
+                    + (f",unfreeze@{uf}" if uf is not None else "") + ")")
+        kw = cfgget(cfg, "stem_kwargs") or {}
+        if kw:
+            bits.append("kw(" + ",".join(f"{k}={v}" for k, v in sorted(kw.items())) + ")")
+    if cfgget(cfg, "head_pool"):
+        hp = cfgget(cfg, "head_pool")
+        bits.append(f"pool({hp.get('type','?')},J{hp.get('J','?')})")
     if cfgget(cfg, "init_from"):
-        bits.append("simclr-init")
+        init = str(cfgget(cfg, "init_from"))
+        bits.append("simclr50-init" if "pre50" in init else "simclr-init")
     if cfgget(cfg, "augment"):
         bits.append(f"{cfgget(cfg,'augment')}-aug")
     if cfgget(cfg, "head"):
         bits.append(f"{cfgget(cfg,'head')}-head")
     if not bits:
         bits.append("BASELINE")
-    ep = cfgget(cfg, "epochs", 200)
     tail = []
     if (cfgget(cfg, "optimizer", "sgd") or "sgd").lower() != "sgd":
         tail.append((cfgget(cfg, "optimizer") or "").lower())
-    if ep != 200:
-        tail.append(f"{ep}ep")
+    if cfgget(cfg, "epochs", 200) != 200:
+        tail.append(f"{cfgget(cfg, 'epochs')}ep")
     return " + ".join(bits) + (f"  [{','.join(tail)}]" if tail else "")
 
 

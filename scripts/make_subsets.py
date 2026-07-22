@@ -34,20 +34,21 @@ from data import SUBSET_DIR, SUBSET_SEED, make_subset_indices, subset_path
 # fractions as the CIFAR pair so the envelopes line up point-for-point; note
 # tin @1% = 5 img/class exactly like cifar100 @1%, but with 2x the classes and
 # 2x the images (1000 vs 500) -- another angle on the granularity confound.
+# FULL GRID (2026-07-22, user decision "no missing data for any configuration"):
+# every dataset carries every fraction whose subset still yields at least one
+# batch of 128 with drop_last=True. Below that the loader is EMPTY and the cell
+# cannot train at all -- those cells are impossible, not merely unrun:
+#   stl10 @1-2% (50/100 imgs), cub @1-2% (60/120), tin20/tin20b @1% (100).
+# cifar100super/tinsuper/tinsem reuse cifar100/tin indices via SUBSET_ALIAS.
+FULL = (1, 2, 3, 5, 7, 10, 15, 20, 25, 50)
 PCTS = {
-    "cifar100": (1, 2, 3, 5, 7, 10, 15, 25),
-    "cifar10": (1, 2, 3, 5, 7, 10, 15, 25),
-    "stl10": (10, 20, 50),
-    "tin": (1, 2, 3, 5, 7, 10, 15, 25),
-    # tin20 = 20 of tin's 200 classes (data.tin20_wnids), 10000 imgs total;
-    # 10% -> 1000 imgs / 50 per class / 1400 steps, the within-tin granularity
-    # mirror of tin@1% (1000 imgs / 5 per class).
-    "tin20": (10,),
-    "tin20b": (10,),
-    # CUB-200-2011: 5994 train imgs / 200 classes / ~30 per class. 100% is
-    # ALREADY the low-label fine-grained regime (30/cls, 46 batches x 200 =
-    # 9200 steps); 25% (~7-8/cls, 2200 steps) probes the deep left flank.
-    "cub": (25,),
+    "cifar100": FULL,
+    "cifar10": FULL,
+    "stl10": (3, 5, 7, 10, 15, 20, 25, 50),
+    "tin": FULL,
+    "tin20": (2, 3, 5, 7, 10, 15, 20, 25, 50),
+    "tin20b": (2, 3, 5, 7, 10, 15, 20, 25, 50),
+    "cub": (3, 5, 7, 10, 15, 20, 25, 50),
 }
 
 
