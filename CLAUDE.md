@@ -717,6 +717,26 @@ ported vs corrected and why.
   BEST ViT NUMBER IN THE STUDY: **75.25%** at C100@100% (DeiT-aug + prior)
   vs 61.39 aug-only and 50.61 plain. This is now the headline ViT result.
 
+- *** ENVELOPES FILLED IN (2026-07-22, fillvit/fillconv still running; the
+  2/3/7/15% points are new). Two corrections to earlier statements:
+    ViT-tiny on C100, Δ by fraction (1/2/3/5/7/10/15/25/100%):
+      plain      +1.35 +3.25 +6.21  +9.35 +10.99 +13.26 **+14.44** +13.67 +9.88
+      DeiT-aug   +3.20 +6.01 +9.48 +16.34 +18.69 +21.00  +24.59 **+25.05** +13.86
+    (1) THE PLAIN-ViT ENVELOPE PEAKS AT 15% (+14.44), not at 25% as the
+        sparser grid suggested; and the DeiT-aug envelope peaks LATER, at 25%
+        (+25.05). So heavy augmentation does not merely amplify the prior
+        (~1.8-2.4x at every fraction) — it SHIFTS the peak RIGHT, toward more
+        data. Consistent with the mechanism: augmentation removes the
+        overfitting that otherwise caps how much structure the net can use.
+    (2) SSL−aux ON CONV IS UNIMODAL, NOT MONOTONE. With 3/7/15% filled:
+        +0.85 +2.38 +2.32 +3.90 +4.99 +5.01 +4.09 at 1/2/3/5/7/10/15%.
+        I previously wrote "the SSL margin over aux GROWS with data" from the
+        1/2/5/10% points alone — WRONG as stated. It grows to a peak near
+        7-10% and is already declining by 15% (+4.09). The honest claim is
+        that SSL's advantage is largest in the mid-data band and shrinks at
+        both ends. Same error class as every other sparse-grid extrapolation
+        in this study, which is exactly what filling the grid is for.
+
 ## State of findings (2026-07-16)
 
 - GENERALIZATION (2026-07-16). The champion (λ0=1.0 cosine→0, magnitude target,
