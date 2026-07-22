@@ -1,0 +1,32 @@
+# DeiT-augmentation ViT cell @C100 100% -- the heavy-augmentation rival.
+# IDENTICAL to diagvit_aux_100pct except for 'augment: deit', so the
+# only variable is the augmentation stack (DeiT hyper-parameters verbatim:
+# randaug rand-m9-mstd0.5-inc1, erasing 0.25, mixup 0.8, cutmix 1.0,
+# label smoothing 0.1). Asks: does the moment prior still add anything
+# once a small ViT is trained the way the literature says it should be?
+# ViT-tiny from scratch @C100 100% -- first ATTENTION backbone (ConvNeXt was
+# the first non-ResNet but is still convolutional). AdamW because ViTs do not
+# train under the frozen SGD recipe; diag-only, never a headline row.
+name: diagdeit_aux_100pct
+dataset: cifar100
+backbone: vit_tiny
+optimizer: adamw
+epochs: 200
+batch_size: 128
+lr: 0.001
+weight_decay: 0.05
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 100
+stem: none
+stem_calibrate: true
+moment_aux:
+  stem: energy-magnitude
+  tap: blocks.8
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine
+  head_norm: true
+augment: deit

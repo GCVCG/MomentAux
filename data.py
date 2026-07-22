@@ -76,18 +76,40 @@ CIFAR_C_CORRUPTIONS = (
 )
 
 
-def build_transforms(dataset, train):
-    """Standard crop+flip only (recipe v1: minimal and identical for all)."""
+def build_transforms(dataset, train, augment=None):
+    """Standard crop+flip only (recipe v1: minimal and identical for all).
+
+    :param augment "deit" ADDS the DeiT (Touvron et al. 2021) augmentation
+        stack on top of the study's base crop+flip, with DeiT's PUBLISHED
+        hyper-parameters verbatim: RandAugment `rand-m9-mstd0.5-inc1` and
+        RandomErasing p=0.25 mode=pixel. (Mixup 0.8 / CutMix 1.0 / label
+        smoothing 0.1 are batch-level and live in train.py.)
+        The base RandomCrop+flip is DELIBERATELY retained so the only
+        difference from every other cell in the study is the ADDED
+        augmentation -- a one-variable change. Diag-only.
+    """
     mean, std = STATS[dataset]
     normalize = [transforms.ToTensor(), transforms.Normalize(mean, std)]
     if not train:
         return transforms.Compose(normalize)
     size = IMAGE_SIZE[dataset]
     pad = size // 8  # 4 px at 32, 12 px at 96
-    return transforms.Compose(
-        [transforms.RandomCrop(size, padding=pad), transforms.RandomHorizontalFlip()]
-        + normalize
+    base = [transforms.RandomCrop(size, padding=pad),
+            transforms.RandomHorizontalFlip()]
+    if not augment:
+        return transforms.Compose(base + normalize)
+    if augment != "deit":
+        raise ValueError(f"unknown augment {augment!r} (only 'deit')")
+    from timm.data.auto_augment import rand_augment_transform
+    from timm.data.random_erasing import RandomErasing
+
+    aa = rand_augment_transform(
+        "rand-m9-mstd0.5-inc1",
+        {"translate_const": int(size * 0.45),
+         "img_mean": tuple(int(255 * m) for m in mean)},
     )
+    erase = RandomErasing(probability=0.25, mode="pixel", device="cpu")
+    return transforms.Compose(base + [aa] + normalize + [erase])
 
 
 def make_subset_indices(labels, pct, seed=SUBSET_SEED):
@@ -350,8 +372,9 @@ class Relabelled(Dataset):
         return self.ds[i][0], self.targets[i]
 
 
-def build_dataset(dataset, data_root, train, subset_pct=None, download=True):
-    tf = build_transforms(dataset, train)
+def build_dataset(dataset, data_root, train, subset_pct=None, download=True,
+                  augment=None):
+    tf = build_transforms(dataset, train, augment=augment)
     if dataset == "cifar100":
         ds = datasets.CIFAR100(data_root, train=train, transform=tf, download=download)
     elif dataset == "cifar100super":

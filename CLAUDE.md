@@ -646,6 +646,43 @@ ported vs corrected and why.
   NEUTRAL. Bottom line unchanged and now demonstrated on BOTH backbone
   families: **aux XOR SSL, never both.**
 
+- deit wave LAUNCHED (2026-07-21, user-approved option (a) + "test it on all
+  data portions"): the HEAVY-AUGMENTATION rival for the ViT claim. DeiT
+  (Touvron et al. 2021) augmentation hyper-parameters VERBATIM — RandAugment
+  rand-m9-mstd0.5-inc1, RandomErasing p=0.25 mode=pixel, Mixup 0.8, CutMix
+  1.0, label smoothing 0.1 (timm's own implementations, so nothing is tuned
+  by me) — ADDED on top of the study's base crop+flip.
+  DESIGN NOTE (deliberate, and it is a choice worth stating): I did NOT
+  import DeiT's optimizer/schedule/epoch budget. diagdeit_* is IDENTICAL to
+  diagvit_* except for `augment: deit`, so the only variable is the
+  augmentation stack. Importing the whole DeiT recipe would confound
+  augmentation with lr/warmup/epochs and make the comparison
+  uninterpretable. Full envelope: 1/5/10/25/100%, both members, 3 seeds
+  + probes. augment: => diag-only (guard in train.py).
+  THE QUESTION: does the moment prior still add anything once a small ViT is
+  trained the way the literature says it should be?
+  PREDICTIONS RECORDED IN ADVANCE:
+    Baselines RISE (that is what DeiT aug is for): diagdeit_none@10%
+      **20..30** (from 16.47), @100% **58..68** (from 50.61). At @1%
+      (500 imgs) heavy aug may instead HURT — too much regularization for
+      too few images; band **5..8** (from 6.44).
+    Δ_deit (aux − none, both under deit aug) SHRINKS but stays positive:
+      @10% **+3..+10** (from +13.26), @1% **+0..+3** (from +1.35),
+      @100% **0..+6** (from +9.88). Reasoning: the SSL result showed
+      anything that fills the same feature deficit does not stack; heavy
+      augmentation plausibly supplies part of what the prior supplies,
+      so partial substitution is the base case.
+    THE DECISIVE ABSOLUTE COMPARISON: diagdeit_none@10% vs diagvit_aux@10%
+      (29.74). If augmentation ALONE reaches 29.74, then "just use the
+      standard recipe" matches "use the prior", and the ViT claim must be
+      restated as a cost claim, not a capability claim.
+    FALSIFIER A (prior redundant with augmentation): Δ_deit <= +1 at 10%
+      => heavy aug supplies what the prior supplied; the ViT headline
+      weakens to "a cheap substitute for a tuned augmentation recipe".
+    FALSIFIER B (prior complementary — strongest form of the claim):
+      Δ_deit >= +8 at 10% (barely shrunk) => the prior injects structure
+      augmentation cannot manufacture, and the two are additive.
+
 ## State of findings (2026-07-16)
 
 - GENERALIZATION (2026-07-16). The champion (λ0=1.0 cosine→0, magnitude target,

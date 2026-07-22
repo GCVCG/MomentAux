@@ -55,7 +55,8 @@ def seed_worker(worker_id):
 
 def build_loaders(cfg, seed, data_root):
     train_ds = data_mod.build_dataset(
-        cfg["dataset"], data_root, train=True, subset_pct=cfg.get("subset_pct")
+        cfg["dataset"], data_root, train=True, subset_pct=cfg.get("subset_pct"),
+        augment=cfg.get("augment"),
     )
     test_ds = data_mod.build_dataset(cfg["dataset"], data_root, train=False)
     gen = torch.Generator().manual_seed(seed)
@@ -169,6 +170,22 @@ def main():
     # pretrain and supervised stay paired. strict=False: the pretrain ckpt
     # omits the classifier (and any aux heads) by construction. Changing the
     # INIT deviates from the frozen recipe -> diag-only.
+    # augment: 'deit' adds RandAugment/RandomErasing (data.py) plus the
+    # batch-level Mixup/CutMix/label-smoothing below, all at DeiT's published
+    # values. A different augmentation stack is a recipe deviation -> diag-only.
+    augment = cfg.get("augment")
+    if augment and not cfg["name"].startswith("diag"):
+        raise ValueError("augment: requires a diag* config name (never headline)")
+    mixup_fn = None
+    if augment == "deit":
+        from timm.data import Mixup
+        from timm.loss import SoftTargetCrossEntropy
+
+        mixup_fn = Mixup(mixup_alpha=0.8, cutmix_alpha=1.0, label_smoothing=0.1,
+                         num_classes=num_classes)
+        print("deit augmentation: randaug m9 + erasing .25 + mixup .8/cutmix 1.0 "
+              "+ label smoothing .1")
+
     init_from = cfg.get("init_from")
     if init_from:
         if not cfg["name"].startswith("diag"):
@@ -241,6 +258,12 @@ def main():
         raise ValueError(f"optimizer must be 'sgd' or 'adamw', got {opt_name!r}")
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=cfg["epochs"])
     criterion = torch.nn.CrossEntropyLoss()
+    # Mixup/CutMix produce SOFT targets, which plain CrossEntropyLoss cannot
+    # take; timm's SoftTargetCrossEntropy is the loss DeiT itself uses.
+    soft_criterion = None
+    if mixup_fn is not None:
+        from timm.loss import SoftTargetCrossEntropy
+        soft_criterion = SoftTargetCrossEntropy()
     use_amp = device.type == "cuda" and not args.no_amp
     scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
 
@@ -293,10 +316,18 @@ def main():
         lr_now = optimizer.param_groups[0]["lr"]
         for x, y in train_loader:
             x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
+            y_hard = y
+            if mixup_fn is not None:
+                # Mixup/CutMix blend the INPUTS, so the aux target is computed
+                # from the mixed image the network actually sees (consistent);
+                # targets become soft, so train_acc is scored against the
+                # pre-mixup labels and is only indicative.
+                x, y = mixup_fn(x, y)
             optimizer.zero_grad(set_to_none=True)
             with torch.amp.autocast("cuda", enabled=use_amp):
                 logits = model(x)
-                loss = criterion(logits, y)
+                loss = (soft_criterion(logits, y) if mixup_fn is not None
+                        else criterion(logits, y))
                 ce_sum += loss.item()
                 # moment-aux prior: soft MSE regression of an intermediate
                 # feature onto the fixed moment maps (deployed path unchanged).
@@ -317,7 +348,7 @@ def main():
                 model.project_heads()
             loss_sum += loss.item()
             n_batches += 1
-            train_metric.update(logits.detach(), y)
+            train_metric.update(logits.detach(), y_hard)
         scheduler.step()
 
         test_acc = evaluate(model, test_loader, device, num_classes)
