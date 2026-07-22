@@ -607,6 +607,45 @@ ported vs corrected and why.
       DO stack on attention, contradicting the conv result and reopening
       aux-on-SSL as a direction.
 
+- *** SSLVIT2 LANDED — THE ViT-SSL ENVELOPE IS COMPLETE, AND THE PRIOR'S
+  ATTENTION ADVANTAGE IS **DATA-BOUNDED** (2026-07-21, COMPLETE 1h45,
+  3 seeds + probes). Both bands HIT; the combo falsifier did NOT fire:
+      C100 (ViT-tiny)  base   aux-ViT   SimCLR-ViT(2x)   SSL−aux   G(aux) G(ssl)
+      @1%              6.44     7.80     7.05 ±0.17      **−0.74**  5.89   1.78
+      @5%             12.25    21.60    20.34 ±0.72      **−1.26**  13.17 10.02
+      @10%            16.47    29.74    29.77 ±1.00      **+0.04**  14.85 13.46
+      @25%            28.50    42.17    43.58 ±0.23      **+1.41**  14.03 14.38
+  SSL−aux is MONOTONE RISING in data (−0.74/−1.26/+0.04/+1.41): the prior
+  WINS below 10%, TIES at 10%, and LOSES at 25% (+1.41 = 3.9σ). My @25%
+  prediction had the fork at 43.5 ("if SSL lands >43.5 the ViT advantage is
+  itself data-bounded"); it landed 43.58 — the data-bounded branch, by a
+  hair but significantly.
+  CORRECTION TO THE EARLIER FRAMING: "the attention regime is the method's
+  niche" was too broad. The correct statement is **the LOW-DATA attention
+  regime (<=10%)**. What is still remarkable is how far the crossover moved:
+  on CONV, SSL wins from 1% upward (+0.85 already at 500 imgs); on ViT the
+  crossover is pushed out to ~10%, and below it the prior wins outright at
+  1/50th the compute.
+  FEATURE SIDE explains it: G(simclr-ViT) COLLAPSES at low data (1.78 @500
+  imgs vs the prior's 5.89) — contrastive learning genuinely starves on a
+  backbone with no spatial prior — then catches up and passes the prior only
+  at 25% (14.38 vs 14.03). This is exactly the mechanism I wrongly predicted
+  for CONV (where it did not happen); on ATTENTION it is real.
+  readout(simclr-ViT) = −1.17/−1.93/−0.16/+0.71 at bases 6.4/12.2/16.5/28.5
+  — negative below the ~30 crossing, rising toward it: the aux-derived sign
+  law continues to hold on a non-aux intervention (4 more cells).
+- *** ViT COMBO: NO STACKING ON ATTENTION EITHER (2026-07-21):
+  diagsslvitaux_10pct = **29.93 ±0.96** — IN BAND (29..32); the falsifier
+  (>=33 => they stack) did NOT fire. vs SimCLR-alone 29.77 (+0.16 ±0.80)
+  and vs aux-alone 29.74 (+0.20 ±0.58) — both indistinguishable from zero.
+  G(combo) = +14.14, BETWEEN the two singles (aux 14.85, simclr 13.46), not
+  above either: the deficits they fill are the same deficit, so the second
+  intervention adds nothing.
+  NOTE the difference from conv: there the combo actively HURT (−1.51, the
+  early λ0=1.0 shaping taxing already-shaped features); on ViT it is merely
+  NEUTRAL. Bottom line unchanged and now demonstrated on BOTH backbone
+  families: **aux XOR SSL, never both.**
+
 ## State of findings (2026-07-16)
 
 - GENERALIZATION (2026-07-16). The champion (λ0=1.0 cosine→0, magnitude target,
