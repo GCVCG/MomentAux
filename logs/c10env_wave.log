@@ -151,3 +151,13 @@ epoch 200/200 loss 0.0016 train 0.9999 test 0.9486
 done: final 0.9486 best 0.9490 -> ./runs/c10_aux_100pct/seed0
 C10ENV_DONE c10_aux_100pct_seed0
 C10ENV_START c10_aux_100pct_seed1
+epoch 200/200 loss 0.0014 train 1.0000 test 0.9503
+done: final 0.9503 best 0.9519 -> ./runs/c10_aux_100pct/seed1
+C10ENV_DONE c10_aux_100pct_seed1
+C10ENV_START c10_aux_100pct_seed2
+epoch 200/200 loss 0.0016 train 0.9999 test 0.9515
+done: final 0.9515 best 0.9515 -> ./runs/c10_aux_100pct/seed2
+C10ENV_DONE c10_aux_100pct_seed2
+C10ENV_CELL_DONE c10_aux_100pct
+C10ENV_PCT_DONE 100
+C10ENV_COMPLETE

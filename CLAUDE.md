@@ -737,6 +737,39 @@ ported vs corrected and why.
         both ends. Same error class as every other sparse-grid extrapolation
         in this study, which is exactly what filling the grid is for.
 
+- deitssl wave LAUNCHED (2026-07-22, user: "are we going somehow to merge the
+  DeiT-aug with SSL − aux?" — a real hole they spotted): the 2x3
+  {plain,deit} x {none,aux,simclr} has NO deit-simclr cell. Every SSL-vs-prior
+  head-to-head ran under plain crop+flip, so the ViT positioning claim is
+  currently conditioned on a recipe nobody would use for a small ViT.
+  THE MECHANISM AT STAKE: aux+augmentation STACK (different currencies —
+  oriented-energy STRUCTURE vs nuisance-INVARIANCE). SimCLR's objective IS
+  invariance to an augmentation family, so heavy augmentation may SUBSTITUTE
+  for it rather than amplify it. If so, the head-to-head FLIPS under a modern
+  recipe and the claim strengthens from "low-data attention" to "attention
+  under any modern recipe".
+  PREDICTIONS RECORDED IN ADVANCE (bands sit BELOW the aux cell — betting on
+  PARTIAL substitution: SSL amplified by aug, but less than aux is):
+    diagdeitssl_simclr_5pct:  **24..30** (deit-base 12.55, deit-aux 28.89)
+    diagdeitssl_simclr_10pct: **38..43** (deit-base 20.28, deit-aux 41.29)
+    diagdeitssl_simclr_25pct: **50..57** (deit-base 32.27, deit-aux 57.32)
+    FALSIFIER A (my bet dies): deit-ssl >= deit-aux at BOTH 10% and 25% =>
+      equal amplification, no flip; the positioning claim then holds ONLY
+      under plain augmentation and must be restated that way.
+    FALSIFIER B (strongest form for the method): deit-ssl <= deit-base + 5
+      => augmentation almost entirely substitutes for SimCLR, and the prior
+      is the only intervention that survives a modern recipe.
+    PROBES: G(deit-ssl) vs G(deit-aux)=22.20. If SSL's currency really is
+      invariance, its G should rise LESS under augmentation than aux's did
+      (aux 14.85 -> 22.20; simclr 13.46 -> ?).
+    COMBO diagdeitsslaux_10pct: "aux XOR SSL" was established WITHOUT
+      augmentation (conv −1.51, ViT neutral). Beating BOTH singles here
+      would falsify it under a modern recipe.
+  COST: the SimCLR pretrain ckpt is AUGMENTATION-AGNOSTIC (only the
+  supervised stage changes), so this reuses fillvit's pretrains — ~27
+  supervised runs, no new pretraining. Full envelope 1-100%, 3 seeds,
+  decisive fractions (10/25) FIRST. Suite 101 green.
+
 ## State of findings (2026-07-16)
 
 - GENERALIZATION (2026-07-16). The champion (λ0=1.0 cosine→0, magnitude target,
