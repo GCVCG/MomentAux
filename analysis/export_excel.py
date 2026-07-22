@@ -61,11 +61,8 @@ def write_grouped(ws, groups, rows, widths, freeze):
             ws.merge_cells(start_row=1, start_column=col, end_row=1,
                            end_column=col + len(cs) - 1)
             ws.cell(row=1, column=col, value=title)
-        else:
-            for i in range(len(cs)):
-                ws.merge_cells(start_row=1, start_column=col + i, end_row=2,
-                               end_column=col + i)
-                ws.cell(row=1, column=col + i, value=cs[i])
+        # else: no band -- row 1 stays blank so row 2 remains a COMPLETE
+        # header row (Excel's autofilter reads row 2 and needs every name).
         col += len(cs)
     for d in rows:
         ws.append([d.get(c) for c in cols])
@@ -237,17 +234,14 @@ def main():
               ("SEEDS", "n")]
     ws.append([""] * (len(lead) + 3 * len(pcts) + 1))
     ws.append(lead + [f"{p}%" for _ in groups for p in pcts] + ["cells"])
-    for i, name in enumerate(lead, start=1):          # id cols span both rows
-        ws.merge_cells(start_row=1, start_column=i, end_row=2, end_column=i)
-        ws.cell(row=1, column=i, value=name)
+    # lead columns keep their names in row 2 (complete header row for the
+    # autofilter); row 1 above them stays blank.
     col = len(lead) + 1
     for title, _ in groups:                            # metric spans its block
         ws.merge_cells(start_row=1, start_column=col, end_row=1,
                        end_column=col + len(pcts) - 1)
         ws.cell(row=1, column=col, value=title)
         col += len(pcts)
-    ws.merge_cells(start_row=1, start_column=col, end_row=2, end_column=col)
-    ws.cell(row=1, column=col, value="cells")
 
     frows = sorted(fams.values(), key=lambda f: (str(f["dataset"]), str(f["backbone"]),
                                                  0 if f["base"] else 1, f["label"]))
