@@ -947,6 +947,37 @@ ported vs corrected and why.
   claim (Tracks A+B); Track C (no pretrain) ran fine. Fixed to a verified
   whitelist (cifar100, tin), both paths smoke-tested, suite 101 green.
   genssl2 (turing) repairs A@1/5/10 + B + deitssl_tin + probes.
+  *** GENSSL/GENSSL2 SCORED (2026-07-23, wave COMPLETE, 3 seeds + probes;
+  tin@10% comparators: base 33.60/aux 35.24; vit base 8.60/aux 17.75;
+  deit base 10.49/aux 27.43):
+    TRACK A (conv SSL on tin) — SSL DOMINANCE TRANSPLANTS, UNIMODAL:
+      SSL-init: 8.30/15.19/20.61/27.79/38.44 at 1/2/3/5/10%
+      SSL−aux:  +1.50/+3.82/+4.63/+4.59/+3.20 — unimodal peaking 3-5%,
+      declining by 10%, same shape as C100. @10% landed 38.44, band top
+      (35.5..38.5). Falsifier (SSL<=aux at 5 AND 10) did NOT fire: conv-SSL
+      dominance is now a TWO-POPULATION claim.
+    TRACK B (ViT SSL, tin@10%) — *** THE FALSIFIER FIRED ***:
+      diagsslvit_tin_simclr_10pct = 20.69 ±0.33 > 19.75 (aux 17.75 + 2):
+      SimCLR-ViT BEATS the prior on attention off-C100, by +2.94, with
+      MORE feature gain (G_ssl +16.76 vs G_aux +12.39). Band (13..18)
+      missed high. RESTATEMENT REQUIRED AND MADE: the "low-data attention
+      niche" is an IMAGE-COUNT statement, not a fraction statement — C100:
+      tie at 5k imgs, SSL wins at 12.5k; tin: SSL wins at 10k. Both
+      populations agree on a crossover ~5k images; below it (C100 1-5%,
+      tin 1-5% pending) the prior wins on attention, above it SSL does.
+      tin ViT-SSL at 1/2/5% (queued in the expansion) adjudicates the
+      below-crossover side off-C100.
+    TRACK C (deit-ssl, tin@10%) — THE MODERN-RECIPE FLIP TRANSPLANTS:
+      diagdeitssl_tin_simclr_10pct = 25.45 ±0.38 < deit-aux 27.43 (−1.98);
+      falsifier (deit-ssl >= deit-aux => flip C100-specific) did NOT fire.
+      Under plain aug SSL wins this cell (+2.94); add DeiT augmentation and
+      the prior wins (−1.98) — the stack-vs-substitute mechanism holds on
+      population #2. Feature side agrees: G(deit-aux) +19.72 >
+      G(deit-ssl) +18.52.
+    NET POSITIONING AFTER GENSSL: "prior beats SSL under a modern recipe"
+    now holds on BOTH C100 and tin; "prior beats SSL under plain aug on
+    attention" holds only BELOW ~5k images (restated); conv plain-aug SSL
+    dominance confirmed everywhere measured.
   ENVELOPE EXTENSION (user: "why not all portions? use the local machine"):
   local 3090 wave fills the tin conv-SSL envelope at 2/3/7/15/25% (predictions
   in scripts/genssl_local_wave.sh header: SSL>base from 2% up, UNIMODAL
