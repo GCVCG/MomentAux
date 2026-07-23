@@ -31,8 +31,10 @@ CTR=\$(cat "\$MS/queue.counter" 2>/dev/null || echo 0)
 NBIG=\$(wc -l < "\$MS/worklist.big" 2>/dev/null || echo 0)
 CBIG=\$(cat "\$MS/queue.counter.big" 2>/dev/null || echo 0)
 BIGJOBS=\$(squeue -u ub881905 -h -n ms_big -t R,PD -o "%i" | wc -l)
-if [ "\$CBIG" -lt "\$NBIG" ] && [ "\$BIGJOBS" -eq 0 ]; then
-    sbatch "\$MS/bsc_big.sbatch" 2>&1 | sed 's/^/SUBMIT-BIG /'
+if [ "\$CBIG" -lt "\$NBIG" ] && [ "\$BIGJOBS" -lt 2 ]; then
+    for i in \$(seq 1 \$((2 - BIGJOBS))); do
+        sbatch "\$MS/bsc_big.sbatch" 2>&1 | sed 's/^/SUBMIT-BIG /'
+    done
 fi
 CUR=\$(squeue -u ub881905 -h -n ms_grid -t R,PD -o "%i" | wc -l)
 if [ "\$CTR" -ge "\$N" ]; then
@@ -46,9 +48,13 @@ if [ "\$CTR" -ge "\$N" ]; then
     # cnx cells at >=25% exceed the 5h45 worker walltime and live in the
     # dedicated 24h big-cell lane (worklist.big / bsc_big.sbatch) -- keep
     # them OUT of the normal reconcile pass or they churn forever.
-    OUT="\$MS/runs" python scripts/make_missing_worklist.py --split bsc 2>/dev/null \
-        | grep -vE "cnx[^ ]*_(25|50|100)pct|grid_(path|food)[^ ]*_100pct|diaggrid_ssl_(tin|pathmnist|food101)_100pct" \
-        > "\$MS/worklist.bsc.new"
+    # exclude every config that lives in the big lane (data-driven: the
+    # big worklist itself is the source of truth, no pattern list to rot)
+    grep -o "configs/[^ ]*\.yaml" "\$MS/worklist.big" | sort -u > "\$MS/.bigcfgs"
+    # --split all: BSC owns the ENTIRE grid since 2026-07-23 (turing's queue
+    # lane retired; its 2 GPUs run dedicated waves only)
+    OUT="\$MS/runs" python scripts/make_missing_worklist.py --split all 2>/dev/null \
+        | grep -vFf "\$MS/.bigcfgs" > "\$MS/worklist.bsc.new"
     M=\$(grep -c . "\$MS/worklist.bsc.new" || echo 0)
     if [ "\$M" -eq 0 ]; then
         rm -f "\$MS/worklist.bsc.new"; touch "\$MS/GRID_COMPLETE"
