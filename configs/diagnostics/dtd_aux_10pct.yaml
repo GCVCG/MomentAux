@@ -1,0 +1,25 @@
+# DTD textures (squash-64px, 47-way) -- the prior's home turf
+# Champion recipe VERBATIM (SGD, 200ep, crop+flip, lambda0=1.0 cosine->0,
+# magnitude target, tap layer3, MSE, head_norm ON) -- domain-generalization campaign
+# 2026-07-23. num_workers=2 (tin convention, 64px pipelines).
+name: dtd_aux_10pct
+dataset: dtd
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 10
+stem: none
+stem_calibrate: true
+moment_aux:
+  stem: energy-magnitude
+  tap: layer3
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine
+  head_norm: true

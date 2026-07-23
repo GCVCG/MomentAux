@@ -48,14 +48,32 @@ STATS = {
     # Stats computed 2026-07-20 on the 5994-image train split at 64x64 after
     # the squash-resize (per-pixel mean/std over all images), then pinned.
     "cub": ((0.4857, 0.4995, 0.4324), (0.2159, 0.2112, 0.2509)),
+    # --- DOMAIN-GENERALIZATION datasets (2026-07-23, user-approved: the five
+    # existing populations are all small natural-photo sets; these test the
+    # prior where image statistics differ fundamentally). Stats pinned from
+    # each train split at 64px, same procedure as cub.
+    # EuroSAT: Sentinel-2 satellite RGB, 27000 imgs, 64px native, 10 classes.
+    # No official split -> deterministic per-class 80/20 (see EuroSAT64).
+    # Computed 2026-07-23 on the 21600-image deterministic train split.
+    "eurosat": ((0.3445, 0.3805, 0.4079), (0.2040, 0.1369, 0.1151)),
+    # DTD textures: 47 classes, train+val (3760) as train / test (1880) as
+    # test, partition 1, squash-resized to 64px like cub.
+    "dtd": ((0.5273, 0.4702, 0.4235), (0.2392, 0.2270, 0.2316)),
+    # PathMNIST (MedMNIST+ 64px variant): colon histopathology, 9 classes,
+    # 89996 train / 7180 test, 64px native npz.
+    "pathmnist": ((0.7405, 0.5330, 0.7058), (0.1237, 0.1768, 0.1244)),
+    # Food-101 at 64px (squash-resize): 101 classes, 750 train/cls.
+    "food101": ((0.5493, 0.4450, 0.3435), (0.2323, 0.2440, 0.2473)),
 }
 
 NUM_CLASSES = {"cifar100": 100, "cifar100super": 20, "cifar10": 10, "stl10": 10,
                "tin": 200, "tin20": 20, "tin20b": 20, "tinsuper": 20,
-               "tinsem": 20, "cub": 200}
+               "tinsem": 20, "cub": 200,
+               "eurosat": 10, "dtd": 47, "pathmnist": 9, "food101": 101}
 IMAGE_SIZE = {"cifar100": 32, "cifar100super": 32, "cifar10": 32, "stl10": 96,
               "tin": 64, "tin20": 64, "tin20b": 64, "tinsuper": 64,
-              "tinsem": 64, "cub": 64}
+              "tinsem": 64, "cub": 64,
+              "eurosat": 64, "dtd": 64, "pathmnist": 64, "food101": 64}
 
 # cifar100super is CIFAR-100's IMAGES with its 20 official coarse labels, and it
 # deliberately reuses CIFAR-100's COMMITTED subset indices (data/subsets/
@@ -294,6 +312,121 @@ class CUB200(Dataset):
         return (self.transform(img) if self.transform else img), y
 
 
+class Squash64(Dataset):
+    """Wrap a (PIL, label) dataset with a 64x64 BILINEAR squash-resize before
+    the transform -- the exact CUB200 convention (whole subject stays in
+    frame; fixed choice, identical for every cell, cancels in every Delta)."""
+
+    def __init__(self, base, transform=None):
+        from PIL import Image
+        self.base, self.transform, self._Image = base, transform, Image
+        self.targets = list(getattr(base, "targets", []) or
+                            [base[i][1] for i in range(len(base))])
+
+    def __len__(self):
+        return len(self.base)
+
+    def __getitem__(self, i):
+        img, y = self.base[i]
+        img = img.convert("RGB").resize((64, 64), self._Image.BILINEAR)
+        return (self.transform(img) if self.transform else img), y
+
+
+class EuroSAT64(Dataset):
+    """EuroSAT RGB (Helber et al. 2019): 27000 Sentinel-2 patches, 64px
+    native, 10 land-use classes. Satellite optics -- the sharpest test of
+    whether the moment prior encodes generic early vision or natural-photo
+    statistics specifically.
+
+    EuroSAT ships with NO official split. Deterministic 80/20 per-class
+    split: torchvision's ImageFolder orders samples by sorted path (stable
+    across machines), and each class's index list is permuted by
+    RandomState(SUBSET_SEED) with the last 20%% held out as test. Pure
+    function of (SUBSET_SEED, sorted paths), so it reproduces byte-identically
+    everywhere without a committed file."""
+
+    def __init__(self, data_root, train, transform=None):
+        from torchvision import datasets as tvd
+        base = tvd.EuroSAT(data_root, download=False)
+        rng_targets = np.asarray(base.targets)
+        keep = []
+        for c in np.unique(rng_targets):
+            idx = np.where(rng_targets == c)[0]          # sorted-path order
+            perm = np.random.RandomState(SUBSET_SEED).permutation(len(idx))
+            cut = int(round(len(idx) * 0.8))
+            keep.extend(idx[perm[:cut]] if train else idx[perm[cut:]])
+        self.indices = sorted(keep)
+        self.base, self.transform = base, transform
+        self.targets = [int(rng_targets[i]) for i in self.indices]
+
+    def __len__(self):
+        return len(self.indices)
+
+    def __getitem__(self, i):
+        img, y = self.base[self.indices[i]]
+        return (self.transform(img) if self.transform else img), y
+
+
+class PathMNIST64(Dataset):
+    """PathMNIST (MedMNIST+ 64px variant, Yang et al. 2023): colon-pathology
+    patches, 9 tissue classes, 89996 train / 7180 test. Histopathology stain
+    statistics are the furthest from ImageNet-like photos of any population
+    in the study -- the biomedical domain test.
+
+    Expects <data_root>/pathmnist_64.npz (Zenodo record 10519652)."""
+
+    def __init__(self, data_root, train, transform=None):
+        from PIL import Image
+        path = os.path.join(data_root, "pathmnist_64.npz")
+        if not os.path.isfile(path):
+            raise FileNotFoundError(
+                f"{path} missing. Get it once with:\n  cd data && wget "
+                "https://zenodo.org/records/10519652/files/pathmnist_64.npz")
+        z = np.load(path)
+        split = "train" if train else "test"
+        self.images = z[f"{split}_images"]           # (N, 64, 64, 3) uint8
+        self.targets = [int(t) for t in z[f"{split}_labels"].ravel()]
+        self.transform, self._Image = transform, Image
+
+    def __len__(self):
+        return len(self.targets)
+
+    def __getitem__(self, i):
+        img = self._Image.fromarray(self.images[i])
+        return (self.transform(img) if self.transform else img), self.targets[i]
+
+
+def dtd64(data_root, train, transform=None):
+    """DTD (Cimpoi et al. 2014) at 64px: 47 texture classes, partition 1,
+    train+val (3760, 80/cls) as train -- the standard DTD protocol -- and
+    test (1880) as test. Texture-dominated images: the moment prior IS an
+    oriented-energy descriptor, so this is the domain where its inductive
+    bias should be strongest."""
+    from torch.utils.data import ConcatDataset
+    from torchvision import datasets as tvd
+    if train:
+        tr = tvd.DTD(data_root, split="train", partition=1, download=False)
+        va = tvd.DTD(data_root, split="val", partition=1, download=False)
+        base = ConcatDataset([tr, va])
+        base.targets = list(tr._labels) + list(va._labels)
+    else:
+        base = tvd.DTD(data_root, split="test", partition=1, download=False)
+        base.targets = list(base._labels)
+    return Squash64(base, transform)
+
+
+def food101_64(data_root, train, transform=None):
+    """Food-101 (Bossard et al. 2014) at 64px squash-resize: 101 dishes,
+    750 train / 250 test per class. Fine-grained, texture-rich natural
+    photos -- the food-domain population (user request 2026-07-23; the
+    segmentation set FoodSeg103 does not fit the classification recipe)."""
+    from torchvision import datasets as tvd
+    split = "train" if train else "test"
+    base = tvd.Food101(data_root, split=split, download=False)
+    base.targets = list(base._labels)
+    return Squash64(base, transform)
+
+
 def tin_root(data_root):
     return os.path.join(data_root, "tiny-imagenet-200")
 
@@ -437,6 +570,14 @@ def build_dataset(dataset, data_root, train, subset_pct=None, download=True,
         ds = Relabelled(base, [cmap[t] for t in base.targets])
     elif dataset == "cub":
         ds = CUB200(data_root, train=train, transform=tf)
+    elif dataset == "eurosat":
+        ds = EuroSAT64(data_root, train=train, transform=tf)
+    elif dataset == "dtd":
+        ds = dtd64(data_root, train=train, transform=tf)
+    elif dataset == "pathmnist":
+        ds = PathMNIST64(data_root, train=train, transform=tf)
+    elif dataset == "food101":
+        ds = food101_64(data_root, train=train, transform=tf)
     else:
         raise ValueError(f"unknown dataset {dataset!r}")
     if subset_pct is not None and subset_pct != 100:
@@ -466,9 +607,20 @@ def calibration_batch(dataset, data_root, n=1024):
         ds = datasets.ImageFolder(os.path.join(tin_root(data_root), "train"), transform=tf)
     elif dataset == "cub":
         ds = CUB200(data_root, train=True, transform=tf)
+    elif dataset in ("eurosat", "dtd", "pathmnist", "food101"):
+        ds = build_dataset(dataset, data_root, train=True, subset_pct=None,
+                           download=False)
+        ds = _with_eval_transform(ds, tf)
     else:
         raise ValueError(f"unknown dataset {dataset!r}")
     return torch.stack([ds[i][0] for i in range(min(n, len(ds)))])
+
+
+def _with_eval_transform(ds, tf):
+    """Return ds with its transform swapped to tf (calibration uses the eval
+    transform). The new datasets all expose .transform at the top level."""
+    ds.transform = tf
+    return ds
 
 
 class CIFARCorrupted(Dataset):

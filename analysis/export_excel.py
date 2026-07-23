@@ -168,7 +168,9 @@ def main():
 
     CHANCE = {"cifar100": 1.0, "cifar100super": 5.0, "cifar10": 10.0,
               "stl10": 10.0, "tin": 0.5, "tin20": 5.0, "tin20b": 5.0,
-              "tinsuper": 5.0, "tinsem": 5.0, "cub": 0.5}
+              "tinsuper": 5.0, "tinsem": 5.0, "cub": 0.5,
+              "eurosat": 10.0, "dtd": 100.0 / 47, "pathmnist": 100.0 / 9,
+              "food101": 100.0 / 101}
 
     # ---- per-cell records ------------------------------------------------
     recs = []

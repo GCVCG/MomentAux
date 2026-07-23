@@ -49,6 +49,15 @@ PCTS = {
     "tin20": (2, 3, 5, 7, 10, 15, 20, 25, 50),
     "tin20b": (2, 3, 5, 7, 10, 15, 20, 25, 50),
     "cub": (3, 5, 7, 10, 15, 20, 25, 50),
+    # Domain-generalization datasets (2026-07-23). Sub-one-batch floors:
+    # eurosat 21600 train -> 1% = 216 >= 128, all fractions live.
+    # dtd 3760 train -> 1%/2%/3% = 37/75/112 < 128 impossible; 5% = 188 ok.
+    # pathmnist 89996 -> all fractions live (1% = 899).
+    # food101 75750 -> all fractions live (1% = 757).
+    "eurosat": FULL,
+    "dtd": (5, 7, 10, 15, 20, 25, 50),
+    "pathmnist": FULL,
+    "food101": FULL,
 }
 
 
@@ -79,6 +88,11 @@ def get_labels(dataset, data_root):
         from data import CUB200
 
         return CUB200(data_root, train=True).targets
+    if dataset in ("eurosat", "dtd", "pathmnist", "food101"):
+        from data import build_dataset
+
+        return build_dataset(dataset, data_root, train=True,
+                             download=False).targets
     raise ValueError(f"unknown dataset {dataset!r}")
 
 

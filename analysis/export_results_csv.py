@@ -33,7 +33,9 @@ import statistics as st
 
 TRAIN_SIZE = {"cifar100": 50000, "cifar100super": 50000, "cifar10": 50000,
               "stl10": 5000, "tin": 100000, "tinsuper": 100000,
-              "tinsem": 100000, "tin20": 10000, "tin20b": 10000, "cub": 5994}
+              "tinsem": 100000, "tin20": 10000, "tin20b": 10000, "cub": 5994,
+              "eurosat": 21600, "dtd": 3760, "pathmnist": 89996,
+              "food101": 75750}
 
 
 def load_cells(roots):
@@ -104,7 +106,9 @@ def main():
 
     CHANCE = {"cifar100": 1.0, "cifar100super": 5.0, "cifar10": 10.0,
               "stl10": 10.0, "tin": 0.5, "tin20": 5.0, "tin20b": 5.0,
-              "tinsuper": 5.0, "tinsem": 5.0, "cub": 0.5}
+              "tinsuper": 5.0, "tinsem": 5.0, "cub": 0.5,
+              "eurosat": 10.0, "dtd": 100.0 / 47, "pathmnist": 100.0 / 9,
+              "food101": 100.0 / 101}
 
     rows = []
     for cell, rec in sorted(cells.items()):
