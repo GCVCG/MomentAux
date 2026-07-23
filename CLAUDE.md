@@ -1055,12 +1055,40 @@ ported vs corrected and why.
       recommendation needs re-derivation per SSL family.
   (c) NOT planned: simsiam x deit (gated on SimSiam's plain-aug result),
       transfer x deit (engineering, no mechanism question).
-  DEFERRED (need real wiring: small-input surgery + aux tap adapters +
-  layout tests): Swin-tiny (hierarchical attention — does the ViT deficit
-  survive convolution-like biases? sharpest mechanism test left),
-  MobileNetV3/EfficientNet (edge positioning: zero-inference-cost prior is
-  most relevant exactly there), DINO (attention-native SSL; gated on the
-  SimSiam outcome). Recorded as the next architecture batch, not launched.
+- *** MODERN-ARCHITECTURE BATCH WIRED AND LAUNCHED (2026-07-23, user: "do we
+  need to add more up to date and modern architectures and baselines?" —
+  the formerly-deferred batch is now real; 51 tasks -> BSC, worklist 2958):
+  NEW CODE: backbones.py gains swin_tiny (timm img_size + window_size=4,
+  layers.2 = layer3 analog, NHWC) and mobilenetv3_small_100 (conv_stem
+  stride 2->1 surgery, blocks.3 tap); aux._to_spatial now folds Swin's
+  4D channels-LAST taps (H==W and C>W heuristic + CONTENT test in
+  test_tensor_layout — suite now 102). scripts/dino_pretrain.py: DINO with
+  EMA teacher, centering, weight-normed head K=4096, 2 global + 4 local
+  crops; DEVIATION STATED IN THE DOCSTRING: local crops are small-SCALE at
+  full RESOLUTION (fixed ViT patch grid), not half-res — never call it
+  verbatim DINO. All three smoke-tested e2e (swin+aux, mnet+aux, dino-vit).
+  CELLS: diaggrid_swin_{c100@5/10/25, tin@10} pairs (AdamW diag);
+  grid_mnet_{c100@5/10, tin@5} pairs (frozen SGD, headline-eligible,
+  bistable flag will catch a cnx-style collapse); diaggrid_dino_vit_{5,10,
+  25}pct (C100).
+  PREDICTIONS RECORDED IN ADVANCE:
+    Swin: baselines FAR above ViT-tiny's (hierarchy is most of what ViT
+      lacks at this scale); G(swin) ≪ G(vit) and Delta_swin +1..+5 —
+      reading: the deficit is ARCHITECTURAL-BIAS-ABSENCE, not attention
+      per se. FALSIFIER: Delta_swin >= +8 at 5-10% => the deficit is
+      attention-intrinsic and the mechanism story changes.
+    MobileNet: conv-with-strong-bias => champion-like +2..+5 @5%,
+      decaying right flank. Watch bistability under frozen SGD.
+    DINO-ViT: self-distillation is MORE data-hungry than contrastive at
+      2.5-12.5k imgs => DINO <= SimCLR-ViT at 5/10%, prior stays ahead
+      <=10%. FALSIFIER: DINO >= aux-ViT anywhere <=10% => modern
+      attention-SSL closes the low-data niche and the ViT positioning
+      must be restated against DINO.
+  STILL EXCLUDED, with reasons: Mamba/VMamba (CUDA-kernel deps, wiring
+  risk ≫ evidence value at 32-64px), BYOL (SimSiam already represents
+  negative-free), MAE (known-weak at tiny data; run only if a reviewer
+  demands it), CaiT/DeiT-III (recipe variants, the aug axis already
+  isolates what they'd add).
   INFRA: ~/.cache lives on a FULL 4TB HDD -> HF_HOME now points into the
   repo (.hf_cache, gitignored); weights pre-fetched and shipped to BSC
   (compute nodes have no internet), env.sh exports HF_HOME.

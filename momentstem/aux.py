@@ -144,7 +144,17 @@ class HOGTarget(nn.Module):
 def _to_spatial(feat):
     """Transformer taps yield (B, N, C) token tensors; the aux head and the
     pooled target need (B, C, H, W). Drop the cls token when present and fold
-    the rest back onto their grid. Conv features pass through untouched."""
+    the rest back onto their grid. Conv features pass through untouched.
+
+    Swin taps yield 4D but channels-LAST (B, H, W, C): detected by H == W
+    with C strictly larger than either (true for every tap in the study:
+    e.g. (B, 4, 4, 384); a genuine NCHW tap like (B, 256, 8, 8) fails the
+    test because dim1 != dim2), then permuted to NCHW."""
+    if feat.dim() == 4:
+        b, d1, d2, d3 = feat.shape
+        if d1 == d2 and d3 > d2:              # NHWC (Swin stages)
+            return feat.permute(0, 3, 1, 2).contiguous()
+        return feat
     if feat.dim() != 3:
         return feat
     b, n, c = feat.shape

@@ -18,7 +18,7 @@ from .controls import build_stem
 from .stem import MomentStem
 
 RESNETS = ("resnet18", "resnet34", "resnet50")
-BACKBONES = RESNETS + ("convnext_tiny", "vit_tiny")
+BACKBONES = RESNETS + ("convnext_tiny", "vit_tiny", "swin_tiny", "mobilenetv3_small_100")
 
 
 class CosineClassifier(nn.Module):
@@ -103,6 +103,24 @@ def build_model(
             img_size=image_size,
             patch_size=image_size // 8,
         )
+    elif backbone == "swin_tiny":
+        # Hierarchical attention (Swin-T): the mechanism control for the
+        # ViT-tiny deficit -- windowed attention + patch merging give it
+        # convolution-like locality/hierarchy biases ViT lacks. patch 4 with
+        # window 4: at 64px the stages run 16/8/4/2, at 32px 8/4/2/1; timm
+        # clamps windows to the feature size where needed. `layers.2` is the
+        # layer3 analog (same depth fraction; NHWC -- aux._to_spatial folds
+        # it). No conv surgery: the patchify stem IS Swin's small-input path.
+        if not small_input:
+            raise ValueError("swin_tiny is only wired for small inputs")
+        net = timm.create_model(
+            "swin_tiny_patch4_window7_224",
+            pretrained=pretrained,
+            num_classes=num_classes,
+            in_chans=stem.out_channels,
+            img_size=image_size,
+            window_size=4,
+        )
     else:
         net = timm.create_model(
             backbone,
@@ -110,7 +128,7 @@ def build_model(
             num_classes=num_classes,
             in_chans=stem.out_channels,
         )
-    if small_input and backbone != "vit_tiny":
+    if small_input and backbone not in ("vit_tiny", "swin_tiny"):
         if backbone in RESNETS:
             conv1 = net.conv1
             net.conv1 = nn.Conv2d(
@@ -130,10 +148,17 @@ def build_model(
                 stem.out_channels, old.out_channels, kernel_size=3, stride=1,
                 padding=1,
             )
+        elif backbone.startswith("mobilenetv3"):
+            # MobileNetV3's stem conv is 3x3 stride 2: at 32-64px that halves
+            # resolution before any block runs. Stride 1 mirrors the ResNet
+            # CIFAR surgery; the inverted-residual strides are kept, so at
+            # 64px the blocks run 64/32/16/8/8/4/4 and `blocks.3` (8x8) is
+            # the layer3 analog in spatial size and depth fraction.
+            net.conv_stem.stride = (1, 1)
         else:
             raise ValueError(
-                f"small_input surgery implemented for {RESNETS} and convnext_*, "
-                f"got {backbone}"
+                f"small_input surgery implemented for {RESNETS}, convnext_*, "
+                f"and mobilenetv3_*, got {backbone}"
             )
     if head_pool:
         from .pooling import MultiMaskPool

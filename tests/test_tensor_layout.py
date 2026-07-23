@@ -88,3 +88,28 @@ def test_train_transform_layout_and_range():
                 torch.isclose(u, torch.tensor(expected), atol=1e-5)
                 or torch.isclose(u, torch.tensor(pad_value), atol=1e-5)
             ), f"channel {c} contains foreign value {u.item()}: channels mixed?"
+
+
+def test_swin_nhwc_to_spatial_content():
+    """Swin taps are (B,H,W,C); _to_spatial must permute so that the value at
+    [b, h, w, c] lands at [b, c, h, w] -- a content check, not a shape check
+    (a wrong permute can produce the right shape with scrambled pixels)."""
+    import torch
+
+    from momentstem.aux import _to_spatial
+
+    b, h, w, c = 2, 4, 4, 384
+    x = torch.arange(b * h * w * c, dtype=torch.float32).reshape(b, h, w, c)
+    y = _to_spatial(x)
+    assert y.shape == (b, c, h, w)
+    for bi in (0, 1):
+        for hi in (0, 3):
+            for wi in (1, 2):
+                for ci in (0, 100, 383):
+                    assert y[bi, ci, hi, wi] == x[bi, hi, wi, ci]
+    # a genuine NCHW conv tap must pass through UNTOUCHED
+    conv = torch.randn(2, 256, 8, 8)
+    assert _to_spatial(conv) is conv
+    # ...including square NCHW where C > H (dim1 != dim2 protects it)
+    conv2 = torch.randn(2, 256, 4, 8)
+    assert _to_spatial(conv2) is conv2
