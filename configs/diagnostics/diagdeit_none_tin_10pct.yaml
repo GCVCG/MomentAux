@@ -1,0 +1,23 @@
+# DeiT-augmentation on tin/ViT (Track C of the GENERALIZATION campaign):
+# the modern-recipe flip (prior beats SSL under DeiT aug) is C100-only.
+# Parent config verbatim + augment: deit. AdamW+augment => diag-only.
+# ViT-tiny on Tiny-ImageNet @10% (64px, patch 8 -> 8x8 token grid,
+# blocks.8 tap). Tests whether the ViT rescue (huge G at 32px C100)
+# TRANSFERS to a different input scale + 200-way. AdamW => diag-only.
+# train under the frozen SGD recipe; diag-only, never a headline row.
+name: diagdeit_none_tin_10pct
+dataset: tin
+backbone: vit_tiny
+optimizer: adamw
+epochs: 200
+batch_size: 128
+lr: 0.001
+weight_decay: 0.05
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 10
+stem: none
+stem_calibrate: true
+augment: deit

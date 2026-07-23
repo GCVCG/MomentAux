@@ -1,0 +1,21 @@
+# SimCLR-init ViT-tiny on tin@10% (Track B of the GENERALIZATION campaign):
+# the "prior beats SSL on attention" claim is C100-only; this is the one cell
+# that tests it at 64px/200-way, against diagvit_aux_tin_10pct (+9.15,
+# G=12.39). diagvit_none_tin_10pct verbatim + SimCLR init.
+# AdamW => diag-only.
+name: diagsslvit_tin_simclr_10pct
+dataset: tin
+backbone: vit_tiny
+optimizer: adamw
+epochs: 200
+batch_size: 128
+lr: 0.001
+weight_decay: 0.05
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 10
+stem: none
+stem_calibrate: true
+init_from: runs/simclr_pre_vit_tin_10pct/seed{seed}/pretrain.pt

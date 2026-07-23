@@ -1,0 +1,20 @@
+# SimCLR-init on tin @10% (Track A of the GENERALIZATION campaign,
+# 2026-07-23: every SSL-vs-prior comparison so far is C100-only). tin_none
+# verbatim + init from a 200ep SimCLR pretrain on the SAME committed subset
+# images. Tests whether conv-SSL dominance transplants to 64px/200-way.
+# init_from => diag-only, never a headline row.
+name: diagssl_tin_simclr_10pct
+dataset: tin
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 10
+stem: none
+stem_calibrate: true
+init_from: runs/simclr_pre_tin_10pct/seed{seed}/pretrain.pt

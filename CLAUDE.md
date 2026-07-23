@@ -917,6 +917,32 @@ ported vs corrected and why.
   same failure family as the R50 no-head_norm collapse. Learned-pool cells
   show the same pattern ({43.97, 1.34, 44.31}).
 
+- genssl wave LAUNCHED (2026-07-23, user: "results are lacking for
+  generalizability — not all datasets are used for the configurations").
+  COVERAGE AUDIT FINDING: moment-aux [plain] spans 10 datasets x 5 backbones
+  (the core claim IS general), but EVERY SSL and DeiT comparison is C100-only
+  — simclr-init, ssl+aux, and the whole DeiT column. All three positioning
+  claims transplant to tin in this wave (2x images, 64px, 200-way: different
+  input scale AND label space at once).
+  PREDICTIONS RECORDED IN ADVANCE:
+    Track A (conv SSL, tin@1/5/10% vs aux +1.49/+2.13/+1.65):
+      diagssl_tin_simclr_1pct:  6.3..7.8  (base 5.30, aux 6.80; SSL ~ aux)
+      diagssl_tin_simclr_5pct:  23.5..26  (base 21.08, aux 23.20)
+      diagssl_tin_simclr_10pct: 35.5..38.5 (base 33.60, aux 35.24)
+      FALSIFIER (narrows the SSL claim): SSL <= aux at BOTH 5% and 10% =>
+        conv-SSL dominance is C100-specific.
+    Track B (ViT SSL, tin@10% vs aux-ViT-tin +9.15, G=12.39):
+      diagsslvit_tin_simclr_10pct: 13..18 (base 8.60, aux 17.75) — betting
+        at-or-below aux. FALSIFIER: > 19.75 => SSL beats the prior on
+        attention off-C100.
+    Track C (DeiT column, tin/ViT@10%): deit-base(tin) 10..16;
+      Delta_deit(aux) +10..+20 (stacking transplants; plain +9.15);
+      deit-ssl BELOW deit-aux (the substitution flip transplants).
+      FALSIFIER: deit-ssl >= deit-aux on tin => the flip is C100-specific
+      and the modern-recipe claim must be scoped to CIFAR.
+  COST: ~33 runs + 12 pretrains, staged tin, one GPU. G probes on all six
+  decisive cells at the end.
+
 ## State of findings (2026-07-16)
 
 - GENERALIZATION (2026-07-16). The champion (λ0=1.0 cosine→0, magnitude target,
