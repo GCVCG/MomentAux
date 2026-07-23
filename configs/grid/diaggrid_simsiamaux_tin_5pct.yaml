@@ -1,0 +1,25 @@
+# SimSiam-init + champion aux COMBO -- does "aux XOR SSL" hold for
+# negative-free SSL, or is the no-stack rule SimCLR-specific? Reuses the
+# diaggrid_simsiam pretrains (augmentation-agnostic). diag (outside init).
+name: diaggrid_simsiamaux_tin_5pct
+dataset: tin
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 5
+stem: none
+stem_calibrate: true
+init_from: runs/simsiam_pre_tin_5pct/seed{seed}/pretrain.pt
+moment_aux:
+  stem: energy-magnitude
+  tap: layer3
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine
+  head_norm: true

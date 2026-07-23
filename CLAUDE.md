@@ -1038,6 +1038,23 @@ ported vs corrected and why.
       result on photo sets. FALSIFIER: transfer wins EVERYWHERE by >10 =>
       the whole from-scratch story needs an explicit scope statement
       ("when pretraining is unavailable/mismatched/disallowed").
+  COMBINATIONS (user: "are we going to do some combination with them?"):
+  (a) transfer x aux is ALREADY the diagtransfer aux arms. PREDICTIONS:
+      photo-like sets (c100@5, cub@100) => no-stack/tax (ImageNet features
+      already fill the deficit, the SSL-combo precedent); pathmnist@5 =>
+      the OPEN FORK — if ImageNet features are domain-mismatched enough,
+      the deficit is unfilled and the prior may STACK on transfer. A
+      confirmed stack there would be the first prior-on-pretrained gain
+      and the most deployable finding in the study ("fine-tuning on
+      medical? add the free prior"). eurosat@5 between the two.
+  (b) simsiamaux combos QUEUED (c100@5/10, tin@5; reuse simsiam pretrains
+      via shared flock): does "aux XOR SSL" hold for negative-free SSL?
+      PREDICTION: no-stack transplants (SimSiam's currency is still
+      invariance). FALSIFIER: combo > simsiam-alone by >= +1.5 anywhere
+      => the no-stack rule was SimCLR-specific, and the whole aux-XOR-SSL
+      recommendation needs re-derivation per SSL family.
+  (c) NOT planned: simsiam x deit (gated on SimSiam's plain-aug result),
+      transfer x deit (engineering, no mechanism question).
   DEFERRED (need real wiring: small-input surgery + aux tap adapters +
   layout tests): Swin-tiny (hierarchical attention — does the ViT deficit
   survive convolution-like biases? sharpest mechanism test left),
