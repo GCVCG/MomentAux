@@ -1016,6 +1016,38 @@ ported vs corrected and why.
       lever. The 32px datasets keep the 8-pair bank regardless (auxmag3
       excess at 32px was +0.02 — dead null).
 
+- ARCHITECTURES/BASELINES AUDIT (2026-07-23, user: "do we need to test more
+  architectures and baselines?"). Two reviewer-critical comparator gaps
+  CLOSED (39 tasks -> BSC, worklist 2898):
+  (1) SimSiam (scripts/simsiam_pretrain.py, paper CIFAR recipe, negative-free)
+      — answers "SimCLR is a weak/old comparator". diaggrid_simsiam on
+      C100@5/10/25 + tin@5/10. PREDICTIONS: SimSiam ≈ or > SimCLR at small
+      data (negative-free methods are reported more data-robust); the
+      prior's positioning must hold against the BETTER of the two SSLs.
+      FALSIFIER: SimSiam ≫ SimCLR AND > aux where SimCLR lost => the SSL
+      comparison must be redone with SimSiam as the reference.
+  (2) ImageNet-TRANSFER comparator (diagtransfer_*, pretrained: true, r18
+      trunk minus surgery-reset conv1): the "nobody trains from scratch"
+      objection, run on c100@5, pathmnist@5, eurosat@5, cub@100, base+aux
+      arms. NEW GUARD: train.py now refuses pretrained: true without a diag
+      prefix (outside images = loudest data-contract break; was unguarded).
+      PREDICTIONS: transfer dominates on photo-like sets (c100, cub);
+      the gap NARROWS on domain-shifted sets (pathmnist stains, eurosat
+      optics — 1-epoch smoke already at 58.15 on pathmnist@5 vs scratch
+      ~? full-run needed); aux-on-transfer mirrors the SSL no-stack
+      result on photo sets. FALSIFIER: transfer wins EVERYWHERE by >10 =>
+      the whole from-scratch story needs an explicit scope statement
+      ("when pretraining is unavailable/mismatched/disallowed").
+  DEFERRED (need real wiring: small-input surgery + aux tap adapters +
+  layout tests): Swin-tiny (hierarchical attention — does the ViT deficit
+  survive convolution-like biases? sharpest mechanism test left),
+  MobileNetV3/EfficientNet (edge positioning: zero-inference-cost prior is
+  most relevant exactly there), DINO (attention-native SSL; gated on the
+  SimSiam outcome). Recorded as the next architecture batch, not launched.
+  INFRA: ~/.cache lives on a FULL 4TB HDD -> HF_HOME now points into the
+  repo (.hf_cache, gitignored); weights pre-fetched and shipped to BSC
+  (compute nodes have no internet), env.sh exports HF_HOME.
+
 ## State of findings (2026-07-16)
 
 - GENERALIZATION (2026-07-16). The champion (λ0=1.0 cosine→0, magnitude target,

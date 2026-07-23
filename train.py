@@ -165,6 +165,11 @@ def main():
     # as adamw below.
     if cfg.get("head") and not cfg["name"].startswith("diag"):
         raise ValueError("head: requires a diag* config name (never headline)")
+    # pretrained: ImageNet weights bring OUTSIDE images into the run -- the
+    # loudest possible break of the committed-subset data contract. Allowed
+    # only as an explicitly diagnostic positioning comparator.
+    if cfg.get("pretrained") and not cfg["name"].startswith("diag"):
+        raise ValueError("pretrained: requires a diag* config name (never headline)")
     # init_from: load a pretrained state_dict (e.g. scripts/simclr_pretrain)
     # before training. "{seed}" in the path is filled with this run's seed so
     # pretrain and supervised stay paired. strict=False: the pretrain ckpt

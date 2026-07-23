@@ -11,3 +11,4 @@ __pycache__/
 .pytest_cache/
 *.pt
 *.egg-info/
+.hf_cache
