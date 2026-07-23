@@ -841,8 +841,28 @@ ported vs corrected and why.
   attention regime (≤10%) under plain augmentation". It now reads "the prior
   beats SimCLR at EVERY C100 fraction once a small ViT is trained the modern
   way (DeiT aug)" — the recipe nobody-would-not-use is exactly where the prior
-  looks best. G probes FAILED on a CLI mismatch (--runs/--out vs the real
-  --run/--config); re-run in deitssl2.
+  looks best.
+  *** G PROBES (re-run correctly in deitssl2, aux-vs-base gap over deit_none):
+      pct   G(deit-ssl)   G(deit-aux)   plain G(ssl)->deit   plain G(aux)->deit
+      5%      +12.77        +21.37        10.02 -> 12.77       13.17 -> 21.37
+      10%     +17.30        +22.20        13.46 -> 17.30       14.85 -> 22.20
+      25%     +17.98        +23.05        14.38 -> 17.98       14.03 -> 23.05
+    THE PRE-REGISTERED PROBE PREDICTION HELD: aux's G rises MUCH more under
+    augmentation than SSL's (@10% +7.35 vs +3.84). SSL's currency IS
+    nuisance-invariance, so heavy augmentation — which also supplies
+    invariance — adds little to its features; the prior's oriented-energy
+    STRUCTURE is orthogonal, so augmentation compounds it. G(deit-aux) >
+    G(deit-ssl) at every fraction, so the e2e flip is a FEATURE-side effect,
+    not a readout artifact — the sharpest statement of the stack-vs-substitute
+    split yet: same-currency interventions (SSL, aug) do not compound;
+    different-currency ones (prior, aug) do.
+  *** DEITSSL2 BUG + RESUBMIT: the stronger-view part of deitssl2 FAILED —
+    every DeiT-view pretrain died on "flock: cannot open lock file
+    .../pretrain.pt.lock: No such file or directory" (flock cannot create the
+    lockfile in a not-yet-existent parent dir; the deitssl wave reused
+    fillvit's pre-made dirs, these paths were new). The G probes above
+    SUCCEEDED regardless. Fix (mkdir -p the parent before flock) shipped as
+    deitssl2b_wave.sbatch, resubmitted; e2e sslsv numbers pending.
 - deitssl2 wave LAUNCHED (2026-07-22, the gated stronger-views rebuttal FIRED
   by the band-holds branch): because deit-ssl sits below deit-aux everywhere
   AND my bands missed LOW, "was SimCLR given its best shot?" is the sharpest
