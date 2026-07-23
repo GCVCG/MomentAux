@@ -807,6 +807,56 @@ ported vs corrected and why.
       strengthened SimCLR.
   Scope if triggered: decisive fractions 5/10/25 only, 3 seeds (9 pretrains
   + 9 finetunes), NOT the full envelope.
+- *** DEITSSL LANDED — THE HEAD-TO-HEAD FLIPS: UNDER A MODERN RECIPE THE
+  PRIOR BEATS SSL AT EVERY FRACTION (2026-07-22, wave COMPLETE, 3 seeds).
+  deit-ssl (SimCLR-init ViT under DeiT augmentation) vs its comparators
+  (C100/ViT-tiny, full envelope):
+      pct   deit-base  deit-ssl   deit-aux   aux−ssl | plain aux−ssl
+      1%      6.48       7.20       9.68      +2.48   | +0.74
+      2%      9.98      11.25      15.99      +4.74   | —
+      3%     11.31      14.28      20.79      +6.51   | —
+      5%     12.55      21.64      28.89      +7.25   | +1.26
+      7%     15.98      29.58      34.67      +5.09   | —
+      10%    20.28      36.06      41.29      +5.23   | −0.04 (ssl tied)
+      15%    24.07      43.46      48.66      +5.20   | —
+      25%    32.27      52.31      57.32      +5.01   | −1.41 (ssl won)
+      100%   61.39      73.25      75.25      +2.00   | —
+  Under PLAIN crop+flip, SSL TIED the prior at 10% and WON at 25% (aux−ssl
+  −0.04/−1.41). Under DeiT augmentation the prior WINS AT EVERY FRACTION, by
+  ~+5 across the mid-range. MECHANISM CONFIRMED: heavy supervised augmentation
+  supplies the nuisance-INVARIANCE SimCLR was providing (same currency, so it
+  SUBSTITUTES and collapses SSL's marginal value), while the prior's
+  oriented-energy STRUCTURE is a different currency that augmentation amplifies
+  (deit-aux ≫ deit-ssl). This is the same STACK-vs-SUBSTITUTE split seen on
+  conv (aux+SSL don't stack; aux+aug do), now shown head-to-head.
+  BANDS: @25% IN BAND (52.31, 50..57); @5% and @10% MISSED LOW (21.64 vs
+  24..30; 36.06 vs 38..43) — I OVER-estimated how much augmentation would
+  amplify SSL; substitution was MORE complete than the "partial" bet. Neither
+  falsifier fired (deit-ssl not ≥ deit-aux, not ≈ deit-base+5).
+  COMBO diagdeitsslaux_10pct = **37.72** (38.60/37.91/36.65) — below aux-alone
+  41.29, barely above ssl-alone 36.06: **aux XOR SSL HOLDS under a modern
+  recipe** (combo falsifier "beat BOTH singles" did NOT fire). Starting from
+  an SSL init, adding aux under augmentation does not climb back to aux-alone.
+  POSITIONING STRENGTHENED: the ViT claim was "the prior wins in the LOW-DATA
+  attention regime (≤10%) under plain augmentation". It now reads "the prior
+  beats SimCLR at EVERY C100 fraction once a small ViT is trained the modern
+  way (DeiT aug)" — the recipe nobody-would-not-use is exactly where the prior
+  looks best. G probes FAILED on a CLI mismatch (--runs/--out vs the real
+  --run/--config); re-run in deitssl2.
+- deitssl2 wave LAUNCHED (2026-07-22, the gated stronger-views rebuttal FIRED
+  by the band-holds branch): because deit-ssl sits below deit-aux everywhere
+  AND my bands missed LOW, "was SimCLR given its best shot?" is the sharpest
+  objection — the deitssl pretrain used SimCLR's OWN 2020 views while the
+  supervised stage used DeiT augs. deitssl2 gives the PRETRAIN DeiT-strength
+  views (--augment deit) at 5/10/25%, 3 seeds (9 new 2x-compute pretrains + 9
+  finetunes), and re-runs the failed deitssl G probes with the correct CLI.
+  PREDICTION RECORDED IN ADVANCE: stronger views RECOVER SOME of SSL's value
+  but do NOT overturn the flip — deit-sslsv stays BELOW deit-aux at 10% and
+  25% (bands 30..40 @10%, 46..55 @25%; SimCLR's own ablation says crop+color
+  is the critical pair, harder views help little at 2.5-12.5k images).
+  FALSIFIER (SSL was under-augmented all along): deit-sslsv ≥ deit-aux at BOTH
+  10% and 25% => the flip was an augmentation-asymmetry artifact and the
+  "prior wins under a modern recipe" claim must be withdrawn.
 
 ## State of findings (2026-07-16)
 
