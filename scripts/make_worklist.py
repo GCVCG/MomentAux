@@ -50,10 +50,11 @@ def main():
                 # the only thing distinguishing it from simclr_pre.
                 ep = " --epochs 50" if "simclr_pre50" in pre else ""
                 cmd += (
+                    'mkdir -p "$(dirname %s)" && '
                     'flock -w 7200 "%s.lock" -c '
                     "'[ -f %s ] || python scripts/simclr_pretrain.py "
                     '--config %s --seed %d --out %s%s --data-root "$DR"\' && '
-                    % (pre, pre, rel, seed, pre, ep)
+                    % (pre, pre, pre, rel, seed, pre, ep)
                 )
                 cost *= 2
             cmd += ('python train.py --config %s --seed %d '
