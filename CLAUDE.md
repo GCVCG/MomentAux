@@ -942,6 +942,23 @@ ported vs corrected and why.
       and the modern-recipe claim must be scoped to CIFAR.
   COST: ~33 runs + 12 pretrains, staged tin, one GPU. G probes on all six
   decisive cells at the end.
+  *** GUARD BUG + REPAIR (2026-07-23, same day): simclr_pretrain.py carried a
+  leftover cifar100-only ValueError — ALL 12 tin pretrains in genssl died at
+  claim (Tracks A+B); Track C (no pretrain) ran fine. Fixed to a verified
+  whitelist (cifar100, tin), both paths smoke-tested, suite 101 green.
+  genssl2 (turing) repairs A@1/5/10 + B + deitssl_tin + probes.
+  ENVELOPE EXTENSION (user: "why not all portions? use the local machine"):
+  local 3090 wave fills the tin conv-SSL envelope at 2/3/7/15/25% (predictions
+  in scripts/genssl_local_wave.sh header: SSL>base from 2% up, UNIMODAL
+  SSL−aux margin peaking mid-band, ~0 by 25%). tin@100% SSL deliberately
+  EXCLUDED: the pretrain alone is ~2x a tin@100% train (week-scale on 3090);
+  queue on turing later only if the envelope shape justifies it.
+  DATASET EXPANSION APPROVED (user): EuroSAT + DTD next (non-photo statistics
+  and texture-dominated — the domain axis none of the current 5 populations
+  covers). Food: FoodSeg103 is a SEGMENTATION set (pixel masks, wrong task
+  for the frozen classification recipe); its classification analog Food-101
+  is the right candidate if the food domain is wanted (fine-grained,
+  texture-rich, squash-resize like CUB).
 
 ## State of findings (2026-07-16)
 
