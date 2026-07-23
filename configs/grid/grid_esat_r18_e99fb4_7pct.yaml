@@ -1,0 +1,18 @@
+# EuroSAT (satellite, 10-way, 64px) -- non-photo optics
+# Champion recipe VERBATIM -- domain-generalization grid (2026-07-23,
+# user: "the new databases need to be benchmarked similarly to the other
+# configurations"). num_workers=2 (64px convention).
+name: grid_esat_r18_e99fb4_7pct
+dataset: eurosat
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 7
+stem: none
+stem_calibrate: true

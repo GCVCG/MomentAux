@@ -26,6 +26,14 @@ TARGET=$TARGET
 [ -f "\$MS/STOP_KEEPER" ] && { echo "STATE stopped-by-file"; exit 0; }
 N=\$(wc -l < "\$MS/worklist.bsc")
 CTR=\$(cat "\$MS/queue.counter" 2>/dev/null || echo 0)
+# big lane: hold ONE 24h ms_big job in flight while worklist.big has
+# unclaimed tasks (cnx >=25%, pathmnist/food101 @100%)
+NBIG=\$(wc -l < "\$MS/worklist.big" 2>/dev/null || echo 0)
+CBIG=\$(cat "\$MS/queue.counter.big" 2>/dev/null || echo 0)
+BIGJOBS=\$(squeue -u ub881905 -h -n ms_big -t R,PD -o "%i" | wc -l)
+if [ "\$CBIG" -lt "\$NBIG" ] && [ "\$BIGJOBS" -eq 0 ]; then
+    sbatch "\$MS/bsc_big.sbatch" 2>&1 | sed 's/^/SUBMIT-BIG /'
+fi
 CUR=\$(squeue -u ub881905 -h -n ms_grid -t R,PD -o "%i" | wc -l)
 if [ "\$CTR" -ge "\$N" ]; then
     # Queue counter exhausted. RECONCILE: the counter advances on CLAIM with no
@@ -39,7 +47,8 @@ if [ "\$CTR" -ge "\$N" ]; then
     # dedicated 24h big-cell lane (worklist.big / bsc_big.sbatch) -- keep
     # them OUT of the normal reconcile pass or they churn forever.
     OUT="\$MS/runs" python scripts/make_missing_worklist.py --split bsc 2>/dev/null \
-        | grep -vE "cnx[^ ]*_(25|50|100)pct" > "\$MS/worklist.bsc.new"
+        | grep -vE "cnx[^ ]*_(25|50|100)pct|grid_(path|food)[^ ]*_100pct" \
+        > "\$MS/worklist.bsc.new"
     M=\$(grep -c . "\$MS/worklist.bsc.new" || echo 0)
     if [ "\$M" -eq 0 ]; then
         rm -f "\$MS/worklist.bsc.new"; touch "\$MS/GRID_COMPLETE"

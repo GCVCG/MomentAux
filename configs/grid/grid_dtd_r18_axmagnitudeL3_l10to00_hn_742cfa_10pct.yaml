@@ -1,0 +1,25 @@
+# DTD textures (squash-64, 47-way) -- the prior's home turf
+# Champion recipe VERBATIM -- domain-generalization grid (2026-07-23,
+# user: "the new databases need to be benchmarked similarly to the other
+# configurations"). num_workers=2 (64px convention).
+name: grid_dtd_r18_axmagnitudeL3_l10to00_hn_742cfa_10pct
+dataset: dtd
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 10
+stem: none
+stem_calibrate: true
+moment_aux:
+  stem: energy-magnitude
+  tap: layer3
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine
+  head_norm: true

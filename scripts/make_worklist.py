@@ -30,6 +30,8 @@ RATE = {
     ("tinsuper", "resnet18"): 115, ("tinsem", "resnet18"): 115,
     ("tin20", "resnet18"): 25, ("tin20b", "resnet18"): 49,
     ("cub", "resnet18"): 50,
+    ("eurosat", "resnet18"): 35, ("dtd", "resnet18"): 6,
+    ("pathmnist", "resnet18"): 145, ("food101", "resnet18"): 122,
 }
 
 

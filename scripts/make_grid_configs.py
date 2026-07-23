@@ -40,7 +40,9 @@ GRID = (1, 2, 3, 5, 7, 10, 15, 20, 25, 50, 100)
 BATCH = 128
 DS_SHORT = {"cifar100": "c100", "cifar100super": "c100s", "cifar10": "c10",
             "stl10": "stl", "tin": "tin", "tinsuper": "tsuper",
-            "tinsem": "tsem", "tin20": "tin20", "tin20b": "tin20b", "cub": "cub"}
+            "tinsem": "tsem", "tin20": "tin20", "tin20b": "tin20b", "cub": "cub",
+            "eurosat": "esat", "dtd": "dtd", "pathmnist": "path",
+            "food101": "food"}
 BB_SHORT = {"resnet18": "r18", "resnet34": "r34", "resnet50": "r50",
             "convnext_tiny": "cnx", "vit_tiny": "vit"}
 
@@ -49,7 +51,8 @@ def n_images(ds, pct):
     total = {"cifar100": 50000, "cifar100super": 50000, "cifar10": 50000,
              "stl10": 5000, "tin": 100000, "tinsuper": 100000,
              "tinsem": 100000, "tin20": 10000, "tin20b": 10000,
-             "cub": 5994}.get(ds, 0)
+             "cub": 5994, "eurosat": 21600, "dtd": 3760,
+             "pathmnist": 89996, "food101": 75750}.get(ds, 0)
     return int(round(total * pct / 100.0))
 
 

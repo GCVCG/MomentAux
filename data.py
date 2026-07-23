@@ -58,12 +58,15 @@ STATS = {
     "eurosat": ((0.3445, 0.3805, 0.4079), (0.2040, 0.1369, 0.1151)),
     # DTD textures: 47 classes, train+val (3760) as train / test (1880) as
     # test, partition 1, squash-resized to 64px like cub.
-    "dtd": ((0.5273, 0.4702, 0.4235), (0.2392, 0.2270, 0.2316)),
+    # Computed 2026-07-23 on the 3760-image train+val split at 64px.
+    "dtd": ((0.5273, 0.4702, 0.4235), (0.2455, 0.2331, 0.2431)),
     # PathMNIST (MedMNIST+ 64px variant): colon histopathology, 9 classes,
     # 89996 train / 7180 test, 64px native npz.
-    "pathmnist": ((0.7405, 0.5330, 0.7058), (0.1237, 0.1768, 0.1244)),
+    # Computed 2026-07-23 on the 89996-image train split.
+    "pathmnist": ((0.7405, 0.5330, 0.7058), (0.1404, 0.1952, 0.1388)),
     # Food-101 at 64px (squash-resize): 101 classes, 750 train/cls.
-    "food101": ((0.5493, 0.4450, 0.3435), (0.2323, 0.2440, 0.2473)),
+    # Computed 2026-07-23 on the 75750-image train split at 64px.
+    "food101": ((0.5450, 0.4435, 0.3436), (0.2612, 0.2627, 0.2675)),
 }
 
 NUM_CLASSES = {"cifar100": 100, "cifar100super": 20, "cifar10": 10, "stl10": 10,
