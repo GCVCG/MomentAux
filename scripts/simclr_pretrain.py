@@ -115,8 +115,14 @@ def main():
 
     with open(args.config) as f:
         cfg = yaml.safe_load(f)
-    if cfg["dataset"] != "cifar100":
-        raise ValueError("simclr_pretrain is wired for cifar100 only (see doc)")
+    # Datasets verified to follow the Subset(base).transform swap pattern and
+    # to have STATS/IMAGE_SIZE/NUM_CLASSES entries. tin added 2026-07-23 for
+    # the generalization campaign (smoke-tested: two-view batches, 64px).
+    SUPPORTED = ("cifar100", "tin")
+    if cfg["dataset"] not in SUPPORTED:
+        raise ValueError(f"simclr_pretrain supports {SUPPORTED}; got "
+                         f"{cfg['dataset']!r} — verify the transform-swap "
+                         f"pattern before whitelisting a new dataset")
     set_seed(args.seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

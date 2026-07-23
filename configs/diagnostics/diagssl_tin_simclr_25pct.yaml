@@ -1,0 +1,20 @@
+# SimCLR-init on tin @25% — ENVELOPE EXTENSION of genssl Track A
+# (2026-07-23, user: "why not all portions?" — decisive fractions ran first
+# on turing; this fills the curve so the SSL-vs-aux margin SHAPE on tin is
+# measured, not extrapolated — the study's oldest failure mode).
+# tin_none verbatim + SimCLR init. init_from => diag-only.
+name: diagssl_tin_simclr_25pct
+dataset: tin
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 25
+stem: none
+stem_calibrate: true
+init_from: runs/simclr_pre_tin_25pct/seed{seed}/pretrain.pt
