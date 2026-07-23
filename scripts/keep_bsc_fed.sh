@@ -26,8 +26,27 @@ TARGET=$TARGET
 [ -f "\$MS/STOP_KEEPER" ] && { echo "STATE stopped-by-file"; exit 0; }
 N=\$(wc -l < "\$MS/worklist.bsc")
 CTR=\$(cat "\$MS/queue.counter" 2>/dev/null || echo 0)
-if [ "\$CTR" -ge "\$N" ]; then echo "STATE drained \$CTR/\$N"; exit 0; fi
 CUR=\$(squeue -u ub881905 -h -n ms_grid -t R,PD -o "%i" | wc -l)
+if [ "\$CTR" -ge "\$N" ]; then
+    # Queue counter exhausted. RECONCILE: the counter advances on CLAIM with no
+    # retry, so cells lost to walltime expiry are gaps. Regenerate the worklist
+    # from what has NO final.json and start a fresh pass over just those. Only
+    # do this when NO worker is live (CUR==0) so we never swap the file under a
+    # worker mid-read; while workers drain we just wait.
+    if [ "\$CUR" -gt 0 ]; then echo "STATE draining \$CTR/\$N, \$CUR still live"; exit 0; fi
+    cd "\$MS/repo"                          # scripts + configs/grid live here
+    OUT="\$MS/runs" python scripts/make_missing_worklist.py --split bsc \
+        > "\$MS/worklist.bsc.new" 2>/dev/null
+    M=\$(grep -c . "\$MS/worklist.bsc.new" || echo 0)
+    if [ "\$M" -eq 0 ]; then
+        rm -f "\$MS/worklist.bsc.new"; touch "\$MS/GRID_COMPLETE"
+        echo "STATE complete: 0 cells missing"; exit 0
+    fi
+    mv "\$MS/worklist.bsc.new" "\$MS/worklist.bsc"
+    echo 0 > "\$MS/queue.counter"           # fresh pass over the gaps
+    echo "STATE reconciled: \$M cells missing -> new pass"
+    N=\$M; CTR=0
+fi
 NEED=\$(( TARGET - CUR ))
 echo "STATE feeding ctr=\$CTR/\$N running_or_pending=\$CUR need=\$NEED"
 [ "\$NEED" -le 0 ] && exit 0
