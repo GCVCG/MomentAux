@@ -1,0 +1,20 @@
+# SimCLR-init on food101 @25% -- SSL-vs-prior on a NON-PHOTO domain
+# (2026-07-23, user: importance over cost). SimCLR's views encode PHOTO
+# invariances (crop+color); food101 tests whether contrastive pretraining
+# transfers off natural photos while the moment prior's oriented-energy
+# target is domain-agnostic. Baseline-config verbatim + init_from.
+name: diaggrid_ssl_food101_25pct
+dataset: food101
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 25
+stem: none
+stem_calibrate: true
+init_from: runs/simclr_pre_food101_25pct/seed{seed}/pretrain.pt

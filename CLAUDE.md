@@ -960,6 +960,32 @@ ported vs corrected and why.
   is the right candidate if the food domain is wanted (fine-grained,
   texture-rich, squash-resize like CUB).
 
+- IMPORTANCE-OVER-COST DIRECTIVE (2026-07-23, user: "Don't worry about how
+  much the question is expensive. If the question is important... we can go
+  with it."). Three cost-excluded questions reinstated the same day:
+  (1) domssl: SimCLR-init on ALL FOUR domain datasets @5/10/25/100% (42
+      normal + 9 big-lane tasks on BSC; simclr_pretrain whitelist extended
+      to eurosat/dtd/pathmnist/food101, each smoke-tested). THE QUESTION:
+      SimCLR's views encode PHOTO invariances (crop+color) — do they
+      transfer to satellite/texture/histopathology, where the natural
+      invariances differ (rotation is real there), while the moment prior
+      is domain-agnostic? PREDICTIONS: SSL > aux on food101/pathmnist
+      (photo-like texture, abundant data); SSL data-starved on dtd@5-10%
+      (188-376 imgs) => SSL <= aux there; eurosat uncertain — recorded as
+      the open fork, no number. FALSIFIER for "SSL always wins on conv":
+      any domain with aux > SSL at >=2 fractions.
+  (2) diaggrid_ssl_tin_100pct: closes the tin conv-SSL envelope (big lane;
+      staging makes it ~7h/seed, not week-scale). PREDICTION: 67..69.5
+      (base 66.17, aux −0.42; SSL stays positive at full data as on C100).
+  (3) vitenv wave (turing 2183): the FULL ViT/DeiT envelope on tin
+      @1/2/5/15/25/100 + deit-ssl @5/25 — the attention story currently
+      rests on ONE tin fraction. PREDICTIONS: Delta_vit(tin) peaks +10..+15
+      @15-25%, stays +6..+10 @100% (permanent-deficit signature);
+      deit amplification 1.8-2.4x throughout (measured 1.85x @10%);
+      deit-ssl below deit-aux at every fraction. FALSIFIERS:
+      Delta_vit(tin@100%) <= +2 => permanent deficit is C100-specific;
+      amplification < 1.3x anywhere on the mid-band; deit-ssl >= deit-aux.
+
 ## State of findings (2026-07-16)
 
 - GENERALIZATION (2026-07-16). The champion (λ0=1.0 cosine→0, magnitude target,

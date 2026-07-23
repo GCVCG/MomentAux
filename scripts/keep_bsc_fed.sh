@@ -47,7 +47,7 @@ if [ "\$CTR" -ge "\$N" ]; then
     # dedicated 24h big-cell lane (worklist.big / bsc_big.sbatch) -- keep
     # them OUT of the normal reconcile pass or they churn forever.
     OUT="\$MS/runs" python scripts/make_missing_worklist.py --split bsc 2>/dev/null \
-        | grep -vE "cnx[^ ]*_(25|50|100)pct|grid_(path|food)[^ ]*_100pct" \
+        | grep -vE "cnx[^ ]*_(25|50|100)pct|grid_(path|food)[^ ]*_100pct|diaggrid_ssl_(tin|pathmnist|food101)_100pct" \
         > "\$MS/worklist.bsc.new"
     M=\$(grep -c . "\$MS/worklist.bsc.new" || echo 0)
     if [ "\$M" -eq 0 ]; then

@@ -117,8 +117,10 @@ def main():
         cfg = yaml.safe_load(f)
     # Datasets verified to follow the Subset(base).transform swap pattern and
     # to have STATS/IMAGE_SIZE/NUM_CLASSES entries. tin added 2026-07-23 for
-    # the generalization campaign (smoke-tested: two-view batches, 64px).
-    SUPPORTED = ("cifar100", "tin")
+    # the generalization campaign; the domain datasets added same day (their
+    # loaders all expose .transform at the top level -- EuroSAT64, Squash64,
+    # PathMNIST64 -- so the two-view swap lands correctly; each smoke-tested).
+    SUPPORTED = ("cifar100", "tin", "eurosat", "dtd", "pathmnist", "food101")
     if cfg["dataset"] not in SUPPORTED:
         raise ValueError(f"simclr_pretrain supports {SUPPORTED}; got "
                          f"{cfg['dataset']!r} — verify the transform-swap "
