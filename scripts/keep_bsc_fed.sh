@@ -35,8 +35,11 @@ if [ "\$CTR" -ge "\$N" ]; then
     # worker mid-read; while workers drain we just wait.
     if [ "\$CUR" -gt 0 ]; then echo "STATE draining \$CTR/\$N, \$CUR still live"; exit 0; fi
     cd "\$MS/repo"                          # scripts + configs/grid live here
-    OUT="\$MS/runs" python scripts/make_missing_worklist.py --split bsc \
-        > "\$MS/worklist.bsc.new" 2>/dev/null
+    # cnx cells at >=25% exceed the 5h45 worker walltime and live in the
+    # dedicated 24h big-cell lane (worklist.big / bsc_big.sbatch) -- keep
+    # them OUT of the normal reconcile pass or they churn forever.
+    OUT="\$MS/runs" python scripts/make_missing_worklist.py --split bsc 2>/dev/null \
+        | grep -vE "cnx[^ ]*_(25|50|100)pct" > "\$MS/worklist.bsc.new"
     M=\$(grep -c . "\$MS/worklist.bsc.new" || echo 0)
     if [ "\$M" -eq 0 ]; then
         rm -f "\$MS/worklist.bsc.new"; touch "\$MS/GRID_COMPLETE"
