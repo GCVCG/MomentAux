@@ -347,6 +347,13 @@ def write_pivot(cells, baselines, out_path):
     row1 += [""]
     row2 += ["cells"]
 
+    def impossible(dataset, pct):
+        """A cell that CANNOT exist under the frozen recipe: fewer than one
+        batch of 128 (drop_last=True -> empty loader). These are 'n/a', not
+        'missing' -- the distinction the full-grid goal needs visible."""
+        n = TRAIN_SIZE.get(dataset)
+        return n is not None and int(n * pct / 100) < 128
+
     body = []
     for f in fams.values():
         r = [f["label"], f["dataset"], f["backbone"],
@@ -355,7 +362,8 @@ def write_pivot(cells, baselines, out_path):
             for p in pcts:
                 d = f["by_pct"].get(p)
                 if not d:
-                    r.append("")
+                    r.append("n/a (<1 batch)" if kind == "acc"
+                             and impossible(f["dataset"], p) else "")
                 elif kind == "acc":
                     r.append(fmt(d["acc"]))
                 elif kind == "delta":

@@ -243,6 +243,13 @@ def main():
         ws.cell(row=1, column=col, value=title)
         col += len(pcts)
 
+    def impossible(dataset, pct):
+        """Sub-one-batch cell (<128 imgs, drop_last -> empty loader): CANNOT
+        run under the frozen recipe. Written as 'n/a (<1 batch)' so it is
+        distinguishable from a still-missing run."""
+        n = TRAIN_SIZE.get(dataset)
+        return n is not None and int(n * pct / 100) < 128
+
     frows = sorted(fams.values(), key=lambda f: (str(f["dataset"]), str(f["backbone"]),
                                                  0 if f["base"] else 1, f["label"]))
     for f in frows:
@@ -252,7 +259,8 @@ def main():
             for p in pcts:
                 d = f["by"].get(p)
                 if not d:
-                    r.append(None)
+                    r.append("n/a (<1 batch)" if kind == "acc"
+                             and impossible(f["dataset"], p) else None)
                 elif kind == "acc":
                     r.append(round(d["acc"], 2))
                 elif kind == "delta":
