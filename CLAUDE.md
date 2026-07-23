@@ -862,7 +862,29 @@ ported vs corrected and why.
     lockfile in a not-yet-existent parent dir; the deitssl wave reused
     fillvit's pre-made dirs, these paths were new). The G probes above
     SUCCEEDED regardless. Fix (mkdir -p the parent before flock) shipped as
-    deitssl2b_wave.sbatch, resubmitted; e2e sslsv numbers pending.
+    deitssl2b_wave.sbatch, resubmitted.
+  *** DEITSSL2B LANDED — STRONGER VIEWS HURT SSL; THE FLIP IS NOT AN
+    AUGMENTATION-ASYMMETRY ARTIFACT (2026-07-22, 3 seeds + probes):
+        pct  deit-sslsv  vs deit-ssl(plain views)  vs deit-aux | G(sslsv) G(ssl)
+        5%     17.52         −4.12                   −11.37     | +6.20    +12.77
+        10%    26.25         −9.81                   −15.04     | +6.37    +17.30
+        25%    40.75        −11.56                   −16.57     | +7.78    +17.98
+    Giving SimCLR DeiT-strength contrastive views (RandAugment + RandomErasing
+    ON TOP of crop+jitter+grayscale) made it WORSE at every fraction — e2e
+    −4..−12 vs plain SimCLR views, and G roughly HALVED (+6..+8 vs +13..+18).
+    The falsifier (deit-sslsv ≥ deit-aux at 10% AND 25%) did NOT fire — sslsv
+    lands 11..17 BELOW aux. MY BAND MISSED: I predicted stronger views
+    "recover SOME SSL value" (30..40 @10%); they HURT. But the hedge I
+    under-committed to was right — "SimCLR's own ablation says crop+color is
+    the critical pair, harder views help little at 2.5-12.5k images" — the
+    truth was not "help little" but "over-distort the positive pair and
+    degrade the contrastive signal". CONCLUSION: SimCLR's BEST SHOT is its
+    STANDARD views; the "was SSL under-augmented?" objection is answered
+    emphatically — its best configuration still loses to the prior under a
+    modern recipe, and strengthening it only widens the gap. The head-to-head
+    flip stands. THE DEIT×SSL COLUMN IS CLOSED: under DeiT augmentation the
+    moment prior beats SimCLR (standard OR strengthened) at every C100
+    fraction, feature-side and e2e.
 - deitssl2 wave LAUNCHED (2026-07-22, the gated stronger-views rebuttal FIRED
   by the band-holds branch): because deit-ssl sits below deit-aux everywhere
   AND my bands missed LOW, "was SimCLR given its best shot?" is the sharpest
