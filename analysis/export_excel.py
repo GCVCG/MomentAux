@@ -154,12 +154,21 @@ def main():
              if os.path.isdir(r)]
     cells = load_cells(roots)
 
+    # Preference: more seeds, then an ORIGINAL named cell over a grid_* re-run
+    # (equal-seed ties previously fell to load order), then name.
+    def base_rank(cell):
+        return (len(cells[cell]["seeds"]),
+                0 if cell.startswith("grid_") else 1, cell)
     baselines = {}
     for cell, rec in cells.items():
         if is_baseline(rec["cfg"]):
             k = family_key(rec["cfg"])
-            if k not in baselines or len(cells[baselines[k]]["seeds"]) < len(rec["seeds"]):
+            if k not in baselines or base_rank(baselines[k]) < base_rank(cell):
                 baselines[k] = cell
+
+    CHANCE = {"cifar100": 1.0, "cifar100super": 5.0, "cifar10": 10.0,
+              "stl10": 10.0, "tin": 0.5, "tin20": 5.0, "tin20b": 5.0,
+              "tinsuper": 5.0, "tinsem": 5.0, "cub": 0.5}
 
     # ---- per-cell records ------------------------------------------------
     recs = []
@@ -168,6 +177,9 @@ def main():
         aux = cfgget(cfg, "moment_aux") or {}
         ds, pct = cfgget(cfg, "dataset"), cfgget(cfg, "subset_pct") or 100
         probe = rec["probes"].get("linear_probe.json")
+        ch = CHANCE.get(ds, 1.0)
+        n_coll = sum(1 for v in accs if v <= ch * 1.5)
+        bistable = n_coll > 0 and st.mean(accs) > ch * 3
         d = {"cell": cell, "config": config_label(cfg), "dataset": ds,
              "backbone": cfgget(cfg, "backbone"),
              "optimizer": (cfgget(cfg, "optimizer", "sgd") or "sgd").lower(),
@@ -184,7 +196,13 @@ def main():
                                       and cfgget(cfg, "epochs", 200) == 200
                                       and not cfgget(cfg, "head")
                                       and not cfgget(cfg, "init_from")
-                                      and not cfgget(cfg, "augment")) else "no",
+                                      and not cfgget(cfg, "augment")
+                                      and len(accs) >= 3
+                                      and not bistable) else "no",
+             # >=1 seed at ~chance while the cell trains: a bimodal cell whose
+             # mean describes NO actual run (ConvNeXt-SGD, learned-pool)
+             "bistable": ("%d/%d seeds at chance" % (n_coll, len(accs))
+                          if bistable else ""),
              "baseline_cell": None, "base_acc": None, "delta": None,
              "delta_sem": None, "G": None, "readout": None}
         b = baselines.get(family_key(cfg))
@@ -301,9 +319,9 @@ def main():
         ("RESULT", ["acc_mean", "acc_std", "probe_mean", "n_probe_seeds"]),
         ("PAIRED COMPARISON  (vs own baseline)",
          ["baseline_cell", "base_acc", "delta", "delta_sem", "G", "readout"]),
-        ("", ["is_headline"]),
+        ("", ["is_headline", "bistable"]),
     ]
-    WIDTHS = [34, 40, 13, 13, 10, 8, 10, 10, 9, 10, 9, 11, 9, 26, 10, 9, 10, 9, 10, 11]
+    WIDTHS = [34, 40, 13, 13, 10, 8, 10, 10, 9, 10, 9, 11, 9, 26, 10, 9, 10, 9, 10, 11, 18]
     ws = wb.create_sheet("All cells")
     cols = write_grouped(ws, GROUPS,
                          sorted(recs, key=lambda r: (str(r["dataset"]), str(r["backbone"]),

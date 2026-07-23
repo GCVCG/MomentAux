@@ -900,6 +900,23 @@ ported vs corrected and why.
   10% and 25% => the flip was an augmentation-asymmetry artifact and the
   "prior wins under a modern recipe" claim must be withdrawn.
 
+- *** TABLE AUDIT (2026-07-23, vs ledger + pairing + law + representation):
+  23/23 recorded headline numbers reproduce exactly from the exporters; all
+  paired Δs match their families on every recipe axis; probe-side G values
+  match the ledger to 0.01. THREE representation fixes shipped: (1) baseline
+  tie-break is now (seeds, original-over-grid_, name) — equal-power ties
+  previously fell to load order (c10@7% twins differ 0.77); (2) `is_headline`
+  now requires >=3 seeds AND no collapsed seed (163 one/two-seed legacy
+  ablations were flagged headline); (3) new `bistable` column: cells where
+  >=1 seed sits at chance while the cell mean trains.
+  *** CORRECTION — ConvNeXt-SGD is BISTABLE, NOT uniformly at chance: BSC
+  re-runs show seeds {0.84, 42.25, 19.54} @100%, {17.78, 1.00, 18.85} @15%.
+  The dead-list's "sits at chance (0.92%)" was a per-seed observation
+  over-generalized. Still dead for headline use (the frozen recipe cannot
+  train it reliably), but the correct statement is seed-bistable collapse —
+  same failure family as the R50 no-head_norm collapse. Learned-pool cells
+  show the same pattern ({43.97, 1.34, 44.31}).
+
 ## State of findings (2026-07-16)
 
 - GENERALIZATION (2026-07-16). The champion (λ0=1.0 cosine→0, magnitude target,

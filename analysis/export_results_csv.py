@@ -84,14 +84,27 @@ def main():
 
     cells = load_cells(roots)
 
-    # baseline lookup: family key -> baseline cell name (prefer more seeds)
+    # baseline lookup: family key -> baseline cell name. Preference order:
+    # (1) more seeds; (2) an ORIGINAL named cell over a grid_* re-run (equal
+    # power: the ledger's recorded numbers live in the named cells, and a
+    # different-num_workers re-run is a different augmentation stream); (3)
+    # name, as a deterministic last resort. Before (2), equal-seed ties fell
+    # to load order -- c10_none_7pct vs its grid twin differ by 0.77.
+    def base_rank(cell):
+        return (len(cells[cell]["seeds"]),
+                0 if cell.startswith("grid_") else 1,
+                cell)
     baselines = {}
     for cell, rec in cells.items():
         if is_baseline(rec["cfg"]):
             k = family_key(rec["cfg"])
             cur = baselines.get(k)
-            if cur is None or len(cells[cur]["seeds"]) < len(rec["seeds"]):
+            if cur is None or base_rank(cur) < base_rank(cell):
                 baselines[k] = cell
+
+    CHANCE = {"cifar100": 1.0, "cifar100super": 5.0, "cifar10": 10.0,
+              "stl10": 10.0, "tin": 0.5, "tin20": 5.0, "tin20b": 5.0,
+              "tinsuper": 5.0, "tinsem": 5.0, "cub": 0.5}
 
     rows = []
     for cell, rec in sorted(cells.items()):
@@ -102,10 +115,21 @@ def main():
         n_img = (int(round(TRAIN_SIZE.get(ds, 0) * pct / 100.0))
                  if ds in TRAIN_SIZE else "")
         probe = rec["probes"].get("linear_probe.json")
+        # BISTABLE cell: >=1 seed collapsed to ~chance while the cell as a
+        # whole trains. A mean over a bimodal set misrepresents both modes
+        # (ConvNeXt-SGD grid re-runs: seeds {0.84, 42.25, 19.54}); flag it so
+        # no downstream reader mistakes the mean for a typical run.
+        ch = CHANCE.get(ds, 1.0)
+        collapsed = [v for v in accs if v <= ch * 1.5]
+        bistable = bool(collapsed) and st.mean(accs) > ch * 3
+        # headline requires the FROZEN recipe *and* >=3 seeds -- the study's
+        # own repeated lesson is that 1-2 seed numbers support nothing.
         headline = (not cell.startswith("diag")
                     and (cfgget(cfg, "optimizer", "sgd") or "sgd").lower() == "sgd"
                     and cfgget(cfg, "epochs", 200) == 200
-                    and not cfgget(cfg, "head") and not cfgget(cfg, "init_from"))
+                    and not cfgget(cfg, "head") and not cfgget(cfg, "init_from")
+                    and not cfgget(cfg, "augment") and len(accs) >= 3
+                    and not bistable)
 
         row = {
             "cell": cell,
@@ -129,6 +153,8 @@ def main():
             "probe_std": fmt(st.stdev(probe)) if probe and len(probe) > 1 else "",
             "n_probe_seeds": len(probe) if probe else "",
             "is_headline": "yes" if headline else "no",
+            "bistable": ("%d/%d seeds at chance" % (len(collapsed), len(accs))
+                         if bistable else ""),
             "baseline_cell": "", "base_acc": "", "delta": "", "delta_sem": "",
             "G": "", "G_sem": "", "readout": "",
         }
