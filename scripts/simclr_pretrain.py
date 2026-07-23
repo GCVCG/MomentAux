@@ -147,12 +147,17 @@ def main():
     # ResNets and .head on ViTs; forward_head applies pooling before it either
     # way, so replacing it makes model(x) return the projection.
     if hasattr(model.net, "fc"):
-        clf_attr, feat_dim = "fc", model.net.fc.in_features
+        holder, clf_attr, feat_dim = model.net, "fc", model.net.fc.in_features
+    elif hasattr(model.net, "head") and hasattr(model.net.head, "fc"):
+        # timm ClassifierHead (Swin): swap only the inner Linear so the
+        # head's own pooling/flatten still run before the projection.
+        holder, clf_attr = model.net.head, "fc"
+        feat_dim = model.net.head.fc.in_features
     elif hasattr(model.net, "head"):
-        clf_attr, feat_dim = "head", model.net.head.in_features
+        holder, clf_attr, feat_dim = model.net, "head", model.net.head.in_features
     else:
         raise ValueError(f"no classifier found on {cfg['backbone']}")
-    setattr(model.net, clf_attr, nn.Sequential(
+    setattr(holder, clf_attr, nn.Sequential(
         nn.Linear(feat_dim, feat_dim), nn.ReLU(inplace=True),
         nn.Linear(feat_dim, args.proj_dim),
     ).to(device))
@@ -190,8 +195,10 @@ def main():
                   f"loss {total/max(nb,1):.4f}", flush=True)
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
+    proj_prefix = ("net.head.fc" if holder is not model.net and clf_attr == "fc"
+                   else f"net.{clf_attr}")
     sd = {k: v for k, v in model.state_dict().items()
-          if not k.startswith(f"net.{clf_attr}")}
+          if not k.startswith(proj_prefix)}
     torch.save(sd, args.out)
     print(f"saved {len(sd)} tensors ({steps} steps) -> {args.out}")
 

@@ -1,0 +1,24 @@
+# DINO-init + champion aux -- does aux-XOR-SSL hold for self-distillation on attention?
+name: diaggrid_dinoaux_vit_5pct
+dataset: cifar100
+backbone: vit_tiny
+optimizer: adamw
+epochs: 200
+batch_size: 128
+lr: 0.001
+weight_decay: 0.05
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 5
+stem: none
+stem_calibrate: true
+init_from: runs/dino_pre_vit_5pct/seed{seed}/pretrain.pt
+moment_aux:
+  stem: energy-magnitude
+  tap: blocks.8
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine
+  head_norm: true

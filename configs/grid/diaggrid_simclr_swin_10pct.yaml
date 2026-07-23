@@ -1,0 +1,17 @@
+# SimCLR-init Swin -- the mechanism completer: if Swin is conv-like (small deficit), SSL should beat the prior here as on conv; ViT-like would flip the reading.
+name: diaggrid_simclr_swin_10pct
+dataset: cifar100
+backbone: swin_tiny
+optimizer: adamw
+epochs: 200
+batch_size: 128
+lr: 0.001
+weight_decay: 0.05
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 10
+stem: none
+stem_calibrate: true
+init_from: runs/simclr_pre_swin_10pct/seed{seed}/pretrain.pt
