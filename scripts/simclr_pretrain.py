@@ -120,7 +120,7 @@ def main():
     # the generalization campaign; the domain datasets added same day (their
     # loaders all expose .transform at the top level -- EuroSAT64, Squash64,
     # PathMNIST64 -- so the two-view swap lands correctly; each smoke-tested).
-    SUPPORTED = ("cifar100", "tin", "eurosat", "dtd", "pathmnist", "food101")
+    SUPPORTED = ("cifar100", "tin", "eurosat", "dtd", "pathmnist", "food101", "cub")
     if cfg["dataset"] not in SUPPORTED:
         raise ValueError(f"simclr_pretrain supports {SUPPORTED}; got "
                          f"{cfg['dataset']!r} — verify the transform-swap "

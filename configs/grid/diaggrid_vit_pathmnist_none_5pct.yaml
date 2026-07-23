@@ -1,0 +1,16 @@
+# ViT-tiny on a domain dataset -- does the attention rescue survive non-photo statistics? AdamW => diag.
+name: diaggrid_vit_pathmnist_none_5pct
+dataset: pathmnist
+backbone: vit_tiny
+optimizer: adamw
+epochs: 200
+batch_size: 128
+lr: 0.001
+weight_decay: 0.05
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 5
+stem: none
+stem_calibrate: true

@@ -986,6 +986,36 @@ ported vs corrected and why.
       Delta_vit(tin@100%) <= +2 => permanent deficit is C100-specific;
       amplification < 1.3x anywhere on the mid-band; deit-ssl >= deit-aux.
 
+- COVERAGE BATCH 2 + RE-PIN EVIDENCE CAMPAIGN (2026-07-23, user: "do we need
+  to submit any other experiments?" + "maybe we can try the re-pin gabor
+  idea"). Claim-coverage audit found three remaining single-population
+  claims; 132 tasks appended to BSC (worklist.bsc now 2859):
+  (A) ViT pairs on domains (attention headline was C100+tin only):
+      diaggrid_vit_{eurosat,pathmnist,food101}@5/25, dtd@25/100.
+      PREDICTION: the rescue transplants (Delta >= +5 wherever the ViT
+      baseline is underfit); pathmnist is the interesting cell (ViTs are
+      the rising architecture in pathology).
+  (B) Backbone universality off C100 (was C100@10% only): r34+r50 champion
+      pairs on tin@5% + pathmnist@5%. PREDICTION: one lambda0=1.0 (+hn)
+      lands within noise of the r18 delta on both datasets — the universal-
+      lambda claim gets its second and third population.
+  (C) SSL on CUB (fine-grained comparator): diaggrid_ssl_cub_{25,100}.
+      PREDICTION: SSL's fine-grained weakness is real — SSL-init <= aux
+      (+2.74@100%); FALSIFIER: SSL > aux by >=2 => even fine-grained is
+      SSL's territory on conv.
+  (D) RE-PIN EVIDENCE (user reopened the 8-pair decision): mag3 (extra
+      OCTAVE, 12ch) AND mag6o (extra ORIENTATIONS, 12ch) arms at every
+      64px domain (@5or10/25) + cub@100. Combined with the existing tin
+      10v10 (+0.49/+0.31), this gives width-vs-octave on SIX 64px
+      populations. DECISION RULE RECORDED IN ADVANCE: if the wide target
+      beats the 8-pair champion by >= +0.3 pooled on >= 3 of 5 new 64px
+      populations, propose a formal 64px-headline-bank re-pin (as a NEW
+      config family — old rows stay valid, nothing is invalidated); if
+      octave and orientations DIVERGE on any domain (>2sigma), the
+      octave-vs-width question reopens with domain statistics as the
+      lever. The 32px datasets keep the 8-pair bank regardless (auxmag3
+      excess at 32px was +0.02 — dead null).
+
 ## State of findings (2026-07-16)
 
 - GENERALIZATION (2026-07-16). The champion (λ0=1.0 cosine→0, magnitude target,
