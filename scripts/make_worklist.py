@@ -51,12 +51,16 @@ def main():
                 # the simclr_pre50 variant IS a 50-epoch pretrain: that is
                 # the only thing distinguishing it from simclr_pre.
                 ep = " --epochs 50" if "simclr_pre50" in pre else ""
+                # the pretrain FAMILY is encoded in the checkpoint path
+                script = ("simsiam_pretrain" if "simsiam_pre" in pre
+                          else "dino_pretrain" if "dino_pre" in pre
+                          else "simclr_pretrain")
                 cmd += (
                     'mkdir -p "$(dirname %s)" && '
                     'flock -w 7200 "%s.lock" -c '
-                    "'[ -f %s ] || python scripts/simclr_pretrain.py "
+                    "'[ -f %s ] || python scripts/%s.py "
                     '--config %s --seed %d --out %s%s --data-root "$DR"\' && '
-                    % (pre, pre, pre, rel, seed, pre, ep)
+                    % (pre, pre, pre, script, rel, seed, pre, ep)
                 )
                 cost *= 2
             cmd += ('python train.py --config %s --seed %d '
