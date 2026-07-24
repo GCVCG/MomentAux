@@ -1124,6 +1124,30 @@ ported vs corrected and why.
   repo (.hf_cache, gitignored); weights pre-fetched and shipped to BSC
   (compute nodes have no internet), env.sh exports HF_HOME.
 
+- *** SIMSIAM + COMBOS + DINO@5 SCORED (2026-07-24, BSC expansion cells,
+  3 seeds each):
+  SIMSIAM COLLAPSES AT STUDY SCALE — MY PREDICTION WRONG, IN THE METHOD'S
+  FAVOR: simsiam-init Δ vs baseline = +0.13/+0.61/−0.03 on C100@5/10/25
+  (25.49/40.89/61.32 vs base 25.36/40.28/61.35) and +0.93/+0.77 on
+  tin@5/10 — negative-free SSL learns ~NOTHING at 2.5-25k imgs, bs128,
+  while SimCLR gains +9/+8.8/+2.8. I predicted "SimSiam ≈ or > SimCLR
+  (more data-robust)" — the opposite. CONSEQUENCE: SimCLR was the
+  STRONGER comparator all along; the "SSL strawman" objection dies
+  empirically. On tin the free prior BEATS SimSiam outright at both
+  fractions (aux 23.20/35.24 vs simsiam 22.01/34.37).
+  *** SIMSIAMAUX COMBO — THE NO-STACK FALSIFIER FIRED: combo beats
+  simsiam-alone by +6.16/+4.29/+2.02 (≫ +1.5 tripwire) AND edges
+  aux-alone by ~+1 everywhere (31.65 vs 30.51 @c100-5; 45.18 vs 44.03
+  @c100-10; 24.03 vs 23.20 @tin-5). "aux XOR SSL" IS SIMCLR-SPECIFIC as
+  a rule — but the CURRENCY MECHANISM survives perfectly: no-stack
+  happens when the init already FILLS the feature deficit (SimCLR);
+  SimSiam fills ~nothing, so the prior does its full work on top.
+  RESTATED RULE: the prior is redundant iff the init has already bought
+  the features — "aux XOR effective-SSL", judged by the init's own gain.
+  DINO-ViT@5%: 15.22 ±0.44 — below aux-ViT 21.60 AND SimCLR-ViT 20.34
+  (+2.97 over base). Falsifier (DINO >= aux <=10%) not fired at 5%;
+  prediction (self-distillation more data-hungry) holding. 10/25% pending.
+
 ## State of findings (2026-07-16)
 
 - GENERALIZATION (2026-07-16). The champion (λ0=1.0 cosine→0, magnitude target,
