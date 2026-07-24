@@ -1122,7 +1122,16 @@ ported vs corrected and why.
   isolates what they'd add).
   INFRA: ~/.cache lives on a FULL 4TB HDD -> HF_HOME now points into the
   repo (.hf_cache, gitignored); weights pre-fetched and shipped to BSC
-  (compute nodes have no internet), env.sh exports HF_HOME.
+  (compute nodes have no internet), env.sh exports HF_HOME + HF_HUB_OFFLINE=1.
+  *** BSC TRANSFER-CELL FIX CHAIN (2026-07-24): timm needs the
+  huggingface_hub PACKAGE to even resolve a pretrained source (cache alone
+  insufficient); BSC pip cannot reach PyPI -> wheels shipped by scp. hub
+  1.24 imports httpcore (absent) -> downgraded to 0.30.2 (requests-based,
+  matches timm 1.0.27). Then timm silently skips the safetensors branch
+  without the safetensors PACKAGE and asks for pytorch_model.bin (not in
+  cache) -> shipped safetensors-0.8.0 manylinux wheel. Verified:
+  "OFFLINE PRETRAINED OK" on the BSC venv. Failed diagtransfer cells
+  self-heal via reconcile.
 
 - *** SIMSIAM + COMBOS + DINO@5 SCORED (2026-07-24, BSC expansion cells,
   3 seeds each):
