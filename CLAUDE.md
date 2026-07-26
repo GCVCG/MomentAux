@@ -1157,6 +1157,90 @@ ported vs corrected and why.
   (+2.97 over base). Falsifier (DINO >= aux <=10%) not fired at 5%;
   prediction (self-distillation more data-hungry) holding. 10/25% pending.
 
+- *** BIG LANDING SWEEP SCORED (2026-07-26, ~1,660 new finals since 07-24;
+  BSC counter 5,104/7,246, big lane 176/198, transfer fix VERIFIED in
+  production — 242 diagtransfer finals exist):
+  (1) RE-PIN ADJUDICATED — **NO RE-PIN; THE TIN WIDTH EFFECT DOES NOT
+      GENERALIZE.** Pooled 12ch-vs-champion excess on the new 64px
+      populations (inverse-variance over all cells with n>=2):
+        dtd  mag3 +0.15±0.19 | mag6o −0.16±0.14
+        path mag3 −0.01±0.27 | mag6o −0.75±0.47
+        food mag3 −0.02±0.10 | mag6o +0.63±0.13
+        cub  mag3 +0.02±0.01 | mag6o +0.02±0.02
+        stl  mag3 +0.09±0.11 | mag6o +0.10±0.15   (esat pending, aux
+        comparators not yet landed at matching pcts)
+      The decision rule needed >= +0.3 pooled on >= 3 of 5 populations:
+      ONE arm on ONE population qualifies (food/mag6o). VERDICT: the
+      committed 8-pair bank stays, now with cross-domain evidence behind
+      it — the tin@5% +0.49/+0.31 excess is a tin-local fact. NOTED, not
+      acted on: on food, mag6o−mag3 = +0.65 ± ~0.16 (~4σ over 2 cells) —
+      the divergence tripwire nominally fires there with ORIENTATIONS,
+      not the octave, as the helpful widening (opposite of tin's
+      original octave story). 2-cell read at n2-3; park unless food
+      becomes a headline population.
+  (2) TRANSFER COMPARATOR SCORED — BOTH PREDICTIONS HELD, THE OPEN FORK
+      CLOSED AGAINST THE STACK. transfer-none vs scratch-none: dominates
+      photo-like sets (+13..+18 c10, +15..+24 stl/tin, +10..+18
+      c100/food, +7 dtd) but the gap NARROWS to +1.9 on eurosat and
+      +1.8..+2.9 on pathmnist — the domain-shift prediction exactly; the
+      "transfer wins everywhere by >10" falsifier did NOT fire, so the
+      from-scratch story needs no defensive scope statement.
+      aux-on-transfer (λ0=1.0 verbatim): NEGATIVE EVERYWHERE. The
+      pathmnist OPEN FORK resolves to NO STACK (−0.4@10%, −1.1@7% —
+      mild tax); photo-like sets take a HEAVY tax (−10..−24 on
+      stl/c10/c100/food/tin; tin@10% has a collapsed seed, σ21 →
+      bistable flag). The tax SCALES with init strength — the currency
+      account's cleanest demonstration yet: the stronger the features
+      the init already bought, the more the early shaping destroys.
+      "Prior on pretrained" is dead as a deployable direction.
+  (3) DINO ENVELOPE COMPLETE (all cells vit_tiny; the expansion
+      diaggrid_dino_<ds> family = DINO-ViT on domains): DINO <= aux-ViT
+      at every fraction <=10% on every dataset (esat −3..−5, dtd −1..−4,
+      food −1..−3, c100 @10% 24.60 vs 29.74), statistical tie on
+      pathmnist @7/10% (−0.17/+0.40, n3). On most domains DINO ≈ the
+      PLAIN ViT baseline — the pretraining buys ~nothing at study scale
+      — EXCEPT pathmnist, where it does real work (+8 over base @10%).
+      DINO beats aux only at c100@100% (62.30 vs 60.50, 2x compute).
+      The "DINO >= aux <=10%" falsifier: one nominal +0.40 tie-cell, no
+      material fire → the ViT positioning stands against modern
+      attention-SSL. Prediction (self-distillation more data-hungry
+      than contrastive) CONFIRMED: DINO < SimCLR-ViT everywhere too.
+  (4) SWIN — THE BASELINE COLLAPSES; THE PRIOR IS AN OPTIMIZER STABILIZER.
+      swin-none is seed-bistable or at chance on most datasets (esat@15%
+      {11.1,33.5,11.1}, stl@100% {10.0,22.0,10.0}, tin@10% {0.5,1.6,0.5},
+      path@7% {44,17,49}, c10@10% {28,42,15}) while swin-aux trains
+      tightly (esat 92.3±0.1, c10 68.3±0.2, tin 17.2±1.6) — the same
+      failure family as ConvNeXt-SGD/R50-no-hn, now under AdamW, and the
+      strongest stabilization signature in the study. On C100 — the ONE
+      dataset where swin-none trains — Δ = +6.1/+7.6/+9.0/+7.2 at
+      5/10/15/25%: ABOVE the predicted +1..+5 band and touching the
+      >=+8 falsifier ("deficit is attention-intrinsic") at 15%. The
+      "hierarchy supplies most of what ViT lacks" prediction MISSED —
+      swin's deficit under this recipe is at least as large as ViT's.
+      All swin cells carry the bistable caveat; none are headline.
+  (5) PATHMNIST ANOMALY VERIFIED AS DATASET-LEVEL, NOT AN SSL BUG: every
+      arm declines above ~10% (base 92.0@10% -> 89.5@25% -> 86.7@100%;
+      aux 93.8 -> 86.7; simclr 94.3 -> 87.6; simsiam 91.6 -> 88.2).
+      More data hurts ALL methods — consistent with PathMNIST's
+      center-shifted test split + the frozen 200-epoch recipe
+      overfitting train-center stain statistics. Treat pathmnist
+      right-flank cells as distribution-shift-confounded; low-data
+      cells (<=10-15%) are the interpretable ones.
+  (6) SSL-VS-AUX ON DOMAINS (conv, partial): food = SSL territory
+      (+2.4..+4.3 over aux); pathmnist ≈ tie (−0.2..+0.8); eurosat aux
+      WINS @5% (+1.85) — one fraction so far, the "aux > SSL at >=2
+      fractions" falsifier needs a second; dtd@15% SimCLR ≫ aux
+      (+6.84: 22.57 vs 15.73) — my "SSL data-starved on dtd" prediction
+      is WRONG at 15% (564 imgs suffice). SimSiam stays ~useless on
+      domains too (≈base on food/path) — the effective-SSL rule holds.
+  (7) BACKBONE TRANSPLANTS ON DOMAINS: mnet (frozen SGD, NO bistability)
+      is champion-like on pathmnist (+2.3..+4.7 across 1-15%), modest
+      on c100/food/stl, ~0 on tin@5% (−0.35, band +2..+5 MISSED) and
+      dtd/cub. vit/deit pairs stack on every domain (deit esat@1%
+      +17.5, path +9..+10, food@10% +20.1) except cub's deep floor.
+      CUB expansion cells at 3-20% sit at 1-4% absolute (~2-8 img/cls,
+      200-way) — deep-left-flank, expected, not an error.
+
 ## State of findings (2026-07-16)
 
 - GENERALIZATION (2026-07-16). The champion (λ0=1.0 cosine→0, magnitude target,
