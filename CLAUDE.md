@@ -1241,6 +1241,33 @@ ported vs corrected and why.
       CUB expansion cells at 3-20% sit at 1-4% absolute (~2-8 img/cls,
       200-way) — deep-left-flank, expected, not an error.
 
+- *** VITENV tin@100% LANDED — THE PERMANENT-DEFICIT FALSIFIER DID NOT
+  FIRE (2026-07-27): diagvit tin@100% (100k imgs, 3 seeds) = 34.81 ->
+  41.98 = **+7.17** — IN the pre-registered band (+6..+10 @100%); the
+  falsifier (<= +2 => "permanent deficit is C100-specific") is dead.
+  ViT-tiny-from-scratch now gains large at FULL data on TWO populations
+  (C100 +9.88@50k, tin +7.17@100k): the permanent-deficit conclusion is
+  a two-population claim. DeiT-aug pair at tin@100%: 50.72 -> 57.32 =
+  +6.60 (amp 0.92x at full data — same compression as C100@100%'s 1.40x
+  vs 1.85-2.4x mid-band; the "amp < 1.3x on the MID-BAND" falsifier is
+  untouched, mid-band tin pairs @15/25% still queued). deit-tin partial
+  envelope: +8.19@3%, +13.33@7% (stacking transplants, as predicted).
+  DINO-tin@10% = 16.98 vs aux-ViT-tin 17.75 (−0.77): DINO below the
+  prior on the second population too. esat aux-vs-SimCLR: +1.85@5% but
+  tie @15% (−0.06, aux n1) — the "aux > SSL at >=2 fractions" falsifier
+  still needs esat@7/10% aux cells (queued).
+- BIG-LANE RECONCILE SHIPPED (2026-07-27): the 24h big lane had NO
+  reconcile path — 53 tasks (SSL-at-scale: dino/simclr/simsiam @50/100%
+  on c10/stl/food + food@100% champion pair) were claimed then
+  walltime-killed and orphaned, and the normal-lane reconcile excludes
+  big configs by design. Fixed: keep_bsc_fed.sh now regenerates
+  worklist.big from missing∩bigcfgs when the big counter drains with no
+  ms_big job live (BIG_COMPLETE marker when empty); worklist.big
+  deduped (food@100% lines were duplicated); the `grep -c || echo 0`
+  double-zero bug fixed in both lanes. Lane restarted 0/53 with 2x 24h
+  jobs. CAVEAT: make_missing only scans configs/grid/, so diagnostics
+  big cells (vitenv — all complete) are outside the reconcile's reach.
+
 ## State of findings (2026-07-16)
 
 - GENERALIZATION (2026-07-16). The champion (λ0=1.0 cosine→0, magnitude target,
