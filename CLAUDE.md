@@ -1345,6 +1345,47 @@ ported vs corrected and why.
     readout term is doing large RESCUE work (strongly positive), which the
     positive-branch decay says it cannot — would break the law at high
     baselines.
+- *** TRANSFER-TAX PROBES LANDED — THE TAX IS ~ENTIRELY FEATURE-SIDE; THE
+  CURRENCY ACCOUNT IS NOW MEASURED, NOT INFERRED (2026-07-29, 3 seeds/cell):
+      cell        base   Δ_e2e | probe_none  probe_aux      G        readout
+      c10 @5%    81.65  −17.11 | 83.71±1.64 67.90±2.46 −15.81±1.71  −1.30
+      c100@7%    45.64  −16.37 | 54.63±1.92 38.37±4.92 −16.26±3.05  −0.11
+      path@10%   93.79   −0.41 | 92.01±0.49 92.28±1.00  +0.27±0.64  −0.68
+  3/3 IN BAND (predicted −17.5/−16.7/−0.7; c100 landed within 0.4 of its
+  point prediction). FALSIFIER A (|G|<=4 on a heavy cell => tax is
+  readout-side) did NOT fire — G carries essentially the ENTIRE tax
+  (−15.81 of −17.11; −16.26 of −16.37). FALSIFIER B (G<=−25) did NOT fire.
+  ORDERING PREDICTION HELD EXACTLY: G(c10) ≈ G(c100) ≪ G(path).
+  WHAT THIS ESTABLISHES: the early λ0=1.0 shaping DESTROYS ImageNet features
+  — this is damage to the representation itself, not a classifier/optimizer
+  failure. And the decisive control is pathmnist: where ImageNet features are
+  domain-mismatched (transfer beats scratch by only +1.8..+2.9 there vs
+  +13..+24 on photo sets), there is NOTHING to destroy and G = +0.27 ±0.64,
+  indistinguishable from zero (0.4σ). The damage is PROPORTIONAL TO WHAT THE
+  INIT ACTUALLY SUPPLIED — the currency account's sharpest confirmation, and
+  the first time it has been shown on the FEATURE side of a NEGATIVE result.
+  READOUT — SCORED HONESTLY AS UNRESOLVED, NOT AS A VIOLATION: the three
+  readouts (−1.30, −0.11, −0.68) are nominally mild NEGATIVES at baselines
+  far ABOVE the [31.8, 40.3] crossing, where the aux-derived positive branch
+  (+0.44 @ base 80.7) would predict small positives. But every one is within
+  ~1σ of zero given G's SEM (±1.71/±3.05/±0.64), so NONE is resolvable and
+  none is significantly different from the predicted small positive either.
+  Additionally the sign law was derived on aux-FROM-SCRATCH cells; a
+  pretrained-init TAX cell is outside its derived scope. Recorded as
+  not-scored (same treatment as tin20's noisy readout), NOT as a 35th cell
+  and NOT as a counterexample. Deepening these three cells' probes would
+  settle whether the positive branch extends to tax cells.
+  CAVEAT for the path cell: probe_none 92.01 sits BELOW its e2e 93.79 — on
+  pathmnist the finetuned network beats a linear head on its own frozen
+  features, so absolute probe levels there understate the cell. The DELTA is
+  unaffected (both arms probed identically), which is the measured quantity.
+  ASIDE, derivable from the existing e2e table and worth stating: the tax
+  DECAYS TO ~ZERO AT FULL DATA on every dataset (c10 −17.65@3% -> −0.26@100%;
+  c100 −11.20@3% -> −0.69@100%; esat −5.75@3% -> −0.06@100%; tin -> −0.56).
+  So "the tax scales with init strength" is more precisely: the tax scales
+  with HOW MUCH OF THE FINAL PERFORMANCE THE INIT IS CARRYING. At 100% the
+  data dominates and the λ->0 schedule's structural neutrality reasserts
+  itself, exactly as it does for aux-from-scratch at 100%.
 - PROBE PATH EXTENDED TO timm ClassifierHead BACKBONES (2026-07-28): the
   Swin probes crashed on `'SwinTransformer' object has no attribute
   'fc_norm'` — swin's `global_pool` is the STRING 'avg' exactly as on ViT,
