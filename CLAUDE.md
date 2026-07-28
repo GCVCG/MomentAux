@@ -1315,6 +1315,36 @@ ported vs corrected and why.
   NET: the prior's swin gain is genuinely feature-side (falsifier B dead) AND
   the prior stabilizes — both, not either. Swin cells stay non-headline
   (bistable baselines off C100), but the C100 column is now a full law cell.
+- TRANSFER-TAX G-PROBE PASS LAUNCHED (2026-07-29, local 3090): the big-sweep
+  claim "aux-on-transfer is negative everywhere and the tax SCALES with init
+  strength — the currency account's cleanest demonstration yet" is e2e-ONLY.
+  The currency account says the prior's early λ0=1.0 shaping DESTROYS features
+  the ImageNet init already bought; that is a claim about FEATURES and has
+  never been measured. This pass probes diagtransfer2_{none,aux} at
+  c10@5% (tax −17.11, base 81.65), c100@7% (tax −16.37, base 45.64) and
+  path@10% (tax −0.41, base 93.79) — 3 seeds each.
+  CELL CHOICE IS CONSTRAINED BY THE PROBE-CEILING RULE: the 100% transfer
+  cells (where the tax nearly VANISHES: c100 −0.69, c10 −0.26, esat −0.06)
+  would be the most interesting comparison but their probe labels == cell
+  labels, so no G/readout split is interpretable there. Low/mid fractions
+  only, where the probe holds 10-20x the cell's labels.
+  PREDICTIONS RECORDED IN ADVANCE, derived from Δ = G + readout. All three
+  baselines sit FAR ABOVE the [31.8, 40.3] crossing, so readout is on the
+  measured positive branch and small (C10's mapped branch: +0.44 @ base 80.7),
+  which forces essentially the whole tax onto G:
+      c10@5%   readout ≈ +0.4 => G ≈ −17.5   BAND [−20, −14]
+      c100@7%  readout ≈ +0.3 => G ≈ −16.7   BAND [−19, −13]
+      path@10% readout ≈ +0.3 => G ≈  −0.7   BAND [−2.5, +0.5]
+  ORDERING PREDICTION: G(c10) ≈ G(c100) ≪ G(path) — a photo-matched init has
+  far more to destroy than a stain-domain-mismatched one.
+  FALSIFIER A (currency account WRONG, tax is READOUT-side): |G| <= 4 on
+    EITHER heavy cell while Δ is −16..−17 => the prior did not damage the
+    features, it broke the classifier/optimization, and "destroys what the
+    init bought" must be replaced by an optimization story.
+  FALSIFIER B (damage worse than e2e shows): G <= −25 on a heavy cell => the
+    readout term is doing large RESCUE work (strongly positive), which the
+    positive-branch decay says it cannot — would break the law at high
+    baselines.
 - PROBE PATH EXTENDED TO timm ClassifierHead BACKBONES (2026-07-28): the
   Swin probes crashed on `'SwinTransformer' object has no attribute
   'fc_norm'` — swin's `global_pool` is the STRING 'avg' exactly as on ViT,
