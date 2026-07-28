@@ -1386,6 +1386,36 @@ ported vs corrected and why.
   with HOW MUCH OF THE FINAL PERFORMANCE THE INIT IS CARRYING. At 100% the
   data dominates and the λ->0 schedule's structural neutrality reasserts
   itself, exactly as it does for aux-from-scratch at 100%.
+- MOBILENETV3 G-PROBE PASS LAUNCHED (2026-07-29, local 3090): mnet is the
+  4th backbone family and the FIRST HEADLINE-ELIGIBLE one beyond the ResNets
+  (frozen SGD recipe, no bistability observed) — and it has no G measurement.
+  It also carries a real anomaly: champion-like on pathmnist (+2.3..+4.7
+  across 1-15%) but FLAT on tin (−0.35..+1.40) and modest on C100.
+  THE QUESTION: is the tin flatness a G effect (mnet's strong conv bias at
+  64px leaves no feature deficit for the prior to fill) or a READOUT effect
+  (tin's sub-crossing baselines suppress a real G, exactly as they do for
+  R18-on-tin, where Δ +1.49 hides readout −2.71)?
+  Cells: grid_mnet_{c100@7%, path@10%, tin@5%}_{none,aux}, 3 seeds.
+  PREDICTIONS RECORDED IN ADVANCE, readout read off the MEASURED curves at
+  matched baselines (C100: −2.76@8.93, −1.12@25.36, +0.08@40.28; tin:
+  −2.71@5.30, −0.54@21.08, −0.06@33.60; positive branch: +0.44@80.7):
+      c100@7%  base 23.12  Δ +2.84 | readout ≈ −1.3 => G ≈ +4.1  BAND [+2.5,+5.5]
+      path@10% base 87.90  Δ +3.46 | readout ≈ +0.3 => G ≈ +3.2  BAND [+1.5,+4.5]
+      tin@5%   base 16.66  Δ −0.35 | readout ≈ −1.1 => G ≈ +0.75 BAND [−0.5,+2.0]
+  THE FORK, and the tin cell decides it:
+    H-NO-DEFICIT (what my point prediction backs): G(tin) <= +1 while
+      G(c100)/G(path) land +3..+4 => mnet genuinely has nothing to gain on
+      tin; the flat tin envelope is a FEATURE statement about efficient
+      convs at 64px, not a readout artifact.
+    H-READOUT-SUPPRESSION: G(tin) ≈ +2..+3, comparable to the other two =>
+      the flatness is the sign law at work and mnet's tin features DO carry
+      a deficit. NOTE this branch requires readout ≈ −2.85 at base 16.66,
+      far more negative than the measured tin curve gives at that height
+      (−0.54 at base 21.08) — so the law makes this the harder branch, which
+      is what makes the test informative rather than a coin flip.
+  FALSIFIER for "the law transplants to efficient-conv": readout = Δ − G
+    coming out POSITIVE at tin@5%'s sub-crossing base 16.66 (i.e. G < −0.35),
+    or strongly NEGATIVE (<= −1.5) at path@10%'s base 87.90.
 - PROBE PATH EXTENDED TO timm ClassifierHead BACKBONES (2026-07-28): the
   Swin probes crashed on `'SwinTransformer' object has no attribute
   'fc_norm'` — swin's `global_pool` is the STRING 'avg' exactly as on ViT,
