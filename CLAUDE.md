@@ -1241,6 +1241,40 @@ ported vs corrected and why.
       CUB expansion cells at 3-20% sit at 1-4% absolute (~2-8 img/cls,
       200-way) — deep-left-flank, expected, not an error.
 
+- SWIN G-PROBE PASS LAUNCHED (2026-07-28, local 3090 on the new study venv,
+  while BSC is fair-share throttled): the swin result — baseline collapses on
+  most datasets, prior stabilizes, and Δ = +6.1/+7.6/+9.0/+7.2 on C100 where
+  the baseline DOES train — has NO feature-side measurement. This pass probes
+  diaggrid_swin_c100_{none,aux}_{5,10,15,25}pct, 3 seeds, full-train-set probe
+  (identical protocol to every other G in the ledger).
+  SCOPE NOTE: only C100 is probed. On esat/stl/tin/path/c10 the swin BASELINE
+  is seed-bistable or at chance, so its probe would measure a TRAINING FAILURE,
+  not a feature deficit — a huge "G" there would be an artifact and must not be
+  fed to the law. C100 swin seeds all train (worst spread 11.7-15.2 @5%).
+  PREDICTIONS RECORDED IN ADVANCE — derived from the law, not guessed. The
+  sign law fixes readout from the BASELINE height (crossing ~30), and swin's
+  baselines are 13.88/19.00/23.40/31.81 at 5/10/15/25%. Reading readout off
+  the measured ViT-on-C100 curve at matched baselines (−3.82@12.3, −1.59@16.5,
+  −0.36@28.5, +0.19@50.6) gives ≈ −3.5/−1.2/−0.8/+0.2, so G = Δ − readout:
+      @5%  G ≈ +9.6   @10% G ≈ +8.8   @15% G ≈ +9.8   @25% G ≈ +7.0
+  BAND: **G(swin) = +7..+11 at every fraction** — i.e. BETWEEN conv R18
+  (3.55-6.26) and ViT (13.17-14.85), roughly 2/3 of ViT's.
+  READING IF THE BAND HOLDS: Swin's hierarchy fills PART of the feature
+  deficit attention-at-small-scale suffers, but only about a third of it; the
+  rest is intrinsic to attention under this recipe. That is the quantitative
+  version of the qualitative claim my original swin prediction got wrong
+  (I said G(swin) ≪ G(vit) and Δ +1..+5; e2e already falsified the Δ half).
+  FALSIFIER A (deficit is ATTENTION-INTRINSIC): G(swin) >= 13 at any fraction
+    (≈ G(vit)) => the hierarchy buys NOTHING on the feature side and the
+    "hierarchy supplies most of what ViT lacks" account dies on both axes.
+  FALSIFIER B (STABILIZATION-ONLY, and it would break the law): G(swin) <= 6
+    (conv-like) => swin's big e2e Δ is NOT feature-side, which forces
+    readout = Δ − G to be strongly POSITIVE (+1..+3) at baselines of 14-23,
+    far below the ~30 crossing — the first sign-law violation on a
+    non-collapsed cell, and it would mean the prior's swin gain is pure
+    optimization rescue rather than feature injection.
+  Note both falsifiers are reachable from the same measurement, and the band
+  between them is narrow — this is a sharp test, not a safe one.
 - *** VITENV tin@100% LANDED — THE PERMANENT-DEFICIT FALSIFIER DID NOT
   FIRE (2026-07-27): diagvit tin@100% (100k imgs, 3 seeds) = 34.81 ->
   41.98 = **+7.17** — IN the pre-registered band (+6..+10 @100%); the
