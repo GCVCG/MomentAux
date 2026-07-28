@@ -99,7 +99,7 @@ def main():
 
     with open(args.config) as f:
         cfg = yaml.safe_load(f)
-    SUPPORTED = ("cifar100", "tin", "eurosat", "dtd", "pathmnist", "food101", "cub")
+    SUPPORTED = ("cifar100", "cifar10", "stl10", "tin", "eurosat", "dtd", "pathmnist", "food101", "cub")
     if cfg["dataset"] not in SUPPORTED:
         raise ValueError(f"dino_pretrain supports {SUPPORTED}")
     set_seed(args.seed)

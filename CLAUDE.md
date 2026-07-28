@@ -1256,6 +1256,31 @@ ported vs corrected and why.
   prior on the second population too. esat aux-vs-SimCLR: +1.85@5% but
   tie @15% (−0.06, aux n1) — the "aux > SSL at >=2 fractions" falsifier
   still needs esat@7/10% aux cells (queued).
+- *** BIG-LANE CRASH-LOOP FIXED (2026-07-28): the reconciled 36-task big
+  pass was churning in ~36s/job — every task FAILED instantly on the
+  pretrain whitelist: dino/simclr/simsiam @50-100% on c10/stl are the
+  first SSL cells ever aimed at cifar10/stl10, and none of the three
+  pretrain scripts listed them (the SAME guard-bug class as genssl's
+  cifar100-only ValueError, third incident). The reconcile loop worked
+  exactly as designed (re-listed the same 36 missing every cycle) but
+  cannot fix a deterministic failure — worth remembering: a reconcile
+  that keeps finding the SAME cells missing is a crash-loop signal, not
+  a walltime signal. FIX: cifar10+stl10 added to all three whitelists
+  (torchvision loaders, same .transform swap pattern; STATS/IMAGE_SIZE/
+  NUM_CLASSES all present). VERIFIED: simclr+simsiam 1-epoch smokes
+  PASS locally on both datasets; DINO verified ON BSC (construction +
+  MultiCrop + forward at 32px and 96px) because the local check is
+  impossible — see next point. Scripts shipped to the BSC repo; the
+  pending big jobs pick them up on start.
+- *** LOCAL ENV HAZARD (2026-07-28): anaconda-base timm is now 0.6.7 —
+  DOWNGRADED (almost certainly by nerfstudio/VolETA, which pins 0.6.7)
+  from the 1.x the study's local ViT work used. timm 0.6.7 cannot build
+  the study's ViT (patch_size override collides in the factory), so ANY
+  local ViT run/probe now fails at construction, and conv runs would
+  execute under a different timm than their originals. BSC (1.0.27,
+  venv) and turing (own venv) are unaffected. RULE: before the next
+  local wave or probe pass, create a dedicated study venv with timm
+  pinned ~1.0.x — do NOT run study code from anaconda base again.
 - BIG-LANE RECONCILE SHIPPED (2026-07-27): the 24h big lane had NO
   reconcile path — 53 tasks (SSL-at-scale: dino/simclr/simsiam @50/100%
   on c10/stl/food + food@100% champion pair) were claimed then
