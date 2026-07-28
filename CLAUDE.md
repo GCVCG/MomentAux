@@ -1275,6 +1275,58 @@ ported vs corrected and why.
     optimization rescue rather than feature injection.
   Note both falsifiers are reachable from the same measurement, and the band
   between them is narrow — this is a sharp test, not a safe one.
+- *** SWIN G-PROBES LANDED — ALL FOUR IN BAND, NEITHER FALSIFIER FIRED, AND
+  THE LAW PREDICTED A NEW BACKBONE FAMILY FROM ITS BASELINES ALONE
+  (2026-07-28/29, local 3090 on the study venv, 3 seeds/cell, full-train probe):
+      pct  base_e2e aux_e2e   Δ    | probe_base   probe_aux     G      readout
+       5%   13.88   19.96  +6.08 | 24.42±4.26  34.93±0.22  +10.51±2.46  −4.43
+      10%   19.00   26.58  +7.58 | 29.91±1.03  39.21±0.65   +9.29±0.71  −1.71
+      15%   23.40   32.42  +9.02 | 32.94±2.21  43.00±0.10  +10.06±1.28  −1.04
+      25%   31.81   39.00  +7.19 | 39.03±0.78  46.62±0.24   +7.59±0.47  −0.40
+  PREDICTION SCORING: band was +7..+11 at every fraction — 4/4 IN BAND, and
+  the POINT predictions derived from the law (9.6/8.8/9.8/7.0) each landed
+  within ~0.9 of measurement (10.51/9.29/10.06/7.59) with the ordering
+  preserved. Falsifier A (G>=13, attention-intrinsic) did NOT fire (max
+  10.51); falsifier B (G<=6, stabilization-only) did NOT fire (min 7.59).
+  This is the first time the law was used to predict a NEW BACKBONE FAMILY's
+  feature gain in advance from nothing but its baseline heights, and it held.
+  THE ANSWER ON HIERARCHY, quantified: G(swin) 7.6-10.5 sits BETWEEN conv R18
+  (3.55-6.26) and ViT (13.17-14.85) — ~2x conv, but only ~2/3 of ViT. So
+  Swin's hierarchy fills roughly ONE THIRD of the attention feature deficit
+  and the rest is intrinsic to attention at this scale. My ORIGINAL swin call
+  ("G(swin) << G(vit)") is directionally right, but the inference I drew from
+  it ("hierarchy supplies MOST of what ViT lacks") is WRONG — it supplies
+  about a third. The e2e half of that prediction (Δ +1..+5) was already
+  falsified by the +6..+9 landings.
+  SIGN LAW: readout −4.43/−1.71/−1.04/−0.40 — negative throughout and
+  MONOTONE rising toward zero as the baseline rises, 4 more clean cells
+  (~34 total, first on a hierarchical-attention backbone). The 25% cell
+  TIGHTENS THE CROSSING BRACKET: readout is still −0.40 at base 31.81, so
+  the zero-crossing is ABOVE 31.8; with conv's +0.08 at base 40.28 the
+  bracket narrows to **base ∈ [31.8, 40.3]** (was [29.8, 39.4], "likely
+  just above 30" — that guess is now excluded).
+  STABILIZATION IS VISIBLE AT THE FEATURE LEVEL TOO: baseline probe σ
+  4.26/1.03/2.21/0.78 vs aux probe σ 0.22/0.65/0.10/0.24. The @5% baseline
+  has a probe outlier (seed2 19.50 vs 26.9) mirroring its e2e wobble
+  (11.7 vs 15.2) — so the instability the prior rescues is a property of the
+  learned FEATURES, not just of the classifier. Consistent with the standing
+  rule: variance reduction is NOT a routine property, but instability rescue
+  is real (R50 no-hn, ConvNeXt, and now Swin).
+  NET: the prior's swin gain is genuinely feature-side (falsifier B dead) AND
+  the prior stabilizes — both, not either. Swin cells stay non-headline
+  (bistable baselines off C100), but the C100 column is now a full law cell.
+- PROBE PATH EXTENDED TO timm ClassifierHead BACKBONES (2026-07-28): the
+  Swin probes crashed on `'SwinTransformer' object has no attribute
+  'fc_norm'` — swin's `global_pool` is the STRING 'avg' exactly as on ViT,
+  but its pooling module lives inside `.head` and forward_features returns
+  NHWC, so the ViT branch mis-pooled and reached for a non-existent
+  fc_norm. FIX in analysis/linear_probe.py: a branch gated on fc_norm's
+  ABSENCE that defers to timm's own `forward_head(f, pre_logits=True)` —
+  verified bit-identical (max|diff| 0.0) to manual head pooling on
+  swin_tiny. Gating on absence means every ViT cell keeps the exact branch
+  its recorded G was measured under; CONFIRMED by re-probing
+  diagvit_aux_10pct after the patch: 39.70±0.28 vs 39.72±0.29 recorded
+  (0.02, within seed noise of an identical computation). Suite 102/102.
 - *** VITENV tin@100% LANDED — THE PERMANENT-DEFICIT FALSIFIER DID NOT
   FIRE (2026-07-27): diagvit tin@100% (100k imgs, 3 seeds) = 34.81 ->
   41.98 = **+7.17** — IN the pre-registered band (+6..+10 @100%); the

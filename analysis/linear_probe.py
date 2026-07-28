@@ -69,6 +69,17 @@ def extract(model, loader, device):
             gp = model.net.global_pool
             if callable(gp):
                 f = gp(f)
+            elif not hasattr(model.net, "fc_norm"):
+                # timm ClassifierHead backbones (Swin, 2026-07-28): global_pool
+                # is the STRING 'avg' exactly as on ViT, but the pooling module
+                # lives inside .head and forward_features returns NHWC -- so the
+                # ViT branches below would both mis-pool and reach for a
+                # non-existent fc_norm. timm's own pre_logits path is the
+                # authority; verified bit-identical to head.flatten(
+                # head.global_pool(f)) on swin_tiny. Gated on fc_norm's ABSENCE
+                # so every ViT cell keeps the exact branch its recorded G was
+                # measured under.
+                f = model.net.forward_head(f, pre_logits=True)
             elif gp == "token":  # timm ViT: global_pool is a STRING; the
                 # penultimate feature is the CLS token (+ fc_norm, Identity
                 # unless pool='avg'), mirroring timm's forward_head.
