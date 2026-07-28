@@ -1416,6 +1416,47 @@ ported vs corrected and why.
   FALSIFIER for "the law transplants to efficient-conv": readout = Δ − G
     coming out POSITIVE at tin@5%'s sub-crossing base 16.66 (i.e. G < −0.35),
     or strongly NEGATIVE (<= −1.5) at path@10%'s base 87.90.
+- *** MOBILENETV3 PROBES LANDED — 3/3 IN BAND, AND THE tin FORK RESOLVES TO
+  H-NO-DEFICIT WITH A MEASURED ZERO (2026-07-29, 3 seeds/cell):
+      cell       base    Δ    | probe_none  probe_aux      G        readout
+      c100@7%   23.12  +2.84 | 32.64±0.72 37.12±1.96  +4.47±1.20   −1.63
+      path@10%  87.90  +3.46 | 90.42±0.19 93.01±0.38  +2.59±0.24   +0.87
+      tin@5%    16.66  −0.35 | 27.44±0.37 27.45±0.16  **+0.01±0.23** −0.36
+  THE FORK IS ANSWERED: G(tin) = +0.01 ±0.23 — a DEAD ZERO (0.04σ), the
+  tightest measured null in the study — while the same backbone shows
+  +4.47 on C100 and +2.59 on pathmnist. So mnet's flat tin envelope is a
+  FEATURE statement, NOT readout suppression: on tin there is simply nothing
+  for the prior to add. H-READOUT-SUPPRESSION is dead (it needed G ≈ +2..+3).
+  THE SHARP COMPARISON: at the SAME cell (tin@5%, identical pixels, images
+  and 200-way label space), G(mnet) = +0.01 while G(R18) = +2.67. G is
+  therefore a function of the BACKBONE as well as (pixels, images, label
+  space) — and strikingly, the WEAKER net (mnet base 16.66 vs R18's 21.08)
+  is the one with NO deficit. Naively a weaker model should have more to
+  gain; it has none.
+  TWO READINGS, NOT ADJUDICATED — state both: (a) mnet's depthwise-separable
+  stack with squeeze-excite already encodes oriented-energy-like structure at
+  64px, so the prior is redundant there; (b) mnet is CAPACITY-limited at tin's
+  200-way task, so extra feature structure cannot be represented regardless of
+  how good the target is. Distinguishing them needs a wider mnet (capacity
+  held up) or a shots-sweep on the frozen features. Do not assert (a) alone —
+  the c100/path cells show mnet CAN cash the prior in when the task is
+  easier, which is equally consistent with (b).
+  SIGN LAW — THE FALSIFIER DID NOT FIRE, LAW TRANSPLANTS TO EFFICIENT-CONV:
+  readout −1.63 @ base 23.12 (negative below crossing), +0.87 @ base 87.90
+  (positive far above), −0.36 @ base 16.66 (negative below). All three
+  correct in sign; 3 more clean cells on a 4th backbone family, and the
+  first on a HEADLINE-ELIGIBLE non-ResNet.
+- PROBE PATH FIXED FOR timm MobileNetV3 (2026-07-29): mnet probes crashed
+  with `mat1 and mat2 shapes cannot be multiplied (28800000x1 and 576x100)`.
+  Cause: mnet's `global_pool` IS callable (so it took the ResNet branch) but
+  its flatten is Identity AND a conv_head+act2 sits between pooling and the
+  classifier — pooling alone returns 4D 576ch, while classifier.in_features
+  is 1024. FIX: inside the callable branch, if the pooled tensor is still
+  >2D, defer to timm's `forward_head(f, pre_logits=True)`. ResNets pool to
+  2D and keep the original path untouched, so every recorded conv G stands.
+  VERIFIED across all four families — extracted feature dim now equals
+  classifier.in_features exactly: r18 512, mnet 1024, swin 768, vit 192.
+  Suite 102/102.
 - PROBE PATH EXTENDED TO timm ClassifierHead BACKBONES (2026-07-28): the
   Swin probes crashed on `'SwinTransformer' object has no attribute
   'fc_norm'` — swin's `global_pool` is the STRING 'avg' exactly as on ViT,

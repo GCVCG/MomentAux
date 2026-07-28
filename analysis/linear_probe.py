@@ -68,7 +68,18 @@ def extract(model, loader, device):
             f = model.net.forward_features(model.stem(x))
             gp = model.net.global_pool
             if callable(gp):
-                f = gp(f)
+                pooled = gp(f)
+                if pooled.ndim > 2:
+                    # timm MobileNetV3 (2026-07-29): global_pool IS callable,
+                    # but its flatten is Identity AND a conv_head+act2 sits
+                    # between pooling and the classifier -- so pooling alone
+                    # is NOT the penultimate feature (576ch, 4D, vs
+                    # classifier.in_features 1024). ResNets pool to 2D and
+                    # keep the branch above, so every recorded conv G is
+                    # measured under the identical code path.
+                    f = model.net.forward_head(f, pre_logits=True)
+                else:
+                    f = pooled
             elif not hasattr(model.net, "fc_norm"):
                 # timm ClassifierHead backbones (Swin, 2026-07-28): global_pool
                 # is the STRING 'avg' exactly as on ViT, but the pooling module
