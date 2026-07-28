@@ -1,0 +1,14 @@
+name: grid_mnet_dtd_none_7pct
+dataset: dtd
+backbone: mobilenetv3_small_100
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 7
+stem: none
+stem_calibrate: true

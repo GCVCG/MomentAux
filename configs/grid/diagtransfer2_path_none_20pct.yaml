@@ -1,0 +1,15 @@
+# diag: ImageNet init breaks the data contract
+name: diagtransfer2_path_none_20pct
+dataset: pathmnist
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: true
+subset_pct: 20
+stem: none
+stem_calibrate: true

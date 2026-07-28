@@ -1,0 +1,15 @@
+name: diaggrid_simsiam_path_2pct
+dataset: pathmnist
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 2
+stem: none
+stem_calibrate: true
+init_from: runs/simsiam_pre_path_2pct/seed{seed}/pretrain.pt

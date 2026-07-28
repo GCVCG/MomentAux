@@ -1,0 +1,22 @@
+# diag: ImageNet init breaks the data contract
+name: diagtransfer2_esat_aux_7pct
+dataset: eurosat
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: true
+subset_pct: 7
+stem: none
+stem_calibrate: true
+moment_aux:
+  stem: energy-magnitude
+  tap: layer3
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine
+  head_norm: true
