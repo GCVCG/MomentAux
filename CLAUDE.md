@@ -1281,6 +1281,26 @@ ported vs corrected and why.
   venv) and turing (own venv) are unaffected. RULE: before the next
   local wave or probe pass, create a dedicated study venv with timm
   pinned ~1.0.x — do NOT run study code from anaconda base again.
+  *** RESOLVED 2026-07-28 (VolETA finished, GPU free): dedicated study venv
+  built at **~/venvs/momentstem** — ALWAYS use `~/venvs/momentstem/bin/python`
+  for local study work, never bare `python`. Pins chosen to match what the
+  study ALREADY ran under, not "latest": torch 2.7.0+cu126 / torchvision
+  0.22.0+cu126 (the exact versions recorded in all 733 local-3090 finals),
+  timm 1.0.27 (BSC's version, so local probes and BSC checkpoints are
+  directly comparable), numpy 1.26.4, sklearn 1.4.2, torchmetrics 1.9.0.
+  Full lock in `requirements-study.txt` (pip freeze, committed).
+  VERIFIED, not assumed: (a) suite 102/102 green INCLUDING the bank-regression
+  fingerprints — the pinned banks are numerically identical under the new env,
+  so no existing run is invalidated; (b) vit_tiny builds at 32/64/96px (the
+  exact thing timm 0.6.7 could not do); (c) REPRODUCTION CHECK — reprobing
+  diagvit_aux_10pct returned **39.72 ±0.27** vs the ledger's recorded
+  **39.72 ±0.29** (mean to 0.01), so the venv reproduces recorded study
+  numbers rather than merely running. That run's linear_probe.json had been
+  an EMPTY STUB (a casualty of the 0.6.7 breakage); this pass restored it.
+  NOTE: torch versions already differ BY MACHINE across the study (BSC
+  2.4.0a0 n=5673, local 2.7.0 n=733, turing 2.8.0 n=443) — pre-existing,
+  recorded per-run in final.json, not introduced by the venv. Keep local work
+  on 2.7.0 so the local population stays internally consistent.
 - BIG-LANE RECONCILE SHIPPED (2026-07-27): the 24h big lane had NO
   reconcile path — 53 tasks (SSL-at-scale: dino/simclr/simsiam @50/100%
   on c10/stl/food + food@100% champion pair) were claimed then
