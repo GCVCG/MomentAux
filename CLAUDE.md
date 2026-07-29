@@ -1386,6 +1386,49 @@ ported vs corrected and why.
   with HOW MUCH OF THE FINAL PERFORMANCE THE INIT IS CARRYING. At 100% the
   data dominates and the λ->0 schedule's structural neutrality reasserts
   itself, exactly as it does for aux-from-scratch at 100%.
+- *** BIG-LANE CRASH-LOOP RESOLVED, VERIFIED IN PRODUCTION (2026-07-29): after
+  the cifar10/stl10 whitelist fix, the final big job logged **OK 36 / 0 FAIL**
+  and wrote BIG_COMPLETE. 18 of the 24 SSL-at-scale orphan cells now carry
+  3 seeds. The other 6 (simclr/simsiam at c10@50, stl@20, stl@25) are NOT
+  orphaned — they sit in the NORMAL lane (present in worklist.bsc, absent from
+  .bigcfgs), so the grid worker picks them up; checked explicitly rather than
+  inferred from the BIG_COMPLETE marker.
+- *** SSL-AT-SCALE RIGHT FLANK MEASURED — AT 50-100% NOTHING MATTERS ON CONV
+  (2026-07-29, the new big-lane cells, 3 seeds):
+      ds    pct |  base    aux   simclr simsiam | ssl−aux
+      food   50 | 71.75  71.09  70.81  70.92 | −0.29
+      food  100 | 78.20  77.73  77.78  77.49 | +0.05
+      tin    50 | 58.70  57.95  58.79  58.29 | +0.84
+      c100   50 | 71.79  71.34  71.92  71.20 | +0.58
+      c10   100 | 95.27    --   95.24  95.02 |   --
+  Every arm converges: at 50-100% data, baseline ≈ champion aux ≈ SimCLR-init
+  ≈ SimSiam-init to within ~0.8 on every population measured. This completes
+  the SSL−aux curve's RIGHT flank: the margin rises to a mid-band peak
+  (+5.01 @c100-10%, +4.63 @tin-3%) and DECAYS TO ZERO by 50%. So SimCLR's
+  advantage over the prior is a MID-DATA phenomenon on both sides — it
+  starves at ≤1-2% and becomes irrelevant at ≥50%, exactly where the data
+  itself dominates and the prior's λ->0 schedule is structurally neutral.
+  The honest one-line summary of the whole conv SSL-vs-aux question:
+  **SSL wins only in the mid-data band; at both extremes the free prior ties
+  it.**
+  ALSO: food@100% champion pair = 78.20 -> 77.73 (**−0.47**) — the 10th
+  population to show the expected ~neutral-at-100% behaviour.
+- *** DINO-ViT AT SCALE — IT FINALLY DOES REAL WORK, BUT STILL LOSES TO THE
+  PRIOR ON PHOTO SETS (2026-07-29):
+      ds   pct | dino-ViT  vit-none  vit-aux | dino−aux
+      c10   50 |  81.39     75.14     83.58  | −2.19
+      c10  100 |  88.71     80.83     89.83  | −1.12
+      stl   50 |  48.27     45.33     55.45  | −7.18
+      stl  100 |  58.44     54.99     62.90  | −4.46
+      food  50 |  40.37     25.59     36.08  | **+4.29**
+  At ≤10% DINO was ≈ the plain ViT baseline (pretraining bought ~nothing);
+  at 50-100% it clearly helps (+6..+15 over vit-none). But it still trails
+  the moment prior on c10 and stl at every scale measured, and beats it only
+  where DINO already showed domain-specific strength: food@50 (+4.29) and
+  c100@100% (62.30 vs 60.50, recorded earlier). Same pattern as pathmnist.
+  So "the prior beats modern attention-SSL" holds on photo-like sets across
+  the whole envelope, but is NOT universal at scale — food and pathmnist are
+  DINO's territory. Worth stating that way rather than as a blanket claim.
 - MOBILENETV3 G-PROBE PASS LAUNCHED (2026-07-29, local 3090): mnet is the
   4th backbone family and the FIRST HEADLINE-ELIGIBLE one beyond the ResNets
   (frozen SGD recipe, no bistability observed) — and it has no G measurement.
