@@ -1419,6 +1419,24 @@ ported vs corrected and why.
   environment never applies and python falls back to /usr/bin/python 3.9 with
   no torch. That looked exactly like a migration breakage and was not one.
   Source without a pipe when testing environment scripts.
+- *** GPU VALIDATION ON RHEL 9.6 PASSED (job 44052275 on the rhel96
+  reservation, 52s): conv train (mnet c100@5%, 2 ep) and ViT train
+  (diagvit@10%, 2 ep) BOTH wrote final.json, and the SimCLR pretrain path ran
+  (120 tensors saved). So training + pretraining are safe for Monday.
+  The only failure was the PROBE step — and it was OUR STALE CODE, not the
+  OS: BSC still carried the pre-2026-07-29 linear_probe.py and died on the
+  known MobileNetV3 `conv_head` bug (`mat1 and mat2 ... 576x100`). The local
+  fix had never been shipped. LESSON: only the pretrain scripts were being
+  rsynced after local fixes; the analysis/ tree had silently drifted.
+  analysis/, momentstem/, scripts/, train.py, data.py re-synced; both probe
+  fixes (mnet ndim>2, swin fc_norm-absent) verified present on BSC, and
+  configs/grid 2313 + configs/diagnostics 368 match local exactly.
+  RSYNC INCIDENT while fixing this, recorded so it is not repeated:
+  `rsync -az analysis/ momentstem/ scripts/ train.py data.py HOST:repo/`
+  merges the CONTENTS of all three dirs into repo/ ROOT (trailing slashes),
+  scattering 35 stray .py files there. They were moved to
+  .stray_backup/ and the root restored to exactly data.py, train.py,
+  eval_robustness.py; package dirs verified intact. Sync one tree at a time.
 - RECONCILE HARDENED FOR THE MIGRATION: both lanes ran the missing-cell
   generator as `python ... 2>/dev/null | grep ...`, so (a) generator errors
   were suppressed and (b) the pipeline's exit status was grep's, meaning a
