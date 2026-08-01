@@ -1386,6 +1386,53 @@ ported vs corrected and why.
   with HOW MUCH OF THE FINAL PERFORMANCE THE INIT IS CARRYING. At 100% the
   data dominates and the λ->0 schedule's structural neutrality reasserts
   itself, exactly as it does for aux-from-scratch at 100%.
+## BSC RHEL 9.6 MIGRATION (2026-08-01, from BSC HPC Support email)
+
+- SCHEDULE: login nodes migrated Thu 30 July 08:00 (DONE); **compute nodes
+  (GPP+ACC) migrate Mon 3 August 07:00, with a FULL-MACHINE RESERVATION from
+  that moment** — jobs must finish before it or they will not start.
+  BSC asked users to validate workflows on the new OS beforehand; the
+  `rhel96` reservation (179 ACC nodes) and alogin2/glogin2 already run it.
+- *** KEEPER OUTAGE FOUND AND FIXED — THE CAMPAIGN HAD STOPPED FEEDING:
+  alogin1 (the ONLY host the cron keeper used) went unreachable while it was
+  migrated; every tick since had logged `rc=255 :: Connection timed out`
+  (121 failed ticks) and NOTHING was being submitted — the grid queue drained
+  to 0 running jobs and stayed there, silently. FIX: keep_bsc_fed.sh now
+  takes a HOST LIST (`BSC_HOSTS`, alogin2 first since it migrated first),
+  probes each with a cheap `ssh true`, and uses the first that answers; the
+  chosen host is recorded in the log line. If none answer it logs
+  NO LOGIN HOST REACHABLE and exits non-zero instead of pretending success.
+  Verified live: keeper reconnected via alogin2 and submitted 8 workers.
+  LESSON (third silent-failure incident of this campaign): a cron job whose
+  only failure signal is a non-zero exit code nobody reads is not monitored.
+- *** STACK VALIDATED ON RHEL 9.6 (login node, alogin2): the module set in
+  env.sh loads unchanged (mkl/gcc/impi/hdf5/PYTHON 3.11.5/nvidia-hpc-sdk/
+  cudnn/nccl), the venv activates, and torch 2.4.0a0 / torchvision 0.19.0a0 /
+  timm 1.0.27 / numpy 1.26.4 all import. Critically `torchvision::nms`
+  RESOLVES — that custom op is the first thing an ABI break kills, and
+  env.sh's own comment records it as the reason the BSC pytorch module is
+  deliberately not loaded. vit_tiny also builds. A GPU job on the rhel96
+  reservation (train conv + train ViT + simclr pretrain + probe) is queued
+  as the compute-node check.
+  METHOD NOTE, recorded because it nearly caused a false alarm: testing with
+  `source env.sh 2>&1 | tail -2` runs env.sh in a SUBSHELL (the pipe), so the
+  environment never applies and python falls back to /usr/bin/python 3.9 with
+  no torch. That looked exactly like a migration breakage and was not one.
+  Source without a pipe when testing environment scripts.
+- RECONCILE HARDENED FOR THE MIGRATION: both lanes ran the missing-cell
+  generator as `python ... 2>/dev/null | grep ...`, so (a) generator errors
+  were suppressed and (b) the pipeline's exit status was grep's, meaning a
+  FAILED generator produced zero lines and was read as "nothing missing" ->
+  GRID_COMPLETE/BIG_COMPLETE -> the lane stops forever. Now the generator
+  runs to a temp file with its status checked explicitly; on failure the
+  keeper logs `STATE ERROR ... generator FAILED` and touches nothing. Both
+  reconciles also source env.sh first so they use the venv python rather than
+  whatever the login node's default happens to be after the migration
+  (system python is 3.9.21 and HAS pyyaml, so this is belt-and-braces).
+- TIMING PLAN: at 2026-08-01 14:45 UTC the reservation is ~38h out = ~6.7
+  worker cycles of 5h45. Slurm will simply refuse to START jobs that would
+  overlap the reservation, so they PEND rather than die — no results are lost
+  by keeping the keeper running through Monday. Nothing needs to be stopped.
 - *** BIG-LANE CRASH-LOOP RESOLVED, VERIFIED IN PRODUCTION (2026-07-29): after
   the cifar10/stl10 whitelist fix, the final big job logged **OK 36 / 0 FAIL**
   and wrote BIG_COMPLETE. 18 of the 24 SSL-at-scale orphan cells now carry
