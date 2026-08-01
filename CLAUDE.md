@@ -1437,6 +1437,17 @@ ported vs corrected and why.
   scattering 35 stray .py files there. They were moved to
   .stray_backup/ and the root restored to exactly data.py, train.py,
   eval_robustness.py; package dirs verified intact. Sync one tree at a time.
+- *** MIGRATION READINESS COMPLETE (2026-08-01): after shipping the code, a
+  probe-only job on the rhel96 reservation returned PROBE_RESULT + PROBE_OK,
+  so ALL FOUR workflow paths are now validated on RHEL 9.6 — conv train,
+  ViT train, SSL pretrain, linear probe. Nothing further is needed before
+  Monday's compute-node migration. (The probe's 10.45 number is from a
+  2-epoch smoke checkpoint and is NOT a measurement — do not record it.)
+  Test artifacts (rhel96_test_runs/, the two test sbatch files) deleted;
+  they lived outside runs/ so they never entered aggregation. The 35 stray
+  root files are retained in .stray_backup/ as a safety copy — they are
+  duplicates of files that exist correctly in analysis/momentstem/scripts,
+  so the directory can be deleted whenever convenient.
 - RECONCILE HARDENED FOR THE MIGRATION: both lanes ran the missing-cell
   generator as `python ... 2>/dev/null | grep ...`, so (a) generator errors
   were suppressed and (b) the pipeline's exit status was grep's, meaning a
