@@ -1386,6 +1386,38 @@ ported vs corrected and why.
   with HOW MUCH OF THE FINAL PERFORMANCE THE INIT IS CARRYING. At 100% the
   data dominates and the λ->0 schedule's structural neutrality reasserts
   itself, exactly as it does for aux-from-scratch at 100%.
+- *** EUROSAT ANSWERS THE DOMAIN-SSL FALSIFIER — THE PRIOR BEATS SimCLR ON
+  CONV, AND THE "SSL WINS ON CONV" CLAIM IS NOW SCOPED TO PHOTO DOMAINS
+  (2026-08-02, full 11-fraction envelope, 3 seeds every cell):
+      pct    base     aux    simclr | aux−ssl | aux−base
+        1   67.47   70.14   69.35   |  +0.79  |  +2.67
+        2   77.98   79.59   80.09   |  −0.51  |  +1.60
+        3   83.90   85.67   84.24   |  +1.43  |  +1.77
+        5   90.80   91.64   89.79   |  +1.85  |  +0.84
+        7   92.25   93.54   92.10   |  +1.44  |  +1.30
+       10   93.67   94.90   94.13   |  +0.77  |  +1.22
+       15   96.04   96.20   95.95   |  +0.25  |  +0.16
+       20-100: all three arms converge (|Δ| <= 0.14)
+  The recorded falsifier — "any domain with aux > SSL at >=2 fractions kills
+  'SSL always wins on conv'" — FIRED at **7 fractions** (1/3/5/7/10/15/50),
+  with the material margins in the 1-10% band (+0.77..+1.85). The domssl
+  prediction had eurosat as the explicit OPEN FORK ("uncertain — no number");
+  it resolves toward the prior, and for the pre-registered REASON: SimCLR's
+  views encode PHOTO invariances (crop + colour jitter), which transfer badly
+  to satellite imagery where the real invariances differ (rotation is
+  meaningful, colour statistics are not photographic), while the moment
+  prior's oriented-energy target is domain-agnostic.
+  STATE IT WITH THE NUANCE, because the domain axis does NOT split cleanly
+  into "photo vs non-photo": on DTD — also non-photo, texture-dominated —
+  SimCLR BEATS aux heavily (+6.84 at 15%), and on food/pathmnist SSL wins or
+  ties. So the correct claim is **eurosat is a population where the free
+  prior beats 2x-compute SimCLR outright in the low-data band**, which is
+  enough to retire the blanket "on conv, SSL wins if you can pay 2x" — that
+  sentence must now name its populations (C100, tin, food, dtd) rather than
+  claim conv in general.
+  Right flank behaves exactly as everywhere else: by 20% all three arms are
+  within 0.14 of each other and the prior is structurally neutral.
+
 ## BSC RHEL 9.6 MIGRATION (2026-08-01, from BSC HPC Support email)
 
 - SCHEDULE: login nodes migrated Thu 30 July 08:00 (DONE); **compute nodes
@@ -1405,6 +1437,38 @@ ported vs corrected and why.
   Verified live: keeper reconnected via alogin2 and submitted 8 workers.
   LESSON (third silent-failure incident of this campaign): a cron job whose
   only failure signal is a non-zero exit code nobody reads is not monitored.
+- *** QUEUE-COUNTER REWIND INCIDENT (2026-08-02) — ~20h OF CLUSTER TIME SPENT
+  RE-RUNNING FINISHED CELLS. Symptom: the grid counter had gone BACKWARDS,
+  7024/7246 -> 2743/7246, while worklist.bsc's mtime was still 2026-07-24
+  (so no reconcile had run). Sampling the tasks being claimed showed **12 of
+  13 already had final.json** — the whole 32-GPU cluster was redoing
+  completed work, two days before the migration reservation.
+  ROOT CAUSE, in bsc_worker.sbatch's atomic claim:
+      i=$(flock "$LOCK" bash -c "read -r v < '$CTR' 2>/dev/null || v=0;
+                                 echo \$((v+1)) > '$CTR'; echo \$v")
+  A single transient failure of that read (GPFS hiccup) sets v=0 and WRITES
+  1 back, rewinding the shared counter for every worker. The `|| v=0` was
+  meant for first-run initialization and doubles as a data-destroying
+  fallback — the same silent-guard family as the pretrain whitelists and the
+  suppressed reconcile generator, 4th incident.
+  FIX: the counter is initialized ONCE before the worker loop (`[ -s $CTR ]
+  || echo 0`), and the claim now VALIDATES the value (non-empty, all digits)
+  and EXITS NON-ZERO if it cannot read it, so the worker backs off and
+  retries instead of restarting the queue. Unit-tested locally against three
+  cases: absent counter (refuses), normal claims (0,1,2 monotone), corrupt
+  counter (refuses, leaves the file untouched).
+  RECOVERY: workers cancelled, worklist regenerated from what is actually
+  missing (7246 stale -> **642** genuinely-missing grid tasks), counter
+  reset to 0, 8 workers resubmitted against the clean list.
+  SECOND BUG THIS EXPOSED: the reconcile generator only scans configs/grid/,
+  so the 78 still-missing configs/diagnostics/ tasks (the vitenv tin ViT/DeiT
+  envelope, incl. BOTH open falsifier blocks at 15/25%) were DROPPED by the
+  regeneration. Recovered by extracting the diagnostics lines from the stale
+  worklist, filtering to those without final.json, and appending — final
+  worklist 720 lines (642 grid + 78 diagnostics), falsifier cells verified
+  present. The generator's configs/grid-only scan remains a known limitation;
+  anything queued from configs/diagnostics/ must be re-appended after every
+  reconcile until that is fixed properly.
 - *** STACK VALIDATED ON RHEL 9.6 (login node, alogin2): the module set in
   env.sh loads unchanged (mkl/gcc/impi/hdf5/PYTHON 3.11.5/nvidia-hpc-sdk/
   cudnn/nccl), the venv activates, and torch 2.4.0a0 / torchvision 0.19.0a0 /
