@@ -1469,6 +1469,23 @@ ported vs corrected and why.
   present. The generator's configs/grid-only scan remains a known limitation;
   anything queued from configs/diagnostics/ must be re-appended after every
   reconcile until that is fixed properly.
+- *** WORKLIST-PATH REGRESSION (2026-08-03, my error, and the cause of the
+  two incidents below looking worse than they were). The BSC-deployed
+  bsc_worker.sbatch read `WORKLIST=$MS_ROOT/worklist.bsc`; the repo copy at
+  slurm/bsc_worker.sbatch was OLDER and still read `worklist.txt` (the
+  original 2026-07-22 full list, 2712 lines, long stale). Shipping the repo
+  copy to deploy the counter fix SILENTLY REVERTED the path, so for ~a day
+  the cluster worked the stale 2712-line list — re-running finished cells —
+  while every rebuilt 604-task queue went unread. Symptom that exposed it:
+  workers logged `tasks=2712` when worklist.bsc was 604 lines.
+  FIX: repo copy corrected to worklist.bsc (with a comment saying why),
+  redeployed, and the stale file renamed worklist.txt.stale.2026-07-22 so
+  nothing can point at it again. VERIFIED: workers now log `tasks=604` and
+  claim real missing cells.
+  LESSON, and it is the general one: THE REPO COPY OF A DEPLOYED SCRIPT CAN
+  BE OLDER THAN WHAT IS DEPLOYED. Diff before rsyncing over a live file —
+  the same drift that left BSC running a pre-2026-07-29 linear_probe.py,
+  only this time the drift went the other way and I overwrote the good copy.
 - *** WORKLIST-SWAP-UNDER-RUNNING-WORKERS INCIDENT (2026-08-03, my error).
   The worker caches `N=$(wc -l < worklist)` ONCE at job start but resolves each
   task with `sed -n "${i}p"` against the LIVE file. I swapped worklist.bsc
