@@ -1469,6 +1469,29 @@ ported vs corrected and why.
   present. The generator's configs/grid-only scan remains a known limitation;
   anything queued from configs/diagnostics/ must be re-appended after every
   reconcile until that is fixed properly.
+- *** WORKLIST-SWAP-UNDER-RUNNING-WORKERS INCIDENT (2026-08-03, my error).
+  The worker caches `N=$(wc -l < worklist)` ONCE at job start but resolves each
+  task with `sed -n "${i}p"` against the LIVE file. I swapped worklist.bsc
+  twice (7246->667->615) while 8 jobs were running with a cached N=2712, so
+  once the counter passed 615 every claim returned an EMPTY line and the
+  worker's `[ -z "$cmd" ] && continue` re-claimed INSTANTLY — a tight spin
+  that raced the shared counter 0 -> 1698 and CONSUMED ~580 genuinely-missing
+  tasks without executing them (claims are atomic, execution is not).
+  WHY IT HAPPENED: the keeper only ever reconciles when CUR==0 precisely to
+  avoid this, and I bypassed that guard by swapping the file by hand.
+  RULE: never replace worklist.bsc while any ms_grid job is live — cancel
+  first, or wait for the drain.
+  FIX (shipped): on an empty line the worker now RE-READS the worklist length
+  and breaks if it is past the new end, with a 1s backoff — so a swap is
+  detected instead of spun on. Recovery: workers cancelled, worklist
+  regenerated (604 real tasks, falsifier cells verified present), counter
+  reset, 8 workers resubmitted. No results were lost — the skipped tasks were
+  never marked done, so the regeneration picked them all back up.
+  NOTE the failure mode is the mirror of the 2026-08-02 counter REWIND: that
+  one re-ran finished work, this one skipped unfinished work. Both come from
+  the same design property — a claim counter with no record of what was
+  actually completed. The reconcile-from-final.json is what makes both
+  recoverable.
 - *** STACK VALIDATED ON RHEL 9.6 (login node, alogin2): the module set in
   env.sh loads unchanged (mkl/gcc/impi/hdf5/PYTHON 3.11.5/nvidia-hpc-sdk/
   cudnn/nccl), the venv activates, and torch 2.4.0a0 / torchvision 0.19.0a0 /

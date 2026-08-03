@@ -73,7 +73,18 @@ worker () {                              # $1 = GPU index
         i=$((i+1))
         [ "$i" -gt "$N" ] && { echo "[gpu$1] queue drained"; break; }
         cmd=$(sed -n "${i}p" "$WORKLIST")
-        [ -z "$cmd" ] && continue
+        if [ -z "$cmd" ]; then
+            # An empty line means our cached N is stale -- the worklist was
+            # REPLACED under us (a reconcile, or a manual swap). Re-read the
+            # real length and stop if we are past it. Without this the worker
+            # spins: empty line -> continue -> instant re-claim, which on
+            # 2026-08-03 raced the shared counter from 0 to 1698 against a
+            # 615-line file and CONSUMED ~580 real tasks without running them.
+            N=$(wc -l < "$WORKLIST" 2>/dev/null || echo 0)
+            [ "$i" -ge "$N" ] && { echo "[gpu$1] queue drained (worklist now $N)"; break; }
+            sleep 1
+            continue
+        fi
         echo "[gpu$1] TASK $i/$N :: ${cmd:0:110}"
         eval "$cmd" > "$MS_ROOT/logs/task_${i}.log" 2>&1 \
             && echo "[gpu$1] OK   $i" || echo "[gpu$1] FAIL $i (see logs/task_${i}.log)"
