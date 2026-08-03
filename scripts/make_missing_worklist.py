@@ -31,14 +31,32 @@ from split_worklist import is_dead  # noqa: E402
 TURING_PORTIONS = (50, 100)
 
 
-def build_tasks():
-    """Yield (pct, cost, cfg, name, seed, cmd) for every (config, seed)."""
-    for path in sorted(glob.glob("configs/grid/*.yaml")):
+def build_tasks(extra_configs=()):
+    """Yield (pct, cost, cfg, name, seed, cmd) for every (config, seed).
+
+    `extra_configs` adds individual config paths OUTSIDE configs/grid/ -- used
+    for the configs/diagnostics/ cells that were deliberately queued on BSC
+    (the vitenv tin ViT/DeiT envelope). Without this the reconcile silently
+    DROPPED them every time it regenerated the worklist, because it only
+    globbed configs/grid/ (happened twice: 2026-08-02 and 2026-08-03, both
+    times taking the two open falsifier blocks out of the queue with it).
+    Only explicitly-listed diagnostics configs are included -- configs/
+    diagnostics/ holds 368 cells that belong to dedicated waves, not the grid
+    queue, so it must never be globbed wholesale.
+    """
+    paths = sorted(glob.glob("configs/grid/*.yaml")) + [
+        p for p in extra_configs if os.path.exists(p)
+    ]
+    for path in paths:
         cfg = yaml.safe_load(open(path))
         ds, bb = cfg["dataset"], cfg["backbone"]
         pct = cfg.get("subset_pct") or 100
         cost = RATE.get((ds, bb), 80) * pct
-        rel = "configs/grid/" + os.path.basename(path)
+        # keep the config's REAL directory (configs/grid or configs/diagnostics);
+        # hardcoding configs/grid here would emit unrunnable paths for the
+        # explicitly-queued diagnostics cells
+        rel = path if path.startswith("configs/") else os.path.join(
+            "configs/grid", os.path.basename(path))
         name = cfg["name"]
         init = cfg.get("init_from")
         for seed in SEEDS:
@@ -71,10 +89,20 @@ def main():
                          "else; all = the full grid (default)")
     ap.add_argument("--out", default=os.environ.get("OUT", "runs"),
                     help="run root to check for final.json (default $OUT or runs)")
+    ap.add_argument("--extra-configs", default=None,
+                    help="file listing config paths outside configs/grid/ (one "
+                         "per line) to include -- the diagnostics cells that "
+                         "were deliberately queued on BSC. Blank lines and "
+                         "'#' comments ignored.")
     args = ap.parse_args()
 
+    extra = []
+    if args.extra_configs and os.path.exists(args.extra_configs):
+        extra = [ln.strip() for ln in open(args.extra_configs)
+                 if ln.strip() and not ln.startswith("#")]
+
     missing, done = [], 0
-    for pct, cost, cfg, name, seed, cmd in build_tasks():
+    for pct, cost, cfg, name, seed, cmd in build_tasks(extra):
         if args.split == "turing" and not (not is_dead(cfg) and pct in TURING_PORTIONS):
             continue
         if args.split == "bsc" and (not is_dead(cfg) and pct in TURING_PORTIONS):

@@ -64,6 +64,7 @@ if [ "\$CBIG" -ge "\$NBIG" ] && [ "\$BIGJOBS" -eq 0 ] && [ "\$NBIG" -gt 0 ] \
     # was then read as "nothing missing" -> BIG_COMPLETE -> lane stops
     # forever. Same silent-guard class as the pretrain whitelist bugs.
     if ! OUT="\$MS/runs" python scripts/make_missing_worklist.py --split all \
+            --extra-configs "\$MS/.diagcfgs" \
             > "\$MS/.missing.big.raw" 2> "\$MS/.missing.big.err"; then
         echo "STATE ERROR big-reconcile: generator FAILED, not declaring complete"
         head -3 "\$MS/.missing.big.err" | sed 's/^/  /'
@@ -109,6 +110,7 @@ if [ "\$CTR" -ge "\$N" ]; then
     # be read as "nothing missing" (that would write GRID_COMPLETE and stop
     # the campaign permanently). See the big-lane note above.
     if ! OUT="\$MS/runs" python scripts/make_missing_worklist.py --split all \
+            --extra-configs "\$MS/.diagcfgs" \
             > "\$MS/.missing.raw" 2> "\$MS/.missing.err"; then
         echo "STATE ERROR reconcile: generator FAILED, not declaring complete"
         head -3 "\$MS/.missing.err" | sed 's/^/  /'
