@@ -1,0 +1,20 @@
+# ImageNet-1k @64px (1.28M imgs, 1000 classes) -- the SCALE control.
+# Same 64px pipeline as tin; ONLY scale changes (13x images, 5x classes).
+# DEVIATION: 40 epochs, not the frozen 200 (200 epochs on 1.28M images is
+# ~90h/seed). Both arms get the identical budget so Delta stays valid.
+# 40 ep is the standard ImageNet64 budget (Chrabaszcz et al. 2017).
+# diag-only: NEVER mixed into frozen-recipe headline tables.
+name: diagin64_r18_none
+dataset: imagenet64
+backbone: resnet18
+epochs: 40
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 8
+small_input: true
+pretrained: false
+subset_pct: 100
+stem: none
+stem_calibrate: true

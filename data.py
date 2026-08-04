@@ -67,16 +67,29 @@ STATS = {
     # Food-101 at 64px (squash-resize): 101 classes, 750 train/cls.
     # Computed 2026-07-23 on the 75750-image train split at 64px.
     "food101": ((0.5450, 0.4435, 0.3436), (0.2612, 0.2627, 0.2675)),
+    # ImageNet-1k at 64px (1,281,167 train / 50,000 val, 1000 classes) -- the
+    # SCALE control: 13x tin's images and 5x its label space at the SAME
+    # resolution, so a tin-vs-imagenet64 comparison changes scale and nothing
+    # else. Computed 2026-08-05 over the full 1.28M train split by
+    # scripts/prepare_imagenet64.py (never recalled -- placeholder stats
+    # silently corrupted all four domain datasets earlier in this study).
+    # CROSS-CHECK, and it is a good one: the mean matches canonical ImageNet
+    # (0.485, 0.456, 0.406) to three decimals, and both mean and std land
+    # within ~0.01 of tin's -- two independently-built 64px ImageNet-derived
+    # datasets agreeing is exactly what a correct pipeline should produce.
+    "imagenet64": ((0.4848, 0.4579, 0.4078), (0.2670, 0.2606, 0.2732)),
 }
 
 NUM_CLASSES = {"cifar100": 100, "cifar100super": 20, "cifar10": 10, "stl10": 10,
                "tin": 200, "tin20": 20, "tin20b": 20, "tinsuper": 20,
                "tinsem": 20, "cub": 200,
-               "eurosat": 10, "dtd": 47, "pathmnist": 9, "food101": 101}
+               "eurosat": 10, "dtd": 47, "pathmnist": 9, "food101": 101,
+               "imagenet64": 1000}
 IMAGE_SIZE = {"cifar100": 32, "cifar100super": 32, "cifar10": 32, "stl10": 96,
               "tin": 64, "tin20": 64, "tin20b": 64, "tinsuper": 64,
               "tinsem": 64, "cub": 64,
-              "eurosat": 64, "dtd": 64, "pathmnist": 64, "food101": 64}
+              "eurosat": 64, "dtd": 64, "pathmnist": 64, "food101": 64,
+              "imagenet64": 64}
 
 # cifar100super is CIFAR-100's IMAGES with its 20 official coarse labels, and it
 # deliberately reuses CIFAR-100's COMMITTED subset indices (data/subsets/
@@ -399,6 +412,44 @@ class PathMNIST64(Dataset):
         return (self.transform(img) if self.transform else img), self.targets[i]
 
 
+class ImageNet64(Dataset):
+    """Full ImageNet-1k at 64px (1,281,167 train / 50,000 val, 1000 classes).
+
+    The SCALE control for the whole study: 13x the images and 5x the label
+    space of tin, at the SAME 64px resolution and through the SAME pipeline,
+    so a comparison against tin changes scale and nothing else.
+
+    Backed by memmap-able uint8 arrays built once by
+    scripts/prepare_imagenet64.py (the parquet originals are PNG-encoded and
+    would be re-decoded every epoch). np.load(mmap_mode="r") keeps RSS flat
+    and lets a compute node stage the array into /dev/shm exactly like tin.
+
+    NOTE the source shards are CLASS-ORDERED; anything sampling a subset must
+    shuffle across the whole array rather than taking a prefix."""
+
+    def __init__(self, data_root, train, transform=None):
+        from PIL import Image
+        split = "train" if train else "val"
+        base = os.path.join(data_root, "imagenet64")
+        xp, yp = (os.path.join(base, f"{split}_x.npy"),
+                  os.path.join(base, f"{split}_y.npy"))
+        if not os.path.isfile(xp):
+            raise FileNotFoundError(
+                f"{xp} missing. Build it once with:\n  python "
+                "scripts/prepare_imagenet64.py --src <hf_snapshot> --out "
+                f"{base}")
+        self.images = np.load(xp, mmap_mode="r")      # (N, 64, 64, 3) uint8
+        self.targets = [int(t) for t in np.load(yp)]
+        self.transform, self._Image = transform, Image
+
+    def __len__(self):
+        return len(self.targets)
+
+    def __getitem__(self, i):
+        img = self._Image.fromarray(np.asarray(self.images[i]))
+        return (self.transform(img) if self.transform else img), self.targets[i]
+
+
 def dtd64(data_root, train, transform=None):
     """DTD (Cimpoi et al. 2014) at 64px: 47 texture classes, partition 1,
     train+val (3760, 80/cls) as train -- the standard DTD protocol -- and
@@ -581,6 +632,8 @@ def build_dataset(dataset, data_root, train, subset_pct=None, download=True,
         ds = PathMNIST64(data_root, train=train, transform=tf)
     elif dataset == "food101":
         ds = food101_64(data_root, train=train, transform=tf)
+    elif dataset == "imagenet64":
+        ds = ImageNet64(data_root, train=train, transform=tf)
     else:
         raise ValueError(f"unknown dataset {dataset!r}")
     if subset_pct is not None and subset_pct != 100:
@@ -610,10 +663,21 @@ def calibration_batch(dataset, data_root, n=1024):
         ds = datasets.ImageFolder(os.path.join(tin_root(data_root), "train"), transform=tf)
     elif dataset == "cub":
         ds = CUB200(data_root, train=True, transform=tf)
-    elif dataset in ("eurosat", "dtd", "pathmnist", "food101"):
+    elif dataset in ("eurosat", "dtd", "pathmnist", "food101", "imagenet64"):
         ds = build_dataset(dataset, data_root, train=True, subset_pct=None,
                            download=False)
         ds = _with_eval_transform(ds, tf)
+        if dataset == "imagenet64":
+            # imagenet64 is CLASS-ORDERED with ~1281 images per class, so the
+            # usual first-n prefix would be ENTIRELY class 0 -- the aux target
+            # would be calibrated on pictures of tench. Take an evenly-spaced
+            # stride instead: still fully deterministic and label-free (so it
+            # leaks nothing into the low-label protocol), but it spans all
+            # 1000 classes. This is a deliberate, dataset-specific deviation;
+            # every other dataset keeps index order, and tin's prefix spans
+            # only ~2 of 200 classes which is tolerable where this is not.
+            step = max(1, len(ds) // n)
+            return torch.stack([ds[i * step][0] for i in range(min(n, len(ds)))])
     else:
         raise ValueError(f"unknown dataset {dataset!r}")
     return torch.stack([ds[i][0] for i in range(min(n, len(ds)))])
