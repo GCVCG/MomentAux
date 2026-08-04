@@ -1493,6 +1493,70 @@ ported vs corrected and why.
   Right flank behaves exactly as everywhere else: by 20% all three arms are
   within 0.14 of each other and the prior is structurally neutral.
 
+## IMAGENET-SCALE VALIDATION (2026-08-05, user: "push it further and make it
+## a TPAMI-class claim")
+
+- WHY: every result in this study is <=100k images, <=200 classes, <=64px,
+  ResNet-18/ViT-tiny. The reviewer objection is not rigor, it is SCALE. The
+  differentiator we have is that the law PREDICTS (Swin's G was called in
+  advance from baselines alone, 4/4 in band). So the test that changes the
+  paper's class is: **does the law still predict at a scale reviewers care
+  about?** Not "does the method win there" — the claim is predictive, not SOTA.
+- CONSTRAINT DISCOVERED: BSC has NO outbound internet on login OR compute
+  nodes (curl returns nothing; this is the same wall that forced scp'ing pip
+  wheels). Every dataset must be fetched on the LOCAL machine and rsynced.
+  9.1T free on BSC scratch, 13T free on local /media/HDD_16TB — space is not
+  the constraint, acquisition is.
+- STAGE 1 (launched): **ImageNet64** (benjamin-paine/imagenet-1k-64x64,
+  ungated parquet, 1.28M images, 1000 classes, 64px). Chosen because it drops
+  into the EXISTING 64px pipeline verbatim (identical to tin), so there is no
+  resolution or recipe confound to argue about — only scale changes:
+  13x the images and 5x the label space of anything measured.
+  Cells: imagenet64 {none,aux} x {resnet18, vit_tiny}, 3 seeds + probes.
+  DEVIATION, stated up front: 200 epochs on 1.28M images is not affordable;
+  these cells run a REDUCED epoch budget and therefore carry a diag prefix
+  and are NEVER mixed into the frozen-recipe headline tables. Both arms of
+  each pair get the identical budget, so Delta stays valid (the step-count
+  lesson from diag10e800).
+  PROBE NOTE: a full-train-set probe at 1.28M x 512 is impractical for LBFGS;
+  these G values will use a FIXED SHOTS budget (--shots) and must be compared
+  only to other same-budget probes, never to the full-train G curve.
+- PREDICTIONS RECORDED IN ADVANCE (before any ImageNet64 run):
+  The sign law says readout is a function of BASELINE HEIGHT, crossing zero
+  at base in [31.8, 40.3] and decaying on the positive branch (+0.44@80.7).
+  ImageNet64 baselines will sit FAR ABOVE the crossing (R18 ~50-60% expected,
+  1280 img/class), so the law makes a sharp, almost parameter-free call:
+    (P1) readout ~ 0..+0.5 => **Delta ~= G within +-0.5** on BOTH backbones.
+         This is the core predictive claim: whatever the prior does to the
+         FEATURES shows up in accuracy nearly 1:1, with no readout penalty.
+    (P2) CONV at 1.28M images is deep on the right flank => G(r18) ~ 0..+1
+         and **Delta(r18) = 0.0 +-0.5** (neutral). Every one of the 10
+         populations measured is neutral at full data; 1.28M images is the
+         most data the prior has ever faced, so this is the strongest form
+         of the redundancy claim.
+    (P3) ViT-tiny: if the PERMANENT-DEFICIT conclusion is real (+9.88 at full
+         C100 50k, +7.17 at full tin 100k, where every conv is neutral), it
+         must survive 1.28M images: **Delta(vit) >= +3**, with G(vit) >= 4.
+  FALSIFIERS, each of which changes a headline claim:
+    (F1) |Delta - G| > 1.5 on either backbone at these high baselines =>
+         the readout term is NOT a pure function of baseline height at scale,
+         and the law's predictive form is bounded to <=100k images. This is
+         the one that would cost the paper its central contribution.
+    (F2) Delta(r18) >= +1.5 => the prior is NOT redundant at full data after
+         all, and "neutral at 100% by construction" needs rewriting (it would
+         also be the method's best practical news).
+    (F3) Delta(vit) <= +1 => ViT-tiny's deficit is DATA-BOUNDED, not
+         permanent; the ViT headline must be restated as "small-data
+         attention" and the strongest claim in the paper weakens.
+  NOTE the asymmetry deliberately built in: F2 and F3 are opposite-signed,
+  so this single experiment cannot be passed by any uniform outcome -- a flat
+  result confirms P2 and fires F3; a large result fires F2 and confirms P3.
+- STAGE 2 (queued behind Stage 1, not yet launched): **ImageNet-100 @224px**
+  (clane9/imagenet-100, ungated, 130k images, 100 classes, native resolution)
+  with ViT-S/16 under a DeiT recipe. Stage 1 buys DATA and LABEL scale;
+  Stage 2 buys RESOLUTION and MODEL scale, which is the other half of the
+  reviewer objection. Predictions to be recorded before it runs.
+
 ## BSC RHEL 9.6 MIGRATION (2026-08-01, from BSC HPC Support email)
 
 - SCHEDULE: login nodes migrated Thu 30 July 08:00 (DONE); **compute nodes
