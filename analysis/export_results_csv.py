@@ -65,6 +65,28 @@ def cfgget(cfg, key, default=None):
     return cfg.get(key, default) if isinstance(cfg, dict) else default
 
 
+def init_label(raw):
+    """Human-readable tag for a pretrained init, from its checkpoint path.
+
+    The pretrain FAMILY is encoded in the path (simclr_pre / simsiam_pre /
+    dino_pre), exactly as the worklist generators route it. This used to
+    hardcode "simclr-init" for ANY init_from, so every SimSiam and DINO row
+    in the exported tables was LABELLED AS SimCLR (2026-08-04) -- the rows
+    were distinct (config_key keeps the variant), but three different SSL
+    methods rendered under one name, e.g. DINO's C100@100% 62.30 appeared as
+    a "simclr-init" number. Grouping was never wrong; the NAME was.
+    """
+    if "simsiam_pre" in raw:
+        return "simsiam-init"
+    if "dino_pre" in raw:
+        return "dino-init"
+    if "pre50" in raw:
+        return "simclr50-init"
+    if "_deit" in raw:                      # DeiT-strength contrastive views
+        return "simclr-init(deit-views)"
+    return "simclr-init"
+
+
 def sem_of_diff(a, b):
     if len(a) < 2 or len(b) < 2:
         return ""
@@ -321,8 +343,7 @@ def config_label(cfg):
         hp = cfgget(cfg, "head_pool")
         bits.append(f"pool({hp.get('type','?')},J{hp.get('J','?')})")
     if cfgget(cfg, "init_from"):
-        init = str(cfgget(cfg, "init_from"))
-        bits.append("simclr50-init" if "pre50" in init else "simclr-init")
+        bits.append(init_label(str(cfgget(cfg, "init_from"))))
     if cfgget(cfg, "augment"):
         bits.append(f"{cfgget(cfg,'augment')}-aug")
     if cfgget(cfg, "head"):
