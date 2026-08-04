@@ -1386,6 +1386,48 @@ ported vs corrected and why.
   with HOW MUCH OF THE FINAL PERFORMANCE THE INIT IS CARRYING. At 100% the
   data dominates and the λ->0 schedule's structural neutrality reasserts
   itself, exactly as it does for aux-from-scratch at 100%.
+- *** deit-ssl ON tin EXTENDED TO 3 FRACTIONS — THE MODERN-RECIPE FLIP
+  TRANSPLANTS BUT ONLY IN THE LOW-DATA BAND (2026-08-04, 3 seeds):
+      pct  deit-none  deit-ssl  deit-aux | aux−ssl        verdict
+        5    8.29      16.67     18.46   | +1.79 ±0.29    prior WINS (6.2σ)
+       10   10.49      25.45     27.43   | +1.98 ±0.32    prior WINS (6.1σ)
+       25   23.14      38.48     38.24   | −0.24 ±0.44    TIE (0.5σ)
+  The pre-registered falsifier was "deit-ssl >= deit-aux on tin => the flip
+  is C100-specific and the modern-recipe claim must be scoped to CIFAR".
+  At 25% deit-ssl is NOMINALLY above deit-aux (+0.24) — but at 0.5σ that is
+  a TIE, not a win, so the falsifier does not fire in substance. Scored
+  honestly rather than as a clean pass, because the SHAPE differs from C100:
+  there the prior beat SimCLR at EVERY fraction including 25% (+5.01) and
+  100% (+2.00); on tin its edge DECAYS to zero by 25%.
+  RESTATEMENT: "the prior beats SimCLR once a small ViT is trained the modern
+  way" holds on BOTH populations, but on tin only up to ~10-15% — above that
+  they converge. Same direction as every other axis in this study (the
+  prior's advantage is a low-data phenomenon); the C100-wide claim was the
+  outlier, not the rule.
+- *** LEGACY FAMILIES FILLED IN — TWO TWO-POINT CLAIMS BECAME FULL ENVELOPES,
+  AND THEY REPRODUCE UNDER A NEW OS (2026-08-04, C100/r18, Δ vs baseline):
+      pct   enrot   enstr   eninv   enste  | axteach(fitnets)
+        1   +0.92   +0.42   +0.41   +1.81  |  −0.02
+        5   +0.32   −0.40   −3.53   +1.37  |    --
+       10   −5.74   −5.30   −9.45   −4.92  |    --
+       15   −8.99   −7.81  −10.85   −8.40  |  +0.35
+       25  −11.87   −8.66  −10.39  −11.07  |  −0.03
+      100   −1.42   −1.03   −1.13   −1.09  |  −0.04
+  (1) REPRODUCTION CHECK: enrot@10% = −5.74 vs the recorded −5.64, enstr@10%
+      = −5.30 vs −5.20 — both within 0.1 of values measured months ago on a
+      different machine and now a different OS (RHEL 9.6). The forward-path
+      negatives are solid.
+  (2) The forward-path penalty band now has its full SHAPE on four energy
+      stems: mildly POSITIVE at 1-5%, deeply negative through 10-25%
+      (−8..−12), then recovering to ~−1 at 100%. Same shape as the Gabor
+      stems — "any fixed pre-committed extra channel costs accuracy at 10%+"
+      is now an envelope statement, not a single-cell one.
+  (3) axteach (FitNets learned teacher) is **~0 at EVERY fraction**
+      (−0.25..+0.73 across 1-100%). The recorded claim rested on two points
+      (−0.36@5%, +0.16@10%); it is now an 8-point envelope of nothing, which
+      makes "a LEARNED target that costs a whole extra model does ~NOTHING
+      while the free hand-crafted moment gives +3.3/+2.8" much harder to
+      dismiss. Worth having run after all.
 - *** THE tin ViT/DeiT ENVELOPE IS COMPLETE — THE LAST PRE-REGISTERED
   FALSIFIER BLOCK LANDS (2026-08-04, 3 seeds every cell):
       pct  vit-none vit-aux  Δ_vit | deit-none deit-aux  Δ_deit | amp
