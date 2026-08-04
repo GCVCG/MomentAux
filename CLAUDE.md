@@ -2664,3 +2664,24 @@ ported vs corrected and why.
   metrics.csv) tracks pruning but pruning conv1 doesn't recover accuracy.
 - H2 (capacity substitution) dead; H3 (CIFAR-C robustness) null at 100%,
   tracks clean gain at 5%.
+- *** axteach CRASH-LOOP FIXED (2026-08-04): the last ~89 tasks were failing
+  more often than succeeding (OK=1 FAIL=5 per job) — 27 of them the
+  `grid_c100_r18_axteach_l03` family (the FitNets learned-teacher control),
+  dying deterministically on
+  `FileNotFoundError: runs/abl3_none/seed0/last.pt`. Those TEACHER
+  checkpoints are products of the original local study and had never been
+  shipped to BSC. Fifth guard/asset-drift incident, and the same signature
+  recorded on 2026-07-28: a reconcile that keeps re-listing the SAME cells
+  is a crash-loop, not a walltime problem.
+  PATH SUBTLETY, worth remembering: aux.py resolves the teacher path
+  RELATIVE TO CWD, and the worker runs from $MS_ROOT/repo — so the teachers
+  belong in **$MS/repo/runs/**, NOT $MS/runs (my first ship went to the
+  wrong one). $MS/repo/runs is a genuinely separate directory holding the
+  SSL pretrain checkpoints, for exactly the same reason (the flock pretrain
+  commands also use relative paths from the repo dir).
+  Shipped 8 teacher checkpoints (344MB) to repo/runs; VERIFIED with a real
+  1-epoch run of grid_c100_r18_axteach_l03_10e860_1pct, which now trains and
+  writes its output. NOTE the scientific value is nil — the FitNets question
+  is settled ("learned teacher does ~NOTHING while the free hand-crafted
+  moment gives +3.3/+2.8") — these cells were shipped only so the queue can
+  reach GRID_COMPLETE instead of crash-looping forever.
