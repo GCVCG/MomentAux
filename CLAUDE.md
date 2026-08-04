@@ -1386,6 +1386,39 @@ ported vs corrected and why.
   with HOW MUCH OF THE FINAL PERFORMANCE THE INIT IS CARRYING. At 100% the
   data dominates and the λ->0 schedule's structural neutrality reasserts
   itself, exactly as it does for aux-from-scratch at 100%.
+- *** THE tin ViT/DeiT ENVELOPE IS COMPLETE — THE LAST PRE-REGISTERED
+  FALSIFIER BLOCK LANDS (2026-08-04, 3 seeds every cell):
+      pct  vit-none vit-aux  Δ_vit | deit-none deit-aux  Δ_deit | amp
+        1    3.45     4.84   +1.39 |   3.99      7.04    +3.05  | 2.20x
+        2    4.17     7.46   +3.29 |   4.28     10.84    +6.56  | 1.99x
+        5    6.02    12.79   +6.77 |   8.29     18.46   +10.18  | 1.50x
+       10    8.60    17.75   +9.15 |  10.49     27.43   +16.94  | 1.85x
+       15   10.92    21.64  +10.73 |  15.15     31.85   +16.70  | 1.56x
+       25   15.86    26.35  +10.48 |  23.14     38.24   +15.11  | 1.44x
+      100   34.81    41.98   +7.17 |  50.72     57.32    +6.60  | 0.92x
+  PREDICTION SCORING (vitenv bands, recorded 2026-07-23):
+    "Δ_vit(tin) peaks +10..+15 @15-25%" — **HIT**: peak +10.73 @15%, +10.48
+      @25%, in band and peaking exactly where predicted. The tin plain-ViT
+      envelope therefore has the SAME SHAPE as C100's (which also peaks at
+      15%, +14.44) at lower magnitude — a second population for the
+      envelope-peak claim.
+    "stays +6..+10 @100%" — HIT (+7.17), scored earlier.
+    "deit amplification 1.8-2.4x throughout" — **MISSED LOW** at 5/15/25%
+      (1.50/1.56/1.44); only 1/2/10% sit in or near the band. The recorded
+      falsifier ("amplification < 1.3x anywhere on the mid-band") did NOT
+      fire — the minimum is 1.44x — so stacking transplants, but WEAKER than
+      on C100. Honest statement: heavy augmentation amplifies the prior
+      ~1.4-1.9x on tin vs ~1.8-2.4x on C100, i.e. amplification is
+      population-dependent and I over-generalized C100's value.
+    Falsifiers: Δ_vit(tin@100%) <= +2 (permanent deficit C100-specific) did
+      NOT fire; deit-ssl >= deit-aux did NOT fire (25.45 < 27.43 @10%).
+  CAVEAT ON THE AMPLIFICATION NUMBERS: the deit-none tin baselines are
+  HIGH-VARIANCE though not collapsed — per-seed @15% {9.72, 16.63, 19.09},
+  @10% {11.94, 6.55, 12.98}, @2% {5.29, 5.14, 2.40}. No seed sits at chance
+  (so not the swin/ConvNeXt bistable family), but a σ up to 4.86 on the
+  DENOMINATOR's baseline makes each amp ratio poorly determined at 10-15%.
+  The aux arms are tight (σ 0.29-0.68) — the same variance asymmetry seen
+  everywhere else. Treat the amp column as ±0.3, not as three digits.
 - *** EUROSAT ANSWERS THE DOMAIN-SSL FALSIFIER — THE PRIOR BEATS SimCLR ON
   CONV, AND THE "SSL WINS ON CONV" CLAIM IS NOW SCOPED TO PHOTO DOMAINS
   (2026-08-02, full 11-fraction envelope, 3 seeds every cell):
