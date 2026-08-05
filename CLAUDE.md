@@ -1654,11 +1654,52 @@ ported vs corrected and why.
   fails; the paper should preempt that by reporting the uncertainty-weighted
   version and being explicit that 75% of high-data cells cannot test it.
   This is exactly what broadening from 5 to 14 populations was for.
-- STAGE 2 (queued behind Stage 1, not yet launched): **ImageNet-100 @224px**
-  (clane9/imagenet-100, ungated, 130k images, 100 classes, native resolution)
-  with ViT-S/16 under a DeiT recipe. Stage 1 buys DATA and LABEL scale;
-  Stage 2 buys RESOLUTION and MODEL scale, which is the other half of the
-  reviewer objection. Predictions to be recorded before it runs.
+- STAGE 2 LAUNCHED (2026-08-05): **ImageNet-100 @224px NATIVE** (clane9/
+  imagenet-100, 126,689 train / 5,000 val, 100 classes) with a MODEL-SCALE
+  CURVE rather than a single point: **ViT-S/16 (21.7M), ViT-B/16 (85.9M),
+  ResNet-50 (23.7M)**, both arms, 3 seeds = 18 runs. Stage 1 (ImageNet64)
+  buys DATA and LABEL scale; Stage 2 buys RESOLUTION and MODEL scale, the
+  other half of the reviewer objection.
+  DEVIATIONS, stated up front: 100 epochs (not the frozen 200); native-res
+  transforms (RandomResizedCrop / Resize+CenterCrop) since the small-image
+  RandomCrop+pad is meaningless for variable-size JPEGs; DeiT augmentation on
+  the two ViTs (the standard small-ViT recipe -- a plain-aug ViT-B on 126k
+  images would barely train, and an untrainable baseline tests nothing).
+  Both arms of each pair are identical, so every Delta stays valid. diag-only.
+  PREDICTIONS RECORDED IN ADVANCE (before any Stage 2 run):
+  All three baselines will sit FAR above the sign-law crossing [31.8, 40.3]
+  (expect 65-85%), so readout is on the decayed positive branch:
+    (S1) readout ~ 0..+0.5 => **Delta ~= G within +-0.5 on all three
+         backbones**. Same core predictive claim as Stage 1, now at 224px and
+         up to 86M params.
+    (S2) CONV at 126k images is on the right flank => **Delta(R50) = 0.0
+         +-1.0**. Every conv population measured is neutral at full data;
+         this asks whether that survives real resolution.
+    (S3) ViT-S: the permanent-deficit claim (+9.88 at full C100, +7.17 at
+         full tin, both with ViT-TINY at 32-64px) must leave a trace on a
+         PROPERLY CONFIGURED ViT: **Delta(ViT-S) = +2..+8**. Smaller than
+         ViT-tiny's because ViT-S/16 at 224 under DeiT aug is a far better
+         model for this data than ViT-tiny at 64px was for tin.
+    (S4) ViT-B vs ViT-S is the NEW question the curve buys: if the deficit is
+         driven by DATA-HUNGER, the bigger model should show a LARGER Delta
+         (**Delta(ViT-B) >= Delta(ViT-S)**); if it is driven by SMALL-MODEL
+         capacity, it should shrink.
+  FALSIFIERS, each costing a specific claim:
+    (G1) |Delta - G| > 1.5 on any backbone => the law's predictive form does
+         not survive resolution/model scale, bounding it to <=96px small nets.
+    (G2) Delta(R50) >= +1.5 => conv redundancy at full data is a low-res
+         artifact and "neutral at 100%" must be rewritten.
+    (G3) Delta(ViT-S) <= +1 => THE ViT HEADLINE LARGELY DIES: the deficit
+         would be an artifact of 5.7M-param ViT-tiny at 32-64px, not a
+         property of attention at small data, and the claim must be restated
+         as "compact ViTs at low resolution".
+    (G4) Delta(ViT-B) < Delta(ViT-S) - 2 => the deficit SHRINKS with model
+         scale, so the claim must be scoped to compact models and cannot be
+         extrapolated to modern ViT sizes.
+  NOTE G3 is the one that matters most: the ViT story is the paper's
+  strongest claim and it currently rests entirely on ViT-tiny. This is the
+  experiment that either promotes it to a general statement about attention
+  or demotes it to a small-model curiosity.
 
 ## BSC RHEL 9.6 MIGRATION (2026-08-01, from BSC HPC Support email)
 
