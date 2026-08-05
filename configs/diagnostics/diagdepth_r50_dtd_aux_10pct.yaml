@@ -1,0 +1,25 @@
+# DEPTH-UNIVERSALITY law cells (2026-08-05): r34/r50 had only 8
+# probed cells each (c100/path/tin), so 'one lambda works across
+# depth' had e2e evidence but almost no FEATURE-side evidence.
+# Champion config verbatim; head_norm on (always-on since 07-16).
+dataset: dtd
+backbone: resnet50
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 3
+small_input: true
+pretrained: false
+stem: none
+stem_calibrate: true
+name: diagdepth_r50_dtd_aux_10pct
+subset_pct: 10
+moment_aux:
+  stem: energy-magnitude
+  tap: layer3
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine
+  head_norm: true
