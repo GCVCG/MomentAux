@@ -1654,6 +1654,37 @@ ported vs corrected and why.
   fails; the paper should preempt that by reporting the uncertainty-weighted
   version and being explicit that 75% of high-data cells cannot test it.
   This is exactly what broadening from 5 to 14 populations was for.
+- *** THE LAW AT 497 CELLS (2026-08-05, after the 1,707-probe campaign; BSC
+  probe count 206 -> 2,238 in a few hours once the per-GPU concurrency fix
+  landed). Restricted to the law's DERIVED SCOPE -- aux-from-scratch, no
+  pretrained init, no SSL init, stem none:
+      497 law cells | 6 backbones | 14 datasets
+        vit_tiny 169, resnet18 130, swin_tiny 91, mobilenetv3 91, r50 8, r34 8
+      readout RESOLVABLE (|readout| > 2 SEM):  134
+      sign as predicted:                       129 (**96%**)
+      wrong side:                                5
+  This is the paper's central evidence and it is now an order of magnitude
+  larger than the ~34 cells it rested on this morning.
+  SCOPE DISCIPLINE THAT MATTERS: a first pass mixed in the ImageNet-TRANSFER
+  cells and reported 86%. Those are `pretrained: true` (the tax), which the
+  2026-07-29 entry explicitly places OUTSIDE the sign law's derived scope,
+  and they enter with large NEGATIVE Delta and G. Excluding them (and the
+  SSL-init cells, which are non-aux interventions scored separately) is not
+  cherry-picking -- it is applying the scope the law was defined with. Both
+  numbers are recorded here so the choice is visible.
+  THE 5 EXCEPTIONS, and one of them is a pattern worth naming:
+      food101 r18 @50%    base 71.7  D −1.30  G +4.66  ro −5.96
+      food101 mnet @50%   base 55.1  D −0.23  G +3.70  ro −3.93
+      pathmnist mnet @20% base 89.0  D −0.48  G +1.88  ro −2.36
+      cifar100 r18 @20%   base 54.1  D +4.03  G +5.92  ro −1.90
+      dtd vit @50% (deit) base 14.2  D +17.30 G +14.73 ro +2.57
+  The first three share a signature: at HIGH data the prior still IMPROVES
+  the frozen features (G > 0, clearly resolved) while COSTING accuracy
+  (Delta < 0). That is a real effect the current law does not capture --
+  "better features, worse accuracy" at sufficiency -- and it is the most
+  interesting open thread left. It is also consistent with the long-standing
+  overshoot account (early lambda=1.0 shaping costs at high data), but the
+  probe now shows the cost is NOT feature-side.
 - STAGE 2 LAUNCHED (2026-08-05): **ImageNet-100 @224px NATIVE** (clane9/
   imagenet-100, 126,689 train / 5,000 val, 100 classes) with a MODEL-SCALE
   CURVE rather than a single point: **ViT-S/16 (21.7M), ViT-B/16 (85.9M),
