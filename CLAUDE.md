@@ -1551,6 +1551,48 @@ ported vs corrected and why.
   NOTE the asymmetry deliberately built in: F2 and F3 are opposite-signed,
   so this single experiment cannot be passed by any uniform outcome -- a flat
   result confirms P2 and fires F3; a large result fires F2 and confirms P3.
+- DOMAIN G-PROBE PASS LAUNCHED (2026-08-05): the GENERALIZABILITY audit found
+  the law is sampled far more narrowly than the effect — Delta is demonstrated
+  on 14 populations (~127 paired cells) but G+readout on only ~5 (probe cells:
+  tin 26, c100 15, vit 15, c10 10, but PathMNIST 4, CUB 4, and ZERO on
+  eurosat/dtd/food101). "Is the law general or a CIFAR/tin regularity?" is
+  therefore weaker than it needs to be, and the fix is cheap: the checkpoints
+  ALREADY EXIST on BSC, so this needs probe runs only, no retraining.
+  Cells chosen to STRADDLE the readout crossing [31.8, 40.3] on four new
+  populations (3 below, 5 above), which is what makes the sign law falsifiable
+  here rather than merely confirmable:
+      cell          base    Delta  | branch
+      dtd  @5%      8.35   +0.30   | below  (readout must be NEGATIVE)
+      dtd  @15%    13.58   +2.15   | below
+      food @5%     21.91   +5.63   | below
+      food @10%    41.73   +3.18   | above  (readout must be POSITIVE)
+      food @15%    52.88   +0.46   | above
+      dtd  @100%   43.51   +3.55   | above
+      esat @5%     90.80   +0.84   | above, far
+      path @10%    92.01   +1.74   | above, far
+  PREDICTIONS RECORDED IN ADVANCE, readout read off the MEASURED curves at
+  matched baseline height (C100: -2.76@8.9, -1.12@25.4, +0.08@40.3; tin:
+  -2.71@5.3, -0.54@21.1, -0.06@33.6; positive branch: +1.80@39.4, +1.14@51.7,
+  +0.44@69.1, +0.44@80.7), so G_pred = Delta - readout_pred:
+      dtd  @5%   readout ~ -2.7 => G ~ +3.0   BAND [+1.0, +5.0]
+      dtd  @15%  readout ~ -2.0 => G ~ +4.2   BAND [+2.0, +6.5]
+      food @5%   readout ~ -1.4 => G ~ +7.0   BAND [+4.5, +9.5]
+      food @10%  readout ~ +0.1 => G ~ +3.1   BAND [+1.5, +4.5]
+      food @15%  readout ~ +1.1 => G ~ -0.6   BAND [-2.0, +1.5]
+      dtd  @100% readout ~ +0.3 => G ~ +3.3   BAND [+1.5, +5.0]
+      esat @5%   readout ~ +0.4 => G ~ +0.4   BAND [-1.0, +2.0]
+      path @10%  readout ~ +0.4 => G ~ +1.3   BAND [-0.5, +3.0]
+  FALSIFIER (the law is CIFAR/tin-specific): readout = Delta - G coming out
+    POSITIVE at any of the three sub-crossing cells (dtd@5/15, food@5), or
+    NEGATIVE below -1.0 at either far-above cell (esat@5, path@10). Either
+    would show the sign law does not transfer to non-photo domains and the
+    law's scope must be stated as "CIFAR-like populations".
+  NOTE esat@5 and food@15 are deliberately included as the HARD cases: their
+  Deltas are small (+0.84, +0.46), so if G comes back large the readout term
+  would have to be strongly negative at a high baseline — the cleanest way for
+  this pass to fail.
+  PLACEMENT: run on BSC's now-idle grid lane (GRID_COMPLETE fired 2026-08-05),
+  NOT the local 3090 — that GPU is running the user's other project.
 - STAGE 2 (queued behind Stage 1, not yet launched): **ImageNet-100 @224px**
   (clane9/imagenet-100, ungated, 130k images, 100 classes, native resolution)
   with ViT-S/16 under a DeiT recipe. Stage 1 buys DATA and LABEL scale;
