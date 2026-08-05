@@ -38,6 +38,23 @@ if mkdir -p "$STAGE" 2>/dev/null; then
     else
         export DR=$MS_DATA
     fi
+    # imagenet64 is a 16GB uint8 memmap hit RANDOMLY 1.28M times per epoch;
+    # left as a GPFS symlink that read IS the bottleneck (same lesson as tin's
+    # 110k small files: ~17s -> 2.2s per epoch once staged). Copy it into RAM
+    # when the node has room -- ACC nodes have ~500GB, so 16GB is cheap.
+    if [ -d "$MS_DATA/imagenet64" ]; then
+        avail=$(df -k --output=avail /dev/shm 2>/dev/null | tail -1)
+        need=$(du -sk "$MS_DATA/imagenet64" 2>/dev/null | cut -f1)
+        if [ -n "$avail" ] && [ -n "$need" ] && [ "$avail" -gt $((need + 52428800)) ]; then
+            rm -f "$STAGE/imagenet64"
+            if cp -r "$MS_DATA/imagenet64" "$STAGE/" 2>/dev/null; then
+                echo "staged imagenet64 -> /dev/shm ($((need/1024/1024))GB)"
+                export DR=$STAGE
+            fi
+        else
+            echo "imagenet64 NOT staged (shm avail=${avail}k need=${need}k); using GPFS"
+        fi
+    fi
     trap 'rm -rf "$STAGE"' EXIT
 else
     export DR=$MS_DATA
