@@ -95,6 +95,18 @@ worker () {                              # $1 = GPU index
     done
 }
 
-for g in 0 1 2 3; do worker "$g" & done
+# CONCURRENCY PER GPU (2026-08-05, measured not assumed): a live node showed
+# 0-6% GPU utilisation and 2-3GB of 65GB in use -- these 32-64px cells are
+# DATALOADER-bound, so one training per H100 wastes ~95% of it. Run SLOTS
+# trainings per GPU instead.
+# The binding constraint is CPU, not GPU: the node has 80 cores, and the
+# ledger records a 5x SLOWDOWN when workers oversubscribe cores (load 113 on
+# 16 cores => 44 min/seed vs 5.4). Budget ~= SLOTS*4*(num_workers+1) threads
+# and keep it under 80.
+SLOTS=${MS_SLOTS:-4}
+echo "concurrency: $SLOTS training(s) per GPU = $((SLOTS*4)) per node"
+for g in 0 1 2 3; do
+    for k in $(seq 1 "$SLOTS"); do worker "$g" & done
+done
 wait
 echo "BSC_WORKER_COMPLETE"
