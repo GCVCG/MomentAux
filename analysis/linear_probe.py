@@ -183,8 +183,14 @@ def main():
         data_mod.build_dataset(ds_name, args.data_root, train=True), ds_name
     )
     test_ds = data_mod.build_dataset(ds_name, args.data_root, train=False)
-    tr_loader = DataLoader(train_ds, batch_size=512, num_workers=8, shuffle=False)
-    te_loader = DataLoader(test_ds, batch_size=512, num_workers=8, shuffle=False)
+    # num_workers is SAFE to tune here (unlike training): shuffle=False and we
+    # extract every feature, so worker count cannot change the result -- only
+    # CPU pressure. Lowered from a hardcoded 8 and made overridable so many
+    # probes can share a node: 2026-08-05 a 16-probe node ran 3 of 4 GPUs at
+    # 0% while 128 loader workers fought over cores.
+    _nw = int(os.environ.get("MS_PROBE_WORKERS", "3"))
+    tr_loader = DataLoader(train_ds, batch_size=512, num_workers=_nw, shuffle=False)
+    te_loader = DataLoader(test_ds, batch_size=512, num_workers=_nw, shuffle=False)
 
     out = []
     for seed_dir in sorted(d for d in os.listdir(args.run) if d.startswith("seed")):

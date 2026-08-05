@@ -55,8 +55,11 @@ DEADLINE=$(( $(date +%s) + 4*3600 + 1800 ))   # stop CLAIMING new work at 4.5h
 # empty -- so a worker starting late never resets a counter already in use.
 flock "$LOCK" bash -c "[ -s '$CTR' ] || echo 0 > '$CTR'"
 
+IDLE_MAX=${MS_IDLE_MAX:-15}      # ~15 min of polling before a drained worker exits
+
 worker () {                              # $1 = GPU index
     export CUDA_VISIBLE_DEVICES=$1
+    IDLE=0
     while :; do
         [ "$(date +%s)" -ge "$DEADLINE" ] && { echo "[gpu$1] deadline"; break; }
         # Atomically claim the next line number.
@@ -75,7 +78,27 @@ worker () {                              # $1 = GPU index
                 echo \$v") \
             || { echo "[gpu$1] counter unreadable/corrupt, backing off"; sleep 10; continue; }
         i=$((i+1))
-        [ "$i" -gt "$N" ] && { echo "[gpu$1] queue drained"; break; }
+        if [ "$i" -gt "$N" ]; then
+            # Queue empty. Do NOT exit immediately: on 2026-08-05 two of four
+            # GPUs sat at 0% for hours because their workers drained while
+            # stragglers ran on the others, and an exited worker never comes
+            # back even when new tasks are APPENDED (which happens often).
+            # Poll for a bounded window instead, then give up so the keeper's
+            # "no workers live -> reconcile" path can still fire.
+            NEWN=$(wc -l < "$WORKLIST" 2>/dev/null || echo 0)
+            if [ "$NEWN" -gt "$N" ]; then
+                echo "[gpu$1] worklist grew $N -> $NEWN, resuming"
+                N=$NEWN
+                continue
+            fi
+            IDLE=$((IDLE + 1))
+            if [ "$IDLE" -ge "$IDLE_MAX" ]; then
+                echo "[gpu$1] queue drained (idled ${IDLE}x)"; break
+            fi
+            sleep 60
+            continue
+        fi
+        IDLE=0
         cmd=$(sed -n "${i}p" "$WORKLIST")
         if [ -z "$cmd" ]; then
             # An empty line means our cached N is stale -- the worklist was
@@ -99,11 +122,12 @@ worker () {                              # $1 = GPU index
 # 0-6% GPU utilisation and 2-3GB of 65GB in use -- these 32-64px cells are
 # DATALOADER-bound, so one training per H100 wastes ~95% of it. Run SLOTS
 # trainings per GPU instead.
-# The binding constraint is CPU, not GPU: the node has 80 cores, and the
+# The binding constraint is CPU, not GPU: the node has 160 cores (measured
+# 2026-08-05 with nproc --all; an earlier note said 80), and the
 # ledger records a 5x SLOWDOWN when workers oversubscribe cores (load 113 on
 # 16 cores => 44 min/seed vs 5.4). Budget ~= SLOTS*4*(num_workers+1) threads
 # and keep it under 80.
-SLOTS=${MS_SLOTS:-4}
+SLOTS=${MS_SLOTS:-8}
 echo "concurrency: $SLOTS training(s) per GPU = $((SLOTS*4)) per node"
 for g in 0 1 2 3; do
     for k in $(seq 1 "$SLOTS"); do worker "$g" & done
