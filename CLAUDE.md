@@ -1627,6 +1627,33 @@ ported vs corrected and why.
   PROTOCOL on that dataset, not evidence against the law. Recorded as a MISS
   regardless; deepening it would need a stronger probe (e.g. MLP head) whose
   results would not be comparable to the rest of the ledger.
+- *** THE SIGN LAW RE-AUDITED AT 84 CELLS — AND THE HEADLINE NUMBER I ALMOST
+  REPORTED WAS WRONG (2026-08-05). The 190-task probe campaign took the law
+  from ~5 populations to **14** (84 r18 champion-pair cells with both a probe
+  and >=3 seeds). A naive sign count looked alarming:
+      below crossing: 21/27 negative readout (78%)
+      above crossing: 27/52 positive readout (**52%** -- a coin flip)
+  That framing is WRONG, and the error is instructive: above the crossing the
+  law PREDICTS readout ~ +0.4 decaying to ~0, and at high fractions Delta and
+  G are both ~0, so readout is a small difference of small numbers and its
+  SIGN is pure noise. Counting those signs tests nothing.
+  Re-audited against each cell's OWN uncertainty (SEM propagated from both
+  e2e arms and both probe arms):
+      UNRESOLVED (|readout| <= 2 SEM):        63 cells (75%)
+      significantly on the PREDICTED side:    20 cells
+      significantly on the WRONG side:         1 cell (1%)
+  So of the **21 cells where readout is resolvable at all, 20 have the
+  predicted sign**. The single exception is c10@50% (readout −0.25 ±0.08 at
+  base 93.04, where a small POSITIVE was expected) -- statistically resolved
+  only because its errors are tiny, and physically negligible at 0.25 points.
+  CONSEQUENCE FOR THE PAPER, and it is a strengthening not a weakening: the
+  sign law's CONTENT lives where readout is resolvable -- the left flank and
+  mid-band, where it is large and negative. On the right flank it correctly
+  predicts ~0 and gets ~0, which is true but not discriminating. State it that
+  way. A reviewer who runs the naive sign count will get 52% and think the law
+  fails; the paper should preempt that by reporting the uncertainty-weighted
+  version and being explicit that 75% of high-data cells cannot test it.
+  This is exactly what broadening from 5 to 14 populations was for.
 - STAGE 2 (queued behind Stage 1, not yet launched): **ImageNet-100 @224px**
   (clane9/imagenet-100, ungated, 130k images, 100 classes, native resolution)
   with ViT-S/16 under a DeiT recipe. Stage 1 buys DATA and LABEL scale;
