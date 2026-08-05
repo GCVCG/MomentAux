@@ -1,0 +1,25 @@
+# ImageNet64 scale control, extra backbone family (swin_tiny).
+# Stage 3: the law's scale test on FOUR backbone families, not two.
+# 40-epoch deviation as diagin64_r18/vit; both arms identical. diag-only.
+name: diagin64_swin_aux
+dataset: imagenet64
+backbone: swin_tiny
+optimizer: adamw
+epochs: 40
+batch_size: 128
+lr: 0.001
+weight_decay: 0.05
+momentum: 0.9
+num_workers: 3
+small_input: true
+pretrained: false
+subset_pct: 100
+stem: none
+stem_calibrate: true
+moment_aux:
+  stem: energy-magnitude
+  tap: layers.2
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine
+  head_norm: true
