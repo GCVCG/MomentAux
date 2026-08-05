@@ -83,8 +83,13 @@ if [ "\$CBIG" -ge "\$NBIG" ] && [ "\$BIGJOBS" -eq 0 ] && [ "\$NBIG" -gt 0 ] \
     fi
     cd "\$MS"
 fi
-if [ "\$CBIG" -lt "\$NBIG" ] && [ "\$BIGJOBS" -lt 2 ]; then
-    for i in \$(seq 1 \$((2 - BIGJOBS))); do
+# BIG target raised 2 -> 4 on 2026-08-05: the grid lane is essentially done
+# (a handful of cheap cells) while the big lane now holds the 12 ImageNet64
+# cells, which are the scientifically decisive ones. Also: workers cache the
+# worklist length at start, so the 2 jobs running when in64 was APPENDED can
+# never claim it -- more slots is what actually gets those cells moving.
+if [ "\$CBIG" -lt "\$NBIG" ] && [ "\$BIGJOBS" -lt 4 ]; then
+    for i in \$(seq 1 \$((4 - BIGJOBS))); do
         sbatch "\$MS/bsc_big.sbatch" 2>&1 | sed 's/^/SUBMIT-BIG /'
     done
 fi
@@ -128,7 +133,15 @@ if [ "\$CTR" -ge "\$N" ]; then
     N=\$M; CTR=0
 fi
 NEED=\$(( TARGET - CUR ))
-echo "STATE feeding ctr=\$CTR/\$N running_or_pending=\$CUR need=\$NEED"
+# Do not submit 8 four-GPU node-jobs for a handful of tasks. On 2026-08-05 a
+# 3-task worklist drew 8 jobs every 15 min, each exiting instantly with
+# "queue drained" -- 24 node-jobs submitted in 45 minutes to run 3 cells.
+# One job already has 4 GPUs, so cap the ask at ceil(remaining / 4).
+REM=\$(( N - CTR ))
+[ "\$REM" -lt 0 ] && REM=0
+CAP=\$(( (REM + 3) / 4 ))
+[ "\$NEED" -gt "\$CAP" ] && NEED=\$CAP
+echo "STATE feeding ctr=\$CTR/\$N running_or_pending=\$CUR need=\$NEED (remaining=\$REM)"
 [ "\$NEED" -le 0 ] && exit 0
 cd "\$MS"
 for i in \$(seq 1 "\$NEED"); do
