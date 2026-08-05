@@ -1593,6 +1593,40 @@ ported vs corrected and why.
   this pass to fail.
   PLACEMENT: run on BSC's now-idle grid lane (GRID_COMPLETE fired 2026-08-05),
   NOT the local 3090 — that GPU is running the user's other project.
+- *** DOMAIN G-PROBES LANDED — THE LAW IS NOT A CIFAR/tin REGULARITY
+  (2026-08-05, 8 cells on 4 new populations, 3 seeds each):
+      cell        base    Δ    | G           | readout | band        verdict
+      dtd @5%     8.35  +0.30  | +1.88±0.50  |  −1.58  | [1.0,5.0]   IN
+      dtd @15%   13.58  +2.15  | +2.52±0.38  |  −0.37  | [2.0,6.5]   IN
+      food@5%    21.91  +5.63  | +6.18±0.57  |  −0.55  | [4.5,9.5]   IN
+      food@10%   41.73  +3.18  | +2.80±0.85  |  +0.37  | [1.5,4.5]   IN
+      food@15%   52.88  +0.46  | −0.12±0.10  |  +0.58  | [-2.0,1.5]  IN
+      dtd @100%  43.51  +3.55  | +3.55±0.54  |  +0.00  | [1.5,5.0]   IN
+      esat@5%    90.80  +0.84  | +0.30±0.14  |  +0.54  | [-1.0,2.0]  IN
+      path@10%   92.01  +1.74  | −0.91±0.70  |  +2.65  | [-0.5,3.0]  OUT
+  **7/8 IN BAND, and 8/8 CORRECT IN SIGN.** The recorded falsifier — readout
+  POSITIVE at any sub-crossing cell, or below −1.0 at a far-above cell — did
+  NOT fire anywhere. The three sub-crossing cells (dtd@5/15, food@5) all give
+  NEGATIVE readout; the five above-crossing cells all give POSITIVE (or zero
+  at dtd@100%, whose base 43.51 sits just above the bracket). The two
+  deliberately HARD cases behaved: esat@5 (Δ +0.84) returned G +0.30, and
+  food@15 (Δ +0.46) returned G −0.12 — small Δ genuinely means small G, not a
+  large G cancelled by a large readout.
+  SCOPE CHANGE: G+readout was previously demonstrated on ~5 populations, all
+  CIFAR-like. It now holds on **satellite (eurosat), texture (dtd), fine-
+  grained food, and histopathology** as well, spanning both branches of the
+  sign law. "Is the law a CIFAR/tin regularity?" is answered: no.
+  THE ONE MISS, scored honestly and NOT explained away: path@10% returned
+  G = −0.91 ±0.70 against a predicted +1.3, forcing readout = +2.65 where the
+  positive branch predicts ~+0.4. The sign is still correct. But note the
+  caveat already recorded for pathmnist on 2026-07-29: its probe_none (91.77)
+  sits BELOW its own e2e (92.01) — on pathmnist a linear head on frozen
+  features UNDER-READS the finetuned network, so the probe is a compressed
+  measuring stick there and absolute G is not trustworthy. This is the same
+  class of limitation as the probe-ceiling rule, and it is a property of the
+  PROTOCOL on that dataset, not evidence against the law. Recorded as a MISS
+  regardless; deepening it would need a stronger probe (e.g. MLP head) whose
+  results would not be comparable to the rest of the ledger.
 - STAGE 2 (queued behind Stage 1, not yet launched): **ImageNet-100 @224px**
   (clane9/imagenet-100, ungated, 130k images, 100 classes, native resolution)
   with ViT-S/16 under a DeiT recipe. Stage 1 buys DATA and LABEL scale;
