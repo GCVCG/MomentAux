@@ -66,8 +66,17 @@ def extract(model, loader, device):
         x = x.to(device, non_blocking=True)
         with torch.autocast("cuda", enabled=device.type == "cuda"):
             f = model.net.forward_features(model.stem(x))
-            gp = model.net.global_pool
-            if callable(gp):
+            gp = getattr(model.net, "global_pool", None)
+            if gp is None:
+                # timm ConvNeXt (2026-08-05): has NO top-level `global_pool` at
+                # all -- pooling lives inside NormMlpClassifierHead -- so the
+                # bare attribute access this line used to do raised
+                # AttributeError before any branch was reached. Defer to timm's
+                # own pre_logits path, as for Swin/MobileNetV3. Gated on the
+                # attribute's ABSENCE, so every backbone that HAS a global_pool
+                # keeps the exact branch its recorded G was measured under.
+                f = model.net.forward_head(f, pre_logits=True)
+            elif callable(gp):
                 pooled = gp(f)
                 if pooled.ndim > 2:
                     # timm MobileNetV3 (2026-07-29): global_pool IS callable,
@@ -203,6 +212,11 @@ def main():
             small_input=cfg.get("small_input", True),
             stem_kernel_size=cfg.get("stem_kernel_size", 11),
             stem_kwargs=cfg.get("stem_kwargs"),
+            # head_pool was never plumbed (2026-08-05): MultiMaskPool cells
+            # replace global_pool with a masked 4096-d readout, so the model
+            # built here did not match their state_dict at all. Defaults to
+            # None for every other cell, i.e. exactly the previous behaviour.
+            head_pool=cfg.get("head_pool"),
             head=cfg.get("head"),
             moment_aux=cfg.get("moment_aux"),
             image_size=data_mod.IMAGE_SIZE[cfg["dataset"]],

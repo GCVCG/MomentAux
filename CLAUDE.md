@@ -1685,6 +1685,84 @@ ported vs corrected and why.
   interesting open thread left. It is also consistent with the long-standing
   overshoot account (early lambda=1.0 shaping costs at high data), but the
   probe now shows the cost is NOT feature-side.
+- *** THE 69 GAP PROBES RAN LOCALLY, AND THE AUDIT IS NOW A COMMITTED SCRIPT
+  (2026-08-05, user: "can we run them locally instead of waiting BSC? We can
+  leave BSC for actual training"). Yes -- and for a stronger reason than
+  scheduling. The pass surfaced three latent bugs:
+  (a) BSC was BLOCKED, not slow: all 8 ms_grid jobs sat at QOSGrpNodeLimit
+      behind the 4 ImageNet big-lane jobs, which hold the whole group node cap.
+  (b) **40 of the 69 probe tasks would have FAILED on BSC** -- those cells
+      (abl*, c10_*, diagcnxadamw_*, diagdeit_*) were trained locally and their
+      checkpoints never existed there. Queued as-is it was a crash-loop: the
+      axteach signature, SIXTH guard/asset-drift incident. Local had 56/69
+      already, the other 13 were a 2.7GB pull -- local 69/69 vs BSC 29/69.
+  (c) CONVNEXT PROBES WERE DEAD EVERYWHERE: timm ConvNeXt has NO top-level
+      `global_pool` attribute at all (pooling lives inside NormMlpClassifierHead),
+      so linear_probe.py's bare attribute access raised AttributeError before
+      any branch ran -- all 22 ConvNeXt probes, on BSC and locally. Fixed by
+      deferring to timm's forward_head(pre_logits=True), gated on the
+      attribute's ABSENCE so every family that HAS a global_pool keeps the exact
+      branch its recorded G was measured under. VERIFIED across five families:
+      extracted dim == classifier.in_features (cnx 768, r18 512, vit 192,
+      swin 768, mnet 1024). ConvNeXt now has feature-side evidence for the
+      FIRST time in the study.
+  (d) `head_pool` WAS NEVER PLUMBED into the probe: MultiMaskPool cells replace
+      global_pool with a masked 4096-d readout, so the model built for them did
+      not match their state_dict at all. build_model already accepted head_pool;
+      linear_probe.py simply never passed it. Defaults to None elsewhere, i.e.
+      previous behaviour exactly.
+  *** NEW INCIDENT CLASS -- SILENT LOCAL CHECKPOINT CORRUPTION THAT RSYNC WILL
+  NEVER REPAIR: 5 of 205 local checkpoints (all grid_c100_cnx_*) failed
+  torch.load with "PytorchStreamReader ... invalid header or archive is
+  corrupted", while the BSC originals loaded fine AT BYTE-IDENTICAL SIZE.
+  Because rsync's default quick check is size+mtime, every previous sync
+  silently preserved the corruption -- it is invisible to the normal repair
+  path. Deleted and re-pulled; all 5 verified. LESSON: verify run mirrors by
+  LOADING, not by listing -- a same-size file is not an intact file. Only these
+  205 of the local tree's 2751 cells were scanned; a full scan is worth doing.
+  ALSO CHECKED, because deleting checkpoints mid-wave is exactly how a silent
+  partial result happens: linear_probe.py SKIPS a missing checkpoint rather than
+  failing, so a cell probed during the delete/re-pull window would have been
+  silently UNDER-SEEDED. Audited all 69 probe-seed counts against their
+  checkpoint counts: 0 under-seeded. The 3 genuine failures wrote no JSON at all
+  (the exception aborts before the write), i.e. they failed loud.
+  *** THE SIGN LAW AT 909 CELLS -- 250/260 RESOLVABLE CORRECT (**96%**), and the
+  audit is now analysis/audit_sign_law.py rather than an ad-hoc query:
+      cells with Delta+G:                909 | 7 backbones | 14 datasets
+        r18 500, vit 189, swin 91, mnet 91, r50 24, r34 8, convnext 6
+      inside crossing bracket [31.8,40.3] (no prediction):  98
+      unresolved (|readout| <= 2 SEM):                     551
+      RESOLVABLE (these test the law):                     260
+        sign as predicted: 250 (96%) | wrong side: 10
+  STATE THE COUNT CHANGE HONESTLY: this is NOT "497 -> 909 because of the 69 new
+  probes" -- 69 probes cannot add 412 cells. The committed script's scope is
+  BROADER than the morning's ad-hoc one: it admits every aux-from-scratch cell
+  including bank variants (mag3/mag6o), tap variants (L3/L4) and non-champion
+  lambdas, which ARE in scope by the law's definition. What is genuinely
+  reproducible is that the headline percentage is UNCHANGED at 96% under a scope
+  ~1.8x wider, and that it is now regenerable by one command.
+  *** THE PRETRAINED-SCOPE LEAK FIRED A THIRD TIME, now fixed at the SOURCE: the
+  first run of the new script reported 90% because all ~40 diagtransfer2 TAX
+  cells were back in -- the scope filter keyed on `init_from`, but transfer cells
+  carry `pretrained: true` and NO init_from. The exporter now emits a
+  `pretrained` column and the audit filters on the real property instead of on a
+  cell-name prefix. Both numbers are printed (--scope all gives 332/374 = 89%)
+  so the choice stays visible, as the earlier 2026-08-05 entry requires.
+  *** THE 10 EXCEPTIONS, and HALF are the SAME open thread: five carry the
+  "BETTER FEATURES, WORSE ACCURACY AT HIGH DATA" signature flagged this morning
+  -- G clearly positive and resolved while Delta is negative:
+      food101   r18  mag3  @50%  base 71.8  D -1.30  G +4.66  ro -5.96
+      food101   r18  mag6o @50%  base 71.8  D -0.91  G +4.97  ro -5.88
+      food101   mnet aux   @50%  base 55.1  D -0.23  G +3.70  ro -3.93
+      pathmnist mnet aux   @20%  base 89.0  D -0.48  G +1.88  ro -2.36
+      pathmnist r18  mag3  @50%  base 89.8  D -1.36  G +0.71  ro -2.07
+  Two more are pathmnist@1% (base 80.8, D +5.6..+5.8, G +9.6..+9.9, ro ~-4.0):
+  large POSITIVE Delta with an even larger G -- the same "readout negative at a
+  high baseline" shape, on the dataset whose probe is already recorded as a
+  COMPRESSED measuring stick (probe_none BELOW its own e2e). The remaining three
+  are small-magnitude singletons. So the exception set is not scattered noise: it
+  concentrates on food101/pathmnist at >=20% data, exactly the regime the current
+  law does not model.
 - STAGE 2 LAUNCHED (2026-08-05): **ImageNet-100 @224px NATIVE** (clane9/
   imagenet-100, 126,689 train / 5,000 val, 100 classes) with a MODEL-SCALE
   CURVE rather than a single point: **ViT-S/16 (21.7M), ViT-B/16 (85.9M),

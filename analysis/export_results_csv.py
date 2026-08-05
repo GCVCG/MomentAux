@@ -166,6 +166,13 @@ def main():
             "head": cfgget(cfg, "head") or "linear",
             "stem": cfgget(cfg, "stem", "none"),
             "init_from": "yes" if cfgget(cfg, "init_from") else "",
+            # pretrained (2026-08-05): the ImageNet-transfer TAX cells are
+            # placed OUTSIDE the sign law's derived scope by the 2026-07-29
+            # entry, but they carry no init_from (they set `pretrained: true`),
+            # so a scope filter keyed on init_from silently let all ~40 of them
+            # back in -- twice. Emit it so audits can filter on the real
+            # property instead of on a cell-name prefix.
+            "pretrained": "yes" if cfgget(cfg, "pretrained", False) else "",
             "aux_target": aux.get("stem", ""),
             "aux_tap": aux.get("tap", ""),
             "aux_lambda0": aux.get("weight", ""),
