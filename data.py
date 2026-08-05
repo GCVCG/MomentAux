@@ -78,18 +78,23 @@ STATS = {
     # within ~0.01 of tin's -- two independently-built 64px ImageNet-derived
     # datasets agreeing is exactly what a correct pipeline should produce.
     "imagenet64": ((0.4848, 0.4579, 0.4078), (0.2670, 0.2606, 0.2732)),
+    # ImageNet-100 at NATIVE 224px -- the resolution/model-scale control.
+    # Computed 2026-08-05 on a 4000-image random subsample AT 224px (what the
+    # transform actually sees), by scripts/prepare_imagenet100.py. Mean lands
+    # on canonical ImageNet (0.485, 0.456, 0.406) as it should.
+    "imagenet100": ((0.4802, 0.4524, 0.4010), (0.2715, 0.2654, 0.2767)),
 }
 
 NUM_CLASSES = {"cifar100": 100, "cifar100super": 20, "cifar10": 10, "stl10": 10,
                "tin": 200, "tin20": 20, "tin20b": 20, "tinsuper": 20,
                "tinsem": 20, "cub": 200,
                "eurosat": 10, "dtd": 47, "pathmnist": 9, "food101": 101,
-               "imagenet64": 1000}
+               "imagenet64": 1000, "imagenet100": 100}
 IMAGE_SIZE = {"cifar100": 32, "cifar100super": 32, "cifar10": 32, "stl10": 96,
               "tin": 64, "tin20": 64, "tin20b": 64, "tinsuper": 64,
               "tinsem": 64, "cub": 64,
               "eurosat": 64, "dtd": 64, "pathmnist": 64, "food101": 64,
-              "imagenet64": 64}
+              "imagenet64": 64, "imagenet100": 224}
 
 # cifar100super is CIFAR-100's IMAGES with its 20 official coarse labels, and it
 # deliberately reuses CIFAR-100's COMMITTED subset indices (data/subsets/
@@ -125,8 +130,21 @@ def build_transforms(dataset, train, augment=None):
     mean, std = STATS[dataset]
     normalize = [transforms.ToTensor(), transforms.Normalize(mean, std)]
     if not train:
+        if dataset == "imagenet100":
+            return transforms.Compose(
+                [transforms.Resize(256), transforms.CenterCrop(IMAGE_SIZE[dataset])]
+                + normalize)
         return transforms.Compose(normalize)
     size = IMAGE_SIZE[dataset]
+    if dataset == "imagenet100":
+        # Native-resolution ImageNet pipeline: RandomResizedCrop + flip (train)
+        # and Resize(256)/CenterCrop(224) (eval). The small-image
+        # RandomCrop(size, padding=size//8) below is meaningless for
+        # variable-size JPEGs -- it would pad a 213x160 photo to a 224 canvas.
+        base = [transforms.RandomResizedCrop(size, scale=(0.08, 1.0)),
+                transforms.RandomHorizontalFlip()]
+        if not augment:
+            return transforms.Compose(base + normalize)
     pad = size // 8  # 4 px at 32, 12 px at 96
     base = [transforms.RandomCrop(size, padding=pad),
             transforms.RandomHorizontalFlip()]
@@ -450,6 +468,43 @@ class ImageNet64(Dataset):
         return (self.transform(img) if self.transform else img), self.targets[i]
 
 
+class ImageNet100(Dataset):
+    """ImageNet-100 at NATIVE resolution (126,689 train / 5,000 val, 100
+    classes) -- the RESOLUTION and MODEL-SCALE control.
+
+    Everything else in the study is 32-96px with <=28M-param backbones, so a
+    reviewer can fairly ask whether any of it survives a standard 224px
+    pipeline with a real ViT. This is that cell, and it is the only dataset
+    here whose images are variable-size JPEGs: they stay ENCODED and are
+    decoded per __getitem__ so RandomResizedCrop sees the original, exactly
+    like a normal ImageNet pipeline.
+
+    Backed by a flat JPEG blob + offsets from scripts/prepare_imagenet100.py.
+    """
+
+    def __init__(self, data_root, train, transform=None):
+        from PIL import Image
+        split = "train" if train else "val"
+        base = os.path.join(data_root, "imagenet100")
+        bp = os.path.join(base, "%s.bin" % split)
+        if not os.path.isfile(bp):
+            raise FileNotFoundError(
+                f"{bp} missing. Build it once with:\n  python "
+                f"scripts/prepare_imagenet100.py --src <hf_snapshot> --out {base}")
+        self.blob = np.memmap(bp, dtype=np.uint8, mode="r")
+        self.offs = np.load(os.path.join(base, "%s_off.npy" % split))
+        self.targets = [int(t) for t in np.load(os.path.join(base, "%s_y.npy" % split))]
+        self.transform, self._Image, self._io = transform, Image, __import__("io")
+
+    def __len__(self):
+        return len(self.targets)
+
+    def __getitem__(self, i):
+        raw = self.blob[self.offs[i]:self.offs[i + 1]].tobytes()
+        img = self._Image.open(self._io.BytesIO(raw)).convert("RGB")
+        return (self.transform(img) if self.transform else img), self.targets[i]
+
+
 def dtd64(data_root, train, transform=None):
     """DTD (Cimpoi et al. 2014) at 64px: 47 texture classes, partition 1,
     train+val (3760, 80/cls) as train -- the standard DTD protocol -- and
@@ -634,6 +689,8 @@ def build_dataset(dataset, data_root, train, subset_pct=None, download=True,
         ds = food101_64(data_root, train=train, transform=tf)
     elif dataset == "imagenet64":
         ds = ImageNet64(data_root, train=train, transform=tf)
+    elif dataset == "imagenet100":
+        ds = ImageNet100(data_root, train=train, transform=tf)
     else:
         raise ValueError(f"unknown dataset {dataset!r}")
     if subset_pct is not None and subset_pct != 100:
@@ -663,12 +720,13 @@ def calibration_batch(dataset, data_root, n=1024):
         ds = datasets.ImageFolder(os.path.join(tin_root(data_root), "train"), transform=tf)
     elif dataset == "cub":
         ds = CUB200(data_root, train=True, transform=tf)
-    elif dataset in ("eurosat", "dtd", "pathmnist", "food101", "imagenet64"):
+    elif dataset in ("eurosat", "dtd", "pathmnist", "food101", "imagenet64",
+                     "imagenet100"):
         ds = build_dataset(dataset, data_root, train=True, subset_pct=None,
                            download=False)
         ds = _with_eval_transform(ds, tf)
-        if dataset == "imagenet64":
-            # imagenet64 is CLASS-ORDERED with ~1281 images per class, so the
+        if dataset in ("imagenet64", "imagenet100"):
+            # both ImageNet packs are CLASS-ORDERED (imagenet64 ~1281 img/class), so the
             # usual first-n prefix would be ENTIRELY class 0 -- the aux target
             # would be calibrated on pictures of tench. Take an evenly-spaced
             # stride instead: still fully deterministic and label-free (so it

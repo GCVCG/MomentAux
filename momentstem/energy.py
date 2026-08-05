@@ -236,12 +236,29 @@ class EnergyStem(nn.Module):
         return torch.cat(comps, dim=1)
 
     @torch.no_grad()
-    def calibrate(self, x):
+    def calibrate(self, x, chunk=64):
         """Set per-channel gain so each energy channel has unit std on the
         calibration batch. Identity RGB channels are untouched. Deterministic
-        given the batch; the gain lives in a buffer and travels with checkpoints."""
-        e = self._energy(self._luma(x))
-        std = e.std(dim=(0, 2, 3)).clamp_min(1e-8)
+        given the batch; the gain lives in a buffer and travels with checkpoints.
+
+        Computed in CHUNKS via accumulated sums rather than one forward over
+        the whole batch: at 224px a 1024-image calibration batch OOMs even a
+        24GB card (the energy maps are B x n_filters x H x W). Chunking is
+        numerically equivalent -- std is pooled over exactly the same elements
+        -- so every previously calibrated stem is unaffected, which
+        tests/test_bank_regression.py checks."""
+        n = 0
+        s1 = s2 = None
+        for i in range(0, x.shape[0], chunk):
+            e = self._energy(self._luma(x[i:i + chunk]))
+            c = e.shape[1]
+            flat = e.permute(1, 0, 2, 3).reshape(c, -1).double()
+            s1 = flat.sum(1) if s1 is None else s1 + flat.sum(1)
+            s2 = (flat ** 2).sum(1) if s2 is None else s2 + (flat ** 2).sum(1)
+            n += flat.shape[1]
+        mean = s1 / n
+        var = (s2 / n - mean ** 2).clamp_min(0)
+        std = var.sqrt().to(self.calib_scale.dtype).clamp_min(1e-8)
         self.calib_scale.copy_(1.0 / std)
         return self
 

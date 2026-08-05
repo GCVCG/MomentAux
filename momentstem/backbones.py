@@ -18,7 +18,8 @@ from .controls import build_stem
 from .stem import MomentStem
 
 RESNETS = ("resnet18", "resnet34", "resnet50")
-BACKBONES = RESNETS + ("convnext_tiny", "vit_tiny", "vit_small", "swin_tiny",
+BACKBONES = RESNETS + ("convnext_tiny", "vit_tiny", "vit_small", "vit_base",
+              "swin_tiny",
               "mobilenetv3_small_100")
 
 
@@ -104,7 +105,7 @@ def build_model(
             img_size=image_size,
             patch_size=image_size // 8,
         )
-    elif backbone == "vit_small":
+    elif backbone in ("vit_small", "vit_base"):
         # ViT-S/16 at NATIVE resolution -- deliberately NOT the small-input
         # surgery used for vit_tiny. This is the scale control for MODEL SIZE
         # and RESOLUTION (22M params, 224px, 14x14 token grid), i.e. the
@@ -114,10 +115,10 @@ def build_model(
         # and aux._to_spatial folds 197 tokens (196 + cls) to (B, C, 14, 14)
         # with no change -- it derives the grid from the token count.
         if small_input:
-            raise ValueError("vit_small is the native-resolution path; "
+            raise ValueError(f"{backbone} is the native-resolution path; "
                              "set small_input: false")
         net = timm.create_model(
-            "vit_small_patch16_224",
+            "%s_patch16_224" % backbone,
             pretrained=pretrained,
             num_classes=num_classes,
             in_chans=stem.out_channels,
