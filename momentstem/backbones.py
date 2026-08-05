@@ -18,7 +18,8 @@ from .controls import build_stem
 from .stem import MomentStem
 
 RESNETS = ("resnet18", "resnet34", "resnet50")
-BACKBONES = RESNETS + ("convnext_tiny", "vit_tiny", "swin_tiny", "mobilenetv3_small_100")
+BACKBONES = RESNETS + ("convnext_tiny", "vit_tiny", "vit_small", "swin_tiny",
+              "mobilenetv3_small_100")
 
 
 class CosineClassifier(nn.Module):
@@ -102,6 +103,25 @@ def build_model(
             in_chans=stem.out_channels,
             img_size=image_size,
             patch_size=image_size // 8,
+        )
+    elif backbone == "vit_small":
+        # ViT-S/16 at NATIVE resolution -- deliberately NOT the small-input
+        # surgery used for vit_tiny. This is the scale control for MODEL SIZE
+        # and RESOLUTION (22M params, 224px, 14x14 token grid), i.e. the
+        # standard configuration a reader recognises, so the ViT claim does
+        # not rest solely on a 5.7M-param net at 32-64px. blocks.8 of 12 keeps
+        # the same depth fraction as every other transformer tap in the study,
+        # and aux._to_spatial folds 197 tokens (196 + cls) to (B, C, 14, 14)
+        # with no change -- it derives the grid from the token count.
+        if small_input:
+            raise ValueError("vit_small is the native-resolution path; "
+                             "set small_input: false")
+        net = timm.create_model(
+            "vit_small_patch16_224",
+            pretrained=pretrained,
+            num_classes=num_classes,
+            in_chans=stem.out_channels,
+            img_size=image_size,
         )
     elif backbone == "swin_tiny":
         # Hierarchical attention (Swin-T): the mechanism control for the
