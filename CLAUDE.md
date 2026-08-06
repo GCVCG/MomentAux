@@ -1792,6 +1792,12 @@ ported vs corrected and why.
   documented, bistability reported as findings); (c) natural venues:
   NeurIPS D&B / TMLR, TPAMI plausible if the ImageNet stages land clean.
   Complete-grid decision (same day, above) directly feeds this framing.
+  VENUE DECISION DEFERRED (user, 2026-08-06): shortlist ranked Information
+  Fusion (fusion reframe, fast, IF ~14) > Pattern Recognition (best natural
+  fit, slower) > KBS/Neural Networks (fast fallbacks) > TPAMI (if ImageNet
+  lands clean). Decide AFTER the full results are in (ImageNet64 P1-P3,
+  ImageNet-100 S1-S4/G1-G4, diagdepth universality, grid completion) -- do
+  not re-pitch venues before then.
 - STAGE 2 LAUNCHED (2026-08-05): **ImageNet-100 @224px NATIVE** (clane9/
   imagenet-100, 126,689 train / 5,000 val, 100 classes) with a MODEL-SCALE
   CURVE rather than a single point: **ViT-S/16 (21.7M), ViT-B/16 (85.9M),
