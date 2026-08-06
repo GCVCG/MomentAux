@@ -165,6 +165,15 @@ def main():
                          "e.g. '5,10,25,50,100,500'. Measures how much of a "
                          "feature gain a classifier with N labels can actually "
                          "cash in. Omit to probe on the full train set only.")
+    ap.add_argument("--shots-only", action="store_true",
+                    help="skip the full-train-set head fit and run ONLY the "
+                         "--shots budgets. Required at ImageNet64 scale: a "
+                         "full-train LBFGS at 1.28M x feat_dim is impractical, "
+                         "so those G values use a FIXED SHOTS budget and are "
+                         "comparable ONLY to other same-budget probes, never "
+                         "to the full-train G curve (pre-registered protocol, "
+                         "2026-08-05). Extraction still covers every image; "
+                         "only the head fit is restricted.")
     ap.add_argument("--probe-dataset", default=None,
                     help="probe the checkpoints' FEATURES under a different "
                          "dataset/label space than they were trained on (the "
@@ -226,10 +235,17 @@ def main():
 
         trf, trY = extract(model, tr_loader, device)
         tef, teY = extract(model, te_loader, device)
-        tr_acc, te_acc = probe(trf, trY, tef, teY, num_classes, device)
-        rec = {"seed": seed_dir, "probe_train": tr_acc, "probe_test": te_acc}
-        print(f"{os.path.basename(args.run)} {seed_dir}: "
-              f"probe train {tr_acc*100:.2f}  test {te_acc*100:.2f}", flush=True)
+        if args.shots_only:
+            if not args.shots:
+                raise SystemExit("--shots-only requires --shots")
+            rec = {"seed": seed_dir, "shots_only": True}
+            print(f"{os.path.basename(args.run)} {seed_dir}: shots-only "
+                  f"({len(trY)} imgs extracted)", flush=True)
+        else:
+            tr_acc, te_acc = probe(trf, trY, tef, teY, num_classes, device)
+            rec = {"seed": seed_dir, "probe_train": tr_acc, "probe_test": te_acc}
+            print(f"{os.path.basename(args.run)} {seed_dir}: "
+                  f"probe train {tr_acc*100:.2f}  test {te_acc*100:.2f}", flush=True)
 
         if args.shots:
             # Same frozen features, head refit on progressively more labels.
@@ -244,17 +260,32 @@ def main():
                       flush=True)
         out.append(rec)
 
-    fname = ("linear_probe.json" if args.probe_dataset is None
-             else f"linear_probe_{args.probe_dataset}.json")
+    # shots-only results live in their OWN file: they are same-budget-
+    # comparable numbers, not the standard full-train probe, and writing them
+    # to linear_probe.json would CLOBBER the recorded G-curve values (caught
+    # live 2026-08-06 -- the first smoke of --shots-only overwrote
+    # abl1_none's probe record, restored immediately after).
+    if args.shots_only:
+        fname = ("linear_probe_shots.json" if args.probe_dataset is None
+                 else f"linear_probe_shots_{args.probe_dataset}.json")
+    else:
+        fname = ("linear_probe.json" if args.probe_dataset is None
+                 else f"linear_probe_{args.probe_dataset}.json")
     path = os.path.join(args.run, fname)
     with open(path, "w") as f:
         json.dump({"config": args.config, "ckpt": args.ckpt, "results": out}, f, indent=2)
     if out:
-        vals = [r["probe_test"] * 100 for r in out]
+        if args.shots_only:
+            k = max(int(s) for s in args.shots.split(","))
+            vals = [r["shots"][k] * 100 for r in out]
+            tag = f"shots{k}"
+        else:
+            vals = [r["probe_test"] * 100 for r in out]
+            tag = "test"
         mean = sum(vals) / len(vals)
         sd = (sum((v - mean) ** 2 for v in vals) / max(len(vals) - 1, 1)) ** 0.5
         print(f"PROBE_RESULT {os.path.basename(args.run)} "
-              f"test {mean:.2f}+/-{sd:.2f} over {len(vals)} seeds -> {path}", flush=True)
+              f"{tag} {mean:.2f}+/-{sd:.2f} over {len(vals)} seeds -> {path}", flush=True)
 
 
 if __name__ == "__main__":

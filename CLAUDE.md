@@ -1872,6 +1872,37 @@ ported vs corrected and why.
     S2 TRACKING IN BAND (partial, 2v2): R50 @224 85.94 -> 85.80 =
       Delta −0.14 vs band 0.0±1.0; G2 (>= +1.5) not firing. Conv
       neutrality survives native resolution. Final seeds in flight.
+  *** P1/S1 PROBE PASS LAUNCHED (2026-08-06 evening, ms_probe lane 44361350;
+  own worklist/counter so live training jobs are untouched). PROTOCOL:
+  ImageNet64 probed at FIXED SHOTS 25/100/250 per class with --shots-only
+  (full-train LBFGS at 1.28M rows impractical; shots G compares only within
+  budget — pre-registered 2026-08-05); ImageNet-100 gets the STANDARD
+  full-train probe (126k rows, ledger-protocol-comparable) + same shots.
+  diagin64_swin EXCLUDED: collapsed baseline => a probe measures training
+  failure, not features (swin scope rule). NEW CODE: linear_probe.py
+  --shots-only; shots-only output goes to linear_probe_SHOTS.json — the
+  first smoke OVERWROTE abl1_none/linear_probe.json (the G-curve record!),
+  restored immediately (26.68±0.37, matches ledger) and the filenames
+  separated so it can never recur. Suite 102/102.
+  PER-CELL IMPLIED PREDICTIONS, from Delta and the measured readout curve
+  (positive branch +1.80@39.4 -> +1.14@51.7 -> +0.44@69.1..80.7), recorded
+  IN ADVANCE of any probe result:
+      G(r18,in64)  ~ -0.5..+0.1  (Delta +0.04, base 55.4)
+      G(vit,in64)  ~ +1.8..+3.0  (Delta +3.23, base 48.2)
+      G(mnet,in64) — NO sign prediction: base 32.9 sits INSIDE the
+        crossing bracket [31.8,40.3]; measured value recorded as data.
+      G(vits,224)  ~ +12.0..+12.6 (Delta +13.00, base 65.4)
+      G(vitb,224)  ~ +24.0..+25.5 (Delta +26.01, base 43.3, ro ~ +1.4)
+      G(r50,224)   ~ -0.7..-0.2  (Delta -0.14, base 85.9)
+  FALSIFIER unchanged (F1/G1): |Delta - G| > 1.5 on any backbone => the
+  law's predictive form is bounded to small images. CAVEATS ON RECORD
+  BEFORE SCORING: (a) in100 probe labels == cell labels (100% cells), so
+  the probe-ceiling rule limits interpreting the residual as "readout" —
+  the aux-vs-base gap under identical probing is the trustworthy quantity
+  (cub@100% precedent); (b) in64 shots-250 probes hold ~20% of the labels
+  the cell saw, so shots-G may UNDERSTATE feature gain — if |Delta−G|
+  exceeds 1.5 there, the full-budget direction must be checked before
+  declaring G1 fired.
   STAGE-1/2 SCOREBOARD: P2 ✓  P3 ✓  S2 ✓(partial)  S3 ✓(above band)  S4 ✓
   — falsifiers F2, F3, G2, G3, G4 ALL DEAD. Still open: P1/S1 (Delta ≈ G
   at scale) — needs the fixed-shots probe pass; and the last 4 in-flight
