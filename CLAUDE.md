@@ -1798,6 +1798,59 @@ ported vs corrected and why.
   lands clean). Decide AFTER the full results are in (ImageNet64 P1-P3,
   ImageNet-100 S1-S4/G1-G4, diagdepth universality, grid completion) -- do
   not re-pitch venues before then.
+- *** STALE-WORKLIST INCIDENT #7 + THE GRID IS ACTUALLY COMPLETE (2026-08-06,
+  my error, caught same day). Rebuilding worklists after the OOM fix I ran the
+  missing-cell generator from $MS/repo WITHOUT OUT=$MS/runs -- its default
+  `runs` resolved to $MS/repo/runs (the SSL-pretrain dir, the EXACT axteach
+  CWD-relative trap recorded 2026-08-04), so it saw ~no finals and emitted
+  7,479 "missing" tasks. TRUTH, regenerated correctly: **21 genuinely missing
+  in the whole study** (8 grid + 13 big-lane, most already in flight) -- the
+  grid was essentially complete; ~99.7% of the list was phantom re-runs.
+  Burned before catch: ~200 re-run completions (~3h x 24 GPUs, detected by
+  finals-mtime arithmetic: 248 new-mtime finals vs total count +45 => ~200
+  overwrites; sample of unclaimed tasks 16/20 already-final). SECOND
+  consequence: my manual rebuild also skipped the keeper's bigcfg exclusion,
+  so the 42 diagin tasks entered BOTH lanes and the ImageNet cells trained
+  TWICE CONCURRENTLY in the same seed dirs. Damage audit: all 42 diagin
+  best.pt VERIFIED by torch.load (0 corrupt); final.json values are computed
+  in-memory (no resume logic) so they are valid single-run measurements;
+  metrics.csv of the raced diagin cells is UNRELIABLE (truncated by killed
+  duplicates) -- final.json is the record for those cells. The keeper's own
+  reconcile was correct all along (OUT= set, grep -vFf .bigcfgs); only my
+  by-hand invocation lacked both. RULE: never run make_missing_worklist by
+  hand without OUT=$MS/runs AND the .bigcfgs exclusion -- or just let the
+  keeper's reconcile do it (CUR==0 path).
+  COROLLARY: the same-day "run the full 7,479-task grid" decision was about
+  phantom tasks -- the completeness the user wanted ALREADY EXISTS (7,468
+  finals). The families I proposed pruning were already complete.
+- *** IMAGENET LANDINGS, FIRST SCORES (2026-08-06, from the correctly-
+  completed big-lane runs; 3 seeds unless noted):
+    STAGE 1 (ImageNet64, 1.28M imgs, 1000-way, 64px, 40ep diag):
+      r18:  55.38+-0.04 -> 55.52 (1 seed)   Delta ~ +0.14  P2 (conv neutral
+            at right-flank scale) TRACKING IN BAND; F2 not firing. 2 aux
+            seeds still queued.
+      vit:  48.24+-0.83 -> 51.48+-0.14  **Delta = +3.23** -- P3 (permanent
+            deficit >= +3 at 1.28M images) CONFIRMED at the band edge;
+            falsifier F3 (<= +1) DEAD. The attention deficit survives 13x
+            the images of any prior population.
+      swin: baseline {16.12, 0.10, 0.10} -- BISTABLE AT CHANCE at 1.28M
+            images (0.1% = 1/1000); aux arm trains tightly (53.62/53.05).
+            The swin stabilization signature transplants to ImageNet scale;
+            cells stay non-headline per the bistable rule.
+      mnet: 32.93 -> 34.88  Delta +1.95 (3v3) -- not pre-registered; small
+            positive at full data on a capacity-limited backbone (baseline
+            deeply underfit at 33%), noted not scored.
+      P1 (Delta ~= G) awaits the fixed-shots probe pass.
+    STAGE 2 (ImageNet-100 @224 NATIVE, DeiT aug, 100ep):
+      *** ViT-S/16 (21.7M params): 65.39+-0.39 -> 78.39+-0.14 =
+      **Delta = +13.00 +- 0.24** -- S3 predicted +2..+8: MISSED HIGH, the
+      good direction; **G3 (<= +1, "ViT headline dies") IS DEAD**. At proper
+      resolution, standard DeiT recipe, and 4x ViT-tiny's size, the prior
+      adds MORE than it did to ViT-tiny at 10% C100 (+13.26). The paper's
+      strongest claim now stands on a properly-configured ViT at 224px.
+      ViT-B and R50 pairs still training (S4/G4, S2/G2 pending).
+      CAVEAT on record: these cells' metrics.csv are the raced ones (see
+      incident above); final.json + verified checkpoints are authoritative.
 - STAGE 2 LAUNCHED (2026-08-05): **ImageNet-100 @224px NATIVE** (clane9/
   imagenet-100, 126,689 train / 5,000 val, 100 classes) with a MODEL-SCALE
   CURVE rather than a single point: **ViT-S/16 (21.7M), ViT-B/16 (85.9M),
