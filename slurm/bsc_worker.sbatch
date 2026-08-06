@@ -129,7 +129,20 @@ worker () {                              # $1 = GPU index
 # ledger records a 5x SLOWDOWN when workers oversubscribe cores (load 113 on
 # 16 cores => 44 min/seed vs 5.4). Budget ~= SLOTS*4*(num_workers+1) threads
 # and keep it under 80.
-SLOTS=${MS_SLOTS:-8}
+# *** GPU MEMORY IS ALSO BINDING, NOT JUST CPU (2026-08-06, measured the hard
+# way): SLOTS=8 was tuned on 32px ResNet-18 cells that use 1-5GB each. When the
+# queue head became diagdepth r34/r50 and diagin64 cells -- 19.5GB apiece -- 8
+# slots on a 63.29GiB card OOM'd instantly: five fresh grid jobs logged OK=0 /
+# FAIL=215, with 187 task logs carrying torch.OutOfMemoryError, and the claim
+# counter burned 359 tasks in minutes WITHOUT RUNNING THEM (claims are atomic,
+# execution is not -- the same asymmetry as the 2026-08-03 spin).
+# 3 slots x 19.5GB = 58.5GB fits with headroom; light cells still get 3-way
+# overlap, which was most of the win. Raise via MS_SLOTS only for a queue known
+# to be uniformly small.
+SLOTS=${MS_SLOTS:-3}
+# Reduces fragmentation when several trainings share a card, which is exactly
+# the regime here (the OOM trace recommended it explicitly).
+export PYTORCH_CUDA_ALLOC_CONF=${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}
 echo "concurrency: $SLOTS training(s) per GPU = $((SLOTS*4)) per node"
 for g in 0 1 2 3; do
     for k in $(seq 1 "$SLOTS"); do worker "$g" & done

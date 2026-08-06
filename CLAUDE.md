@@ -1763,6 +1763,17 @@ ported vs corrected and why.
   are small-magnitude singletons. So the exception set is not scattered noise: it
   concentrates on food101/pathmnist at >=20% data, exactly the regime the current
   law does not model.
+- *** RUN-THE-FULL-GRID DECISION (2026-08-06, user): the rebuilt 7,479-task
+  worklist runs IN FULL -- no pruning. I proposed cutting ~1,760 tasks whose
+  verdicts are already adjudicated at power (simsiam_domains 552: SimSiam
+  ~useless on 5 populations; stgaborlearn 111: prior-as-init falsified;
+  dino_domains 570: envelope declared complete; parts of transfer2), on
+  marginal-information grounds. User decision: "having all of them are
+  defensible and complete answers. Having a complete results always safer" --
+  the axteach precedent (a complete null envelope is much harder to dismiss
+  than a partial one) applied campaign-wide. Decisive families (diagdepth,
+  diagin*) stay ORDERED FIRST in the worklist, so the completeness tail costs
+  cluster-days only, never time-to-decisive-results. Do not reopen.
 - STAGE 2 LAUNCHED (2026-08-05): **ImageNet-100 @224px NATIVE** (clane9/
   imagenet-100, 126,689 train / 5,000 val, 100 classes) with a MODEL-SCALE
   CURVE rather than a single point: **ViT-S/16 (21.7M), ViT-B/16 (85.9M),
