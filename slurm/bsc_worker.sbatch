@@ -113,8 +113,10 @@ worker () {                              # $1 = GPU index
             continue
         fi
         echo "[gpu$1] TASK $i/$N :: ${cmd:0:110}"
-        eval "$cmd" > "$MS_ROOT/logs/task_${i}.log" 2>&1 \
-            && echo "[gpu$1] OK   $i" || echo "[gpu$1] FAIL $i (see logs/task_${i}.log)"
+        # LANE-PREFIXED (2026-08-06): see bsc_big.sbatch -- both lanes wrote
+        # logs/task_${i}.log and clobbered each other's failure diagnostics.
+        eval "$cmd" > "$MS_ROOT/logs/grid_task_${i}.log" 2>&1 \
+            && echo "[gpu$1] OK   $i" || echo "[gpu$1] FAIL $i (see logs/grid_task_${i}.log)"
     done
 }
 

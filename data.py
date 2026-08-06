@@ -141,13 +141,22 @@ def build_transforms(dataset, train, augment=None):
         # and Resize(256)/CenterCrop(224) (eval). The small-image
         # RandomCrop(size, padding=size//8) below is meaningless for
         # variable-size JPEGs -- it would pad a 213x160 photo to a 224 canvas.
+        #
+        # THIS BASE MUST ALSO BE USED WHEN augment='deit' (fixed 2026-08-06).
+        # It previously `return`ed early only when augment was UNSET, so every
+        # DeiT-aug ImageNet-100 cell fell through to RandomCrop(224) and died
+        # on the first image narrower than 224: "Required crop size (224, 224)
+        # is larger than input image size (216, 227)". That killed all 12
+        # Stage-2 ViT runs (ViT-S and ViT-B, both arms) at epoch 0 while R50 --
+        # the one cell without DeiT aug -- trained fine, which is exactly the
+        # pattern observed. imagenet64 is unaffected: it is a fixed 64x64
+        # array, so the small-image RandomCrop+pad path below is correct there.
         base = [transforms.RandomResizedCrop(size, scale=(0.08, 1.0)),
                 transforms.RandomHorizontalFlip()]
-        if not augment:
-            return transforms.Compose(base + normalize)
-    pad = size // 8  # 4 px at 32, 12 px at 96
-    base = [transforms.RandomCrop(size, padding=pad),
-            transforms.RandomHorizontalFlip()]
+    else:
+        pad = size // 8  # 4 px at 32, 12 px at 96
+        base = [transforms.RandomCrop(size, padding=pad),
+                transforms.RandomHorizontalFlip()]
     if not augment:
         return transforms.Compose(base + normalize)
     if augment != "deit":

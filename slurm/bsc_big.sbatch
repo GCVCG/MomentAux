@@ -99,8 +99,13 @@ worker () {                              # $1 = GPU index
         cmd=$(sed -n "${i}p" "$WORKLIST")
         [ -z "$cmd" ] && continue
         echo "[gpu$1] TASK $i/$N :: ${cmd:0:110}"
-        eval "$cmd" > "$MS_ROOT/logs/task_${i}.log" 2>&1 \
-            && echo "[gpu$1] OK   $i" || echo "[gpu$1] FAIL $i (see logs/task_${i}.log)"
+        # LANE-PREFIXED (2026-08-06): both lanes previously wrote
+        # logs/task_${i}.log, so grid task 61 CLOBBERED big task 61. When all
+        # 12 Stage-2 ImageNet-100 ViT runs failed, their tracebacks had already
+        # been overwritten by unrelated diagdepth cells and the failure had to
+        # be reproduced locally to diagnose. Keep the lanes' logs disjoint.
+        eval "$cmd" > "$MS_ROOT/logs/big_task_${i}.log" 2>&1 \
+            && echo "[gpu$1] OK   $i" || echo "[gpu$1] FAIL $i (see logs/big_task_${i}.log)"
     done
 }
 
