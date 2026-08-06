@@ -1774,6 +1774,24 @@ ported vs corrected and why.
   than a partial one) applied campaign-wide. Decisive families (diagdepth,
   diagin*) stay ORDERED FIRST in the worklist, so the completeness tail costs
   cluster-days only, never time-to-decisive-results. Do not reopen.
+- *** PAPER FRAMING DECISION (2026-08-06, user): the paper is sold as
+  **"a controlled, cost-normalized benchmark of data-efficiency interventions
+  -- and the predictive law that organizes its results."** Benchmark as the
+  spine (frozen-recipe instrument -> complete grid -> decision guide), the law
+  Delta = G + readout as the analysis layer that EXPLAINS the grid (stack-vs-
+  substitute, sign law at 96% of resolvable cells), never as a separate
+  thread. Rationale: the study's honest content is a multi-method comparison
+  (free prior vs SimCLR/SimSiam/DINO vs transfer vs augmentation vs learned
+  teachers, at 1x/~1.02x/2x compute, 14 datasets x 7 backbones, 500->1.28M
+  images), and this framing DE-RISKS the G3 falsifier -- if ViT-S demotes the
+  attention headline, the benchmark contribution stands and the honest
+  falsifier scoring becomes evidence of integrity. Consequences accepted:
+  (a) the harness (configs, subsets, pinned banks, runner, aggregation,
+  audit scripts) must be RELEASED as a usable artifact; (b) fairness audits
+  front-loaded (SimCLR best-shot tested, frozen-recipe-is-a-ResNet-recipe
+  documented, bistability reported as findings); (c) natural venues:
+  NeurIPS D&B / TMLR, TPAMI plausible if the ImageNet stages land clean.
+  Complete-grid decision (same day, above) directly feeds this framing.
 - STAGE 2 LAUNCHED (2026-08-05): **ImageNet-100 @224px NATIVE** (clane9/
   imagenet-100, 126,689 train / 5,000 val, 100 classes) with a MODEL-SCALE
   CURVE rather than a single point: **ViT-S/16 (21.7M), ViT-B/16 (85.9M),
