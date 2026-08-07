@@ -230,58 +230,82 @@ the model question of whether one architecture beats another.
 
 
 \subsection{Relation to fusion theory}\label{sec:fusiontheory}
-The outcomes we measure are not new categories. Classical multi-sensor
-fusion has classified the relationship between two information sources
-since \citet{durrantwhyte1988sensor}, who distinguishes \emph{complementary}
-sources, which describe different aspects of the target and are combined
-for a fuller picture, from \emph{redundant} (or competitive) sources, which
-describe the same aspect and are combined to raise confidence, and
-\emph{cooperative} sources, which jointly yield what neither yields alone.
-Our stack and substitute outcomes are that distinction, reached from the
-opposite direction: rather than assuming a source relationship from the
-sensing geometry, we \emph{measure} it, and we do so in a setting the
-classical taxonomy was not written for, where one source is a fixed
-hand-crafted prior and the other is a learned representation.
+The outcomes we measure are not new categories, and we set out the prior
+claims before our own. \citet{durrantwhyte1988sensor} classified the
+interactions between disparate information sources as \emph{cooperative},
+\emph{competitive} and \emph{complementary}; the surveyed form now standard
+in the field \citep{khaleghi2013multisensor} states the triple as
+complementary, redundant and cooperative, where complementary sources
+describe different aspects of the target, redundant sources describe the
+same aspect, and cooperative sources jointly yield what neither yields
+alone. Our \emph{stack} is complementary combination and our
+\emph{substitute} is redundant combination. We adopt that vocabulary here
+and use our own terms only as informal labels for it.
 
-Two things follow, and we state both as claims about scope rather than
-about novelty. First, the classical taxonomy is a statement about what
-sources \emph{are}; it does not say how to find out which case you are in
-before building the combined system. The feature-level measurement of
-Section~\ref{sec:probe} supplies exactly that, and the resulting rule,
-that same-currency sources do not compound, is a testable operational form
-of the complementary--redundant distinction. Second, our third outcome has
-no classical counterpart. \emph{Tax}, in which a second source destroys
-what the first supplied in proportion to how much it supplied, is not
-complementarity, redundancy or cooperation; the nearest existing account
-is negative transfer \citep{wang2019negative,zhang2023negative}, which is
-studied as a property of source--target mismatch rather than as a fusion
-outcome. Section~\ref{sec:taxsub} shows the tax is carried by the feature
-term rather than the readout, which is what makes it a statement about the
-representation and not about optimization.
+One difference is substantive rather than terminological, and it sharpens
+what a representation-learning setting adds. In sensor fusion redundancy is
+a \emph{virtue}: two instruments measuring the same quantity reduce
+variance and buy fault tolerance. In ours it is waste, because performance
+is bounded by the information the sources share rather than improved by
+supplying it twice. Redundancy pays for reliability and not for
+representation quality, and a taxonomy built for the first case does not
+transfer its sign to the second.
 
-The formal version of the currency idea is information-theoretic.
-Partial information decomposition \citep{williams2010nonnegative} splits
-what two sources tell us about a target into unique, redundant and
-synergistic parts, which is the decomposition our taxonomy approximates.
-We do not claim to compute it. Our measurement is a proxy, the gap a
-linear evaluation reads between two frozen representations, and it is
-ordinal rather than an information quantity. We use it because it is
-cheap enough to run on 2{,}800 cells and because it turns out to predict
-combination outcomes; a genuine decomposition at the scale of neural
-network features remains open, and estimator instability in that
-literature is a known obstacle.
+Our third outcome, in which a source destroys what its partner supplied,
+is likewise not new, and has at least three names. It is \emph{catastrophic
+fusion} in the sense of \citet{movellan1997catastrophic}, where modules
+combined under mismatched assumptions do worse than the better module
+alone; it is a form of negative transfer
+\citep{wang2019negative,zhang2023negative}; and on the multimodal side it
+is the modality competition of \citet{wang2020multimodal}, who report that
+the best unimodal network often beats the jointly trained multimodal one
+despite the latter receiving strictly more information. What we add is not
+the phenomenon but its magnitude law: the damage scales with how much the
+displaced source had contributed, and vanishes exactly where it had
+contributed nothing.
 
-Finally, our knowledge source sits in a place that
-\citet{vonrueden2023informed} make precise. Their taxonomy of informed
-machine learning classifies an approach by its knowledge \emph{source},
-its \emph{representation}, and the \emph{integration point} in the
-learning pipeline. Ours is scientific knowledge about early visual
-processing, represented as a pinned filter bank, integrated at the
-training objective. That survey catalogues where knowledge \emph{can} be
-injected across a wide range of such choices. What it does not settle,
-and what a practitioner has to decide, is when injecting it is worth
-anything given what the data and the available pre-trained artifacts
-already supply. That is the question this benchmark is built to answer.
+The formal account of our informal ``currency'' is partial information
+decomposition \citep{williams2010nonnegative}, which splits what two
+sources tell us about a target into unique, redundant and synergistic
+atoms, and which \citet{liang2023quantifying} have already carried into
+deep multimodal learning with estimators that scale and with a-priori model
+selection as the application. We do not compute it. Our measurement is a
+linear-evaluation gap on frozen features: cheap enough for 2{,}800 cells,
+ordinal rather than an information quantity, and blind to anything not
+linearly decodable. Read our result as an empirical instance of the
+decomposition those authors formalize, not as an estimate of it.
+
+Two further connections position the predictor rather than the taxonomy.
+Predicting a downstream outcome from a cheap measurement, without training
+the combined system, is the programme of transferability estimation
+\citep{nguyen2020leep,you2021logme}, which scores a single pre-trained
+source; ours asks the same question of a \emph{pair}. And the challenge
+that programme raises for us is direct:
+\citet{newell2020useful} report that linear evaluation does not correlate
+with fine-tuning performance in general. Our defence is narrow and
+empirical rather than a rebuttal. We do not use the linear evaluation to
+rank absolute quality; we use the \emph{gap} between two arms probed under
+an identical protocol, on checkpoints that differ in one intervention, and
+we report how well that gap predicts the paired difference
+(Section~\ref{sec:law}) rather than assuming it does.
+
+Finally, our knowledge source sits where \citet{vonrueden2023informed} make
+precise. Their taxonomy classifies informed learning by knowledge
+\emph{source}, \emph{representation} and \emph{integration point}, and
+states that informed learning requires two independent sources of
+information, data and prior knowledge, which is the reading of ``two
+sources'' under which this study is a fusion study at all. Ours is
+scientific knowledge about early vision, represented as a pinned filter
+bank, integrated at the learning algorithm; the nearest existing method is
+their own informed pre-training \citep{vonrueden2022informedpre}, which
+condenses knowledge into prototypes for initialization rather than into a
+decaying auxiliary target. That survey catalogues where knowledge can be
+injected. What it does not settle, and what a practitioner must decide, is
+\emph{when} injecting it is worth anything given what the data and the
+available pre-trained artifacts already supply. That is the question this
+benchmark is built to answer, and we are careful to claim only that: we
+found no controlled, compute-declared answer to it, not that no neighbouring
+question has been answered.
 
 \subsection{The gap this paper closes}\label{sec:gap}
 

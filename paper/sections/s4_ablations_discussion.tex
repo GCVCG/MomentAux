@@ -227,10 +227,13 @@ under coarse evaluation than fine on the same checkpoints (the measuring
 stick itself is label-hungry).
 
 \paragraph{What the currency account contributes to fusion theory.}
-We want to be careful about what is new here, because two of our three
-outcomes are not. Fusion has distinguished complementary from redundant
-sources since \citet{durrantwhyte1988sensor}, and stack and substitute are
-that distinction. What the classical taxonomy does not provide, because it
+We want to be careful about what is new here, because none of our three
+outcomes is. Fusion has distinguished complementary from redundant sources
+since \citet{durrantwhyte1988sensor}, and stack and substitute are that
+distinction; the destructive third case is catastrophic fusion
+\citep{movellan1997catastrophic}, negative transfer
+\citep{wang2019negative} and modality competition
+\citep{wang2020multimodal} under three different names. What the classical taxonomy does not provide, because it
 was written for sensors whose relationship is known from the sensing
 geometry, is a way to \emph{determine} which case holds when the sources
 are a hand-crafted prior and a learned representation, whose relationship
@@ -244,15 +247,14 @@ linear evaluation of each source alone, and the measurement predicts the
 combination. Fusion decisions can be made by measurement rather than by
 fashion, before any joint training is run.
 
-The third outcome is the one without a classical counterpart. A source
-that destroys what its partner supplied, in proportion to how much was
-supplied, is neither complementary nor redundant; it is closest to
-negative transfer \citep{zhang2023negative}, which that literature treats
-as a source--target mismatch problem. Our measurement locates it
-differently: the loss is carried by the feature term, and it vanishes
-exactly where the partner had contributed nothing, which frames it as a
-fusion outcome governed by the same currency logic as the other two rather
-than as a separate pathology.
+On the third outcome our addition is a magnitude law rather than a
+phenomenon. The literatures above establish that combining sources can hurt;
+what we measure is that the damage is \emph{proportional to what the
+displaced source had supplied}, is carried by the feature term rather than
+the readout, and falls to a measured zero exactly where the partner had
+supplied nothing. That makes it a fusion outcome on the same currency logic
+as the other two rather than a separate pathology, and it is the part of
+the taxonomy we would defend as ours.
 
 \paragraph{What the attention result does and does not say.}
 The persistent, scale-growing ViT deficit is a statement about
