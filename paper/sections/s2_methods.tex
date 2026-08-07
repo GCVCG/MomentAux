@@ -9,7 +9,8 @@ committed subset indices, so every intervention is measured on
 byte-identical images; deviations are quarantined under a diagnostic
 namespace and never enter headline tables. \textbf{(b)} MomentAux, the
 fused knowledge source: a pinned bank of oriented-energy targets
-regressed from a third-stage tap during training only, with the loss
+regressed from a tap at the third of the backbone's four feature stages,
+during training only, with the loss
 weight $\lambda$ decaying to exactly zero, so the deployed network is
 byte-identical to the baseline and high-data neutrality is structural.
 \textbf{(c)} Each cell yields two measurements, the end-to-end gain
@@ -96,9 +97,11 @@ ablation of Section~\ref{sec:ablations} shows oriented \emph{edges} are a
 poor target ($-0.24$) while their phase-invariant energy is the best one
 measured ($+2.81$ at the same cell).
 
-\paragraph{The fusion mechanism.} Let $f_3(x)$ be the backbone's
-third-stage activations and $W$ a $1{\times}1$ convolution mapping them
-to $N$ channels. Training minimizes
+\paragraph{The fusion mechanism.} Let $f_3(x)$ be the activations of the
+backbone's third feature stage, the third of four in every architecture we
+use (\texttt{layer3} in a ResNet, \texttt{stages.2} in ConvNeXt, the
+matching block group in ViT and Swin), and $W$ a $1{\times}1$ convolution
+mapping them to $N$ channels. Training minimizes
 \begin{equation}
   \begin{aligned}
     \mathcal{L}(t) &\;=\; \mathcal{L}_{\mathrm{CE}}

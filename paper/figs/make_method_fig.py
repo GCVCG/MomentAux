@@ -9,8 +9,10 @@ Four panels across a two-column span (7.0 in):
 
 Revision 2026-08-07, author requests:
   * Title Case everywhere, matching the graphical abstract;
-  * panel (b) redrawn to match the graphical abstract's fusion panel: named
-    backbone stages inside a labelled container, explicit tap annotation;
+  * panel (b) redrawn to match the graphical abstract's fusion panel: FOUR
+    backbone stages (not three) named by feature depth inside a labelled
+    container, with the tap on the THIRD of four (ResNet layer3). The old
+    three-box drawing put the tap on the final stage, which is wrong;
   * the lambda inset now says what it plots (axis labels + the consequence),
     instead of being an unlabelled curve;
   * panel (c) relaid out so no label sits under an arrow, and so every box
@@ -114,25 +116,28 @@ axa.text(4.9, 0.95, "Deviations Quarantined, Never Headline", ha="center",
 # ---------------------------------------------------------------- (b)
 axb, UB = panel([0.263, 0.06, 0.235, 0.79], "(b)  MomentAux: The Fused Prior")
 
-PY, PH = 8.05, 1.35
-box(axb, 0.05, PY, 1.45, PH, "Image", "#e6e6e6", UB, tc=INK, fs=4.5)
-axb.add_patch(FancyBboxPatch((1.86, PY - 0.20), 4.42, PH + 0.40,
+PY, PH = 7.82, 1.35
+box(axb, 0.05, PY, 1.25, PH, "Image", "#e6e6e6", UB, tc=INK, fs=4.4)
+axb.add_patch(FancyBboxPatch((1.62, PY - 0.18), 5.50, PH + 0.36,
                              boxstyle="round,pad=0.05,rounding_size=0.18",
                              fc="none", ec=GREY, lw=0.5, ls=(0, (2, 1.4)),
                              zorder=1))
-for i, xx in enumerate([1.98, 3.42, 4.86]):
-    box(axb, xx, PY, 1.30, PH, "Stage\n%d" % (i + 1), BLUE, UB, fs=4.3)
-axb.text(1.90, PY - 0.38, "Backbone, Unchanged", ha="left", va="top",
-         fontsize=4.1, color=MUTED)
-box(axb, 6.62, PY, 2.60, PH, "Classifier", "#e6e6e6", UB, tc=INK, fs=4.4)
-for x1, x2 in [(1.50, 1.84), (6.30, 6.60)]:
+STAGE_X = [1.74, 3.10, 4.46, 5.82]
+for xx, name in zip(STAGE_X, ["Early", "Mid", "Deep", "Final"]):
+    box(axb, xx, PY, 1.16, PH, name, BLUE, UB, fs=4.2, pad=0.16)
+# label ABOVE: below the container the tap arrow would run through it
+axb.text(1.66, PY + PH + 0.52, "Backbone Feature Stages, Unchanged",
+         ha="left", va="top", fontsize=4.0, color=MUTED)
+box(axb, 7.46, PY, 2.45, PH, "Classifier", "#e6e6e6", UB, tc=INK, fs=4.3)
+for x1, x2 in [(1.31, 1.60), (7.14, 7.44)]:
     arrow(axb, x1, PY + PH / 2, x2, PY + PH / 2)
-axb.text(7.92, PY - 0.38, "Cross-Entropy", ha="center", va="top",
-         fontsize=4.1, color=MUTED)
+axb.text(8.68, PY - 0.34, "Cross-Entropy", ha="center", va="top",
+         fontsize=4.0, color=MUTED)
 
-arrow(axb, 5.51, PY - 0.26, 5.51, 6.30, VERM, ls=(0, (2, 1.2)))
-axb.text(5.72, 7.10, "Tap at Stage 3", fontsize=4.2, color=VERM, ha="left",
-         va="center")
+TAP_X = STAGE_X[2] + 0.58
+arrow(axb, TAP_X, PY - 0.24, TAP_X, 6.30, VERM, ls=(0, (2, 1.2)))
+axb.text(TAP_X + 0.22, 7.10, "Tap: Deep Stage (3 of 4)", fontsize=4.1,
+         color=VERM, ha="left", va="center")
 box(axb, 3.95, 4.90, 3.15, 1.35, "Aux Head\nTraining Only", VERM, UB, fs=4.4)
 arrow(axb, 3.85, 5.57, 3.20, 5.57, VERM, ls=(0, (2, 1.2)))
 box(axb, 0.05, 4.90, 3.05, 1.35, "Fixed Gabor\nEnergy Bank", GREEN, UB, fs=4.4)

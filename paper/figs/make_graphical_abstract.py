@@ -12,8 +12,9 @@ Layout rules enforced here (revision 2026-08-07):
     2026-08-07); acronyms and model names keep their own casing;
   * every label is measured against its box before drawing, so nothing
     overflows -- see fit_fontsize();
-  * the three backbone boxes sit inside a labelled container so "STAGE 1"
-    is self-explanatory rather than jargon;
+  * the backbone shows FOUR stages, not three, and they are named by feature
+    depth rather than by an opaque index: the tap is at the THIRD of four
+    (ResNet layer3), so a three-box drawing wrongly implied a final-stage tap;
   * the scatter carries a legend and is widened into the gutter that the
     y-axis label used to waste;
   * panel 2's subtitle is wrapped and clipped to panel 2's own column, so
@@ -109,27 +110,29 @@ def arrow(ax, x1, y1, x2, y2, color=GREY, ls="-"):
 
 # --- the deployed network: input, backbone container, classifier
 PIPE_Y, PIPE_H = 7.30, 1.25
-box(axA, 0.10, PIPE_Y, 1.40, PIPE_H, "Image", "#e6e6e6", UNIT_A, fs=4.6, tc=INK)
-axA.add_patch(FancyBboxPatch((1.92, PIPE_Y - 0.22), 4.28, PIPE_H + 0.44,
+box(axA, 0.05, PIPE_Y, 1.28, PIPE_H, "Image", "#e6e6e6", UNIT_A, fs=4.5, tc=INK)
+axA.add_patch(FancyBboxPatch((1.68, PIPE_Y - 0.18), 5.48, PIPE_H + 0.36,
                              boxstyle="round,pad=0.05,rounding_size=0.18",
                              fc="none", ec=GREY, lw=0.5, ls=(0, (2, 1.4)),
                              zorder=1))
-for i, xx in enumerate([2.05, 3.44, 4.83]):
-    box(axA, xx, PIPE_Y, 1.24, PIPE_H, "Stage\n%d" % (i + 1), BLUE, UNIT_A,
-        fs=4.4)
-axA.text(1.95, PIPE_Y - 0.42, "Backbone, Unchanged", ha="left", va="top",
-         fontsize=4.2, color=MUTED)
-box(axA, 6.62, PIPE_Y, 2.55, PIPE_H, "Classifier", "#e6e6e6", UNIT_A, fs=4.6,
+STAGE_X = [1.80, 3.16, 4.52, 5.88]
+for xx, name in zip(STAGE_X, ["Early", "Mid", "Deep", "Final"]):
+    box(axA, xx, PIPE_Y, 1.16, PIPE_H, name, BLUE, UNIT_A, fs=4.2, pad=0.16)
+# label ABOVE the container: below it the tap arrow would cut through it
+axA.text(1.72, PIPE_Y + PIPE_H + 0.62, "Backbone Feature Stages, Unchanged",
+         ha="left", va="top", fontsize=4.0, color=MUTED)
+box(axA, 7.50, PIPE_Y, 2.45, PIPE_H, "Classifier", "#e6e6e6", UNIT_A, fs=4.4,
     tc=INK)
-for x1, x2 in [(1.50, 1.90), (6.22, 6.60)]:
+for x1, x2 in [(1.31, 1.66), (7.16, 7.48)]:
     arrow(axA, x1, PIPE_Y + PIPE_H / 2, x2, PIPE_Y + PIPE_H / 2)
 
-# --- the training-only branch
-arrow(axA, 5.45, PIPE_Y - 0.28, 5.45, 5.35, VERM, ls=(0, (2, 1.2)))
-axA.text(5.68, 6.28, "Tap at Stage 3", fontsize=4.4, color=VERM, ha="left",
-         va="center")
-axA.text(5.68, 5.78, "λ Decays 1 to 0", fontsize=4.4, color=VERM, ha="left",
-         va="center")
+# --- the training-only branch, tapped at the THIRD of four stages
+TAP_X = STAGE_X[2] + 0.58
+arrow(axA, TAP_X, PIPE_Y - 0.24, TAP_X, 5.35, VERM, ls=(0, (2, 1.2)))
+axA.text(TAP_X + 0.24, 6.28, "Tap: Deep Stage (3 of 4)", fontsize=4.2,
+         color=VERM, ha="left", va="center")
+axA.text(TAP_X + 0.24, 5.78, "λ Decays 1 to 0", fontsize=4.2, color=VERM,
+         ha="left", va="center")
 box(axA, 4.30, 3.95, 3.30, 1.35, "Aux Head\nTraining Only", VERM, UNIT_A,
     fs=4.6)
 arrow(axA, 4.20, 4.62, 3.55, 4.62, VERM, ls=(0, (2, 1.2)))
