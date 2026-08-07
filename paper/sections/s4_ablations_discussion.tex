@@ -15,7 +15,7 @@ same bank placed in the forward path, and reports its failure mode.
 Section~\ref{abl:width} tests whether a wider bank helps.
 Section~\ref{abl:stab} separates a second effect that the accuracy
 tables alone would conflate with the first: the prior also stabilizes
-optimisation on backbones whose baselines collapse.
+optimization on backbones whose baselines collapse.
 
 \subsection{The target is the ingredient}\label{abl:target}
 \begin{table}[t]
@@ -24,8 +24,7 @@ configuration except the varied ingredient; $\Delta$ vs.\ shared
 baseline, three seeds). The gain needs the moment structure specifically:
 random fixed targets do nothing, a $2\times$-cost learned teacher does
 nothing anywhere on an eight-point envelope, and the classical HOG
-descriptor recovers about half. Within each block rows are sorted by the
-10\% gain, descending; \up{} marks columns where higher is better.}
+descriptor recovers about half.}
 \label{tab:controls}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
@@ -132,8 +131,7 @@ that too).
 \caption{What to use when: the grid distilled to recommendations. Costs
 are training-compute multiples of the baseline; gains are typical measured
 ranges, not promises. ``Prior'' is the champion MomentAux configuration
-verbatim. Rows are ordered by backbone family and then by data regime,
-convolutional first, attention next, initialisation-dependent cases last.}
+verbatim.}
 \label{tab:guide}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
@@ -174,7 +172,7 @@ readout channel whose behavior is set by how well the task is already
 being solved. This explains, with one mechanism, observations that
 otherwise require separate stories: why gains collapse at extreme
 scarcity even when features improve (readout deeply negative, five
-labels per class cannot express a better representation); why relabelling
+labels per class cannot express a better representation); why relabeling
 the same pixels with coarser classes triples the visible gain (the
 baseline crosses the readout zero, not because features changed; we
 measure them unchanged); why every intervention converges at sufficiency
@@ -218,11 +216,31 @@ that cannot be wrong is not measuring anything.
 %% ---------------------------------------------------------------------
 \section{Limitations and future directions}\label{sec:limits}
 
+\paragraph{The law's status and domain of validity.} The law is an
+\emph{empirical} regularity, not a theorem, and we state its measured scope
+plainly so that it is not read as more than it is. It was fitted to nothing:
+we report the measured readout curve and use it directly. Its demonstrated
+domain is 14 datasets across five visual domains, backbones from 5.7M to 86M
+parameters, images from $32$ to $224$\,px, and training sets from 500 to
+$1.28$M images, all under one supervised recipe with an auxiliary prior
+trained from scratch. Cells initialized from self-supervised or ImageNet
+weights lie outside the scope the law was derived under and are scored
+separately. Within that domain its credibility rests on prediction rather
+than fit: bands registered before the runs called an unseen backbone
+family's feature gain from baseline heights alone (four of four in band),
+eight cells on four unseen domains (seven in band, eight of eight correct in
+sign), and the ImageNet-scale residual. Where the law is weakest is equally
+explicit: on the right flank it predicts readout ${\approx}0$ and gets it,
+which is true but not discriminating, so 613 of 989 in-scope cells cannot
+test it at all, and we count only the 278 that can. Nothing here licenses
+extrapolation to web-scale pre-training, to architectures whose baselines do
+not train under this recipe, or to tasks other than classification.
+
 \paragraph{Known boundary of the law.} Ten resolvable cells violate the
 sign law, concentrated on Food-101 and PathMNIST at ${\geq}20\%$ data,
 all with the same signature: the prior still improves frozen-feature
 quality while costing end-to-end accuracy. The current law has no term
-for this ``better features, worse accuracy'' regime; modelling it,
+for this ``better features, worse accuracy'' regime; modeling it,
 plausibly an interaction between late-stage optimization and
 sufficiency, is the clearest open problem the grid poses.
 

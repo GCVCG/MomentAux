@@ -8,6 +8,8 @@
 %% cas-dc loads xcolor WITHOUT the table option; pass it here so that
 %% \rowcolors (alternating row shading) is available in every table.
 \PassOptionsToPackage{table}{xcolor}
+%% allow long URLs to break across lines in the first-page footnote
+\PassOptionsToPackage{hyphens}{url}
 \documentclass[a4paper,fleqn]{cas-dc}
 
 \usepackage[numbers]{natbib}
@@ -60,13 +62,13 @@
                 city={Barcelona}, country={Spain}}
 \cortext[1]{Corresponding author.}
 \nonumnote{Code, configurations, committed subset indices, per-run records
-and all result tables: \url{https://github.com/GCVCG/MomentsCNNEncoder}}
+and all result tables: \url{https://github.com/GCVCG/MomentAux}}
 
 \begin{abstract}
 % DRAFT, one paragraph, <=250 words, no references, fusion vocabulary first.
 Fusing prior knowledge with data-driven learning is attractive precisely
-where data is scarce, yet the field lacks a controlled account of when such
-fusion helps, when it is redundant, and when it actively harms. We present a
+where data is scarce, yet no controlled account says when such fusion helps,
+when it is redundant, and when it harms. We present a
 benchmark that measures one fixed, hand-crafted source of knowledge, a
 pinned bank of Gabor and moment spectral targets, injected only during training
 through an auxiliary regression head at $\sim$2\% compute overhead, against
@@ -78,22 +80,25 @@ committed data subsets: 14 datasets, 7 backbone families, data scales from
 86M parameters ($2{,}800$ experimental cells; ${\sim}8{,}900$ training runs). The grid is organized by a
 single empirical law, $\Delta = G + \mathrm{readout}(\mathrm{base})$,
 separating each intervention's feature-level gain $G$ from a readout term
-that depends only on baseline accuracy. The law is predictive: registered in
-advance, it called the feature gain of unseen backbone families and of
-ImageNet-scale cells from baseline heights alone (96\% of resolvable cells;
-$|\Delta-G| \le 1.1$ points on five of six ImageNet-scale pairs). It yields
-a sharp fusion taxonomy: sources fusing DIFFERENT currencies stack (prior +
-augmentation), same-currency sources substitute (the prior against effective
-self-supervised pre-training),
-and fusing into an already-informed initialization taxes in proportion to
-what the initialization carries (ImageNet transfer). A decision guide maps
-regime to the cheapest effective intervention. The complete harness, every
-configuration and subset index, every per-run record, and all result tables
-are released at \url{https://github.com/GCVCG/MomentsCNNEncoder}.
+depending only on baseline accuracy. Registered in advance, the law
+called the feature gain of unseen backbone families and of ImageNet-scale
+cells from baseline heights alone (96\% of resolvable cells; $|\Delta-G|
+\le 1.1$ points on five of six ImageNet-scale pairs). It yields
+a sharp fusion taxonomy: sources supplying different currencies stack (prior
+with augmentation), same-currency sources substitute (the prior against
+effective self-supervised pre-training), and fusing into an already-informed
+initialization taxes in proportion to what that initialization carries
+(ImageNet transfer). A decision guide maps regime to the cheapest
+intervention. Harness, configurations, subset indices, per-run records and
+result tables are released at
+\href{https://github.com/GCVCG/MomentAux}{\texttt{github.com/\allowbreak GCVCG/MomentAux}}.
 \end{abstract}
 
 \begin{graphicalabstract}
-\includegraphics[width=\linewidth]{figs/graphical_abstract.pdf}
+%% NB: inside cas-dc's PrelimsAbstract box, \linewidth is wider than the
+%% box that actually receives the image, so \linewidth overflows by ~124pt.
+%% Use an explicit width that fits the abstract measure.
+\includegraphics[width=0.98\columnwidth]{figs/graphical_abstract.pdf}
 \end{graphicalabstract}
 
 \begin{highlights}
@@ -147,7 +152,7 @@ reported in this paper.
 
 \section*{Data availability}
 All artifacts needed to reproduce every number in this paper are released
-at \url{https://github.com/GCVCG/MomentsCNNEncoder}: the training and
+at \url{https://github.com/GCVCG/MomentAux}: the training and
 evaluation harness (configs for all 2{,}800 cells, the committed subset
 indices, the fingerprinted filter banks, the single training entry point,
 the aggregation and audit scripts), and the complete result tables in open
@@ -169,9 +174,16 @@ subset indices we release make the exact image selection reproducible
 without redistributing the images. Model checkpoints (223\,GB) are not
 distributed; every cell retrains from its committed configuration.
 
-\section*{Declaration of generative AI in the writing process}
-% Per Elsevier policy: disclose any use of generative AI in manuscript
-% preparation. TODO finalize wording with authors.
+\section*{Declaration of generative AI and AI-assisted technologies in the
+writing process}
+%% Elsevier's prescribed wording (policy: "The use of generative AI and
+%% AI-assisted technologies in writing for Elsevier"). AUTHORS: confirm the
+%% tool name and the stated purpose before submission, or delete this whole
+%% section if there is nothing to disclose.
+During the preparation of this work the authors used Claude (Anthropic) in
+order to assist with drafting, editing and figure generation. After using
+this tool, the authors reviewed and edited the content as needed and take
+full responsibility for the content of the publication.
 
 \bibliographystyle{unsrtnat}
 \bibliography{refs}

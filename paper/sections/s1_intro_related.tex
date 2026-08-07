@@ -6,7 +6,7 @@ the same menu of remedies: pre-train on ImageNet, run a self-supervised
 stage, augment more aggressively, or inject some form of prior knowledge
 into the model. Each remedy fuses an external source of information,
 weights learned elsewhere, invariances distilled from augmented views,
-hand-crafted structure, with whatever the labelled data can teach on its
+hand-crafted structure, with whatever the labeled data can teach on its
 own. What the field lacks is not remedies but a controlled account of how
 these information sources \emph{combine}: when does adding a second source
 help, when is it redundant with what the first already supplies, and when
@@ -107,7 +107,7 @@ learn.
 
 We group prior work by the mechanism through which it supplies
 information to a data-limited network, since that is the axis along which
-our comparison is organised: hand-crafted structure placed in the forward
+our comparison is organized: hand-crafted structure placed in the forward
 path; auxiliary and distillation targets that shape features during
 training; self-supervised and transfer initializations that pay compute
 for representation; augmentation recipes that supply invariance;
@@ -199,10 +199,10 @@ self-supervised and vision-language alternatives. \citet{marks2025closer}
 take a closer look at self-supervised benchmarking specifically, and show
 that conclusions depend heavily on the evaluation protocol chosen. Both
 benchmark \emph{pretrained backbones}, so their unit of comparison is a
-checkpoint someone else produced, and neither normalises by training
+checkpoint someone else produced, and neither normalizes by training
 cost nor asks what happens when two sources of information are combined.
 Our unit is instead the \emph{intervention applied to a fixed recipe},
-which is what makes cost normalisation and the stacking question
+which is what makes cost normalization and the stacking question
 answerable at all.
 
 \paragraph{Spectral structure inside transformers.}
@@ -264,7 +264,7 @@ Backbone and self-supervised benchmarks
 \end{tabular}}
 \end{table}
 
-Table~\ref{tab:gap} summarises the position. Each column is a property
+Table~\ref{tab:gap} summarizes the position. Each column is a property
 that a question about \emph{fusing} information sources requires, and no
 existing line supplies all five at once.
 
@@ -290,7 +290,7 @@ so the same intervention is measured end-to-end and on frozen features at
 once, which is what exposes redundancy between two sources. Combinations
 are the least studied of all: the question of what happens when a prior
 is applied on top of augmentation, on top of self-supervised weights, or
-on top of a pretrained initialisation is precisely the fusion question,
+on top of a pretrained initialization is precisely the fusion question,
 and we could find no controlled study that measures all three.
 
 The fifth column is the one we regard as the paper's distinguishing
@@ -308,7 +308,7 @@ data-efficiency interventions.
 Reality-check studies have repeatedly shown that uncontrolled recipes
 manufacture illusory progress \citep{musgrave2020metric,wightman2021resnet},
 and reproducibility in ML remains fragile \citep{raff2019step}. We adopt
-the strictest discipline we could operationalise: a single frozen recipe;
+the strictest discipline we could operationalize: a single frozen recipe;
 committed per-subset indices so every intervention sees byte-identical
 images; numerically fingerprinted filter banks; deviations quarantined
 under a separate namespace and never mixed into headline tables; and,

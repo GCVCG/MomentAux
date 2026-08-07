@@ -1,6 +1,6 @@
 Fusing prior knowledge with data-driven learning is attractive precisely
-where data is scarce, yet the field lacks a controlled account of when such
-fusion helps, when it is redundant, and when it actively harms. We present a
+where data is scarce, yet no controlled account says when such fusion helps,
+when it is redundant, and when it harms. We present a
 benchmark that measures one fixed, hand-crafted source of knowledge, a
 pinned bank of Gabor and moment spectral targets, injected only during training
 through an auxiliary regression head at $\sim$2\% compute overhead, against
@@ -12,15 +12,15 @@ committed data subsets: 14 datasets, 7 backbone families, data scales from
 86M parameters ($2{,}800$ experimental cells; ${\sim}8{,}900$ training runs). The grid is organized by a
 single empirical law, $\Delta = G + \mathrm{readout}(\mathrm{base})$,
 separating each intervention's feature-level gain $G$ from a readout term
-that depends only on baseline accuracy. The law is predictive: registered in
-advance, it called the feature gain of unseen backbone families and of
-ImageNet-scale cells from baseline heights alone (96\% of resolvable cells;
-$|\Delta-G| \le 1.1$ points on five of six ImageNet-scale pairs). It yields
-a sharp fusion taxonomy: sources fusing DIFFERENT currencies stack (prior +
-augmentation), same-currency sources substitute (the prior against effective
-self-supervised pre-training),
-and fusing into an already-informed initialization taxes in proportion to
-what the initialization carries (ImageNet transfer). A decision guide maps
-regime to the cheapest effective intervention. The complete harness, every
-configuration and subset index, every per-run record, and all result tables
-are released at \url{https://github.com/GCVCG/MomentsCNNEncoder}.
+depending only on baseline accuracy. Registered in advance, the law
+called the feature gain of unseen backbone families and of ImageNet-scale
+cells from baseline heights alone (96\% of resolvable cells; $|\Delta-G|
+\le 1.1$ points on five of six ImageNet-scale pairs). It yields
+a sharp fusion taxonomy: sources supplying different currencies stack (prior
+with augmentation), same-currency sources substitute (the prior against
+effective self-supervised pre-training), and fusing into an already-informed
+initialization taxes in proportion to what that initialization carries
+(ImageNet transfer). A decision guide maps regime to the cheapest
+intervention. Harness, configurations, subset indices, per-run records and
+result tables are released at
+\href{https://github.com/GCVCG/MomentAux}{\texttt{github.com/\allowbreak GCVCG/MomentAux}}.

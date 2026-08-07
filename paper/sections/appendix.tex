@@ -7,8 +7,7 @@
 \caption{Complete measured envelopes for the champion prior ($\Delta$ vs.\
 shared baseline; bold = 10 seeds per arm). Blank = not measured. ViT rows
 are CIFAR-100 unless marked tin (Tiny-ImageNet), whose fractions are
-1, 2, 5, 10, 15, 25 and 100\%. Rows are sorted by data fraction,
-ascending; \up{} marks columns where higher is better.}
+1, 2, 5, 10, 15, 25 and 100\%.}
 \label{tab:appenv}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
@@ -37,9 +36,8 @@ frac. & C100 & C10 & tin & C100 & +DeiT & tin \\
 \caption{SimCLR initialization ($2\times$ compute) minus the prior
 ($1.02\times$) on CIFAR-100 with ResNet-18 under plain augmentation. The
 margin is unimodal: SSL's advantage is a mid-band phenomenon that
-vanishes at both extremes. Both column pairs are sorted by data
-fraction, ascending; a positive entry is a fraction where the
-$2\times$-compute initialisation wins.}
+vanishes at both extremes. A positive entry is a fraction where the
+$2\times$-compute initialization wins.}
 \label{tab:appssl}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
@@ -90,8 +88,7 @@ the evaluation space.
 Five share the ``better features, worse accuracy at sufficiency''
 signature (top block); two are PathMNIST@1\% cells whose linear evaluation is a
 known compressed measuring stick on that dataset; three are
-small-magnitude singletons. Rows are grouped by signature and, within a
-group, sorted by the magnitude of the readout residual, largest first.}
+small-magnitude singletons.}
 \label{tab:exceptions}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
@@ -99,7 +96,7 @@ group, sorted by the magnitude of the readout residual, largest first.}
 \zebra{2}
 \begin{tabular}{@{}lllrrrr@{}}
 \toprule
-dataset & backbone & cell & base & $\Delta$~\up & $G$~\up & readout \\
+dataset & backbone & cell & base & $\Delta$ & $G$ & readout \\
 \midrule
 Food-101 & R18 & mag3@50\% & 71.8 & $-1.30$ & $+4.66$ & $-5.96$ \\
 Food-101 & R18 & mag6o@50\% & 71.8 & $-0.91$ & $+4.97$ & $-5.88$ \\
@@ -125,7 +122,7 @@ near-duplicates, moves the prior's gain by at most $0.20$ points at any
 fraction; both arms eat identical contamination, so it cancels in
 $\Delta$.
 
-\paragraph{Granularity, decisively.} Relabelling CIFAR-100's committed
+\paragraph{Granularity, decisively.} Relabeling CIFAR-100's committed
 subsets with their 20 coarse labels (byte-identical pixels, identical
 steps) reproduces the full gain at matched data ($+5.84$ vs.\ $+5.30$ at
 5\%): gain follows data and task performance, not class count. The
@@ -165,8 +162,7 @@ what every arm consumes.
 
 \begin{table}[t]
 \caption{Datasets in the grid. Resolutions are as trained (native-size
-sources squash-resized where marked). Rows are ordered by domain, then by
-training-set size.}
+sources squash-resized where marked).}
 \label{tab:datasets}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
@@ -206,7 +202,7 @@ verified by \emph{loading and evaluating} checkpoints against their
 recorded accuracies, not by file listing. The full harness, configs,
 subsets, banks, runner, aggregation, audit, is released with the paper (anonymized repository during review; archival DOI on acceptance).
 
-\section{Explainability analyses}\label{app:explain}
+\section{Explainability analyzes}\label{app:explain}
 
 The prior's mechanism is visible directly in the learned features
 (Fig.~\ref{fig:explain}, CIFAR-100 @5\% champion pair). Class-activation

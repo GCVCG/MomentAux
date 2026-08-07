@@ -1,7 +1,7 @@
 # Prompt — Build a Bachelor Thesis Proposal (for Claude Code, run inside this repo)
 
 Copy everything below the line into Claude Code while your working directory is
-the `MomentsCNNEncoder` repository. It will read the codebase, do literature
+the `MomentAux` repository. It will read the codebase, do literature
 research, and produce a complete, defensible thesis proposal.
 
 ---

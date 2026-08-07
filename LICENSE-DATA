@@ -1,0 +1,31 @@
+Creative Commons Attribution 4.0 International (CC BY 4.0)
+=========================================================
+
+This licence applies to the DERIVED DATA released with this repository, that
+is: the aggregated result tables (results/*.csv, the workbook, the audit
+outputs), the per-run records (final.json, linear evaluation records), the
+per-epoch training curves (metrics.csv), the campaign logs, and the committed
+subset index files under data/subsets/.
+
+  https://creativecommons.org/licenses/by/4.0/
+
+You are free to share and adapt this material for any purpose, including
+commercially, provided you give appropriate credit and indicate if changes
+were made. Cite the accompanying paper.
+
+Source code in this repository is licensed separately under the MIT License;
+see LICENSE.
+
+IMAGE DATASETS ARE NOT COVERED AND ARE NOT REDISTRIBUTED
+--------------------------------------------------------
+None of the 14 image datasets used in this study are contained in this
+repository or in its release assets. Each carries its own licence and access
+terms, and must be obtained from its original source: CIFAR-10, CIFAR-100,
+ciFAIR-100, STL-10, Tiny-ImageNet, EuroSAT, DTD, Food-101, PathMNIST
+(MedMNIST v2), CUB-200-2011, ImageNet64 (downsampled ImageNet) and
+ImageNet-100 (an ImageNet subset; ImageNet's own terms apply).
+
+What we release instead are the committed SUBSET INDICES: the exact per-class
+image indices each experimental cell consumed. Combined with
+scripts/make_subsets.py, they reproduce the precise image selection from a
+user's own copy of each dataset, without redistributing any image.

@@ -60,8 +60,8 @@ uncertainty.
 \caption{Scope-wide sign-law audit (regenerable by one command from the
 released artifact). A cell is resolvable when $|\mathrm{readout}| >
 2\,\mathrm{SEM}$; cells inside the crossing bracket make no sign
-prediction. Rows follow the filtering order, from every measured cell
-down to the resolvable subset that actually tests the law.}
+prediction. The rows narrow, step by step, from every measured cell down
+to the resolvable subset that actually tests the law.}
 \label{tab:audit}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
@@ -137,7 +137,7 @@ dataset property but a (dataset, architecture) property.
 
 The grid's central comparative finding is that fusion outcomes are
 predictable from the \emph{currency} each information source supplies.
-This section presents the three outcomes in order of how favourable they
+This section presents the three outcomes in order of how favorable they
 are, then draws them together. Section~\ref{sec:stack} gives the case
 where two sources supply different currencies and their gains compound;
 Section~\ref{sec:substitute} the case where they supply the same currency
@@ -166,9 +166,9 @@ predicted partial substitution and measured strong complementarity.
 ViT-tiny, CIFAR-100, and the effect of recipe. Under plain augmentation
 SSL catches the prior at ${\sim}5$k images; under the DeiT recipe the
 prior wins at every fraction because the recipe supplies the invariance
-SSL was selling. Three seeds per cell. Columns are sorted by data
-fraction, ascending; \up{} marks that higher is better, so positive
-entries are fractions where the prior wins.}
+SSL was selling. Three seeds per cell. A positive entry is a fraction
+where the prior wins; no better-direction marker is used, since neither
+sign of a method-versus-method difference is better a priori.}
 \label{tab:flip}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
@@ -176,7 +176,7 @@ entries are fractions where the prior wins.}
 \zebra{3}
 \begin{tabular}{@{}lrrrrr@{}}
 \toprule
- & \multicolumn{5}{c}{aux $-$ SimCLR (points)~\up} \\
+ & \multicolumn{5}{c}{aux $-$ SimCLR (points)} \\
 \cmidrule(l){2-6}
 recipe & 1\% & 5\% & 10\% & 25\% & 100\% \\
 \midrule
@@ -218,9 +218,7 @@ gain, not by its family name.
 prior on top of ImageNet weights is destructive in proportion to what the
 initialization supplied; linear evaluation shows the loss is carried almost
 entirely by $G$ (features), not by the readout. PathMNIST, where
-ImageNet features barely transfer, is the null control. Three seeds.
-Rows are sorted by the size of the tax, most destructive first; \up{}
-marks columns where higher is better.}
+ImageNet features barely transfer, is the null control. Three seeds.}
 \label{tab:tax}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
@@ -251,8 +249,7 @@ does not.
 \subsection{The taxonomy}\label{sec:taxonomy}
 \begin{table}[t]
 \caption{The fusion taxonomy the grid supports, with the measurement that
-establishes each row. Rows are ordered from the most to the least
-favourable outcome for the fused pair.}
+establishes each row.}
 \label{tab:taxonomy}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
@@ -295,9 +292,7 @@ to both arms of every pair.
 \caption{The pre-registered scale block. Every falsifier was declared
 before the first run; every one is dead. $G$ at ImageNet64 uses the
 fixed-budget evaluation protocol (250 per class shown); ImageNet-100 uses
-the standard full-train evaluation. Three seeds per cell. Rows are grouped by
-scale stage and, within a stage, ordered by model capacity; \up{} marks
-columns where higher is better and \down{} where lower is better.}
+the standard full-train evaluation. Three seeds per cell.}
 \label{tab:scale}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}

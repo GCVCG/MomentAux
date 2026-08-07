@@ -13,3 +13,7 @@ epoch 10/100 loss 2.0540 train 0.4814 test 0.4232
 epoch 11/100 loss 2.0147 train 0.4901 test 0.4302
 epoch 12/100 loss 1.9761 train 0.5002 test 0.5004
 epoch 13/100 loss 1.9614 train 0.5046 test 0.4888
+epoch 14/100 loss 1.9368 train 0.5094 test 0.4676
+epoch 15/100 loss 1.9162 train 0.5139 test 0.4664
+epoch 16/100 loss 1.9034 train 0.5174 test 0.4502
+epoch 17/100 loss 1.8764 train 0.5233 test 0.4544

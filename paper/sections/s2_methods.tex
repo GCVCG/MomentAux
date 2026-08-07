@@ -23,14 +23,14 @@ pairwise combinations are measured as well.}
 
 The benchmark's claims rest on the comparisons being controlled, so we
 describe the controls before the results (Fig.~\ref{fig:method}). This
-section is organised as the instrument's six components, in the order a
+section is organized as the instrument's six components, in the order a
 reader would need to trust a single number.
 Section~\ref{sec:recipe} fixes the training recipe and the committed data
 subsets that make any two cells comparable.
 Section~\ref{sec:momentaux} specifies the knowledge source under study,
 the pinned spectral bank and the auxiliary head that injects it.
 Section~\ref{sec:comparators} defines the competing interventions and the
-cost normalisation under which they are compared.
+cost normalization under which they are compared.
 Section~\ref{sec:probe} introduces the linear evaluation of frozen
 features that supplies the quantity $G$, without which the law of
 Section~\ref{sec:law} could not be measured at all.
@@ -57,7 +57,7 @@ $S_{\mathcal{D},p}$ by drawing, per class, a seeded permutation truncated
 to $p\%$, and commit it to version control. Every intervention therefore
 consumes byte-identical images, which is what makes an accuracy
 difference attributable to the intervention rather than to the draw.
-Because the recipe fixes epochs rather than steps, the optimisation
+Because the recipe fixes epochs rather than steps, the optimization
 budget scales with $|S_{\mathcal{D},p}|$; we treat data and compute as
 jointly varied along this axis and say so wherever it matters.
 
@@ -98,13 +98,15 @@ measured ($+2.81$ at the same cell).
 
 \paragraph{The fusion mechanism.} Let $f_3(x)$ be the backbone's
 third-stage activations and $W$ a $1{\times}1$ convolution mapping them
-to $N$ channels. Training minimises
+to $N$ channels. Training minimizes
 \begin{equation}
-  \mathcal{L}(t) \;=\; \mathcal{L}_{\mathrm{CE}}
-   \;+\; \lambda(t)\,
-   \bigl\lVert\, W f_3(x) - \mathbf{m}(x) \,\bigr\rVert_2^2 ,
-  \qquad
-  \lambda(t) = \tfrac{\lambda_0}{2}\Bigl(1+\cos\tfrac{\pi t}{T}\Bigr),
+  \begin{aligned}
+    \mathcal{L}(t) &\;=\; \mathcal{L}_{\mathrm{CE}}
+      \;+\; \lambda(t)\,
+      \bigl\lVert\, W f_3(x) - \mathbf{m}(x) \,\bigr\rVert_2^2 ,\\[2pt]
+    \lambda(t) &\;=\; \tfrac{\lambda_0}{2}
+      \Bigl(1+\cos\tfrac{\pi t}{T}\Bigr),
+  \end{aligned}
   \label{eq:loss}
 \end{equation}
 so the prior dominates early and vanishes by the final epoch. Three
@@ -125,24 +127,24 @@ which lets SGD satisfy it by collapsing the tapped features and inflating
 the head rather than by learning structure. We traced this directly:
 on ResNet-50 the tapped standard deviation fell from $0.596$ to $0.051$ while
 $\lVert W\rVert$ grew from $1.64$ to $11.2$ and cross-entropy stalled at
-chance. Projecting $\lVert W \rVert$ back to its initialisation norm after
+chance. Projecting $\lVert W \rVert$ back to its initialization norm after
 each step removes the degenerate direction, converting a bistable failure
 into a stable $+3.9$ (Section~\ref{sec:ablations}); we adopt it always-on.
 One configuration, $\lambda_0{=}1.0$, magnitude target, third-stage tap,
 head-norm on, transplants across every dataset and backbone without
 retuning, and we use it verbatim as the \emph{champion} unless stated.
 
-\subsection{Comparators and cost normalisation}\label{sec:comparators}
-We normalise by declared training cost relative to the baseline:
+\subsection{Comparators and cost normalization}\label{sec:comparators}
+We normalize by declared training cost relative to the baseline:
 MomentAux ${\approx}1.02\times$; SimCLR, SimSiam and DINO initializations
 $2\times$ (a full pre-training stage, then the frozen recipe);
 DeiT-strength augmentation \citep{touvron2021deit} ${\approx}1\times$
 compute but a modern recipe change; FitNets teachers $2\times$; HOG
-targets ${\approx}1.02\times$; ImageNet transfer amortised, but flagged
+targets ${\approx}1.02\times$; ImageNet transfer amortized, but flagged
 throughout as the one comparator with an external-data advantage.
 
 Every self-supervised stage runs on the committed subset images of the
-cell it initialises, never on extra data, for 200 epochs at batch
+cell it initializes, never on extra data, for 200 epochs at batch
 128 with that method's own published view augmentations, and is followed
 by the unchanged frozen recipe. Because a weak comparator would flatter
 our result, we test SimCLR's configuration explicitly rather than assume
@@ -213,8 +215,7 @@ predictions cannot fail is not measuring anything.
 \begin{table}[t]
 \caption{The benchmark at a glance. Every cell trains the frozen recipe
 of Section~\ref{sec:recipe}; costs are declared multiples of baseline
-training compute. Rows are ordered from what is varied (data, domain,
-architecture) to what is measured.}
+training compute.}
 \label{tab:glance}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
@@ -239,7 +240,7 @@ Measured & $2{,}800$ cells, ${\sim}8{,}900$ runs \\
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:glance} summarises the design space, and the rest of this
+Table~\ref{tab:glance} summarizes the design space, and the rest of this
 section unpacks it in five steps. Section~\ref{sec:datasets} describes
 the 14 datasets and the five domains they span, and
 Section~\ref{sec:compute} reports the hardware, wall-clock and carbon
@@ -249,20 +250,23 @@ Section~\ref{sec:ownenvelope} gives the prior's own gain envelope across
 data fractions, which is the object the law of Section~\ref{sec:law}
 explains; Section~\ref{sec:multimethod} places the competing
 interventions on the same envelope at matched cost, which is what
-Section~\ref{sec:fusion} analyses; and Section~\ref{sec:attention}
+Section~\ref{sec:fusion} analyzes; and Section~\ref{sec:attention}
 isolates the attention backbones, where the effect is largest and where
 the scale validation of Section~\ref{sec:scale} concentrates.
-Throughout the paper, tables shade alternate rows for readability, state
-their sort order in the caption, and mark with \up{} (\down{}) any column
-in which a higher (lower) value is the better outcome.
+Two table conventions hold throughout and are stated here once rather than
+repeated in every caption: alternate rows are lightly shaded for
+readability, and \up{} (\down{}) marks any column in which a higher
+(lower) value is the better outcome. Columns holding a signed
+method-versus-method difference carry no marker, because neither sign of
+such a difference is better a priori. A dash marks a cell we did not
+measure.
 
 \subsection{Datasets}\label{sec:datasets}
 \begin{table}[t]
 \caption{The 14 datasets, grouped by domain. Fractions are drawn from the
 committed subset indices of Section~\ref{sec:recipe}; sources with
 variable native resolution are squash-resized once, offline, and the
-resized copies are what every arm consumes. Rows are grouped by domain
-and, within a domain, ordered by training-set size.}
+resized copies are what every arm consumes.}
 \label{tab:maindatasets}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
@@ -287,7 +291,7 @@ fine-grained   & CUB-200 \citep{wah2011cub}          & 5{,}994  & 200 & 64 \\
 ImageNet scale & ImageNet64 \citep{chrabaszcz2017downsampled} & 1{,}281{,}167 & 1000 & 64 \\
  & ImageNet-100 \citep{deng2009imagenet}        & 126{,}689     & 100  & 224 \\
 \midrule
-\multicolumn{5}{@{}l}{relabelled controls: CIFAR-100-super (20 coarse),}\\
+\multicolumn{5}{@{}l}{relabeled controls: CIFAR-100-super (20 coarse),}\\
 \multicolumn{5}{@{}l}{Tiny-ImageNet-20, -20b, -super and -semantic}\\
 \bottomrule
 \end{tabular}}
@@ -298,7 +302,7 @@ deliberate rather than convenient. Five visual domains are represented
 because the currency account predicts that which information source is
 scarce depends on image statistics, and a benchmark drawn only from
 photographic data could not test that: satellite imagery has
-non-photographic colour statistics and meaningful rotations, texture
+non-photographic color statistics and meaningful rotations, texture
 lacks object-level structure, histopathology is stain-dominated, and
 fine-grained birds require discriminating parts rather than categories.
 The two ImageNet stages buy the axes small datasets cannot: ImageNet64
@@ -307,13 +311,13 @@ supplies native $224$\,px resolution and a model-scale curve.
 
 A second group exists purely as controls. CIFAR-100-super relabels
 byte-identical CIFAR-100 subsets with 20 coarse classes, so class count
-changes while pixels and optimisation steps do not; the Tiny-ImageNet
+changes while pixels and optimization steps do not; the Tiny-ImageNet
 variants do the same on a second population, including a semantically
 ordered grouping and an arbitrary positional one whose contrast isolates
 whether coherence or count is doing the work
 (Appendix~\ref{app:controls}). ciFAIR-100 replaces the 927 CIFAR-100 test
 images that duplicate training images, which lets us verify that low-data
-gains are not memorised duplicates.
+gains are not memorized duplicates.
 
 \subsection{Implementation, compute and carbon}\label{sec:compute}
 Training uses PyTorch with automatic mixed precision and \texttt{timm}
@@ -333,13 +337,18 @@ so that the heaviest cells still fit in memory.
 Aggregating the wall-clock recorded in all 8{,}887 timed run records, the
 study consumed \textbf{3{,}286 GPU-hours}: 2{,}901 on H100, 141 on H100~NVL and
 H200~NVL, and 239 on RTX 3090. Taking device thermal design power as an
-upper bound on draw, a data-centre power usage effectiveness of $1.2$, and
+upper bound on draw, a data-center power usage effectiveness of $1.2$, and
 a Spanish grid carbon intensity of $0.17$\,kg\,CO$_2$eq per kWh, this
 corresponds to approximately $2{,}600$\,kWh and \textbf{450\,kg
 CO$_2$eq}, about $50$\,g CO$_2$eq per training run. We report this as an
-order-of-magnitude accounting, not a measurement: it ignores idle and
-host-side draw and assumes sustained peak GPU power, so it should be read
-as a conservative upper bound. Two aspects of the study's design lower
+order-of-magnitude accounting following the methodology of the Machine
+Learning Impact calculator \citep{lacoste2019quantifying}, not a
+measurement. Its known omissions should be read with it: it assumes
+sustained peak GPU power and uniform throughput, ignores idle and host-side
+draw, excludes embodied (manufacturing) carbon and storage, and applies a
+single national grid intensity rather than the regional and hourly value at
+the time each job ran. The figure covers every run the campaign executed,
+including exploration and repeats, not only the runs reported here. Two aspects of the study's design lower
 this figure materially. The intervention under test adds only about $2\%$
 to a run, so the comparison itself is cheap; the expense lies in the
 comparators, since every self-supervised arm doubles the cost of its cell.
@@ -351,8 +360,7 @@ campaign would otherwise have silently recomputed finished work.
 \begin{table}[t]
 \caption{Complete envelopes: gain $\Delta$ of the champion prior over the
 shared baseline (points). Bold: ten seeds per arm; others three. Per-cell
-SEMs ($0.07$--$0.7$) ship with the released records. Rows are sorted by
-data fraction, ascending; \up{} marks columns where higher is better.}
+SEMs ($0.07$--$0.7$) ship with the released records.}
 \label{tab:envelope}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
@@ -378,9 +386,8 @@ fraction & CIFAR-100~\up & CIFAR-10~\up & Tiny-IN~\up \\
 \caption{Domain datasets at representative fractions (points, three
 seeds). The unimodal shape recurs on satellite, texture, food,
 histopathology and fine-grained data. PathMNIST above ${\sim}15\%$ is
-confounded by a shifted test split that penalises \emph{all} methods
-(Appendix~\ref{app:domains}). Rows are sorted by the fraction at which
-each dataset peaks; \up{} marks columns where higher is better.}
+confounded by a shifted test split that penalizes \emph{all} methods
+(Appendix~\ref{app:domains}).}
 \label{tab:domainenv}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
@@ -426,9 +433,9 @@ can pay for everything.
 
 \subsection{The multi-method comparison}\label{sec:multimethod}
 The same envelope measured for every comparator produces the head-to-head
-tables that Sections~\ref{sec:fusion} and \ref{sec:guide} analyse. As a
+tables that Sections~\ref{sec:fusion} and \ref{sec:guide} analyze. As a
 preview of their shape: on CIFAR-100 under plain augmentation, SimCLR
-initialisation at $2\times$ compute beats the $1.02\times$ prior by
+initialization at $2\times$ compute beats the $1.02\times$ prior by
 $+0.85$ to $+5.0$ points between 1\% and 10\% and converges back to
 parity by 50\%; SimSiam learns nothing at this scale
 (${\leq}+0.9$ everywhere); DINO trails the prior at every fraction below
@@ -440,8 +447,7 @@ augmentation recipe, the ordering inverts (Section~\ref{sec:fusion}).
 \caption{ViT-tiny on CIFAR-100: gain of the prior under the plain recipe
 and under DeiT-strength augmentation, with the amplification ratio.
 Augmentation does not substitute for the prior; it amplifies it and
-shifts its peak toward more data. Three seeds per cell. Rows are sorted
-by data fraction, ascending; \up{} marks columns where higher is better.}
+shifts its peak toward more data. Three seeds per cell.}
 \label{tab:vitenvelope}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
