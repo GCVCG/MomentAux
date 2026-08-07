@@ -7,14 +7,16 @@
 \caption{Complete measured envelopes for the champion prior ($\Delta$ vs.\
 shared baseline; bold = 10 seeds per arm). Blank = not measured. ViT rows
 are CIFAR-100 unless marked tin (Tiny-ImageNet), whose fractions are
-1, 2, 5, 10, 15, 25 and 100\%.}
+1, 2, 5, 10, 15, 25 and 100\%. Rows are sorted by data fraction,
+ascending; \up{} marks columns where higher is better.}
 \label{tab:appenv}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \resizebox{\columnwidth}{!}{%
+\zebra{4}
 \begin{tabular}{@{}lrrrrrr@{}}
 \toprule
- & \multicolumn{3}{c}{ResNet-18} & \multicolumn{3}{c}{ViT-tiny} \\
+ & \multicolumn{3}{c}{ResNet-18~\up} & \multicolumn{3}{c}{ViT-tiny~\up} \\
 \cmidrule(lr){2-4}\cmidrule(l){5-7}
 frac. & C100 & C10 & tin & C100 & +DeiT & tin \\
 \midrule
@@ -35,10 +37,13 @@ frac. & C100 & C10 & tin & C100 & +DeiT & tin \\
 \caption{SimCLR initialization ($2\times$ compute) minus the prior
 ($1.02\times$) on CIFAR-100 with ResNet-18 under plain augmentation. The
 margin is unimodal: SSL's advantage is a mid-band phenomenon that
-vanishes at both extremes.}
+vanishes at both extremes. Both column pairs are sorted by data
+fraction, ascending; a positive entry is a fraction where the
+$2\times$-compute initialisation wins.}
 \label{tab:appssl}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
+\zebra{2}
 \begin{tabular}{@{}lrlr@{}}
 \toprule
 frac. & SSL $-$ prior & frac. & SSL $-$ prior \\
@@ -85,14 +90,16 @@ the probe space.
 Five share the ``better features, worse accuracy at sufficiency''
 signature (top block); two are PathMNIST@1\% cells whose probe is a
 known compressed measuring stick on that dataset; three are
-small-magnitude singletons.}
+small-magnitude singletons. Rows are grouped by signature and, within a
+group, sorted by the magnitude of the readout residual, largest first.}
 \label{tab:exceptions}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \resizebox{\columnwidth}{!}{%
+\zebra{2}
 \begin{tabular}{@{}lllrrrr@{}}
 \toprule
-dataset & backbone & cell & base & $\Delta$ & $G$ & readout \\
+dataset & backbone & cell & base & $\Delta$~\up & $G$~\up & readout \\
 \midrule
 Food-101 & R18 & mag3@50\% & 71.8 & $-1.30$ & $+4.66$ & $-5.96$ \\
 Food-101 & R18 & mag6o@50\% & 71.8 & $-0.91$ & $+4.97$ & $-5.88$ \\
@@ -158,16 +165,19 @@ what every arm consumes.
 
 \begin{table}[t]
 \caption{Datasets in the grid. Resolutions are as trained (native-size
-sources squash-resized where marked).}
+sources squash-resized where marked). Rows are ordered by domain, then by
+training-set size.}
 \label{tab:datasets}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \resizebox{\columnwidth}{!}{%
+\zebra{2}
 \begin{tabular}{@{}lrrrl@{}}
 \toprule
 dataset & train imgs & classes & px & domain \\
 \midrule
-CIFAR-10 / -100 & 50{,}000 & 10 / 100 & 32 & photographic \\
+CIFAR-10 & 50{,}000 & 10 & 32 & photographic \\
+CIFAR-100 & 50{,}000 & 100 & 32 & photographic \\
 ciFAIR-100 (eval) &--& 100 & 32 & decontaminated test \\
 STL-10 & 5{,}000 & 10 & 96 & photographic \\
 Tiny-ImageNet & 100{,}000 & 200 & 64 & photographic \\
@@ -179,7 +189,7 @@ CUB-200-2011 & 5{,}994 & 200 & 64$^{r}$ & fine-grained \\
 ImageNet64 & 1{,}281{,}167 & 1000 & 64 & photographic \\
 ImageNet-100 & 126{,}689 & 100 & 224 & photographic \\
 \bottomrule
-\multicolumn{5}{@{}l}{\footnotesize $^{r}$squash-resized from native.} \\
+\rowcolor{white}\multicolumn{5}{@{}l}{\footnotesize $^{r}$squash-resized from native.} \\
 \end{tabular}}
 \end{table}
 

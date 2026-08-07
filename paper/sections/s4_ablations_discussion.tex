@@ -2,23 +2,38 @@
 \section{Ablations and controls}\label{sec:ablations}
 
 The benchmark's defensibility rests on knowing \emph{which} ingredient
-carries the gain. We ablate every one.
+carries the gain. We ablate every one, and the six subsections below move
+outward from the ingredient itself to the design choices around it.
+Section~\ref{abl:target} isolates the target, the single ingredient the
+whole effect depends on, against random, learned and alternative
+hand-crafted alternatives. Section~\ref{abl:placement} varies where in
+the network the target is applied, how its weight is scheduled, and what
+form the classifier head takes. Section~\ref{abl:universal} asks whether
+one configuration survives changes of architecture and depth without
+retuning. Section~\ref{abl:forward} runs the classical alternative, the
+same bank placed in the forward path, and reports its failure mode.
+Section~\ref{abl:width} tests whether a wider bank helps.
+Section~\ref{abl:stab} separates a second effect that the accuracy
+tables alone would conflate with the first: the prior also stabilizes
+optimisation on backbones whose baselines collapse.
 
-\subsection{The target is the ingredient}
+\subsection{The target is the ingredient}\label{abl:target}
 \begin{table}[t]
 \caption{Target and mechanism controls on CIFAR-100 (champion
 configuration except the varied ingredient; $\Delta$ vs.\ shared
 baseline, three seeds). The gain needs the moment structure specifically:
 random fixed targets do nothing, a $2\times$-cost learned teacher does
 nothing anywhere on an eight-point envelope, and the classical HOG
-descriptor recovers about half.}
+descriptor recovers about half. Within each block rows are sorted by the
+10\% gain, descending; \up{} marks columns where higher is better.}
 \label{tab:controls}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \resizebox{\columnwidth}{!}{%
+\zebra{2}
 \begin{tabular}{@{}lrrl@{}}
 \toprule
-aux target & @5\% & @10\% & note \\
+aux target & @5\%~\up & @10\%~\up & note \\
 \midrule
 moment magnitude (ours) & $+3.31$ & $+2.81$ & phase-invariant energy \\
 structure tensor &--& $+1.78$ & mild nonlinearity \\
@@ -27,9 +42,9 @@ rotation-invariant energy &--& $+0.84$ & \\
 oriented edges (Gabor) &--& $-0.24$ & raw edges hurt \\
 2nd-order invariants &--& $-2.97$ & over-processed \\
 \midrule
-random fixed maps & $+0.01$ & $+0.14$ & kills ``any aux signal'' \\
-learned teacher (FitNets) & $-0.36$ & $+0.16$ & $2\times$ cost, ${\sim}0$ on 8-pt envelope \\
 HOG target & $+1.22$ & $+1.37$ & descriptor helps; moments $2\times$ better \\
+learned teacher (FitNets) & $-0.36$ & $+0.16$ & $2\times$ cost, ${\sim}0$ on 8-pt envelope \\
+random fixed maps & $+0.01$ & $+0.14$ & kills ``any aux signal'' \\
 \midrule
 cosine loss (not MSE) & -- & $+0.46$ & magnitude scale matters \\
 \bottomrule
@@ -46,7 +61,7 @@ phase-invariant \emph{magnitude} wins decisively; discarding magnitude
 scale (cosine loss) forfeits most of the gain, and heavily processed
 invariants are actively harmful targets.
 
-\subsection{Placement, schedule, and head}
+\subsection{Placement, schedule, and head}\label{abl:placement}
 The tap depth is flat across the first three stages (within seed noise at
 both 1\% and 10\%) with a cliff only at the final stage: the one design
 knob in the study that is \emph{not} a data-regime knob. The schedule
@@ -64,10 +79,11 @@ Notably, three plausible fixes tried \emph{before} tracing the mechanism
 backfired, the last making collapse $25\times$ faster, a small case
 study in mechanism-first debugging.
 
-\subsection{One configuration, every architecture and depth}
-A single champion setting transplants without retuning: ResNet-18/34/50
-land $+4.3/+4.0/+3.9$ at the same cell; the new depth sweep confirms one
-$\lambda_0$ across ResNet-34/50 on six further domains ($+0.4$ to $+9.0$
+\subsection{One configuration, every architecture and depth}\label{abl:universal}
+A single champion setting transplants without retuning: ResNet-18, -34
+and -50 land $+4.3$, $+4.0$ and $+3.9$ at the same cell; the new depth
+sweep confirms one $\lambda_0$ across ResNet-34 and -50 on six further
+domains ($+0.4$ to $+9.0$
 at 5--10\% everywhere except CUB's deep-scarcity floor, decaying on the
 right flank as the law requires). Head \emph{form} is irrelevant where it
 plausibly might not have been: linear, cosine, and nearest-class-mean
@@ -75,7 +91,7 @@ readouts measure the same aux-vs-baseline gap to within $0.3$ points,
 the left-flank bottleneck is label information, not classifier
 expressivity.
 
-\subsection{The forward-path alternative}
+\subsection{The forward-path alternative}\label{abl:forward}
 Placing the same bank \emph{in the forward path}, concatenated fixed
 channels at the stem, the classical hybrid design, yields the study's
 sharpest structural contrast. Forward-path stems are the low-data
@@ -90,7 +106,7 @@ auxiliary placement of the \emph{same} knowledge is what removes the
 band, which is the design argument for fusing priors through
 training-only targets rather than through architecture.
 
-\subsection{Bank width}
+\subsection{Bank width}\label{abl:width}
 Widening the pinned 8-pair bank to 12 channels (via a third octave or two
 extra orientations, indistinguishable at $10{\times}10$ seeds) buys a
 real but local $+0.3$--$0.5$ at Tiny-ImageNet's 64\,px and nothing at
@@ -98,7 +114,7 @@ real but local $+0.3$--$0.5$ at Tiny-ImageNet's 64\,px and nothing at
 pre-registered re-pin criterion. The committed 8-pair bank therefore
 stays, with cross-domain evidence rather than convenience behind it.
 
-\subsection{Stabilization as a second, distinct effect}
+\subsection{Stabilization as a second, distinct effect}\label{abl:stab}
 Across ConvNeXt (under the frozen SGD recipe), ResNet-50 (without
 head-norm), Swin-T (on five datasets), and Swin at ImageNet64, baselines
 are bistable, some seeds train, some sit at chance, while the prior
@@ -116,11 +132,13 @@ that too).
 \caption{What to use when: the grid distilled to recommendations. Costs
 are training-compute multiples of the baseline; gains are typical measured
 ranges, not promises. ``Prior'' is the champion MomentAux configuration
-verbatim.}
+verbatim. Rows are ordered by backbone family and then by data regime,
+convolutional first, attention next, initialisation-dependent cases last.}
 \label{tab:guide}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \resizebox{\columnwidth}{!}{%
+\zebra{2}
 \begin{tabular}{@{}p{0.30\linewidth}p{0.22\linewidth}lp{0.27\linewidth}@{}}
 \toprule
 regime & recommendation & cost & measured basis \\
@@ -130,7 +148,7 @@ Conv, photo-like, $2\times$ \emph{not} affordable & prior & $1.02\times$ & $+1.4
 Conv, extreme scarcity (${\leq}1$--$2\%$) & prior (or fwd stem) & $1.02\times$ & SSL margin ${\leq}1$ pt; forward stem best ${\leq}2\%$ \\
 Satellite-like statistics, low data & prior & $1.02\times$ & beats SimCLR at 7 of 11 EuroSAT fractions \\
 Any ViT trained the modern way (DeiT aug) & prior \emph{and} augmentation & $1.02\times$ & flip: beats SSL at every fraction; $+14..{+}25$ over recipe alone \\
-ViT and Swin from scratch, any scale & prior & $1.02\times$ & $+3.2$ at 1.28M imgs; $+13/{+}26$ at 224\,px; stabilizes Swin \\
+ViT and Swin from scratch, any scale & prior & $1.02\times$ & $+3.2$ at 1.28M imgs; $+13$ and $+26$ at 224\,px; stabilizes Swin \\
 ImageNet-transferable task & transfer; \textbf{never} add prior &--& tax $-10..{-}24$, feature-side \\
 Domain-shifted from ImageNet (e.g.\ stains) & prior from scratch competitive & $1.02\times$ & transfer advantage shrinks to $+2..{+}3$ \\
 Data sufficient (${\geq}50\%$) & nothing (all converge) &--& every intervention within $\pm 0.8$ \\

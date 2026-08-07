@@ -105,6 +105,18 @@ learn.
 %% ---------------------------------------------------------------------
 \section{Related work}\label{sec:related}
 
+We group prior work by the mechanism through which it supplies
+information to a data-limited network, since that is the axis along which
+our comparison is organised: hand-crafted structure placed in the forward
+path; auxiliary and distillation targets that shape features during
+training; self-supervised and transfer initializations that pay compute
+for representation; augmentation recipes that supply invariance;
+small-data results specific to attention; and the large-scale comparative
+benchmarks that most closely resemble what we build. Each paragraph below
+takes one of these in turn. Section~\ref{sec:gap} then states, in a
+single table, which properties a controlled fusion study requires and
+which of them each line of work currently provides.
+
 \paragraph{Hand-crafted structure inside learned networks.}
 Fixed oriented filters predate deep learning as models of early visual
 cortex \citep{jones1987gabor} and as image descriptors
@@ -197,7 +209,7 @@ answerable at all.
 A parallel line injects spectral structure into attention architectures:
 the Scattering Vision Transformer \citep{patro2023scattering} performs
 spectral decomposition with dual-tree complex wavelets inside the token
-mixer, and FViT \citep{chen2025fvit} adds a \emph{learnable} Gabor filter
+mixer, and FViT \citep{shi2026fvit} adds a \emph{learnable} Gabor filter
 to focus attention across scales and orientations. These are
 architectural changes that persist at inference, and each is evaluated as
 a model proposal against published baselines. Our object is the
@@ -222,15 +234,16 @@ happens when two sources are applied together.}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \resizebox{\columnwidth}{!}{%
+\zebra{2}
 \begin{tabular}{@{}lccccc@{}}
 \toprule
 line of work & \rotbox{one frozen recipe} & \rotbox{cost-normalized} &
   \rotbox{feature-side} & \rotbox{combinations} & \rotbox{predictive model} \\
 \midrule
 Fixed spectral filters in the forward path
-  \citep{bruna2013scattering,oyallon2017scaling,luan2018gaborcnn,patro2023scattering,chen2025fvit}
+  \citep{bruna2013scattering,oyallon2017scaling,luan2018gaborcnn,patro2023scattering,shi2026fvit}
   & \pmark & \xmark & \xmark & \xmark & \xmark \\
-Auxiliary / distillation targets
+Auxiliary and distillation targets
   \citep{romero2015fitnets,lee2015deeply,wei2022maskfeat}
   & \pmark & \xmark & \pmark & \xmark & \xmark \\
 Self-supervised pre-training
@@ -242,7 +255,7 @@ Transfer learning studies
 Small-data ViT recipes
   \citep{touvron2021deit,steiner2022train,liu2021efficient,gani2022train}
   & \xmark & \pmark & \xmark & \pmark & \xmark \\
-Backbone / SSL benchmarks
+Backbone and self-supervised benchmarks
   \citep{goldblum2023battle,marks2025closer,zhai2019vtab}
   & \pmark & \xmark & \cmark & \xmark & \xmark \\
 \midrule

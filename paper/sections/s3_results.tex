@@ -1,7 +1,21 @@
 %% ---------------------------------------------------------------------
 \section{The organizing law}\label{sec:law}
 
-\subsection{Form and origin}
+A grid of $2{,}800$ cells is only as useful as the account that organizes
+it, and this section builds that account in four steps.
+Section~\ref{sec:lawform} states the law's form, how the end-to-end gain
+$\Delta$ decomposes into a feature term $G$ and a readout term governed
+by baseline accuracy, and is explicit about what the law is not.
+Section~\ref{sec:lawaudit} audits it over the whole grid under a
+resolvability criterion that keeps uninformative cells from inflating the
+score. Section~\ref{sec:lawpredict} is the part that distinguishes a law
+from a curve fit: three episodes in which the account was used to predict
+unmeasured quantities in advance, including a backbone family it had
+never seen. Section~\ref{sec:lawG} then localizes what each term depends
+on, which is what makes the fusion outcomes of Section~\ref{sec:fusion}
+anticipatable rather than merely observed.
+
+\subsection{Form and origin}\label{sec:lawform}
 For each paired cell we measure the end-to-end gain $\Delta$ and the
 feature gain $G$ (Section~\ref{sec:instrument}), and define
 $\mathrm{readout} \equiv \Delta - G$. Across the grid the readout term
@@ -41,20 +55,23 @@ coin flip and wrongly suggest failure. The honest audit therefore counts
 only cells whose readout is resolvable against its own propagated
 uncertainty.
 
-\subsection{The audit}
+\subsection{The audit}\label{sec:lawaudit}
 \begin{table}[t]
 \caption{Scope-wide sign-law audit (regenerable by one command from the
 released artifact). A cell is resolvable when $|\mathrm{readout}| >
 2\,\mathrm{SEM}$; cells inside the crossing bracket make no sign
-prediction.}
+prediction. Rows follow the filtering order, from every measured cell
+down to the resolvable subset that actually tests the law.}
 \label{tab:audit}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
+\zebra{1}
 \begin{tabular}{@{}lr@{}}
 \toprule
 cells with paired $\Delta$ and $G$ (all interventions) & 1{,}660 \\
 \quad in law scope (prior, from scratch, ${\geq}3$ seeds per arm) & 989 \\
-backbone variants (families) / datasets in scope & 9 (7) / 15 \\
+backbone variants in scope (distinct families) & 9 (7) \\
+datasets in scope & 15 \\
 inside crossing bracket (no prediction) & 98 \\
 unresolved ($|\mathrm{readout}| \le 2$\,SEM) & 613 \\
 \midrule
@@ -75,13 +92,14 @@ explain this cluster; we name it as the law's known boundary
 (Section~\ref{sec:limits}) and list every exception in
 Appendix~\ref{app:exceptions}.
 
-\subsection{Prediction, not description}
+\subsection{Prediction, not description}\label{sec:lawpredict}
 Three pre-registered episodes distinguish the law from a post-hoc fit.
 
 \emph{(i) A new backbone family from baselines alone.} Before any Swin-T
 probe existed, we read the readout term off the measured curve at Swin's
 baseline heights and published bands for its feature gain
-($G \approx 9.6/8.8/9.8/7.0$ at 5, 10, 15 and 25\% of CIFAR-100, band
+($G \approx 9.6$, $8.8$, $9.8$ and $7.0$ at 5, 10, 15 and 25\% of
+CIFAR-100; band
 $+7$--$+11$). The measurements landed at $10.5$, $9.3$, $10.1$, $7.6$: four of
 four in band, each within $0.9$ of its point call, against two live
 falsifiers (attention-intrinsic $G{\geq}13$; stabilization-only
@@ -98,7 +116,7 @@ small $G$).
 where the residual $\Delta - G$ was pre-registered to stay within
 $1.5$ points on every backbone.
 
-\subsection{What $G$ is a function of}
+\subsection{What $G$ is a function of}\label{sec:lawG}
 Controlled crossings localize the law's terms. $G$ is a property of the
 checkpoint and the probe's label space, invariant to which coarse
 partition relabels the data but cut roughly from $4.2$ to $2.9$ when
@@ -119,8 +137,18 @@ dataset property but a (dataset, architecture) property.
 
 The grid's central comparative finding is that fusion outcomes are
 predictable from the \emph{currency} each information source supplies.
+This section presents the three outcomes in order of how favourable they
+are, then draws them together. Section~\ref{sec:stack} gives the case
+where two sources supply different currencies and their gains compound;
+Section~\ref{sec:substitute} the case where they supply the same currency
+and the second adds nothing, together with the refinement that rescues
+the rule from its apparent counterexamples;
+Section~\ref{sec:taxsub} the one fusion in the grid that is uniformly
+destructive, and the probe measurement that explains why.
+Section~\ref{sec:taxonomy} collects the three into a single table with
+the evidence for each row.
 
-\subsection{Different currencies stack}
+\subsection{Different currencies stack}\label{sec:stack}
 DeiT-strength augmentation supplies invariance to nuisance transforms;
 the prior supplies oriented-energy structure. Fusing both
 (Table~\ref{tab:vitenvelope}) does not trade off: the prior's ViT gain
@@ -132,20 +160,23 @@ network can commit more capacity to the structure the target teaches. Our
 own pre-registered bet here was wrong in the pessimistic direction: we
 predicted partial substitution and measured strong complementarity.
 
-\subsection{Same currency substitutes}
+\subsection{Same currency substitutes}\label{sec:substitute}
 \begin{table}[t]
 \caption{Prior versus SimCLR initialization ($2\times$ compute) on
 ViT-tiny, CIFAR-100, and the effect of recipe. Under plain augmentation
 SSL catches the prior at ${\sim}5$k images; under the DeiT recipe the
 prior wins at every fraction because the recipe supplies the invariance
-SSL was selling. Three seeds per cell.}
+SSL was selling. Three seeds per cell. Columns are sorted by data
+fraction, ascending; \up{} marks that higher is better, so positive
+entries are fractions where the prior wins.}
 \label{tab:flip}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \resizebox{\columnwidth}{!}{%
+\zebra{3}
 \begin{tabular}{@{}lrrrrr@{}}
 \toprule
- & \multicolumn{5}{c}{aux $-$ SimCLR (points)} \\
+ & \multicolumn{5}{c}{aux $-$ SimCLR (points)~\up} \\
 \cmidrule(l){2-6}
 recipe & 1\% & 5\% & 10\% & 25\% & 100\% \\
 \midrule
@@ -175,26 +206,29 @@ $G$), so its standard configuration was its best shot.
 The substitution rule refines rather than universalizes: fusing the prior
 onto \emph{ineffective} SSL stacks trivially. SimSiam learns almost
 nothing at study scale ($\Delta \leq +0.9$ everywhere measured), and
-prior-on-SimSiam recovers the prior's full gain ($+6.2/+4.3/+2.0$ over
-SimSiam alone at CIFAR-100 $5/10/25\%$). The operative rule is therefore
+prior-on-SimSiam recovers the prior's full gain ($+6.2$, $+4.3$ and
+$+2.0$ over SimSiam alone at CIFAR-100 5, 10 and 25\%). The operative rule is therefore
 \emph{the prior is redundant exactly insofar as the other source already
 bought the same features}, judged by the other source's own measured
 gain, not by its family name.
 
-\subsection{Fusing into mature features taxes}
+\subsection{Fusing into mature features taxes}\label{sec:taxsub}
 \begin{table}[t]
 \caption{The transfer tax and its feature-side origin. Injecting the
 prior on top of ImageNet weights is destructive in proportion to what the
 initialization supplied; linear probes show the loss is carried almost
 entirely by $G$ (features), not by the readout. PathMNIST, where
-ImageNet features barely transfer, is the null control. Three seeds.}
+ImageNet features barely transfer, is the null control. Three seeds.
+Rows are sorted by the size of the tax, most destructive first; \up{}
+marks columns where higher is better.}
 \label{tab:tax}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \resizebox{\columnwidth}{!}{%
+\zebra{2}
 \begin{tabular}{@{}lrrrr@{}}
 \toprule
-cell & transfer adv. & $\Delta$ (tax) & $G$ & readout \\
+cell & transfer adv. & $\Delta$ (tax)~\up & $G$~\up & readout \\
 \midrule
 CIFAR-10 @5\% & $+13..{+}18$ & $-17.1$ & $-15.8 \pm 1.7$ & $-1.3$ \\
 CIFAR-100 @7\% & $+10..{+}18$ & $-16.4$ & $-16.3 \pm 3.1$ & $-0.1$ \\
@@ -214,14 +248,16 @@ to destroy and the tax is a measured zero. Fusion with an information-rich
 partner must respect what the partner already encodes; a shaping prior
 does not.
 
-\subsection{The taxonomy}
+\subsection{The taxonomy}\label{sec:taxonomy}
 \begin{table}[t]
 \caption{The fusion taxonomy the grid supports, with the measurement that
-establishes each row.}
+establishes each row. Rows are ordered from the most to the least
+favourable outcome for the fused pair.}
 \label{tab:taxonomy}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \resizebox{\columnwidth}{!}{%
+\zebra{2}
 \begin{tabular}{@{}llll@{}}
 \toprule
 fusion & currencies & outcome & key evidence \\
@@ -232,7 +268,7 @@ prior + ineffective SSL & structure + ${\sim}$nothing & stack & full gain recove
 prior + ImageNet init & structure vs.\ mature features & \textbf{tax} & $-17$ e2e, carried by $G$; null on shift \\
 augmentation + SSL & invariance + invariance & substitute & DeiT recipe collapses SimCLR's margin \\
 \bottomrule
-\multicolumn{4}{@{}p{0.95\linewidth}@{}}{\footnotesize $^{*}$Same
+\rowcolor{white}\multicolumn{4}{@{}p{0.95\linewidth}@{}}{\footnotesize $^{*}$Same
 currency in effect: at matched cells the two sources' feature gains
 coincide, which is why neither adds to the other.} \\
 \end{tabular}}
@@ -258,15 +294,18 @@ to both arms of every pair.
 \begin{table}[t]
 \caption{The pre-registered scale block. Every falsifier was declared
 before the first run; every one is dead. $G$ at ImageNet64 uses the
-fixed-budget probe protocol (250/class shown); ImageNet-100 uses the
-standard full-train probe. Three seeds per cell.}
+fixed-budget probe protocol (250 per class shown); ImageNet-100 uses the
+standard full-train probe. Three seeds per cell. Rows are grouped by
+scale stage and, within a stage, ordered by model capacity; \up{} marks
+columns where higher is better and \down{} where lower is better.}
 \label{tab:scale}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \resizebox{\columnwidth}{!}{%
+\zebra{2}
 \begin{tabular}{@{}llrrrl@{}}
 \toprule
-cell & registered band & $\Delta$ & $G$ & $|\Delta{-}G|$ & verdict \\
+cell & registered band & $\Delta$~\up & $G$~\up & $|\Delta{-}G|$~\down & verdict \\
 \midrule
 \multicolumn{6}{@{}l}{\emph{ImageNet64: 1.28M images, 1000 classes}} \\
 ResNet-18 & $\Delta$: $0.0{\pm}0.5$ & $+0.04$ & $+0.05$ & $0.01$ & neutral, exactly \\
@@ -279,7 +318,7 @@ ResNet-50 & $\Delta$: $0.0{\pm}1.0$ & $-0.14$ & $+0.03$ & $0.17$ & neutral at 22
 ViT-S/16 & $\Delta$: $+2..{+}8$; $G$: $12.0..12.6$ & $+13.00$ & $+11.95$ & $1.05$ & above band \\
 ViT-B/16 & $\Delta \geq \Delta_{\mathrm{ViT\mbox{-}S}}$ & $+26.01$ & $+22.89^{*}$ & $3.12^{*}$ & grows with scale \\
 \bottomrule
-\multicolumn{6}{@{}p{0.95\linewidth}@{}}{\footnotesize $^{*}$The ViT-B
+\rowcolor{white}\multicolumn{6}{@{}p{0.95\linewidth}@{}}{\footnotesize $^{*}$The ViT-B
 aux arm probes at its own ceiling (probe $69.8$ vs.\ e2e $69.3$), a
 pre-registered caveat that compresses $G$; the residual is not resolvable
 against its uncertainty ($\pm 2.4$).} \\

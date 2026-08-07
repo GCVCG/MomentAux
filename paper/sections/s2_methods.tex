@@ -22,7 +22,21 @@ pairwise combinations are measured as well.}
 \end{figure*}
 
 The benchmark's claims rest on the comparisons being controlled, so we
-describe the controls before the results (Fig.~\ref{fig:method}).
+describe the controls before the results (Fig.~\ref{fig:method}). This
+section is organised as the instrument's six components, in the order a
+reader would need to trust a single number.
+Section~\ref{sec:recipe} fixes the training recipe and the committed data
+subsets that make any two cells comparable.
+Section~\ref{sec:momentaux} specifies the knowledge source under study,
+the pinned spectral bank and the auxiliary head that injects it.
+Section~\ref{sec:comparators} defines the competing interventions and the
+cost normalisation under which they are compared.
+Section~\ref{sec:probe} introduces the linear probe that supplies the
+feature-side quantity $G$, without which the law of
+Section~\ref{sec:law} could not be measured at all.
+Section~\ref{sec:stats} states the seed and uncertainty protocol, and
+Section~\ref{sec:prereg} the pre-registration discipline that turns the
+grid's predictions into falsifiable ones.
 
 \subsection{Frozen recipe and committed subsets}\label{sec:recipe}
 Every headline cell trains with an identical recipe: stochastic gradient descent (SGD) with momentum
@@ -118,7 +132,7 @@ One configuration, $\lambda_0{=}1.0$, magnitude target, third-stage tap,
 head-norm on, transplants across every dataset and backbone without
 retuning, and we use it verbatim as the \emph{champion} unless stated.
 
-\subsection{Comparators and cost normalisation}
+\subsection{Comparators and cost normalisation}\label{sec:comparators}
 We normalise by declared training cost relative to the baseline:
 MomentAux ${\approx}1.02\times$; SimCLR, SimSiam and DINO initializations
 $2\times$ (a full pre-training stage, then the frozen recipe);
@@ -136,7 +150,7 @@ it: strengthening its contrastive views to DeiT strength makes it
 \emph{worse} at every fraction measured (Section~\ref{sec:fusion}), so
 its standard views are its best shot at this scale.
 
-\subsection{Measuring features: the probe protocol}
+\subsection{Measuring features: the probe protocol}\label{sec:probe}
 The law needs a feature-side quantity. For each trained checkpoint we
 freeze the network, extract penultimate features
 $z = \mathrm{pool}(f_L(x))$ for the full training split under the
@@ -164,7 +178,7 @@ ImageNet64 scale, where an LBFGS fit over $1.28$M rows is impractical,
 probes use fixed per-class budgets whose $G$ values are compared only to
 other same-budget probes.
 
-\subsection{Statistical protocol}
+\subsection{Statistical protocol}\label{sec:stats}
 Each cell runs ${\geq}3$ seeds, ten for headline envelopes. For a paired
 cell we report $\Delta$ as the difference of arm means with the standard error of the mean (SEM) of that difference, and propagate to the readout term as
 \begin{equation}
@@ -180,7 +194,7 @@ conservative. Cells in which any seed collapses to chance are flagged
 \emph{bistable}, excluded from headline status, and reported as findings
 about trainability in their own right.
 
-\subsection{Pre-registration}
+\subsection{Pre-registration}\label{sec:prereg}
 Each experimental wave was launched with numeric prediction bands and
 explicit falsifiers recorded in a project ledger before any result
 existed, and outcomes are reported against those bands including the
@@ -198,20 +212,22 @@ predictions cannot fail is not measuring anything.
 \begin{table}[t]
 \caption{The benchmark at a glance. Every cell trains the frozen recipe
 of Section~\ref{sec:recipe}; costs are declared multiples of baseline
-training compute.}
+training compute. Rows are ordered from what is varied (data, domain,
+architecture) to what is measured.}
 \label{tab:glance}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
+\zebra{2}
 \begin{tabular}{@{}lp{0.60\columnwidth}@{}}
 \toprule
 \textbf{Axis} & \textbf{Coverage} \\
 \midrule
-Datasets & CIFAR-10/100, ciFAIR-100, STL-10, Tiny-ImageNet, coarse
+Datasets & CIFAR-10, CIFAR-100, ciFAIR-100, STL-10, Tiny-ImageNet, coarse
   variants; EuroSAT, DTD, Food-101, PathMNIST, CUB-200; ImageNet64,
   ImageNet-100 \\
 Domains & photographic, satellite, texture, food, histopathology \\
-Backbones & ResNet-18/34/50, MobileNetV3, ConvNeXt-T, ViT-tiny/S/B,
-  Swin-T \\
+Backbones & ResNet-18, -34 and -50, MobileNetV3, ConvNeXt-T,
+  ViT-tiny, -S and -B, Swin-T \\
 Data scale & 500 to 1.28M images; 10 to 1000 classes \\
 Resolution & 32, 64, 96, 224\,px \\
 Interventions & MomentAux ($1.02\times$); SimCLR, SimSiam and DINO
@@ -222,25 +238,40 @@ Measured & $2{,}800$ cells, ${\sim}8{,}900$ runs \\
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:glance} summarises the design space. Three views of the
-grid organise the results that follow.
+Table~\ref{tab:glance} summarises the design space, and the rest of this
+section unpacks it in five steps. Section~\ref{sec:datasets} describes
+the 14 datasets and the five domains they span, and
+Section~\ref{sec:compute} reports the hardware, wall-clock and carbon
+budget the grid consumed. The remaining three subsections are the three
+views of the grid that the results are built from:
+Section~\ref{sec:ownenvelope} gives the prior's own gain envelope across
+data fractions, which is the object the law of Section~\ref{sec:law}
+explains; Section~\ref{sec:multimethod} places the competing
+interventions on the same envelope at matched cost, which is what
+Section~\ref{sec:fusion} analyses; and Section~\ref{sec:attention}
+isolates the attention backbones, where the effect is largest and where
+the scale validation of Section~\ref{sec:scale} concentrates.
+Throughout the paper, tables shade alternate rows for readability, state
+their sort order in the caption, and mark with \up{} (\down{}) any column
+in which a higher (lower) value is the better outcome.
 
 \subsection{Datasets}\label{sec:datasets}
 \begin{table}[t]
 \caption{The 14 datasets, grouped by domain. Fractions are drawn from the
 committed subset indices of Section~\ref{sec:recipe}; sources with
 variable native resolution are squash-resized once, offline, and the
-resized copies are what every arm consumes.}
+resized copies are what every arm consumes. Rows are grouped by domain
+and, within a domain, ordered by training-set size.}
 \label{tab:maindatasets}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \resizebox{\columnwidth}{!}{%
+\zebra{2}
 \begin{tabular}{@{}llrrr@{}}
 \toprule
 domain & dataset & train & cls. & px \\
 \midrule
-\multirow{5}{*}{photographic}
- & CIFAR-10 \citep{krizhevsky2009cifar}      & 50{,}000    & 10   & 32 \\
+photographic & CIFAR-10 \citep{krizhevsky2009cifar}      & 50{,}000    & 10   & 32 \\
  & CIFAR-100 \citep{krizhevsky2009cifar}     & 50{,}000    & 100  & 32 \\
  & ciFAIR-100 \citep{barz2020cifair}         & (test only) & 100  & 32 \\
  & STL-10 \citep{coates2011stl10}            & 5{,}000     & 10   & 96 \\
@@ -252,12 +283,11 @@ food           & Food-101 \citep{bossard2014food101} & 75{,}750 & 101 & 64 \\
 histopathology & PathMNIST \citep{yang2023medmnist}  & 89{,}996 & 9   & 64 \\
 fine-grained   & CUB-200 \citep{wah2011cub}          & 5{,}994  & 200 & 64 \\
 \midrule
-\multirow{2}{*}{ImageNet scale}
- & ImageNet64 \citep{chrabaszcz2017downsampled} & 1{,}281{,}167 & 1000 & 64 \\
+ImageNet scale & ImageNet64 \citep{chrabaszcz2017downsampled} & 1{,}281{,}167 & 1000 & 64 \\
  & ImageNet-100 \citep{deng2009imagenet}        & 126{,}689     & 100  & 224 \\
 \midrule
 \multicolumn{5}{@{}l}{relabelled controls: CIFAR-100-super (20 coarse),}\\
-\multicolumn{5}{@{}l}{Tiny-ImageNet-20 / -20b / -super / -semantic}\\
+\multicolumn{5}{@{}l}{Tiny-ImageNet-20, -20b, -super and -semantic}\\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -316,17 +346,19 @@ And the completed-run guard makes re-running an existing cell a no-op,
 which matters more than it sounds: several queue faults during the
 campaign would otherwise have silently recomputed finished work.
 
-\subsection{The prior's own envelope}
+\subsection{The prior's own envelope}\label{sec:ownenvelope}
 \begin{table}[t]
 \caption{Complete envelopes: gain $\Delta$ of the champion prior over the
 shared baseline (points). Bold: ten seeds per arm; others three. Per-cell
-SEMs ($0.07$--$0.7$) ship with the released records.}
+SEMs ($0.07$--$0.7$) ship with the released records. Rows are sorted by
+data fraction, ascending; \up{} marks columns where higher is better.}
 \label{tab:envelope}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
+\zebra{2}
 \begin{tabular}{@{}lrrr@{}}
 \toprule
-fraction & CIFAR-100 & CIFAR-10 & Tiny-IN \\
+fraction & CIFAR-100~\up & CIFAR-10~\up & Tiny-IN~\up \\
 \midrule
 1\%   & $\mathbf{+1.42}$ & $\mathbf{+6.37}$ & $+1.49$ \\
 2\%   & $+2.50$          & $\mathbf{+6.66}$ & $+1.81$ \\
@@ -346,23 +378,25 @@ fraction & CIFAR-100 & CIFAR-10 & Tiny-IN \\
 seeds). The unimodal shape recurs on satellite, texture, food,
 histopathology and fine-grained data. PathMNIST above ${\sim}15\%$ is
 confounded by a shifted test split that penalises \emph{all} methods
-(Appendix~\ref{app:domains}).}
+(Appendix~\ref{app:domains}). Rows are sorted by the fraction at which
+each dataset peaks; \up{} marks columns where higher is better.}
 \label{tab:domainenv}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \resizebox{\columnwidth}{!}{%
+\zebra{2}
 \begin{tabular}{@{}lrrrr@{}}
 \toprule
-dataset & 1\% & 5\% & 10--15\% & $\geq$25\% \\
+dataset & 1\%~\up & 5\%~\up & 10--15\%~\up & $\geq$25\%~\up \\
 \midrule
-EuroSAT   & $+2.67$ & $+0.84$ & $+1.22$ & ${\sim}0$ \\
-Food-101  &,      & $+5.63$ & $+3.18$ & $-0.47$ \\
-DTD       &,      & $+0.30$ & $+2.15$ & $+3.55$\rlap{$^{\ast}$} \\
-PathMNIST & $+5.70$ &,      & $+1.74$ & conf. \\
-CUB-200   &,      &,      &,      & $+2.74$\rlap{$^{\ast}$} \\
-STL-10    &,      &,      & $+5.92$ & $+3.18$ \\
+EuroSAT   & $+2.67$ & $+0.84$ & $+1.22$  & ${\sim}0$ \\
+PathMNIST & $+5.70$ & --      & $+1.74$  & conf. \\
+Food-101  & --      & $+5.63$ & $+3.18$  & $-0.47$ \\
+STL-10    & --      & --      & $+5.92$  & $+3.18$ \\
+DTD       & --      & $+0.30$ & $+2.15$  & $+3.55$\rlap{$^{\ast}$} \\
+CUB-200   & --      & --      & --       & $+2.74$\rlap{$^{\ast}$} \\
 \bottomrule
-\multicolumn{5}{@{}l}{\footnotesize $^{\ast}$value at 100\%.} \\
+\rowcolor{white}\multicolumn{5}{@{}l}{\footnotesize $^{\ast}$value at 100\%.} \\
 \end{tabular}}
 \end{table}
 
@@ -389,7 +423,7 @@ within noise on every one of ten populations, which is what the
 the decaying weight schedule is for: the fusion asks nothing when the data
 can pay for everything.
 
-\subsection{The multi-method comparison}
+\subsection{The multi-method comparison}\label{sec:multimethod}
 The same envelope measured for every comparator produces the head-to-head
 tables that Sections~\ref{sec:fusion} and \ref{sec:guide} analyse. As a
 preview of their shape: on CIFAR-100 under plain augmentation, SimCLR
@@ -400,19 +434,21 @@ parity by 50\%; SimSiam learns nothing at this scale
 25\%. On attention backbones, and on any backbone under a modern
 augmentation recipe, the ordering inverts (Section~\ref{sec:fusion}).
 
-\subsection{Attention: where the prior is dramatic}
+\subsection{Attention: where the prior is dramatic}\label{sec:attention}
 \begin{table}[t]
 \caption{ViT-tiny on CIFAR-100: gain of the prior under the plain recipe
 and under DeiT-strength augmentation, with the amplification ratio.
 Augmentation does not substitute for the prior; it amplifies it and
-shifts its peak toward more data. Three seeds per cell.}
+shifts its peak toward more data. Three seeds per cell. Rows are sorted
+by data fraction, ascending; \up{} marks columns where higher is better.}
 \label{tab:vitenvelope}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \resizebox{\columnwidth}{!}{%
+\zebra{2}
 \begin{tabular}{@{}lrrr@{}}
 \toprule
-fraction & $\Delta_{\mathrm{plain}}$ & $\Delta_{\mathrm{DeiT}}$ & ratio \\
+fraction & $\Delta_{\mathrm{plain}}$~\up & $\Delta_{\mathrm{DeiT}}$~\up & ratio~\up \\
 \midrule
 1\%   & $+1.4$  & $+3.2$            & 2.2 \\
 2\%   & $+3.3$  & $+6.0$            & 1.8 \\

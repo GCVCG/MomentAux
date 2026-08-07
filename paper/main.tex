@@ -5,6 +5,9 @@
 %% knowledge-data fusion lens: WHEN does fusing a fixed spectral prior with
 %% data-driven learning pay, substitute, or tax?
 %% Every number cited here must trace to CLAUDE.md / results exporters.
+%% cas-dc loads xcolor WITHOUT the table option; pass it here so that
+%% \rowcolors (alternating row shading) is available in every table.
+\PassOptionsToPackage{table}{xcolor}
 \documentclass[a4paper,fleqn]{cas-dc}
 
 \usepackage[numbers]{natbib}
@@ -17,6 +20,17 @@
 \newcommand{\xmark}{\ding{55}}
 \newcommand{\pmark}{$\circ$}
 \newcommand{\rotbox}[1]{\rotatebox{90}{\scriptsize #1}}
+
+%% ---- table conventions -------------------------------------------------
+%% Alternating row shading: \zebra{n} starts the banding at body row n of
+%% the tabular (rows are counted from the first row after \begin{tabular},
+%% header rows included), so each table declares where its body begins.
+\definecolor{rowshade}{gray}{0.94}
+\newcommand{\zebra}[1]{\rowcolors{#1}{}{rowshade}}
+%% Better-direction markers used in column headers, the standard benchmark
+%% convention: \up marks "higher is better", \down "lower is better".
+\newcommand{\up}{$\uparrow$}
+\newcommand{\down}{$\downarrow$}
 
 \begin{document}
 \let\WriteBookmarks\relax
