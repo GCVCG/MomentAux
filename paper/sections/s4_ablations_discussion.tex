@@ -15,7 +15,8 @@ same bank placed in the forward path, and reports its failure mode.
 Section~\ref{abl:width} tests whether a wider bank helps.
 Section~\ref{abl:stab} separates a second effect that the accuracy
 tables alone would conflate with the first: the prior also stabilizes
-optimization on backbones whose baselines collapse.
+optimization on backbones whose baselines collapse. Finally,
+Section~\ref{abl:notablated} states what we did \emph{not} vary.
 
 \subsection{The target is the ingredient}\label{abl:target}
 \begin{table}[t]
@@ -122,6 +123,43 @@ $4.3$ vs.\ $0.2$ with the prior). We report stabilization as a real,
 separate property; we do not claim routine variance reduction (a
 $10{\times}10$-seed test of that claim came back negative, and we report
 that too).
+
+%% ---------------------------------------------------------------------
+\subsection{What we did not ablate}\label{abl:notablated}
+Completeness cuts both ways, so we list the design constants that the
+method declares and this paper does \emph{not} vary, and separate those
+that could change a conclusion from those that cannot.
+
+Four are held fixed by construction and are applied identically to both
+arms of every pair, so they bound absolute values without being able to
+explain a paired difference. The training recipe itself is the instrument
+and is never tuned (Section~\ref{sec:recipe}). The target is pooled to the
+tapped stage's resolution by average pooling; max or learned pooling are
+untested. The auxiliary head is a single $1{\times}1$ convolution, and
+although we ablate the \emph{classifier} head thoroughly
+(Section~\ref{abl:placement}), we never widen or deepen the auxiliary one.
+The linear evaluation uses a fixed ridge constant of $10^{-4}$; it shifts
+every arm's absolute accuracy together, so $G$'s sign and ordering are
+unaffected, but the numeric value of $G$ is conditional on it.
+
+Three are more consequential, because they define the knowledge source
+rather than the measurement. The bank's envelope width is tied to its
+frequency by a fixed relation, so every filter carries the same number of
+cycles; we vary how many scales and orientations the bank holds
+(Section~\ref{abl:width}) but never that constant, so ``how localized
+should an oriented-energy target be'' is open. The target is computed on
+BT.601 luminance, which makes the prior colorblind by construction, and a
+color-opponent target is untested. And while the endpoint of the weight
+schedule is ablated and load-bearing ($\lambda(T)=0$ against
+$\lambda(T)=0.1$), its cosine \emph{shape} is not; a linear or stepped
+decay to the same endpoint may behave identically, and we do not know.
+
+None of these is a confound for the results reported here, since a
+paired $\Delta$ and a same-protocol $G$ gap are differences taken under
+identical settings. They are the boundary of what one bank, one head form
+and one schedule shape can establish, and the first two are the natural
+next dimensions for anyone extending the taxonomy to other structural
+priors.
 
 %% ---------------------------------------------------------------------
 \section{A decision guide}\label{sec:guide}

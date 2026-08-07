@@ -82,12 +82,66 @@ Unresolved ($|\mathrm{readout}| \le 2$\,SEM) & 613 \\
 \end{tabular}
 \end{table}
 
+\begin{table}[t]
+\caption{Robustness of the audit. The hit rate is stable against the
+resolvability threshold, survives clustering on the units that share a
+baseline arm, and is carried by the left flank, where the law makes a
+strong prediction, rather than by the right flank, where it predicts
+${\approx}0$. Intervals are Wilson 95\%; $p$ is a one-sided exact
+binomial against an even coin, and is indicative rather than literal
+because cells are clustered.}
+\label{tab:robust}
+\centering\scriptsize
+\setlength{\tabcolsep}{2.6pt}
+\zebra{2}
+\begin{tabular}{@{}P{0.30\columnwidth}rrrP{0.20\columnwidth}@{}}
+\toprule
+Audit variant & Cells & Correct & Rate & 95\% CI \\
+\midrule
+$|\mathrm{readout}| > 1$\,SEM & 470 & 418 & 88.9\% & [85.8, 91.5] \\
+$>1.5$\,SEM & 368 & 345 & 93.8\% & [90.8, 95.8] \\
+\textbf{$>2$\,SEM (declared)} & \textbf{278} & \textbf{268} & \textbf{96.4\%} & \textbf{[93.5, 98.0]} \\
+$>3$\,SEM & 186 & 182 & 97.8\% & [94.6, 99.2] \\
+\midrule
+One vote per (dataset, backbone, fraction) & 128 & 121 & 94.5\% & [89.1, 97.3] \\
+Cells with 3--4 seeds only & 271 & 261 & 96.3\% & [93.3, 98.0] \\
+\midrule
+Below the crossing & 236 & 234 & 99.2\% & [97.0, 99.8] \\
+Above the crossing & 42 & 34 & 81.0\% & [66.7, 90.0] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 Table~\ref{tab:audit} summarizes the current audit: of 278 resolvable
 cells spanning nine backbone families and fifteen datasets, 268 (96\%)
-fall on the predicted side. The ten exceptions are not scattered noise;
+fall on the predicted side (Wilson 95\% CI $[93.5, 98.0]$; one-sided
+exact binomial against an even coin, $p \approx 10^{-66}$). The ten exceptions are not scattered noise;
 they concentrate in one regime and share one signature, $G$ clearly
 positive while $\Delta$ is negative at ${\geq}20\%$ data on Food-101 and
-PathMNIST, ``better features, worse accuracy at sufficiency''. We do not
+PathMNIST, ``better features, worse accuracy at sufficiency''.
+
+Table~\ref{tab:robust} reports what the headline number does and does not
+survive, and we read it against ourselves. The rate is not an artifact of
+where the resolvability threshold was set: it rises monotonically from
+$88.9\%$ over 470 cells at one SEM to $97.8\%$ over 186 at three, never
+approaching chance, so a reader who prefers a stricter or looser criterion
+reaches the same conclusion. It survives the dependence between cells:
+collapsing to one vote per (dataset, backbone, fraction) group leaves
+$121/128 = 94.5\%$, and thirteen of the fourteen datasets have a correct
+majority. It is not an artifact of thin seeds either, since cells with only
+three or four seeds per arm score $96.3\%$ on their own.
+
+Two things it does \emph{not} survive, and both matter. First, the
+evidence is overwhelmingly left-flank: below the crossing the law scores
+$234/236$ ($99.2\%$), above it only $34/42$ ($81.0\%$). That is exactly the
+asymmetry we described above, now quantified, and it means the headline
+$96\%$ should be read as a strong claim about the scarce-data regime and a
+much weaker one about sufficiency. Second, the single dataset that fails is
+PathMNIST, at $4/8$, chance. Its linear evaluation is a known compressed
+measuring stick (its frozen-feature accuracy sits \emph{below} its own
+end-to-end accuracy), so we regard its $G$ as unreliable rather than the law
+as refuted there, but we report the failure rather than excluding the
+dataset. We do not
 explain this cluster; we name it as the law's known boundary
 (Section~\ref{sec:limits}) and list every exception in
 Appendix~\ref{app:exceptions}.

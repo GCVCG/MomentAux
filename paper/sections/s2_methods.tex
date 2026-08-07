@@ -200,6 +200,35 @@ conservative. Cells in which any seed collapses to chance are flagged
 \emph{bistable}, excluded from headline status, and reported as findings
 about trainability in their own right.
 
+Four properties of this protocol are worth stating plainly, because each
+bounds what the audit of Section~\ref{sec:lawaudit} can claim.
+
+\emph{The two-SEM rule is a declared magnitude threshold, not an exact
+test.} With three seeds per arm the Student-$t$ multiplier for a 95\%
+interval exceeds two, so the criterion is mildly liberal at the minimum
+seed count. We therefore fix it in advance and report the audit across a
+range of thresholds rather than defending one value
+(Table~\ref{tab:robust}).
+
+\emph{Cells are not independent.} A baseline arm is shared by every
+variant paired against it, and cells recur across the same datasets and
+backbones, so the 278 resolvable cells come from 128 distinct
+(dataset, backbone, fraction) groups and 152 distinct baseline arms. We
+therefore report a cluster-level audit alongside the cell-level one, and
+treat exact $p$-values as indicative rather than literal.
+
+\emph{The aggregate claim is not a family of per-cell tests.} We never
+assert significance for an individual cell, so no multiplicity correction
+applies to the hit rate; the resolvability filter is a selection rule
+applied identically to every cell, declared before the audit.
+
+\emph{Three-seed deltas are slightly optimistic.} When we deepened the
+three headline CIFAR-100 cells from three to ten seeds per arm, every
+$\Delta$ shrank, by $0.07$, $0.15$ and $0.39$ points. The direction
+reproduces an earlier CIFAR-10 deepening. Nothing in the shape of any
+envelope changed, but a three-seed $\Delta$ should be read as an
+upper-ish estimate, and headline envelopes use ten seeds for that reason.
+
 \subsection{Pre-registration}\label{sec:prereg}
 Each experimental wave was launched with numeric prediction bands and
 explicit falsifiers recorded in a project ledger before any result
