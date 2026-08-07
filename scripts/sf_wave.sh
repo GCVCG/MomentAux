@@ -13,7 +13,7 @@ LOG=/media/HDD_4TB/amughrabi/momentstem/sf_wave.log
 TASKS=()
 for band in rgb nir all; do
   for arm in none aux; do
-    for pct in 5 10 25; do
+    for pct in 5 10; do   # 25% runs on the local half (sf_wave_local.sh)
       for seed in 0 1 2; do
         TASKS+=("configs/sensorfusion/sf_eurosatms_${band}_${arm}_${pct}pct.yaml $seed")
       done
