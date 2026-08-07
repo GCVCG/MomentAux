@@ -1,8 +1,28 @@
 %% ---------------------------------------------------------------------
 \section{The instrument}\label{sec:instrument}
 
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/method.pdf}
+\caption{The study in one picture. \textbf{(a)} One frozen recipe and
+committed subset indices, so every intervention is measured on
+byte-identical images; deviations are quarantined under a diagnostic
+namespace and never enter headline tables. \textbf{(b)} MomentAux, the
+fused knowledge source: a pinned bank of oriented-energy targets
+regressed from a third-stage tap during training only, with the loss
+weight $\lambda$ decaying to exactly zero -- so the deployed network is
+byte-identical to the baseline and high-data neutrality is structural.
+\textbf{(c)} Each cell yields two measurements -- the end-to-end gain
+$\Delta$ and the frozen-feature gain $G$ from an identically-configured
+linear probe -- whose difference defines the readout term of
+Eq.~\ref{eq:law}. \textbf{(d)} The comparator ladder, ordered by declared
+training cost; all are fused into the same frozen recipe, and their
+pairwise combinations are measured as well.}
+\label{fig:method}
+\end{figure*}
+
 The benchmark's claims rest on the comparisons being controlled, so we
-describe the controls before the results.
+describe the controls before the results (Fig.~\ref{fig:method}).
 
 \subsection{Frozen recipe and committed subsets}
 Every headline cell trains with an identical recipe: SGD with momentum
@@ -87,7 +107,7 @@ and excluded from headline status as a finding in their own right.
 %% ---------------------------------------------------------------------
 \section{The grid}\label{sec:grid}
 
-\begin{table}[t]
+\begin{table*}[t]
 \caption{The benchmark at a glance. Every cell trains the frozen recipe of
 Section~\ref{sec:instrument}; costs are declared multiples of baseline
 training compute.}
@@ -111,13 +131,13 @@ Interventions & MomentAux (${\sim}1.02\times$); SimCLR/SimSiam/DINO \\
 Measured cells & $2{,}800$ cells, ${\sim}8{,}900$ runs (${\geq}3$ seeds; envelopes at 10) \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 Table~\ref{tab:glance} summarizes the design space. Three views of the
 grid organize the results that follow.
 
 \subsection{The prior's own envelope}
-\begin{table}[t]
+\begin{table*}[t]
 \caption{Complete envelopes: end-to-end gain $\Delta$ of the champion
 prior over the shared baseline (points; per-cell SEMs, $0.07$--$0.7$,
 ship with the released records). Bold cells: ten seeds per arm; others
@@ -137,9 +157,9 @@ CIFAR-10 & $\mathbf{+6.37}$ & $\mathbf{+6.66}$ & $+5.38$ & $+4.41$ & $+2.21$ & $
 Tiny-ImageNet & $+1.49$ & $+1.81$ & -- & $\mathbf{+2.12}$ & -- & $+1.65$ & -- & $+0.10$ & $-0.42$ \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
-\begin{table}[t]
+\begin{table*}[t]
 \caption{Domain-dataset cells at representative fractions (points; three
 seeds). The same unimodal shape recurs on satellite, texture, food,
 histopathology and fine-grained data. PathMNIST cells above ${\sim}15\%$
@@ -161,9 +181,9 @@ CUB-200 & -- & -- & -- & $+0.56$ & $+2.74$ \\
 STL-10 & -- & -- & $+5.92$ & $+3.18$ & -- \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
 \includegraphics[width=\linewidth]{figs/envelopes.pdf}
 \caption{The prior's gain across the data axis. (a) On convolutional
@@ -172,7 +192,7 @@ tracks task difficulty, not fraction. (b) On ViT-tiny the gain is large
 at \emph{every} scale, and DeiT-strength augmentation amplifies rather
 than replaces it (Section~\ref{sec:fusion}).}
 \label{fig:envelopes}
-\end{figure}
+\end{figure*}
 
 Tables~\ref{tab:envelope}--\ref{tab:domainenv} and
 Fig.~\ref{fig:envelopes}a show the prior's gain across the data axis.
@@ -198,7 +218,7 @@ backbones, and on any backbone under a modern augmentation recipe, the
 ordering inverts (Section~\ref{sec:fusion}).
 
 \subsection{Attention: the regime where the prior is dramatic}
-\begin{table}[t]
+\begin{table*}[t]
 \caption{ViT-tiny on CIFAR-100: gain of the prior under the plain recipe
 ($\Delta_{\mathrm{plain}}$) and under DeiT-strength augmentation
 ($\Delta_{\mathrm{DeiT}}$), and the amplification ratio. Augmentation does
@@ -216,7 +236,7 @@ $\Delta_{\mathrm{DeiT}}$ & $+3.2$ & $+6.0$ & $+9.5$ & $+16.3$ & $+18.7$ & $+21.0
 ratio & 2.2 & 1.8 & 1.5 & 1.7 & 1.7 & 1.6 & 1.7 & 1.8 & 1.4 \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 Table~\ref{tab:vitenvelope} previews the study's most striking axis.
 ViT-tiny trained from scratch gains $+9.9$ points from the prior even at

@@ -5,7 +5,7 @@ The benchmark's defensibility rests on knowing \emph{which} ingredient
 carries the gain. We ablate every one.
 
 \subsection{The target is the ingredient}
-\begin{table}[t]
+\begin{table*}[t]
 \caption{Target and mechanism controls on CIFAR-100 (champion
 configuration except the varied ingredient; $\Delta$ vs.\ shared
 baseline, three seeds). The gain needs the moment structure specifically:
@@ -33,7 +33,7 @@ HOG target & $+1.22$ & $+1.37$ & descriptor helps; moments $2\times$ better \\
 loss: MSE $\rightarrow$ cosine & $+3.31 \rightarrow$ & $+2.81 \rightarrow +0.46$ & magnitude scale matters \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 Table~\ref{tab:controls}: a random fixed target of identical shape moves
 accuracy by at most $0.14$ points -- the mechanism is not ``regression as
@@ -111,7 +111,7 @@ that too).
 %% ---------------------------------------------------------------------
 \section{A decision guide}\label{sec:guide}
 
-\begin{table}[t]
+\begin{table*}[t]
 \caption{What to use when: the grid distilled to recommendations. Costs
 are training-compute multiples of the baseline; gains are typical measured
 ranges, not promises. ``Prior'' is the champion MomentAux configuration
@@ -134,7 +134,7 @@ Domain-shifted from ImageNet (e.g.\ stains) & prior from scratch competitive & $
 Data sufficient (${\geq}50\%$) & nothing (all converge) & -- & every intervention within $\pm 0.8$ \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 Table~\ref{tab:guide} is the benchmark's practical distillate. Its
 strongest single row is the modern-ViT one: for anyone training a small

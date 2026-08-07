@@ -51,7 +51,7 @@ the leading data-driven alternatives (SimCLR, SimSiam, DINO, ImageNet
 transfer, heavy augmentation, learned teachers) under one frozen recipe with
 committed data subsets: 14 datasets, 7 backbone families, data scales from
 500 to 1.28M images, resolutions from 32 to 224\,px, and models from 5.7M to
-86M parameters ($2{,}800$ experimental cells; ${sim}8{,}900$ training runs). The grid is organized by a
+86M parameters ($2{,}800$ experimental cells; ${\sim}8{,}900$ training runs). The grid is organized by a
 single empirical law, $\Delta = G + \mathrm{readout}(\mathrm{base})$,
 separating each intervention's feature-level gain $G$ from a readout term
 that depends only on baseline accuracy. The law is predictive: registered in
@@ -80,6 +80,7 @@ self-supervised learning \sep auxiliary losses \sep benchmark
 \end{keywords}
 
 \maketitle
+\sloppy  % CAS columns are narrow; prefer loose spacing over margin overrun
 
 %% ------------------------------------------------------------------
 \input{sections/s1_intro_related}

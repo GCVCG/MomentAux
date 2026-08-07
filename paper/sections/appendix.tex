@@ -3,7 +3,7 @@
 
 \section{Full envelopes}\label{app:envelopes}
 
-\begin{table}[h]
+\begin{table*}[t]
 \caption{Complete measured envelopes for the champion prior
 ($\Delta$ vs.\ shared baseline; bold = 10 seeds/arm). Blank = not
 measured; the C10/C100 grids are complete at every listed fraction.}
@@ -22,9 +22,9 @@ ViT-tiny/C100 & $+1.35$ & $+3.25$ & $+6.21$ & $+9.35$ & $+10.99$ & $+13.26$ & $+
 ViT-tiny/tin & $+1.39$ & $+3.29$ & $+6.77^{5\%}$ & $+9.15^{10\%}$ & $+10.73^{15\%}$ & $+10.48^{25\%}$ & \multicolumn{2}{r}{$+7.17^{100\%}$} & \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
-\begin{table}[h]
+\begin{table*}[t]
 \caption{SimCLR initialization ($2\times$ compute) minus prior
 ($1.02\times$), CIFAR-100, ResNet-18, plain augmentation. The margin is
 unimodal -- SSL's advantage is a mid-band phenomenon that vanishes at
@@ -38,7 +38,7 @@ fraction & 1\% & 2\% & 3\% & 5\% & 7\% & 10\% & 15\% & 50\% & 100\% \\
 SSL $-$ prior & $+0.85$ & $+2.38$ & $+2.32$ & $+3.90$ & $+4.99$ & $+5.01$ & $+4.09$ & $+0.58$ & $+0.05$ \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 \section{The law's components}\label{app:law}
 
@@ -68,7 +68,7 @@ the probe space.
 
 \section{Sign-law exceptions}\label{app:exceptions}
 
-\begin{table}[h]
+\begin{table*}[t]
 \caption{All ten resolvable sign-law violations at the current audit.
 Five share the ``better features, worse accuracy at sufficiency''
 signature (top block); two are PathMNIST@1\% cells whose probe is a
@@ -95,7 +95,7 @@ CIFAR-100 & R50 & L3@2\% & 13.1 & $-0.95$ & $-2.96$ & $+2.01$ \\
 CIFAR-100 & R18 & L4-$\lambda.3$@50\% & 71.8 & $-0.73$ & $-0.21$ & $-0.52$ \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 \section{Selected controls}\label{app:controls}
 
@@ -136,7 +136,14 @@ which currency is scarce.
 
 \section{Datasets}\label{app:datasets}
 
-\begin{table}[h]
+Table~\ref{tab:datasets} lists every dataset in the grid with the training
+split size, class count and resolution as trained. Five visual domains are
+represented; the two ImageNet stages supply the data-scale and
+resolution/model-scale axes respectively. Sources with variable native
+resolution are squash-resized once, offline, and the resized copies are
+what every arm consumes.
+
+\begin{table*}[t]
 \caption{Datasets in the grid. Resolutions are as trained (native-size
 sources squash-resized where marked).}
 \label{tab:datasets}
@@ -160,7 +167,7 @@ ImageNet-100 & 126{,}689 & 100 & 224 & photographic \\
 \bottomrule
 \multicolumn{5}{@{}l}{\footnotesize $^{r}$squash-resized from native.} \\
 \end{tabular}
-\end{table}
+\end{table*}
 
 \section{Reproducibility}\label{app:repro}
 
@@ -190,7 +197,7 @@ $0.22$ for the baseline: the auxiliary loss leaves a measurable spectral
 imprint on the representation even though its weight has decayed to zero
 by the end of training.
 
-\begin{figure}[h]
+\begin{figure*}[t]
 \centering
 \includegraphics[width=0.48\linewidth]{figs_explain/cam_auxmag_5pct_sched0.png}\hfill
 \includegraphics[width=0.48\linewidth]{figs_explain/heatmaps_auxmag_5pct_sched0.png}\\[2pt]
@@ -202,4 +209,4 @@ heatmaps (right), baseline vs.\ prior arm. Bottom left: t-SNE of frozen
 penultimate features. Bottom right: the pinned 8-pair oriented-energy
 bank that serves as the auxiliary target.}
 \label{fig:explain}
-\end{figure}
+\end{figure*}
