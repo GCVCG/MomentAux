@@ -125,8 +125,8 @@ class EnergyStem(nn.Module):
         super().__init__()
         if feature_type not in ENERGY_TYPES:
             raise ValueError(f"feature_type must be one of {ENERGY_TYPES}")
-        if in_channels != 3:
-            raise ValueError("EnergyStem operates on BT.601 luma; needs 3 input channels")
+        if in_channels < 1:
+            raise ValueError("in_channels must be >= 1")
         if kernel_size % 2 != 1:
             raise ValueError("kernel_size must be odd (same-padding contract)")
 
@@ -134,7 +134,17 @@ class EnergyStem(nn.Module):
         self.in_channels = in_channels
         self.kernel_size = kernel_size
         self.padding = kernel_size // 2
-        self.register_buffer("luma_w", torch.tensor(LUMA_WEIGHTS).view(1, in_channels, 1, 1))
+        # BT.601 luma for ordinary 3-channel colour. For multispectral input
+        # (EuroSAT MS carries 13 Sentinel-2 bands) there is no luma, so we use
+        # the unweighted band mean as the achromatic surrogate: the bank
+        # measures ORIENTED ENERGY, which is a spatial property, and we do not
+        # want an arbitrary photometric weighting of non-visible bands to
+        # decide what it sees. Recorded as a deliberate deviation.
+        if in_channels == 3:
+            _w = torch.tensor(LUMA_WEIGHTS).view(1, 3, 1, 1)
+        else:
+            _w = torch.full((1, in_channels, 1, 1), 1.0 / in_channels)
+        self.register_buffer("luma_w", _w)
 
         if feature_type == "magnitude":
             even, odd = quadrature_bank(_MAG_FREQS, _MAG_ORIENTS, kernel_size)

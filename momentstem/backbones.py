@@ -68,6 +68,7 @@ def build_model(
     head=None,
     moment_aux=None,
     image_size=32,
+    in_channels=3,
 ):
     """Build stem + backbone for one experimental cell.
 
@@ -84,8 +85,12 @@ def build_model(
          "kernel_size": 11, "stem_kwargs": {...}}. Requires stem_name "none".
         See aux.py. Mutually exclusive with head_pool.
     """
+    # in_channels defaults to 3, so every existing cell is byte-unchanged.
+    # It is >3 only for the multispectral EuroSAT sensor-fusion cells, where
+    # the input carries 10 or 13 Sentinel-2 bands.
     stem = build_stem(
-        stem_name, kernel_size=stem_kernel_size, seed=stem_seed, **(stem_kwargs or {})
+        stem_name, in_channels=in_channels, kernel_size=stem_kernel_size,
+        seed=stem_seed, **(stem_kwargs or {})
     )
     if backbone == "vit_tiny":
         # ViT's small-input "surgery" happens at construction: the patch size
@@ -231,6 +236,7 @@ def build_model(
         else:
             target = MomentTarget(build_stem(
                 moment_aux["stem"],
+                in_channels=in_channels,
                 kernel_size=moment_aux.get("kernel_size", 11),
                 seed=stem_seed,
                 **(moment_aux.get("stem_kwargs") or {}),
@@ -244,6 +250,7 @@ def build_model(
             head_norm=moment_aux.get("head_norm", False),
             stem=stem if moment_aux.get("allow_forward_stem") else None,
             image_size=image_size,
+            in_channels=in_channels,
         )
     return StemmedModel(stem, net)
 

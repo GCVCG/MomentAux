@@ -186,7 +186,7 @@ class MomentAuxModel(nn.Module):
     """
 
     def __init__(self, net, target, tap="layer3", aux_weight=0.1, loss_form="mse",
-                 head_norm=False, stem=None, image_size=32):
+                 head_norm=False, stem=None, image_size=32, in_channels=3):
         """:param head_norm project each aux head back to its initial weight norm
         after every optimizer step. The aux objective ||W.f - t||^2 is INVARIANT
         under (f -> f/c, W -> c.W), so SGD can minimise it by COLLAPSING the
@@ -209,7 +209,9 @@ class MomentAuxModel(nn.Module):
             raise ValueError(f"loss_form must be 'mse' or 'cosine', got {loss_form!r}")
         self.net = net
         # deployed path: identity by default (vanilla backbone), see :param stem
-        self.stem = stem if stem is not None else IdentityStem(3)
+        # IdentityStem must match the backbone's input width; hardcoding 3
+        # breaks the multispectral cells, where net expects 10 or 13 bands.
+        self.stem = stem if stem is not None else IdentityStem(in_channels)
         self.target = target
         self.taps = [tap] if isinstance(tap, str) else list(tap)
         self.aux_weight = aux_weight
@@ -230,7 +232,11 @@ class MomentAuxModel(nn.Module):
         was_training = net.training
         net.eval()
         with torch.no_grad():  # via self.stem: the net's in_chans follows it
-            net(self.stem(torch.zeros(1, 3, image_size, image_size)))
+            # channel count comes from the stem, not a hardcoded 3: the
+            # multispectral EuroSAT cells feed 10 or 13 Sentinel-2 bands.
+            # (Same bug class as the hardcoded image_size fixed 2026-07-21.)
+            _c = getattr(self.stem, "in_channels", 3)
+            net(self.stem(torch.zeros(1, _c, image_size, image_size)))
         net.train(was_training)
         self.aux_heads = nn.ModuleDict({
             _head_key(t): nn.Conv2d(

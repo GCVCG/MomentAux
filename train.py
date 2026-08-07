@@ -185,6 +185,9 @@ def main():
         head=cfg.get("head"),
         moment_aux=cfg.get("moment_aux"),
         image_size=image_size,
+        # >3 only for the multispectral sensor-fusion cells (10 or 13
+        # Sentinel-2 bands); defaults to 3 so every other cell is unchanged.
+        in_channels=data_mod.INPUT_CHANNELS.get(cfg["dataset"], 3),
     ).to(device)
     # A non-linear classifier head is an ARCHITECTURE deviation from the
     # frozen recipe's implicit plain-linear readout: diag-only, same rule
