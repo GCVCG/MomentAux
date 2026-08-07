@@ -118,8 +118,8 @@ stays, with cross-domain evidence rather than convenience behind it.
 Across ConvNeXt (under the frozen SGD recipe), ResNet-50 (without
 head-norm), Swin-T (on five datasets), and Swin at ImageNet64, baselines
 are bistable, some seeds train, some sit at chance, while the prior
-arm trains tightly every time. Swin's probe variance shows the
-instability lives in the \emph{features} (baseline probe $\sigma$ up to
+arm trains tightly every time. Swin's feature-level variance shows the
+instability lives in the \emph{features} (baseline evaluation $\sigma$ up to
 $4.3$ vs.\ $0.2$ with the prior). We report stabilization as a real,
 separate property; we do not claim routine variance reduction (a
 $10{\times}10$-seed test of that claim came back negative, and we report
@@ -178,7 +178,7 @@ labels per class cannot express a better representation); why relabelling
 the same pixels with coarser classes triples the visible gain (the
 baseline crosses the readout zero, not because features changed; we
 measure them unchanged); why every intervention converges at sufficiency
-(both terms go to zero); and why probes read ${\sim}2$ points more gain
+(both terms go to zero); and why coarse label spaces read ${\sim}2$ points more gain
 under coarse evaluation than fine on the same checkpoints (the measuring
 stick itself is label-hungry).
 
@@ -188,7 +188,7 @@ knowledge--data fusion outcomes: fusion adds value exactly when the
 sources' contributions are non-overlapping \emph{in feature space}, and
 harms when one source's dynamics (here, early shaping) overwrite what the
 other supplied. The practical corollary is that fusion decisions can be
-made by measurement rather than fashion: a cheap linear probe of what
+made by measurement rather than fashion: a cheap linear evaluation of what
 each candidate source contributes predicts whether their combination is
 worth anything, before any joint training is run.
 
@@ -230,8 +230,9 @@ sufficiency, is the clearest open problem the grid poses.
 ResNet recipe: architectures that cannot train under it (ConvNeXt, Swin
 under SGD) enter only through diagnostic AdamW cells, and their
 bistability, itself a finding, limits headline claims. PathMNIST's
-shifted test split confounds its high-data cells for every method. Probes
-lose interpretability at 100\% cells (probe-ceiling) and at ImageNet64
+shifted test split confounds its high-data cells for every method. Linear
+evaluations lose interpretability at 100\% cells (the evaluation ceiling)
+and at ImageNet64
 are budget-bound by construction. One prior family (Gabor and moment energy)
 is tested as the knowledge source; the taxonomy predicts, but does not
 yet demonstrate, that other structural priors will slot into the same
@@ -242,7 +243,7 @@ exception cluster}: instrument the late-training dynamics of high-data
 Food-101 and PathMNIST cells to locate where good features fail to become
 accuracy. (ii) \emph{Other currencies}: repeat the fusion matrix with
 priors carrying genuinely different structure (depth, symmetry,
-frequency-phase) to test whether currency-overlap measured by probes
+frequency-phase) to test whether currency-overlap measured by linear evaluation
 predicts stacking in general. (iii) \emph{Attention at deployment
 scale}: the model-scale trend ($+13$ rising to $+26$ from ViT-S to ViT-B at fixed
 data) invites the obvious next point on the curve, and the

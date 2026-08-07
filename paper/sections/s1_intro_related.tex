@@ -35,7 +35,7 @@ A grid of this size threatens to be a table dump. It is rescued by an
 empirical law that we did not assume but found, and then tested the way
 laws should be tested, by registering its predictions in advance and
 trying to break them. Writing $\Delta$ for an intervention's end-to-end
-accuracy gain and $G$ for the gain a linear probe reads from its frozen
+accuracy gain and $G$ for the gain a linear evaluation reads from its frozen
 features under identical probing, we find across the grid that
 \begin{equation}
   \Delta \;=\; G \;+\; \mathrm{readout}(\mathrm{base}),
@@ -166,7 +166,7 @@ ImageNet initialization remains the strongest single intervention on
 photo-like data \citep{kornblith2019better}, with known caveats under
 domain shift and with training-from-scratch competitive given enough data
 \citep{he2019rethinking}. We use transfer both as a comparator and as a
-probe of fusion: injecting the spectral prior \emph{on top of} ImageNet
+test of fusion: injecting the spectral prior \emph{on top of} ImageNet
 weights is the one configuration in our grid that is destructive
 everywhere, and linear probing shows the destruction is feature-side,
 early shaping erases exactly the mature structure the initialization

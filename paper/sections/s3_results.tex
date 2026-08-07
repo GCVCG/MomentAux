@@ -96,7 +96,7 @@ Appendix~\ref{app:exceptions}.
 Three pre-registered episodes distinguish the law from a post-hoc fit.
 
 \emph{(i) A new backbone family from baselines alone.} Before any Swin-T
-probe existed, we read the readout term off the measured curve at Swin's
+linear evaluation existed, we read the readout term off the measured curve at Swin's
 baseline heights and published bands for its feature gain
 ($G \approx 9.6$, $8.8$, $9.8$ and $7.0$ at 5, 10, 15 and 25\% of
 CIFAR-100; band
@@ -118,7 +118,7 @@ $1.5$ points on every backbone.
 
 \subsection{What $G$ is a function of}\label{sec:lawG}
 Controlled crossings localize the law's terms. $G$ is a property of the
-checkpoint and the probe's label space, invariant to which coarse
+checkpoint and the evaluation's label space, invariant to which coarse
 partition relabels the data but cut roughly from $4.2$ to $2.9$ when
 training supervision moves from 200-way fine to 20-way coarse labels on
 identical pixels, fine-grained weak supervision is where the prior has
@@ -144,7 +144,7 @@ Section~\ref{sec:substitute} the case where they supply the same currency
 and the second adds nothing, together with the refinement that rescues
 the rule from its apparent counterexamples;
 Section~\ref{sec:taxsub} the one fusion in the grid that is uniformly
-destructive, and the probe measurement that explains why.
+destructive, and the feature-level measurement that explains why.
 Section~\ref{sec:taxonomy} collects the three into a single table with
 the evidence for each row.
 
@@ -196,7 +196,7 @@ head-to-head flips with the recipe (Table~\ref{tab:flip}): under plain
 augmentation SSL overtakes the prior once data is plentiful, but under
 the DeiT recipe, the recipe anyone training a small ViT would actually
 use, the prior wins at every CIFAR-100 fraction, by ${\sim}5$ points
-across the mid-band, and the probe shows why: augmentation lifts the
+across the mid-band, and the feature side shows why: augmentation lifts the
 prior's $G$ by $+7.4$ but SimCLR's by only $+3.8$ at 10\%. The same flip
 reproduces on Tiny-ImageNet in the low-data band. Third, SimCLR was not
 under-equipped: giving its contrastive views DeiT strength makes it
@@ -216,7 +216,7 @@ gain, not by its family name.
 \begin{table}[t]
 \caption{The transfer tax and its feature-side origin. Injecting the
 prior on top of ImageNet weights is destructive in proportion to what the
-initialization supplied; linear probes show the loss is carried almost
+initialization supplied; linear evaluation shows the loss is carried almost
 entirely by $G$ (features), not by the readout. PathMNIST, where
 ImageNet features barely transfer, is the null control. Three seeds.
 Rows are sorted by the size of the tax, most destructive first; \up{}
@@ -294,8 +294,8 @@ to both arms of every pair.
 \begin{table}[t]
 \caption{The pre-registered scale block. Every falsifier was declared
 before the first run; every one is dead. $G$ at ImageNet64 uses the
-fixed-budget probe protocol (250 per class shown); ImageNet-100 uses the
-standard full-train probe. Three seeds per cell. Rows are grouped by
+fixed-budget evaluation protocol (250 per class shown); ImageNet-100 uses
+the standard full-train evaluation. Three seeds per cell. Rows are grouped by
 scale stage and, within a stage, ordered by model capacity; \up{} marks
 columns where higher is better and \down{} where lower is better.}
 \label{tab:scale}
@@ -319,7 +319,7 @@ ViT-S/16 & $\Delta$: $+2..{+}8$; $G$: $12.0..12.6$ & $+13.00$ & $+11.95$ & $1.05
 ViT-B/16 & $\Delta \geq \Delta_{\mathrm{ViT\mbox{-}S}}$ & $+26.01$ & $+22.89^{*}$ & $3.12^{*}$ & grows with scale \\
 \bottomrule
 \rowcolor{white}\multicolumn{6}{@{}p{0.95\linewidth}@{}}{\footnotesize $^{*}$The ViT-B
-aux arm probes at its own ceiling (probe $69.8$ vs.\ e2e $69.3$), a
+aux arm evaluates at its own ceiling ($69.8$ vs.\ e2e $69.3$), a
 pre-registered caveat that compresses $G$; the residual is not resolvable
 against its uncertainty ($\pm 2.4$).} \\
 \end{tabular}}
@@ -345,9 +345,9 @@ the larger gain. It does, by 13 points. Notably, with the prior the
 
 \emph{The law's predictive form survives.} Five of six pairs tie
 $\Delta$ to $G$ within $1.1$ points; the sixth (ViT-B) carries a
-pre-registered probe-ceiling caveat and an unresolvable residual. The
-ViT-S band, derived from the law before the probe ran, was hit on its
+pre-registered evaluation-ceiling caveat and an unresolvable residual. The
+ViT-S band, derived from the law before the evaluation ran, was hit on its
 edge ($11.95$ vs.\ $12.0$--$12.6$). As an additional robustness check,
-the ViT-S and ResNet-50 probes were independently re-run on a second
-machine with a from-scratch environment; the probe means agree with the
+the ViT-S and ResNet-50 evaluations were independently re-run on a second
+machine with a from-scratch environment; their means agree with the
 primary measurement to $0.01$--$0.05$ points.

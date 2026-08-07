@@ -14,7 +14,7 @@ weight $\lambda$ decaying to exactly zero, so the deployed network is
 byte-identical to the baseline and high-data neutrality is structural.
 \textbf{(c)} Each cell yields two measurements, the end-to-end gain
 $\Delta$ and the frozen-feature gain $G$ from an identically-configured
-linear probe, whose difference defines the readout term of
+linear evaluation, whose difference defines the readout term of
 Eq.~\ref{eq:law}. \textbf{(d)} The comparator ladder, ordered by declared
 training cost; all are fused into the same frozen recipe, and their
 pairwise combinations are measured as well.}
@@ -31,8 +31,8 @@ Section~\ref{sec:momentaux} specifies the knowledge source under study,
 the pinned spectral bank and the auxiliary head that injects it.
 Section~\ref{sec:comparators} defines the competing interventions and the
 cost normalisation under which they are compared.
-Section~\ref{sec:probe} introduces the linear probe that supplies the
-feature-side quantity $G$, without which the law of
+Section~\ref{sec:probe} introduces the linear evaluation of frozen
+features that supplies the quantity $G$, without which the law of
 Section~\ref{sec:law} could not be measured at all.
 Section~\ref{sec:stats} states the seed and uncertainty protocol, and
 Section~\ref{sec:prereg} the pre-registration discipline that turns the
@@ -150,33 +150,34 @@ it: strengthening its contrastive views to DeiT strength makes it
 \emph{worse} at every fraction measured (Section~\ref{sec:fusion}), so
 its standard views are its best shot at this scale.
 
-\subsection{Measuring features: the probe protocol}\label{sec:probe}
-The law needs a feature-side quantity. For each trained checkpoint we
-freeze the network, extract penultimate features
+\subsection{Measuring features: linear evaluation}\label{sec:probe}
+The law needs a feature-side quantity, and we obtain it by \emph{linear
+evaluation} of frozen representations, the protocol introduced as linear
+classifier probing by \citet{alain2016understanding}. For each trained
+checkpoint we freeze the network, extract penultimate features
 $z = \mathrm{pool}(f_L(x))$ for the full training split under the
 deterministic (no-augmentation) transform, and fit a multinomial logistic
-probe using the limited-memory BFGS optimizer (L-BFGS) and fixed
-hyper-parameters
-\citep{alain2016understanding}:
+regression using the limited-memory BFGS optimizer (L-BFGS) and fixed
+hyper-parameters:
 \begin{equation}
   \min_{V}\; \tfrac{1}{n}\!\sum_{i} \mathrm{CE}\bigl(Vz_i, y_i\bigr)
     \;+\; 10^{-4}\lVert V\rVert_2^2 .
   \label{eq:probe}
 \end{equation}
 Only the features differ between arms; everything else is identical. We
-define the feature gain as the probe-accuracy gap
-$G = \mathrm{acc}_{\mathrm{probe}}^{\mathrm{aux}} -
-     \mathrm{acc}_{\mathrm{probe}}^{\mathrm{base}}$, and the readout term
+define the feature gain as the linear-evaluation gap
+$G = \mathrm{acc}_{\mathrm{lin}}^{\mathrm{aux}} -
+     \mathrm{acc}_{\mathrm{lin}}^{\mathrm{base}}$, and the readout term
 as the residual $\Delta - G$.
 
-Probes are diagnostics and never headline numbers; they read labels the
-cell never saw. Two scope rules, both learned the hard way and enforced
-throughout: a probe is interpretable only while it holds substantially
-more labels than the cell trained on, so at 100\% cells we report the
-aux-vs-baseline gap but do not split it into $G$ and readout; and at
-ImageNet64 scale, where an LBFGS fit over $1.28$M rows is impractical,
-probes use fixed per-class budgets whose $G$ values are compared only to
-other same-budget probes.
+Linear evaluations are diagnostics and never headline numbers; they read
+labels the cell never saw. Two scope rules, both learned the hard way and
+enforced throughout: an evaluation is interpretable only while it holds
+substantially more labels than the cell trained on, so at 100\% cells we
+report the aux-vs-baseline gap but do not split it into $G$ and readout;
+and at ImageNet64 scale, where an L-BFGS fit over $1.28$M rows is
+impractical, evaluations use fixed per-class budgets whose $G$ values are
+compared only to other same-budget evaluations.
 
 \subsection{Statistical protocol}\label{sec:stats}
 Each cell runs ${\geq}3$ seeds, ten for headline envelopes. For a paired
@@ -186,7 +187,7 @@ cell we report $\Delta$ as the difference of arm means with the standard error o
   \sqrt{\mathrm{SEM}(\Delta)^2 + \mathrm{SEM}(G)^2},
   \label{eq:sem}
 \end{equation}
-using all four arms (two end-to-end, two probe). A cell is called
+using all four arms (two end-to-end, two linear-evaluation). A cell is called
 \emph{resolvable} when $|\mathrm{readout}| > 2\,\mathrm{SEM}$; only
 resolvable cells can test the sign law, and Section~\ref{sec:law}
 explains why counting the rest would be misleading rather than
@@ -324,7 +325,7 @@ the MareNostrum5 accelerated partition at the Barcelona Supercomputing
 Center, using up to 40 NVIDIA H100 GPUs concurrently (ten four-GPU nodes)
 under a shared work-queue that pulls cells atomically so heterogeneous
 cell costs do not idle accelerators; a university cluster with H100 and
-H200 nodes; and two local NVIDIA RTX 3090 workstations used for probe
+H200 nodes; and two local NVIDIA RTX 3090 workstations used for evaluation
 passes and analysis. Because these small-image cells are dataloader-bound
 rather than compute-bound, we run two to three trainings per GPU, sized
 so that the heaviest cells still fit in memory.

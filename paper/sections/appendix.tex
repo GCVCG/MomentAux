@@ -76,19 +76,19 @@ pinned by a Swin cell still negative at $31.8$ and a conv cell already
 positive at $40.3$.
 
 \paragraph{Label-space crossings.} On byte-identical CIFAR-100 pixels, a
-full $2{\times}2$ of training label space $\times$ probe label space
+full $2{\times}2$ of training label space $\times$ evaluation label space
 (100-way vs.\ 20-way) moves $G$ by at most $1\sigma$: invariance. On
 Tiny-ImageNet the same crossing finds two real, opposing effects
-(probe-space $+1.9$, checkpoint-set $+1.6$, both ${\sim}5\sigma$) that
+(evaluation-space $+1.9$, checkpoint-set $+1.6$, both ${\sim}5\sigma$) that
 cancel on the diagonal; $G$ comparisons in the paper therefore always fix
-the probe space.
+the evaluation space.
 
 \section{Sign-law exceptions}\label{app:exceptions}
 
 \begin{table}[t]
 \caption{All ten resolvable sign-law violations at the current audit.
 Five share the ``better features, worse accuracy at sufficiency''
-signature (top block); two are PathMNIST@1\% cells whose probe is a
+signature (top block); two are PathMNIST@1\% cells whose linear evaluation is a
 known compressed measuring stick on that dataset; three are
 small-magnitude singletons. Rows are grouped by signature and, within a
 group, sorted by the magnitude of the readout residual, largest first.}
@@ -206,7 +206,7 @@ verified by \emph{loading and evaluating} checkpoints against their
 recorded accuracies, not by file listing. The full harness, configs,
 subsets, banks, runner, aggregation, audit, is released with the paper (anonymized repository during review; archival DOI on acceptance).
 
-\section{Explainability probes}\label{app:explain}
+\section{Explainability analyses}\label{app:explain}
 
 The prior's mechanism is visible directly in the learned features
 (Fig.~\ref{fig:explain}, CIFAR-100 @5\% champion pair). Class-activation
@@ -214,7 +214,7 @@ maps of the prior arm concentrate on object contours and texture
 boundaries where the baseline's maps at this data scale are diffuse;
 tapped-stage feature energy shows the same contrast; and t-SNE of
 penultimate features shows visibly tighter class structure, the
-qualitative face of the $+6.3$-point probe gap at this cell.
+qualitative face of the $+6.3$-point feature gap at this cell.
 Quantitatively, the cosine alignment between tapped features and the
 bank's oriented-energy targets is $0.53$ for the prior arm against
 $0.22$ for the baseline: the auxiliary loss leaves a measurable spectral
