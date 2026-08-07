@@ -1931,6 +1931,26 @@ ported vs corrected and why.
   (self-consistent Delta and G from the same runs); (d) the fully-genuine
   ViT-B pair probes NOW on the local 3090 — S1's most important cell
   (Delta +26.01) is unblocked.
+  *** FIRST S1 CELL SCORED — G(ViT-B @224) LANDS JUST UNDER ITS BAND, AND THE
+  RESIDUAL IS EXACTLY THE PRE-REGISTERED CEILING SIGNATURE (2026-08-07, local
+  3090, full-train probe, 3 seeds, GENUINE ckpts):
+      probe(none) 46.91±2.04  probe(aux) 69.81±0.74
+      **G(vitb,224) = +22.89 ±1.25**  [band +24.0..+25.5 — MISSED LOW by 1.1]
+      Delta −G = +3.12 ±2.37  [G1 threshold 1.5 — NOMINALLY exceeded,
+      NOT statistically resolvable (1.3σ from zero)]
+  SCORED HONESTLY, NEITHER PASS NOR FIRE: caveat (a), recorded IN ADVANCE,
+  applies with its signature visibly present — probe(aux) 69.81 vs e2e(aux)
+  69.34 means the aux arm sits AT its own probe ceiling (+0.5 headroom), so
+  full-train G is COMPRESSED on the aux side exactly as the probe-ceiling
+  rule predicts at probe-labels == cell-labels. The baseline has ~3.6 of
+  headroom (46.9 vs 43.3), the asymmetry that produces a positive residual.
+  Shots cross-check runs the right direction: G +29.3/+27.8/+24.6 at
+  25/100/250/cls, converging DOWN toward the ceiling-compressed 22.9 — the
+  aux features are dramatically more label-efficient, and a budget below
+  saturation reads a LARGER gap. VERDICT: Delta ≈ G holds within ~1σ at
+  224px/86M params under a pre-registered caveat; G1 is NOT declared fired
+  on a ceiling-compressed cell. The vits pair (repairing) gives the second,
+  less-compressed S1 point (aux e2e 78.4 sits farther from any ceiling).
   STAGE-1/2 SCOREBOARD: P2 ✓  P3 ✓  S2 ✓(partial)  S3 ✓(above band)  S4 ✓
   — falsifiers F2, F3, G2, G3, G4 ALL DEAD. Still open: P1/S1 (Delta ≈ G
   at scale) — needs the fixed-shots probe pass; and the last 4 in-flight
