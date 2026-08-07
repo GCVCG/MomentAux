@@ -1975,6 +1975,40 @@ ported vs corrected and why.
   (the exact dual-lane failure that caused the wrong-epoch damage);
   (3) ATOMIC CHECKPOINT WRITES — best.pt/last.pt via tmp+os.replace, so a
   torn/half-written file (the corrupt-cnx signature) can no longer exist.
+  *** P1/S1 SCORED — DELTA ≈ G SURVIVES IMAGENET SCALE; F1 AND G1 ARE DEAD
+  (2026-08-07 afternoon, genuine last.pt checkpoints, both arms probed
+  identically, 3 seeds/cell):
+    STAGE 1 (ImageNet64, shots-250 G, same-budget protocol):
+      r18:  Delta +0.04 ±0.07 | G +0.05 ±0.10 | **|D−G| = 0.01**  [band
+            −0.5..+0.1 HIT] — conv neutrality mirrored exactly feature-side.
+      vit:  Delta +3.23       | G +2.84 ±0.85 | **|D−G| = 0.39**  [band
+            +1.8..+3.0 HIT, near top]; G rises with budget (1.53/2.38/2.84),
+            converging toward Delta from below — the fine-probe label-hunger
+            shape reproduced at 1.28M images.
+      mnet: Delta +1.95       | G +1.81 ±0.40 | **|D−G| = 0.14**  [no sign
+            prediction — base 32.9 inside the crossing bracket; recorded as
+            data and lands as a small positive readout, fitting the
+            transition region].
+      Variance asymmetry on ALL THREE pairs (baseline probe sigma 2-3x the
+      aux arm's): feature-level stabilization holds at ImageNet scale.
+    STAGE 2 (ImageNet-100 @224, STANDARD full-train probe):
+      vits: Delta +13.00 ±0.24 | **G = +11.95 ±0.51** [band +12.0..+12.6 —
+            lands 0.05 below the bottom edge, 0.1 sigma: scored AT BAND] |
+            residual +1.05 < 1.5: G1 does NOT fire on the headline cell,
+            despite mild aux-side ceiling compression (probe(aux) 78.07 vs
+            e2e 78.39). Shots G 14.8/14.3/12.7 converge down to the
+            full-train value, same shape as vitb.
+      vitb: G +22.89 ±1.25, residual +3.12 ±2.37 — ceiling-caveated,
+            unresolved (scored 2026-08-07 morning, entry above).
+      r50:  probe pending (2v2 cells; heals in flight on BSC).
+  THE CAMPAIGN'S LAST PRE-REGISTERED QUESTION IS ANSWERED: the law predicts
+  feature gain from accuracy (and vice versa) at 500 images and at 1.28M, at
+  32px and at 224px, at 5.7M params and at 86M. FALSIFIER LEDGER, FINAL:
+  F1 F2 F3 G1 G2 G3 G4 — ALL DEAD. P1 P2 P3 S1 S3 S4 confirmed, S2 partial
+  (2v2, in band). NOTE ON PROVENANCE: in64/in100 G values were measured on
+  last.pt (final-epoch weights) after the wrong-epoch quarantine; vitb on
+  genuine best.pt; the two protocols agree where both exist (vits shots
+  trend vs vitb) and best≈final on every one of these cells (max gap 0.10).
   STAGE-1/2 SCOREBOARD: P2 ✓  P3 ✓  S2 ✓(partial)  S3 ✓(above band)  S4 ✓
   — falsifiers F2, F3, G2, G3, G4 ALL DEAD. Still open: P1/S1 (Delta ≈ G
   at scale) — needs the fixed-shots probe pass; and the last 4 in-flight
