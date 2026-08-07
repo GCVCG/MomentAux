@@ -56,8 +56,15 @@ def load_cells(roots):
             with open(path) as f:
                 payload = json.load(f)
             name = os.path.basename(path)
-            cells[cell]["probes"][name] = [100.0 * r["probe_test"]
-                                           for r in payload["results"]]
+            # shots-only probe records (linear_probe_shots.json, 2026-08-07:
+            # the ImageNet fixed-budget protocol) carry no probe_test -- only
+            # per-budget shots accuracies. They are same-budget-comparable
+            # numbers, NOT the standard full-train probe, so they must never
+            # enter the G column; skip records without probe_test.
+            vals = [100.0 * r["probe_test"]
+                    for r in payload["results"] if "probe_test" in r]
+            if vals:
+                cells[cell]["probes"][name] = vals
     return cells
 
 
