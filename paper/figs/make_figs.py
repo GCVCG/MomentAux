@@ -54,25 +54,42 @@ for r in csv.DictReader(open(CSV)):
     else:
         pts["wrong"].append((base, ro))
 
-fig, ax = plt.subplots(figsize=(3.45, 2.5))
+fig, ax = plt.subplots(figsize=(3.45, 2.95))
 ax.axvspan(LO, HI, color="#000000", alpha=0.07, lw=0, zorder=0)
 ax.axhline(0, color="#666666", lw=0.7, zorder=1)
+# plotted in the order the audit reads them: the two classes that TEST the
+# law first, then the two that cannot.
 ax.scatter(*zip(*pts["unres"]), s=6, c="#c9c9c9", lw=0, alpha=0.75, zorder=2,
-           label=f"unresolved (n={len(pts['unres'])})")
-ax.scatter(*zip(*pts["bracket"]), s=6, c=OI["grey"], marker="D", lw=0,
-           alpha=0.8, zorder=2, label=f"in bracket (n={len(pts['bracket'])})")
+           label=f"cannot test it: unresolved ({len(pts['unres'])})")
+ax.scatter(*zip(*pts["bracket"]), s=7, c=OI["grey"], marker="D", lw=0,
+           alpha=0.8, zorder=2,
+           label=f"cannot test it: in bracket ({len(pts['bracket'])})")
 ax.scatter(*zip(*pts["correct"]), s=9, c=OI["blue"], lw=0, alpha=0.85,
-           zorder=3, label=f"resolvable, predicted sign (n={len(pts['correct'])})")
-ax.scatter(*zip(*pts["wrong"]), s=16, c=OI["verm"], marker="x", lw=1.1,
-           zorder=4, label=f"resolvable, wrong sign (n={len(pts['wrong'])})")
+           zorder=3, label=f"tests it: sign as predicted ({len(pts['correct'])})")
+ax.scatter(*zip(*pts["wrong"]), s=18, c=OI["verm"], marker="x", lw=1.1,
+           zorder=4, label=f"tests it: sign wrong ({len(pts['wrong'])})")
 ax.set_xlabel("baseline accuracy (%)")
 ax.set_ylabel(r"readout $=\Delta-G$ (points)")
 ax.set_xlim(0, 100)
 ax.set_ylim(-8, 6)
-ax.annotate("crossing\nbracket", xy=((LO + HI) / 2, 5.4), ha="center",
-            va="top", fontsize=6.5, color="#555555")
-ax.legend(loc="lower right", frameon=False, handletextpad=0.3,
-          borderaxespad=0.1)
+
+# state what the law actually predicts in each region, so the point classes
+# are readable without consulting the caption
+ax.annotate("crossing bracket:\nno sign predicted", xy=((LO + HI) / 2, 5.85),
+            ha="center", va="top", fontsize=6.0, color="#555555",
+            linespacing=1.2)
+ax.annotate("law predicts\nreadout $<0$", xy=(17, -7.15), ha="center",
+            va="center", fontsize=6.2, color="#555555", linespacing=1.2)
+ax.annotate("law predicts\nreadout $>0$", xy=(99, 5.6), ha="right",
+            va="top", fontsize=6.2, color="#555555", linespacing=1.2)
+
+# legend BELOW the axes: every in-axes position overlapped the point cloud
+handles, labels = ax.get_legend_handles_labels()
+order = [2, 3, 0, 1]
+leg = ax.legend([handles[i] for i in order], [labels[i] for i in order],
+                loc="upper center", bbox_to_anchor=(0.5, -0.24), ncol=2,
+                frameon=False, handletextpad=0.35, columnspacing=1.0,
+                borderaxespad=0.0, markerscale=1.7, fontsize=6.4)
 fig.tight_layout(pad=0.4)
 fig.savefig(os.path.join(HERE, "law_scatter.pdf"))
 print("law_scatter:", {k: len(v) for k, v in pts.items()})

@@ -68,12 +68,12 @@ to the resolvable subset that actually tests the law.}
 \zebra{1}
 \begin{tabular}{@{}lr@{}}
 \toprule
-cells with paired $\Delta$ and $G$ (all interventions) & 1{,}660 \\
+Cells with paired $\Delta$ and $G$ (all interventions) & 1{,}660 \\
 \quad in law scope (prior, from scratch, ${\geq}3$ seeds per arm) & 989 \\
-backbone variants in scope (distinct families) & 9 (7) \\
-datasets in scope & 15 \\
-inside crossing bracket (no prediction) & 98 \\
-unresolved ($|\mathrm{readout}| \le 2$\,SEM) & 613 \\
+Backbone variants in scope (distinct families) & 9 (7) \\
+Datasets in scope & 15 \\
+Inside crossing bracket (no prediction) & 98 \\
+Unresolved ($|\mathrm{readout}| \le 2$\,SEM) & 613 \\
 \midrule
 \textbf{resolvable (these test the law)} & \textbf{278} \\
 \quad sign as predicted & \textbf{268 (96\%)} \\
@@ -172,18 +172,17 @@ sign of a method-versus-method difference is better a priori.}
 \label{tab:flip}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
-\resizebox{\columnwidth}{!}{%
 \zebra{3}
 \begin{tabular}{@{}lrrrrr@{}}
 \toprule
  & \multicolumn{5}{c}{aux $-$ SimCLR (points)} \\
 \cmidrule(l){2-6}
-recipe & 1\% & 5\% & 10\% & 25\% & 100\% \\
+Recipe & 1\% & 5\% & 10\% & 25\% & 100\% \\
 \midrule
-plain crop+flip & $+0.7$ & $+1.3$ & $0.0$ & $-1.4$ &--\\
+Plain crop+flip & $+0.7$ & $+1.3$ & $0.0$ & $-1.4$ &-- \\
 DeiT augmentation & $+2.5$ & $+7.3$ & $+5.2$ & $+5.0$ & $+2.0$ \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
 
 SimCLR's objective \emph{is} invariance to an augmentation family. Three
@@ -222,17 +221,16 @@ ImageNet features barely transfer, is the null control. Three seeds.}
 \label{tab:tax}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
-\resizebox{\columnwidth}{!}{%
 \zebra{2}
 \begin{tabular}{@{}lrrrr@{}}
 \toprule
-cell & transfer adv. & $\Delta$ (tax)~\up & $G$~\up & readout \\
+Cell & Transfer adv. & $\Delta$ (tax)~\up & $G$~\up & Readout \\
 \midrule
 CIFAR-10 @5\% & $+13..{+}18$ & $-17.1$ & $-15.8 \pm 1.7$ & $-1.3$ \\
 CIFAR-100 @7\% & $+10..{+}18$ & $-16.4$ & $-16.3 \pm 3.1$ & $-0.1$ \\
 PathMNIST @10\% & $+1.8..{+}2.9$ & $-0.4$ & $+0.3 \pm 0.6$ & $-0.7$ \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
 
 The one uniformly destructive fusion in the grid is instructive
@@ -253,22 +251,21 @@ establishes each row.}
 \label{tab:taxonomy}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
-\resizebox{\columnwidth}{!}{%
 \zebra{2}
-\begin{tabular}{@{}llll@{}}
+\begin{tabular}{@{}P{0.185\columnwidth}P{0.235\columnwidth}lP{0.275\columnwidth}@{}}
 \toprule
-fusion & currencies & outcome & key evidence \\
+Fusion & Currencies & Outcome & Key evidence \\
 \midrule
-prior + augmentation & structure + invariance & \textbf{stack} & $\Delta$ amplified $1.4$--$2.4\times$; $G\uparrow$ \\
-prior + effective SSL & structure $\approx$ invariance$^{*}$ & \textbf{substitute} & combo $\leq$ best single; equal $G$ \\
-prior + ineffective SSL & structure + ${\sim}$nothing & stack & full gain recovered on SimSiam \\
-prior + ImageNet init & structure vs.\ mature features & \textbf{tax} & $-17$ e2e, carried by $G$; null on shift \\
-augmentation + SSL & invariance + invariance & substitute & DeiT recipe collapses SimCLR's margin \\
+Prior + augmentation & structure + invariance & \textbf{stack} & $\Delta$ amplified $1.4$--$2.4\times$; $G\uparrow$ \\
+Prior + effective SSL & structure $\approx$ invariance$^{*}$ & \textbf{substitute} & combo $\leq$ best single; equal $G$ \\
+Prior + ineffective SSL & structure + ${\sim}$nothing & stack & full gain recovered on SimSiam \\
+Prior + ImageNet init & structure vs.\ mature features & \textbf{tax} & $-17$ e2e, carried by $G$; null on shift \\
+Augmentation + SSL & invariance + invariance & substitute & DeiT recipe collapses SimCLR's margin \\
 \bottomrule
 \rowcolor{white}\multicolumn{4}{@{}p{0.95\linewidth}@{}}{\footnotesize $^{*}$Same
 currency in effect: at matched cells the two sources' feature gains
 coincide, which is why neither adds to the other.} \\
-\end{tabular}}
+\end{tabular}
 \end{table}
 
 Table~\ref{tab:taxonomy} states the taxonomy compactly. Its practical
@@ -296,11 +293,10 @@ the standard full-train evaluation. Three seeds per cell.}
 \label{tab:scale}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
-\resizebox{\columnwidth}{!}{%
 \zebra{2}
-\begin{tabular}{@{}llrrrl@{}}
+\begin{tabular}{@{}P{0.175\columnwidth}P{0.180\columnwidth}rrrP{0.150\columnwidth}@{}}
 \toprule
-cell & registered band & $\Delta$~\up & $G$~\up & $|\Delta{-}G|$~\down & verdict \\
+Cell & Registered band & $\Delta$~\up & $G$~\up & $|\Delta{-}G|$~\down & Verdict \\
 \midrule
 \multicolumn{6}{@{}l}{\emph{ImageNet64: 1.28M images, 1000 classes}} \\
 ResNet-18 & $\Delta$: $0.0{\pm}0.5$ & $+0.04$ & $+0.05$ & $0.01$ & neutral, exactly \\
@@ -317,7 +313,7 @@ ViT-B/16 & $\Delta \geq \Delta_{\mathrm{ViT\mbox{-}S}}$ & $+26.01$ & $+22.89^{*}
 aux arm evaluates at its own ceiling ($69.8$ vs.\ e2e $69.3$), a
 pre-registered caveat that compresses $G$; the residual is not resolvable
 against its uncertainty ($\pm 2.4$).} \\
-\end{tabular}}
+\end{tabular}
 \end{table}
 
 Table~\ref{tab:scale} reports the block. Three conclusions.

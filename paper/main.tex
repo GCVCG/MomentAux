@@ -33,6 +33,13 @@
 %% convention: \up marks "higher is better", \down "lower is better".
 \newcommand{\up}{$\uparrow$}
 \newcommand{\down}{$\downarrow$}
+%% ragged-right fixed-width column, so wide text columns wrap inside the
+%% narrow CAS column instead of being scaled by \resizebox (which used to
+%% give every table a different effective font size)
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash\hspace{0pt}}p{#1}}  % L/C/R are taken by makecell;
+%% the \hspace{0pt} re-enables hyphenation of the first word, which plain
+%% \raggedright suppresses (long tokens like "ImageNet-transferable" then
+%% overflow no matter how the column is sized)
 
 \begin{document}
 \let\WriteBookmarks\relax
@@ -52,15 +59,19 @@
 
 \author[2]{Ricardo Marques}[orcid=0000-0001-8261-4409]
 \ead{ricardo.marques@upf.edu}
+\fnmark[1]
 
 \author[1]{Petia Radeva}[orcid=0000-0003-0047-5172]
 \ead{petia.ivanova@ub.edu}
+\fnmark[1]
 
 \affiliation[1]{organization={Universitat de Barcelona},
                 city={Barcelona}, country={Spain}}
 \affiliation[2]{organization={Universitat Pompeu Fabra},
                 city={Barcelona}, country={Spain}}
 \cortext[1]{Corresponding author.}
+\fntext[1]{These authors contributed equally to the supervision of this
+work.}
 \nonumnote{Code, configurations, committed subset indices, per-run records
 and all result tables: \url{https://github.com/GCVCG/MomentAux}}
 
@@ -140,10 +151,13 @@ MareNostrum5 for IM-2025-3-0008.
 Validation, Formal analysis, Investigation, Data curation, Writing,
 original draft, Writing, review \& editing, Visualization, Project
 administration.
-\textbf{Ricardo Marques}: Supervision, Writing, review \& editing.
-\textbf{Petia Radeva}: Conceptualization, Resources, Supervision,
+\textbf{Ricardo Marques}: Supervision, Conceptualization, Writing,
+review \& editing.
+\textbf{Petia Radeva}: Supervision, Conceptualization, Resources,
 Project administration, Funding acquisition, Writing, review \&
 editing.
+R.~Marques and P.~Radeva contributed equally to the supervision of this
+work.
 
 \section*{Declaration of competing interest}
 The authors declare that they have no known competing financial interests or

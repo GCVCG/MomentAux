@@ -28,26 +28,25 @@ descriptor recovers about half.}
 \label{tab:controls}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
-\resizebox{\columnwidth}{!}{%
 \zebra{2}
-\begin{tabular}{@{}lrrl@{}}
+\begin{tabular}{@{}P{0.33\columnwidth}rrP{0.31\columnwidth}@{}}
 \toprule
-aux target & @5\%~\up & @10\%~\up & note \\
+Aux target & @5\%~\up & @10\%~\up & Note \\
 \midrule
-moment magnitude (ours) & $+3.31$ & $+2.81$ & phase-invariant energy \\
-structure tensor &--& $+1.78$ & mild nonlinearity \\
-steerable harmonics &--& $+1.01$ & principled rot.-inv. \\
-rotation-invariant energy &--& $+0.84$ & \\
-oriented edges (Gabor) &--& $-0.24$ & raw edges hurt \\
+Moment magnitude (ours) & $+3.31$ & $+2.81$ & phase-invariant energy \\
+Structure tensor &--& $+1.78$ & mild nonlinearity \\
+Steerable harmonics &--& $+1.01$ & principled rot.-inv. \\
+Rotation-invariant energy &--& $+0.84$ & \\
+Oriented edges (Gabor) &--& $-0.24$ & raw edges hurt \\
 2nd-order invariants &--& $-2.97$ & over-processed \\
 \midrule
 HOG target & $+1.22$ & $+1.37$ & descriptor helps; moments $2\times$ better \\
-learned teacher (FitNets) & $-0.36$ & $+0.16$ & $2\times$ cost, ${\sim}0$ on 8-pt envelope \\
-random fixed maps & $+0.01$ & $+0.14$ & kills ``any aux signal'' \\
+Learned teacher (FitNets) & $-0.36$ & $+0.16$ & $2\times$ cost, ${\sim}0$ on 8-pt envelope \\
+Random fixed maps & $+0.01$ & $+0.14$ & kills ``any aux signal'' \\
 \midrule
-cosine loss (not MSE) & -- & $+0.46$ & magnitude scale matters \\
+Cosine loss (not MSE) & -- & $+0.46$ & magnitude scale matters \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
 
 Table~\ref{tab:controls}: a random fixed target of identical shape moves
@@ -135,11 +134,10 @@ verbatim.}
 \label{tab:guide}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
-\resizebox{\columnwidth}{!}{%
 \zebra{2}
-\begin{tabular}{@{}p{0.30\linewidth}p{0.22\linewidth}lp{0.27\linewidth}@{}}
+\begin{tabular}{@{}P{0.285\columnwidth}P{0.205\columnwidth}lP{0.265\columnwidth}@{}}
 \toprule
-regime & recommendation & cost & measured basis \\
+Regime & Recommendation & Cost & Measured basis \\
 \midrule
 Conv backbone, photo-like data, mid band (2--15\%), $2\times$ affordable & SimCLR init & $2\times$ & $+2..{+}9$ over baseline; beats prior by $+2..{+}5$ \\
 Conv, photo-like, $2\times$ \emph{not} affordable & prior & $1.02\times$ & $+1.4..{+}6.7$; ${\sim}$SSL parity at extremes \\
@@ -151,7 +149,7 @@ ImageNet-transferable task & transfer; \textbf{never} add prior &--& tax $-10..{
 Domain-shifted from ImageNet (e.g.\ stains) & prior from scratch competitive & $1.02\times$ & transfer advantage shrinks to $+2..{+}3$ \\
 Data sufficient (${\geq}50\%$) & nothing (all converge) &--& every intervention within $\pm 0.8$ \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
 
 Table~\ref{tab:guide} is the benchmark's practical distillate. Its

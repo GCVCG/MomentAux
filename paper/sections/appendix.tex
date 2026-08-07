@@ -1,7 +1,27 @@
 %% ---------------------------------------------------------------------
 \appendix
 
+\section*{Appendix}
+\noindent The appendices hold the material a reader may want to check but
+which would interrupt the argument. Appendix~\ref{app:envelopes} gives the
+complete measured envelopes behind the summary tables of
+Section~\ref{sec:grid}; Appendix~\ref{app:law} the component curves ($G$
+and readout) that the law decomposes; Appendix~\ref{app:exceptions} every
+one of the ten sign-law violations, individually; Appendix~\ref{app:controls}
+the controls cited in passing in the main text;
+Appendix~\ref{app:domains} the per-domain notes, including the PathMNIST
+confound; Appendix~\ref{app:datasets} the dataset table;
+Appendix~\ref{app:repro} the reproduction commands and released artifacts;
+and Appendix~\ref{app:explain} the explainability panels.
+
 \section{Full envelopes}\label{app:envelopes}
+
+Tables~\ref{tab:appenv} and \ref{tab:appssl} give the two envelopes the
+main text summarizes: the champion prior's gain at every measured fraction
+on both convolutional and attention backbones, and the margin of a
+$2\times$-compute SimCLR initialization over that prior. Both are the raw
+material for Fig.~\ref{fig:envelopes}, and every cell in them is a paired
+difference against its own baseline arm under the frozen recipe.
 
 \begin{table}[t]
 \caption{Complete measured envelopes for the champion prior ($\Delta$ vs.\
@@ -10,14 +30,13 @@ are CIFAR-100 unless marked tin (Tiny-ImageNet), whose fractions are
 1, 2, 5, 10, 15, 25 and 100\%.}
 \label{tab:appenv}
 \centering\scriptsize
-\setlength{\tabcolsep}{2.6pt}
-\resizebox{\columnwidth}{!}{%
+\setlength{\tabcolsep}{1.7pt}
 \zebra{4}
 \begin{tabular}{@{}lrrrrrr@{}}
 \toprule
  & \multicolumn{3}{c}{ResNet-18~\up} & \multicolumn{3}{c}{ViT-tiny~\up} \\
 \cmidrule(lr){2-4}\cmidrule(l){5-7}
-frac. & C100 & C10 & tin & C100 & +DeiT & tin \\
+Frac. & C100 & C10 & Tin & C100 & +DeiT & Tin \\
 \midrule
 1\%   & $\mathbf{+1.42}$ & $\mathbf{+6.37}$ & $+1.49$ & $+1.35$ & $+3.20$ & $+1.39$ \\
 2\%   & $+2.50$ & $\mathbf{+6.66}$ & $+1.81$ & $+3.25$ & $+6.01$ & $+3.29$ \\
@@ -29,7 +48,7 @@ frac. & C100 & C10 & tin & C100 & +DeiT & tin \\
 25\%  & $+0.25$ & $-0.83$ & $+0.10$ & $+13.67$ & $+25.05$ & $+10.48$ \\
 100\% & $+0.08$ & $-0.26$ & $-0.42$ & $+9.88$ & $+13.86$ & $+7.17$ \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
 
 \begin{table}[t]
@@ -44,13 +63,13 @@ $2\times$-compute initialization wins.}
 \zebra{2}
 \begin{tabular}{@{}lrlr@{}}
 \toprule
-frac. & SSL $-$ prior & frac. & SSL $-$ prior \\
+Frac. & SSL $-$ prior & Frac. & SSL $-$ prior \\
 \midrule
 1\% & $+0.85$ & 10\%  & $+5.01$ \\
 2\% & $+2.38$ & 15\%  & $+4.09$ \\
 3\% & $+2.32$ & 50\%  & $+0.58$ \\
 5\% & $+3.90$ & 100\% & $+0.05$ \\
-7\% & $+4.99$ &       &          \\
+7\% & $+4.99$ &       & \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -92,11 +111,10 @@ small-magnitude singletons.}
 \label{tab:exceptions}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
-\resizebox{\columnwidth}{!}{%
 \zebra{2}
 \begin{tabular}{@{}lllrrrr@{}}
 \toprule
-dataset & backbone & cell & base & $\Delta$ & $G$ & readout \\
+Dataset & Backbone & Cell & Base & $\Delta$ & $G$ & Readout \\
 \midrule
 Food-101 & R18 & mag3@50\% & 71.8 & $-1.30$ & $+4.66$ & $-5.96$ \\
 Food-101 & R18 & mag6o@50\% & 71.8 & $-0.91$ & $+4.97$ & $-5.88$ \\
@@ -111,7 +129,7 @@ DTD & ViT & deit-aux@50\% & 14.2 & $+17.30$ & $+14.73$ & $+2.57$ \\
 CIFAR-100 & R50 & L3@2\% & 13.1 & $-0.95$ & $-2.96$ & $+2.01$ \\
 CIFAR-100 & R18 & L4-$\lambda.3$@50\% & 71.8 & $-0.73$ & $-0.21$ & $-0.52$ \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
 
 \section{Selected controls}\label{app:controls}
@@ -166,15 +184,14 @@ sources squash-resized where marked).}
 \label{tab:datasets}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
-\resizebox{\columnwidth}{!}{%
 \zebra{2}
 \begin{tabular}{@{}lrrrl@{}}
 \toprule
-dataset & train imgs & classes & px & domain \\
+Dataset & Train imgs & Classes & Px & Domain \\
 \midrule
 CIFAR-10 & 50{,}000 & 10 & 32 & photographic \\
 CIFAR-100 & 50{,}000 & 100 & 32 & photographic \\
-ciFAIR-100 (eval) &--& 100 & 32 & decontaminated test \\
+CiFAIR-100 (eval) &--& 100 & 32 & decontaminated test \\
 STL-10 & 5{,}000 & 10 & 96 & photographic \\
 Tiny-ImageNet & 100{,}000 & 200 & 64 & photographic \\
 EuroSAT & 21{,}600 & 10 & 64 & satellite \\
@@ -186,7 +203,7 @@ ImageNet64 & 1{,}281{,}167 & 1000 & 64 & photographic \\
 ImageNet-100 & 126{,}689 & 100 & 224 & photographic \\
 \bottomrule
 \rowcolor{white}\multicolumn{5}{@{}l}{\footnotesize $^{r}$squash-resized from native.} \\
-\end{tabular}}
+\end{tabular}
 \end{table}
 
 \section{Reproducibility}\label{app:repro}
@@ -202,7 +219,7 @@ verified by \emph{loading and evaluating} checkpoints against their
 recorded accuracies, not by file listing. The full harness, configs,
 subsets, banks, runner, aggregation, audit, is released with the paper (anonymized repository during review; archival DOI on acceptance).
 
-\section{Explainability analyzes}\label{app:explain}
+\section{Explainability analyses}\label{app:explain}
 
 The prior's mechanism is visible directly in the learned features
 (Fig.~\ref{fig:explain}, CIFAR-100 @5\% champion pair). Class-activation
