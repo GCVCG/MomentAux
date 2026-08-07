@@ -149,7 +149,11 @@ NEED=\$(( TARGET - CUR ))
 REM=\$(( N - CTR ))
 [ "\$REM" -lt 0 ] && REM=0
 CAP=\$(( (REM + 31) / 32 ))     # a job runs SLOTS*4 = 32 tasks at once
-[ "\$NEED" -gt "\$CAP" ] && NEED=\$CAP
+# CAP bounds the STANDING POOL, not the per-tick ask (fixed 2026-08-07): with
+# the old per-tick form the keeper added one job every tick while they all sat
+# pending, accumulating 8 four-GPU jobs to run a SINGLE remaining task.
+POOLROOM=\$(( CAP - CUR ))
+[ "\$NEED" -gt "\$POOLROOM" ] && NEED=\$POOLROOM
 echo "STATE feeding ctr=\$CTR/\$N running_or_pending=\$CUR need=\$NEED (remaining=\$REM)"
 [ "\$NEED" -le 0 ] && exit 0
 cd "\$MS"

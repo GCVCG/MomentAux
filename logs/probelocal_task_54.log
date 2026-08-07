@@ -1,0 +1,4 @@
+grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_2pct seed0: probe train 11.64  test 9.45
+grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_2pct seed1: probe train 3.10  test 2.82
+grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_2pct seed2: probe train 10.07  test 8.66
+PROBE_RESULT grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_2pct test 6.98+/-3.62 over 3 seeds -> runs/grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_2pct/linear_probe.json

@@ -59,6 +59,8 @@
 \affiliation[2]{organization={Universitat Pompeu Fabra},
                 city={Barcelona}, country={Spain}}
 \cortext[1]{Corresponding author.}
+\nonumnote{Code, configurations, committed subset indices, per-run records
+and all result tables: \url{https://github.com/GCVCG/MomentsCNNEncoder}}
 
 \begin{abstract}
 % DRAFT, one paragraph, <=250 words, no references, fusion vocabulary first.
@@ -85,7 +87,9 @@ augmentation), same-currency sources substitute (the prior against effective
 self-supervised pre-training),
 and fusing into an already-informed initialization taxes in proportion to
 what the initialization carries (ImageNet transfer). A decision guide maps
-regime to the cheapest effective intervention.
+regime to the cheapest effective intervention. The complete harness, every
+configuration and subset index, every per-run record, and all result tables
+are released at \url{https://github.com/GCVCG/MomentsCNNEncoder}.
 \end{abstract}
 
 \begin{graphicalabstract}
@@ -143,10 +147,15 @@ reported in this paper.
 
 \section*{Data availability}
 All artifacts needed to reproduce every number in this paper are released
-with it: the training and evaluation harness (configs for all 2{,}800
-cells, the committed subset indices, the fingerprinted filter banks, the
-single training entry point, the aggregation and audit scripts), and the
-complete result tables in open formats. The latter comprise a per-cell
+at \url{https://github.com/GCVCG/MomentsCNNEncoder}: the training and
+evaluation harness (configs for all 2{,}800 cells, the committed subset
+indices, the fingerprinted filter banks, the single training entry point,
+the aggregation and audit scripts), and the complete result tables in open
+formats. The tagged release additionally carries the \emph{raw} evidence as
+downloadable assets: every run's \texttt{final.json} record (configuration
+as executed, accuracy, parameter and floating-point-operation accounting,
+environment), every linear-probe record, every per-epoch training curve, and
+the campaign logs, with \texttt{SHA256} checksums. The latter comprise a per-cell
 table (\texttt{all\_results.csv}: 2{,}800 rows with dataset, backbone,
 intervention, fraction, seed count, accuracy mean and standard deviation,
 probe accuracy, paired baseline, $\Delta$, its standard error, $G$ and
@@ -157,7 +166,8 @@ regenerates from these files by one command, and the sign-law audit of
 Table~\ref{tab:audit} is itself a released script rather than a manual
 query. Public datasets are cited in Section~\ref{sec:datasets}; the
 subset indices we release make the exact image selection reproducible
-without redistributing the images.
+without redistributing the images. Model checkpoints (223\,GB) are not
+distributed; every cell retrains from its committed configuration.
 
 \section*{Declaration of generative AI in the writing process}
 % Per Elsevier policy: disclose any use of generative AI in manuscript

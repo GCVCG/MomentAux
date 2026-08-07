@@ -1,0 +1,116 @@
+=== probelocal wave start 2026-08-05T14:44:32+02:00 tasks=69 conc=4 nw=3
+OK   2/69 auxmag_100pct_sched01
+OK   1/69 c10_none_7pct
+OK   3/69 abl3_none
+FAIL 7/69 grid_c100_cnx_64bc90_3pct (logs/probelocal_task_7.log)
+OK   4/69 tin_none_25pct
+OK   6/69 diaggrid_c100_r18_e800_5c8bbf_15pct
+FAIL 8/69 grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_3pct (logs/probelocal_task_8.log)
+OK   5/69 tin_aux_25pct
+OK   9/69 diaggrid_c100_r18_e800_5c8bbf_50pct
+OK   10/69 c10_none_25pct
+OK   12/69 diagdeit_aux_2pct
+OK   11/69 diagdeit_none_2pct
+FAIL 16/69 grid_c100_r18_poollearned_d9c446_2pct (logs/probelocal_task_16.log)
+OK   13/69 diagdeit_aux_tin_25pct
+OK   17/69 abl7_none
+OK   14/69 grid_c100_cnx_64bc90_25pct
+OK   15/69 diaggrid_c100_cnx_adamw_axmagnitudes2_l10to00_df3002_25pct
+OK   18/69 auxmag_7pct_sched0
+OK   19/69 grid_c100_cnx_64bc90_20pct
+OK   21/69 diagdeit_aux_tin_1pct
+OK   20/69 grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_20pct
+OK   22/69 diaggrid_c100_cnx_adamw_c79e16_15pct
+OK   24/69 super100_none
+OK   25/69 super100_aux
+OK   23/69 grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_15pct
+OK   27/69 diaggrid_c100_cnx_adamw_c79e16_5pct
+OK   28/69 diaggrid_c100_cnx_adamw_axmagnitudes2_l10to00_df3002_5pct
+OK   26/69 tin_none_100pct
+OK   29/69 diagcnxadamw_none_10pct
+OK   31/69 r50_none_5pct
+OK   32/69 r50_none_10pct
+OK   30/69 diagcnxadamw_aux_10pct
+OK   33/69 r50_aux_10pct
+OK   36/69 super25_aux
+OK   35/69 super25_none
+OK   37/69 diagvit_none_15pct
+OK   34/69 tin_none_7pct
+OK   38/69 diagvit_aux_15pct
+OK   39/69 diagdeit_none_tin_2pct
+OK   40/69 grid_c100_cnx_64bc90_50pct
+OK   41/69 grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_50pct
+OK   44/69 c10_aux_100pct
+OK   42/69 grid_c100_cnx_64bc90_1pct
+OK   43/69 diaggrid_c100_cnx_adamw_axmagnitudes2_l10to00_df3002_1pct
+OK   46/69 grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_7pct
+OK   47/69 diagvit_none_7pct
+OK   48/69 diagvit_aux_7pct
+OK   45/69 diaggrid_c100_cnx_adamw_c79e16_7pct
+OK   51/69 diaggrid_c100_vit_adamw_3800f8_20pct
+OK   52/69 diaggrid_c100_vit_adamw_axmagnitudeb8_l10to00_hn_08a844_50pct
+OK   49/69 diagdeit_none_15pct
+OK   50/69 diagdeit_aux_15pct
+OK   56/69 diagvit_none_3pct
+OK   55/69 diagdeit_aux_tin_100pct
+OK   53/69 diaggrid_c100_cnx_adamw_c79e16_2pct
+OK   54/69 grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_2pct
+OK   57/69 diagvit_aux_3pct
+OK   58/69 diagvit_none_2pct
+OK   59/69 diagvit_aux_2pct
+OK   60/69 r34_none_10pct
+OK   61/69 r34_aux_10pct
+OK   62/69 diagdeit_none_7pct
+OK   63/69 diagdeit_aux_7pct
+OK   64/69 diaggrid_c100_cnx_adamw_c79e16_100pct
+OK   65/69 diaggrid_c100_cnx_adamw_axmagnitudes2_l10to00_df3002_100pct
+OK   68/69 diagdeit_none_3pct
+OK   66/69 super10_none
+OK   67/69 super10_aux
+OK   69/69 diagdeit_aux_3pct
+=== probelocal counts: OK=66 FAIL=3
+PROBELOCAL_COMPLETE 2026-08-05T15:06:09+02:00
+=== probelocal wave start 2026-08-05T15:06:43+02:00 tasks=3 conc=3 nw=3
+OK   3/3 grid_c100_r18_poollearned_d9c446_2pct
+OK   1/3 grid_c100_cnx_64bc90_3pct
+OK   2/3 grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_3pct
+=== probelocal counts: OK=69 FAIL=3
+PROBELOCAL_COMPLETE 2026-08-05T15:08:00+02:00
+=== probelocal wave start 2026-08-07T10:50:11+02:00 tasks=12 conc=2 nw=6
+OK   1/12 diagin64_r18_none
+OK   2/12 diagin64_r18_aux
+=== probelocal wave start 2026-08-07T11:18:25+02:00 tasks=2 conc=2 nw=6
+OK   1/2 diagin100_vitb_none
+OK   2/2 diagin100_vitb_aux
+=== probelocal counts: OK=73 FAIL=3
+PROBELOCAL_COMPLETE 2026-08-07T11:29:09+02:00
+=== probelocal wave start 2026-08-07T12:14:21+02:00 tasks=10 conc=2 nw=6
+OK   1/10 diagin64_r18_none
+OK   2/10 diagin64_r18_aux
+OK   3/10 diagin64_vit_none
+OK   4/10 diagin64_vit_aux
+OK   6/10 diagin64_mnet_aux
+OK   5/10 diagin64_mnet_none
+OK   8/10 diagin100_vits_aux
+OK   7/10 diagin100_vits_none
+OK   10/10 diagin100_r50_aux
+OK   9/10 diagin100_r50_none
+=== probelocal counts: OK=83 FAIL=3
+PROBELOCAL_COMPLETE 2026-08-07T12:57:30+02:00
+=== probelocal wave start 2026-08-07T13:11:20+02:00 tasks=14 conc=4 nw=3
+OK   1/14 abl15_none
+OK   3/14 abl2_none
+OK   4/14 abl3_none
+OK   2/14 abl25_none
+OK   6/14 diagvit_none_15pct
+OK   8/14 diagvit_none_3pct
+OK   7/14 diagvit_none_2pct
+OK   5/14 abl7_none
+OK   9/14 diagvit_none_7pct
+OK   10/14 tin_none_100pct
+OK   11/14 tin_none_15pct
+OK   12/14 tin_none_25pct
+OK   13/14 tin_none_3pct
+OK   14/14 tin_none_7pct
+=== probelocal counts: OK=97 FAIL=3
+PROBELOCAL_COMPLETE 2026-08-07T13:17:04+02:00

@@ -1,0 +1,31 @@
+grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_3pct seed0: probe train 9.92  test 8.50
+Traceback (most recent call last):
+  File "/home/amughrabi/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 256, in <module>
+    main()
+  File "/home/amughrabi/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 219, in main
+    model.load_state_dict(torch.load(ckpt, map_location=device))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 1486, in load
+    with _open_zipfile_reader(opened_file) as opened_zipfile:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 771, in __init__
+    super().__init__(torch._C.PyTorchFileReader(name_or_buffer))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: PytorchStreamReader failed reading zip archive: failed finding central directory
+diagin100_vits_aux seed0: probe train 90.79  test 77.82
+      25 shots/class (n= 2500): test 74.46
+     100 shots/class (n=10000): test 74.72
+     250 shots/class (n=25000): test 74.46
+diagin100_vits_aux seed1: probe train 90.46  test 78.90
+      25 shots/class (n= 2500): test 74.74
+     100 shots/class (n=10000): test 74.80
+     250 shots/class (n=25000): test 75.54
+diagin100_vits_aux seed2: probe train 90.59  test 77.50
+      25 shots/class (n= 2500): test 74.78
+     100 shots/class (n=10000): test 74.14
+     250 shots/class (n=25000): test 74.80
+PROBE_RESULT diagin100_vits_aux test 78.07+/-0.73 over 3 seeds -> runs/diagin100_vits_aux/linear_probe.json
+diagvit_none_3pct seed0: probe train 19.84  test 17.99
+diagvit_none_3pct seed1: probe train 22.54  test 18.17
+diagvit_none_3pct seed2: probe train 23.93  test 18.75
+PROBE_RESULT diagvit_none_3pct test 18.30+/-0.40 over 3 seeds -> runs/diagvit_none_3pct/linear_probe.json

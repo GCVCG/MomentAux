@@ -1,0 +1,4 @@
+diagcnxadamw_aux_10pct seed0: probe train 59.07  test 45.60
+diagcnxadamw_aux_10pct seed1: probe train 57.95  test 45.60
+diagcnxadamw_aux_10pct seed2: probe train 56.16  test 44.40
+PROBE_RESULT diagcnxadamw_aux_10pct test 45.20+/-0.69 over 3 seeds -> runs/diagcnxadamw_aux_10pct/linear_probe.json

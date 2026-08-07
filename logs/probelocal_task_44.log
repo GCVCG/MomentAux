@@ -1,0 +1,4 @@
+c10_aux_100pct seed0: probe train 100.00  test 94.84
+c10_aux_100pct seed1: probe train 100.00  test 95.13
+c10_aux_100pct seed2: probe train 100.00  test 95.17
+PROBE_RESULT c10_aux_100pct test 95.05+/-0.18 over 3 seeds -> runs/c10_aux_100pct/linear_probe.json

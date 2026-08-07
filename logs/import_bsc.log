@@ -1,0 +1,175 @@
+load bsc/1.0 (PATH, MANPATH)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_axmagnitudeL3_l10to00_cosinehead_d1f3e0_7pct/seed2/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_cosinehead_2f17a9_10pct/seed2/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_cosinehead_2f17a9_20pct/seed2/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_cosinehead_2f17a9_5pct/seed0/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e100_4cd1ae_1pct/seed1/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e100_4cd1ae_2pct/seed2/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e100_stmomentscatk11_kw03e54b_1201eb_5pct/seed0/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e100_stmomentscatk11_kw03e54b_1201eb_7pct/seed0/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e20_383f0d_15pct/seed1/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e20_383f0d_15pct/seed2/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e20_383f0d_1pct/seed2/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e20_stmomentscatk11_d25252_20pct/seed2/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e20_stmomentscatk11_d25252_3pct/seed2/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e400_06c094_20pct/seed1/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e400_stmomentscatk11_kw03e54b_f77742_1pct/seed2/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e400_stmomentscatk11_kw03e54b_f77742_20pct/seed0/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e400_stmomentscatk11_kw03e54b_f77742_20pct/seed2/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e400_stmomentscatk11_kw03e54b_f77742_7pct/seed2/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e800_stmomentscatk11_kw03e54b_a76449_20pct/seed1/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e800_stmomentscatk11_kw03e54b_a76449_3pct/seed0/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_vit_adamw_axmagnitudeb8_l10to00_hn_08a844_20pct/seed1/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_15pct/seed1/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_20pct/seed0/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_axmagnitudeL3_l10to00_cosinehead_d1f3e0_7pct/seed2/best.pt": Input/output error (5)
+ERROR: diaggrid_c100_r18_axmagnitudeL3_l10to00_cosinehead_d1f3e0_7pct/seed2/best.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_cosinehead_2f17a9_10pct/seed2/best.pt": Input/output error (5)
+ERROR: diaggrid_c100_r18_cosinehead_2f17a9_10pct/seed2/best.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_7pct/seed0/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_cosinehead_2f17a9_20pct/seed2/best.pt": Input/output error (5)
+ERROR: diaggrid_c100_r18_cosinehead_2f17a9_20pct/seed2/best.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_tin_r18_cosinehead_05b132_10pct/seed2/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_tin_r18_cosinehead_05b132_15pct/seed0/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_tin_r18_cosinehead_05b132_20pct/seed0/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_cosinehead_2f17a9_5pct/seed0/best.pt": Input/output error (5)
+ERROR: diaggrid_c100_r18_cosinehead_2f17a9_5pct/seed0/best.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_tin_r18_cosinehead_05b132_2pct/seed0/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e100_4cd1ae_1pct/seed1/last.pt": Input/output error (5)
+ERROR: diaggrid_c100_r18_e100_4cd1ae_1pct/seed1/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e100_4cd1ae_2pct/seed2/last.pt": Input/output error (5)
+ERROR: diaggrid_c100_r18_e100_4cd1ae_2pct/seed2/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_tin_vit_adamw_95e854_5pct/seed1/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e100_stmomentscatk11_kw03e54b_1201eb_5pct/seed0/last.pt": Input/output error (5)
+ERROR: diaggrid_c100_r18_e100_stmomentscatk11_kw03e54b_1201eb_5pct/seed0/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e100_stmomentscatk11_kw03e54b_1201eb_7pct/seed0/last.pt": Input/output error (5)
+ERROR: diaggrid_c100_r18_e100_stmomentscatk11_kw03e54b_1201eb_7pct/seed0/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e20_383f0d_15pct/seed1/last.pt": Input/output error (5)
+ERROR: diaggrid_c100_r18_e20_383f0d_15pct/seed1/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e20_383f0d_15pct/seed2/last.pt": Input/output error (5)
+ERROR: diaggrid_c100_r18_e20_383f0d_15pct/seed2/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e20_383f0d_1pct/seed2/best.pt": Input/output error (5)
+ERROR: diaggrid_c100_r18_e20_383f0d_1pct/seed2/best.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_tin_vit_adamw_axmagnitudeb8_l10to00_hn_65458b_7pct/seed2/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_64bc90_15pct/seed2/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_64bc90_15pct/seed2/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_64bc90_1pct/seed0/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_64bc90_1pct/seed2/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_64bc90_3pct/seed1/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_64bc90_7pct/seed1/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_64bc90_7pct/seed1/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_64bc90_7pct/seed2/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_15pct/seed0/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e20_stmomentscatk11_d25252_20pct/seed2/last.pt": Input/output error (5)
+ERROR: diaggrid_c100_r18_e20_stmomentscatk11_d25252_20pct/seed2/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_3pct/seed1/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e20_stmomentscatk11_d25252_3pct/seed2/last.pt": Input/output error (5)
+ERROR: diaggrid_c100_r18_e20_stmomentscatk11_d25252_3pct/seed2/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_5pct/seed0/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_7pct/seed0/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_7pct/seed1/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_3a0225_20pct/seed1/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e400_06c094_20pct/seed1/best.pt": Input/output error (5)
+ERROR: diaggrid_c100_r18_e400_06c094_20pct/seed1/best.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axhog_l03_fc141d_1pct/seed0/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axhog_l03_fc141d_3pct/seed1/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axhog_l03_fc141d_7pct/seed0/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e400_stmomentscatk11_kw03e54b_f77742_1pct/seed2/last.pt": Input/output error (5)
+ERROR: diaggrid_c100_r18_e400_stmomentscatk11_kw03e54b_f77742_1pct/seed2/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e400_stmomentscatk11_kw03e54b_f77742_20pct/seed0/best.pt": Input/output error (5)
+ERROR: diaggrid_c100_r18_e400_stmomentscatk11_kw03e54b_f77742_20pct/seed0/best.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e400_stmomentscatk11_kw03e54b_f77742_20pct/seed2/best.pt": Input/output error (5)
+ERROR: diaggrid_c100_r18_e400_stmomentscatk11_kw03e54b_f77742_20pct/seed2/best.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axinvariantsL3_l03_e17c19_1pct/seed2/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e400_stmomentscatk11_kw03e54b_f77742_7pct/seed2/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e800_stmomentscatk11_kw03e54b_a76449_20pct/seed1/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_r18_e800_stmomentscatk11_kw03e54b_a76449_3pct/seed0/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_c100_vit_adamw_axmagnitudeb8_l10to00_hn_08a844_20pct/seed1/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_15pct/seed1/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_20pct/seed0/last.pt": Input/output error (5)
+ERROR: diaggrid_c100_r18_e400_stmomentscatk11_kw03e54b_f77742_7pct/seed2/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_7pct/seed0/best.pt": Input/output error (5)
+ERROR: diaggrid_c100_r18_e800_stmomentscatk11_kw03e54b_a76449_20pct/seed1/best.pt failed verification -- update discarded.
+ERROR: diaggrid_c100_r18_e800_stmomentscatk11_kw03e54b_a76449_3pct/seed0/best.pt failed verification -- update discarded.
+ERROR: diaggrid_c100_vit_adamw_axmagnitudeb8_l10to00_hn_08a844_20pct/seed1/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_tin_r18_cosinehead_05b132_10pct/seed2/best.pt": Input/output error (5)
+ERROR: diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_15pct/seed1/best.pt failed verification -- update discarded.
+ERROR: diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_20pct/seed0/last.pt failed verification -- update discarded.
+ERROR: diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_7pct/seed0/best.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_tin_r18_cosinehead_05b132_15pct/seed0/best.pt": Input/output error (5)
+ERROR: diaggrid_tin_r18_cosinehead_05b132_10pct/seed2/best.pt failed verification -- update discarded.
+ERROR: diaggrid_tin_r18_cosinehead_05b132_15pct/seed0/best.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_tin_r18_cosinehead_05b132_20pct/seed0/last.pt": Input/output error (5)
+ERROR: diaggrid_tin_r18_cosinehead_05b132_20pct/seed0/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_tin_r18_cosinehead_05b132_2pct/seed0/last.pt": Input/output error (5)
+ERROR: diaggrid_tin_r18_cosinehead_05b132_2pct/seed0/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_tin_vit_adamw_95e854_5pct/seed1/last.pt": Input/output error (5)
+ERROR: diaggrid_tin_vit_adamw_95e854_5pct/seed1/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/diaggrid_tin_vit_adamw_axmagnitudeb8_l10to00_hn_65458b_7pct/seed2/last.pt": Input/output error (5)
+ERROR: diaggrid_tin_vit_adamw_axmagnitudeb8_l10to00_hn_65458b_7pct/seed2/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_64bc90_15pct/seed2/best.pt": Input/output error (5)
+ERROR: grid_c100_cnx_64bc90_15pct/seed2/best.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_64bc90_15pct/seed2/last.pt": Input/output error (5)
+ERROR: grid_c100_cnx_64bc90_15pct/seed2/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_64bc90_1pct/seed0/best.pt": Input/output error (5)
+ERROR: grid_c100_cnx_64bc90_1pct/seed0/best.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_64bc90_1pct/seed2/last.pt": Input/output error (5)
+ERROR: grid_c100_cnx_64bc90_1pct/seed2/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_64bc90_3pct/seed1/best.pt": Input/output error (5)
+ERROR: grid_c100_cnx_64bc90_3pct/seed1/best.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_64bc90_7pct/seed1/best.pt": Input/output error (5)
+ERROR: grid_c100_cnx_64bc90_7pct/seed1/best.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_64bc90_7pct/seed1/last.pt": Input/output error (5)
+ERROR: grid_c100_cnx_64bc90_7pct/seed1/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_64bc90_7pct/seed2/best.pt": Input/output error (5)
+ERROR: grid_c100_cnx_64bc90_7pct/seed2/best.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_15pct/seed0/best.pt": Input/output error (5)
+ERROR: grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_15pct/seed0/best.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_3pct/seed1/best.pt": Input/output error (5)
+ERROR: grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_3pct/seed1/best.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_5pct/seed0/last.pt": Input/output error (5)
+ERROR: grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_5pct/seed0/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_7pct/seed0/best.pt": Input/output error (5)
+ERROR: grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_7pct/seed0/best.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_7pct/seed1/last.pt": Input/output error (5)
+ERROR: grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_7pct/seed1/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_3a0225_20pct/seed1/last.pt": Input/output error (5)
+ERROR: grid_c100_r18_3a0225_20pct/seed1/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axhog_l03_fc141d_1pct/seed0/last.pt": Input/output error (5)
+ERROR: grid_c100_r18_axhog_l03_fc141d_1pct/seed0/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axhog_l03_fc141d_3pct/seed1/last.pt": Input/output error (5)
+ERROR: grid_c100_r18_axhog_l03_fc141d_3pct/seed1/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axhog_l03_fc141d_7pct/seed0/best.pt": Input/output error (5)
+ERROR: grid_c100_r18_axhog_l03_fc141d_7pct/seed0/best.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axinvariantsL3_l03_e17c19_1pct/seed2/best.pt": Input/output error (5)
+ERROR: grid_c100_r18_axinvariantsL3_l03_e17c19_1pct/seed2/best.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitude3L3_l10to00_1ab8e4_15pct/seed0/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitude3L3_l10to00_1ab8e4_7pct/seed0/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitudeL1_l20to00_319207_20pct/seed0/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitudeL2L3L4_l03_6928d7_7pct/seed0/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitudeL2_l03_699ce0_15pct/seed0/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitudeL2_l03_699ce0_1pct/seed2/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitudeL2_l03_699ce0_20pct/seed1/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitudeL2_l03_699ce0_20pct/seed2/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitudeL2_l03_699ce0_7pct/seed1/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitudeL2_l20to00_101ce2_7pct/seed2/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitudeL3_l002_e831ac_20pct/seed0/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitudeL3_l002_e831ac_5pct/seed1/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitudeL3_l005_2133c7_1pct/seed1/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitudeL3_l005_2133c7_3pct/seed0/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitudeL3_l005_2133c7_5pct/seed0/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitudeL3_l03_cosine_8fc914_20pct/seed2/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitude3L3_l10to00_1ab8e4_15pct/seed0/last.pt": Input/output error (5)
+ERROR: grid_c100_r18_axmagnitude3L3_l10to00_1ab8e4_15pct/seed0/last.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitudeL3_l10_270a59_15pct/seed1/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitudeL3_l10_270a59_1pct/seed2/best.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitude3L3_l10to00_1ab8e4_7pct/seed0/best.pt": Input/output error (5)
+ERROR: grid_c100_r18_axmagnitude3L3_l10to00_1ab8e4_7pct/seed0/best.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitudeL1_l20to00_319207_20pct/seed0/best.pt": Input/output error (5)
+ERROR: grid_c100_r18_axmagnitudeL1_l20to00_319207_20pct/seed0/best.pt failed verification -- update discarded.
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitudeL3_l10to00_hn_d94ac5_15pct/seed1/last.pt": Input/output error (5)
+rsync: [sender] read errors mapping "/gpfs/scratch/ub234/momentstem/runs/grid_c100_r18_axmagnitudeL3_l10to00_hn_d94ac5_15pct/seed2/best.pt": Input/output error (5)
+rsync: connection unexpectedly closed (124440350616 bytes received so far) [receiver]
+rsync error: error in rsync protocol data stream (code 12) at io.c(232) [receiver=3.2.7]
+rsync: connection unexpectedly closed (244682 bytes received so far) [generator]
+rsync error: error in rsync protocol data stream (code 12) at io.c(232) [generator=3.2.7]

@@ -1,0 +1,5 @@
+moment-aux target calibrated on 1024 images
+[diagin64_r18_aux seed0] {"params_trainable": 11683888, "params_stem_trainable": 0, "params_stem_fixed_filters": 0, "flops_total": 2227130368, "flops_stem": 0, "flops_image_size": 64}
+epoch 1/2 loss 4.8871 train 0.1096 test 0.1322
+epoch 2/2 loss 3.6658 train 0.2449 test 0.2122
+done: final 0.2122 best 0.2122 -> /tmp/claude-1000/-home-amughrabi-projects-MomentsCNNEncoder/08d0108f-3b49-418e-af2b-a161c3dbad59/scratchpad/in64_smoke/diagin64_r18_aux/seed0

@@ -21,6 +21,9 @@ is positive at every data scale up to 25%, neutral at 100% by construction.
   bank) with how-to-read guides and interpretations.
 - **[Findings](FINDINGS.md)** — the full question-by-question experimental
   record: every hypothesis, prediction, landing, and retraction.
+- **[Released artifacts](ARTIFACTS.md)** — what is in each released asset
+  (per-run records, training curves, result tables, campaign logs) and how
+  to load it.
 - **[Porting notes](PORTING.md)** — what was ported vs corrected from the
   original MomentsNeRF code and why.
 
@@ -28,22 +31,31 @@ is positive at every data scale up to 25%, neutral at 100% by construction.
 
 | dataset | best Δ (cell) | envelope shape |
 |---|---|---|
-| CIFAR-10 | +6.66 @2% | plateau 1–2%, decays, crosses zero 10–15% |
-| CIFAR-100 | +5.30 @5% | unimodal, peak 5%, neutral @100% |
+| CIFAR-10 | +6.66 @2% (10 seeds) | plateau 1–2%, decays, crosses zero 10–15% |
+| CIFAR-100 | +5.15 @5% (10 seeds) | unimodal, peak 5%, neutral @100% |
 | STL-10 | +5.92 @10% | tracks CIFAR-10 at matched images |
-| Tiny-ImageNet | +2.13 @5% | flat ≤ +2.2 (readout-suppressed; see findings) |
+| Tiny-ImageNet | +2.12 @5% (10 seeds) | flat ≤ +2.2 (readout-suppressed) |
+| ViT-tiny, CIFAR-100 | +14.44 @15% | large at *every* scale; +9.88 at 100% |
+| ViT-S/16 @224px | +13.00 | ImageNet-100, standard DeiT recipe |
+| ViT-B/16 @224px | **+26.01** | the deficit grows with model scale |
 
-The law behind every cell: **Δe2e = G(features) + readout(task performance)**
-— G measured by linear probes on frozen features, readout sign governed by
-baseline accuracy (negative below ≈30%, positive above ≈34%; 20 cells, zero
-violations). Machine-verified by `analysis/audit_law.py`.
+The law behind every cell: **Δ = G(features) + readout(baseline accuracy)**
+— `G` measured by linear probes on frozen features, readout negative below
+the measured crossing bracket `[31.8, 40.3]` and positive above it. Of the
+278 cells whose readout is resolvable against its own uncertainty, **268
+(96%) fall on the predicted side**. Machine-verified by
+`analysis/audit_sign_law.py`.
+
+The law is predictive: registered in advance it called an unseen backbone
+family's feature gain from baseline heights alone (Swin-T, four of four in
+band) and the ImageNet-scale residual (`|Δ−G| ≤ 1.1` on five of six pairs).
 
 ## Reproducing
 
 ```bash
 python train.py --config configs/diagnostics/<cell>.yaml --seed N
 python analysis/aggregate.py          # regenerate all tables from runs/
-python analysis/audit_law.py          # re-verify the law from raw files
+python analysis/audit_sign_law.py     # re-verify the law from raw files
 python analysis/visualize_features.py --pair <none_cell> <aux_cell>
 ```
 

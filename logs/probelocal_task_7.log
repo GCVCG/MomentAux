@@ -1,0 +1,39 @@
+grid_c100_cnx_64bc90_3pct seed0: probe train 8.44  test 7.65
+Traceback (most recent call last):
+  File "/home/amughrabi/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 256, in <module>
+    main()
+  File "/home/amughrabi/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 219, in main
+    model.load_state_dict(torch.load(ckpt, map_location=device))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 1516, in load
+    return _load(
+           ^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 2114, in _load
+    result = unpickler.load()
+             ^^^^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/_weights_only_unpickler.py", line 532, in load
+    self.append(self.persistent_load(pid))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 2078, in persistent_load
+    typed_storage = load_tensor(
+                    ^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 2031, in load_tensor
+    zip_file.get_storage_from_record(name, numel, torch.UntypedStorage)
+RuntimeError: PytorchStreamReader failed reading file data/17: invalid header or archive is corrupted
+diagin100_vits_none seed0: probe train 80.90  test 66.68
+      25 shots/class (n= 2500): test 60.50
+     100 shots/class (n=10000): test 59.80
+     250 shots/class (n=25000): test 62.90
+diagin100_vits_none seed1: probe train 80.12  test 65.92
+      25 shots/class (n= 2500): test 59.34
+     100 shots/class (n=10000): test 59.50
+     250 shots/class (n=25000): test 61.44
+diagin100_vits_none seed2: probe train 80.40  test 65.76
+      25 shots/class (n= 2500): test 59.74
+     100 shots/class (n=10000): test 61.46
+     250 shots/class (n=25000): test 62.36
+PROBE_RESULT diagin100_vits_none test 66.12+/-0.49 over 3 seeds -> runs/diagin100_vits_none/linear_probe.json
+diagvit_none_2pct seed0: probe train 20.77  test 18.08
+diagvit_none_2pct seed1: probe train 22.68  test 18.84
+diagvit_none_2pct seed2: probe train 18.91  test 17.44
+PROBE_RESULT diagvit_none_2pct test 18.12+/-0.70 over 3 seeds -> runs/diagvit_none_2pct/linear_probe.json

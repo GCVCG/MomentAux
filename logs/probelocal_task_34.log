@@ -1,0 +1,4 @@
+tin_none_7pct seed0: probe train 49.67  test 35.91
+tin_none_7pct seed1: probe train 49.56  test 35.48
+tin_none_7pct seed2: probe train 49.41  test 35.50
+PROBE_RESULT tin_none_7pct test 35.63+/-0.24 over 3 seeds -> runs/tin_none_7pct/linear_probe.json

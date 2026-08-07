@@ -1,0 +1,17 @@
+diaggrid_c100_r18_e800_5c8bbf_50pct seed0: probe train 89.21  test 71.47
+diaggrid_c100_r18_e800_5c8bbf_50pct seed1: probe train 89.31  test 72.18
+diaggrid_c100_r18_e800_5c8bbf_50pct seed2: probe train 89.37  test 71.86
+PROBE_RESULT diaggrid_c100_r18_e800_5c8bbf_50pct test 71.84+/-0.36 over 3 seeds -> runs/diaggrid_c100_r18_e800_5c8bbf_50pct/linear_probe.json
+diagin100_r50_none seed1: probe train 99.50  test 84.58
+      25 shots/class (n= 2500): test 83.50
+     100 shots/class (n=10000): test 83.58
+     250 shots/class (n=25000): test 84.22
+diagin100_r50_none seed2: probe train 99.55  test 85.38
+      25 shots/class (n= 2500): test 84.22
+     100 shots/class (n=10000): test 84.58
+     250 shots/class (n=25000): test 84.42
+PROBE_RESULT diagin100_r50_none test 84.98+/-0.57 over 2 seeds -> runs/diagin100_r50_none/linear_probe.json
+diagvit_none_7pct seed0: probe train 29.35  test 23.35
+diagvit_none_7pct seed1: probe train 24.55  test 21.40
+diagvit_none_7pct seed2: probe train 26.38  test 22.95
+PROBE_RESULT diagvit_none_7pct test 22.57+/-1.03 over 3 seeds -> runs/diagvit_none_7pct/linear_probe.json

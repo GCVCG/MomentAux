@@ -1,0 +1,4 @@
+r50_none_5pct seed0: probe train 82.46  test 37.41
+r50_none_5pct seed1: probe train 82.81  test 38.17
+r50_none_5pct seed2: probe train 80.88  test 37.52
+PROBE_RESULT r50_none_5pct test 37.70+/-0.41 over 3 seeds -> runs/r50_none_5pct/linear_probe.json

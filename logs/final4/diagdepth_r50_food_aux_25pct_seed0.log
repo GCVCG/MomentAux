@@ -1,0 +1,75 @@
+moment-aux target calibrated on 1024 images
+[diagdepth_r50_food_aux_25pct seed0] {"params_trainable": 23715501, "params_stem_trainable": 0, "params_stem_fixed_filters": 0, "flops_total": 5219035136, "flops_stem": 0, "flops_image_size": 64}
+Traceback (most recent call last):
+  File "/home/amughrabi/projects/MomentsCNNEncoder/train.py", line 436, in <module>
+    main()
+  File "/home/amughrabi/projects/MomentsCNNEncoder/train.py", line 385, in main
+    test_acc = evaluate(model, test_loader, device, num_classes)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amughrabi/projects/MomentsCNNEncoder/train.py", line 115, in evaluate
+    metric.update(model(x), y)
+                  ^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amughrabi/projects/MomentsCNNEncoder/momentstem/aux.py", line 269, in forward
+    logits = self.net(self.stem(x))
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/timm/models/resnet.py", line 776, in forward
+    x = self.forward_features(x)
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/timm/models/resnet.py", line 753, in forward_features
+    x = self.layer1(x)
+        ^^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/container.py", line 240, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/timm/models/resnet.py", line 267, in forward
+    shortcut = self.downsample(shortcut)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/container.py", line 240, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/batchnorm.py", line 193, in forward
+    return F.batch_norm(
+           ^^^^^^^^^^^^^
+  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/functional.py", line 2822, in batch_norm
+    return torch.batch_norm(
+           ^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 GiB. GPU 0 has a total capacity of 23.56 GiB of which 1.18 GiB is free. Process 1604820 has 7.00 GiB memory in use. Including non-PyTorch memory, this process has 7.16 GiB memory in use. Process 1604821 has 8.17 GiB memory in use. Of the allocated memory 4.87 GiB is allocated by PyTorch, and 1.97 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)

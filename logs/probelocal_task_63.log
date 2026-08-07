@@ -1,0 +1,4 @@
+diagdeit_aux_7pct seed0: probe train 52.07  test 45.55
+diagdeit_aux_7pct seed1: probe train 52.11  test 44.94
+diagdeit_aux_7pct seed2: probe train 52.54  test 45.83
+PROBE_RESULT diagdeit_aux_7pct test 45.44+/-0.46 over 3 seeds -> runs/diagdeit_aux_7pct/linear_probe.json

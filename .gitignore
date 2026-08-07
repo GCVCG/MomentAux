@@ -3,6 +3,10 @@ data/*
 !data/subsets/
 runs/
 results/
+!results/*.csv
+!results/*.md
+!results/*.tex
+release/
 slurm/logs/
 logs/*.pid
 

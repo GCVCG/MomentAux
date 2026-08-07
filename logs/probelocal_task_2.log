@@ -1,0 +1,51 @@
+auxmag_100pct_sched01 seed0: probe train 99.98  test 78.50
+auxmag_100pct_sched01 seed1: probe train 99.98  test 78.50
+auxmag_100pct_sched01 seed2: probe train 99.98  test 78.66
+PROBE_RESULT auxmag_100pct_sched01 test 78.55+/-0.09 over 3 seeds -> runs/auxmag_100pct_sched01/linear_probe.json
+grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_3pct seed0: probe train 10.02  test 8.47
+grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_3pct seed1: probe train 4.47  test 4.08
+grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_3pct seed2: probe train 5.82  test 5.13
+PROBE_RESULT grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_3pct test 5.89+/-2.29 over 3 seeds -> runs/grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_3pct/linear_probe.json
+diagin64_r18_aux seed0: shots-only (1281167 imgs extracted)
+      25 shots/class (n=25000): test 21.89
+     100 shots/class (n=100000): test 29.67
+     250 shots/class (n=250000): test 32.75
+diagin64_r18_aux seed1: shots-only (1281167 imgs extracted)
+      25 shots/class (n=25000): test 46.43
+     100 shots/class (n=100000): test 50.94
+     250 shots/class (n=250000): test 53.71
+diagin64_r18_aux seed2: shots-only (1281167 imgs extracted)
+      25 shots/class (n=25000): test 46.68
+     100 shots/class (n=100000): test 51.16
+     250 shots/class (n=250000): test 53.87
+PROBE_RESULT diagin64_r18_aux shots250 46.78+/-12.15 over 3 seeds -> runs/diagin64_r18_aux/linear_probe_shots.json
+diagin100_vitb_aux seed0: probe train 85.94  test 70.32
+      25 shots/class (n= 2500): test 64.52
+     100 shots/class (n=10000): test 64.12
+     250 shots/class (n=25000): test 65.84
+diagin100_vitb_aux seed1: probe train 83.74  test 68.96
+      25 shots/class (n= 2500): test 62.46
+     100 shots/class (n=10000): test 62.70
+     250 shots/class (n=25000): test 64.78
+diagin100_vitb_aux seed2: probe train 85.23  test 70.14
+      25 shots/class (n= 2500): test 64.12
+     100 shots/class (n=10000): test 64.06
+     250 shots/class (n=25000): test 65.20
+PROBE_RESULT diagin100_vitb_aux test 69.81+/-0.74 over 3 seeds -> runs/diagin100_vitb_aux/linear_probe.json
+diagin64_r18_aux seed0: shots-only (1281167 imgs extracted)
+      25 shots/class (n=25000): test 46.66
+     100 shots/class (n=100000): test 50.98
+     250 shots/class (n=250000): test 54.04
+diagin64_r18_aux seed1: shots-only (1281167 imgs extracted)
+      25 shots/class (n=25000): test 46.44
+     100 shots/class (n=100000): test 50.96
+     250 shots/class (n=250000): test 53.73
+diagin64_r18_aux seed2: shots-only (1281167 imgs extracted)
+      25 shots/class (n=25000): test 46.68
+     100 shots/class (n=100000): test 51.17
+     250 shots/class (n=250000): test 53.88
+PROBE_RESULT diagin64_r18_aux shots250 53.89+/-0.15 over 3 seeds -> runs/diagin64_r18_aux/linear_probe_shots.json
+abl25_none seed0: probe train 80.17  test 63.34
+abl25_none seed1: probe train 81.07  test 63.25
+abl25_none seed2: probe train 80.65  test 62.82
+PROBE_RESULT abl25_none test 63.14+/-0.28 over 3 seeds -> runs/abl25_none/linear_probe.json

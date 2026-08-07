@@ -1,0 +1,4 @@
+diagdeit_aux_15pct seed0: probe train 65.53  test 56.18
+diagdeit_aux_15pct seed1: probe train 64.47  test 54.41
+diagdeit_aux_15pct seed2: probe train 64.74  test 55.38
+PROBE_RESULT diagdeit_aux_15pct test 55.32+/-0.89 over 3 seeds -> runs/diagdeit_aux_15pct/linear_probe.json

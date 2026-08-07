@@ -1,0 +1,4 @@
+super10_aux seed0: probe train 69.85  test 63.23
+super10_aux seed1: probe train 70.12  test 62.76
+super10_aux seed2: probe train 70.67  test 63.12
+PROBE_RESULT super10_aux test 63.04+/-0.25 over 3 seeds -> runs/super10_aux/linear_probe.json

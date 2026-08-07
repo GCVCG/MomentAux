@@ -1,0 +1,4 @@
+diaggrid_c100_vit_adamw_axmagnitudeb8_l10to00_hn_08a844_50pct seed0: probe train 81.50  test 53.35
+diaggrid_c100_vit_adamw_axmagnitudeb8_l10to00_hn_08a844_50pct seed1: probe train 81.59  test 53.95
+diaggrid_c100_vit_adamw_axmagnitudeb8_l10to00_hn_08a844_50pct seed2: probe train 81.61  test 53.75
+PROBE_RESULT diaggrid_c100_vit_adamw_axmagnitudeb8_l10to00_hn_08a844_50pct test 53.68+/-0.31 over 3 seeds -> runs/diaggrid_c100_vit_adamw_axmagnitudeb8_l10to00_hn_08a844_50pct/linear_probe.json

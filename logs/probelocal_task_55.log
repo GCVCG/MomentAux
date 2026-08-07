@@ -1,0 +1,4 @@
+diagdeit_aux_tin_100pct seed0: probe train 85.71  test 55.86
+diagdeit_aux_tin_100pct seed1: probe train 86.11  test 56.55
+diagdeit_aux_tin_100pct seed2: probe train 88.02  test 56.88
+PROBE_RESULT diagdeit_aux_tin_100pct test 56.43+/-0.52 over 3 seeds -> runs/diagdeit_aux_tin_100pct/linear_probe.json

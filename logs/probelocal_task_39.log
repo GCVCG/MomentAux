@@ -1,0 +1,4 @@
+diagdeit_none_tin_2pct seed0: probe train 12.45  test 10.97
+diagdeit_none_tin_2pct seed1: probe train 12.53  test 11.26
+diagdeit_none_tin_2pct seed2: probe train 5.38  test 4.68
+PROBE_RESULT diagdeit_none_tin_2pct test 8.97+/-3.72 over 3 seeds -> runs/diagdeit_none_tin_2pct/linear_probe.json

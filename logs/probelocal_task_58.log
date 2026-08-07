@@ -1,0 +1,4 @@
+diagvit_none_2pct seed0: probe train 20.75  test 18.10
+diagvit_none_2pct seed1: probe train 22.67  test 18.84
+diagvit_none_2pct seed2: probe train 18.91  test 17.39
+PROBE_RESULT diagvit_none_2pct test 18.11+/-0.73 over 3 seeds -> runs/diagvit_none_2pct/linear_probe.json

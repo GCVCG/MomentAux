@@ -1,0 +1,9 @@
+diagvit_none_10pct seed0: probe train 35.28  test 25.68
+diagvit_none_10pct seed1: probe train 28.00  test 23.94
+diagvit_none_10pct seed2: probe train 31.37  test 24.99
+PROBE_RESULT diagvit_none_10pct test 24.87+/-0.88 over 3 seeds -> runs/diagvit_none_10pct/linear_probe.json
+diagvit_aux_10pct seed0: probe train 49.84  test 39.45
+diagvit_aux_10pct seed1: probe train 50.20  test 40.02
+diagvit_aux_10pct seed2: probe train 49.62  test 39.70
+PROBE_RESULT diagvit_aux_10pct test 39.72+/-0.29 over 3 seeds -> runs/diagvit_aux_10pct/linear_probe.json
+VITPROBE_COMPLETE

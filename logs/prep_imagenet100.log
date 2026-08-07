@@ -1,0 +1,12 @@
+train: 17 shards
+  21050
+  41361
+  61669
+  80669
+  81977
+  100977
+  121285
+train packed: 126689 images
+val: 1 shards
+val packed: 5000 images
+train STATS @224 mean=(0.4802, 0.4524, 0.401) std=(0.2715, 0.2654, 0.2767)

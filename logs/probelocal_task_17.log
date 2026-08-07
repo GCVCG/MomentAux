@@ -1,0 +1,4 @@
+abl7_none seed0: probe train 58.77  test 42.14
+abl7_none seed1: probe train 57.81  test 41.82
+abl7_none seed2: probe train 59.35  test 42.97
+PROBE_RESULT abl7_none test 42.31+/-0.59 over 3 seeds -> runs/abl7_none/linear_probe.json

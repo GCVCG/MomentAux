@@ -1,0 +1,15 @@
+moment-aux target calibrated on 1024 images
+[diagin100_r50_aux seed1] {"params_trainable": 23721132, "params_stem_trainable": 0, "params_stem_fixed_filters": 0, "flops_total": 4109669376, "flops_stem": 0, "flops_image_size": 224}
+epoch 1/100 loss 3.9898 train 0.1276 test 0.1698
+epoch 2/100 loss 3.1590 train 0.2472 test 0.1934
+epoch 3/100 loss 2.7993 train 0.3184 test 0.2478
+epoch 4/100 loss 2.5823 train 0.3637 test 0.3718
+epoch 5/100 loss 2.4203 train 0.3972 test 0.3444
+epoch 6/100 loss 2.2984 train 0.4263 test 0.4098
+epoch 7/100 loss 2.2192 train 0.4431 test 0.4068
+epoch 8/100 loss 2.1494 train 0.4600 test 0.4206
+epoch 9/100 loss 2.0958 train 0.4722 test 0.4102
+epoch 10/100 loss 2.0540 train 0.4814 test 0.4232
+epoch 11/100 loss 2.0147 train 0.4901 test 0.4302
+epoch 12/100 loss 1.9761 train 0.5002 test 0.5004
+epoch 13/100 loss 1.9614 train 0.5046 test 0.4888

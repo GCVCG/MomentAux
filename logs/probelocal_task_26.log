@@ -1,0 +1,4 @@
+tin_none_100pct seed0: probe train 99.98  test 65.71
+tin_none_100pct seed1: probe train 99.98  test 65.53
+tin_none_100pct seed2: probe train 99.98  test 66.10
+PROBE_RESULT tin_none_100pct test 65.78+/-0.29 over 3 seeds -> runs/tin_none_100pct/linear_probe.json

@@ -1,0 +1,33 @@
+abl3_none seed0: probe train 46.34  test 32.66
+abl3_none seed1: probe train 46.19  test 32.83
+abl3_none seed2: probe train 46.64  test 32.88
+PROBE_RESULT abl3_none test 32.79+/-0.12 over 3 seeds -> runs/abl3_none/linear_probe.json
+grid_c100_r18_poollearned_d9c446_2pct seed0: probe train 5.79  test 4.86
+grid_c100_r18_poollearned_d9c446_2pct seed1: probe train 95.19  test 16.49
+grid_c100_r18_poollearned_d9c446_2pct seed2: probe train 1.00  test 1.00
+PROBE_RESULT grid_c100_r18_poollearned_d9c446_2pct test 7.45+/-8.06 over 3 seeds -> runs/grid_c100_r18_poollearned_d9c446_2pct/linear_probe.json
+diagin64_vit_none seed0: shots-only (1281167 imgs extracted)
+      25 shots/class (n=25000): test 38.77
+     100 shots/class (n=100000): test 43.81
+     250 shots/class (n=250000): test 46.07
+diagin64_vit_none seed1: shots-only (1281167 imgs extracted)
+      25 shots/class (n=25000): test 38.84
+     100 shots/class (n=100000): test 43.64
+     250 shots/class (n=250000): test 46.08
+diagin64_vit_none seed0: shots-only (1281167 imgs extracted)
+      25 shots/class (n=25000): test 38.77
+     100 shots/class (n=100000): test 43.81
+     250 shots/class (n=250000): test 46.08
+diagin64_vit_none seed1: shots-only (1281167 imgs extracted)
+      25 shots/class (n=25000): test 38.84
+     100 shots/class (n=100000): test 43.64
+     250 shots/class (n=250000): test 46.06
+diagin64_vit_none seed2: shots-only (1281167 imgs extracted)
+      25 shots/class (n=25000): test 41.27
+     100 shots/class (n=100000): test 46.34
+     250 shots/class (n=250000): test 48.57
+PROBE_RESULT diagin64_vit_none shots250 46.90+/-1.44 over 3 seeds -> runs/diagin64_vit_none/linear_probe_shots.json
+abl2_none seed0: probe train 41.82  test 29.22
+abl2_none seed1: probe train 41.94  test 29.79
+abl2_none seed2: probe train 42.07  test 30.36
+PROBE_RESULT abl2_none test 29.79+/-0.57 over 3 seeds -> runs/abl2_none/linear_probe.json

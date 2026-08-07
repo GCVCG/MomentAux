@@ -1,0 +1,4 @@
+auxmag_7pct_sched0 seed0: probe train 63.37  test 46.69
+auxmag_7pct_sched0 seed1: probe train 63.17  test 47.21
+auxmag_7pct_sched0 seed2: probe train 63.68  test 47.43
+PROBE_RESULT auxmag_7pct_sched0 test 47.11+/-0.38 over 3 seeds -> runs/auxmag_7pct_sched0/linear_probe.json

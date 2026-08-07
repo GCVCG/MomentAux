@@ -1,0 +1,29 @@
+tin_none_25pct seed0: probe train 68.69  test 50.53
+tin_none_25pct seed1: probe train 68.97  test 50.62
+tin_none_25pct seed2: probe train 69.81  test 51.14
+PROBE_RESULT tin_none_25pct test 50.76+/-0.33 over 3 seeds -> runs/tin_none_25pct/linear_probe.json
+diagin64_vit_aux seed0: shots-only (1281167 imgs extracted)
+      25 shots/class (n=25000): test 22.94
+     100 shots/class (n=100000): test 31.06
+     250 shots/class (n=250000): test 34.13
+diagin64_vit_aux seed1: shots-only (1281167 imgs extracted)
+      25 shots/class (n=25000): test 22.07
+     100 shots/class (n=100000): test 30.11
+     250 shots/class (n=250000): test 33.03
+diagin64_vit_aux seed0: shots-only (1281167 imgs extracted)
+      25 shots/class (n=25000): test 41.05
+     100 shots/class (n=100000): test 46.88
+     250 shots/class (n=250000): test 49.63
+diagin64_vit_aux seed1: shots-only (1281167 imgs extracted)
+      25 shots/class (n=25000): test 41.12
+     100 shots/class (n=100000): test 46.77
+     250 shots/class (n=250000): test 49.52
+diagin64_vit_aux seed2: shots-only (1281167 imgs extracted)
+      25 shots/class (n=25000): test 41.29
+     100 shots/class (n=100000): test 47.29
+     250 shots/class (n=250000): test 50.08
+PROBE_RESULT diagin64_vit_aux shots250 49.74+/-0.29 over 3 seeds -> runs/diagin64_vit_aux/linear_probe_shots.json
+abl3_none seed0: probe train 46.31  test 32.64
+abl3_none seed1: probe train 46.17  test 32.82
+abl3_none seed2: probe train 46.59  test 32.90
+PROBE_RESULT abl3_none test 32.79+/-0.13 over 3 seeds -> runs/abl3_none/linear_probe.json

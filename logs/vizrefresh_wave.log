@@ -1,0 +1,59 @@
+ALIGNMENT tin_aux_1pct: baseline -0.041 aux +0.492
+VIZ_DONE tin_aux_1pct -> docs/viz
+DYNAMICS tin_aux_1pct -> docs/viz/dynamics_tin_aux_1pct.png
+tin_none_1pct seed0: mean 5.68
+tin_none_1pct seed1: mean 5.23
+tin_none_1pct seed2: mean 5.04
+tin_none_1pct seed3: mean 5.38
+tin_none_1pct seed4: mean 5.70
+tin_none_1pct seed5: mean 5.24
+tin_none_1pct seed6: mean 5.69
+tin_none_1pct seed7: mean 5.37
+tin_none_1pct seed8: mean 5.45
+tin_none_1pct seed9: mean 5.36
+tin_aux_1pct seed0: mean 7.08
+tin_aux_1pct seed1: mean 6.87
+tin_aux_1pct seed2: mean 6.86
+tin_aux_1pct seed3: mean 7.26
+tin_aux_1pct seed4: mean 6.71
+tin_aux_1pct seed5: mean 6.69
+tin_aux_1pct seed6: mean 6.90
+tin_aux_1pct seed7: mean 7.05
+tin_aux_1pct seed8: mean 6.84
+tin_aux_1pct seed9: mean 6.86
+PERCLASS tin_aux_1pct: mean Δ +1.50, 139/200 classes helped, best convertible +17.0, worst monarch -8.8 -> runs/tin_aux_1pct/per_class_delta.json, docs/viz/perclass_tin_aux_1pct.png
+ALIGNMENT auxmag_5pct_sched0: baseline +0.215 aux +0.525
+VIZ_DONE auxmag_5pct_sched0 -> docs/viz
+DYNAMICS auxmag_5pct_sched0 -> docs/viz/dynamics_auxmag_5pct_sched0.png
+abl5_none seed0: mean 25.11
+abl5_none seed1: mean 24.87
+abl5_none seed2: mean 25.99
+auxmag_5pct_sched0 seed0: mean 30.57
+auxmag_5pct_sched0 seed1: mean 31.04
+auxmag_5pct_sched0 seed2: mean 30.55
+PERCLASS auxmag_5pct_sched0: mean Δ +5.40, 83/100 classes helped, best mountain +25.0, worst baby -6.0 -> runs/auxmag_5pct_sched0/per_class_delta.json, docs/viz/perclass_auxmag_5pct_sched0.png
+ALIGNMENT tin20_aux: baseline +0.191 aux +0.584
+VIZ_DONE tin20_aux -> docs/viz
+DYNAMICS tin20_aux -> docs/viz/dynamics_tin20_aux.png
+tin20_none seed0: mean 43.70
+tin20_none seed1: mean 40.90
+tin20_none seed2: mean 41.40
+tin20_none seed3: mean 40.30
+tin20_none seed4: mean 42.80
+tin20_none seed5: mean 41.60
+tin20_none seed6: mean 41.10
+tin20_none seed7: mean 40.40
+tin20_none seed8: mean 41.90
+tin20_none seed9: mean 41.70
+tin20_aux seed0: mean 46.70
+tin20_aux seed1: mean 46.10
+tin20_aux seed2: mean 46.10
+tin20_aux seed3: mean 46.30
+tin20_aux seed4: mean 47.10
+tin20_aux seed5: mean 47.50
+tin20_aux seed6: mean 46.30
+tin20_aux seed7: mean 48.00
+tin20_aux seed8: mean 47.40
+tin20_aux seed9: mean 45.90
+PERCLASS tin20_aux: mean Δ +5.16, 18/20 classes helped, best refrigerator +13.2, worst iPod -2.4 -> runs/tin20_aux/per_class_delta.json, docs/viz/perclass_tin20_aux.png
+VIZREFRESH_COMPLETE

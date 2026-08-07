@@ -1,139 +1,240 @@
-# MomentStem: fixed moment filters as a prior for CNNs
+# A controlled, cost-normalized benchmark of data-efficiency interventions
 
-**→ [docs/FINDINGS.md](docs/FINDINGS.md) is the record: every question asked,
-its answer, the evidence, and its status** (settled / open / falsified /
-retracted). `CLAUDE.md` is the denser chronological working ledger.
+**When does fusing hand-crafted spectral knowledge with learned
+representations pay?**
 
-**Documentation** (all render directly on GitHub, mermaid included):
-[docs/index.md](docs/index.md) — overview & headline results ·
-[docs/GLOSSARY.md](docs/GLOSSARY.md) — **every term defined** (λ, the Gabor
-magnitude maps, G, readout, cells, probes, waves...) ·
-[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — architecture + measurement
-diagrams · [docs/VISUALS.md](docs/VISUALS.md) — the observability figures,
-explained and embedded · `analysis/audit_law.py` — machine-verifies every
-number in the law table from raw run files.
+This repository is the complete instrument, data and analysis behind the
+paper of that name. It measures one fixed, hand-crafted source of knowledge,
+a pinned bank of Gabor moment-energy targets injected only during training at
+about 2% compute overhead, against the leading data-driven alternatives
+(SimCLR, SimSiam and DINO self-supervised pre-training, ImageNet transfer,
+DeiT-strength augmentation, and learned FitNets teachers) under **one frozen
+recipe with committed data subsets**.
 
-**Observability toolkit** (`analysis/`, all diagnostics): `linear_probe`
-(feature gain G, shot-limited, cross-label-space), `head_forms`
-(linear/cosine/NCM readouts at matched labels), `visualize_features`
-(bank, target-alignment heatmaps, t-SNE, CAMs), `per_class_delta`
-(which classes gain, by name, across seeds), `training_dynamics`
-(when the gap opens; λ/lr schedules; loss components; collapse check),
-`audit_law` (machine-checks the law table). See the
-[GLOSSARY tool table](docs/GLOSSARY.md#infrastructure--conventions).
+| | |
+|---|---|
+| experimental cells | 2,800 |
+| training runs | ~8,900 (3,286 GPU-hours) |
+| datasets | 14, across 5 visual domains |
+| backbone families | 7 (ResNet-18/34/50, MobileNetV3, ConvNeXt-T, ViT-tiny/S/B, Swin-T) |
+| data scale | 500 to 1,281,167 images; 10 to 1000 classes |
+| resolution | 32, 64, 96, 224 px |
+| model scale | 5.7M to 86M parameters |
 
-## Where the study actually landed
+Everything is released: the harness, every configuration, the committed
+subset indices, the pinned filter-bank fingerprints, **every per-run JSON
+record, every training curve, every campaign log**, and the aggregated result
+tables. See **[Released artifacts](#released-artifacts)**.
 
-**MomentAux** (`momentstem/aux.py`): the moments are a **training-only soft
-prior**, not a forward-path stem. The deployed model is a **plain ResNet** —
-RGB→logits, identical FLOPs, **+0 inference params**. During training only, a
-1×1-conv head taps `layer3` and is regressed onto fixed phase-invariant moment
-maps (MSE·λ + CE), with λ cosine-decayed to **exactly 0** so that neutrality at
-full data is structural rather than tuned.
+---
 
-It is **positive at every data scale** (CIFAR-100, ResNet-18, 3 seeds):
+## The three claims
 
-| data | 1% | 3% | 5% | 10% | 25% | 100% |
-|---|---|---|---|---|---|---|
-| **Δ top-1** | +1.91 | +3.68 | **+5.30** | +4.14 | +0.97 | +0.15 (n.s., neutral) |
+### 1. One law organizes the grid
 
-and it transplants with no retuning across depth and dataset — one λ0=1.0
-(+`head_norm`) gives +3.9…+4.3 on R18/R34/R50; CIFAR-10 gives +6.37@1% / +6.66@2% (10 seeds).
+For every paired cell we measure the end-to-end gain `Δ` and the
+feature-level gain `G` from an identically-configured linear probe on frozen
+features. Their difference behaves as a function of a single variable, the
+**baseline accuracy** of the cell:
 
-**The controls are the contribution.** A random target gives ≈0; a *learned*
-FitNets teacher costing a whole extra model gives ≈0; HOG gives about half. The
-gain is the moment structure specifically — see FINDINGS §4.
+```
+Δ  =  G  +  readout(base)
+```
 
-## How it got here (the negatives matter)
+`readout` is strongly negative at low baselines (the features improve more
+than a data-starved classifier can express), crosses zero in a measured
+bracket of `[31.8, 40.3]` points, and decays back toward zero with
+sufficiency. Audited scope-wide by `analysis/audit_sign_law.py`:
 
-The original framing — fixed moments **in the forward path** — is **dead as a
-scaling answer**, and the ledger keeps it dead. Such stems help below 5% but
-*cost* accuracy at 10–25% (the "penalty band"), and that band survived every
-attempt to explain it away: calibration, ZCA, an 8× step budget, prior-as-init,
-prior-as-warmup, and nonlinear/rotation-invariant/2nd-order features alike. Any
-fixed pre-committed input channel occupies bandwidth abundant data wants back.
-Moving the prior **off the forward path** is what made it scale.
+| | |
+|---|---|
+| cells with paired `Δ` and `G` | 1,660 |
+| in law scope (prior, from scratch, ≥3 seeds per arm) | 989 |
+| inside the crossing bracket (no prediction made) | 98 |
+| unresolved (`|readout| ≤ 2·SEM`) | 613 |
+| **resolvable, these test the law** | **278** |
+| sign as predicted | **268 (96%)** |
+| wrong side | 10 |
 
-The original three hypotheses were answered, and two of them failed:
-**H1** (data efficiency) holds only in the aux formulation; **H2** (capacity
-substitution — R18+moments ≈ R34) is **dead**; **H3** (robustness gain under
-CIFAR-C) is **null**.
+The law is **predictive, not descriptive**. Registered in advance, it called
+the feature gain of a backbone family it had never seen (Swin-T: predicted
+band `+7..+11`, measured `10.5 / 9.3 / 10.1 / 7.6`, four of four in band),
+eight cells on four unseen domains (seven in band, eight of eight correct in
+sign), and the ImageNet-scale residual (`|Δ−G| ≤ 1.1` on five of six pairs).
 
-See [PORTING.md](PORTING.md) for exactly what was ported from momentsnerf,
-what changed, and one important finding about the original Zernike code.
+### 2. Fusion outcomes follow the *currency* each source supplies
 
-## The controls ARE the contribution
+| fusion | currencies | outcome | evidence |
+|---|---|---|---|
+| prior + augmentation | structure + invariance | **stack** | `Δ` amplified 1.4–2.4×; `G` rises 14.9 → 22.2 |
+| prior + effective SSL | structure ≈ invariance | **substitute** | combo ≤ best single; equal `G` |
+| prior + ineffective SSL | structure + ~nothing | stack | full gain recovered on SimSiam |
+| prior + ImageNet init | structure vs. mature features | **tax** | −17 points, carried by `G`; null under domain shift |
+| augmentation + SSL | invariance + invariance | substitute | the DeiT recipe collapses SimCLR's margin |
 
-**Aux targets** (`moment_aux.stem`, the live question — is it the moments?):
+The practical corollary: a cheap linear probe of what each candidate source
+contributes predicts whether combining them is worth anything, **before** any
+joint training is run.
 
-| target | what it isolates | Δ@10% |
+### 3. Attention carries a feature deficit that grows with model scale
+
+Every convolutional backbone is neutral at data sufficiency, including at
+1.28M images (`Δ = +0.04 ± 0.07`). Vision transformers are not:
+
+| cell | baseline | with prior | Δ |
+|---|---|---|---|
+| ViT-tiny, ImageNet64, 1.28M imgs | 48.24 | 51.48 | **+3.23** |
+| ViT-S/16, ImageNet-100 @224px, DeiT recipe | 65.39 | 78.39 | **+13.00** |
+| ViT-B/16, ImageNet-100 @224px, DeiT recipe | 43.33 | 69.34 | **+26.01** |
+
+Every pre-registered scale falsifier (F1, F2, F3, G1, G2, G3, G4) is dead.
+
+---
+
+## The method under test: MomentAux
+
+`momentstem/aux.py`. The moments are a **training-only soft prior**, never a
+forward-path stem. The deployed model is a plain backbone, RGB to logits,
+identical FLOPs, **zero extra inference parameters**. During training a 1×1
+convolution taps the third stage and is regressed onto fixed phase-invariant
+Gabor magnitude maps, with `λ` cosine-decayed to **exactly zero**, so
+neutrality at full data is structural rather than tuned.
+
+One configuration (`λ0 = 1.0`, magnitude target, third-stage tap, head-norm
+on) transplants across every dataset and backbone without retuning.
+
+**The controls are the contribution.** On CIFAR-100 at 10%:
+
+| aux target | what it isolates | Δ |
 |---|---|---|
-| `energy-magnitude` | the method (phase-invariant moment energy) | **+2.81** |
-| `random-fixed` | "any aux regression / deep supervision?" | +0.14 |
-| `teacher` (FitNets) | "just distillation? is a LEARNED target better?" | +0.16 |
-| `hog` (MaskFeat) | "would any hand-crafted descriptor do?" | +1.37 |
+| moment magnitude (ours) | phase-invariant energy | **+2.81** |
+| HOG (MaskFeat descriptor) | would any hand-crafted descriptor do? | +1.37 |
+| learned teacher (FitNets) | is a *learned* target better? (2× cost) | +0.16 |
+| random fixed maps | is it just "any auxiliary regression"? | +0.14 |
+| oriented edges (raw Gabor) | is it the filters, or their energy? | −0.24 |
 
-**Forward-path stems** (the original design; superseded — see FINDINGS §1):
+A learned teacher costing an entire extra model does approximately nothing,
+across a full eight-point envelope. The gain is the moment structure
+specifically.
 
-| stem | what | what it isolates |
-|---|---|---|
-| `none` | vanilla backbone | control |
-| `moments-sum` | fixed Gabor+Zernike, 3-ch output | pretrained-stem-compatible variant |
-| `moments-cat` | fixed bank, 27-ch output (RGB+9 Gabor+15 Zernike) | headline variant |
-| `energy-*` | fixed nonlinear energy (magnitude/rotinv/structure/steerable/invariants) | which invariance, if any, survives past 5% |
-| `learned` | ONE plain conv, params/FLOPs matched to moments-cat within 2% | prior vs. depth/compute |
-| `random-fixed` | moments-cat architecture, frozen random filters, matched norms | structure vs. fixedness |
-| `gabor-learn` | moment-initialised, trainable | is fixing a feature or a bug? |
+---
 
-All under ONE recipe (deviations are a bug): SGD momentum 0.9, lr 0.1, wd
-5e-4, cosine, 200 epochs, batch 128, crop+flip only, >=3 seeds per cell.
+## Released artifacts
 
-## Setup
+Attached to the tagged release (see the repository's Releases page). Sizes
+are compressed; `SHA256SUMS` accompanies them.
 
-```bash
-pip install -r requirements.txt
-python scripts/make_subsets.py --check   # verify committed subsets reproduce
-python -m pytest tests/ -q               # must pass before any training
-```
+| asset | contents |
+|---|---|
+| `run-records.tar.gz` | every run's `final.json` (config, accuracy, parameter and FLOP accounting, environment) plus every `linear_probe*.json` and `robustness.json`, under original `runs/<cell>/seed<N>/` paths |
+| `training-curves.tar.gz` | every run's per-epoch `metrics.csv` |
+| `result-tables.tar.gz` | the aggregated tables: `all_results.csv` (one row per cell), `results_by_portion.csv`, the combined workbook, `law_audit.md`, `summary.md`, `summary.tex` |
+| `logs.tar.gz` | campaign and wave logs, including the cluster work-queue logs |
+| `configs-and-subsets.tar.gz` | every cell configuration and the committed subset indices |
 
-## Reproducing any number
+Every table and figure in the paper regenerates from `result-tables` by one
+command. The per-run records are the raw evidence behind them, so any number
+in the paper can be traced from the printed table back to the individual
+training run that produced it.
 
-```bash
-python train.py --config configs/<cell>.yaml --seed N   # one run
-python eval_robustness.py --run-dir runs/<cell>/seedN --cifar-c-root <dir>
-python analysis/aggregate.py                            # regenerates ALL tables
-```
+**What is not released:** model checkpoints (223 GB) and the source image
+datasets. All datasets are public and cited in the paper; the committed
+subset indices reproduce the exact image selection without redistributing
+images.
 
-Each run writes `metrics.csv` (per-epoch), `final.json` (config + accuracy +
-fvcore param/FLOP accounting), and checkpoints under `runs/<cell>/seed<N>/`.
-No external services involved.
+---
 
-## Cluster (turing)
+## Reproducing
 
 ```bash
-python slurm/submit_grid.py --dry-run     # inspect the plan
-python slurm/submit_grid.py               # full grid, 2 chained job streams
-sbatch slurm/train.sbatch configs/<cell>.yaml 0 1 2   # one cell by hand
+pip install -r requirements-study.txt   # pinned lock for the study environment
+python scripts/make_subsets.py --check  # verify committed subsets reproduce
+python -m pytest tests/ -q              # contracts; must pass before training
 ```
+
+```bash
+python train.py --config configs/<cell>.yaml --seed N   # one cell, one seed
+python analysis/linear_probe.py --run-dir runs/<cell>   # the feature gain G
+python analysis/aggregate.py                            # regenerate ALL tables
+python analysis/audit_sign_law.py                       # re-run the law audit
+```
+
+Each run writes `metrics.csv` (per-epoch), `final.json` (config, accuracy,
+`fvcore` parameter and FLOP accounting, environment) and checkpoints under
+`runs/<cell>/seed<N>/`. No external services are involved.
+
+### What makes a comparison in this repository trustworthy
+
+- **The recipe is frozen.** SGD momentum 0.9, lr 0.1, weight decay 5e-4,
+  cosine schedule, 200 epochs, batch 128, crop and flip only. Cells that must
+  deviate carry a diagnostic namespace enforced by a guard in `train.py` and
+  never enter a headline table. Both arms of such a pair share the deviation,
+  so the paired difference stays valid.
+- **Subsets are committed** under `data/subsets/`. Every intervention
+  consumes byte-identical images.
+- **Filter banks are pinned.** `tests/test_bank_regression.py` fingerprints
+  their numerical values, so no measurement can drift with a library version.
+- **`num_workers` is part of the contract.** PyTorch seeds each worker's
+  augmentation RNG from a base seed plus worker index, so changing the count
+  redraws the augmentation stream. It is pinned per cell and recorded per run.
+- **Predictions were registered before results.** Every experimental wave was
+  launched with numeric bands and explicit falsifiers recorded in `CLAUDE.md`
+  before any result existed. Four major predictions missed; all four are
+  reported in the paper.
+- **Run-directory guards.** A completed run is a no-op, concurrent trainers
+  on the same cell abort on an exclusive lock, and checkpoint writes are
+  atomic.
+
+---
+
+## Documentation
+
+- **[docs/index.md](docs/index.md)** — overview and headline results
+- **[docs/GLOSSARY.md](docs/GLOSSARY.md)** — every term defined once: `λ` and
+  its schedule, the Gabor bank and magnitude maps, `G`, readout, cells,
+  pairs, envelopes, probes and their caveats
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — architecture and
+  measurement diagrams
+- **[docs/VISUALS.md](docs/VISUALS.md)** — the explainability figures, with
+  how-to-read guides
+- **[docs/FINDINGS.md](docs/FINDINGS.md)** — the question-by-question
+  experimental record: every hypothesis, prediction, landing and retraction
+- **[docs/ARTIFACTS.md](docs/ARTIFACTS.md)** — what is in each released
+  asset and how to load it
+- **[PORTING.md](PORTING.md)** — what was ported and what was corrected
+- **`CLAUDE.md`** — the dense chronological working ledger, including every
+  pre-registered prediction and every failure post-mortem
 
 ## Layout
 
 ```
-momentstem/stem.py        MomentStem (fixed Gabor+Zernike buffers)
-momentstem/controls.py    LearnedStem, random-fixed, gabor-learn, registry
-momentstem/backbones.py   timm backbones + CIFAR surgery + fvcore accounting
-data.py                   CIFAR-100/STL-10, committed subsets, CIFAR-C loader
-train.py                  the single training entry point
-eval_robustness.py        CIFAR-C evaluation (no retraining)
-analysis/aggregate.py     runs/ -> markdown+LaTeX tables (mean+/-std, mCE)
+momentstem/aux.py         MomentAux: the training-only prior under test
+momentstem/stem.py        forward-path MomentStem (superseded; kept as a control)
+momentstem/controls.py    learned / random-fixed / gabor-learn control stems
+momentstem/backbones.py   timm backbones, small-image surgery, FLOP accounting
+data.py                   14 dataset loaders, committed subsets, CIFAR-C
+train.py                  the single training entry point (with run guards)
+scripts/simclr_pretrain.py, simsiam_pretrain.py, dino_pretrain.py
+analysis/linear_probe.py  the feature gain G (full-train and fixed-shot)
+analysis/aggregate.py     runs/ -> markdown + LaTeX tables
+analysis/audit_sign_law.py  scope-wide audit of the law
+analysis/export_results_csv.py  the released result tables
 configs/                  one YAML per cell (generated, committed)
-tests/                    contracts: frozen filters, shapes+content, overhead
-                          match, subset determinism, metric reference, layout
-slurm/                    sbatch template + grid submitter (turing)
+tests/                    contracts: pinned banks, tensor layout, overhead,
+                          subset determinism, metric reference
+slurm/                    cluster work-queue: worker, big lane, probe lane
+paper/                    the manuscript sources and figure generators
 ```
 
-## Out of scope (v1)
+## Citation
 
-NeRF/rendering, ImageNet-scale training, ViT backbones, hyperparameter
-search, RandAugment. Scattering front-end (kymatio; Oyallon et al.) is the
-closest published rival -- cited, optionally run later.
+```bibtex
+@article{almughrabi2026fusing,
+  author  = {AlMughrabi, Ahmad and Marques, Ricardo and Radeva, Petia},
+  title   = {When does fusing hand-crafted spectral knowledge with learned
+             representations pay? A controlled, cost-normalized benchmark
+             and its organizing law},
+  journal = {Information Fusion},
+  year    = {2026}
+}
+```

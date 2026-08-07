@@ -1,0 +1,4 @@
+pathmnist train size: 89996 classes: 9
+STATS pathmnist (0.7405, 0.533, 0.7058) (0.1404, 0.1952, 0.1388)
+food101 train size: 75750 classes: 101
+STATS food101 (0.545, 0.4435, 0.3436) (0.2612, 0.2627, 0.2675)

@@ -1,0 +1,4 @@
+grid_c100_cnx_64bc90_1pct seed0: probe train 13.85  test 12.77
+grid_c100_cnx_64bc90_1pct seed1: probe train 10.24  test 9.18
+grid_c100_cnx_64bc90_1pct seed2: probe train 11.99  test 10.72
+PROBE_RESULT grid_c100_cnx_64bc90_1pct test 10.89+/-1.80 over 3 seeds -> runs/grid_c100_cnx_64bc90_1pct/linear_probe.json

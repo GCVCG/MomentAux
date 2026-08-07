@@ -1,0 +1,8 @@
+grid_c100_cnx_64bc90_25pct seed0: probe train 33.00  test 31.46
+grid_c100_cnx_64bc90_25pct seed1: probe train 21.91  test 20.48
+grid_c100_cnx_64bc90_25pct seed2: probe train 31.17  test 30.07
+PROBE_RESULT grid_c100_cnx_64bc90_25pct test 27.34+/-5.98 over 3 seeds -> runs/grid_c100_cnx_64bc90_25pct/linear_probe.json
+tin_none_7pct seed0: probe train 49.70  test 35.91
+tin_none_7pct seed1: probe train 49.57  test 35.51
+tin_none_7pct seed2: probe train 49.42  test 35.50
+PROBE_RESULT tin_none_7pct test 35.64+/-0.23 over 3 seeds -> runs/tin_none_7pct/linear_probe.json

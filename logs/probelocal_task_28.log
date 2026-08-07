@@ -1,0 +1,4 @@
+diaggrid_c100_cnx_adamw_axmagnitudes2_l10to00_df3002_5pct seed0: probe train 46.87  test 38.70
+diaggrid_c100_cnx_adamw_axmagnitudes2_l10to00_df3002_5pct seed1: probe train 41.49  test 35.98
+diaggrid_c100_cnx_adamw_axmagnitudes2_l10to00_df3002_5pct seed2: probe train 46.99  test 38.71
+PROBE_RESULT diaggrid_c100_cnx_adamw_axmagnitudes2_l10to00_df3002_5pct test 37.80+/-1.57 over 3 seeds -> runs/diaggrid_c100_cnx_adamw_axmagnitudes2_l10to00_df3002_5pct/linear_probe.json

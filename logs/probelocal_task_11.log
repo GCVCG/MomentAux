@@ -1,0 +1,8 @@
+diagdeit_none_2pct seed0: probe train 19.97  test 18.71
+diagdeit_none_2pct seed1: probe train 21.76  test 20.26
+diagdeit_none_2pct seed2: probe train 20.43  test 18.63
+PROBE_RESULT diagdeit_none_2pct test 19.20+/-0.92 over 3 seeds -> runs/diagdeit_none_2pct/linear_probe.json
+tin_none_15pct seed0: probe train 60.08  test 43.68
+tin_none_15pct seed1: probe train 60.00  test 44.35
+tin_none_15pct seed2: probe train 59.91  test 44.36
+PROBE_RESULT tin_none_15pct test 44.13+/-0.39 over 3 seeds -> runs/tin_none_15pct/linear_probe.json

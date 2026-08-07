@@ -1,0 +1,4 @@
+super100_aux seed0: probe train 99.99  test 85.90
+super100_aux seed1: probe train 99.99  test 85.84
+super100_aux seed2: probe train 99.99  test 85.84
+PROBE_RESULT super100_aux test 85.86+/-0.03 over 3 seeds -> runs/super100_aux/linear_probe.json

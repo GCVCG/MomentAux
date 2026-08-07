@@ -21,4 +21,6 @@ augmentation), same-currency sources substitute (the prior against effective
 self-supervised pre-training),
 and fusing into an already-informed initialization taxes in proportion to
 what the initialization carries (ImageNet transfer). A decision guide maps
-regime to the cheapest effective intervention.
+regime to the cheapest effective intervention. The complete harness, every
+configuration and subset index, every per-run record, and all result tables
+are released at \url{https://github.com/GCVCG/MomentsCNNEncoder}.

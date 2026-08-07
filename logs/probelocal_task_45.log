@@ -1,0 +1,4 @@
+diaggrid_c100_cnx_adamw_c79e16_7pct seed0: probe train 42.67  test 31.14
+diaggrid_c100_cnx_adamw_c79e16_7pct seed1: probe train 44.70  test 32.62
+diaggrid_c100_cnx_adamw_c79e16_7pct seed2: probe train 44.19  test 32.49
+PROBE_RESULT diaggrid_c100_cnx_adamw_c79e16_7pct test 32.08+/-0.82 over 3 seeds -> runs/diaggrid_c100_cnx_adamw_c79e16_7pct/linear_probe.json

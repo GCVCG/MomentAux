@@ -1,0 +1,4 @@
+super25_none seed0: probe train 83.26  test 74.41
+super25_none seed1: probe train 83.04  test 74.06
+super25_none seed2: probe train 83.16  test 74.05
+PROBE_RESULT super25_none test 74.17+/-0.21 over 3 seeds -> runs/super25_none/linear_probe.json

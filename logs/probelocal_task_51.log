@@ -1,0 +1,4 @@
+diaggrid_c100_vit_adamw_3800f8_20pct seed0: probe train 49.42  test 32.90
+diaggrid_c100_vit_adamw_3800f8_20pct seed1: probe train 48.82  test 31.75
+diaggrid_c100_vit_adamw_3800f8_20pct seed2: probe train 48.80  test 32.40
+PROBE_RESULT diaggrid_c100_vit_adamw_3800f8_20pct test 32.35+/-0.58 over 3 seeds -> runs/diaggrid_c100_vit_adamw_3800f8_20pct/linear_probe.json
