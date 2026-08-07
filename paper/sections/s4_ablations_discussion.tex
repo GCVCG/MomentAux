@@ -60,7 +60,7 @@ which collapses bottleneck ResNets), converts ResNet-50 from a bistable
 failure ($\{41.2, 36.4, 42.4\}$ across seeds) into a stable $+3.9$
 ($\{44.5, 45.0, 44.4\}$) and is free elsewhere; we adopt it always-on.
 Notably, three plausible fixes tried \emph{before} tracing the mechanism
-(gradient balancing, disabling AMP, BatchNorm on the tap) all failed or
+(gradient balancing, disabling automatic mixed precision (AMP), BatchNorm on the tap) all failed or
 backfired, the last making collapse $25\times$ faster, a small case
 study in mechanism-first debugging.
 

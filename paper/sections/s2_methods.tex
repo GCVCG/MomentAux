@@ -25,7 +25,7 @@ The benchmark's claims rest on the comparisons being controlled, so we
 describe the controls before the results (Fig.~\ref{fig:method}).
 
 \subsection{Frozen recipe and committed subsets}\label{sec:recipe}
-Every headline cell trains with an identical recipe: SGD with momentum
+Every headline cell trains with an identical recipe: stochastic gradient descent (SGD) with momentum
 $0.9$, learning rate $0.1$, weight decay $5{\times}10^{-4}$, cosine
 schedule, 200 epochs, batch size 128, and random-crop + horizontal-flip
 augmentation only. The recipe is frozen in the strict sense: no cell
@@ -100,7 +100,8 @@ cross-entropy and neutrality at sufficiency is structural, not tuned,
 the right-hand end of every envelope in Table~\ref{tab:envelope} is a
 prediction of the schedule, not a fitted result. (ii) $W$ is discarded
 after training, so the deployed network is byte-identical to the
-baseline: same parameters, same FLOPs, zero inference cost. (iii) The
+baseline: same parameters, same floating-point operations (FLOPs), zero
+inference cost. (iii) The
 measured training overhead is ${\sim}2\%$, against $100\%$ for a
 self-supervised pre-training stage.
 
@@ -119,7 +120,7 @@ retuning, and we use it verbatim as the \emph{champion} unless stated.
 
 \subsection{Comparators and cost normalisation}
 We normalise by declared training cost relative to the baseline:
-MomentAux ${\approx}1.02\times$; SimCLR, SimSiam and DINO initialisations
+MomentAux ${\approx}1.02\times$; SimCLR, SimSiam and DINO initializations
 $2\times$ (a full pre-training stage, then the frozen recipe);
 DeiT-strength augmentation \citep{touvron2021deit} ${\approx}1\times$
 compute but a modern recipe change; FitNets teachers $2\times$; HOG
@@ -140,7 +141,8 @@ The law needs a feature-side quantity. For each trained checkpoint we
 freeze the network, extract penultimate features
 $z = \mathrm{pool}(f_L(x))$ for the full training split under the
 deterministic (no-augmentation) transform, and fit a multinomial logistic
-probe with LBFGS and fixed hyper-parameters
+probe using the limited-memory BFGS optimizer (L-BFGS) and fixed
+hyper-parameters
 \citep{alain2016understanding}:
 \begin{equation}
   \min_{V}\; \tfrac{1}{n}\!\sum_{i} \mathrm{CE}\bigl(Vz_i, y_i\bigr)
@@ -164,8 +166,7 @@ other same-budget probes.
 
 \subsection{Statistical protocol}
 Each cell runs ${\geq}3$ seeds, ten for headline envelopes. For a paired
-cell we report $\Delta$ as the difference of arm means with the SEM of
-that difference, and propagate to the readout term as
+cell we report $\Delta$ as the difference of arm means with the standard error of the mean (SEM) of that difference, and propagate to the readout term as
 \begin{equation}
   \mathrm{SEM}(\mathrm{readout}) =
   \sqrt{\mathrm{SEM}(\Delta)^2 + \mathrm{SEM}(G)^2},
@@ -223,6 +224,97 @@ Measured & $2{,}800$ cells, ${\sim}8{,}900$ runs \\
 
 Table~\ref{tab:glance} summarises the design space. Three views of the
 grid organise the results that follow.
+
+\subsection{Datasets}\label{sec:datasets}
+\begin{table}[t]
+\caption{The 14 datasets, grouped by domain. Fractions are drawn from the
+committed subset indices of Section~\ref{sec:recipe}; sources with
+variable native resolution are squash-resized once, offline, and the
+resized copies are what every arm consumes.}
+\label{tab:maindatasets}
+\centering\scriptsize
+\setlength{\tabcolsep}{2.6pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+domain & dataset & train & cls. & px \\
+\midrule
+\multirow{5}{*}{photographic}
+ & CIFAR-10 \citep{krizhevsky2009cifar}      & 50{,}000    & 10   & 32 \\
+ & CIFAR-100 \citep{krizhevsky2009cifar}     & 50{,}000    & 100  & 32 \\
+ & ciFAIR-100 \citep{barz2020cifair}         & (test only) & 100  & 32 \\
+ & STL-10 \citep{coates2011stl10}            & 5{,}000     & 10   & 96 \\
+ & Tiny-ImageNet \citep{le2015tinyimagenet}  & 100{,}000   & 200  & 64 \\
+\midrule
+satellite      & EuroSAT \citep{helber2019eurosat}   & 21{,}600 & 10  & 64 \\
+texture        & DTD \citep{cimpoi2014dtd}           & 1{,}880  & 47  & 64 \\
+food           & Food-101 \citep{bossard2014food101} & 75{,}750 & 101 & 64 \\
+histopathology & PathMNIST \citep{yang2023medmnist}  & 89{,}996 & 9   & 64 \\
+fine-grained   & CUB-200 \citep{wah2011cub}          & 5{,}994  & 200 & 64 \\
+\midrule
+\multirow{2}{*}{ImageNet scale}
+ & ImageNet64 \citep{chrabaszcz2017downsampled} & 1{,}281{,}167 & 1000 & 64 \\
+ & ImageNet-100 \citep{deng2009imagenet}        & 126{,}689     & 100  & 224 \\
+\midrule
+\multicolumn{5}{@{}l}{relabelled controls: CIFAR-100-super (20 coarse),}\\
+\multicolumn{5}{@{}l}{Tiny-ImageNet-20 / -20b / -super / -semantic}\\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+Table~\ref{tab:maindatasets} lists the datasets. The selection is
+deliberate rather than convenient. Five visual domains are represented
+because the currency account predicts that which information source is
+scarce depends on image statistics, and a benchmark drawn only from
+photographic data could not test that: satellite imagery has
+non-photographic colour statistics and meaningful rotations, texture
+lacks object-level structure, histopathology is stain-dominated, and
+fine-grained birds require discriminating parts rather than categories.
+The two ImageNet stages buy the axes small datasets cannot: ImageNet64
+supplies data and label scale at fixed resolution, while ImageNet-100
+supplies native $224$\,px resolution and a model-scale curve.
+
+A second group exists purely as controls. CIFAR-100-super relabels
+byte-identical CIFAR-100 subsets with 20 coarse classes, so class count
+changes while pixels and optimisation steps do not; the Tiny-ImageNet
+variants do the same on a second population, including a semantically
+ordered grouping and an arbitrary positional one whose contrast isolates
+whether coherence or count is doing the work
+(Appendix~\ref{app:controls}). ciFAIR-100 replaces the 927 CIFAR-100 test
+images that duplicate training images, which lets us verify that low-data
+gains are not memorised duplicates.
+
+\subsection{Implementation, compute and carbon}\label{sec:compute}
+Training uses PyTorch with automatic mixed precision and \texttt{timm}
+model definitions, pinned per machine and recorded in every run record
+(PyTorch 2.4--2.8, \texttt{timm} 1.0.27, CUDA 12.x); metrics come from
+\texttt{torchmetrics} with a scikit-learn cross-check in the test suite
+rather than hand-rolled implementations. The study ran on three systems:
+the MareNostrum5 accelerated partition at the Barcelona Supercomputing
+Center, using up to 40 NVIDIA H100 GPUs concurrently (ten four-GPU nodes)
+under a shared work-queue that pulls cells atomically so heterogeneous
+cell costs do not idle accelerators; a university cluster with H100 and
+H200 nodes; and two local NVIDIA RTX 3090 workstations used for probe
+passes and analysis. Because these small-image cells are dataloader-bound
+rather than compute-bound, we run two to three trainings per GPU, sized
+so that the heaviest cells still fit in memory.
+
+Aggregating the wall-clock recorded in all 8{,}887 timed run records, the
+study consumed \textbf{3{,}286 GPU-hours}: 2{,}901 on H100, 141 on H100~NVL and
+H200~NVL, and 239 on RTX 3090. Taking device thermal design power as an
+upper bound on draw, a data-centre power usage effectiveness of $1.2$, and
+a Spanish grid carbon intensity of $0.17$\,kg\,CO$_2$eq per kWh, this
+corresponds to approximately $2{,}600$\,kWh and \textbf{450\,kg
+CO$_2$eq}, about $50$\,g CO$_2$eq per training run. We report this as an
+order-of-magnitude accounting, not a measurement: it ignores idle and
+host-side draw and assumes sustained peak GPU power, so it should be read
+as a conservative upper bound. Two aspects of the study's design lower
+this figure materially. The intervention under test adds only about $2\%$
+to a run, so the comparison itself is cheap; the expense lies in the
+comparators, since every self-supervised arm doubles the cost of its cell.
+And the completed-run guard makes re-running an existing cell a no-op,
+which matters more than it sounds: several queue faults during the
+campaign would otherwise have silently recomputed finished work.
 
 \subsection{The prior's own envelope}
 \begin{table}[t]

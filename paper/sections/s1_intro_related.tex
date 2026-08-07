@@ -26,7 +26,7 @@ training through a small auxiliary regression head whose loss weight decays
 to exactly zero, adding ${\sim}2\%$ training compute and \emph{nothing} at
 inference. Against it we field SimCLR, SimSiam, and DINO initializations
 (each ${\sim}2\times$ compute), ImageNet transfer, DeiT-strength
-augmentation, learned FitNets-style teachers, and HOG targets. The
+augmentation, learned FitNets-style teachers, and targets built from histograms of oriented gradients (HOG). The
 resulting grid spans 14 datasets across five visual domains, seven backbone
 families from ResNet-18 to ViT-B/16, data scales from 500 to 1.28M images,
 resolutions from $32$ to $224$\,px, and 2{,}800 experimental cells comprising roughly 8{,}900 training runs.
@@ -135,7 +135,7 @@ random fixed target does nothing (Table~\ref{tab:controls}), so the gain
 is attributable to the moment structure itself, not to auxiliary
 regression as a mechanism.
 
-\paragraph{Self-supervised initialization.}
+\paragraph{Self-supervised learning (SSL) as initialization.}
 Contrastive and self-distilling pre-training
 \citep{chen2020simclr,chen2021simsiam,caron2021dino,grill2020byol,he2022mae}
 is the modern default source of ``free'' features, and cookbook-level

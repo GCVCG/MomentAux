@@ -10,6 +10,7 @@
 \usepackage[numbers]{natbib}
 \usepackage{booktabs}
 \usepackage{graphicx}
+\usepackage{multirow}
 
 \begin{document}
 \let\WriteBookmarks\relax
@@ -47,8 +48,9 @@ fusion helps, when it is redundant, and when it actively harms. We present a
 benchmark that measures one fixed, hand-crafted source of knowledge, a
 pinned bank of Gabor and moment spectral targets, injected only during training
 through an auxiliary regression head at $\sim$2\% compute overhead, against
-the leading data-driven alternatives (SimCLR, SimSiam, DINO, ImageNet
-transfer, heavy augmentation, learned teachers) under one frozen recipe with
+the leading data-driven alternatives (self-supervised learning with
+SimCLR, SimSiam and DINO, ImageNet transfer, heavy augmentation, and
+learned teachers) under one frozen recipe with
 committed data subsets: 14 datasets, 7 backbone families, data scales from
 500 to 1.28M images, resolutions from 32 to 224\,px, and models from 5.7M to
 86M parameters ($2{,}800$ experimental cells; ${\sim}8{,}900$ training runs). The grid is organized by a
@@ -59,7 +61,8 @@ advance, it called the feature gain of unseen backbone families and of
 ImageNet-scale cells from baseline heights alone (96\% of resolvable cells;
 $|\Delta-G| \le 1.1$ points on five of six ImageNet-scale pairs). It yields
 a sharp fusion taxonomy: sources fusing DIFFERENT currencies stack (prior +
-augmentation), same-currency sources substitute (prior vs.\ effective SSL),
+augmentation), same-currency sources substitute (the prior against effective
+self-supervised pre-training),
 and fusing into an already-informed initialization taxes in proportion to
 what the initialization carries (ImageNet transfer). A decision guide maps
 regime to the cheapest effective intervention.
@@ -119,8 +122,22 @@ personal relationships that could have appeared to influence the work
 reported in this paper.
 
 \section*{Data availability}
-% Harness (configs, committed subsets, pinned banks, runner, aggregation and
-% audit scripts) to be released at <repo URL>; all run records regenerable.
+All artifacts needed to reproduce every number in this paper are released
+with it: the training and evaluation harness (configs for all 2{,}800
+cells, the committed subset indices, the fingerprinted filter banks, the
+single training entry point, the aggregation and audit scripts), and the
+complete result tables in open formats. The latter comprise a per-cell
+table (\texttt{all\_results.csv}: 2{,}800 rows with dataset, backbone,
+intervention, fraction, seed count, accuracy mean and standard deviation,
+probe accuracy, paired baseline, $\Delta$, its standard error, $G$ and
+readout), a configuration-by-fraction view
+(\texttt{results\_by\_portion.csv}), and a workbook combining both with a
+column dictionary and the law audit. Every table and figure in the paper
+regenerates from these files by one command, and the sign-law audit of
+Table~\ref{tab:audit} is itself a released script rather than a manual
+query. Public datasets are cited in Section~\ref{sec:datasets}; the
+subset indices we release make the exact image selection reproducible
+without redistributing the images.
 
 \section*{Declaration of generative AI in the writing process}
 % Per Elsevier policy: disclose any use of generative AI in manuscript
