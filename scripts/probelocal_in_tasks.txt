@@ -1,0 +1,12 @@
+/home/amughrabi/venvs/momentstem/bin/python analysis/linear_probe.py --run "$OUT/diagin64_r18_none" --config configs/diagnostics/diagin64_r18_none.yaml --data-root "$DR" --shots 25,100,250 --shots-only
+/home/amughrabi/venvs/momentstem/bin/python analysis/linear_probe.py --run "$OUT/diagin64_r18_aux" --config configs/diagnostics/diagin64_r18_aux.yaml --data-root "$DR" --shots 25,100,250 --shots-only
+/home/amughrabi/venvs/momentstem/bin/python analysis/linear_probe.py --run "$OUT/diagin64_vit_none" --config configs/diagnostics/diagin64_vit_none.yaml --data-root "$DR" --shots 25,100,250 --shots-only
+/home/amughrabi/venvs/momentstem/bin/python analysis/linear_probe.py --run "$OUT/diagin64_vit_aux" --config configs/diagnostics/diagin64_vit_aux.yaml --data-root "$DR" --shots 25,100,250 --shots-only
+/home/amughrabi/venvs/momentstem/bin/python analysis/linear_probe.py --run "$OUT/diagin64_mnet_none" --config configs/diagnostics/diagin64_mnet_none.yaml --data-root "$DR" --shots 25,100,250 --shots-only
+/home/amughrabi/venvs/momentstem/bin/python analysis/linear_probe.py --run "$OUT/diagin64_mnet_aux" --config configs/diagnostics/diagin64_mnet_aux.yaml --data-root "$DR" --shots 25,100,250 --shots-only
+/home/amughrabi/venvs/momentstem/bin/python analysis/linear_probe.py --run "$OUT/diagin100_vits_none" --config configs/diagnostics/diagin100_vits_none.yaml --data-root "$DR" --shots 25,100,250
+/home/amughrabi/venvs/momentstem/bin/python analysis/linear_probe.py --run "$OUT/diagin100_vits_aux" --config configs/diagnostics/diagin100_vits_aux.yaml --data-root "$DR" --shots 25,100,250
+/home/amughrabi/venvs/momentstem/bin/python analysis/linear_probe.py --run "$OUT/diagin100_vitb_none" --config configs/diagnostics/diagin100_vitb_none.yaml --data-root "$DR" --shots 25,100,250
+/home/amughrabi/venvs/momentstem/bin/python analysis/linear_probe.py --run "$OUT/diagin100_vitb_aux" --config configs/diagnostics/diagin100_vitb_aux.yaml --data-root "$DR" --shots 25,100,250
+/home/amughrabi/venvs/momentstem/bin/python analysis/linear_probe.py --run "$OUT/diagin100_r50_none" --config configs/diagnostics/diagin100_r50_none.yaml --data-root "$DR" --shots 25,100,250
+/home/amughrabi/venvs/momentstem/bin/python analysis/linear_probe.py --run "$OUT/diagin100_r50_aux" --config configs/diagnostics/diagin100_r50_aux.yaml --data-root "$DR" --shots 25,100,250

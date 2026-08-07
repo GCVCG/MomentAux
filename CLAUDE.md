@@ -1903,6 +1903,34 @@ ported vs corrected and why.
   the cell saw, so shots-G may UNDERSTATE feature gain — if |Delta−G|
   exceeds 1.5 there, the full-budget direction must be checked before
   declaring G1 fired.
+  *** CHECKPOINT-IDENTITY INCIDENT — THE DUPLICATE RACE DID DAMAGE AFTER ALL,
+  ONE LEVEL DEEPER THAN THE LOAD TEST SEES (2026-08-07). The 2026-08-06 audit
+  said "all 42 diagin best.pt VERIFIED by torch.load (0 corrupt)" — TRUE and
+  INSUFFICIENT: a checkpoint can load perfectly and be the WRONG NETWORK. The
+  first in64 probe returned aux-seed0 probing exactly at baseline level while
+  its siblings sat 21 points higher; e2e re-evaluation of every ImageNet
+  checkpoint against its own final.json exposed the mechanism: the grid-lane
+  duplicates, cancelled mid-run at ~13:05 on 08-06, had been OVERWRITING
+  best.pt with their best-so-far EARLY-EPOCH weights AFTER the big-lane
+  originals finished (final.json survived because the duplicates never reached
+  their end-of-run write; the recorded ACCURACIES are in-memory values and all
+  stand). IDENTITY AUDIT (ckpt-eval vs recorded, |diff|<1.5 passes):
+  **13/34 genuine, 21 wrong-epoch** — genuine: vitb BOTH ARMS 6/6 (finished
+  after the cancellation), r50_aux 2, in64_r18_aux seeds1-2 (fresh restarts),
+  in64_vit_none 3; damaged: vits ALL 6, r50_none 2, in64 r18_none 3 +
+  r18_aux seed0 + vit_aux 3 + mnet 6.
+  RULE ESTABLISHED: verify run mirrors by LOADING was already the lesson;
+  the stronger form is verify by IDENTITY — evaluate the checkpoint and
+  compare to its recorded final. analysis-level check, cheap (one val pass).
+  RECOVERY: (a) local probes of damaged cells stopped, their outputs
+  quarantined (*.DAMAGED-CKPT); (b) BSC ms_probe job cancelled (it would
+  have probed damaged files); (c) worklist.big rebuilt (safe: 0 running
+  workers) with 3 final-heals + 21 ckpt-repair retrains into
+  **runs_ckptfix/** so recorded finals are never overwritten — probes of
+  those cells will read runs_ckptfix and pair with ITS OWN finals
+  (self-consistent Delta and G from the same runs); (d) the fully-genuine
+  ViT-B pair probes NOW on the local 3090 — S1's most important cell
+  (Delta +26.01) is unblocked.
   STAGE-1/2 SCOREBOARD: P2 ✓  P3 ✓  S2 ✓(partial)  S3 ✓(above band)  S4 ✓
   — falsifiers F2, F3, G2, G3, G4 ALL DEAD. Still open: P1/S1 (Delta ≈ G
   at scale) — needs the fixed-shots probe pass; and the last 4 in-flight
