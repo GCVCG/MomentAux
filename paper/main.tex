@@ -1,0 +1,170 @@
+%% Information Fusion submission -- Elsevier CAS double-column template.
+%% Framing (ledger decision 2026-08-06): "a controlled, cost-normalized
+%% benchmark of data-efficiency interventions -- and the predictive law that
+%% organizes its results", sold to Information Fusion through the
+%% knowledge-data fusion lens: WHEN does fusing a fixed spectral prior with
+%% data-driven learning pay, substitute, or tax?
+%% Every number cited here must trace to CLAUDE.md / results exporters.
+\documentclass[a4paper,fleqn]{cas-dc}
+
+\usepackage[numbers]{natbib}
+\usepackage{booktabs}
+\usepackage{graphicx}
+
+\begin{document}
+\let\WriteBookmarks\relax
+\def\floatpagepagefraction{1}
+\def\textpagefraction{.001}
+
+\shorttitle{Fusing fixed spectral priors with learned representations}
+\shortauthors{Al Mughrabi et~al.}
+
+\title[mode = title]{When does fusing hand-crafted spectral knowledge with
+  learned representations pay? A controlled, cost-normalized benchmark and
+  its organizing law}
+
+\author[1]{Ahmad Al Mughrabi}[orcid=0000-0000-0000-0000]
+\ead{sci.mughrabi@gmail.com}
+\cormark[1]
+% TODO co-authors + affiliations
+\affiliation[1]{organization={Universitat de Barcelona},
+                city={Barcelona}, country={Spain}}
+\cortext[1]{Corresponding author.}
+
+\begin{abstract}
+% DRAFT -- one paragraph, <=250 words, no references, fusion vocabulary first.
+Fusing prior knowledge with data-driven learning is attractive precisely
+where data is scarce, yet the field lacks a controlled account of when such
+fusion helps, when it is redundant, and when it actively harms. We present a
+benchmark that measures one fixed, hand-crafted source of knowledge -- a
+pinned bank of Gabor/moment spectral targets, injected only during training
+through an auxiliary regression head at $\sim$2\% compute overhead -- against
+the leading data-driven alternatives (SimCLR, SimSiam, DINO, ImageNet
+transfer, heavy augmentation, learned teachers) under one frozen recipe with
+committed data subsets: 14 datasets, 7 backbone families, data scales from
+500 to 1.28M images, resolutions from 32 to 224\,px, and models from 5.7M to
+86M parameters ($\sim$7{,}500 measured cells). The grid is organized by a
+single empirical law, $\Delta = G + \mathrm{readout}(\mathrm{base})$,
+separating each intervention's feature-level gain $G$ from a readout term
+that depends only on baseline accuracy. The law is predictive: registered in
+advance, it called the feature gain of unseen backbone families and of
+ImageNet-scale cells from baseline heights alone (96\% of resolvable cells;
+$|\Delta-G| \le 1.1$ points on five of six ImageNet-scale pairs). It yields
+a sharp fusion taxonomy: sources fusing DIFFERENT currencies stack (prior +
+augmentation), same-currency sources substitute (prior vs.\ effective SSL),
+and fusing into an already-informed initialization taxes in proportion to
+what the initialization carries (ImageNet transfer). A decision guide maps
+regime to the cheapest effective intervention.
+\end{abstract}
+
+\begin{highlights}
+% 3-5 bullets, <=85 chars each INCLUDING spaces (Elsevier limit).
+\item A 7,500-cell cost-normalized benchmark of data-efficiency interventions
+\item One law, $\Delta=G+$readout(base), predicts fusion gains before training
+\item Different-currency fusions stack; same-currency fusions substitute
+\item Free spectral prior beats 2$\times$-compute SSL on ViTs under modern recipes
+\item Attention's feature deficit persists at 1.28M images and grows with scale
+\end{highlights}
+
+\begin{keywords}
+information fusion \sep data-efficient learning \sep hand-crafted priors \sep
+self-supervised learning \sep auxiliary losses \sep benchmark
+\end{keywords}
+
+\maketitle
+
+%% ------------------------------------------------------------------
+\section{Introduction}\label{sec:intro}
+% - Fusion question up front: model-based knowledge x data-driven learning.
+% - The three possible outcomes (stack / substitute / tax) have never been
+%   measured under one instrument at cost parity. We do that.
+% - Contributions list:
+%   (C1) the instrument: frozen recipe, committed subsets, pinned banks;
+%   (C2) the grid: 14 datasets x 7 backbones x 500..1.28M images, ~7,500 cells;
+%   (C3) the law Delta = G + readout(base), predictive at 96% of resolvable
+%        cells, validated to ImageNet scale (falsifiers pre-registered);
+%   (C4) the fusion taxonomy (stack/substitute/tax) with feature-side
+%        mechanism (currency account);
+%   (C5) the decision guide + released harness.
+
+\section{Related work}\label{sec:related}
+% Fixed filters/scattering; aux-loss targets (FitNets, HOG/MaskFeat);
+% SSL (SimCLR/SimSiam/DINO); transfer; augmentation theory; benchmark
+% methodology (pre-registration in ML). Position: intersection is unmeasured.
+
+\section{The instrument}\label{sec:instrument}
+% Frozen recipe (SGD m=.9 lr=.1 wd=5e-4 cosine 200ep bs128 crop+flip);
+% committed subsets; pinned 8-pair bank + fingerprint tests; MomentAux
+% (aux head taps layer3, MSE to magnitude targets, lambda cosine -> 0);
+% cost normalization 1x / ~1.02x / 2x; diag-prefix deviations; bistability
+% flags; num_workers reproducibility contract.
+
+\section{The benchmark grid}\label{sec:grid}
+% Datasets (photo, satellite, texture, food, histopathology, fine-grained);
+% backbones (R18/34/50, MobileNetV3, ConvNeXt, ViT, Swin);
+% interventions (prior, SimCLR, SimSiam, DINO, transfer, DeiT aug, learned
+% teachers, HOG); envelopes 1..100%; ImageNet64 + ImageNet-100 stages.
+% Headline envelope tables here.
+
+\section{The organizing law}\label{sec:law}
+% Delta = G + readout(base); probe protocol; sign law, crossing bracket
+% [31.8, 40.3]; 96% of 260 resolvable cells (909-cell audit, one command);
+% pre-registered predictions that held (Swin G from baselines alone, 4/4;
+% domain probes 7/8 in band, 8/8 sign; ImageNet |Delta-G| table).
+% Honest boundary: the "better features, worse accuracy" exception cluster
+% (food101/pathmnist >=20%) -- named, unmodeled.
+
+\section{Fusion outcomes: stack, substitute, tax}\label{sec:fusion}
+% The currency account.
+% STACK: prior + DeiT aug (amplification 1.4-2.4x, G rises under aug);
+% SUBSTITUTE: prior vs SimCLR on conv (mid-band SSL wins at 2x cost;
+%   ties at both extremes); aux XOR effective-SSL (combos <= singles);
+%   under modern recipes the head-to-head FLIPS (deit-aux > deit-ssl
+%   everywhere on C100, low-data band on tin);
+% TAX: aux-on-ImageNet-transfer negative everywhere, G carries the whole
+%   tax, proportional to what the init supplied (pathmnist null control).
+
+\section{Scale validation}\label{sec:scale}
+% Pre-registered falsifier block F1-F3/G1-G4, all dead:
+% conv neutral at 1.28M (Delta +0.04, G +0.05); ViT deficit +3.2 at 1.28M,
+% +13.0 ViT-S -> +26.0 ViT-B @224 (grows with model scale);
+% Delta ~= G table (six pairs); cross-machine reproduction of G(ViT-S).
+
+\section{Decision guide}\label{sec:guide}
+% The user-facing table: regime (data scale x backbone x domain x budget)
+% -> recommended intervention, expected gain, cost. Extracted from the grid.
+
+\section{Limitations and scope}\label{sec:limits}
+% Frozen recipe is a ResNet recipe (AdamW cells diag-only); bistable
+% baselines (Swin/ConvNeXt) reported as findings, non-headline; probe
+% ceiling at 100% cells; shots-G budget comparability; the exception
+% cluster; single prior family (moments) as the knowledge source.
+
+\section{Reproducibility and released artifact}\label{sec:repro}
+% One entry point; aggregation regenerates every table; audit_sign_law.py;
+% committed subsets; pinned banks; identity-verification of checkpoints;
+% cross-machine venv pins; harness release.
+
+\section{Conclusion}\label{sec:conclusion}
+
+%% ------------------------------------------------------------------
+\section*{CRediT authorship contribution statement}
+% TODO per Elsevier CRediT taxonomy.
+
+\section*{Declaration of competing interest}
+The authors declare that they have no known competing financial interests or
+personal relationships that could have appeared to influence the work
+reported in this paper.
+
+\section*{Data availability}
+% Harness (configs, committed subsets, pinned banks, runner, aggregation and
+% audit scripts) to be released at <repo URL>; all run records regenerable.
+
+\section*{Declaration of generative AI in the writing process}
+% Per Elsevier policy: disclose any use of generative AI in manuscript
+% preparation. TODO finalize wording with authors.
+
+\bibliographystyle{cas-model2-names}
+\bibliography{refs}
+
+\end{document}
