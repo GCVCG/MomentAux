@@ -11,14 +11,28 @@ count, or fraction through which we first tried to explain it. It is
 strongly negative at low baselines (features improve more than accuracy
 can show: a classifier with five labels per class cannot cash in a better
 representation), crosses zero in a narrow band we bracket at
-$[31.8, 40.3]$ percentage points of baseline accuracy, and is small and
-positive above the crossing, decaying toward zero with sufficiency
-(measured up to $+0.4$ at baselines near $70$--$80$).
+$[31.8, 40.3]$ percentage points of baseline accuracy, and is positive
+above the crossing -- largest just above it ($+1.8$ at baseline $39$) and
+decaying toward zero with sufficiency ($+0.4$ by baselines of
+$70$--$80$). Fig.~\ref{fig:law} shows the full picture; we deliberately
+fit no parametric form and use only the measured curve for prediction.
 
-We emphasise what the law is not. It is not a theorem; it is an empirical
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/law_scatter.pdf}
+\caption{The law, in full: readout $=\Delta-G$ against baseline accuracy
+for all 989 law-scope cells with ${\geq}3$ seeds on both arms. Shaded
+band: the measured crossing bracket $[31.8,40.3]$, inside which no sign
+is predicted. Of the 278 cells whose readout is resolvable against its
+own uncertainty, 268 fall on the predicted side of zero; the ten
+crosses are the exceptions of Appendix~\ref{app:exceptions}.}
+\label{fig:law}
+\end{figure}
+
+We emphasize what the law is not. It is not a theorem; it is an empirical
 regularity with measured scope, and we found it only after two wrong
 intermediate laws (a ``deficit'' law and a multiplicative
-realisation$\times$gain form) were falsified by our own cells and
+realization$\times$gain form) were falsified by our own cells and
 retracted. Its content is asymmetric: below the crossing it makes strong,
 falsifiable predictions (large negative readout), while far above the
 crossing it predicts readout ${\approx}0$, which is true but weakly
@@ -30,16 +44,16 @@ uncertainty.
 \subsection{The audit}
 \begin{table}[t]
 \caption{Scope-wide sign-law audit (regenerable by one command from the
-released artefact). A cell is resolvable when $|\mathrm{readout}| >
+released artifact). A cell is resolvable when $|\mathrm{readout}| >
 2\,\mathrm{SEM}$; cells inside the crossing bracket make no sign
 prediction.}
 \label{tab:audit}
 \centering\small
 \begin{tabular}{@{}lr@{}}
 \toprule
-cells with paired $\Delta$ and $G$ & 1{,}660 \\
-\quad in law scope (aux-from-scratch) & 1{,}000+ \\
-backbone families / datasets in scope & 9 / 15 \\
+cells with paired $\Delta$ and $G$ (all interventions) & 1{,}660 \\
+\quad in law scope (prior, from scratch, ${\geq}3$ seeds/arm) & 989 \\
+backbone variants (families) / datasets in scope & 9 (7) / 15 \\
 inside crossing bracket (no prediction) & 98 \\
 unresolved ($|\mathrm{readout}| \le 2$\,SEM) & 613 \\
 \midrule
@@ -50,7 +64,7 @@ unresolved ($|\mathrm{readout}| \le 2$\,SEM) & 613 \\
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:audit} summarises the current audit: of 278 resolvable
+Table~\ref{tab:audit} summarizes the current audit: of 278 resolvable
 cells spanning nine backbone families and fifteen datasets, 268 (96\%)
 fall on the predicted side. The ten exceptions are not scattered noise;
 they concentrate in one regime and share one signature -- $G$ clearly
@@ -69,7 +83,7 @@ baseline heights and published bands for its feature gain
 ($G \approx 9.6/8.8/9.8/7.0$ at $5/10/15/25\%$ of CIFAR-100, band
 $+7$--$+11$). The measurements landed at $10.5/9.3/10.1/7.6$ -- four of
 four in band, each within $0.9$ of its point call -- against two live
-falsifiers (attention-intrinsic $G{\geq}13$; stabilisation-only
+falsifiers (attention-intrinsic $G{\geq}13$; stabilization-only
 $G{\leq}6$), either of which would have killed the account.
 
 \emph{(ii) Four unseen domains.} The same procedure applied to satellite,
@@ -84,7 +98,7 @@ where the residual $\Delta - G$ was pre-registered to stay within
 $1.5$ points on every backbone.
 
 \subsection{What $G$ is a function of}
-Controlled crossings localise the law's terms. $G$ is a property of the
+Controlled crossings localize the law's terms. $G$ is a property of the
 checkpoint and the probe's label space, invariant to which coarse
 partition relabels the data but cut roughly from $4.2$ to $2.9$ when
 training supervision moves from 200-way fine to 20-way coarse labels on
@@ -119,7 +133,7 @@ predicted partial substitution and measured strong complementarity.
 
 \subsection{Same currency substitutes}
 \begin{table}[t]
-\caption{Prior versus SimCLR initialisation ($2\times$ compute) on
+\caption{Prior versus SimCLR initialization ($2\times$ compute) on
 ViT-tiny, CIFAR-100, and the effect of recipe. Under plain augmentation
 SSL catches the prior at ${\sim}5$k images; under the DeiT recipe the
 prior wins at every fraction because the recipe supplies the invariance
@@ -156,7 +170,7 @@ under-equipped: giving its contrastive views DeiT strength makes it
 \emph{worse} at every fraction (by $4$--$12$ points e2e, halving its
 $G$), so its standard configuration was its best shot.
 
-The substitution rule refines rather than universalises: fusing the prior
+The substitution rule refines rather than universalizes: fusing the prior
 onto \emph{ineffective} SSL stacks trivially. SimSiam learns almost
 nothing at study scale ($\Delta \leq +0.9$ everywhere measured), and
 prior-on-SimSiam recovers the prior's full gain ($+6.2/+4.3/+2.0$ over
@@ -169,7 +183,7 @@ gain, not by its family name.
 \begin{table}[t]
 \caption{The transfer tax and its feature-side origin. Injecting the
 prior on top of ImageNet weights is destructive in proportion to what the
-initialisation supplied; linear probes show the loss is carried almost
+initialization supplied; linear probes show the loss is carried almost
 entirely by $G$ (features), not by the readout. PathMNIST -- where
 ImageNet features barely transfer -- is the null control. Three seeds.}
 \label{tab:tax}
@@ -190,9 +204,9 @@ The one uniformly destructive fusion in the grid is instructive
 (Table~\ref{tab:tax}). The prior's early shaping, so valuable from
 scratch, \emph{erases} mature ImageNet features: the tax reaches
 $-17$ points where transfer was worth $+13$ to $+24$, decays to zero at
-full data (where the initialisation no longer carries the performance),
+full data (where the initialization no longer carries the performance),
 and -- the decisive measurement -- lands almost entirely on $G$. Where
-the initialisation had little to offer (histopathology), there is nothing
+the initialization had little to offer (histopathology), there is nothing
 to destroy and the tax is a measured zero. Fusion with an information-rich
 partner must respect what the partner already encodes; a shaping prior
 does not.
@@ -252,7 +266,7 @@ cell & registered band & $\Delta$ & $G$ & $|\Delta{-}G|$ & verdict \\
 ResNet-18 & $\Delta$: $0.0{\pm}0.5$ & $+0.04$ & $+0.05$ & $0.01$ & neutral, exactly \\
 MobileNetV3 & (none: in bracket) & $+1.95$ & $+1.81$ & $0.14$ & consistent \\
 ViT-tiny & $\Delta \geq +3$ & $+3.23$ & $+2.84$ & $0.39$ & deficit persists \\
-Swin-T & -- & \multicolumn{3}{l}{baseline collapses at chance} & stabilised by prior \\
+Swin-T & -- & \multicolumn{3}{l}{baseline collapses at chance} & stabilized by prior \\
 \midrule
 \multicolumn{6}{@{}l}{\emph{ImageNet-100 @ 224\,px, DeiT recipe on ViTs}} \\
 ResNet-50 & $\Delta$: $0.0{\pm}1.0$ & $-0.14$ & $+0.03$ & $0.17$ & neutral at 224\,px \\

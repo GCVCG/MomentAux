@@ -43,7 +43,7 @@ the leading data-driven alternatives (SimCLR, SimSiam, DINO, ImageNet
 transfer, heavy augmentation, learned teachers) under one frozen recipe with
 committed data subsets: 14 datasets, 7 backbone families, data scales from
 500 to 1.28M images, resolutions from 32 to 224\,px, and models from 5.7M to
-86M parameters ($\sim$7{,}500 measured cells). The grid is organized by a
+86M parameters ($2{,}800$ experimental cells; ${sim}8{,}900$ training runs). The grid is organized by a
 single empirical law, $\Delta = G + \mathrm{readout}(\mathrm{base})$,
 separating each intervention's feature-level gain $G$ from a readout term
 that depends only on baseline accuracy. The law is predictive: registered in
@@ -59,7 +59,7 @@ regime to the cheapest effective intervention.
 
 \begin{highlights}
 % 3-5 bullets, <=85 chars each INCLUDING spaces (Elsevier limit).
-\item A 7,500-cell cost-normalized benchmark of data-efficiency interventions
+\item A 2,800-cell, cost-normalized benchmark of data-efficiency interventions
 \item One law, $\Delta=G+$readout(base), predicts fusion gains before training
 \item Different-currency fusions stack; same-currency fusions substitute
 \item Free spectral prior beats 2$\times$-compute SSL on ViTs under modern recipes

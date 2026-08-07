@@ -24,12 +24,12 @@ declared compute. The prior, which we call \emph{MomentAux}, could hardly be
 cheaper: a fixed bank of oriented-energy targets, injected only during
 training through a small auxiliary regression head whose loss weight decays
 to exactly zero, adding ${\sim}2\%$ training compute and \emph{nothing} at
-inference. Against it we field SimCLR, SimSiam, and DINO initialisations
+inference. Against it we field SimCLR, SimSiam, and DINO initializations
 (each ${\sim}2\times$ compute), ImageNet transfer, DeiT-strength
 augmentation, learned FitNets-style teachers, and HOG targets. The
 resulting grid spans 14 datasets across five visual domains, seven backbone
 families from ResNet-18 to ViT-B/16, data scales from 500 to 1.28M images,
-resolutions from $32$ to $224$\,px, and roughly 7{,}500 measured cells.
+resolutions from $32$ to $224$\,px, and 2{,}800 experimental cells comprising roughly 8{,}900 training runs.
 
 A grid of this size threatens to be a table dump. It is rescued by an
 empirical law that we did not assume but found, and then tested the way
@@ -61,9 +61,9 @@ Same-currency fusions substitute -- the prior and SimCLR each render the
 other nearly worthless, and their combination never beats the better
 single. Different-currency fusions stack -- the prior's gain under
 DeiT-strength augmentation does not shrink but grows by a factor of
-$1.4$--$2.4$. And fusing a shaping prior into an initialisation that
+$1.4$--$2.4$. And fusing a shaping prior into an initialization that
 already carries mature features taxes accuracy in proportion to what the
-initialisation supplied, a cost we show lands almost entirely on the
+initialization supplied, a cost we show lands almost entirely on the
 features themselves rather than on the classifier
 (Section~\ref{sec:fusion}).
 
@@ -84,9 +84,9 @@ learn.
 \begin{enumerate}
   \item \textbf{An instrument, not just experiments} (Section~\ref{sec:instrument}):
     a frozen recipe with committed subsets, pinned filter banks, declared
-    cost normalisation, and pre-registered predictions with falsifiers --
-    every headline table regenerable by one command from released artefacts.
-  \item \textbf{The grid} (Section~\ref{sec:grid}): ${\sim}7{,}500$ cells
+    cost normalization, and pre-registered predictions with falsifiers --
+    every headline table regenerable by one command from released artifacts.
+  \item \textbf{The grid} (Section~\ref{sec:grid}): $2{,}800$ cells (${\sim}8{,}900$ runs)
     comparing a free spectral prior against SSL, transfer, augmentation and
     learned teachers across 14 datasets, 7 backbone families and
     $500$--$1.28$M images.
@@ -111,7 +111,7 @@ cortex \citep{jones1987gabor} and as image descriptors
 \citep{dalal2005hog,teague1980zernike}. Scattering networks showed that
 cascades of fixed wavelets rival learned features in small-data regimes
 \citep{bruna2013scattering,oyallon2017scaling}, and Gabor-structured
-convolutions have been used to regularise or cheapen early layers
+convolutions have been used to regularize or cheapen early layers
 \citep{luan2018gaborcnn,sarwar2017gabor}. These lines place the structure
 \emph{in the forward path}, where it occupies input bandwidth permanently.
 Our forward-path baselines reproduce their known failure mode -- a
@@ -135,7 +135,7 @@ random fixed target does nothing (Table~\ref{tab:controls}) -- so the gain
 is attributable to the moment structure itself, not to auxiliary
 regression as a mechanism.
 
-\paragraph{Self-supervised initialisation.}
+\paragraph{Self-supervised initialization.}
 Contrastive and self-distilling pre-training
 \citep{chen2020simclr,chen2021simsiam,caron2021dino,grill2020byol,he2022mae}
 is the modern default source of ``free'' features, and cookbook-level
@@ -150,19 +150,19 @@ recipe, because the augmentation stack substitutes for the invariance SSL
 sells (Section~\ref{sec:fusion}).
 
 \paragraph{Transfer learning.}
-ImageNet initialisation remains the strongest single interventions on
+ImageNet initialization remains the strongest single intervention on
 photo-like data \citep{kornblith2019better}, with known caveats under
 domain shift and with training-from-scratch competitive given enough data
 \citep{he2019rethinking}. We use transfer both as a comparator and as a
 probe of fusion: injecting the spectral prior \emph{on top of} ImageNet
 weights is the one configuration in our grid that is destructive
 everywhere, and linear probing shows the destruction is feature-side --
-early shaping erases exactly the mature structure the initialisation
+early shaping erases exactly the mature structure the initialization
 supplied, in proportion to how much that structure was worth
 (Section~\ref{sec:fusion}).
 
 \paragraph{Small-data vision transformers.}
-That ViTs underperform without large data or heavy regularisation is well
+That ViTs underperform without large data or heavy regularization is well
 documented \citep{dosovitskiy2021vit,touvron2021deit,steiner2022train},
 and a family of remedies exists: distillation tokens
 \citep{touvron2021deit}, soft convolutional biases \citep{dascoli2021convit},

@@ -37,7 +37,7 @@ loss: MSE $\rightarrow$ cosine & $+3.31 \rightarrow$ & $+2.81 \rightarrow +0.46$
 
 Table~\ref{tab:controls}: a random fixed target of identical shape moves
 accuracy by at most $0.14$ points -- the mechanism is not ``regression as
-regularisation''. A FitNets teacher trained on the same data at twice the
+regularization''. A FitNets teacher trained on the same data at twice the
 cost does nothing anywhere we measured it (eight fractions, $-0.25$ to
 $+0.73$), making the free hand-crafted target strictly better than an
 expensive learned one in this regime. Among hand-crafted families,
@@ -53,7 +53,7 @@ start $\lambda_0$ \emph{is} a regime knob (best $2.0$ at 1--2\%, $1.0$ at
 3--10\%, $0.3$ at 15--25\%), but its reach is bounded: three attempts to
 push $\Delta$ past the measured feature gain by retuning $\lambda_0$ all
 failed, consistent with the law -- the knob cannot manufacture $G$ it can
-only realise it. Head-norm projection, derived from a traced scale
+only realize it. Head-norm projection, derived from a traced scale
 degeneracy (the aux loss is invariant under feature-shrink/head-inflate,
 which collapses bottleneck ResNets), converts ResNet-50 from a bistable
 failure ($\{41.2, 36.4, 42.4\}$ across seeds) into a stable $+3.9$
@@ -74,6 +74,21 @@ readouts measure the same aux-vs-baseline gap to within $0.3$ points --
 the left-flank bottleneck is label information, not classifier
 expressivity.
 
+\subsection{The forward-path alternative}
+Placing the same bank \emph{in the forward path} -- concatenated fixed
+channels at the stem, the classical hybrid design -- yields the study's
+sharpest structural contrast. Forward-path stems are the low-data
+accuracy leaders (energy-magnitude reaches $+2.6/+3.5$ at CIFAR-100
+1--2\%, beating the auxiliary prior there), but every fixed forward
+variant we test -- linear Gabor at two kernel scales, and four nonlinear
+energy families -- pays a penalty band at 10--25\% data ($-1.4$ to
+$-7.3$) that no filter choice escapes, and the phase-invariant variants
+never wash out even at 100\% ($-3.9$): a hard constraint permanently
+occupies input bandwidth that abundant data would rather use. The
+auxiliary placement of the \emph{same} knowledge is what removes the
+band, which is the design argument for fusing priors through
+training-only targets rather than through architecture.
+
 \subsection{Bank width}
 Widening the pinned 8-pair bank to 12 channels (via a third octave or two
 extra orientations -- indistinguishable at $10{\times}10$ seeds) buys a
@@ -82,13 +97,13 @@ real but local $+0.3$--$0.5$ at Tiny-ImageNet's 64\,px and nothing at
 pre-registered re-pin criterion. The committed 8-pair bank therefore
 stays, with cross-domain evidence rather than convenience behind it.
 
-\subsection{Stabilisation as a second, distinct effect}
+\subsection{Stabilization as a second, distinct effect}
 Across ConvNeXt (under the frozen SGD recipe), ResNet-50 (without
 head-norm), Swin-T (on five datasets), and Swin at ImageNet64, baselines
 are bistable -- some seeds train, some sit at chance -- while the prior
 arm trains tightly every time. Swin's probe variance shows the
 instability lives in the \emph{features} (baseline probe $\sigma$ up to
-$4.3$ vs.\ $0.2$ with the prior). We report stabilisation as a real,
+$4.3$ vs.\ $0.2$ with the prior). We report stabilization as a real,
 separate property; we do not claim routine variance reduction (a
 $10{\times}10$-seed test of that claim came back negative, and we report
 that too).
@@ -113,7 +128,7 @@ Conv, photo-like, $2\times$ \emph{not} affordable & prior & $1.02\times$ & $+1.4
 Conv, extreme scarcity (${\leq}1$--$2\%$) & prior (or fwd stem) & $1.02\times$ & SSL margin ${\leq}1$ pt; forward stem best ${\leq}2\%$ \\
 Satellite-like statistics, low data & prior & $1.02\times$ & beats SimCLR at 7 of 11 EuroSAT fractions \\
 Any ViT trained the modern way (DeiT aug) & prior \emph{and} augmentation & $1.02\times$ & flip: beats SSL at every fraction; $+14..{+}25$ over recipe alone \\
-ViT/Swin from scratch, any scale & prior & $1.02\times$ & $+3.2$ at 1.28M imgs; $+13/{+}26$ at 224\,px; stabilises Swin \\
+ViT/Swin from scratch, any scale & prior & $1.02\times$ & $+3.2$ at 1.28M imgs; $+13/{+}26$ at 224\,px; stabilizes Swin \\
 ImageNet-transferable task & transfer; \textbf{never} add prior & -- & tax $-10..{-}24$, feature-side \\
 Domain-shifted from ImageNet (e.g.\ stains) & prior from scratch competitive & $1.02\times$ & transfer advantage shrinks to $+2..{+}3$ \\
 Data sufficient (${\geq}50\%$) & nothing (all converge) & -- & every intervention within $\pm 0.8$ \\
@@ -135,7 +150,7 @@ rather than competing with it.
 The grid's size is not its point; its point is that one low-dimensional
 structure explains it. The decomposition in Eq.~\ref{eq:law} says that an
 intervention's visible benefit is feature gain passed through a
-readout channel whose behaviour is set by how well the task is already
+readout channel whose behavior is set by how well the task is already
 being solved. This explains, with one mechanism, observations that
 otherwise require separate stories: why gains collapse at extreme
 scarcity even when features improve (readout deeply negative -- five
@@ -188,7 +203,7 @@ sign law, concentrated on Food-101 and PathMNIST at ${\geq}20\%$ data,
 all with the same signature: the prior still improves frozen-feature
 quality while costing end-to-end accuracy. The current law has no term
 for this ``better features, worse accuracy'' regime; modelling it --
-plausibly an interaction between late-stage optimisation and
+plausibly an interaction between late-stage optimization and
 sufficiency -- is the clearest open problem the grid poses.
 
 \paragraph{Scope of the instrument.} The frozen recipe is, in effect, a
@@ -211,7 +226,7 @@ frequency-phase) to test whether currency-overlap measured by probes
 predicts stacking in general. (iii) \emph{Attention at deployment
 scale}: the model-scale trend ($+13 \to +26$ from ViT-S to ViT-B at fixed
 data) invites the obvious next point on the curve, and the
-stabilisation-plus-structure account suggests trying the prior as a
+stabilization-plus-structure account suggests trying the prior as a
 warmup for large-ViT pre-training proper.
 
 %% ---------------------------------------------------------------------
@@ -221,7 +236,7 @@ We built an instrument -- one recipe, committed data, pinned filters,
 pre-registered predictions -- and used it to measure how a nearly free
 structural prior fuses with the modern menu of data-efficiency
 interventions across 14 datasets, 7 architectures and four orders of
-magnitude in data. The measurements organise under one empirical law
+magnitude in data. The measurements organize under one empirical law
 separating feature gain from readout, sharp enough to predict unseen
 backbones and to survive ImageNet scale within a point; and they support
 a three-way fusion taxonomy -- stack, substitute, tax -- decided by
