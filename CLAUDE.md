@@ -2000,7 +2000,11 @@ ported vs corrected and why.
             full-train value, same shape as vitb.
       vitb: G +22.89 ±1.25, residual +3.12 ±2.37 — ceiling-caveated,
             unresolved (scored 2026-08-07 morning, entry above).
-      r50:  probe pending (2v2 cells; heals in flight on BSC).
+      r50:  Delta −0.14 (2v2) | G = +0.03 (2v2, unpaired seeds none{1,2}
+            aux{0,2}) | residual −0.17. Band was −0.7..−0.2: nominally 0.23
+            above the top at 2v2 — a rounding-level miss on a dead-zero
+            quantity; the substantive claim (conv feature-neutrality at
+            224px) lands exactly. Re-probe at 3v3 when the heals finish.
   THE CAMPAIGN'S LAST PRE-REGISTERED QUESTION IS ANSWERED: the law predicts
   feature gain from accuracy (and vice versa) at 500 images and at 1.28M, at
   32px and at 224px, at 5.7M params and at 86M. FALSIFIER LEDGER, FINAL:
