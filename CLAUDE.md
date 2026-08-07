@@ -1792,12 +1792,23 @@ ported vs corrected and why.
   documented, bistability reported as findings); (c) natural venues:
   NeurIPS D&B / TMLR, TPAMI plausible if the ImageNet stages land clean.
   Complete-grid decision (same day, above) directly feeds this framing.
-  VENUE DECISION DEFERRED (user, 2026-08-06): shortlist ranked Information
-  Fusion (fusion reframe, fast, IF ~14) > Pattern Recognition (best natural
-  fit, slower) > KBS/Neural Networks (fast fallbacks) > TPAMI (if ImageNet
-  lands clean). Decide AFTER the full results are in (ImageNet64 P1-P3,
-  ImageNet-100 S1-S4/G1-G4, diagdepth universality, grid completion) -- do
-  not re-pitch venues before then.
+  VENUE DECIDED (user, 2026-08-07, after the full results landed):
+  **INFORMATION FUSION**, with the fusion reframe. The deferred shortlist
+  (2026-08-06: InfFus > PatternRec > KBS/NN > TPAMI) resolved once every
+  scale falsifier died and P1/S1 held. Paper scaffold lives in paper/
+  (Elsevier CAS double-column, cas-dc; compiles locally -- missing
+  texlive-latex-extra styles hand-installed to ~/texmf: balance, makecell,
+  stfloats, xstring, footmisc, moreverb, wrapfig; stix/charis/inconsolata
+  fonts are file_if_exist-guarded and safely absent). Title frames the
+  fusion question ("When does fusing hand-crafted spectral knowledge with
+  learned representations pay?"); highlights <=85 chars each; abstract
+  <=250 words draft in place; section plan C1-C5 with the stack/substitute/
+  tax taxonomy as the fusion contribution. GUIDE-FOR-AUTHORS CAVEAT: the
+  live ScienceDirect page is bot-blocked (403 on every route); requirements
+  encoded from the stable Elsevier standard -- highlights 3-5 bullets
+  <=85 chars, CRediT + competing-interests + data-availability + generative-
+  AI statements, numbered references, format-free first submission (Your
+  Paper Your Way) -- VERIFY manually in a browser before submitting.
 - *** STALE-WORKLIST INCIDENT #7 + THE GRID IS ACTUALLY COMPLETE (2026-08-06,
   my error, caught same day). Rebuilding worklists after the OOM fix I ran the
   missing-cell generator from $MS/repo WITHOUT OUT=$MS/runs -- its default
