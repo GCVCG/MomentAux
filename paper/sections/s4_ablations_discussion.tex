@@ -216,15 +216,33 @@ measure them unchanged); why every intervention converges at sufficiency
 under coarse evaluation than fine on the same checkpoints (the measuring
 stick itself is label-hungry).
 
-\paragraph{The currency account as fusion theory in miniature.}
-Our stack, substitute, or tax taxonomy is, we suggest, the general shape of
-knowledge--data fusion outcomes: fusion adds value exactly when the
-sources' contributions are non-overlapping \emph{in feature space}, and
-harms when one source's dynamics (here, early shaping) overwrite what the
-other supplied. The practical corollary is that fusion decisions can be
-made by measurement rather than fashion: a cheap linear evaluation of what
-each candidate source contributes predicts whether their combination is
-worth anything, before any joint training is run.
+\paragraph{What the currency account contributes to fusion theory.}
+We want to be careful about what is new here, because two of our three
+outcomes are not. Fusion has distinguished complementary from redundant
+sources since \citet{durrantwhyte1988sensor}, and stack and substitute are
+that distinction. What the classical taxonomy does not provide, because it
+was written for sensors whose relationship is known from the sensing
+geometry, is a way to \emph{determine} which case holds when the sources
+are a hand-crafted prior and a learned representation, whose relationship
+is not evident a priori and, as Section~\ref{sec:fusion} shows, is not
+predictable from their family names either: the same prior is redundant
+with effective self-supervision and complementary with augmentation.
+Our contribution is therefore operational rather than taxonomic. Fusion
+adds value exactly when the sources' contributions are non-overlapping
+\emph{in feature space}, that overlap is measurable in advance by a cheap
+linear evaluation of each source alone, and the measurement predicts the
+combination. Fusion decisions can be made by measurement rather than by
+fashion, before any joint training is run.
+
+The third outcome is the one without a classical counterpart. A source
+that destroys what its partner supplied, in proportion to how much was
+supplied, is neither complementary nor redundant; it is closest to
+negative transfer \citep{zhang2023negative}, which that literature treats
+as a source--target mismatch problem. Our measurement locates it
+differently: the loss is carried by the feature term, and it vanishes
+exactly where the partner had contributed nothing, which frames it as a
+fusion outcome governed by the same currency logic as the other two rather
+than as a separate pathology.
 
 \paragraph{What the attention result does and does not say.}
 The persistent, scale-growing ViT deficit is a statement about

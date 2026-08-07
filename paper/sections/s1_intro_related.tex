@@ -113,9 +113,11 @@ training; self-supervised and transfer initializations that pay compute
 for representation; augmentation recipes that supply invariance;
 small-data results specific to attention; and the large-scale comparative
 benchmarks that most closely resemble what we build. Each paragraph below
-takes one of these in turn. Section~\ref{sec:gap} then states, in a
-single table, which properties a controlled fusion study requires and
-which of them each line of work currently provides.
+takes one of these in turn. Section~\ref{sec:fusiontheory} then places our
+three outcomes against the fusion literature's own account of how sources
+relate, and Section~\ref{sec:gap} states, in a single table, which
+properties a controlled fusion study requires and which of them each line
+of work currently provides.
 
 \paragraph{Hand-crafted structure inside learned networks.}
 Fixed oriented filters predate deep learning as models of early visual
@@ -219,6 +221,60 @@ lets us ask the benchmark question of when adding them pays rather than
 the model question of whether one architecture beats another.
 
 
+\subsection{Relation to fusion theory}\label{sec:fusiontheory}
+The outcomes we measure are not new categories. Classical multi-sensor
+fusion has classified the relationship between two information sources
+since \citet{durrantwhyte1988sensor}, who distinguishes \emph{complementary}
+sources, which describe different aspects of the target and are combined
+for a fuller picture, from \emph{redundant} (or competitive) sources, which
+describe the same aspect and are combined to raise confidence, and
+\emph{cooperative} sources, which jointly yield what neither yields alone.
+Our stack and substitute outcomes are that distinction, reached from the
+opposite direction: rather than assuming a source relationship from the
+sensing geometry, we \emph{measure} it, and we do so in a setting the
+classical taxonomy was not written for, where one source is a fixed
+hand-crafted prior and the other is a learned representation.
+
+Two things follow, and we state both as claims about scope rather than
+about novelty. First, the classical taxonomy is a statement about what
+sources \emph{are}; it does not say how to find out which case you are in
+before building the combined system. The feature-level measurement of
+Section~\ref{sec:probe} supplies exactly that, and the resulting rule,
+that same-currency sources do not compound, is a testable operational form
+of the complementary--redundant distinction. Second, our third outcome has
+no classical counterpart. \emph{Tax}, in which a second source destroys
+what the first supplied in proportion to how much it supplied, is not
+complementarity, redundancy or cooperation; the nearest existing account
+is negative transfer \citep{wang2019negative,zhang2023negative}, which is
+studied as a property of source--target mismatch rather than as a fusion
+outcome. Section~\ref{sec:taxsub} shows the tax is carried by the feature
+term rather than the readout, which is what makes it a statement about the
+representation and not about optimization.
+
+The formal version of the currency idea is information-theoretic.
+Partial information decomposition \citep{williams2010nonnegative} splits
+what two sources tell us about a target into unique, redundant and
+synergistic parts, which is the decomposition our taxonomy approximates.
+We do not claim to compute it. Our measurement is a proxy, the gap a
+linear evaluation reads between two frozen representations, and it is
+ordinal rather than an information quantity. We use it because it is
+cheap enough to run on 2{,}800 cells and because it turns out to predict
+combination outcomes; a genuine decomposition at the scale of neural
+network features remains open, and estimator instability in that
+literature is a known obstacle.
+
+Finally, our knowledge source sits in a place that
+\citet{vonrueden2023informed} make precise. Their taxonomy of informed
+machine learning classifies an approach by its knowledge \emph{source},
+its \emph{representation}, and the \emph{integration point} in the
+learning pipeline. Ours is scientific knowledge about early visual
+processing, represented as a pinned filter bank, integrated at the
+training objective. That survey catalogues where knowledge \emph{can} be
+injected across a wide range of such choices. What it does not settle,
+and what a practitioner has to decide, is when injecting it is worth
+anything given what the data and the available pre-trained artifacts
+already supply. That is the question this benchmark is built to answer.
+
 \subsection{The gap this paper closes}\label{sec:gap}
 
 \begin{table}[t]
@@ -236,7 +292,7 @@ happens when two sources are applied together.}
 \zebra{2}
 \begin{tabular}{@{}lccccc@{}}
 \toprule
-line of work & \rotbox{one frozen recipe} & \rotbox{cost-normalized} &
+Line of work & \rotbox{one frozen recipe} & \rotbox{cost-normalized} &
   \rotbox{feature-side} & \rotbox{combinations} & \rotbox{predictive model} \\
 \midrule
 Fixed spectral filters in the forward path
@@ -257,6 +313,9 @@ Small-data ViT recipes
 Backbone and self-supervised benchmarks
   \citep{goldblum2023battle,marks2025closer,zhai2019vtab}
   & \pmark & \xmark & \cmark & \xmark & \xmark \\
+Classical fusion taxonomy
+  \citep{durrantwhyte1988sensor,williams2010nonnegative}
+  & \xmark & \xmark & \xmark & \cmark & \pmark \\
 \midrule
 \textbf{This work} & \cmark & \cmark & \cmark & \cmark & \cmark \\
 \bottomrule
