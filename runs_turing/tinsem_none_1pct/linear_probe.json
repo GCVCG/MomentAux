@@ -1,0 +1,56 @@
+{
+  "config": "configs/diagnostics/tinsem_none_1pct.yaml",
+  "ckpt": "best.pt",
+  "results": [
+    {
+      "seed": "seed0",
+      "probe_train": 0.3007200062274933,
+      "probe_test": 0.2662000060081482
+    },
+    {
+      "seed": "seed1",
+      "probe_train": 0.2961199879646301,
+      "probe_test": 0.26659998297691345
+    },
+    {
+      "seed": "seed2",
+      "probe_train": 0.2953999936580658,
+      "probe_test": 0.2655999958515167
+    },
+    {
+      "seed": "seed3",
+      "probe_train": 0.2996099889278412,
+      "probe_test": 0.27160000801086426
+    },
+    {
+      "seed": "seed4",
+      "probe_train": 0.30065998435020447,
+      "probe_test": 0.26899999380111694
+    },
+    {
+      "seed": "seed5",
+      "probe_train": 0.2978000044822693,
+      "probe_test": 0.26999998092651367
+    },
+    {
+      "seed": "seed6",
+      "probe_train": 0.29652997851371765,
+      "probe_test": 0.27629998326301575
+    },
+    {
+      "seed": "seed7",
+      "probe_train": 0.2979999780654907,
+      "probe_test": 0.2637999951839447
+    },
+    {
+      "seed": "seed8",
+      "probe_train": 0.2954300045967102,
+      "probe_test": 0.26249998807907104
+    },
+    {
+      "seed": "seed9",
+      "probe_train": 0.2948399782180786,
+      "probe_test": 0.26510000228881836
+    }
+  ]
+}

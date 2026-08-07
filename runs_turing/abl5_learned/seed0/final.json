@@ -1,0 +1,35 @@
+{
+  "name": "abl5_learned",
+  "seed": 0,
+  "config": {
+    "name": "abl5_learned",
+    "dataset": "cifar100",
+    "backbone": "resnet18",
+    "epochs": 200,
+    "batch_size": 128,
+    "lr": 0.1,
+    "weight_decay": 0.0005,
+    "momentum": 0.9,
+    "num_workers": 8,
+    "small_input": true,
+    "pretrained": false,
+    "stem_kernel_size": 11,
+    "subset_pct": 5,
+    "stem": "learned"
+  },
+  "final_test_acc": 0.2101999968290329,
+  "best_test_acc": 0.21230000257492065,
+  "accounting": {
+    "params_trainable": 11240517,
+    "params_stem_trainable": 6561,
+    "params_stem_fixed_filters": 0,
+    "flops_total": 577580032,
+    "flops_stem": 6718464,
+    "flops_image_size": 32
+  },
+  "wall_seconds": 422.7039785385132,
+  "torch_version": "2.7.0+cu126",
+  "device": "cuda",
+  "gpu_name": "NVIDIA GeForce RTX 3090",
+  "amp": true
+}

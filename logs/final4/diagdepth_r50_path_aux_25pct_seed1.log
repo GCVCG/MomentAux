@@ -55,3 +55,4 @@ epoch 52/200 loss 0.1078 train 0.9714 test 0.9170
 epoch 53/200 loss 0.0999 train 0.9736 test 0.9235
 epoch 54/200 loss 0.0997 train 0.9746 test 0.8185
 epoch 55/200 loss 0.0994 train 0.9727 test 0.8338
+epoch 56/200 loss 0.1043 train 0.9730 test 0.6370

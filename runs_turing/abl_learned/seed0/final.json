@@ -1,0 +1,34 @@
+{
+  "name": "abl_learned",
+  "seed": 0,
+  "config": {
+    "name": "abl_learned",
+    "dataset": "cifar100",
+    "subset_pct": 10,
+    "backbone": "resnet18",
+    "epochs": 200,
+    "batch_size": 128,
+    "lr": 0.1,
+    "weight_decay": 0.0005,
+    "momentum": 0.9,
+    "num_workers": 8,
+    "small_input": true,
+    "pretrained": false,
+    "stem_kernel_size": 11,
+    "stem": "learned"
+  },
+  "final_test_acc": 0.32710000872612,
+  "best_test_acc": 0.33000001311302185,
+  "accounting": {
+    "params_trainable": 11240517,
+    "params_stem_trainable": 6561,
+    "params_stem_fixed_filters": 0,
+    "flops_total": 577580032,
+    "flops_stem": 6718464,
+    "flops_image_size": 32
+  },
+  "wall_seconds": 214.58637952804565,
+  "torch_version": "2.8.0+cu128",
+  "device": "cuda",
+  "amp": true
+}

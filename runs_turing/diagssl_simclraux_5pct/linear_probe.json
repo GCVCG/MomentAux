@@ -1,0 +1,21 @@
+{
+  "config": "configs/diagnostics/diagssl_simclraux_5pct.yaml",
+  "ckpt": "best.pt",
+  "results": [
+    {
+      "seed": "seed0",
+      "probe_train": 0.6086999773979187,
+      "probe_test": 0.4519999921321869
+    },
+    {
+      "seed": "seed1",
+      "probe_train": 0.605679988861084,
+      "probe_test": 0.4509999752044678
+    },
+    {
+      "seed": "seed2",
+      "probe_train": 0.6060000061988831,
+      "probe_test": 0.45719999074935913
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "config": "configs/diagnostics/diagcos_c100_aux_1pct.yaml",
+  "ckpt": "best.pt",
+  "results": [
+    {
+      "seed": "seed0",
+      "probe_train": 0.4220599830150604,
+      "probe_test": 0.28919997811317444
+    },
+    {
+      "seed": "seed1",
+      "probe_train": 0.4226599931716919,
+      "probe_test": 0.2947999835014343
+    },
+    {
+      "seed": "seed2",
+      "probe_train": 0.42583999037742615,
+      "probe_test": 0.29170000553131104
+    }
+  ]
+}

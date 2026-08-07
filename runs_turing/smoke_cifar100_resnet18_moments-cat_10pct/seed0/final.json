@@ -1,0 +1,35 @@
+{
+  "name": "smoke_cifar100_resnet18_moments-cat_10pct",
+  "seed": 0,
+  "config": {
+    "name": "smoke_cifar100_resnet18_moments-cat_10pct",
+    "dataset": "cifar100",
+    "subset_pct": 10,
+    "backbone": "resnet18",
+    "stem": "moments-cat",
+    "epochs": 20,
+    "batch_size": 128,
+    "lr": 0.1,
+    "weight_decay": 0.0005,
+    "momentum": 0.9,
+    "num_workers": 8,
+    "small_input": true,
+    "pretrained": false,
+    "stem_kernel_size": 11,
+    "epochs_overridden": true
+  },
+  "final_test_acc": 0.1973000019788742,
+  "best_test_acc": 0.1973000019788742,
+  "accounting": {
+    "params_trainable": 11233956,
+    "params_stem_trainable": 0,
+    "params_stem_fixed_filters": 6534,
+    "flops_total": 577552384,
+    "flops_stem": 6690816,
+    "flops_image_size": 32
+  },
+  "wall_seconds": 32.696446657180786,
+  "torch_version": "2.8.0+cu128",
+  "device": "cuda",
+  "amp": true
+}

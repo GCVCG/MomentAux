@@ -1,0 +1,21 @@
+{
+  "config": "configs/diagnostics/diagvit_aux_1pct.yaml",
+  "ckpt": "best.pt",
+  "results": [
+    {
+      "seed": "seed0",
+      "probe_train": 0.2592200040817261,
+      "probe_test": 0.2142999917268753
+    },
+    {
+      "seed": "seed1",
+      "probe_train": 0.26622000336647034,
+      "probe_test": 0.22669999301433563
+    },
+    {
+      "seed": "seed2",
+      "probe_train": 0.24819999933242798,
+      "probe_test": 0.20809999108314514
+    }
+  ]
+}

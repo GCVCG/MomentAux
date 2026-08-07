@@ -1,0 +1,21 @@
+{
+  "config": "configs/diagnostics/diagssl_none400_5pct.yaml",
+  "ckpt": "best.pt",
+  "results": [
+    {
+      "seed": "seed0",
+      "probe_train": 0.5270799994468689,
+      "probe_test": 0.3837999999523163
+    },
+    {
+      "seed": "seed1",
+      "probe_train": 0.5130199790000916,
+      "probe_test": 0.37059998512268066
+    },
+    {
+      "seed": "seed2",
+      "probe_train": 0.5263000130653381,
+      "probe_test": 0.3852999806404114
+    }
+  ]
+}

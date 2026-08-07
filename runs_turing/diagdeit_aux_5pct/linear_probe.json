@@ -1,0 +1,21 @@
+{
+  "config": "configs/diagnostics/diagdeit_aux_5pct.yaml",
+  "ckpt": "best.pt",
+  "results": [
+    {
+      "seed": "seed0",
+      "probe_train": 0.4686200022697449,
+      "probe_test": 0.41599997878074646
+    },
+    {
+      "seed": "seed1",
+      "probe_train": 0.4778199791908264,
+      "probe_test": 0.4177999794483185
+    },
+    {
+      "seed": "seed2",
+      "probe_train": 0.47279998660087585,
+      "probe_test": 0.41579997539520264
+    }
+  ]
+}

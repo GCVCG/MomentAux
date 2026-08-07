@@ -1,0 +1,35 @@
+{
+  "name": "abl5_none",
+  "seed": 8,
+  "config": {
+    "name": "abl5_none",
+    "dataset": "cifar100",
+    "backbone": "resnet18",
+    "epochs": 200,
+    "batch_size": 128,
+    "lr": 0.1,
+    "weight_decay": 0.0005,
+    "momentum": 0.9,
+    "num_workers": 8,
+    "small_input": true,
+    "pretrained": false,
+    "stem_kernel_size": 11,
+    "subset_pct": 5,
+    "stem": "none"
+  },
+  "final_test_acc": 0.2639999985694885,
+  "best_test_acc": 0.26429998874664307,
+  "accounting": {
+    "params_trainable": 11220132,
+    "params_stem_trainable": 0,
+    "params_stem_fixed_filters": 0,
+    "flops_total": 556705792,
+    "flops_stem": 0,
+    "flops_image_size": 32
+  },
+  "wall_seconds": 133.21937680244446,
+  "torch_version": "2.8.0+cu128",
+  "device": "cuda",
+  "gpu_name": "NVIDIA H100 NVL",
+  "amp": true
+}

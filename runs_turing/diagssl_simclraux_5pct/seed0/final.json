@@ -1,0 +1,43 @@
+{
+  "name": "diagssl_simclraux_5pct",
+  "seed": 0,
+  "config": {
+    "name": "diagssl_simclraux_5pct",
+    "dataset": "cifar100",
+    "backbone": "resnet18",
+    "epochs": 200,
+    "batch_size": 128,
+    "lr": 0.1,
+    "weight_decay": 0.0005,
+    "momentum": 0.9,
+    "num_workers": 8,
+    "small_input": true,
+    "pretrained": false,
+    "subset_pct": 5,
+    "stem": "none",
+    "stem_calibrate": true,
+    "moment_aux": {
+      "stem": "energy-magnitude",
+      "tap": "layer3",
+      "weight": 1.0,
+      "weight_final": 0.0,
+      "weight_schedule": "cosine"
+    },
+    "init_from": "runs/simclr_pre_5pct/seed{seed}/pretrain.pt"
+  },
+  "final_test_acc": 0.33309999108314514,
+  "best_test_acc": 0.33309999108314514,
+  "accounting": {
+    "params_trainable": 11222188,
+    "params_stem_trainable": 0,
+    "params_stem_fixed_filters": 0,
+    "flops_total": 556705792,
+    "flops_stem": 0,
+    "flops_image_size": 32
+  },
+  "wall_seconds": 141.53150343894958,
+  "torch_version": "2.8.0+cu128",
+  "device": "cuda",
+  "gpu_name": "NVIDIA H100 NVL",
+  "amp": true
+}

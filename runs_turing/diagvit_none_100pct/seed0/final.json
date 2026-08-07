@@ -1,0 +1,36 @@
+{
+  "name": "diagvit_none_100pct",
+  "seed": 0,
+  "config": {
+    "name": "diagvit_none_100pct",
+    "dataset": "cifar100",
+    "backbone": "vit_tiny",
+    "optimizer": "adamw",
+    "epochs": 200,
+    "batch_size": 128,
+    "lr": 0.001,
+    "weight_decay": 0.05,
+    "momentum": 0.9,
+    "num_workers": 2,
+    "small_input": true,
+    "pretrained": false,
+    "subset_pct": 100,
+    "stem": "none",
+    "stem_calibrate": true
+  },
+  "final_test_acc": 0.5001999735832214,
+  "best_test_acc": 0.5016000270843506,
+  "accounting": {
+    "params_trainable": 5380132,
+    "params_stem_trainable": 0,
+    "params_stem_fixed_filters": 0,
+    "flops_total": 347216064,
+    "flops_stem": 0,
+    "flops_image_size": 32
+  },
+  "wall_seconds": 1221.7935483455658,
+  "torch_version": "2.8.0+cu128",
+  "device": "cuda",
+  "gpu_name": "NVIDIA H200 NVL",
+  "amp": true
+}

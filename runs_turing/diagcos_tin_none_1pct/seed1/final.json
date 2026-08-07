@@ -1,0 +1,36 @@
+{
+  "name": "diagcos_tin_none_1pct",
+  "seed": 1,
+  "config": {
+    "name": "diagcos_tin_none_1pct",
+    "dataset": "tin",
+    "backbone": "resnet18",
+    "epochs": 200,
+    "batch_size": 128,
+    "lr": 0.1,
+    "weight_decay": 0.0005,
+    "momentum": 0.9,
+    "num_workers": 8,
+    "small_input": true,
+    "pretrained": false,
+    "subset_pct": 1,
+    "stem": "none",
+    "stem_calibrate": true,
+    "head": "cosine"
+  },
+  "final_test_acc": 0.053599998354911804,
+  "best_test_acc": 0.054099999368190765,
+  "accounting": {
+    "params_trainable": 11271233,
+    "params_stem_trainable": 0,
+    "params_stem_fixed_filters": 0,
+    "flops_total": 2226720768,
+    "flops_stem": 0,
+    "flops_image_size": 64
+  },
+  "wall_seconds": 1303.2657959461212,
+  "torch_version": "2.8.0+cu128",
+  "device": "cuda",
+  "gpu_name": "NVIDIA H200 NVL",
+  "amp": true
+}

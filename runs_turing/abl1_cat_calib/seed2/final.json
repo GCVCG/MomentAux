@@ -1,0 +1,36 @@
+{
+  "name": "abl1_cat_calib",
+  "seed": 2,
+  "config": {
+    "name": "abl1_cat_calib",
+    "dataset": "cifar100",
+    "epochs": 200,
+    "batch_size": 128,
+    "lr": 0.1,
+    "weight_decay": 0.0005,
+    "momentum": 0.9,
+    "num_workers": 8,
+    "small_input": true,
+    "pretrained": false,
+    "stem_kernel_size": 11,
+    "subset_pct": 1,
+    "backbone": "resnet18",
+    "stem": "moments-cat",
+    "stem_calibrate": true
+  },
+  "final_test_acc": 0.10119999945163727,
+  "best_test_acc": 0.10239999741315842,
+  "accounting": {
+    "params_trainable": 11233956,
+    "params_stem_trainable": 0,
+    "params_stem_fixed_filters": 6534,
+    "flops_total": 577552384,
+    "flops_stem": 6690816,
+    "flops_image_size": 32
+  },
+  "wall_seconds": 334.0174615383148,
+  "torch_version": "2.7.0+cu126",
+  "device": "cuda",
+  "gpu_name": "NVIDIA GeForce RTX 3090",
+  "amp": true
+}

@@ -1,0 +1,40 @@
+{
+  "name": "pool10_zernike",
+  "seed": 1,
+  "config": {
+    "name": "pool10_zernike",
+    "dataset": "cifar100",
+    "backbone": "resnet18",
+    "epochs": 200,
+    "batch_size": 128,
+    "lr": 0.1,
+    "weight_decay": 0.0005,
+    "momentum": 0.9,
+    "num_workers": 8,
+    "small_input": true,
+    "pretrained": false,
+    "stem_kernel_size": 11,
+    "subset_pct": 10,
+    "stem": "none",
+    "head_pool": {
+      "type": "zernike",
+      "J": 8,
+      "hw": 4
+    }
+  },
+  "final_test_acc": 0.3107999861240387,
+  "best_test_acc": 0.31150001287460327,
+  "accounting": {
+    "params_trainable": 11578532,
+    "params_stem_trainable": 0,
+    "params_stem_fixed_filters": 0,
+    "flops_total": 557121550,
+    "flops_stem": 0,
+    "flops_image_size": 32
+  },
+  "wall_seconds": 168.33246898651123,
+  "torch_version": "2.8.0+cu128",
+  "device": "cuda",
+  "gpu_name": "NVIDIA H100 NVL",
+  "amp": true
+}

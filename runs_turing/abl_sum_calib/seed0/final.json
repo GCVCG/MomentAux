@@ -1,0 +1,35 @@
+{
+  "name": "abl_sum_calib",
+  "seed": 0,
+  "config": {
+    "name": "abl_sum_calib",
+    "dataset": "cifar100",
+    "subset_pct": 10,
+    "backbone": "resnet18",
+    "epochs": 200,
+    "batch_size": 128,
+    "lr": 0.1,
+    "weight_decay": 0.0005,
+    "momentum": 0.9,
+    "num_workers": 8,
+    "small_input": true,
+    "pretrained": false,
+    "stem_kernel_size": 11,
+    "stem": "moments-sum",
+    "stem_calibrate": true
+  },
+  "final_test_acc": 0.32850000262260437,
+  "best_test_acc": 0.3294999897480011,
+  "accounting": {
+    "params_trainable": 11220132,
+    "params_stem_trainable": 0,
+    "params_stem_fixed_filters": 1452,
+    "flops_total": 558192640,
+    "flops_stem": 1486848,
+    "flops_image_size": 32
+  },
+  "wall_seconds": 190.73726177215576,
+  "torch_version": "2.8.0+cu128",
+  "device": "cuda",
+  "amp": true
+}

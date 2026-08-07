@@ -1,0 +1,41 @@
+{
+  "config": "configs/diagnostics/tinsuper_aux_1pct.yaml",
+  "ckpt": "best.pt",
+  "results": [
+    {
+      "seed": "seed3",
+      "probe_train": 0.2798900008201599,
+      "probe_test": 0.2506999969482422
+    },
+    {
+      "seed": "seed4",
+      "probe_train": 0.27897000312805176,
+      "probe_test": 0.2556000053882599
+    },
+    {
+      "seed": "seed5",
+      "probe_train": 0.2771799862384796,
+      "probe_test": 0.25029999017715454
+    },
+    {
+      "seed": "seed6",
+      "probe_train": 0.2762099802494049,
+      "probe_test": 0.24009999632835388
+    },
+    {
+      "seed": "seed7",
+      "probe_train": 0.2755799889564514,
+      "probe_test": 0.24129998683929443
+    },
+    {
+      "seed": "seed8",
+      "probe_train": 0.2756099998950958,
+      "probe_test": 0.25349998474121094
+    },
+    {
+      "seed": "seed9",
+      "probe_train": 0.27764999866485596,
+      "probe_test": 0.2506999969482422
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "config": "configs/ablations_full/abl1_none.yaml",
+  "ckpt": "best.pt",
+  "results": [
+    {
+      "seed": "seed0",
+      "probe_train": 0.3673799932003021,
+      "probe_test": 0.26600000262260437
+    },
+    {
+      "seed": "seed1",
+      "probe_train": 0.3721199929714203,
+      "probe_test": 0.27059999108314514
+    },
+    {
+      "seed": "seed2",
+      "probe_train": 0.37397998571395874,
+      "probe_test": 0.26739999651908875
+    },
+    {
+      "seed": "seed3",
+      "probe_train": 0.3705199956893921,
+      "probe_test": 0.2604999840259552
+    },
+    {
+      "seed": "seed4",
+      "probe_train": 0.37567999958992004,
+      "probe_test": 0.26919999718666077
+    },
+    {
+      "seed": "seed5",
+      "probe_train": 0.37119999527931213,
+      "probe_test": 0.2709999978542328
+    },
+    {
+      "seed": "seed6",
+      "probe_train": 0.3748999834060669,
+      "probe_test": 0.26639997959136963
+    },
+    {
+      "seed": "seed7",
+      "probe_train": 0.372079998254776,
+      "probe_test": 0.26330000162124634
+    },
+    {
+      "seed": "seed8",
+      "probe_train": 0.37439998984336853,
+      "probe_test": 0.27140000462532043
+    },
+    {
+      "seed": "seed9",
+      "probe_train": 0.3700000047683716,
+      "probe_test": 0.26269999146461487
+    }
+  ]
+}

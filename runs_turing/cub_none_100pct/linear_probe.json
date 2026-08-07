@@ -1,0 +1,21 @@
+{
+  "config": "configs/cub_none_100pct.yaml",
+  "ckpt": "best.pt",
+  "results": [
+    {
+      "seed": "seed0",
+      "probe_train": 1.0,
+      "probe_test": 0.42975491285324097
+    },
+    {
+      "seed": "seed1",
+      "probe_train": 1.0,
+      "probe_test": 0.4212978780269623
+    },
+    {
+      "seed": "seed2",
+      "probe_train": 1.0,
+      "probe_test": 0.437866747379303
+    }
+  ]
+}

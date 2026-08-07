@@ -1,0 +1,41 @@
+{
+  "config": "configs/diagnostics/auxmag_10pct_sched0.yaml",
+  "ckpt": "best.pt",
+  "results": [
+    {
+      "seed": "seed3",
+      "probe_train": 0.6753399968147278,
+      "probe_test": 0.5152999758720398
+    },
+    {
+      "seed": "seed4",
+      "probe_train": 0.6833199858665466,
+      "probe_test": 0.5230000019073486
+    },
+    {
+      "seed": "seed5",
+      "probe_train": 0.6775199770927429,
+      "probe_test": 0.515500009059906
+    },
+    {
+      "seed": "seed6",
+      "probe_train": 0.674340009689331,
+      "probe_test": 0.5087000131607056
+    },
+    {
+      "seed": "seed7",
+      "probe_train": 0.6828599572181702,
+      "probe_test": 0.5149999856948853
+    },
+    {
+      "seed": "seed8",
+      "probe_train": 0.6805999875068665,
+      "probe_test": 0.5198999643325806
+    },
+    {
+      "seed": "seed9",
+      "probe_train": 0.6777799725532532,
+      "probe_test": 0.512499988079071
+    }
+  ]
+}

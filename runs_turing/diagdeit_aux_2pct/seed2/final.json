@@ -1,0 +1,45 @@
+{
+  "name": "diagdeit_aux_2pct",
+  "seed": 2,
+  "config": {
+    "name": "diagdeit_aux_2pct",
+    "dataset": "cifar100",
+    "backbone": "vit_tiny",
+    "optimizer": "adamw",
+    "epochs": 200,
+    "batch_size": 128,
+    "lr": 0.001,
+    "weight_decay": 0.05,
+    "momentum": 0.9,
+    "num_workers": 2,
+    "small_input": true,
+    "pretrained": false,
+    "subset_pct": 2,
+    "stem": "none",
+    "stem_calibrate": true,
+    "moment_aux": {
+      "stem": "energy-magnitude",
+      "tap": "blocks.8",
+      "weight": 1.0,
+      "weight_final": 0.0,
+      "weight_schedule": "cosine",
+      "head_norm": true
+    },
+    "augment": "deit"
+  },
+  "final_test_acc": 0.15870000422000885,
+  "best_test_acc": 0.1615000069141388,
+  "accounting": {
+    "params_trainable": 5381676,
+    "params_stem_trainable": 0,
+    "params_stem_fixed_filters": 0,
+    "flops_total": 347216064,
+    "flops_stem": 0,
+    "flops_image_size": 32
+  },
+  "wall_seconds": 158.05335402488708,
+  "torch_version": "2.8.0+cu128",
+  "device": "cuda",
+  "gpu_name": "NVIDIA H200 NVL",
+  "amp": true
+}

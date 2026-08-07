@@ -1,0 +1,21 @@
+{
+  "config": "configs/diagnostics/diagvit_none_100pct.yaml",
+  "ckpt": "best.pt",
+  "results": [
+    {
+      "seed": "seed0",
+      "probe_train": 0.999779999256134,
+      "probe_test": 0.5020999908447266
+    },
+    {
+      "seed": "seed1",
+      "probe_train": 0.9998199939727783,
+      "probe_test": 0.5130000114440918
+    },
+    {
+      "seed": "seed2",
+      "probe_train": 0.999779999256134,
+      "probe_test": 0.5109999775886536
+    }
+  ]
+}

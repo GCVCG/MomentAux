@@ -1,0 +1,21 @@
+{
+  "config": "configs/diagnostics/diagsslvit_simclr_1pct.yaml",
+  "ckpt": "best.pt",
+  "results": [
+    {
+      "seed": "seed0",
+      "probe_train": 0.19307999312877655,
+      "probe_test": 0.17099998891353607
+    },
+    {
+      "seed": "seed1",
+      "probe_train": 0.20931999385356903,
+      "probe_test": 0.1817999929189682
+    },
+    {
+      "seed": "seed2",
+      "probe_train": 0.19219999015331268,
+      "probe_test": 0.17299999296665192
+    }
+  ]
+}

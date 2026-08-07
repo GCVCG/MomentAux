@@ -1,0 +1,34 @@
+{
+  "name": "abl_none",
+  "seed": 0,
+  "config": {
+    "name": "abl_none",
+    "dataset": "cifar100",
+    "subset_pct": 10,
+    "backbone": "resnet18",
+    "epochs": 200,
+    "batch_size": 128,
+    "lr": 0.1,
+    "weight_decay": 0.0005,
+    "momentum": 0.9,
+    "num_workers": 8,
+    "small_input": true,
+    "pretrained": false,
+    "stem_kernel_size": 11,
+    "stem": "none"
+  },
+  "final_test_acc": 0.39410001039505005,
+  "best_test_acc": 0.3962000012397766,
+  "accounting": {
+    "params_trainable": 11220132,
+    "params_stem_trainable": 0,
+    "params_stem_fixed_filters": 0,
+    "flops_total": 556705792,
+    "flops_stem": 0,
+    "flops_image_size": 32
+  },
+  "wall_seconds": 238.7030463218689,
+  "torch_version": "2.8.0+cu128",
+  "device": "cuda",
+  "amp": true
+}

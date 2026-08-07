@@ -1,0 +1,42 @@
+{
+  "name": "cub_aux_100pct",
+  "seed": 2,
+  "config": {
+    "name": "cub_aux_100pct",
+    "dataset": "cub",
+    "backbone": "resnet18",
+    "epochs": 200,
+    "batch_size": 128,
+    "lr": 0.1,
+    "weight_decay": 0.0005,
+    "momentum": 0.9,
+    "num_workers": 4,
+    "small_input": true,
+    "pretrained": false,
+    "subset_pct": 100,
+    "stem": "none",
+    "stem_calibrate": true,
+    "moment_aux": {
+      "stem": "energy-magnitude",
+      "tap": "layer3",
+      "weight": 1.0,
+      "weight_final": 0.0,
+      "weight_schedule": "cosine"
+    }
+  },
+  "final_test_acc": 0.4642733931541443,
+  "best_test_acc": 0.4689333736896515,
+  "accounting": {
+    "params_trainable": 11273488,
+    "params_stem_trainable": 0,
+    "params_stem_fixed_filters": 0,
+    "flops_total": 2226720768,
+    "flops_stem": 0,
+    "flops_image_size": 64
+  },
+  "wall_seconds": 5222.000793457031,
+  "torch_version": "2.8.0+cu128",
+  "device": "cuda",
+  "gpu_name": "NVIDIA H100 NVL",
+  "amp": true
+}

@@ -1,0 +1,38 @@
+{
+  "name": "ablf_zernikeonly_calib",
+  "seed": 0,
+  "config": {
+    "name": "ablf_zernikeonly_calib",
+    "dataset": "cifar100",
+    "subset_pct": 100,
+    "backbone": "resnet18",
+    "epochs": 200,
+    "batch_size": 128,
+    "lr": 0.1,
+    "weight_decay": 0.0005,
+    "momentum": 0.9,
+    "num_workers": 8,
+    "small_input": true,
+    "pretrained": false,
+    "stem_kernel_size": 11,
+    "stem": "moments-cat",
+    "stem_calibrate": true,
+    "stem_kwargs": {
+      "use_gabor": false
+    }
+  },
+  "final_test_acc": 0.77920001745224,
+  "best_test_acc": 0.7803999781608582,
+  "accounting": {
+    "params_trainable": 11228772,
+    "params_stem_trainable": 0,
+    "params_stem_fixed_filters": 5445,
+    "flops_total": 571128832,
+    "flops_stem": 5575680,
+    "flops_image_size": 32
+  },
+  "wall_seconds": 687.6585466861725,
+  "torch_version": "2.8.0+cu128",
+  "device": "cuda",
+  "amp": true
+}

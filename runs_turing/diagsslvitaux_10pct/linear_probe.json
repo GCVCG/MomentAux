@@ -1,0 +1,21 @@
+{
+  "config": "configs/diagnostics/diagsslvitaux_10pct.yaml",
+  "ckpt": "best.pt",
+  "results": [
+    {
+      "seed": "seed0",
+      "probe_train": 0.5026199817657471,
+      "probe_test": 0.3985999822616577
+    },
+    {
+      "seed": "seed1",
+      "probe_train": 0.5029399991035461,
+      "probe_test": 0.3976999819278717
+    },
+    {
+      "seed": "seed2",
+      "probe_train": 0.4861999750137329,
+      "probe_test": 0.37389999628067017
+    }
+  ]
+}
