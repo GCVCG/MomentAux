@@ -89,9 +89,18 @@ fi
 # worklist length at start, so the 2 jobs running when in64 was APPENDED can
 # never claim it -- more slots is what actually gets those cells moving.
 if [ "\$CBIG" -lt "\$NBIG" ] && [ "\$BIGJOBS" -lt 4 ]; then
-    for i in \$(seq 1 \$((4 - BIGJOBS))); do
-        sbatch "\$MS/bsc_big.sbatch" 2>&1 | sed 's/^/SUBMIT-BIG /'
-    done
+    # Cap like the grid lane (2026-08-07): a big job runs SLOTS*4 = 8 tasks
+    # concurrently, so never hold more jobs than ceil(remaining/8) -- a
+    # 3-task heal list does not need 4 four-GPU nodes, and every idle
+    # queued job drags fair-share priority down for the whole group.
+    REMBIG=\$(( NBIG - CBIG ))
+    CAPBIG=\$(( (REMBIG + 7) / 8 ))
+    NEEDBIG=\$(( CAPBIG - BIGJOBS ))
+    if [ "\$NEEDBIG" -gt 0 ]; then
+        for i in \$(seq 1 \$NEEDBIG); do
+            sbatch "\$MS/bsc_big.sbatch" 2>&1 | sed 's/^/SUBMIT-BIG /'
+        done
+    fi
 fi
 CUR=\$(squeue -u ub881905 -h -n ms_grid -t R,PD -o "%i" | wc -l)
 if [ "\$CTR" -ge "\$N" ]; then
@@ -139,7 +148,7 @@ NEED=\$(( TARGET - CUR ))
 # One job already has 4 GPUs, so cap the ask at ceil(remaining / 4).
 REM=\$(( N - CTR ))
 [ "\$REM" -lt 0 ] && REM=0
-CAP=\$(( (REM + 3) / 4 ))
+CAP=\$(( (REM + 31) / 32 ))     # a job runs SLOTS*4 = 32 tasks at once
 [ "\$NEED" -gt "\$CAP" ] && NEED=\$CAP
 echo "STATE feeding ctr=\$CTR/\$N running_or_pending=\$CUR need=\$NEED (remaining=\$REM)"
 [ "\$NEED" -le 0 ] && exit 0
