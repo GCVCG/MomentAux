@@ -1,0 +1,294 @@
+%% ---------------------------------------------------------------------
+\section{The organizing law}\label{sec:law}
+
+\subsection{Form and origin}
+For each paired cell we measure the end-to-end gain $\Delta$ and the
+feature gain $G$ (Section~\ref{sec:instrument}), and define
+$\mathrm{readout} \equiv \Delta - G$. Across the grid the readout term
+behaves like a function of a single variable -- the \emph{baseline
+accuracy} of the cell -- rather than of the dataset, backbone, label
+count, or fraction through which we first tried to explain it. It is
+strongly negative at low baselines (features improve more than accuracy
+can show: a classifier with five labels per class cannot cash in a better
+representation), crosses zero in a narrow band we bracket at
+$[31.8, 40.3]$ percentage points of baseline accuracy, and is small and
+positive above the crossing, decaying toward zero with sufficiency
+(measured up to $+0.4$ at baselines near $70$--$80$).
+
+We emphasise what the law is not. It is not a theorem; it is an empirical
+regularity with measured scope, and we found it only after two wrong
+intermediate laws (a ``deficit'' law and a multiplicative
+realisation$\times$gain form) were falsified by our own cells and
+retracted. Its content is asymmetric: below the crossing it makes strong,
+falsifiable predictions (large negative readout), while far above the
+crossing it predicts readout ${\approx}0$, which is true but weakly
+discriminating -- a naive sign-count over high-data cells would produce a
+coin flip and wrongly suggest failure. The honest audit therefore counts
+only cells whose readout is resolvable against its own propagated
+uncertainty.
+
+\subsection{The audit}
+\begin{table}[t]
+\caption{Scope-wide sign-law audit (regenerable by one command from the
+released artefact). A cell is resolvable when $|\mathrm{readout}| >
+2\,\mathrm{SEM}$; cells inside the crossing bracket make no sign
+prediction.}
+\label{tab:audit}
+\centering\small
+\begin{tabular}{@{}lr@{}}
+\toprule
+cells with paired $\Delta$ and $G$ & 1{,}660 \\
+\quad in law scope (aux-from-scratch) & 1{,}000+ \\
+backbone families / datasets in scope & 9 / 15 \\
+inside crossing bracket (no prediction) & 98 \\
+unresolved ($|\mathrm{readout}| \le 2$\,SEM) & 613 \\
+\midrule
+\textbf{resolvable (these test the law)} & \textbf{278} \\
+\quad sign as predicted & \textbf{268 (96\%)} \\
+\quad wrong side & 10 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:audit} summarises the current audit: of 278 resolvable
+cells spanning nine backbone families and fifteen datasets, 268 (96\%)
+fall on the predicted side. The ten exceptions are not scattered noise;
+they concentrate in one regime and share one signature -- $G$ clearly
+positive while $\Delta$ is negative at ${\geq}20\%$ data on Food-101 and
+PathMNIST -- ``better features, worse accuracy at sufficiency''. We do not
+explain this cluster; we name it as the law's known boundary
+(Section~\ref{sec:limits}) and list every exception in
+Appendix~\ref{app:exceptions}.
+
+\subsection{Prediction, not description}
+Three pre-registered episodes distinguish the law from a post-hoc fit.
+
+\emph{(i) A new backbone family from baselines alone.} Before any Swin-T
+probe existed, we read the readout term off the measured curve at Swin's
+baseline heights and published bands for its feature gain
+($G \approx 9.6/8.8/9.8/7.0$ at $5/10/15/25\%$ of CIFAR-100, band
+$+7$--$+11$). The measurements landed at $10.5/9.3/10.1/7.6$ -- four of
+four in band, each within $0.9$ of its point call -- against two live
+falsifiers (attention-intrinsic $G{\geq}13$; stabilisation-only
+$G{\leq}6$), either of which would have killed the account.
+
+\emph{(ii) Four unseen domains.} The same procedure applied to satellite,
+texture, food and histopathology cells straddling the crossing produced
+eight banded predictions; seven landed in band and all eight had the
+predicted sign, including the two deliberately hard cases where a small
+$\Delta$ could have hidden a large $G$ (it did not: small $\Delta$ meant
+small $G$).
+
+\emph{(iii) ImageNet scale} -- the subject of Section~\ref{sec:scale},
+where the residual $\Delta - G$ was pre-registered to stay within
+$1.5$ points on every backbone.
+
+\subsection{What $G$ is a function of}
+Controlled crossings localise the law's terms. $G$ is a property of the
+checkpoint and the probe's label space, invariant to which coarse
+partition relabels the data but cut roughly from $4.2$ to $2.9$ when
+training supervision moves from 200-way fine to 20-way coarse labels on
+identical pixels -- fine-grained weak supervision is where the prior has
+the most feature work to do. The readout term follows task performance,
+not label budget: engineered cells that lower class count without raising
+baseline accuracy get no readout boost (a prediction our own account
+initially got wrong, and the cell that corrected it is in
+Appendix~\ref{app:controls}). And $G$ depends on the backbone as sharply
+as on the data: at the same Tiny-ImageNet cell, ResNet-18 carries
+$G = +2.67$ while MobileNetV3 carries $G = +0.01 \pm 0.23$ -- a measured
+zero on the weaker network -- so ``how much a prior can add'' is not a
+dataset property but a (dataset, architecture) property.
+
+%% ---------------------------------------------------------------------
+\section{Fusion outcomes: stack, substitute, tax}\label{sec:fusion}
+
+The grid's central comparative finding is that fusion outcomes are
+predictable from the \emph{currency} each information source supplies.
+
+\subsection{Different currencies stack}
+DeiT-strength augmentation supplies invariance to nuisance transforms;
+the prior supplies oriented-energy structure. Fusing both
+(Table~\ref{tab:vitenvelope}) does not trade off: the prior's ViT gain
+grows $1.4$--$2.4\times$ under augmentation on CIFAR-100 and
+$1.4$--$1.9\times$ on Tiny-ImageNet, and the feature side confirms the
+mechanism -- the prior's $G$ \emph{rises} under augmentation (from
+$14.9$ to $22.2$ at 10\%), because once nuisance variation is handled the
+network can commit more capacity to the structure the target teaches. Our
+own pre-registered bet here was wrong in the pessimistic direction: we
+predicted partial substitution and measured strong complementarity.
+
+\subsection{Same currency substitutes}
+\begin{table}[t]
+\caption{Prior versus SimCLR initialisation ($2\times$ compute) on
+ViT-tiny, CIFAR-100, and the effect of recipe. Under plain augmentation
+SSL catches the prior at ${\sim}5$k images; under the DeiT recipe the
+prior wins at every fraction because the recipe supplies the invariance
+SSL was selling. Three seeds per cell.}
+\label{tab:flip}
+\centering\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+ & \multicolumn{5}{c}{aux $-$ SimCLR (points)} \\
+\cmidrule(l){2-6}
+recipe & 1\% & 5\% & 10\% & 25\% & 100\% \\
+\midrule
+plain crop+flip & $+0.7$ & $+1.3$ & $0.0$ & $-1.4$ & -- \\
+DeiT augmentation & $+2.5$ & $+7.3$ & $+5.2$ & $+5.0$ & $+2.0$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+SimCLR's objective \emph{is} invariance to an augmentation family. Three
+measurements pin the consequence. First, prior and SimCLR never stack:
+on convolutional backbones the combination costs $-1.5$ points against
+SimCLR alone, and on ViT it is exactly neutral against the better single
+-- their feature gains are the same gain ($G = 14.9$ vs.\ $13.5$ at the
+same cell), so the second source has nothing left to add. Second, the
+head-to-head flips with the recipe (Table~\ref{tab:flip}): under plain
+augmentation SSL overtakes the prior once data is plentiful, but under
+the DeiT recipe -- the recipe anyone training a small ViT would actually
+use -- the prior wins at every CIFAR-100 fraction, by ${\sim}5$ points
+across the mid-band, and the probe shows why: augmentation lifts the
+prior's $G$ by $+7.4$ but SimCLR's by only $+3.8$ at 10\%. The same flip
+reproduces on Tiny-ImageNet in the low-data band. Third, SimCLR was not
+under-equipped: giving its contrastive views DeiT strength makes it
+\emph{worse} at every fraction (by $4$--$12$ points e2e, halving its
+$G$), so its standard configuration was its best shot.
+
+The substitution rule refines rather than universalises: fusing the prior
+onto \emph{ineffective} SSL stacks trivially. SimSiam learns almost
+nothing at study scale ($\Delta \leq +0.9$ everywhere measured), and
+prior-on-SimSiam recovers the prior's full gain ($+6.2/+4.3/+2.0$ over
+SimSiam alone at CIFAR-100 $5/10/25\%$). The operative rule is therefore
+\emph{the prior is redundant exactly insofar as the other source already
+bought the same features} -- judged by the other source's own measured
+gain, not by its family name.
+
+\subsection{Fusing into mature features taxes}
+\begin{table}[t]
+\caption{The transfer tax and its feature-side origin. Injecting the
+prior on top of ImageNet weights is destructive in proportion to what the
+initialisation supplied; linear probes show the loss is carried almost
+entirely by $G$ (features), not by the readout. PathMNIST -- where
+ImageNet features barely transfer -- is the null control. Three seeds.}
+\label{tab:tax}
+\centering\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+cell & transfer adv. & $\Delta$ (tax) & $G$ & readout \\
+\midrule
+CIFAR-10 @5\% & $+13..{+}18$ & $-17.1$ & $-15.8 \pm 1.7$ & $-1.3$ \\
+CIFAR-100 @7\% & $+10..{+}18$ & $-16.4$ & $-16.3 \pm 3.1$ & $-0.1$ \\
+PathMNIST @10\% & $+1.8..{+}2.9$ & $-0.4$ & $+0.3 \pm 0.6$ & $-0.7$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The one uniformly destructive fusion in the grid is instructive
+(Table~\ref{tab:tax}). The prior's early shaping, so valuable from
+scratch, \emph{erases} mature ImageNet features: the tax reaches
+$-17$ points where transfer was worth $+13$ to $+24$, decays to zero at
+full data (where the initialisation no longer carries the performance),
+and -- the decisive measurement -- lands almost entirely on $G$. Where
+the initialisation had little to offer (histopathology), there is nothing
+to destroy and the tax is a measured zero. Fusion with an information-rich
+partner must respect what the partner already encodes; a shaping prior
+does not.
+
+\subsection{The taxonomy}
+\begin{table}[t]
+\caption{The fusion taxonomy the grid supports, with the measurement that
+establishes each row.}
+\label{tab:taxonomy}
+\centering\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+fusion & currencies & outcome & key evidence \\
+\midrule
+prior + augmentation & structure + invariance & \textbf{stack} & $\Delta$ amplified $1.4$--$2.4\times$; $G\uparrow$ \\
+prior + effective SSL & structure $\approx$ invariance$^{*}$ & \textbf{substitute} & combo $\leq$ best single; equal $G$ \\
+prior + ineffective SSL & structure + ${\sim}$nothing & stack & full gain recovered on SimSiam \\
+prior + ImageNet init & structure vs.\ mature features & \textbf{tax} & $-17$ e2e, carried by $G$; null on shift \\
+augmentation + SSL & invariance + invariance & substitute & DeiT recipe collapses SimCLR's margin \\
+\bottomrule
+\multicolumn{4}{@{}p{0.95\linewidth}@{}}{\footnotesize $^{*}$Same
+currency in effect: at matched cells the two sources' feature gains
+coincide, which is why neither adds to the other.} \\
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:taxonomy} states the taxonomy compactly. Its practical
+force is that the fusion outcome can be anticipated \emph{before}
+training: measure (or look up) what each source contributes at the feature
+level, and same-currency pairs will not add.
+
+%% ---------------------------------------------------------------------
+\section{Validation at scale}\label{sec:scale}
+
+Everything above could, in principle, have been a small-image regularity.
+We therefore pre-registered a falsifier block and bought the two scale
+axes separately: ImageNet64 (1.28M images, 1000 classes, 64\,px --
+13$\times$ the images and 5$\times$ the label space of anything else in
+the grid) and ImageNet-100 at native $224$\,px with a model-scale curve
+(ViT-S/16, ViT-B/16, ResNet-50, the ViTs under the standard DeiT recipe).
+Deviations (reduced epochs; native-resolution transforms) apply equally
+to both arms of every pair.
+
+\begin{table}[t]
+\caption{The pre-registered scale block. Every falsifier was declared
+before the first run; every one is dead. $G$ at ImageNet64 uses the
+fixed-budget probe protocol (250/class shown); ImageNet-100 uses the
+standard full-train probe. Three seeds per cell.}
+\label{tab:scale}
+\centering\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}llrrrl@{}}
+\toprule
+cell & registered band & $\Delta$ & $G$ & $|\Delta{-}G|$ & verdict \\
+\midrule
+\multicolumn{6}{@{}l}{\emph{ImageNet64: 1.28M images, 1000 classes}} \\
+ResNet-18 & $\Delta$: $0.0{\pm}0.5$ & $+0.04$ & $+0.05$ & $0.01$ & neutral, exactly \\
+MobileNetV3 & (none: in bracket) & $+1.95$ & $+1.81$ & $0.14$ & consistent \\
+ViT-tiny & $\Delta \geq +3$ & $+3.23$ & $+2.84$ & $0.39$ & deficit persists \\
+Swin-T & -- & \multicolumn{3}{l}{baseline collapses at chance} & stabilised by prior \\
+\midrule
+\multicolumn{6}{@{}l}{\emph{ImageNet-100 @ 224\,px, DeiT recipe on ViTs}} \\
+ResNet-50 & $\Delta$: $0.0{\pm}1.0$ & $-0.14$ & $+0.03$ & $0.17$ & neutral at 224\,px \\
+ViT-S/16 & $\Delta$: $+2..{+}8$; $G$: $12.0..12.6$ & $+13.00$ & $+11.95$ & $1.05$ & above band \\
+ViT-B/16 & $\Delta \geq \Delta_{\mathrm{ViT\mbox{-}S}}$ & $+26.01$ & $+22.89^{*}$ & $3.12^{*}$ & grows with scale \\
+\bottomrule
+\multicolumn{6}{@{}p{0.95\linewidth}@{}}{\footnotesize $^{*}$The ViT-B
+aux arm probes at its own ceiling (probe $69.8$ vs.\ e2e $69.3$), a
+pre-registered caveat that compresses $G$; the residual is not resolvable
+against its uncertainty ($\pm 2.4$).} \\
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:scale} reports the block. Three conclusions.
+
+\emph{Convolutional redundancy at sufficiency is exact and scale-stable.}
+ResNet-18 at 1.28M images gains $+0.04 \pm 0.07$ end-to-end and
+$+0.05 \pm 0.10$ feature-side -- the law's neutral regime measured to a
+hundredth of a point at the largest data scale in the study, and again at
+native resolution with ResNet-50.
+
+\emph{The attention deficit is real, persistent, and grows with model
+scale.} ViT-tiny still gains $+3.2$ points at 1.28M images. At $224$\,px
+under the standard recipe, ViT-S/16 gains $+13.0$ -- more than ViT-tiny
+ever gained on CIFAR -- and ViT-B/16 gains $+26.0$, twice ViT-S, with the
+baseline's seed variance three times the prior arm's. The pre-registered
+fork read: if the deficit is data-hunger, the bigger model should show
+the larger gain. It does, by 13 points. Notably, with the prior the
+\emph{smaller} ViT still outperforms the bigger one at this data scale
+($78.4$ vs.\ $69.3$): right-sizing plus structure beats scale.
+
+\emph{The law's predictive form survives.} Five of six pairs tie
+$\Delta$ to $G$ within $1.1$ points; the sixth (ViT-B) carries a
+pre-registered probe-ceiling caveat and an unresolvable residual. The
+ViT-S band -- derived from the law before the probe ran -- was hit on its
+edge ($11.95$ vs.\ $12.0$--$12.6$). As an additional robustness check,
+the ViT-S and ResNet-50 probes were independently re-run on a second
+machine with a from-scratch environment; the probe means agree with the
+primary measurement to $0.01$--$0.05$ points.

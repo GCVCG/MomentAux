@@ -1,0 +1,190 @@
+%% ---------------------------------------------------------------------
+\section{Introduction}\label{sec:intro}
+
+Every practitioner who has trained a network on a small dataset has faced
+the same menu of remedies: pre-train on ImageNet, run a self-supervised
+stage, augment more aggressively, or inject some form of prior knowledge
+into the model. Each remedy fuses an external source of information --
+weights learned elsewhere, invariances distilled from augmented views,
+hand-crafted structure -- with whatever the labelled data can teach on its
+own. What the field lacks is not remedies but a controlled account of how
+these information sources \emph{combine}: when does adding a second source
+help, when is it redundant with what the first already supplies, and when
+does the fusion actively destroy value? These three outcomes -- we will
+call them \emph{stack}, \emph{substitute}, and \emph{tax} -- are usually
+discovered anecdotally, one paper and one setting at a time, under training
+recipes that differ in a dozen uncontrolled ways.
+
+This paper treats the question as a measurement problem. We build a single
+instrument -- one frozen training recipe, byte-identical data subsets
+committed to version control, and a numerically pinned bank of Gabor/moment
+spectral filters -- and use it to measure one deliberately austere source of
+prior knowledge against the strongest data-driven alternatives at matched or
+declared compute. The prior, which we call \emph{MomentAux}, could hardly be
+cheaper: a fixed bank of oriented-energy targets, injected only during
+training through a small auxiliary regression head whose loss weight decays
+to exactly zero, adding ${\sim}2\%$ training compute and \emph{nothing} at
+inference. Against it we field SimCLR, SimSiam, and DINO initialisations
+(each ${\sim}2\times$ compute), ImageNet transfer, DeiT-strength
+augmentation, learned FitNets-style teachers, and HOG targets. The
+resulting grid spans 14 datasets across five visual domains, seven backbone
+families from ResNet-18 to ViT-B/16, data scales from 500 to 1.28M images,
+resolutions from $32$ to $224$\,px, and roughly 7{,}500 measured cells.
+
+A grid of this size threatens to be a table dump. It is rescued by an
+empirical law that we did not assume but found, and then tested the way
+laws should be tested -- by registering its predictions in advance and
+trying to break them. Writing $\Delta$ for an intervention's end-to-end
+accuracy gain and $G$ for the gain a linear probe reads from its frozen
+features under identical probing, we find across the grid that
+\begin{equation}
+  \Delta \;=\; G \;+\; \mathrm{readout}(\mathrm{base}),
+  \label{eq:law}
+\end{equation}
+where the readout term depends, to a good approximation, only on the
+\emph{baseline accuracy} of the cell: it is negative below a crossing
+located at ${\sim}32$--$40\%$ accuracy, near zero at the crossing, and
+small and positive above it. The law's sign prediction holds in 96\% of
+the 278 cells where measurement uncertainty allows it to be tested at all
+(Section~\ref{sec:law}), and its quantitative form survived our hardest
+pre-registered tests: it predicted the feature gain of a backbone family it
+had never seen (Swin) from baseline heights alone, and at ImageNet scale it
+tied end-to-end gains to feature gains within $1.1$ accuracy points on five
+of six backbone pairs (Section~\ref{sec:scale}).
+
+The law converts the grid into an explanation. Interventions turn out to
+carry identifiable \emph{currencies}: heavy augmentation supplies
+nuisance-invariance, contrastive pre-training supplies much the same
+invariance at greater expense, ImageNet weights supply mature photographic
+features, and the moment prior supplies oriented-energy structure.
+Same-currency fusions substitute -- the prior and SimCLR each render the
+other nearly worthless, and their combination never beats the better
+single. Different-currency fusions stack -- the prior's gain under
+DeiT-strength augmentation does not shrink but grows by a factor of
+$1.4$--$2.4$. And fusing a shaping prior into an initialisation that
+already carries mature features taxes accuracy in proportion to what the
+initialisation supplied, a cost we show lands almost entirely on the
+features themselves rather than on the classifier
+(Section~\ref{sec:fusion}).
+
+Two headline findings illustrate what the instrument can resolve. First,
+small vision transformers carry a large feature deficit that the prior
+fills: the gain reaches $+13.0$ points for ViT-S/16 and $+26.0$ for
+ViT-B/16 on ImageNet-100 at $224$\,px under the standard DeiT recipe --
+\emph{growing} with model scale -- and persists at $+3.2$ points after 1.28
+million training images, where every convolutional backbone we measure is
+exactly neutral ($+0.04$). Second, the fashionable remedy is not always the
+right one: under plain augmentation SimCLR beats the prior across the
+mid-data band on photographic datasets, but under the modern DeiT recipe
+the comparison flips at every fraction we measure, because the recipe
+itself supplies the invariance SimCLR was being paid $2\times$ compute to
+learn.
+
+\paragraph{Contributions.}
+\begin{enumerate}
+  \item \textbf{An instrument, not just experiments} (Section~\ref{sec:instrument}):
+    a frozen recipe with committed subsets, pinned filter banks, declared
+    cost normalisation, and pre-registered predictions with falsifiers --
+    every headline table regenerable by one command from released artefacts.
+  \item \textbf{The grid} (Section~\ref{sec:grid}): ${\sim}7{,}500$ cells
+    comparing a free spectral prior against SSL, transfer, augmentation and
+    learned teachers across 14 datasets, 7 backbone families and
+    $500$--$1.28$M images.
+  \item \textbf{The law} (Section~\ref{sec:law}): $\Delta = G +
+    \mathrm{readout}(\mathrm{base})$, validated from CIFAR scale to
+    ImageNet scale, with its boundary cases reported as findings.
+  \item \textbf{A fusion taxonomy with mechanism}
+    (Section~\ref{sec:fusion}): stack / substitute / tax, decided by
+    whether the fused sources carry the same information currency, and
+    verified on the feature side, not just end-to-end.
+  \item \textbf{A decision guide} (Section~\ref{sec:guide}): a
+    regime-indexed recommendation table distilled from the grid, with
+    honest costs attached.
+\end{enumerate}
+
+%% ---------------------------------------------------------------------
+\section{Related work}\label{sec:related}
+
+\paragraph{Hand-crafted structure inside learned networks.}
+Fixed oriented filters predate deep learning as models of early visual
+cortex \citep{jones1987gabor} and as image descriptors
+\citep{dalal2005hog,teague1980zernike}. Scattering networks showed that
+cascades of fixed wavelets rival learned features in small-data regimes
+\citep{bruna2013scattering,oyallon2017scaling}, and Gabor-structured
+convolutions have been used to regularise or cheapen early layers
+\citep{luan2018gaborcnn,sarwar2017gabor}. These lines place the structure
+\emph{in the forward path}, where it occupies input bandwidth permanently.
+Our forward-path baselines reproduce their known failure mode -- a
+mid-data penalty band that no filter choice escapes
+(Section~\ref{sec:ablations}) -- and our central object differs precisely
+in that the structure lives in a training-only auxiliary target whose
+influence decays to zero, so abundant data can override the prior rather
+than pay for it.
+
+\paragraph{Auxiliary targets, deep supervision, and distillation.}
+Regressing intermediate features onto targets is the mechanism of FitNets
+\citep{romero2015fitnets} and deep supervision \citep{lee2015deeply}; HOG
+targets power MaskFeat's self-supervised pre-training
+\citep{wei2022maskfeat}. What distinguishes our setting is the
+\emph{fixedness and cost} of the target: no teacher network is trained, no
+pre-training stage is run, and the target is a closed-form function of the
+input. Our controls quantify how much this matters: a learned same-data
+teacher moves accuracy by at most $0.7$ points anywhere on an eight-point
+envelope, HOG targets recover roughly half the moment target's gain, and a
+random fixed target does nothing (Table~\ref{tab:controls}) -- so the gain
+is attributable to the moment structure itself, not to auxiliary
+regression as a mechanism.
+
+\paragraph{Self-supervised initialisation.}
+Contrastive and self-distilling pre-training
+\citep{chen2020simclr,chen2021simsiam,caron2021dino,grill2020byol,he2022mae}
+is the modern default source of ``free'' features, and cookbook-level
+guidance exists for large-scale use \citep{balestriero2023cookbook}. Much
+less is measured about the small-data, from-scratch regime we target. Our
+grid contributes three facts to that gap: negative-free SimSiam learns
+essentially nothing at $2.5$--$25$k images under its published CIFAR
+recipe; SimCLR is strong on photographic statistics but loses to a free
+domain-agnostic prior on satellite imagery in the low-data band; and the
+entire SSL-versus-prior comparison inverts under a modern supervised
+recipe, because the augmentation stack substitutes for the invariance SSL
+sells (Section~\ref{sec:fusion}).
+
+\paragraph{Transfer learning.}
+ImageNet initialisation remains the strongest single interventions on
+photo-like data \citep{kornblith2019better}, with known caveats under
+domain shift and with training-from-scratch competitive given enough data
+\citep{he2019rethinking}. We use transfer both as a comparator and as a
+probe of fusion: injecting the spectral prior \emph{on top of} ImageNet
+weights is the one configuration in our grid that is destructive
+everywhere, and linear probing shows the destruction is feature-side --
+early shaping erases exactly the mature structure the initialisation
+supplied, in proportion to how much that structure was worth
+(Section~\ref{sec:fusion}).
+
+\paragraph{Small-data vision transformers.}
+That ViTs underperform without large data or heavy regularisation is well
+documented \citep{dosovitskiy2021vit,touvron2021deit,steiner2022train},
+and a family of remedies exists: distillation tokens
+\citep{touvron2021deit}, soft convolutional biases \citep{dascoli2021convit},
+compact hybrid designs \citep{hassani2021compact}, and auxiliary
+self-supervision \citep{liu2021efficient,gani2022train}. Our contribution
+to this literature is quantitative and comparative: we measure the deficit
+as a feature quantity ($G \approx 13$--$15$ points for ViT-tiny across
+$2.5$--$12.5$k images, roughly $2.3\times$ any convolutional backbone),
+show a fixed spectral target fills it more cheaply than contrastive
+pre-training and more effectively than DeiT augmentation alone, and show
+the deficit \emph{grows} with model scale at fixed data
+(Section~\ref{sec:scale}), which argues it reflects data-hunger rather
+than small-model capacity.
+
+\paragraph{Benchmark methodology.}
+Reality-check studies have repeatedly shown that uncontrolled recipes
+manufacture illusory progress \citep{musgrave2020metric,wightman2021resnet},
+and reproducibility in ML remains fragile \citep{raff2019step}. We adopt
+the strictest discipline we could operationalise: a single frozen recipe;
+committed per-subset indices so every intervention sees byte-identical
+images; numerically fingerprinted filter banks; deviations quarantined
+under a separate namespace and never mixed into headline tables; and --
+unusual in this literature -- predictions with explicit falsifiers
+registered \emph{before} each wave of runs, with misses reported as
+plainly as hits (Sections~\ref{sec:instrument}, \ref{sec:scale}).

@@ -1,0 +1,234 @@
+%% ---------------------------------------------------------------------
+\section{Ablations and controls}\label{sec:ablations}
+
+The benchmark's defensibility rests on knowing \emph{which} ingredient
+carries the gain. We ablate every one.
+
+\subsection{The target is the ingredient}
+\begin{table}[t]
+\caption{Target and mechanism controls on CIFAR-100 (champion
+configuration except the varied ingredient; $\Delta$ vs.\ shared
+baseline, three seeds). The gain needs the moment structure specifically:
+random fixed targets do nothing, a $2\times$-cost learned teacher does
+nothing anywhere on an eight-point envelope, and the classical HOG
+descriptor recovers about half.}
+\label{tab:controls}
+\centering\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}lrrl@{}}
+\toprule
+aux target & @5\% & @10\% & note \\
+\midrule
+moment magnitude (ours) & $+3.31$ & $+2.81$ & phase-invariant energy \\
+structure tensor & -- & $+1.78$ & mild nonlinearity \\
+steerable harmonics & -- & $+1.01$ & principled rot.-inv. \\
+rotation-invariant energy & -- & $+0.84$ & \\
+oriented edges (Gabor) & -- & $-0.24$ & raw edges hurt \\
+2nd-order invariants & -- & $-2.97$ & over-processed \\
+\midrule
+random fixed maps & $+0.01$ & $+0.14$ & kills ``any aux signal'' \\
+learned teacher (FitNets) & $-0.36$ & $+0.16$ & $2\times$ cost, ${\sim}0$ on 8-pt envelope \\
+HOG target & $+1.22$ & $+1.37$ & descriptor helps; moments $2\times$ better \\
+\midrule
+loss: MSE $\rightarrow$ cosine & $+3.31 \rightarrow$ & $+2.81 \rightarrow +0.46$ & magnitude scale matters \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:controls}: a random fixed target of identical shape moves
+accuracy by at most $0.14$ points -- the mechanism is not ``regression as
+regularisation''. A FitNets teacher trained on the same data at twice the
+cost does nothing anywhere we measured it (eight fractions, $-0.25$ to
+$+0.73$), making the free hand-crafted target strictly better than an
+expensive learned one in this regime. Among hand-crafted families,
+phase-invariant \emph{magnitude} wins decisively; discarding magnitude
+scale (cosine loss) forfeits most of the gain, and heavily processed
+invariants are actively harmful targets.
+
+\subsection{Placement, schedule, and head}
+The tap depth is flat across the first three stages (within seed noise at
+both 1\% and 10\%) with a cliff only at the final stage -- the one design
+knob in the study that is \emph{not} a data-regime knob. The schedule
+start $\lambda_0$ \emph{is} a regime knob (best $2.0$ at 1--2\%, $1.0$ at
+3--10\%, $0.3$ at 15--25\%), but its reach is bounded: three attempts to
+push $\Delta$ past the measured feature gain by retuning $\lambda_0$ all
+failed, consistent with the law -- the knob cannot manufacture $G$ it can
+only realise it. Head-norm projection, derived from a traced scale
+degeneracy (the aux loss is invariant under feature-shrink/head-inflate,
+which collapses bottleneck ResNets), converts ResNet-50 from a bistable
+failure ($\{41.2, 36.4, 42.4\}$ across seeds) into a stable $+3.9$
+($\{44.5, 45.0, 44.4\}$) and is free elsewhere; we adopt it always-on.
+Notably, three plausible fixes tried \emph{before} tracing the mechanism
+(gradient balancing, disabling AMP, BatchNorm on the tap) all failed or
+backfired -- the last making collapse $25\times$ faster -- a small case
+study in mechanism-first debugging.
+
+\subsection{One configuration, every architecture and depth}
+A single champion setting transplants without retuning: ResNet-18/34/50
+land $+4.3/+4.0/+3.9$ at the same cell; the new depth sweep confirms one
+$\lambda_0$ across ResNet-34/50 on six further domains ($+0.4$ to $+9.0$
+at 5--10\% everywhere except CUB's deep-scarcity floor, decaying on the
+right flank as the law requires). Head \emph{form} is irrelevant where it
+plausibly might not have been: linear, cosine, and nearest-class-mean
+readouts measure the same aux-vs-baseline gap to within $0.3$ points --
+the left-flank bottleneck is label information, not classifier
+expressivity.
+
+\subsection{Bank width}
+Widening the pinned 8-pair bank to 12 channels (via a third octave or two
+extra orientations -- indistinguishable at $10{\times}10$ seeds) buys a
+real but local $+0.3$--$0.5$ at Tiny-ImageNet's 64\,px and nothing at
+32\,px; across five further 64\,px domains the pooled excess fails our
+pre-registered re-pin criterion. The committed 8-pair bank therefore
+stays, with cross-domain evidence rather than convenience behind it.
+
+\subsection{Stabilisation as a second, distinct effect}
+Across ConvNeXt (under the frozen SGD recipe), ResNet-50 (without
+head-norm), Swin-T (on five datasets), and Swin at ImageNet64, baselines
+are bistable -- some seeds train, some sit at chance -- while the prior
+arm trains tightly every time. Swin's probe variance shows the
+instability lives in the \emph{features} (baseline probe $\sigma$ up to
+$4.3$ vs.\ $0.2$ with the prior). We report stabilisation as a real,
+separate property; we do not claim routine variance reduction (a
+$10{\times}10$-seed test of that claim came back negative, and we report
+that too).
+
+%% ---------------------------------------------------------------------
+\section{A decision guide}\label{sec:guide}
+
+\begin{table}[t]
+\caption{What to use when: the grid distilled to recommendations. Costs
+are training-compute multiples of the baseline; gains are typical measured
+ranges, not promises. ``Prior'' is the champion MomentAux configuration
+verbatim.}
+\label{tab:guide}
+\centering\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}p{0.30\linewidth}p{0.22\linewidth}lp{0.27\linewidth}@{}}
+\toprule
+regime & recommendation & cost & measured basis \\
+\midrule
+Conv backbone, photo-like data, mid band (2--15\%), $2\times$ affordable & SimCLR init & $2\times$ & $+2..{+}9$ over baseline; beats prior by $+2..{+}5$ \\
+Conv, photo-like, $2\times$ \emph{not} affordable & prior & $1.02\times$ & $+1.4..{+}6.7$; ${\sim}$SSL parity at extremes \\
+Conv, extreme scarcity (${\leq}1$--$2\%$) & prior (or fwd stem) & $1.02\times$ & SSL margin ${\leq}1$ pt; forward stem best ${\leq}2\%$ \\
+Satellite-like statistics, low data & prior & $1.02\times$ & beats SimCLR at 7 of 11 EuroSAT fractions \\
+Any ViT trained the modern way (DeiT aug) & prior \emph{and} augmentation & $1.02\times$ & flip: beats SSL at every fraction; $+14..{+}25$ over recipe alone \\
+ViT/Swin from scratch, any scale & prior & $1.02\times$ & $+3.2$ at 1.28M imgs; $+13/{+}26$ at 224\,px; stabilises Swin \\
+ImageNet-transferable task & transfer; \textbf{never} add prior & -- & tax $-10..{-}24$, feature-side \\
+Domain-shifted from ImageNet (e.g.\ stains) & prior from scratch competitive & $1.02\times$ & transfer advantage shrinks to $+2..{+}3$ \\
+Data sufficient (${\geq}50\%$) & nothing (all converge) & -- & every intervention within $\pm 0.8$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:guide} is the benchmark's practical distillate. Its
+strongest single row is the modern-ViT one: for anyone training a small
+or mid-sized ViT with the standard recipe, a fixed spectral auxiliary
+target at $2\%$ overhead is, in every regime we measured, either the best
+or tied-best intervention available -- and it composes with the recipe
+rather than competing with it.
+
+%% ---------------------------------------------------------------------
+\section{Discussion}\label{sec:discussion}
+
+\paragraph{Why a law, and why this one.}
+The grid's size is not its point; its point is that one low-dimensional
+structure explains it. The decomposition in Eq.~\ref{eq:law} says that an
+intervention's visible benefit is feature gain passed through a
+readout channel whose behaviour is set by how well the task is already
+being solved. This explains, with one mechanism, observations that
+otherwise require separate stories: why gains collapse at extreme
+scarcity even when features improve (readout deeply negative -- five
+labels per class cannot express a better representation); why relabelling
+the same pixels with coarser classes triples the visible gain (the
+baseline crosses the readout zero, not because features changed -- we
+measure them unchanged); why every intervention converges at sufficiency
+(both terms go to zero); and why probes read ${\sim}2$ points more gain
+under coarse evaluation than fine on the same checkpoints (the measuring
+stick itself is label-hungry).
+
+\paragraph{The currency account as fusion theory in miniature.}
+Our stack/substitute/tax taxonomy is, we suggest, the general shape of
+knowledge--data fusion outcomes: fusion adds value exactly when the
+sources' contributions are non-overlapping \emph{in feature space}, and
+harms when one source's dynamics (here, early shaping) overwrite what the
+other supplied. The practical corollary is that fusion decisions can be
+made by measurement rather than fashion: a cheap linear probe of what
+each candidate source contributes predicts whether their combination is
+worth anything, before any joint training is run.
+
+\paragraph{What the attention result does and does not say.}
+The persistent, scale-growing ViT deficit is a statement about
+\emph{training small-data vision transformers from scratch}, where we
+show a fixed spectral target supplies structure that neither 1.28M images
+nor the DeiT recipe nor $2\times$-compute SSL supplies as cheaply. It is
+not a claim about web-scale pre-training, where data eventually buys
+everything (our own convolutional cells show exactly that limit). The
+right reading is deployment-oriented: wherever from-scratch ViTs are
+trained on $10^4$--$10^6$ images -- medical imaging, remote sensing,
+industrial inspection -- a $2\%$-overhead structural prior is close to
+free accuracy, and the smaller-model-plus-prior configuration can beat
+the larger model outright.
+
+\paragraph{On being wrong in public.}
+Four of our major pre-registered predictions missed: SSL did not collapse
+at 1\% on convolutional backbones (it won everywhere under plain
+augmentation); augmentation did not substitute for the prior (it
+amplified it); stronger contrastive views did not help SimCLR (they hurt
+it); and an early ``gain tracks deficit'' law was falsified outright and
+retracted. We report these because the misses carry as much information
+as the hits -- each redirected the program -- and because a benchmark
+that cannot be wrong is not measuring anything.
+
+%% ---------------------------------------------------------------------
+\section{Limitations and future directions}\label{sec:limits}
+
+\paragraph{Known boundary of the law.} Ten resolvable cells violate the
+sign law, concentrated on Food-101 and PathMNIST at ${\geq}20\%$ data,
+all with the same signature: the prior still improves frozen-feature
+quality while costing end-to-end accuracy. The current law has no term
+for this ``better features, worse accuracy'' regime; modelling it --
+plausibly an interaction between late-stage optimisation and
+sufficiency -- is the clearest open problem the grid poses.
+
+\paragraph{Scope of the instrument.} The frozen recipe is, in effect, a
+ResNet recipe: architectures that cannot train under it (ConvNeXt, Swin
+under SGD) enter only through diagnostic AdamW cells, and their
+bistability -- itself a finding -- limits headline claims. PathMNIST's
+shifted test split confounds its high-data cells for every method. Probes
+lose interpretability at 100\% cells (probe-ceiling) and at ImageNet64
+are budget-bound by construction. One prior family (Gabor/moment energy)
+is tested as the knowledge source; the taxonomy predicts, but does not
+yet demonstrate, that other structural priors will slot into the same
+currency logic.
+
+\paragraph{Future directions.} Three follow directly. (i) \emph{The
+exception cluster}: instrument the late-training dynamics of high-data
+Food-101/PathMNIST cells to locate where good features fail to become
+accuracy. (ii) \emph{Other currencies}: repeat the fusion matrix with
+priors carrying genuinely different structure (depth, symmetry,
+frequency-phase) to test whether currency-overlap measured by probes
+predicts stacking in general. (iii) \emph{Attention at deployment
+scale}: the model-scale trend ($+13 \to +26$ from ViT-S to ViT-B at fixed
+data) invites the obvious next point on the curve, and the
+stabilisation-plus-structure account suggests trying the prior as a
+warmup for large-ViT pre-training proper.
+
+%% ---------------------------------------------------------------------
+\section{Conclusion}\label{sec:conclusion}
+
+We built an instrument -- one recipe, committed data, pinned filters,
+pre-registered predictions -- and used it to measure how a nearly free
+structural prior fuses with the modern menu of data-efficiency
+interventions across 14 datasets, 7 architectures and four orders of
+magnitude in data. The measurements organise under one empirical law
+separating feature gain from readout, sharp enough to predict unseen
+backbones and to survive ImageNet scale within a point; and they support
+a three-way fusion taxonomy -- stack, substitute, tax -- decided by
+whether the fused sources carry the same information currency. The
+practical residue is a decision guide whose strongest entry is also the
+study's headline: for vision transformers trained the way practitioners
+actually train them, a fixed spectral target costing $2\%$ of training
+compute and nothing at inference is worth between $+13$ and $+26$
+accuracy points, and no $2\times$-compute alternative we measured matches
+it.

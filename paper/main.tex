@@ -74,78 +74,10 @@ self-supervised learning \sep auxiliary losses \sep benchmark
 \maketitle
 
 %% ------------------------------------------------------------------
-\section{Introduction}\label{sec:intro}
-% - Fusion question up front: model-based knowledge x data-driven learning.
-% - The three possible outcomes (stack / substitute / tax) have never been
-%   measured under one instrument at cost parity. We do that.
-% - Contributions list:
-%   (C1) the instrument: frozen recipe, committed subsets, pinned banks;
-%   (C2) the grid: 14 datasets x 7 backbones x 500..1.28M images, ~7,500 cells;
-%   (C3) the law Delta = G + readout(base), predictive at 96% of resolvable
-%        cells, validated to ImageNet scale (falsifiers pre-registered);
-%   (C4) the fusion taxonomy (stack/substitute/tax) with feature-side
-%        mechanism (currency account);
-%   (C5) the decision guide + released harness.
-
-\section{Related work}\label{sec:related}
-% Fixed filters/scattering; aux-loss targets (FitNets, HOG/MaskFeat);
-% SSL (SimCLR/SimSiam/DINO); transfer; augmentation theory; benchmark
-% methodology (pre-registration in ML). Position: intersection is unmeasured.
-
-\section{The instrument}\label{sec:instrument}
-% Frozen recipe (SGD m=.9 lr=.1 wd=5e-4 cosine 200ep bs128 crop+flip);
-% committed subsets; pinned 8-pair bank + fingerprint tests; MomentAux
-% (aux head taps layer3, MSE to magnitude targets, lambda cosine -> 0);
-% cost normalization 1x / ~1.02x / 2x; diag-prefix deviations; bistability
-% flags; num_workers reproducibility contract.
-
-\section{The benchmark grid}\label{sec:grid}
-% Datasets (photo, satellite, texture, food, histopathology, fine-grained);
-% backbones (R18/34/50, MobileNetV3, ConvNeXt, ViT, Swin);
-% interventions (prior, SimCLR, SimSiam, DINO, transfer, DeiT aug, learned
-% teachers, HOG); envelopes 1..100%; ImageNet64 + ImageNet-100 stages.
-% Headline envelope tables here.
-
-\section{The organizing law}\label{sec:law}
-% Delta = G + readout(base); probe protocol; sign law, crossing bracket
-% [31.8, 40.3]; 96% of 260 resolvable cells (909-cell audit, one command);
-% pre-registered predictions that held (Swin G from baselines alone, 4/4;
-% domain probes 7/8 in band, 8/8 sign; ImageNet |Delta-G| table).
-% Honest boundary: the "better features, worse accuracy" exception cluster
-% (food101/pathmnist >=20%) -- named, unmodeled.
-
-\section{Fusion outcomes: stack, substitute, tax}\label{sec:fusion}
-% The currency account.
-% STACK: prior + DeiT aug (amplification 1.4-2.4x, G rises under aug);
-% SUBSTITUTE: prior vs SimCLR on conv (mid-band SSL wins at 2x cost;
-%   ties at both extremes); aux XOR effective-SSL (combos <= singles);
-%   under modern recipes the head-to-head FLIPS (deit-aux > deit-ssl
-%   everywhere on C100, low-data band on tin);
-% TAX: aux-on-ImageNet-transfer negative everywhere, G carries the whole
-%   tax, proportional to what the init supplied (pathmnist null control).
-
-\section{Scale validation}\label{sec:scale}
-% Pre-registered falsifier block F1-F3/G1-G4, all dead:
-% conv neutral at 1.28M (Delta +0.04, G +0.05); ViT deficit +3.2 at 1.28M,
-% +13.0 ViT-S -> +26.0 ViT-B @224 (grows with model scale);
-% Delta ~= G table (six pairs); cross-machine reproduction of G(ViT-S).
-
-\section{Decision guide}\label{sec:guide}
-% The user-facing table: regime (data scale x backbone x domain x budget)
-% -> recommended intervention, expected gain, cost. Extracted from the grid.
-
-\section{Limitations and scope}\label{sec:limits}
-% Frozen recipe is a ResNet recipe (AdamW cells diag-only); bistable
-% baselines (Swin/ConvNeXt) reported as findings, non-headline; probe
-% ceiling at 100% cells; shots-G budget comparability; the exception
-% cluster; single prior family (moments) as the knowledge source.
-
-\section{Reproducibility and released artifact}\label{sec:repro}
-% One entry point; aggregation regenerates every table; audit_sign_law.py;
-% committed subsets; pinned banks; identity-verification of checkpoints;
-% cross-machine venv pins; harness release.
-
-\section{Conclusion}\label{sec:conclusion}
+\input{sections/s1_intro_related}
+\input{sections/s2_methods}
+\input{sections/s3_results}
+\input{sections/s4_ablations_discussion}
 
 %% ------------------------------------------------------------------
 \section*{CRediT authorship contribution statement}
@@ -164,7 +96,9 @@ reported in this paper.
 % Per Elsevier policy: disclose any use of generative AI in manuscript
 % preparation. TODO finalize wording with authors.
 
-\bibliographystyle{cas-model2-names}
+\bibliographystyle{unsrtnat}
 \bibliography{refs}
+
+\input{sections/appendix}
 
 \end{document}

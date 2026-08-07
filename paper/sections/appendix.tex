@@ -1,0 +1,177 @@
+%% ---------------------------------------------------------------------
+\appendix
+
+\section{Full envelopes}\label{app:envelopes}
+
+\begin{table}[h]
+\caption{Complete measured envelopes for the champion prior
+($\Delta$ vs.\ shared baseline; bold = 10 seeds/arm). Blank = not
+measured; the C10/C100 grids are complete at every listed fraction.}
+\label{tab:appenv}
+\centering\small
+\setlength{\tabcolsep}{3.6pt}
+\begin{tabular}{@{}lrrrrrrrrr@{}}
+\toprule
+ & 1\% & 2\% & 3\% & 5\% & 7\% & 10\% & 15\% & 25\% & 100\% \\
+\midrule
+CIFAR-100 & $\mathbf{+1.42}$ & $+2.50$ & $+3.68$ & $\mathbf{+5.15}$ & $+4.87$ & $\mathbf{+3.75}$ & $+2.55$ & $+0.25$ & $+0.08$ \\
+CIFAR-10 & $\mathbf{+6.37}$ & $\mathbf{+6.66}$ & $+5.38$ & $+4.41$ & $+2.21$ & $+1.09$ & $-0.66$ & $-0.83$ & $-0.26$ \\
+Tiny-IN & $+1.49$ & $+1.81$ & -- & $\mathbf{+2.12}$ & -- & $+1.65$ & -- & $+0.10$ & $-0.42$ \\
+ViT-tiny/C100 & $+1.35$ & $+3.25$ & $+6.21$ & $+9.35$ & $+10.99$ & $+13.26$ & $+14.44$ & $+13.67$ & $+9.88$ \\
+\;\;+ DeiT aug & $+3.20$ & $+6.01$ & $+9.48$ & $+16.34$ & $+18.69$ & $+21.00$ & $+24.59$ & $+25.05$ & $+13.86$ \\
+ViT-tiny/tin & $+1.39$ & $+3.29$ & $+6.77^{5\%}$ & $+9.15^{10\%}$ & $+10.73^{15\%}$ & $+10.48^{25\%}$ & \multicolumn{2}{r}{$+7.17^{100\%}$} & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\caption{SimCLR initialisation ($2\times$ compute) minus prior
+($1.02\times$), CIFAR-100, ResNet-18, plain augmentation. The margin is
+unimodal -- SSL's advantage is a mid-band phenomenon that vanishes at
+both extremes.}
+\label{tab:appssl}
+\centering\small
+\begin{tabular}{@{}lrrrrrrrrr@{}}
+\toprule
+fraction & 1\% & 2\% & 3\% & 5\% & 7\% & 10\% & 15\% & 50\% & 100\% \\
+\midrule
+SSL $-$ prior & $+0.85$ & $+2.38$ & $+2.32$ & $+3.90$ & $+4.99$ & $+5.01$ & $+4.09$ & $+0.58$ & $+0.05$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{The law's components}\label{app:law}
+
+\paragraph{Feature-gain curves.} $G$ is non-monotone in data and
+dataset-specific in shape: CIFAR-10 $4.81/5.52/3.97/0.65$ at
+$0.5/1/2.5/5$k images; CIFAR-100 $3.88/5.33/6.35/3.66$; Tiny-ImageNet
+falls monotonically $4.33/2.67/1.70$ ($1/5/10$k); STL-10
+$4.70/4.98/3.20$. Wherever the readout term is flat, the end-to-end
+envelope peak coincides with the $G$ peak -- the envelope's shape
+\emph{is} the feature-gain curve.
+
+\paragraph{The readout branch.} Mapped on ceiling-free CIFAR-10:
+$+1.80$ at baseline $39.4$, $+1.14$ at $51.7$, $+0.44$ at $69.1$ and at
+$80.7$ -- positive throughout and decaying, never growing, toward
+sufficiency. Below the crossing, measured values reach $-2.8$ (base
+$8.9$) and $-2.7$ (base $5.3$). The crossing bracket $[31.8, 40.3]$ is
+pinned by a Swin cell still negative at $31.8$ and a conv cell already
+positive at $40.3$.
+
+\paragraph{Label-space crossings.} On byte-identical CIFAR-100 pixels, a
+full $2{\times}2$ of training label space $\times$ probe label space
+(100-way vs.\ 20-way) moves $G$ by at most $1\sigma$ -- invariance. On
+Tiny-ImageNet the same crossing finds two real, opposing effects
+(probe-space $+1.9$, checkpoint-set $+1.6$, both ${\sim}5\sigma$) that
+cancel on the diagonal; $G$ comparisons in the paper therefore always fix
+the probe space.
+
+\section{Sign-law exceptions}\label{app:exceptions}
+
+\begin{table}[h]
+\caption{All ten resolvable sign-law violations at the current audit.
+Five share the ``better features, worse accuracy at sufficiency''
+signature (top block); two are PathMNIST@1\% cells whose probe is a
+known compressed measuring stick on that dataset; three are
+small-magnitude singletons.}
+\label{tab:exceptions}
+\centering\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lllrrrr@{}}
+\toprule
+dataset & backbone & cell & base & $\Delta$ & $G$ & readout \\
+\midrule
+Food-101 & R18 & mag3@50\% & 71.8 & $-1.30$ & $+4.66$ & $-5.96$ \\
+Food-101 & R18 & mag6o@50\% & 71.8 & $-0.91$ & $+4.97$ & $-5.88$ \\
+Food-101 & MNet & aux@50\% & 55.1 & $-0.23$ & $+3.70$ & $-3.93$ \\
+PathMNIST & MNet & aux@20\% & 89.0 & $-0.48$ & $+1.88$ & $-2.36$ \\
+PathMNIST & R18 & mag3@50\% & 89.8 & $-1.36$ & $+0.71$ & $-2.07$ \\
+\midrule
+PathMNIST & R18 & mag6o@1\% & 80.8 & $+5.80$ & $+9.90$ & $-4.10$ \\
+PathMNIST & R18 & mag3@1\% & 80.8 & $+5.62$ & $+9.60$ & $-3.98$ \\
+\midrule
+DTD & ViT & deit-aux@50\% & 14.2 & $+17.30$ & $+14.73$ & $+2.57$ \\
+CIFAR-100 & R50 & L3@2\% & 13.1 & $-0.95$ & $-2.96$ & $+2.01$ \\
+CIFAR-100 & R18 & L4-$\lambda.3$@50\% & 71.8 & $-0.73$ & $-0.21$ & $-0.52$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Selected controls}\label{app:controls}
+
+\paragraph{Contamination.} Re-evaluating the low-data CIFAR-100 cells on
+ciFAIR-100 \citep{barz2020cifair}, which replaces the test set's 927
+near-duplicates, moves the prior's gain by at most $0.20$ points at any
+fraction -- both arms eat identical contamination, so it cancels in
+$\Delta$.
+
+\paragraph{Granularity, decisively.} Relabelling CIFAR-100's committed
+subsets with their 20 coarse labels (byte-identical pixels, identical
+steps) reproduces the full gain at matched data ($+5.84$ vs.\ $+5.30$ at
+5\%) -- gain follows data and task performance, not class count. The
+mirrored Tiny-ImageNet control (positional, visually incoherent coarse
+groups) is the cell that falsified our own earlier account: class count
+dropped tenfold, baseline accuracy did not rise, and no readout boost
+appeared -- exactly as Eq.~\ref{eq:law} requires and as ``label count
+drives gain'' does not.
+
+\paragraph{Robustness.} On CIFAR-100-C \citep{hendrycks2019benchmarking},
+corruption robustness tracks $55$--$60\%$ of the clean gain at low data
+and is neutral at 100\% -- the prior neither buys nor costs robustness
+beyond its accuracy effect.
+
+\section{Domain notes}\label{app:domains}
+
+EuroSAT: the prior beats SimCLR at 7 of 11 fractions (materially
+$+0.8$--$+1.9$ in the 1--10\% band) -- consistent with SimCLR's
+photographic view-invariances transferring poorly to satellite
+statistics while the spectral target is domain-agnostic. DTD (texture)
+is the reverse: SimCLR dominates from a few hundred images. Food-101 is
+SSL territory on conv backbones. PathMNIST declines with added data for
+\emph{every} method above ${\sim}10$--$15\%$ (baseline $92.0 \to 86.7$
+from 10\% to 100\%), the signature of its centre-shifted test split;
+we therefore interpret only its low-data cells. The domain axis thus
+does not split ``photo vs.\ non-photo''; each domain's statistics decide
+which currency is scarce.
+
+\section{Reproducibility}\label{app:repro}
+
+One entry point trains any cell (\texttt{train.py --config <cell> --seed
+N}); one command regenerates every table from run records; one command
+re-runs the sign-law audit. Subset indices, filter-bank fingerprints, and
+per-run environment records (library versions, worker counts) are
+committed. Training refuses to overwrite a completed cell, holds an
+exclusive per-run lock (two of this study's incident classes made these
+guards necessary), and writes checkpoints atomically; mirrors are
+verified by \emph{loading and evaluating} checkpoints against their
+recorded accuracies, not by file listing. The full harness -- configs,
+subsets, banks, runner, aggregation, audit -- is released with the paper.
+
+\section{Explainability probes}\label{app:explain}
+
+The prior's mechanism is visible directly in the learned features
+(Fig.~\ref{fig:explain}, CIFAR-100 @5\% champion pair). Class-activation
+maps of the prior arm concentrate on object contours and texture
+boundaries where the baseline's maps at this data scale are diffuse;
+tapped-stage feature energy shows the same contrast; and t-SNE of
+penultimate features shows visibly tighter class structure -- the
+qualitative face of the $+6.3$-point probe gap at this cell.
+Quantitatively, the cosine alignment between tapped features and the
+bank's oriented-energy targets is $0.53$ for the prior arm against
+$0.22$ for the baseline: the auxiliary loss leaves a measurable spectral
+imprint on the representation even though its weight has decayed to zero
+by the end of training.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.48\linewidth]{figs_explain/cam_auxmag_5pct_sched0.png}\hfill
+\includegraphics[width=0.48\linewidth]{figs_explain/heatmaps_auxmag_5pct_sched0.png}\\[2pt]
+\includegraphics[width=0.48\linewidth]{figs_explain/tsne_auxmag_5pct_sched0.png}\hfill
+\includegraphics[width=0.48\linewidth]{figs_explain/bank_gabor.png}
+\caption{Explainability panels for the CIFAR-100 @5\% champion pair.
+Top: class-activation maps (left) and tapped-stage feature-energy
+heatmaps (right), baseline vs.\ prior arm. Bottom left: t-SNE of frozen
+penultimate features. Bottom right: the pinned 8-pair oriented-energy
+bank that serves as the auxiliary target.}
+\label{fig:explain}
+\end{figure}

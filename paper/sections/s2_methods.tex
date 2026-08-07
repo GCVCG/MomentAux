@@ -1,0 +1,201 @@
+%% ---------------------------------------------------------------------
+\section{The instrument}\label{sec:instrument}
+
+The benchmark's claims rest on the comparisons being controlled, so we
+describe the controls before the results.
+
+\subsection{Frozen recipe and committed subsets}
+Every headline cell trains with an identical recipe: SGD with momentum
+$0.9$, learning rate $0.1$, weight decay $5{\times}10^{-4}$, cosine
+schedule, 200 epochs, batch size 128, and random-crop + horizontal-flip
+augmentation only. The recipe is frozen in the strict sense: no cell tunes
+it, and any configuration that must deviate (AdamW for architectures the
+SGD recipe cannot train, reduced epochs at ImageNet scale, added
+augmentation stacks) carries a diagnostic namespace and never enters a
+headline table; within such cells both arms of every comparison share the
+deviation, so paired differences remain valid.
+
+Data fractions are not sampled at run time. For every dataset and fraction
+we commit stratified subset indices to version control, so every
+intervention -- baseline, prior, SSL initialisation, transfer -- sees
+byte-identical images. Even the dataloader worker count is part of the
+reproducibility contract, because PyTorch seeds per-worker augmentation
+streams: we verified that changing it re-draws augmentations (validly but
+non-reproducibly) and therefore pin it per cell.
+
+\subsection{The prior: MomentAux}
+The knowledge source under test is a bank of eight complex Gabor
+quadrature pairs (two spatial scales, four orientations) whose
+phase-invariant magnitude responses form an oriented-energy map of the
+input -- the classical spectral description of early vision
+\citep{jones1987gabor}. The bank is \emph{pinned}: unit tests fingerprint
+its numerical values, so no result can drift with a library version.
+
+During training only, a $1{\times}1$ convolutional head taps the
+backbone's third stage and regresses (MSE) onto the bank's magnitude maps,
+weighted by $\lambda$ that follows a cosine schedule from $\lambda_0$
+to exactly zero. Because $\lambda$ reaches zero, late training is pure
+cross-entropy; high-data neutrality is structural rather than tuned. The
+deployed network is byte-identical to the baseline: same FLOPs, same
+parameters, no extra inference cost. Training overhead is ${\sim}2\%$.
+One setting -- $\lambda_0{=}1.0$, magnitude target, third-stage tap, with
+head-norm projection (Section~\ref{sec:ablations}) -- transplants across
+every dataset and backbone in the study without retuning; we call it the
+\emph{champion} configuration and use it verbatim unless stated.
+
+\subsection{Comparators and cost normalisation}
+We normalise by declared training cost relative to the baseline:
+MomentAux ${\approx}1.02\times$; SimCLR, SimSiam and DINO initialisations
+$2\times$ (a full pre-training stage on the same subset images, then the
+frozen recipe); ImageNet transfer (amortised, but an external-data
+advantage we flag); DeiT-strength augmentation \citep{touvron2021deit}
+${\approx}1\times$ compute but a modern recipe change; FitNets teachers
+$2\times$; HOG targets ${\approx}1.02\times$. SSL pre-training uses each
+method's published small-image protocol, and we additionally verify SimCLR
+was given its best shot: strengthening its views to DeiT strength
+\emph{hurts} it at every fraction tested (Section~\ref{sec:fusion}).
+
+\subsection{Measuring features: the probe protocol}
+The law needs a feature-side quantity. For every trained pair we fit a
+multinomial logistic probe (LBFGS, fixed hyper-parameters) on frozen
+penultimate features over the full training split, and define $G$ as the
+aux-minus-baseline probe gap under identical probing
+\citep{alain2016understanding}. Probes are diagnostics, never headline
+numbers. Two scope rules, learned during the study and enforced
+throughout: a probe is trustworthy only while it holds substantially more
+labels than the cell trained on (at 100\% cells the $G$/readout split is
+not interpreted); and at ImageNet64 scale, where a 1.28M-row LBFGS is
+impractical, probes use fixed per-class budgets that are compared only
+within the same budget.
+
+\subsection{Pre-registration}
+Each experimental wave was launched with numeric prediction bands and
+explicit falsifiers recorded in the project ledger before any result
+existed. We report outcomes against those bands, including the misses:
+of the major predictions in this program, several failed in instructive
+ways (our ``SSL is data-regime-bounded'' prediction was wrong; our
+``augmentation substitutes for the prior'' prediction was wrong in the
+opposite direction), and both failures became findings
+(Section~\ref{sec:fusion}). Seed counts are three per cell minimum, ten
+for headline envelopes; cells with collapsed seeds are flagged bistable
+and excluded from headline status as a finding in their own right.
+
+%% ---------------------------------------------------------------------
+\section{The grid}\label{sec:grid}
+
+\begin{table}[t]
+\caption{The benchmark at a glance. Every cell trains the frozen recipe of
+Section~\ref{sec:instrument}; costs are declared multiples of baseline
+training compute.}
+\label{tab:glance}
+\centering\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Axis} & \textbf{Coverage} \\
+\midrule
+Datasets (14+2) & CIFAR-10/100, ciFAIR-100, STL-10, Tiny-ImageNet,\\
+ & coarse/relabelled variants; EuroSAT, DTD, Food-101,\\
+ & PathMNIST, CUB-200; ImageNet64, ImageNet-100 \\
+Domains & photographic, satellite, texture, food, histopathology \\
+Backbones (7) & ResNet-18/34/50, MobileNetV3, ConvNeXt-T, \\
+ & ViT (tiny/S/B), Swin-T \\
+Data scale & 500 $\rightarrow$ 1.28M images; 10 $\rightarrow$ 1000 classes \\
+Resolution & 32, 64, 96, 224\,px \\
+Interventions & MomentAux (${\sim}1.02\times$); SimCLR/SimSiam/DINO \\
+ & ($2\times$); ImageNet transfer; DeiT augmentation; \\
+ & FitNets teacher ($2\times$); HOG target; combinations \\
+Measured cells & ${\sim}7{,}500$ (${\geq}3$ seeds; envelopes at 10) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:glance} summarises the design space. Three views of the
+grid organise the results that follow.
+
+\subsection{The prior's own envelope}
+\begin{table}[t]
+\caption{End-to-end gain $\Delta$ of the champion prior over the shared
+baseline (percentage points, mean $\pm$ SEM of the difference). Ten seeds
+per arm on bold cells, three elsewhere. The envelope is unimodal in the
+data fraction on every dataset; at 100\% the prior is neutral by
+construction ($\lambda \to 0$).}
+\label{tab:envelope}
+\centering\small
+\setlength{\tabcolsep}{4.2pt}
+\begin{tabular}{@{}lrrrrrrrr@{}}
+\toprule
+ & \multicolumn{8}{c}{\textbf{data fraction}} \\
+\cmidrule(l){2-9}
+\textbf{dataset} & 1\% & 2\% & 5\% & 10\% & 15\% & 25\% & 50\% & 100\% \\
+\midrule
+CIFAR-100 & $\mathbf{+1.42}$ & $+2.50$ & $\mathbf{+5.15}$ & $\mathbf{+3.75}$ & $+2.55$ & $+0.25$ & -- & $+0.08$ \\
+CIFAR-10 & $\mathbf{+6.37}$ & $\mathbf{+6.66}$ & $+4.41$ & $+1.09$ & $-0.66$ & $-0.83$ & -- & $-0.26$ \\
+Tiny-ImageNet & $+1.49$ & $+1.81$ & $\mathbf{+2.12}$ & $+1.65$ & -- & $+0.10$ & -- & $-0.42$ \\
+STL-10 & -- & -- & -- & $+5.92$ & -- & -- & $+3.18$ & -- \\
+EuroSAT & $+2.67$ & $+1.60$ & $+0.84$ & $+1.22$ & $+0.16$ & ${\sim}0$ & ${\sim}0$ & ${\sim}0$ \\
+Food-101 & -- & -- & $+5.63$ & $+3.18$ & $+0.46$ & -- & $-0.47^{\dagger}$ & $-0.47$ \\
+DTD & -- & -- & $+0.30$ & -- & $+2.15$ & -- & -- & $+3.55$ \\
+PathMNIST & $+5.7$ & -- & -- & $+1.74$ & -- & $-0.5^{\ddagger}$ & -- & $-$ \\
+CUB-200 & \multicolumn{6}{c}{\small (deep left flank; $+0.56$ at 25\%)} & & $+2.74$ \\
+\bottomrule
+\multicolumn{9}{@{}p{0.94\linewidth}@{}}{\footnotesize $^{\dagger}$50\%
+shown in the 100\% column position for Food-101 where measured.
+$^{\ddagger}$PathMNIST cells above ${\sim}15\%$ are confounded by a
+distribution-shifted test split that penalises \emph{all} methods
+(Appendix~\ref{app:domains}); we treat only its low-data cells as
+interpretable.} \\
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:envelope} shows the prior's gain over the baseline across
+the data axis. Three regularities recur. The envelope is
+\emph{unimodal}: gains rise from the extreme-scarcity floor, peak in a
+dataset-specific band, and decay toward zero as data becomes sufficient.
+The peak's location tracks the dataset's difficulty rather than its
+fraction -- easy ten-way CIFAR-10 peaks by 1--2\% and is already negative
+at 15\%, while hundred-way CIFAR-100 peaks at 5\%. And at full data the
+prior is neutral within noise on every one of ten populations, which is
+what the $\lambda \to 0$ schedule is for: the fusion asks nothing when the
+data can pay for everything.
+
+\subsection{The multi-method comparison}
+The same envelope measured for every comparator produces the head-to-head
+tables that Sections~\ref{sec:fusion} and \ref{sec:guide} analyse. As a
+preview of their shape: on CIFAR-100 under plain augmentation, SimCLR
+initialisation at $2\times$ compute beats the $1.02\times$ prior by
+$+0.85$ to $+5.0$ points between 1\% and 10\% and converges back to parity
+by 50\%; SimSiam learns nothing at this scale (${\leq}+0.9$ everywhere);
+DINO trails the prior at every fraction below 25\%. On attention
+backbones, and on any backbone under a modern augmentation recipe, the
+ordering inverts (Section~\ref{sec:fusion}).
+
+\subsection{Attention: the regime where the prior is dramatic}
+\begin{table}[t]
+\caption{ViT-tiny on CIFAR-100: gain of the prior under the plain recipe
+($\Delta_{\mathrm{plain}}$) and under DeiT-strength augmentation
+($\Delta_{\mathrm{DeiT}}$), and the amplification ratio. Augmentation does
+not substitute for the prior; it amplifies it and shifts its peak toward
+more data. Three seeds per cell.}
+\label{tab:vitenvelope}
+\centering\small
+\setlength{\tabcolsep}{4.5pt}
+\begin{tabular}{@{}lrrrrrrrrr@{}}
+\toprule
+fraction & 1\% & 2\% & 3\% & 5\% & 7\% & 10\% & 15\% & 25\% & 100\% \\
+\midrule
+$\Delta_{\mathrm{plain}}$ & $+1.4$ & $+3.3$ & $+6.2$ & $+9.4$ & $+11.0$ & $+13.3$ & $\mathbf{+14.4}$ & $+13.7$ & $+9.9$ \\
+$\Delta_{\mathrm{DeiT}}$ & $+3.2$ & $+6.0$ & $+9.5$ & $+16.3$ & $+18.7$ & $+21.0$ & $+24.6$ & $\mathbf{+25.1}$ & $+13.9$ \\
+ratio & 2.2 & 1.8 & 1.5 & 1.7 & 1.7 & 1.6 & 1.7 & 1.8 & 1.4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:vitenvelope} previews the study's most striking axis.
+ViT-tiny trained from scratch gains $+9.9$ points from the prior even at
+\emph{full} CIFAR-100 -- a scale at which every convolutional backbone is
+neutral -- and under the standard DeiT recipe the gains grow to
+$+25$ points, peaking later in the data axis. The best ViT number in the
+study, $75.3\%$ at full CIFAR-100, is DeiT augmentation \emph{plus} the
+prior, against $61.4\%$ for the recipe alone. Sections~\ref{sec:law} and
+\ref{sec:scale} show this is a feature-side phenomenon that persists to
+ImageNet scale and grows with model size.
