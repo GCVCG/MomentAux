@@ -171,40 +171,21 @@ which currency is scarce.
 
 \section{Datasets}\label{app:datasets}
 
-Table~\ref{tab:datasets} lists every dataset in the grid with the training
-split size, class count and resolution as trained. Five visual domains are
-represented; the two ImageNet stages supply the data-scale and
-resolution and model-scale axes respectively. Sources with variable native
-resolution are squash-resized once, offline, and the resized copies are
-what every arm consumes.
+Table~\ref{tab:maindatasets} in the main text lists every dataset with its
+training split size, class count and resolution as trained, and we do not
+repeat it here. Five visual domains are represented; the two ImageNet
+stages supply the data-scale and the resolution-and-model-scale axes
+respectively. Sources with variable native resolution are squash-resized
+once, offline, and the resized copies are what every arm consumes. The
+grid also contains five relabelled controls derived from CIFAR-100 and
+Tiny-ImageNet, which share their parents' pixels exactly and differ only
+in the label space; they are listed at the foot of that table and are what
+make the dataset-identity count in Table~\ref{tab:audit} exceed the number
+of image sources.
 
-\begin{table}[t]
-\caption{Datasets in the grid. Resolutions are as trained (native-size
-sources squash-resized where marked).}
-\label{tab:datasets}
-\centering\scriptsize
-\setlength{\tabcolsep}{2.6pt}
-\zebra{2}
-\begin{tabular}{@{}lrrrl@{}}
-\toprule
-Dataset & Train imgs & Classes & Px & Domain \\
-\midrule
-CIFAR-10 & 50{,}000 & 10 & 32 & photographic \\
-CIFAR-100 & 50{,}000 & 100 & 32 & photographic \\
-CiFAIR-100 (eval) &--& 100 & 32 & decontaminated test \\
-STL-10 & 5{,}000 & 10 & 96 & photographic \\
-Tiny-ImageNet & 100{,}000 & 200 & 64 & photographic \\
-EuroSAT & 21{,}600 & 10 & 64 & satellite \\
-DTD & 1{,}880 & 47 & 64$^{r}$ & texture \\
-Food-101 & 75{,}750 & 101 & 64$^{r}$ & food \\
-PathMNIST & 89{,}996 & 9 & 64$^{r}$ & histopathology \\
-CUB-200-2011 & 5{,}994 & 200 & 64$^{r}$ & fine-grained \\
-ImageNet64 & 1{,}281{,}167 & 1000 & 64 & photographic \\
-ImageNet-100 & 126{,}689 & 100 & 224 & photographic \\
-\bottomrule
-\rowcolor{white}\multicolumn{5}{@{}l}{\footnotesize $^{r}$squash-resized from native.} \\
-\end{tabular}
-\end{table}
+Table~\ref{tab:maindatasets} in the main text lists every dataset,
+grouped by domain, with its training-set size, class count and the
+resolution at which it was trained. We do not repeat it here.
 
 \section{Reproducibility}\label{app:repro}
 

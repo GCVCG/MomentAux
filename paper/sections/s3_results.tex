@@ -18,10 +18,16 @@ anticipatable rather than merely observed.
 \subsection{Form and origin}\label{sec:lawform}
 For each paired cell we measure the end-to-end gain $\Delta$ and the
 feature gain $G$ (Section~\ref{sec:instrument}), and define
-$\mathrm{readout} \equiv \Delta - G$. Across the grid the readout term
-behaves like a function of a single variable, the \emph{baseline
-accuracy} of the cell, rather than of the dataset, backbone, label
-count, or fraction through which we first tried to explain it. It is
+$\mathrm{readout} \equiv \Delta - G$. Across the grid, baseline accuracy is
+the largest single determinant of this term, and it is the only one whose
+effect is consistent in sign across datasets and backbones. We are
+deliberate about how strong that claim is: binned on baseline accuracy
+alone the readout term has $R^2 = 0.18$, dataset identity explains a
+further $0.10$ of the residual, backbone essentially none ($0.004$), and
+the residual standard deviation at fixed baseline is $2.2$ points. So this
+is a first-order trend with substantial scatter, not a curve that pins a
+cell's readout. What is robust is its \emph{sign}, which is what the rest
+of this section audits. The term is
 strongly negative at low baselines (features improve more than accuracy
 can show: a classifier with five labels per class cannot cash in a better
 representation), crosses zero in a narrow band we bracket at
@@ -37,9 +43,10 @@ fit no parametric form and use only the measured curve for prediction.
 \caption{The law, in full: readout $=\Delta-G$ against baseline accuracy
 for all 989 law-scope cells with ${\geq}3$ seeds on both arms. Shaded
 band: the measured crossing bracket $[31.8,40.3]$, inside which no sign
-is predicted. Of the 278 cells whose readout is resolvable against its
-own uncertainty, 268 fall on the predicted side of zero; the ten
-crosses are the exceptions of Appendix~\ref{app:exceptions}.}
+is predicted. Of the 498 cells whose readout is resolvable against its
+own seed-paired uncertainty, 393 fall on the predicted side of zero.
+The scatter at fixed baseline is substantial ($R^2 = 0.18$, residual SD
+$2.2$ points): the account predicts the sign of this term, not its value.}
 \label{fig:law}
 \end{figure}
 
@@ -60,8 +67,10 @@ uncertainty.
 \caption{Scope-wide sign-law audit (regenerable by one command from the
 released artifact). A cell is resolvable when $|\mathrm{readout}| >
 2\,\mathrm{SEM}$; cells inside the crossing bracket make no sign
-prediction. The rows narrow, step by step, from every measured cell down
-to the resolvable subset that actually tests the law.}
+prediction. Uncertainty is seed-paired (Section~\ref{sec:stats}), not
+propagated from independent arms. The rows narrow, step by step, from every
+measured cell down to the resolvable subset that actually tests the
+account.}
 \label{tab:audit}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
@@ -69,27 +78,27 @@ to the resolvable subset that actually tests the law.}
 \begin{tabular}{@{}lr@{}}
 \toprule
 Cells with paired $\Delta$ and $G$ (all interventions) & 1{,}660 \\
-\quad in law scope (prior, from scratch, ${\geq}3$ seeds per arm) & 989 \\
+\quad in scope, ${\geq}3$ seed-matched arms & 1{,}075 \\
 Backbone variants in scope (architecture families) & 9 (5) \\
 Dataset identities in scope & 15 \\
-Inside crossing bracket (no prediction) & 98 \\
-Unresolved ($|\mathrm{readout}| \le 2$\,SEM) & 613 \\
+Inside crossing bracket (no prediction) & 102 \\
+Unresolved ($|\mathrm{readout}| \le 2$\,SEM) & 475 \\
 \midrule
-\textbf{resolvable (these test the law)} & \textbf{278} \\
-\quad sign as predicted & \textbf{268 (96\%)} \\
-\quad wrong side & 10 \\
+\textbf{Resolvable (these test the account)} & \textbf{498} \\
+\quad Sign as predicted & \textbf{393 (78.9\%)} \\
+\quad Wrong side & 105 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{table}[t]
-\caption{Robustness of the audit. The hit rate is stable against the
+\caption{Robustness of the audit. The rate is stable against the
 resolvability threshold, survives clustering on the units that share a
-baseline arm, and is carried by the left flank, where the law makes a
-strong prediction, rather than by the right flank, where it predicts
-${\approx}0$. Intervals are Wilson 95\%; $p$ is a one-sided exact
-binomial against an even coin, and is indicative rather than literal
-because cells are clustered.}
+baseline arm, and survives re-fitting the crossing bracket without the
+dataset being audited, which is the out-of-sample check. It is carried by
+the left flank, where the account makes a strong prediction, not by the
+right flank, where it predicts ${\approx}0$ and is correspondingly weak.
+Intervals are Wilson 95\%.}
 \label{tab:robust}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
@@ -98,53 +107,57 @@ because cells are clustered.}
 \toprule
 Audit variant & Cells & Correct & Rate & 95\% CI \\
 \midrule
-$|\mathrm{readout}| > 1$\,SEM & 470 & 418 & 88.9\% & [85.8, 91.5] \\
-$>1.5$\,SEM & 368 & 345 & 93.8\% & [90.8, 95.8] \\
-\textbf{$>2$\,SEM (declared)} & \textbf{278} & \textbf{268} & \textbf{96.4\%} & \textbf{[93.5, 98.0]} \\
-$>3$\,SEM & 186 & 182 & 97.8\% & [94.6, 99.2] \\
+$|\mathrm{readout}| > 1$\,SEM & 691 & 517 & 74.8\% & [71.5, 77.9] \\
+$>1.5$\,SEM & 581 & 451 & 77.6\% & [74.1, 80.8] \\
+\textbf{$>2$\,SEM (declared)} & \textbf{498} & \textbf{393} & \textbf{78.9\%} & \textbf{[75.1, 82.3]} \\
+$>3$\,SEM & 372 & 301 & 80.9\% & [76.6, 84.6] \\
 \midrule
-One vote per (dataset, backbone, fraction) & 128 & 121 & 94.5\% & [89.1, 97.3] \\
-Cells with 3--4 seeds only & 271 & 261 & 96.3\% & [93.3, 98.0] \\
+One vote per (dataset, backbone, fraction) & 247 & 191 & 77.3\% & [71.7, 82.1] \\
+Held out: bracket fitted without the audited dataset & 273 & 218 & 79.9\% & [74.7, 84.2] \\
 \midrule
-Below the crossing & 236 & 234 & 99.2\% & [97.0, 99.8] \\
-Above the crossing & 42 & 34 & 81.0\% & [66.7, 90.0] \\
+Below the crossing & 332 & 291 & 87.7\% & [83.7, 90.8] \\
+Above the crossing & 166 & 102 & 61.4\% & [53.9, 68.5] \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:audit} summarizes the current audit: of 278 resolvable
-cells spanning nine backbones and fifteen dataset identities, 268 (96\%)
-fall on the predicted side (Wilson 95\% CI $[93.5, 98.0]$; one-sided
-exact binomial against an even coin, $p \approx 10^{-66}$). The ten exceptions are not scattered noise;
-five of the ten share one signature, $G$ clearly positive while $\Delta$
-is negative at ${\geq}20\%$ data on Food-101 and PathMNIST, ``better
-features, worse accuracy at sufficiency''. Two more are PathMNIST cells at
-1\%, and the remaining three are small-magnitude singletons with no shared
-pattern; Appendix~\ref{app:exceptions} lists all ten individually.
+Table~\ref{tab:audit} summarizes the audit: of 498 resolvable cells
+spanning nine backbones and fifteen dataset identities, 393 ($78.9\%$)
+fall on the predicted side (Wilson 95\% CI $[75.1, 82.3]$; one-sided exact
+binomial against an even coin, $p \approx 10^{-40}$). Below the crossing,
+where the account makes a strong prediction, it is $291/332 = 87.7\%$;
+above it, where it predicts only that the term is small, $102/166 =
+61.4\%$. The ten exceptions are not scattered noise;
+a recurring group carries one signature, $G$ clearly positive while
+$\Delta$ is negative at ${\geq}20\%$ data on Food-101 and PathMNIST,
+``better features, worse accuracy at sufficiency''.
+Appendix~\ref{app:exceptions} lists the largest-magnitude exceptions
+individually.
 
-Table~\ref{tab:robust} reports what the headline number does and does not
-survive, and we read it against ourselves. The rate is not an artifact of
-where the resolvability threshold was set: it rises monotonically from
-$88.9\%$ over 470 cells at one SEM to $97.8\%$ over 186 at three, never
-approaching chance, so a reader who prefers a stricter or looser criterion
-reaches the same conclusion. It survives the dependence between cells:
-collapsing to one vote per (dataset, backbone, fraction) group leaves
-$121/128 = 94.5\%$, and thirteen of the fourteen dataset identities with
-resolvable cells have a correct
-majority. It is not an artifact of thin seeds either, since cells with only
-three or four seeds per arm score $96.3\%$ on their own.
+Table~\ref{tab:robust} reports what that number does and does not survive.
+It is not an artifact of where the resolvability threshold was set: the
+rate moves only from $74.8\%$ over 691 cells at one SEM to $80.9\%$ over
+372 at three, so a reader who prefers a stricter or looser criterion
+reaches the same conclusion. It is not an artifact of the dependence
+between cells, since collapsing to one vote per (dataset, backbone,
+fraction) group leaves $191/247 = 77.3\%$. And, the check that matters
+most, it is not an artifact of estimating the crossing bracket on the same
+cells we then audit: re-fitting the bracket on the other datasets and
+auditing each dataset out of sample gives $218/273 = 79.9\%$,
+statistically indistinguishable from the in-sample figure. The account
+generalizes across datasets at the rate it fits within them, which is the
+one thing about it we can state without qualification.
 
-Two things it does \emph{not} survive, and both matter. First, the
-evidence is overwhelmingly left-flank: below the crossing the law scores
-$234/236$ ($99.2\%$), above it only $34/42$ ($81.0\%$). That is exactly the
-asymmetry we described above, now quantified, and it means the headline
-$96\%$ should be read as a strong claim about the scarce-data regime and a
-much weaker one about sufficiency. Second, the single dataset that fails is
-PathMNIST, at $4/8$, chance. Its linear evaluation is a known compressed
-measuring stick (its frozen-feature accuracy sits \emph{below} its own
-end-to-end accuracy), so we regard its $G$ as unreliable rather than the law
-as refuted there, but we report the failure rather than excluding the
-dataset. We do not
+What the number does \emph{not} survive is disaggregation, and we would
+rather say so than let a reader discover it. The evidence is
+overwhelmingly left-flank: below the crossing the sign is right $87.7\%$
+of the time, above it $61.4\%$, barely better than a coin once the term it
+predicts has shrunk to nothing. Two datasets behave badly out of sample,
+CIFAR-10 at $50\%$ and PathMNIST at $44\%$; PathMNIST's linear evaluation
+is a known compressed measuring stick, since its frozen-feature accuracy
+sits \emph{below} its own end-to-end accuracy, so we treat its $G$ as
+unreliable rather than the account as refuted there, but we report both
+failures rather than excluding the datasets. We do not
 explain this cluster; we name it as the law's known boundary
 (Section~\ref{sec:limits}) and list every exception in
 Appendix~\ref{app:exceptions}.
@@ -345,7 +358,11 @@ to both arms of every pair.
 
 \begin{table}[t]
 \caption{The pre-registered scale block. Every falsifier was declared
-before the first run; every one is dead. $G$ at ImageNet64 uses the
+before the first run and none fired, with two qualifications we keep in
+view: ViT-S's $G$ landed $0.05$ below its registered band, and ViT-B's
+$|\Delta-G|$ of $3.12$ exceeds the $1.5$ registered for the residual,
+though on a cell whose evaluation-ceiling caveat was also registered in
+advance and whose residual is not resolvable against its own uncertainty. $G$ at ImageNet64 uses the
 fixed-budget evaluation protocol (250 per class shown); ImageNet-100 uses
 the standard full-train evaluation. Three seeds per cell.}
 \label{tab:scale}

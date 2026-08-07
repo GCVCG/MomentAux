@@ -153,7 +153,7 @@ fig.text(PB_L, 0.901, "2  The Law", fontsize=6.4, fontweight="bold",
          color=INK, va="top")
 fig.text(PB_L, 0.843, "Δ = G + readout(base)", fontsize=5.0, color=INK,
          va="top")
-fig.text(PB_L, 0.794, "268 of 278 Testable Cells Correct", fontsize=4.6,
+fig.text(PB_L, 0.794, "Sign Correct on 79% of Testable Cells", fontsize=4.6,
          color=MUTED, va="top")
 
 axB = fig.add_axes([PB_L + 0.028, 0.165, 0.283, 0.545])

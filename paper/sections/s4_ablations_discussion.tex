@@ -20,9 +20,12 @@ Section~\ref{abl:notablated} states what we did \emph{not} vary.
 
 \subsection{The target is the ingredient}\label{abl:target}
 \begin{table}[t]
-\caption{Target and mechanism controls on CIFAR-100 (champion
-configuration except the varied ingredient; $\Delta$ vs.\ shared
-baseline, three seeds). The gain needs the moment structure specifically:
+\caption{Target and mechanism controls on CIFAR-100 with ResNet-18 (each
+row is the champion configuration with one ingredient varied; $\Delta$ vs.\
+the shared baseline, three seeds). These cells predate the champion's final
+weight schedule and so are not directly comparable to the envelope of
+Table~\ref{tab:envelope}; they are internally comparable to each other,
+which is what an ablation requires. The gain needs the moment structure specifically:
 random fixed targets do nothing, a $2\times$-cost learned teacher does
 nothing anywhere on an eight-point envelope, and the classical HOG
 descriptor recovers about half.}
@@ -79,8 +82,11 @@ backfired, the last making collapse $25\times$ faster, a small case
 study in mechanism-first debugging.
 
 \subsection{One configuration, every architecture and depth}\label{abl:universal}
-A single champion setting transplants without retuning: ResNet-18, -34
-and -50 land $+4.3$, $+4.0$ and $+3.9$ at the same cell; the new depth
+A single champion setting transplants without retuning: at CIFAR-100 with
+$10\%$ of the data, ResNet-18, -34 and -50 land $+4.3$, $+4.0$ and $+3.9$
+against their own baselines (these are the head-norm cells of the
+backbone sweep, not the frozen-recipe envelope of
+Table~\ref{tab:envelope}); the new depth
 sweep confirms one $\lambda_0$ across ResNet-34 and -50 on six further
 domains ($+0.4$ to $+9.0$
 at 5--10\% everywhere except CUB's deep-scarcity floor, decaying on the
@@ -200,9 +206,13 @@ rather than competing with it.
 %% ---------------------------------------------------------------------
 \section{Discussion}\label{sec:discussion}
 
-\paragraph{Why a law, and why this one.}
-The grid's size is not its point; its point is that one low-dimensional
-structure explains it. The decomposition in Eq.~\ref{eq:law} says that an
+\paragraph{What the decomposition buys, and what it does not.}
+The grid's size is not its point; its point is that a single
+low-dimensional structure organizes a large part of it. We are careful
+with ``explains'': binned on baseline accuracy the readout term has
+$R^2 = 0.18$ and a residual spread of $2.2$ points, so this is an
+account of a trend and of a \emph{sign}, not a predictor of a cell's
+value. The decomposition in Eq.~\ref{eq:law} says that an
 intervention's visible benefit is feature gain passed through a
 readout channel whose behavior is set by how well the task is already
 being solved. This explains, with one mechanism, observations that
@@ -290,10 +300,14 @@ test it at all, and we count only the 278 that can. Nothing here licenses
 extrapolation to web-scale pre-training, to architectures whose baselines do
 not train under this recipe, or to tasks other than classification.
 
-\paragraph{Known boundary of the law.} Ten resolvable cells violate the
-sign law, concentrated on Food-101 and PathMNIST at ${\geq}20\%$ data,
-five of them with the same signature: the prior still improves frozen-feature
-quality while costing end-to-end accuracy. The current law has no term
+\paragraph{Known boundaries.} Two are worth naming. The first is
+regime: the sign prediction is right $88\%$ of the time below the crossing
+and $61\%$ above it, so the account is informative where the readout term
+is large and close to uninformative where it has decayed to nothing. It
+should be read as an account of the scarce-data flank. The second is a
+recurring exception concentrated on Food-101 and PathMNIST at
+${\geq}20\%$ data, where the prior still improves frozen-feature quality
+while costing end-to-end accuracy. The account has no term
 for this ``better features, worse accuracy'' regime; modeling it,
 plausibly an interaction between late-stage optimization and
 sufficiency, is the clearest open problem the grid poses.
@@ -329,11 +343,14 @@ We built an instrument, one recipe, committed data, pinned filters,
 pre-registered predictions, and used it to measure how a nearly free
 structural prior fuses with the modern menu of data-efficiency
 interventions across 12 datasets, 9 backbones and four orders of
-magnitude in data. The measurements organize under one empirical law
-separating feature gain from readout, sharp enough to predict unseen
-backbones and to survive ImageNet scale within a point; and they support
-a three-way fusion taxonomy, stack, substitute, tax, decided by
-whether the fused sources carry the same information currency. The
+magnitude in data. The measurements organize under one empirical
+decomposition separating feature gain from readout, which predicted an
+unseen backbone family's feature gain in advance and tied accuracy to
+features within about a point at ImageNet scale, and whose sign holds on
+$79\%$ of testable cells overall and $88\%$ in the scarce-data regime it
+describes best; and they support a three-way fusion taxonomy, stack,
+substitute, tax, decided by whether the fused sources carry the same
+information currency. The
 practical residue is a decision guide whose strongest entry is also the
 study's headline: for vision transformers trained the way practitioners
 actually train them, a fixed spectral target costing $2\%$ of training

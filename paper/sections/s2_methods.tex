@@ -35,16 +35,19 @@ cost normalization under which they are compared.
 Section~\ref{sec:probe} introduces the linear evaluation of frozen
 features that supplies the quantity $G$, without which the law of
 Section~\ref{sec:law} could not be measured at all.
-Section~\ref{sec:stats} states the seed and uncertainty protocol, and
-Section~\ref{sec:prereg} the pre-registration discipline that turns the
-grid's predictions into falsifiable ones.
+Section~\ref{sec:stats} states the seed and uncertainty protocol,
+Sections~\ref{sec:selection} and \ref{sec:parity} disclose how the
+configuration under test was selected and how that leaves it advantaged
+relative to the comparators, and Section~\ref{sec:prereg} describes the
+pre-registration discipline that turns the grid's predictions into
+falsifiable ones.
 
 \subsection{Frozen recipe and committed subsets}\label{sec:recipe}
 Every headline cell trains with an identical recipe: stochastic gradient descent (SGD) with momentum
 $0.9$, learning rate $0.1$, weight decay $5{\times}10^{-4}$, cosine
 schedule, 200 epochs, batch size 128, and random-crop + horizontal-flip
 augmentation only. The recipe is frozen in the strict sense: no cell
-tunes it. Configurations that must deviate, AdamW for architectures the
+tunes it. Configurations that must deviate, AdamW \citep{loshchilov2019adamw} for architectures the
 SGD recipe cannot train, reduced epochs at ImageNet scale, added
 augmentation stacks, carry a diagnostic namespace enforced by a guard
 in the training entry point, and never enter a headline table. Within
@@ -87,10 +90,11 @@ with $k_\sigma$ set so each envelope carries a comparable number of
 cycles. The target is the \emph{phase-invariant magnitude} of the
 response to the greyscale input $x$,
 \begin{equation}
-  m_{\sigma,\theta}(x) \;=\; \bigl\lVert\, x * g_{\sigma,\theta} \,\bigr\rVert,
+  m_{\sigma,\theta}(x)[u] \;=\; \bigl|\, (x * g_{\sigma,\theta})[u] \,\bigr|,
   \label{eq:energy}
 \end{equation}
-stacked over the $N$ pairs and average-pooled to the tapped stage's
+taken pointwise at every spatial location $u$, then stacked over the $N$
+pairs and average-pooled to the tapped stage's
 spatial resolution, giving $\mathbf{m}(x)\in\mathbb{R}^{N\times h\times w}$.
 Magnitude rather than raw filter response is the operative choice: the
 ablation of Section~\ref{sec:ablations} shows oriented \emph{edges} are a
@@ -186,13 +190,26 @@ compared only to other same-budget evaluations.
 
 \subsection{Statistical protocol}\label{sec:stats}
 Each cell runs ${\geq}3$ seeds, ten for headline envelopes. For a paired
-cell we report $\Delta$ as the difference of arm means with the standard error of the mean (SEM) of that difference, and propagate to the readout term as
+cell we report $\Delta$ as the difference of arm means with the standard
+error of the mean (SEM) of that difference.
+
+The readout term needs more care than a difference of two independent
+measurements, because $\Delta$ and $G$ are not independent: the linear
+evaluation probes the very checkpoints whose end-to-end accuracy gives
+$\Delta$, so across seeds the two move together and
+$\mathrm{Cov}(\Delta, G) > 0$. Propagating the residual as
+$\sqrt{\mathrm{SEM}(\Delta)^2 + \mathrm{SEM}(G)^2}$ would therefore
+\emph{overstate} its uncertainty; on this grid it does so by a median
+factor of $1.8$. We instead form the readout \emph{per seed} and take the
+standard error of that quantity directly,
 \begin{equation}
-  \mathrm{SEM}(\mathrm{readout}) =
-  \sqrt{\mathrm{SEM}(\Delta)^2 + \mathrm{SEM}(G)^2},
+  \mathrm{readout}_s =
+  \bigl(a^{\mathrm{aux}}_s - e^{\mathrm{aux}}_s\bigr) -
+  \bigl(a^{\mathrm{base}}_s - e^{\mathrm{base}}_s\bigr),
   \label{eq:sem}
 \end{equation}
-using all four arms (two end-to-end, two linear-evaluation). A cell is called
+where $a_s$ and $e_s$ are seed $s$'s end-to-end and linear-evaluation
+accuracies, and only seeds present in all four arms contribute. A cell is called
 \emph{resolvable} when $|\mathrm{readout}| > 2\,\mathrm{SEM}$; only
 resolvable cells can test the sign law, and Section~\ref{sec:law}
 explains why counting the rest would be misleading rather than
@@ -208,7 +225,11 @@ test.} With three seeds per arm the Student-$t$ multiplier for a 95\%
 interval exceeds two, so the criterion is mildly liberal at the minimum
 seed count. We therefore fix it in advance and report the audit across a
 range of thresholds rather than defending one value
-(Table~\ref{tab:robust}).
+(Table~\ref{tab:robust}). Because the seed-paired standard error is
+smaller than an independent propagation would give, this rule admits about
+$1.8$ times as many cells to the audit as the naive formula does, and the
+extra cells are the borderline ones. That makes the test harder, not
+easier.
 
 \emph{Cells are not independent.} A baseline arm is shared by every
 variant paired against it, and cells recur across the same datasets and
@@ -228,6 +249,45 @@ $\Delta$ shrank, by $0.07$, $0.15$ and $0.39$ points. The direction
 reproduces an earlier CIFAR-10 deepening. Nothing in the shape of any
 envelope changed, but a three-seed $\Delta$ should be read as an
 upper-ish estimate, and headline envelopes use ten seeds for that reason.
+
+\subsection{Configuration selection, and what it costs us}\label{sec:selection}
+The champion configuration was not given; it was chosen. Target family,
+tap depth, $\lambda_0$, head-norm and loss form were each swept, and those
+sweeps were run on CIFAR-100 and scored on the same test split that
+supplies this paper's CIFAR-100 numbers. We did not hold out a validation
+split, and we state the consequence rather than leave it to be inferred:
+\emph{the CIFAR-100 cells are a selection set, and their absolute values
+carry a selection bias of unknown size.}
+
+Two things limit the damage, and one argument survives intact. The sweeps
+selected among a small number of pre-declared alternatives rather than
+searching a continuous space, and the chosen setting was fixed once and
+then applied verbatim everywhere else. That is what makes the transplant
+evidence the load-bearing evidence here: the same configuration, with no
+retuning, was applied to eleven further datasets, nine backbones and two
+ImageNet-scale stages that played no part in its selection, and its
+behaviour there is not selection-contaminated. Where this paper makes a
+general claim, it should be read as resting on those populations, with
+CIFAR-100 as the development set that produced the candidate.
+
+\subsection{Comparator parity}\label{sec:parity}
+Cost normalization fixes the comparators' budget, and that cuts both ways.
+Every comparator is run at its published defaults inside the frozen recipe,
+at the declared multiple of the baseline's training cost, on the cell's own
+subset. The prior, by contrast, was developed here and therefore received
+the sweep just described. We did not sweep the comparators.
+
+The sharpest consequence is at the smallest fractions. Self-supervised
+pre-training at $1\%$ of CIFAR-100 means 200 epochs of contrastive learning
+over 500 images, which is far short of the schedules used in published
+small-data practice, and our check that strengthening SimCLR's views does
+not help (Section~\ref{sec:comparators}) varies the view distribution, not
+the budget. So a statement such as ``SimSiam learns almost nothing at this
+scale'' is, strictly, a statement about SimSiam \emph{at this budget};
+undertraining and method weakness are not separable under a cost-normalized
+protocol, by construction. Readers who care about the best attainable
+accuracy rather than the best accuracy per unit compute should treat our
+self-supervised numbers as lower bounds.
 
 \subsection{Pre-registration}\label{sec:prereg}
 Each experimental wave was launched with numeric prediction bands and
@@ -260,14 +320,17 @@ Datasets & CIFAR-10, CIFAR-100, ciFAIR-100, STL-10, Tiny-ImageNet, coarse
   variants; EuroSAT, DTD, Food-101, PathMNIST, CUB-200; ImageNet64,
   ImageNet-100 \\
 Domains & photographic, satellite, texture, food, histopathology \\
-Backbones & ResNet-18, -34 and -50, MobileNetV3, ConvNeXt-T,
-  ViT-tiny, -S and -B, Swin-T \\
+Backbones & ResNet-18, -34 and -50 \citep{he2016resnet}, MobileNetV3
+  \citep{howard2019mobilenetv3}, ConvNeXt-T \citep{liu2022convnext},
+  ViT-tiny, -S and -B \citep{dosovitskiy2021vit}, Swin-T
+  \citep{liu2021swin} \\
 Data scale & 500 to 1.28M images; 10 to 1000 classes \\
 Resolution & 32, 64, 96, 224\,px \\
 Interventions & MomentAux ($1.02\times$); SimCLR, SimSiam and DINO
   ($2\times$); ImageNet transfer; DeiT augmentation; FitNets teacher
   ($2\times$); HOG target; pairwise combinations \\
-Measured & $2{,}800$ cells, ${\sim}8{,}900$ runs \\
+Measured & $2{,}800$ cells; the campaign recorded $8{,}887$ timed runs
+  including exploration and repeats \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -336,6 +399,9 @@ photographic data could not test that: satellite imagery has
 non-photographic color statistics and meaningful rotations, texture
 lacks object-level structure, histopathology is stain-dominated, and
 fine-grained birds require discriminating parts rather than categories.
+PathMNIST is a public, de-identified benchmark distributed as part of
+MedMNIST v2 \citep{yang2023medmnist}; its use here involves no new data
+collection and required no ethics approval.
 The two ImageNet stages buy the axes small datasets cannot: ImageNet64
 supplies data and label scale at fixed resolution, while ImageNet-100
 supplies native $224$\,px resolution and a model-scale curve.
@@ -455,7 +521,9 @@ Three regularities recur. The envelope is \emph{unimodal}: gains rise
 from the extreme-scarcity floor, peak in a dataset-specific band, and
 decay toward zero as data becomes sufficient. The peak's location tracks
 the dataset's difficulty rather than its fraction, easy ten-way
-CIFAR-10 peaks by 1--2\% and is already negative at 15\%, while
+CIFAR-10 plateaus across 1--2\% (the two cells differ by $0.29$, which
+their seed uncertainty cannot resolve) and is already negative at 15\%,
+while
 hundred-way CIFAR-100 peaks at 5\%. And at full data the prior is neutral
 within noise on every one of ten populations, which is what the
 the decaying weight schedule is for: the fusion asks nothing when the data

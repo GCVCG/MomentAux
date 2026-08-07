@@ -81,13 +81,14 @@ SimCLR, SimSiam and DINO, ImageNet transfer, heavy augmentation, and
 learned teachers) under one frozen recipe with
 committed data subsets: 12 datasets, 9 backbones, data scales from
 500 to 1.28M images, resolutions from 32 to 224\,px, and models from 5.7M to
-86M parameters ($2{,}800$ experimental cells; ${\sim}8{,}900$ training runs). The grid is organized by a
+86M parameters ($2{,}800$ experimental cells). The grid is organized by a
 single empirical law, $\Delta = G + \mathrm{readout}(\mathrm{base})$,
 separating each intervention's feature-level gain $G$ from a readout term
-depending only on baseline accuracy. Registered in advance, the law
-called the feature gain of unseen backbone families and of ImageNet-scale
-cells from baseline heights alone (96\% of resolvable cells; $|\Delta-G|
-\le 1.1$ points on five of six ImageNet-scale pairs). It yields
+depending only on baseline accuracy. Registered in advance, it
+called the feature gain of an unseen backbone family and of ImageNet-scale
+cells from baseline heights alone ($|\Delta-G| \le 1.1$ points on five of
+six ImageNet-scale pairs); its sign holds on $79\%$ of the cells where
+measurement uncertainty permits a test, and $88\%$ below the crossing. It yields
 a sharp fusion taxonomy: sources supplying different currencies stack (prior
 with augmentation), same-currency sources substitute (the prior against
 effective self-supervised pre-training), and fusing into an already-informed
@@ -107,7 +108,7 @@ result tables are released at
 
 \begin{highlights}
 \item A 2,800-cell, cost-normalized benchmark of data-efficiency interventions
-\item One law, $\Delta=G+$readout(base), predicts fusion gains before training
+\item Feature gain and readout separate: sign correct on 79\% of testable cells
 \item Different-currency fusions stack; same-currency fusions substitute
 \item Free spectral prior beats 2$\times$-compute SSL on ViTs under modern recipes
 \item Attention's feature deficit persists at 1.28M images and grows with scale
