@@ -183,7 +183,7 @@ Conv, extreme scarcity (${\leq}1$--$2\%$) & prior (or fwd stem) & $1.02\times$ &
 Satellite-like statistics, low data & prior & $1.02\times$ & beats SimCLR at 7 of 11 EuroSAT fractions \\
 Any ViT trained the modern way (DeiT aug) & prior \emph{and} augmentation & $1.02\times$ & flip: beats SSL at every fraction; $+14..{+}25$ over recipe alone \\
 ViT and Swin from scratch, any scale & prior & $1.02\times$ & $+3.2$ at 1.28M imgs; $+13$ and $+26$ at 224\,px; stabilizes Swin \\
-ImageNet-transferable task & transfer; \textbf{never} add prior &--& tax $-10..{-}24$, feature-side \\
+ImageNet-transferable task & transfer; \textbf{never} add prior &--& tax up to $-17$, feature-side \\
 Domain-shifted from ImageNet (e.g.\ stains) & prior from scratch competitive & $1.02\times$ & transfer advantage shrinks to $+2..{+}3$ \\
 Data sufficient (${\geq}50\%$) & nothing (all converge) &--& every intervention within $\pm 0.8$ \\
 \bottomrule
@@ -256,7 +256,7 @@ that cannot be wrong is not measuring anything.
 \emph{empirical} regularity, not a theorem, and we state its measured scope
 plainly so that it is not read as more than it is. It was fitted to nothing:
 we report the measured readout curve and use it directly. Its demonstrated
-domain is 14 datasets across five visual domains, backbones from 5.7M to 86M
+domain is 12 datasets across five visual domains, backbones from 5.7M to 86M
 parameters, images from $32$ to $224$\,px, and training sets from 500 to
 $1.28$M images, all under one supervised recipe with an auxiliary prior
 trained from scratch. Cells initialized from self-supervised or ImageNet
@@ -274,7 +274,7 @@ not train under this recipe, or to tasks other than classification.
 
 \paragraph{Known boundary of the law.} Ten resolvable cells violate the
 sign law, concentrated on Food-101 and PathMNIST at ${\geq}20\%$ data,
-all with the same signature: the prior still improves frozen-feature
+five of them with the same signature: the prior still improves frozen-feature
 quality while costing end-to-end accuracy. The current law has no term
 for this ``better features, worse accuracy'' regime; modeling it,
 plausibly an interaction between late-stage optimization and
@@ -310,7 +310,7 @@ warmup for large-ViT pre-training proper.
 We built an instrument, one recipe, committed data, pinned filters,
 pre-registered predictions, and used it to measure how a nearly free
 structural prior fuses with the modern menu of data-efficiency
-interventions across 14 datasets, 7 architectures and four orders of
+interventions across 12 datasets, 9 backbones and four orders of
 magnitude in data. The measurements organize under one empirical law
 separating feature gain from readout, sharp enough to predict unseen
 backbones and to survive ImageNet scale within a point; and they support

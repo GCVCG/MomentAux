@@ -27,7 +27,7 @@ to exactly zero, adding ${\sim}2\%$ training compute and \emph{nothing} at
 inference. Against it we field SimCLR, SimSiam, and DINO initializations
 (each ${\sim}2\times$ compute), ImageNet transfer, DeiT-strength
 augmentation, learned FitNets-style teachers, and targets built from histograms of oriented gradients (HOG). The
-resulting grid spans 14 datasets across five visual domains, seven backbone
+resulting grid spans 12 datasets across five visual domains, nine backbone
 families from ResNet-18 to ViT-B/16, data scales from 500 to 1.28M images,
 resolutions from $32$ to $224$\,px, and 2{,}800 experimental cells comprising roughly 8{,}900 training runs.
 
@@ -72,7 +72,7 @@ small vision transformers carry a large feature deficit that the prior
 fills: the gain reaches $+13.0$ points for ViT-S/16 and $+26.0$ for
 ViT-B/16 on ImageNet-100 at $224$\,px under the standard DeiT recipe,
 \emph{growing} with model scale, and persists at $+3.2$ points after 1.28
-million training images, where every convolutional backbone we measure is
+million training images, where the ResNet baseline we measure is
 exactly neutral ($+0.04$). Second, the fashionable remedy is not always the
 right one: under plain augmentation SimCLR beats the prior across the
 mid-data band on photographic datasets, but under the modern DeiT recipe
@@ -88,7 +88,7 @@ learn.
     every headline table regenerable by one command from released artifacts.
   \item \textbf{The grid} (Section~\ref{sec:grid}): $2{,}800$ cells (${\sim}8{,}900$ runs)
     comparing a free spectral prior against SSL, transfer, augmentation and
-    learned teachers across 14 datasets, 7 backbone families and
+    learned teachers across 12 datasets, 9 backbones and
     500 to 1.28M images.
   \item \textbf{The law} (Section~\ref{sec:law}): $\Delta = G +
     \mathrm{readout}(\mathrm{base})$, validated from CIFAR scale to

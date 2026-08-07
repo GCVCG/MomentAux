@@ -1,10 +1,4 @@
-%% Information Fusion submission, Elsevier CAS double-column template.
-%% Framing (ledger decision 2026-08-06): "a controlled, cost-normalized
-%% benchmark of data-efficiency interventions, and the predictive law that
-%% organizes its results", sold to Information Fusion through the
-%% knowledge-data fusion lens: WHEN does fusing a fixed spectral prior with
-%% data-driven learning pay, substitute, or tax?
-%% Every number cited here must trace to CLAUDE.md / results exporters.
+%% Elsevier CAS double-column template.
 %% cas-dc loads xcolor WITHOUT the table option; pass it here so that
 %% \rowcolors (alternating row shading) is available in every table.
 \PassOptionsToPackage{table}{xcolor}
@@ -76,7 +70,6 @@ work.}
 and all result tables: \url{https://github.com/GCVCG/MomentAux}}
 
 \begin{abstract}
-% DRAFT, one paragraph, <=250 words, no references, fusion vocabulary first.
 Fusing prior knowledge with data-driven learning is attractive precisely
 where data is scarce, yet no controlled account says when such fusion helps,
 when it is redundant, and when it harms. We present a
@@ -86,7 +79,7 @@ through an auxiliary regression head at $\sim$2\% compute overhead, against
 the leading data-driven alternatives (self-supervised learning with
 SimCLR, SimSiam and DINO, ImageNet transfer, heavy augmentation, and
 learned teachers) under one frozen recipe with
-committed data subsets: 14 datasets, 7 backbone families, data scales from
+committed data subsets: 12 datasets, 9 backbones, data scales from
 500 to 1.28M images, resolutions from 32 to 224\,px, and models from 5.7M to
 86M parameters ($2{,}800$ experimental cells; ${\sim}8{,}900$ training runs). The grid is organized by a
 single empirical law, $\Delta = G + \mathrm{readout}(\mathrm{base})$,
@@ -113,7 +106,6 @@ result tables are released at
 \end{graphicalabstract}
 
 \begin{highlights}
-% 3-5 bullets, <=85 chars each INCLUDING spaces (Elsevier limit).
 \item A 2,800-cell, cost-normalized benchmark of data-efficiency interventions
 \item One law, $\Delta=G+$readout(base), predicts fusion gains before training
 \item Different-currency fusions stack; same-currency fusions substitute
@@ -190,10 +182,6 @@ distributed; every cell retrains from its committed configuration.
 
 \section*{Declaration of generative AI and AI-assisted technologies in the
 writing process}
-%% Elsevier's prescribed wording (policy: "The use of generative AI and
-%% AI-assisted technologies in writing for Elsevier"). AUTHORS: confirm the
-%% tool name and the stated purpose before submission, or delete this whole
-%% section if there is nothing to disclose.
 During the preparation of this work the authors used Claude (Anthropic) in
 order to assist with drafting, editing and figure generation. After using
 this tool, the authors reviewed and edited the content as needed and take

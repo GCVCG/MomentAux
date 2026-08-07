@@ -274,7 +274,7 @@ Measured & $2{,}800$ cells, ${\sim}8{,}900$ runs \\
 
 Table~\ref{tab:glance} summarizes the design space, and the rest of this
 section unpacks it in five steps. Section~\ref{sec:datasets} describes
-the 14 datasets and the five domains they span, and
+the 12 datasets and the five domains they span, and
 Section~\ref{sec:compute} reports the hardware, wall-clock and carbon
 budget the grid consumed. The remaining three subsections are the three
 views of the grid that the results are built from:
@@ -295,7 +295,7 @@ measure.
 
 \subsection{Datasets}\label{sec:datasets}
 \begin{table}[t]
-\caption{The 14 datasets, grouped by domain. Fractions are drawn from the
+\caption{The 12 datasets, grouped by domain. Fractions are drawn from the
 committed subset indices of Section~\ref{sec:recipe}; sources with
 variable native resolution are squash-resized once, offline, and the
 resized copies are what every arm consumes.}
@@ -366,7 +366,7 @@ rather than compute-bound, we run two to three trainings per GPU, sized
 so that the heaviest cells still fit in memory.
 
 Aggregating the wall-clock recorded in all 8{,}887 timed run records, the
-study consumed \textbf{3{,}286 GPU-hours}: 2{,}901 on H100, 141 on H100~NVL and
+study consumed \textbf{3{,}281 GPU-hours}: 2{,}901 on H100, 141 on H100~NVL and
 H200~NVL, and 239 on RTX 3090. Taking device thermal design power as an
 upper bound on draw, a data-center power usage effectiveness of $1.2$, and
 a Spanish grid carbon intensity of $0.17$\,kg\,CO$_2$eq per kWh, this
@@ -486,7 +486,7 @@ shifts its peak toward more data. Three seeds per cell.}
 \toprule
 Fraction & $\Delta_{\mathrm{plain}}$~\up & $\Delta_{\mathrm{DeiT}}$~\up & Ratio~\up \\
 \midrule
-1\%   & $+1.4$  & $+3.2$            & 2.2 \\
+1\%   & $+1.4$  & $+3.2$            & 2.4 \\
 2\%   & $+3.3$  & $+6.0$            & 1.8 \\
 3\%   & $+6.2$  & $+9.5$            & 1.5 \\
 5\%   & $+9.4$  & $+16.3$           & 1.7 \\
@@ -501,7 +501,7 @@ Fraction & $\Delta_{\mathrm{plain}}$~\up & $\Delta_{\mathrm{DeiT}}$~\up & Ratio~
 
 Table~\ref{tab:vitenvelope} previews the study's most striking axis.
 ViT-tiny trained from scratch gains $+9.9$ points from the prior even at
-\emph{full} CIFAR-100, a scale at which every convolutional backbone is
+\emph{full} CIFAR-100, a scale at which the ResNet backbones are
 neutral, and under the standard DeiT recipe the gains grow to
 $+25$ points, peaking later in the data axis. The best ViT number in the
 study, $75.3\%$ at full CIFAR-100, is DeiT augmentation \emph{plus} the

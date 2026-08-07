@@ -70,8 +70,8 @@ to the resolvable subset that actually tests the law.}
 \toprule
 Cells with paired $\Delta$ and $G$ (all interventions) & 1{,}660 \\
 \quad in law scope (prior, from scratch, ${\geq}3$ seeds per arm) & 989 \\
-Backbone variants in scope (distinct families) & 9 (7) \\
-Datasets in scope & 15 \\
+Backbone variants in scope (architecture families) & 9 (5) \\
+Dataset identities in scope & 15 \\
 Inside crossing bracket (no prediction) & 98 \\
 Unresolved ($|\mathrm{readout}| \le 2$\,SEM) & 613 \\
 \midrule
@@ -113,12 +113,14 @@ Above the crossing & 42 & 34 & 81.0\% & [66.7, 90.0] \\
 \end{table}
 
 Table~\ref{tab:audit} summarizes the current audit: of 278 resolvable
-cells spanning nine backbone families and fifteen datasets, 268 (96\%)
+cells spanning nine backbones and fifteen dataset identities, 268 (96\%)
 fall on the predicted side (Wilson 95\% CI $[93.5, 98.0]$; one-sided
 exact binomial against an even coin, $p \approx 10^{-66}$). The ten exceptions are not scattered noise;
-they concentrate in one regime and share one signature, $G$ clearly
-positive while $\Delta$ is negative at ${\geq}20\%$ data on Food-101 and
-PathMNIST, ``better features, worse accuracy at sufficiency''.
+five of the ten share one signature, $G$ clearly positive while $\Delta$
+is negative at ${\geq}20\%$ data on Food-101 and PathMNIST, ``better
+features, worse accuracy at sufficiency''. Two more are PathMNIST cells at
+1\%, and the remaining three are small-magnitude singletons with no shared
+pattern; Appendix~\ref{app:exceptions} lists all ten individually.
 
 Table~\ref{tab:robust} reports what the headline number does and does not
 survive, and we read it against ourselves. The rate is not an artifact of
@@ -127,7 +129,8 @@ $88.9\%$ over 470 cells at one SEM to $97.8\%$ over 186 at three, never
 approaching chance, so a reader who prefers a stricter or looser criterion
 reaches the same conclusion. It survives the dependence between cells:
 collapsing to one vote per (dataset, backbone, fraction) group leaves
-$121/128 = 94.5\%$, and thirteen of the fourteen datasets have a correct
+$121/128 = 94.5\%$, and thirteen of the fourteen dataset identities with
+resolvable cells have a correct
 majority. It is not an artifact of thin seeds either, since cells with only
 three or four seeds per arm score $96.3\%$ on their own.
 
@@ -290,7 +293,8 @@ PathMNIST @10\% & $+1.8..{+}2.9$ & $-0.4$ & $+0.3 \pm 0.6$ & $-0.7$ \\
 The one uniformly destructive fusion in the grid is instructive
 (Table~\ref{tab:tax}). The prior's early shaping, so valuable from
 scratch, \emph{erases} mature ImageNet features: the tax reaches
-$-17$ points where transfer was worth $+13$ to $+24$, decays to zero at
+$-17$ points where transfer was worth $+13$ to $+18$ on the cells of
+Table~\ref{tab:tax}, decays to zero at
 full data (where the initialization no longer carries the performance),
 and, the decisive measurement, lands almost entirely on $G$. Where
 the initialization had little to offer (histopathology), there is nothing
