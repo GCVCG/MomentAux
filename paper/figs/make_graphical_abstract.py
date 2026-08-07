@@ -31,19 +31,15 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CSV = os.path.join(HERE, "..", "..", "results", "all_results.csv")
 LO, HI = 31.8, 40.3
 
-fig = plt.figure(figsize=(13 / 2.54, 8 / 2.54), dpi=300)
+fig = plt.figure(figsize=(13 / 2.54, 6.4 / 2.54), dpi=300)
 fig.patch.set_facecolor("white")
 
-fig.text(0.5, 0.975, "When does fusing hand-crafted spectral knowledge",
-         ha="center", va="top", fontsize=7.2, fontweight="bold", color=INK)
-fig.text(0.5, 0.918, "with learned representations pay?",
-         ha="center", va="top", fontsize=7.2, fontweight="bold", color=INK)
-fig.text(0.5, 0.855, "A controlled, cost-normalized benchmark: 14 datasets × "
-         "7 backbones × 500→1.28M images — and its organizing law",
-         ha="center", va="top", fontsize=5.4, color=MUTED)
+fig.text(0.5, 0.985, "A controlled, cost-normalized benchmark of data-efficiency "
+         "interventions, and the law that organizes it", ha="center",
+         va="top", fontsize=5.6, color=MUTED)
 
 # ---------------------------------------------------------------- panel A
-axA = fig.add_axes([0.025, 0.06, 0.30, 0.72])
+axA = fig.add_axes([0.025, 0.06, 0.30, 0.84])
 axA.set_xlim(0, 10); axA.set_ylim(0, 10); axA.axis("off")
 axA.text(0.1, 9.8, "1  The fusion", fontsize=6.4, fontweight="bold", color=INK,
          va="top")
@@ -68,7 +64,7 @@ for x1, x2 in [(1.75, 2.10), (3.35, 3.50), (4.75, 4.90), (6.15, 6.35)]:
     arrow(axA, x1, 7.35, x2, 7.35)
 
 arrow(axA, 5.5, 6.6, 5.5, 5.15, VERM, ls=(0, (2, 1.2)))
-axA.text(5.75, 5.9, "λ: 1 → 0", fontsize=5.0, color=VERM, ha="left",
+axA.text(5.75, 5.9, "λ decays 1 to 0", fontsize=5.0, color=VERM, ha="left",
          va="center", style="italic")
 box(axA, 4.15, 3.75, 2.9, 1.35, "aux head\n(training only)", VERM, fs=4.8)
 arrow(axA, 4.05, 4.42, 3.35, 4.42, VERM, ls=(0, (2, 1.2)))
@@ -80,11 +76,10 @@ axA.text(4.05, 1.35, "+0 at inference · identical deployed net",
          ha="center", fontsize=5.0, color=MUTED)
 
 # ---------------------------------------------------------------- panel B
-fig.text(0.365, 0.775, "2  The law", fontsize=6.4, fontweight="bold",
+fig.text(0.372, 0.905, "2  The law", fontsize=6.4, fontweight="bold",
          color=INK, va="top")
-fig.text(0.365, 0.723, "Δ = G + readout(base) · sign correct in "
-         "268 of 278 testable cells", fontsize=5.0, color=MUTED, va="top")
-axB = fig.add_axes([0.415, 0.155, 0.225, 0.53])
+fig.text(0.372, 0.856, "Δ = G + readout(base) · 268 of 278 testable cells correct", fontsize=5.0, color=MUTED, va="top")
+axB = fig.add_axes([0.415, 0.15, 0.225, 0.58])
 
 pts = {"ok": [], "bad": [], "un": [], "br": []}
 for r in csv.DictReader(open(CSV)):
@@ -121,7 +116,7 @@ axB.text((LO + HI) / 2, -7.35, "crossing", fontsize=4.3, color=MUTED,
          ha="center", va="bottom")
 
 # ---------------------------------------------------------------- panel C
-axC = fig.add_axes([0.685, 0.06, 0.30, 0.72])
+axC = fig.add_axes([0.685, 0.06, 0.30, 0.84])
 axC.set_xlim(0, 10); axC.set_ylim(0, 10); axC.axis("off")
 axC.text(0.1, 9.8, "3  When it pays", fontsize=6.4, fontweight="bold",
          color=INK, va="top")
@@ -146,7 +141,7 @@ axC.text(4.75, 1.88, "Headline: small ViTs, modern recipe", ha="center",
          va="top", fontsize=5.2, fontweight="bold", color=BLUE)
 axC.text(4.75, 1.28, "+13.0 (ViT-S), +26.0 (ViT-B) at 224 px", ha="center",
          va="top", fontsize=4.6, color=INK)
-axC.text(4.75, 0.80, "+3.2 at 1.28M images — every CNN neutral",
+axC.text(4.75, 0.80, "+3.2 at 1.28M images, every CNN neutral",
          ha="center", va="top", fontsize=4.6, color=INK)
 
 for ext in ("pdf", "png"):

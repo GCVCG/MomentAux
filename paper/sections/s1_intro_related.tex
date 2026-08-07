@@ -4,21 +4,21 @@
 Every practitioner who has trained a network on a small dataset has faced
 the same menu of remedies: pre-train on ImageNet, run a self-supervised
 stage, augment more aggressively, or inject some form of prior knowledge
-into the model. Each remedy fuses an external source of information --
+into the model. Each remedy fuses an external source of information,
 weights learned elsewhere, invariances distilled from augmented views,
-hand-crafted structure -- with whatever the labelled data can teach on its
+hand-crafted structure, with whatever the labelled data can teach on its
 own. What the field lacks is not remedies but a controlled account of how
 these information sources \emph{combine}: when does adding a second source
 help, when is it redundant with what the first already supplies, and when
-does the fusion actively destroy value? These three outcomes -- we will
-call them \emph{stack}, \emph{substitute}, and \emph{tax} -- are usually
+does the fusion actively destroy value? These three outcomes, we will
+call them \emph{stack}, \emph{substitute}, and \emph{tax}, are usually
 discovered anecdotally, one paper and one setting at a time, under training
 recipes that differ in a dozen uncontrolled ways.
 
 This paper treats the question as a measurement problem. We build a single
-instrument -- one frozen training recipe, byte-identical data subsets
-committed to version control, and a numerically pinned bank of Gabor/moment
-spectral filters -- and use it to measure one deliberately austere source of
+instrument, one frozen training recipe, byte-identical data subsets
+committed to version control, and a numerically pinned bank of Gabor and moment
+spectral filters, and use it to measure one deliberately austere source of
 prior knowledge against the strongest data-driven alternatives at matched or
 declared compute. The prior, which we call \emph{MomentAux}, could hardly be
 cheaper: a fixed bank of oriented-energy targets, injected only during
@@ -33,7 +33,7 @@ resolutions from $32$ to $224$\,px, and 2{,}800 experimental cells comprising ro
 
 A grid of this size threatens to be a table dump. It is rescued by an
 empirical law that we did not assume but found, and then tested the way
-laws should be tested -- by registering its predictions in advance and
+laws should be tested, by registering its predictions in advance and
 trying to break them. Writing $\Delta$ for an intervention's end-to-end
 accuracy gain and $G$ for the gain a linear probe reads from its frozen
 features under identical probing, we find across the grid that
@@ -57,9 +57,9 @@ carry identifiable \emph{currencies}: heavy augmentation supplies
 nuisance-invariance, contrastive pre-training supplies much the same
 invariance at greater expense, ImageNet weights supply mature photographic
 features, and the moment prior supplies oriented-energy structure.
-Same-currency fusions substitute -- the prior and SimCLR each render the
+Same-currency fusions substitute; the prior and SimCLR each render the
 other nearly worthless, and their combination never beats the better
-single. Different-currency fusions stack -- the prior's gain under
+single. Different-currency fusions stack; the prior's gain under
 DeiT-strength augmentation does not shrink but grows by a factor of
 $1.4$--$2.4$. And fusing a shaping prior into an initialization that
 already carries mature features taxes accuracy in proportion to what the
@@ -70,8 +70,8 @@ features themselves rather than on the classifier
 Two headline findings illustrate what the instrument can resolve. First,
 small vision transformers carry a large feature deficit that the prior
 fills: the gain reaches $+13.0$ points for ViT-S/16 and $+26.0$ for
-ViT-B/16 on ImageNet-100 at $224$\,px under the standard DeiT recipe --
-\emph{growing} with model scale -- and persists at $+3.2$ points after 1.28
+ViT-B/16 on ImageNet-100 at $224$\,px under the standard DeiT recipe,
+\emph{growing} with model scale, and persists at $+3.2$ points after 1.28
 million training images, where every convolutional backbone we measure is
 exactly neutral ($+0.04$). Second, the fashionable remedy is not always the
 right one: under plain augmentation SimCLR beats the prior across the
@@ -84,17 +84,17 @@ learn.
 \begin{enumerate}
   \item \textbf{An instrument, not just experiments} (Section~\ref{sec:instrument}):
     a frozen recipe with committed subsets, pinned filter banks, declared
-    cost normalization, and pre-registered predictions with falsifiers --
+    cost normalization, and pre-registered predictions with falsifiers,
     every headline table regenerable by one command from released artifacts.
   \item \textbf{The grid} (Section~\ref{sec:grid}): $2{,}800$ cells (${\sim}8{,}900$ runs)
     comparing a free spectral prior against SSL, transfer, augmentation and
     learned teachers across 14 datasets, 7 backbone families and
-    $500$--$1.28$M images.
+    500 to 1.28M images.
   \item \textbf{The law} (Section~\ref{sec:law}): $\Delta = G +
     \mathrm{readout}(\mathrm{base})$, validated from CIFAR scale to
     ImageNet scale, with its boundary cases reported as findings.
   \item \textbf{A fusion taxonomy with mechanism}
-    (Section~\ref{sec:fusion}): stack / substitute / tax, decided by
+    (Section~\ref{sec:fusion}): stack, substitute, or tax, decided by
     whether the fused sources carry the same information currency, and
     verified on the feature side, not just end-to-end.
   \item \textbf{A decision guide} (Section~\ref{sec:guide}): a
@@ -114,9 +114,9 @@ cascades of fixed wavelets rival learned features in small-data regimes
 convolutions have been used to regularize or cheapen early layers
 \citep{luan2018gaborcnn,sarwar2017gabor}. These lines place the structure
 \emph{in the forward path}, where it occupies input bandwidth permanently.
-Our forward-path baselines reproduce their known failure mode -- a
+Our forward-path baselines reproduce their known failure mode, a
 mid-data penalty band that no filter choice escapes
-(Section~\ref{sec:ablations}) -- and our central object differs precisely
+(Section~\ref{sec:ablations}), and our central object differs precisely
 in that the structure lives in a training-only auxiliary target whose
 influence decays to zero, so abundant data can override the prior rather
 than pay for it.
@@ -131,7 +131,7 @@ pre-training stage is run, and the target is a closed-form function of the
 input. Our controls quantify how much this matters: a learned same-data
 teacher moves accuracy by at most $0.7$ points anywhere on an eight-point
 envelope, HOG targets recover roughly half the moment target's gain, and a
-random fixed target does nothing (Table~\ref{tab:controls}) -- so the gain
+random fixed target does nothing (Table~\ref{tab:controls}), so the gain
 is attributable to the moment structure itself, not to auxiliary
 regression as a mechanism.
 
@@ -156,7 +156,7 @@ domain shift and with training-from-scratch competitive given enough data
 \citep{he2019rethinking}. We use transfer both as a comparator and as a
 probe of fusion: injecting the spectral prior \emph{on top of} ImageNet
 weights is the one configuration in our grid that is destructive
-everywhere, and linear probing shows the destruction is feature-side --
+everywhere, and linear probing shows the destruction is feature-side,
 early shaping erases exactly the mature structure the initialization
 supplied, in proportion to how much that structure was worth
 (Section~\ref{sec:fusion}).
@@ -184,7 +184,7 @@ and reproducibility in ML remains fragile \citep{raff2019step}. We adopt
 the strictest discipline we could operationalise: a single frozen recipe;
 committed per-subset indices so every intervention sees byte-identical
 images; numerically fingerprinted filter banks; deviations quarantined
-under a separate namespace and never mixed into headline tables; and --
-unusual in this literature -- predictions with explicit falsifiers
+under a separate namespace and never mixed into headline tables; and,
+unusual in this literature, predictions with explicit falsifiers
 registered \emph{before} each wave of runs, with misses reported as
 plainly as hits (Sections~\ref{sec:instrument}, \ref{sec:scale}).

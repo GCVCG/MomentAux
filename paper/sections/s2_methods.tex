@@ -10,11 +10,11 @@ byte-identical images; deviations are quarantined under a diagnostic
 namespace and never enter headline tables. \textbf{(b)} MomentAux, the
 fused knowledge source: a pinned bank of oriented-energy targets
 regressed from a third-stage tap during training only, with the loss
-weight $\lambda$ decaying to exactly zero -- so the deployed network is
+weight $\lambda$ decaying to exactly zero, so the deployed network is
 byte-identical to the baseline and high-data neutrality is structural.
-\textbf{(c)} Each cell yields two measurements -- the end-to-end gain
+\textbf{(c)} Each cell yields two measurements, the end-to-end gain
 $\Delta$ and the frozen-feature gain $G$ from an identically-configured
-linear probe -- whose difference defines the readout term of
+linear probe, whose difference defines the readout term of
 Eq.~\ref{eq:law}. \textbf{(d)} The comparator ladder, ordered by declared
 training cost; all are fused into the same frozen recipe, and their
 pairwise combinations are measured as well.}
@@ -24,166 +24,257 @@ pairwise combinations are measured as well.}
 The benchmark's claims rest on the comparisons being controlled, so we
 describe the controls before the results (Fig.~\ref{fig:method}).
 
-\subsection{Frozen recipe and committed subsets}
+\subsection{Frozen recipe and committed subsets}\label{sec:recipe}
 Every headline cell trains with an identical recipe: SGD with momentum
 $0.9$, learning rate $0.1$, weight decay $5{\times}10^{-4}$, cosine
 schedule, 200 epochs, batch size 128, and random-crop + horizontal-flip
-augmentation only. The recipe is frozen in the strict sense: no cell tunes
-it, and any configuration that must deviate (AdamW for architectures the
+augmentation only. The recipe is frozen in the strict sense: no cell
+tunes it. Configurations that must deviate, AdamW for architectures the
 SGD recipe cannot train, reduced epochs at ImageNet scale, added
-augmentation stacks) carries a diagnostic namespace and never enters a
-headline table; within such cells both arms of every comparison share the
-deviation, so paired differences remain valid.
+augmentation stacks, carry a diagnostic namespace enforced by a guard
+in the training entry point, and never enter a headline table. Within
+such cells both arms share the deviation, so the paired difference
+remains valid even though the absolute numbers are not comparable to
+frozen-recipe cells.
 
-Data fractions are not sampled at run time. For every dataset and fraction
-we commit stratified subset indices to version control, so every
-intervention -- baseline, prior, SSL initialization, transfer -- sees
-byte-identical images. Even the dataloader worker count is part of the
-reproducibility contract, because PyTorch seeds per-worker augmentation
-streams: we verified that changing it re-draws augmentations (validly but
-non-reproducibly) and therefore pin it per cell.
+Data fractions are not sampled at run time. For each dataset $\mathcal{D}$
+and fraction $p$ we precompute a stratified index set
+$S_{\mathcal{D},p}$ by drawing, per class, a seeded permutation truncated
+to $p\%$, and commit it to version control. Every intervention therefore
+consumes byte-identical images, which is what makes an accuracy
+difference attributable to the intervention rather than to the draw.
+Because the recipe fixes epochs rather than steps, the optimisation
+budget scales with $|S_{\mathcal{D},p}|$; we treat data and compute as
+jointly varied along this axis and say so wherever it matters.
 
-\subsection{The prior: MomentAux}
-The knowledge source under test is a bank of eight complex Gabor
-quadrature pairs (two spatial scales, four orientations) whose
-phase-invariant magnitude responses form an oriented-energy map of the
-input -- the classical spectral description of early vision
-\citep{jones1987gabor}. The bank is \emph{pinned}: unit tests fingerprint
-its numerical values, so no result can drift with a library version.
+Two further controls proved necessary in practice. Dataloader worker
+count is part of the reproducibility contract: PyTorch seeds each
+worker's augmentation RNG from a base seed plus worker index, so changing
+the count re-draws the augmentation stream. The change is unbiased, it
+acts like a different augmentation seed, but it breaks byte-level
+reproducibility, so the count is pinned per cell and recorded per run.
+Second, the filter bank is \emph{pinned}: unit tests fingerprint its
+numerical values, so no measurement can silently drift with a library
+version.
 
-During training only, a $1{\times}1$ convolutional head taps the
-backbone's third stage and regresses (MSE) onto the bank's magnitude maps,
-weighted by $\lambda$ that follows a cosine schedule from $\lambda_0$
-to exactly zero. Because $\lambda$ reaches zero, late training is pure
-cross-entropy; high-data neutrality is structural rather than tuned. The
-deployed network is byte-identical to the baseline: same FLOPs, same
-parameters, no extra inference cost. Training overhead is ${\sim}2\%$.
-One setting -- $\lambda_0{=}1.0$, magnitude target, third-stage tap, with
-head-norm projection (Section~\ref{sec:ablations}) -- transplants across
-every dataset and backbone in the study without retuning; we call it the
-\emph{champion} configuration and use it verbatim unless stated.
+\subsection{The prior: MomentAux}\label{sec:momentaux}
+\paragraph{The knowledge source.} The bank consists of $N{=}8$ complex
+Gabor quadrature pairs, two spatial scales $\sigma \in \{2,3\}$ crossed
+with four orientations $\theta \in \{0, \pi/4, \pi/2, 3\pi/4\}$; each
+of the form
+\begin{equation}
+  g_{\sigma,\theta}(\mathbf{u}) \;=\;
+  e^{-\lVert \mathbf{u}\rVert^{2}/2\sigma^{2}}\,
+  e^{\,i\,k_\sigma\, \mathbf{u}^{\!\top} (\cos\theta, \sin\theta)},
+  \label{eq:gabor}
+\end{equation}
+with $k_\sigma$ set so each envelope carries a comparable number of
+cycles. The target is the \emph{phase-invariant magnitude} of the
+response to the greyscale input $x$,
+\begin{equation}
+  m_{\sigma,\theta}(x) \;=\; \bigl\lVert\, x * g_{\sigma,\theta} \,\bigr\rVert,
+  \label{eq:energy}
+\end{equation}
+stacked over the $N$ pairs and average-pooled to the tapped stage's
+spatial resolution, giving $\mathbf{m}(x)\in\mathbb{R}^{N\times h\times w}$.
+Magnitude rather than raw filter response is the operative choice: the
+ablation of Section~\ref{sec:ablations} shows oriented \emph{edges} are a
+poor target ($-0.24$) while their phase-invariant energy is the best one
+measured ($+2.81$ at the same cell).
 
-\subsection{Comparators and cost normalization}
-We normalize by declared training cost relative to the baseline:
-MomentAux ${\approx}1.02\times$; SimCLR, SimSiam and DINO initializations
-$2\times$ (a full pre-training stage on the same subset images, then the
-frozen recipe); ImageNet transfer (amortised, but an external-data
-advantage we flag); DeiT-strength augmentation \citep{touvron2021deit}
-${\approx}1\times$ compute but a modern recipe change; FitNets teachers
-$2\times$; HOG targets ${\approx}1.02\times$. SSL pre-training uses each
-method's published small-image protocol (200 epochs, batch 128, the
-method's own view augmentations), runs \emph{only} on the committed
-subset images of the cell it initializes -- no external data anywhere
-except declared ImageNet transfer -- and is followed by the unchanged
-frozen recipe. We additionally verify SimCLR was given its best shot:
-strengthening its views to DeiT strength \emph{hurts} it at every
-fraction tested (Section~\ref{sec:fusion}).
+\paragraph{The fusion mechanism.} Let $f_3(x)$ be the backbone's
+third-stage activations and $W$ a $1{\times}1$ convolution mapping them
+to $N$ channels. Training minimises
+\begin{equation}
+  \mathcal{L}(t) \;=\; \mathcal{L}_{\mathrm{CE}}
+   \;+\; \lambda(t)\,
+   \bigl\lVert\, W f_3(x) - \mathbf{m}(x) \,\bigr\rVert_2^2 ,
+  \qquad
+  \lambda(t) = \tfrac{\lambda_0}{2}\Bigl(1+\cos\tfrac{\pi t}{T}\Bigr),
+  \label{eq:loss}
+\end{equation}
+so the prior dominates early and vanishes by the final epoch. Three
+properties follow directly and each is load-bearing for the paper's
+claims. (i) Because $\lambda(T)=0$ \emph{exactly}, late training is pure
+cross-entropy and neutrality at sufficiency is structural, not tuned,
+the right-hand end of every envelope in Table~\ref{tab:envelope} is a
+prediction of the schedule, not a fitted result. (ii) $W$ is discarded
+after training, so the deployed network is byte-identical to the
+baseline: same parameters, same FLOPs, zero inference cost. (iii) The
+measured training overhead is ${\sim}2\%$, against $100\%$ for a
+self-supervised pre-training stage.
+
+\paragraph{The scale degeneracy and its fix.} The auxiliary objective in
+Eq.~\ref{eq:loss} is invariant under replacing $f_3$ by $f_3/c$ and $W$ by $cW$,
+which lets SGD satisfy it by collapsing the tapped features and inflating
+the head rather than by learning structure. We traced this directly:
+on ResNet-50 the tapped standard deviation fell from $0.596$ to $0.051$ while
+$\lVert W\rVert$ grew from $1.64$ to $11.2$ and cross-entropy stalled at
+chance. Projecting $\lVert W \rVert$ back to its initialisation norm after
+each step removes the degenerate direction, converting a bistable failure
+into a stable $+3.9$ (Section~\ref{sec:ablations}); we adopt it always-on.
+One configuration, $\lambda_0{=}1.0$, magnitude target, third-stage tap,
+head-norm on, transplants across every dataset and backbone without
+retuning, and we use it verbatim as the \emph{champion} unless stated.
+
+\subsection{Comparators and cost normalisation}
+We normalise by declared training cost relative to the baseline:
+MomentAux ${\approx}1.02\times$; SimCLR, SimSiam and DINO initialisations
+$2\times$ (a full pre-training stage, then the frozen recipe);
+DeiT-strength augmentation \citep{touvron2021deit} ${\approx}1\times$
+compute but a modern recipe change; FitNets teachers $2\times$; HOG
+targets ${\approx}1.02\times$; ImageNet transfer amortised, but flagged
+throughout as the one comparator with an external-data advantage.
+
+Every self-supervised stage runs on the committed subset images of the
+cell it initialises, never on extra data, for 200 epochs at batch
+128 with that method's own published view augmentations, and is followed
+by the unchanged frozen recipe. Because a weak comparator would flatter
+our result, we test SimCLR's configuration explicitly rather than assume
+it: strengthening its contrastive views to DeiT strength makes it
+\emph{worse} at every fraction measured (Section~\ref{sec:fusion}), so
+its standard views are its best shot at this scale.
 
 \subsection{Measuring features: the probe protocol}
-The law needs a feature-side quantity. For every trained pair we fit a
-multinomial logistic probe (LBFGS, fixed hyper-parameters) on frozen
-penultimate features over the full training split, and define $G$ as the
-aux-minus-baseline probe gap under identical probing
-\citep{alain2016understanding}. Probes are diagnostics, never headline
-numbers. Two scope rules, learned during the study and enforced
-throughout: a probe is trustworthy only while it holds substantially more
-labels than the cell trained on (at 100\% cells the $G$/readout split is
-not interpreted); and at ImageNet64 scale, where a 1.28M-row LBFGS is
-impractical, probes use fixed per-class budgets that are compared only
-within the same budget.
+The law needs a feature-side quantity. For each trained checkpoint we
+freeze the network, extract penultimate features
+$z = \mathrm{pool}(f_L(x))$ for the full training split under the
+deterministic (no-augmentation) transform, and fit a multinomial logistic
+probe with LBFGS and fixed hyper-parameters
+\citep{alain2016understanding}:
+\begin{equation}
+  \min_{V}\; \tfrac{1}{n}\!\sum_{i} \mathrm{CE}\bigl(Vz_i, y_i\bigr)
+    \;+\; 10^{-4}\lVert V\rVert_2^2 .
+  \label{eq:probe}
+\end{equation}
+Only the features differ between arms; everything else is identical. We
+define the feature gain as the probe-accuracy gap
+$G = \mathrm{acc}_{\mathrm{probe}}^{\mathrm{aux}} -
+     \mathrm{acc}_{\mathrm{probe}}^{\mathrm{base}}$, and the readout term
+as the residual $\Delta - G$.
+
+Probes are diagnostics and never headline numbers; they read labels the
+cell never saw. Two scope rules, both learned the hard way and enforced
+throughout: a probe is interpretable only while it holds substantially
+more labels than the cell trained on, so at 100\% cells we report the
+aux-vs-baseline gap but do not split it into $G$ and readout; and at
+ImageNet64 scale, where an LBFGS fit over $1.28$M rows is impractical,
+probes use fixed per-class budgets whose $G$ values are compared only to
+other same-budget probes.
+
+\subsection{Statistical protocol}
+Each cell runs ${\geq}3$ seeds, ten for headline envelopes. For a paired
+cell we report $\Delta$ as the difference of arm means with the SEM of
+that difference, and propagate to the readout term as
+\begin{equation}
+  \mathrm{SEM}(\mathrm{readout}) =
+  \sqrt{\mathrm{SEM}(\Delta)^2 + \mathrm{SEM}(G)^2},
+  \label{eq:sem}
+\end{equation}
+using all four arms (two end-to-end, two probe). A cell is called
+\emph{resolvable} when $|\mathrm{readout}| > 2\,\mathrm{SEM}$; only
+resolvable cells can test the sign law, and Section~\ref{sec:law}
+explains why counting the rest would be misleading rather than
+conservative. Cells in which any seed collapses to chance are flagged
+\emph{bistable}, excluded from headline status, and reported as findings
+about trainability in their own right.
 
 \subsection{Pre-registration}
 Each experimental wave was launched with numeric prediction bands and
-explicit falsifiers recorded in the project ledger before any result
-existed. We report outcomes against those bands, including the misses:
-of the major predictions in this program, several failed in instructive
-ways (our ``SSL is data-regime-bounded'' prediction was wrong; our
-``augmentation substitutes for the prior'' prediction was wrong in the
-opposite direction), and both failures became findings
-(Section~\ref{sec:fusion}). Seed counts are three per cell minimum, ten
-for headline envelopes; cells with collapsed seeds are flagged bistable
-and excluded from headline status as a finding in their own right.
+explicit falsifiers recorded in a project ledger before any result
+existed, and outcomes are reported against those bands including the
+misses. Several of our predictions failed instructively, ``SSL is
+data-regime-bounded'' (wrong: SSL won at every conv fraction under plain
+augmentation) and ``augmentation substitutes for the prior'' (wrong in
+the opposite direction: it amplifies), and both failures became
+findings in Section~\ref{sec:fusion}. We regard this discipline as part
+of the instrument rather than a presentational choice: a benchmark whose
+predictions cannot fail is not measuring anything.
 
 %% ---------------------------------------------------------------------
 \section{The grid}\label{sec:grid}
 
-\begin{table*}[t]
-\caption{The benchmark at a glance. Every cell trains the frozen recipe of
-Section~\ref{sec:instrument}; costs are declared multiples of baseline
+\begin{table}[t]
+\caption{The benchmark at a glance. Every cell trains the frozen recipe
+of Section~\ref{sec:recipe}; costs are declared multiples of baseline
 training compute.}
 \label{tab:glance}
-\centering\small
-\begin{tabular}{@{}ll@{}}
+\centering\scriptsize
+\setlength{\tabcolsep}{2.6pt}
+\begin{tabular}{@{}lp{0.60\columnwidth}@{}}
 \toprule
 \textbf{Axis} & \textbf{Coverage} \\
 \midrule
-Datasets (14+2) & CIFAR-10/100, ciFAIR-100, STL-10, Tiny-ImageNet,\\
- & coarse/relabelled variants; EuroSAT, DTD, Food-101,\\
- & PathMNIST, CUB-200; ImageNet64, ImageNet-100 \\
+Datasets & CIFAR-10/100, ciFAIR-100, STL-10, Tiny-ImageNet, coarse
+  variants; EuroSAT, DTD, Food-101, PathMNIST, CUB-200; ImageNet64,
+  ImageNet-100 \\
 Domains & photographic, satellite, texture, food, histopathology \\
-Backbones (7) & ResNet-18/34/50, MobileNetV3, ConvNeXt-T, \\
- & ViT (tiny/S/B), Swin-T \\
-Data scale & 500 $\rightarrow$ 1.28M images; 10 $\rightarrow$ 1000 classes \\
+Backbones & ResNet-18/34/50, MobileNetV3, ConvNeXt-T, ViT-tiny/S/B,
+  Swin-T \\
+Data scale & 500 to 1.28M images; 10 to 1000 classes \\
 Resolution & 32, 64, 96, 224\,px \\
-Interventions & MomentAux (${\sim}1.02\times$); SimCLR/SimSiam/DINO \\
- & ($2\times$); ImageNet transfer; DeiT augmentation; \\
- & FitNets teacher ($2\times$); HOG target; combinations \\
-Measured cells & $2{,}800$ cells, ${\sim}8{,}900$ runs (${\geq}3$ seeds; envelopes at 10) \\
+Interventions & MomentAux ($1.02\times$); SimCLR, SimSiam and DINO
+  ($2\times$); ImageNet transfer; DeiT augmentation; FitNets teacher
+  ($2\times$); HOG target; pairwise combinations \\
+Measured & $2{,}800$ cells, ${\sim}8{,}900$ runs \\
 \bottomrule
 \end{tabular}
-\end{table*}
+\end{table}
 
-Table~\ref{tab:glance} summarizes the design space. Three views of the
-grid organize the results that follow.
+Table~\ref{tab:glance} summarises the design space. Three views of the
+grid organise the results that follow.
 
 \subsection{The prior's own envelope}
-\begin{table*}[t]
-\caption{Complete envelopes: end-to-end gain $\Delta$ of the champion
-prior over the shared baseline (points; per-cell SEMs, $0.07$--$0.7$,
-ship with the released records). Bold cells: ten seeds per arm; others
-three. The envelope is unimodal on every dataset; at 100\% the prior is
-neutral by construction ($\lambda \to 0$).}
+\begin{table}[t]
+\caption{Complete envelopes: gain $\Delta$ of the champion prior over the
+shared baseline (points). Bold: ten seeds per arm; others three. Per-cell
+SEMs ($0.07$--$0.7$) ship with the released records.}
 \label{tab:envelope}
-\centering\small
-\setlength{\tabcolsep}{4.2pt}
-\begin{tabular}{@{}lrrrrrrrrr@{}}
+\centering\scriptsize
+\setlength{\tabcolsep}{2.6pt}
+\begin{tabular}{@{}lrrr@{}}
 \toprule
- & \multicolumn{9}{c}{\textbf{data fraction}} \\
-\cmidrule(l){2-10}
-\textbf{dataset} & 1\% & 2\% & 3\% & 5\% & 7\% & 10\% & 15\% & 25\% & 100\% \\
+fraction & CIFAR-100 & CIFAR-10 & Tiny-IN \\
 \midrule
-CIFAR-100 & $\mathbf{+1.42}$ & $+2.50$ & $+3.68$ & $\mathbf{+5.15}$ & $+4.87$ & $\mathbf{+3.75}$ & $+2.55$ & $+0.25$ & $+0.08$ \\
-CIFAR-10 & $\mathbf{+6.37}$ & $\mathbf{+6.66}$ & $+5.38$ & $+4.41$ & $+2.21$ & $+1.09$ & $-0.66$ & $-0.83$ & $-0.26$ \\
-Tiny-ImageNet & $+1.49$ & $+1.81$ & -- & $\mathbf{+2.12}$ & -- & $+1.65$ & -- & $+0.10$ & $-0.42$ \\
+1\%   & $\mathbf{+1.42}$ & $\mathbf{+6.37}$ & $+1.49$ \\
+2\%   & $+2.50$          & $\mathbf{+6.66}$ & $+1.81$ \\
+3\%   & $+3.68$          & $+5.38$          &--\\
+5\%   & $\mathbf{+5.15}$ & $+4.41$          & $\mathbf{+2.12}$ \\
+7\%   & $+4.87$          & $+2.21$          &--\\
+10\%  & $\mathbf{+3.75}$ & $+1.09$          & $+1.65$ \\
+15\%  & $+2.55$          & $-0.66$          &--\\
+25\%  & $+0.25$          & $-0.83$          & $+0.10$ \\
+100\% & $+0.08$          & $-0.26$          & $-0.42$ \\
 \bottomrule
 \end{tabular}
-\end{table*}
+\end{table}
 
-\begin{table*}[t]
-\caption{Domain-dataset cells at representative fractions (points; three
-seeds). The same unimodal shape recurs on satellite, texture, food,
-histopathology and fine-grained data. PathMNIST cells above ${\sim}15\%$
-are confounded by a distribution-shifted test split that penalizes
-\emph{all} methods (Appendix~\ref{app:domains}); we interpret only its
-low-data cells.}
+\begin{table}[t]
+\caption{Domain datasets at representative fractions (points, three
+seeds). The unimodal shape recurs on satellite, texture, food,
+histopathology and fine-grained data. PathMNIST above ${\sim}15\%$ is
+confounded by a shifted test split that penalises \emph{all} methods
+(Appendix~\ref{app:domains}).}
 \label{tab:domainenv}
-\centering\small
-\setlength{\tabcolsep}{5pt}
-\begin{tabular}{@{}lrrrrr@{}}
+\centering\scriptsize
+\setlength{\tabcolsep}{2.6pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lrrrr@{}}
 \toprule
-\textbf{dataset} & 1\% & 5\% & 10--15\% & 25--50\% & 100\% \\
+dataset & 1\% & 5\% & 10--15\% & $\geq$25\% \\
 \midrule
-EuroSAT & $+2.67$ & $+0.84$ & $+1.22$ & ${\sim}0$ & ${\sim}0$ \\
-Food-101 & -- & $+5.63$ & $+3.18$ & $-0.47$ & $-0.47$ \\
-DTD & -- & $+0.30$ & $+2.15$ & -- & $+3.55$ \\
-PathMNIST & $+5.7$ & -- & $+1.74$ & (confounded) & -- \\
-CUB-200 & -- & -- & -- & $+0.56$ & $+2.74$ \\
-STL-10 & -- & -- & $+5.92$ & $+3.18$ & -- \\
+EuroSAT   & $+2.67$ & $+0.84$ & $+1.22$ & ${\sim}0$ \\
+Food-101  &,      & $+5.63$ & $+3.18$ & $-0.47$ \\
+DTD       &,      & $+0.30$ & $+2.15$ & $+3.55$\rlap{$^{\ast}$} \\
+PathMNIST & $+5.70$ &,      & $+1.74$ & conf. \\
+CUB-200   &,      &,      &,      & $+2.74$\rlap{$^{\ast}$} \\
+STL-10    &,      &,      & $+5.92$ & $+3.18$ \\
 \bottomrule
-\end{tabular}
-\end{table*}
+\multicolumn{5}{@{}l}{\footnotesize $^{\ast}$value at 100\%.} \\
+\end{tabular}}
+\end{table}
 
-\begin{figure*}[t]
+\begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figs/envelopes.pdf}
 \caption{The prior's gain across the data axis. (a) On convolutional
@@ -192,56 +283,62 @@ tracks task difficulty, not fraction. (b) On ViT-tiny the gain is large
 at \emph{every} scale, and DeiT-strength augmentation amplifies rather
 than replaces it (Section~\ref{sec:fusion}).}
 \label{fig:envelopes}
-\end{figure*}
+\end{figure}
 
 Tables~\ref{tab:envelope}--\ref{tab:domainenv} and
 Fig.~\ref{fig:envelopes}a show the prior's gain across the data axis.
 Three regularities recur. The envelope is \emph{unimodal}: gains rise
 from the extreme-scarcity floor, peak in a dataset-specific band, and
 decay toward zero as data becomes sufficient. The peak's location tracks
-the dataset's difficulty rather than its fraction -- easy ten-way
+the dataset's difficulty rather than its fraction, easy ten-way
 CIFAR-10 peaks by 1--2\% and is already negative at 15\%, while
-hundred-way CIFAR-100 peaks at 5\%. And at full data the prior is
-neutral within noise on every one of ten populations, which is what the
-$\lambda \to 0$ schedule is for: the fusion asks nothing when the data
+hundred-way CIFAR-100 peaks at 5\%. And at full data the prior is neutral
+within noise on every one of ten populations, which is what the
+the decaying weight schedule is for: the fusion asks nothing when the data
 can pay for everything.
 
 \subsection{The multi-method comparison}
 The same envelope measured for every comparator produces the head-to-head
 tables that Sections~\ref{sec:fusion} and \ref{sec:guide} analyse. As a
 preview of their shape: on CIFAR-100 under plain augmentation, SimCLR
-initialization at $2\times$ compute beats the $1.02\times$ prior by
-$+0.85$ to $+5.0$ points between 1\% and 10\% and converges back to parity
-by 50\%; SimSiam learns nothing at this scale (${\leq}+0.9$ everywhere);
-DINO trails the prior at every fraction below 25\%. On attention
-backbones, and on any backbone under a modern augmentation recipe, the
-ordering inverts (Section~\ref{sec:fusion}).
+initialisation at $2\times$ compute beats the $1.02\times$ prior by
+$+0.85$ to $+5.0$ points between 1\% and 10\% and converges back to
+parity by 50\%; SimSiam learns nothing at this scale
+(${\leq}+0.9$ everywhere); DINO trails the prior at every fraction below
+25\%. On attention backbones, and on any backbone under a modern
+augmentation recipe, the ordering inverts (Section~\ref{sec:fusion}).
 
-\subsection{Attention: the regime where the prior is dramatic}
-\begin{table*}[t]
+\subsection{Attention: where the prior is dramatic}
+\begin{table}[t]
 \caption{ViT-tiny on CIFAR-100: gain of the prior under the plain recipe
-($\Delta_{\mathrm{plain}}$) and under DeiT-strength augmentation
-($\Delta_{\mathrm{DeiT}}$), and the amplification ratio. Augmentation does
-not substitute for the prior; it amplifies it and shifts its peak toward
-more data. Three seeds per cell.}
+and under DeiT-strength augmentation, with the amplification ratio.
+Augmentation does not substitute for the prior; it amplifies it and
+shifts its peak toward more data. Three seeds per cell.}
 \label{tab:vitenvelope}
-\centering\small
-\setlength{\tabcolsep}{4.5pt}
-\begin{tabular}{@{}lrrrrrrrrr@{}}
+\centering\scriptsize
+\setlength{\tabcolsep}{2.6pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lrrr@{}}
 \toprule
-fraction & 1\% & 2\% & 3\% & 5\% & 7\% & 10\% & 15\% & 25\% & 100\% \\
+fraction & $\Delta_{\mathrm{plain}}$ & $\Delta_{\mathrm{DeiT}}$ & ratio \\
 \midrule
-$\Delta_{\mathrm{plain}}$ & $+1.4$ & $+3.3$ & $+6.2$ & $+9.4$ & $+11.0$ & $+13.3$ & $\mathbf{+14.4}$ & $+13.7$ & $+9.9$ \\
-$\Delta_{\mathrm{DeiT}}$ & $+3.2$ & $+6.0$ & $+9.5$ & $+16.3$ & $+18.7$ & $+21.0$ & $+24.6$ & $\mathbf{+25.1}$ & $+13.9$ \\
-ratio & 2.2 & 1.8 & 1.5 & 1.7 & 1.7 & 1.6 & 1.7 & 1.8 & 1.4 \\
+1\%   & $+1.4$  & $+3.2$            & 2.2 \\
+2\%   & $+3.3$  & $+6.0$            & 1.8 \\
+3\%   & $+6.2$  & $+9.5$            & 1.5 \\
+5\%   & $+9.4$  & $+16.3$           & 1.7 \\
+7\%   & $+11.0$ & $+18.7$           & 1.7 \\
+10\%  & $+13.3$ & $+21.0$           & 1.6 \\
+15\%  & $\mathbf{+14.4}$ & $+24.6$  & 1.7 \\
+25\%  & $+13.7$ & $\mathbf{+25.1}$  & 1.8 \\
+100\% & $+9.9$  & $+13.9$           & 1.4 \\
 \bottomrule
-\end{tabular}
-\end{table*}
+\end{tabular}}
+\end{table}
 
 Table~\ref{tab:vitenvelope} previews the study's most striking axis.
 ViT-tiny trained from scratch gains $+9.9$ points from the prior even at
-\emph{full} CIFAR-100 -- a scale at which every convolutional backbone is
-neutral -- and under the standard DeiT recipe the gains grow to
+\emph{full} CIFAR-100, a scale at which every convolutional backbone is
+neutral, and under the standard DeiT recipe the gains grow to
 $+25$ points, peaking later in the data axis. The best ViT number in the
 study, $75.3\%$ at full CIFAR-100, is DeiT augmentation \emph{plus} the
 prior, against $61.4\%$ for the recipe alone. Sections~\ref{sec:law} and

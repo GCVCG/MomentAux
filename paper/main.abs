@@ -1,9 +1,9 @@
 Fusing prior knowledge with data-driven learning is attractive precisely
 where data is scarce, yet the field lacks a controlled account of when such
 fusion helps, when it is redundant, and when it actively harms. We present a
-benchmark that measures one fixed, hand-crafted source of knowledge -- a
-pinned bank of Gabor/moment spectral targets, injected only during training
-through an auxiliary regression head at $\sim$2\% compute overhead -- against
+benchmark that measures one fixed, hand-crafted source of knowledge, a
+pinned bank of Gabor and moment spectral targets, injected only during training
+through an auxiliary regression head at $\sim$2\% compute overhead, against
 the leading data-driven alternatives (SimCLR, SimSiam, DINO, ImageNet
 transfer, heavy augmentation, learned teachers) under one frozen recipe with
 committed data subsets: 14 datasets, 7 backbone families, data scales from
