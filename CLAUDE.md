@@ -1951,6 +1951,30 @@ ported vs corrected and why.
   224px/86M params under a pre-registered caveat; G1 is NOT declared fired
   on a ceiling-compressed cell. The vits pair (repairing) gives the second,
   less-compressed S1 point (aux e2e 78.4 sits farther from any ceiling).
+  *** FULL RECOVERY WITHOUT RETRAINING — last.pt SURVIVED THE RACE
+  (2026-08-07 midday). Insight: the duplicates were all KILLED MID-RUN, and
+  last.pt is written only at run COMPLETION — so the originals' final-epoch
+  weights were never touched. mtimes confirm (damaged best.pt all 12:26-13:03
+  = duplicate writes; last.pt hours earlier = original completions), and an
+  identity audit of all 28 pulled last.pt files returned **28/28 GENUINE**
+  (last.pt eval == final_test_acc to 0.04). CONSEQUENCE: the 21-run
+  ckpt-repair retrain plan is CANCELLED (1-2 node-days saved); worklist.big
+  trimmed to the 3 genuine heals; the 21 wrong-epoch best.pt QUARANTINED
+  (renamed *.wrongepoch on BSC AND locally so nothing can silently probe
+  them). The remaining P1/S1 probes run locally with --ckpt last.pt, BOTH
+  arms of each pair identically, so every gap is protocol-clean; PROTOCOL
+  NOTE: those G values are measured on final-epoch weights rather than
+  best.pt — for these diag cells best≈final (largest gap 0.10), and the
+  vitb pair (probed on genuine best.pt) is unaffected.
+  *** TRAIN.PY RUN-DIR GUARDS SHIPPED (2026-08-07, local + BSC, suite
+  102/102, all three smoke-tested): (1) COMPLETED-RUN GUARD — final.json
+  present => SKIP (idempotent re-runs; every stale-worklist incident #2..#7
+  reduces to re-running finished cells; MS_FORCE_RERUN=1 overrides);
+  (2) EXCLUSIVE RUN LOCK — flock on <seed_dir>/.runlock, second trainer on
+  the same (config,seed) ABORTS loudly instead of racing checkpoint writes
+  (the exact dual-lane failure that caused the wrong-epoch damage);
+  (3) ATOMIC CHECKPOINT WRITES — best.pt/last.pt via tmp+os.replace, so a
+  torn/half-written file (the corrupt-cnx signature) can no longer exist.
   STAGE-1/2 SCOREBOARD: P2 ✓  P3 ✓  S2 ✓(partial)  S3 ✓(above band)  S4 ✓
   — falsifiers F2, F3, G2, G3, G4 ALL DEAD. Still open: P1/S1 (Delta ≈ G
   at scale) — needs the fixed-shots probe pass; and the last 4 in-flight

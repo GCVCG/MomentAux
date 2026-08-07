@@ -139,6 +139,32 @@ def main():
     out_dir = os.path.join(args.out_root, name, f"seed{args.seed}")
     os.makedirs(out_dir, exist_ok=True)
 
+    # --- RUN-DIR GUARDS (2026-08-07, after the duplicate-race incident that
+    # left 21 wrong-epoch best.pt files: two lanes trained the same seed dir
+    # concurrently, and the loser's mid-run "best so far" overwrote the
+    # winner's finished weights).
+    # (1) Completed-run guard: final.json is the record of a finished cell.
+    #     Re-running would overwrite scored, committed numbers with a fresh
+    #     draw -- every stale-worklist incident (#2..#7) reduces to this.
+    #     MS_FORCE_RERUN=1 overrides for a deliberate re-measurement.
+    if (os.path.exists(os.path.join(out_dir, "final.json"))
+            and not os.environ.get("MS_FORCE_RERUN")):
+        print(f"SKIP: {out_dir}/final.json exists -- this cell is complete. "
+              f"Set MS_FORCE_RERUN=1 to retrain deliberately.")
+        return
+    # (2) Exclusive run lock: a second trainer on the same seed dir aborts
+    #     LOUDLY instead of silently racing checkpoint writes. The fd must
+    #     outlive this scope, so it is parked on the function.
+    import fcntl
+    lock_fd = open(os.path.join(out_dir, ".runlock"), "w")
+    try:
+        fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        raise SystemExit(
+            f"ABORT: {out_dir} is locked -- another training process is "
+            f"live on this exact (config, seed). Refusing to race it.")
+    main._run_lock = lock_fd  # keep the lock for the process lifetime
+
     set_seed(args.seed)
     device = torch.device(args.device)
     if device.type != "cuda":
@@ -374,13 +400,19 @@ def main():
         csv_file.flush()
         if test_acc > best_acc:
             best_acc = test_acc
-            torch.save(model.state_dict(), os.path.join(out_dir, "best.pt"))
+            # atomic: write-then-rename, so a reader (or a crash) can never
+            # see a half-written checkpoint (the corrupt-cnx signature).
+            _tmp = os.path.join(out_dir, "best.pt.tmp")
+            torch.save(model.state_dict(), _tmp)
+            os.replace(_tmp, os.path.join(out_dir, "best.pt"))
         print(
             f"epoch {epoch + 1}/{cfg['epochs']} loss {loss_sum / max(n_batches, 1):.4f} "
             f"train {train_acc:.4f} test {test_acc:.4f}"
         )
     csv_file.close()
-    torch.save(model.state_dict(), os.path.join(out_dir, "last.pt"))
+    _tmp = os.path.join(out_dir, "last.pt.tmp")
+    torch.save(model.state_dict(), _tmp)
+    os.replace(_tmp, os.path.join(out_dir, "last.pt"))
 
     final = {
         "name": name,
