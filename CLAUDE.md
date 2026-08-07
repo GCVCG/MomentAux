@@ -2005,6 +2005,13 @@ ported vs corrected and why.
             above the top at 2v2 — a rounding-level miss on a dead-zero
             quantity; the substantive claim (conv feature-neutrality at
             224px) lands exactly. Re-probe at 3v3 when the heals finish.
+  CROSS-MACHINE REPRODUCTION (2026-08-07): the in100 probes were run
+  REDUNDANTLY on solarflare (161.116.84.52, second RTX 3090, fresh venv
+  built that day: torch 2.7.0+cu126 / timm 1.0.27). Probe means agree with
+  the local machine to 0.01-0.05 on all four cells; G(vits) = +11.91 vs
+  +11.95 local. The S1 headline number reproduces on independent hardware
+  and a from-scratch environment. solarflare is now a commissioned second
+  worker (repo+venv+in100 data at /media/HDD_4TB/amughrabi/momentstem).
   THE CAMPAIGN'S LAST PRE-REGISTERED QUESTION IS ANSWERED: the law predicts
   feature gain from accuracy (and vice versa) at 500 images and at 1.28M, at
   32px and at 224px, at 5.7M params and at 86M. FALSIFIER LEDGER, FINAL:
