@@ -557,25 +557,33 @@ class EuroSATMS(Dataset):
     """
 
     def __init__(self, data_root, train=True, band_set="all", transform=None,
-                 pack="eurosat_ms_64.npz"):
-        path = os.path.join(data_root, pack)
-        if not os.path.isfile(path):
+                 pack="eurosat_ms_64"):
+        # MEMMAP, deliberately. The compressed .npz decompresses ~3 GB on every
+        # instantiation, which is ~30 s of startup per run and 3 GB of private
+        # RAM per concurrent worker. The raw .npy is memmapped instead: startup
+        # is instant and the page cache is SHARED across concurrent runs, which
+        # is what makes several cells fit on one machine.
+        img_p = os.path.join(data_root, pack + "_images.npy")
+        meta_p = os.path.join(data_root, pack + "_meta.npz")
+        if not (os.path.isfile(img_p) and os.path.isfile(meta_p)):
             raise FileNotFoundError(
-                f"{path} not found; build it with scripts/make_eurosat_ms.py")
-        z = np.load(path, allow_pickle=False)
-        idx = z["train_idx"] if train else z["test_idx"]
-        bands = list(EUROSAT_MS_BANDS[band_set])
-        self.images = z["images"][idx][:, bands]          # (N, C, 64, 64) uint16
-        self.targets = z["labels"][idx].tolist()
-        self.mean = torch.tensor(z["mean"][bands]).view(-1, 1, 1)
-        self.std = torch.tensor(z["std"][bands]).view(-1, 1, 1).clamp_min(1e-6)
+                f"{img_p} / {meta_p} not found; build them with "
+                "scripts/make_eurosat_ms.py")
+        z = np.load(meta_p, allow_pickle=False)
+        self._all = np.load(img_p, mmap_mode="r")         # (27000, 13, 64, 64)
+        self.index = z["train_idx"] if train else z["test_idx"]
+        self.bands = list(EUROSAT_MS_BANDS[band_set])
+        self.targets = z["labels"][self.index].tolist()
+        self.mean = torch.tensor(z["mean"][self.bands]).view(-1, 1, 1)
+        self.std = torch.tensor(z["std"][self.bands]).view(-1, 1, 1).clamp_min(1e-6)
         self.transform = transform
 
     def __len__(self):
         return len(self.targets)
 
     def __getitem__(self, i):
-        x = torch.from_numpy(self.images[i].astype(np.float32) / 10000.0)
+        raw = np.asarray(self._all[self.index[i]][self.bands], dtype=np.float32)
+        x = torch.from_numpy(raw / 10000.0)
         x = (x - self.mean) / self.std
         if self.transform is not None:
             x = self.transform(x)
