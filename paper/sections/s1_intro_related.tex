@@ -177,6 +177,120 @@ the deficit \emph{grows} with model scale at fixed data
 (Section~\ref{sec:scale}), which argues it reflects data-hunger rather
 than small-model capacity.
 
+\paragraph{Large-scale comparative benchmarks.}
+Two recent efforts share our comparative ambition and clarify what is
+still missing. \emph{Battle of the Backbones}
+\citep{goldblum2023battle} compares a broad suite of pretrained
+backbones across tasks over more than 1{,}500 training runs, and finds
+supervised convolutional pre-training still competitive with
+self-supervised and vision-language alternatives. \citet{marks2025closer}
+take a closer look at self-supervised benchmarking specifically, and show
+that conclusions depend heavily on the evaluation protocol chosen. Both
+benchmark \emph{pretrained backbones}, so their unit of comparison is a
+checkpoint someone else produced, and neither normalises by training
+cost nor asks what happens when two sources of information are combined.
+Our unit is instead the \emph{intervention applied to a fixed recipe},
+which is what makes cost normalisation and the stacking question
+answerable at all.
+
+\paragraph{Spectral structure inside transformers.}
+A parallel line injects spectral structure into attention architectures:
+the Scattering Vision Transformer \citep{patro2023scattering} performs
+spectral decomposition with dual-tree complex wavelets inside the token
+mixer, and FViT \citep{chen2025fvit} adds a \emph{learnable} Gabor filter
+to focus attention across scales and orientations. These are
+architectural changes that persist at inference, and each is evaluated as
+a model proposal against published baselines. Our object is the
+complement: the filters are fixed rather than learned, they never enter
+the forward path, and the deployed network is unchanged, which is what
+lets us ask the benchmark question of when adding them pays rather than
+the model question of whether one architecture beats another.
+
+
+\subsection{The gap this paper closes}\label{sec:gap}
+
+\begin{table}[t]
+\caption{Where the literature stands on the five properties a fusion
+question needs, and what this work adds. \cmark{} = property present;
+\pmark{} = partial or incidental; \xmark{} = absent. ``Cost-normalized''
+means comparators are reported against a declared training-compute
+multiple rather than at whatever budget each method's authors chose;
+``feature-side'' means the effect is measured on frozen representations,
+not only end-to-end; ``combination'' means the study measures what
+happens when two sources are applied together.}
+\label{tab:gap}
+\centering\scriptsize
+\setlength{\tabcolsep}{2.6pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+line of work & \rotbox{one frozen recipe} & \rotbox{cost-normalized} &
+  \rotbox{feature-side} & \rotbox{combinations} & \rotbox{predictive model} \\
+\midrule
+Fixed spectral filters in the forward path
+  \citep{bruna2013scattering,oyallon2017scaling,luan2018gaborcnn,patro2023scattering,chen2025fvit}
+  & \pmark & \xmark & \xmark & \xmark & \xmark \\
+Auxiliary / distillation targets
+  \citep{romero2015fitnets,lee2015deeply,wei2022maskfeat}
+  & \pmark & \xmark & \pmark & \xmark & \xmark \\
+Self-supervised pre-training
+  \citep{chen2020simclr,chen2021simsiam,caron2021dino,he2022mae}
+  & \xmark & \xmark & \cmark & \xmark & \xmark \\
+Transfer learning studies
+  \citep{kornblith2019better,he2019rethinking}
+  & \pmark & \xmark & \pmark & \xmark & \xmark \\
+Small-data ViT recipes
+  \citep{touvron2021deit,steiner2022train,liu2021efficient,gani2022train}
+  & \xmark & \pmark & \xmark & \pmark & \xmark \\
+Backbone / SSL benchmarks
+  \citep{goldblum2023battle,marks2025closer,zhai2019vtab}
+  & \pmark & \xmark & \cmark & \xmark & \xmark \\
+\midrule
+\textbf{This work} & \cmark & \cmark & \cmark & \cmark & \cmark \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+Table~\ref{tab:gap} summarises the position. Each column is a property
+that a question about \emph{fusing} information sources requires, and no
+existing line supplies all five at once.
+
+The first column matters because comparisons made under each method's own
+preferred recipe cannot attribute a difference to the method. Benchmarks
+of pretrained backbones \citep{goldblum2023battle,marks2025closer} inherit
+whatever recipe produced each checkpoint, and \citet{marks2025closer}
+show directly that the evaluation protocol can change the conclusion. We
+instead hold one recipe and one set of committed image indices fixed and
+vary only the intervention.
+
+The second is rarely reported at all. Self-supervised pre-training costs
+roughly twice the training compute of the baseline it improves, but that
+factor almost never appears next to the accuracy it buys, which makes
+``method A beats method B'' unanswerable for a practitioner with a fixed
+budget. Every comparator here carries a declared multiple.
+
+The third and fourth columns are what turn a table of numbers into an
+explanation. Linear probing is standard practice for evaluating
+self-supervised representations, so the feature-side view exists in that
+literature; what is missing is applying it to a \emph{paired} comparison
+so the same intervention is measured end-to-end and on frozen features at
+once, which is what exposes redundancy between two sources. Combinations
+are the least studied of all: the question of what happens when a prior
+is applied on top of augmentation, on top of self-supervised weights, or
+on top of a pretrained initialisation is precisely the fusion question,
+and we could find no controlled study that measures all three.
+
+The fifth column is the one we regard as the paper's distinguishing
+contribution. Benchmarks describe; a law predicts. Our decomposition
+$\Delta = G + \mathrm{readout}(\mathrm{base})$ was registered in advance
+and used to call the feature gain of a backbone family it had never seen,
+of four unseen domains, and of ImageNet-scale cells, before those
+measurements existed (Sections~\ref{sec:law} and~\ref{sec:scale}). A
+related decomposition of learning dynamics into representation and
+readout components has been proposed for grokking and double descent; to
+our knowledge no comparable predictive account exists for
+data-efficiency interventions.
+
 \paragraph{Benchmark methodology.}
 Reality-check studies have repeatedly shown that uncontrolled recipes
 manufacture illusory progress \citep{musgrave2020metric,wightman2021resnet},
