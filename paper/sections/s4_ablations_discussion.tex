@@ -295,8 +295,9 @@ family's feature gain from baseline heights alone (four of four in band),
 eight cells on four unseen domains (seven in band, eight of eight correct in
 sign), and the ImageNet-scale residual. Where the law is weakest is equally
 explicit: on the right flank it predicts readout ${\approx}0$ and gets it,
-which is true but not discriminating, so 613 of 989 in-scope cells cannot
-test it at all, and we count only the 278 that can. Nothing here licenses
+which is true but not discriminating, so 475 of 1{,}075 in-scope cells
+cannot test it at all, and of the 498 that can, those above the crossing
+are right only $61\%$ of the time. Nothing here licenses
 extrapolation to web-scale pre-training, to architectures whose baselines do
 not train under this recipe, or to tasks other than classification.
 
