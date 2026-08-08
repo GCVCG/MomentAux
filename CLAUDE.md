@@ -74,9 +74,11 @@ ported vs corrected and why.
 - **CLUSTER SPLIT CONFIRMED**: turing runs the LIVE work (envelope completion,
   new waves); BSC fills the missing numbers of the results grid, including the
   1,467 already-closed-configuration runs. Unchanged from the 2026-07-22 split.
-- BSC password ROTATED 2026-07-22 (the old one had been pasted in plaintext).
-  New value in ~/.bsc_password (0600) on the local machine, never echoed to a
-  transcript; SSH key auth is what the automation actually uses.
+- BSC credentials were rotated 2026-07-22 after an earlier one was pasted in
+  plaintext. Credentials live only in a 0600 file on the local machine, are
+  never echoed to a transcript, and SSH key auth is what the automation
+  actually uses. (Details deliberately omitted: this file is released with
+  the paper.)
 
 ## Active campaign (2026-07-18, user-approved "run the whole needed experiments")
 
@@ -2017,7 +2019,7 @@ ported vs corrected and why.
             quantity; the substantive claim (conv feature-neutrality at
             224px) lands exactly. Re-probe at 3v3 when the heals finish.
   CROSS-MACHINE REPRODUCTION (2026-08-07): the in100 probes were run
-  REDUNDANTLY on solarflare (161.116.84.52, second RTX 3090, fresh venv
+  REDUNDANTLY on a second workstation ("solarflare", second RTX 3090, fresh venv
   built that day: torch 2.7.0+cu126 / timm 1.0.27). Probe means agree with
   the local machine to 0.01-0.05 on all four cells; G(vits) = +11.91 vs
   +11.95 local. The S1 headline number reproduces on independent hardware
