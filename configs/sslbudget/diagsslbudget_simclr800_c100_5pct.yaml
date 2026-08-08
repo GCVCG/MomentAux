@@ -1,0 +1,22 @@
+# SSL BUDGET CONTROL: SimCLR pre-trained for 800 epochs (4x the
+# cost-normalised budget, ~5x the baseline's total cost) before the frozen
+# supervised recipe. The SimSiam arm of this control showed that "learns
+# almost nothing at this scale" was a statement about the BUDGET; this arm
+# asks the same question of the comparator that was already winning at 2x,
+# so that Table 4's ranking is tested against the STRONGEST comparator at
+# its best affordable budget rather than only against the weakest.
+name: diagsslbudget_simclr800_c100_5pct
+dataset: cifar100
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 5
+stem: none
+stem_calibrate: true
+init_from: runs/simclr_pre800_c100_5pct/seed{seed}/pretrain.pt

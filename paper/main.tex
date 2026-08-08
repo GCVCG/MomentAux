@@ -77,18 +77,21 @@ benchmark that measures one fixed, hand-crafted source of knowledge, a
 pinned bank of Gabor targets injected only during training at $\sim$2\%
 compute overhead, against the data-driven alternatives (SimCLR, SimSiam and
 DINO pre-training, ImageNet transfer, heavy augmentation, learned teachers)
-under one frozen recipe with committed subsets: 12 datasets, 9 backbones, data scales from
-500 to 1.28M images, resolutions from 32 to 224\,px, and models from 5.7M to
-86M parameters ($2{,}800$ experimental cells). Every pairwise combination
-is measured too, and follow one rule: different-\emph{currency}
-sources stack (prior with augmentation), same-currency sources substitute
-(prior against effective self-supervised pre-training), and fusing into an
-already-informed initialization interferes in proportion to what it carries
-(ImageNet transfer, up to $-17$ points). Because each source's currency is
-measurable on frozen features before the combination is built, the outcome
-is predictable in advance, which we state as a procedure. The rule holds
-where the sources are two Sentinel-2 sensor sets and where they are two
-trained classifiers, not only where one is a prior. Underlying it is an empirical decomposition,
+under one frozen recipe with committed subsets: 13 datasets, 9 backbones,
+500 to 1.28M images, 32 to 224\,px, and 5.7M to 86M parameters
+($2{,}874$ cells). Every pairwise combination is measured too, and all
+follow one rule: different-\emph{currency} sources stack (prior with
+augmentation), same-currency sources substitute (prior against effective
+self-supervised pre-training), and fusing into an already-informed
+initialization interferes in proportion to what it carries (ImageNet
+transfer, up to $-17$ points). Because each source's currency is
+measurable on frozen features beforehand, the outcome is predictable in
+advance, which we state as a procedure. Two sensor tests bound it:
+splitting one instrument's bands pays at every data scale, whereas pairing
+two satellites (Sentinel-1 radar with Sentinel-2 optical) never does, and
+the accuracy asymmetry between sources predicts which happens ($r=-0.80$),
+as it also does for two trained classifiers. Underlying it is an empirical
+decomposition,
 $\Delta = G + \mathrm{readout}(\mathrm{base})$, whose sign holds on $79\%$
 of testable cells and which, registered in advance, called an unseen
 backbone family's feature gain from baseline heights alone. All artifacts are released at
@@ -103,8 +106,8 @@ backbone family's feature gain from baseline heights alone. All artifacts are re
 \end{graphicalabstract}
 
 \begin{highlights}
-\item A 2,800-cell, cost-normalized benchmark of data-efficiency interventions
-\item Verified on two Sentinel-2 sensor sets and on decision-level fusion
+\item A 2,874-cell, cost-normalized benchmark of data-efficiency interventions
+\item Source asymmetry predicts when a second sensor pays, and when it does not
 \item A measurable rule predicts stacking, substitution or interference
 \item Free spectral prior beats 2$\times$-compute SSL on ViTs under modern recipes
 \item Attention's feature deficit persists at 1.28M images and grows with scale
@@ -157,7 +160,7 @@ reported in this paper.
 \section*{Data availability}
 All artifacts needed to reproduce every number in this paper are released
 at \url{https://github.com/GCVCG/MomentAux}: the training and
-evaluation harness (configs for all 2{,}800 cells, the committed subset
+evaluation harness (configs for all 2{,}874 cells, the committed subset
 indices, the fingerprinted filter banks, the single training entry point,
 the aggregation and audit scripts), and the complete result tables in open
 formats. The tagged release additionally carries the \emph{raw} evidence as
@@ -165,7 +168,7 @@ downloadable assets: every run's \texttt{final.json} record (configuration
 as executed, accuracy, parameter and floating-point-operation accounting,
 environment), every linear-probe record, every per-epoch training curve, and
 the campaign logs, with \texttt{SHA256} checksums. The latter comprise a per-cell
-table (\texttt{all\_results.csv}: 2{,}800 rows with dataset, backbone,
+table (\texttt{all\_results.csv}: 2{,}874 rows with dataset, backbone,
 intervention, fraction, seed count, accuracy mean and standard deviation,
 probe accuracy, paired baseline, $\Delta$, its standard error, $G$ and
 readout), a configuration-by-fraction view

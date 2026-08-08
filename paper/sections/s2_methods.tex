@@ -380,7 +380,7 @@ Resolution & 32, 64, 96, 224\,px \\
 Interventions & MomentAux ($1.02\times$); SimCLR, SimSiam and DINO
   ($2\times$); ImageNet transfer; DeiT augmentation; FitNets teacher
   ($2\times$); HOG target; pairwise combinations \\
-Measured & $2{,}800$ cells; the campaign recorded $8{,}887$ timed runs
+Measured & $2{,}874$ cells; the campaign recorded $8{,}887$ timed runs
   including exploration and repeats \\
 \bottomrule
 \end{tabular}
@@ -388,7 +388,7 @@ Measured & $2{,}800$ cells; the campaign recorded $8{,}887$ timed runs
 
 Table~\ref{tab:glance} summarizes the design space, and the rest of this
 section unpacks it in five steps. Section~\ref{sec:datasets} describes
-the 12 datasets and the five domains they span, and
+the 13 datasets and the six domains they span, and
 Section~\ref{sec:compute} reports the hardware, wall-clock and carbon
 budget the grid consumed. The remaining three subsections are the three
 views of the grid that the results are built from:
@@ -409,7 +409,7 @@ measure.
 
 \subsection{Datasets}\label{sec:datasets}
 \begin{table}[t]
-\caption{The 12 datasets, grouped by domain. Fractions are drawn from the
+\caption{The 13 datasets, grouped by domain. Fractions are drawn from the
 committed subset indices of Section~\ref{sec:recipe}; sources with
 variable native resolution are squash-resized once, offline, and the
 resized copies are what every arm consumes.}
@@ -428,6 +428,7 @@ Photographic & CIFAR-10 \citep{krizhevsky2009cifar}      & 50{,}000    & 10   & 
  & Tiny-ImageNet \citep{le2015tinyimagenet}  & 100{,}000   & 200  & 64 \\
 \midrule
 Satellite      & EuroSAT \citep{helber2019eurosat}   & 21{,}600 & 10  & 64 \\
+Multi-sensor   & So2Sat LCZ42 \citep{zhu2020so2sat}  & 352{,}366 & 17 & 32 \\
 Texture        & DTD \citep{cimpoi2014dtd}           & 1{,}880  & 47  & 64 \\
 Food           & Food-101 \citep{bossard2014food101} & 75{,}750 & 101 & 64 \\
 Histopathology & PathMNIST \citep{yang2023medmnist}  & 89{,}996 & 9   & 64 \\
@@ -438,6 +439,8 @@ ImageNet scale & ImageNet64 \citep{chrabaszcz2017downsampled} & 1{,}281{,}167 & 
 \midrule
 \multicolumn{5}{@{}l}{relabeled controls: CIFAR-100-super (20 coarse),}\\
 \multicolumn{5}{@{}l}{Tiny-ImageNet-20, -20b, -super and -semantic}\\
+\multicolumn{5}{@{}l}{multi-source views: EuroSAT-MS visible, non-visible, all;}\\
+\multicolumn{5}{@{}l}{So2Sat SAR, optical, both (Section~\ref{sec:multisensor})}\\
 \bottomrule
 \end{tabular}
 \end{table}

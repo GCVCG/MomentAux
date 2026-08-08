@@ -1,0 +1,6 @@
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_so2sat_opt_none_10pct.yaml --run runs/sf_so2sat_opt_none_10pct --ckpt best.pt --data-root data_sf
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_so2sat_opt_aux_10pct.yaml --run runs/sf_so2sat_opt_aux_10pct --ckpt best.pt --data-root data_sf
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_so2sat_sar_none_10pct.yaml --run runs/sf_so2sat_sar_none_10pct --ckpt best.pt --data-root data_sf
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_so2sat_sar_aux_10pct.yaml --run runs/sf_so2sat_sar_aux_10pct --ckpt best.pt --data-root data_sf
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_so2sat_all_none_10pct.yaml --run runs/sf_so2sat_all_none_10pct --ckpt best.pt --data-root data_sf
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_so2sat_all_aux_10pct.yaml --run runs/sf_so2sat_all_aux_10pct --ckpt best.pt --data-root data_sf

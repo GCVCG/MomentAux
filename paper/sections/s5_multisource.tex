@@ -10,91 +10,110 @@ models at the decision level. Both are tests of transfer rather than
 restatements: the rule was derived from training-time fusion of a prior
 into a network, and neither of these is that.
 
-\subsection{Two sensors: multispectral EuroSAT}\label{sec:multisensor}
-EuroSAT ships as 13 Sentinel-2 bands, of which three are visible. The
-visible bands and the red-edge, near-infrared, short-wave infrared and
-cirrus bands come from different detectors and carry different physical
-information, which makes the complementary-versus-redundant question
-askable of the data itself. We build three sources from one archive:
-\textbf{visible} (3 bands), \textbf{non-visible} (the other 10), and
-\textbf{sensor-fused} (all 13). The tiles and the committed subset indices
-are identical across the three, so the only thing that varies is which
-detectors the network reads. Each is crossed with the baseline and the
-prior under the frozen recipe.
+\subsection{Two sensors, and when a second one pays}\label{sec:multisensor}
+We build two multi-source populations that differ in how far apart the
+sources are, because that turns out to be the variable that matters.
+
+\textbf{EuroSAT-MS} splits \emph{one} instrument: Sentinel-2's 13 bands
+become \textbf{visible} (3), \textbf{non-visible} (the other 10, spanning
+red-edge, near-infrared, short-wave infrared and cirrus) and
+\textbf{sensor-fused} (all 13). \textbf{So2Sat LCZ42} pairs \emph{two
+satellites}: Sentinel-1 synthetic-aperture radar (8 channels) with
+Sentinel-2 optical (10 channels), over 17 local-climate-zone classes. The
+second is the harder and more honest test, since radar backscatter and
+optical reflectance share no detector and no physics. In both, tiles and
+committed subset indices are identical across the sources and the
+configuration is the champion verbatim with only the source changed, so
+nothing but the input varies.
 
 \begin{table}[t]
-\caption{Multispectral EuroSAT. Identical tiles and identical subset
-indices; only the band set differs. Three seeds per cell, ResNet-18. A second sensor
-does not absorb the prior on either backbone, but whether it amplifies the
-prior is backbone-dependent: the ordering rises with sensor count on
-ResNet-18 and inverts on ViT-tiny, where it instead tracks baseline
-weakness. ViT cells use AdamW and are diagnostic.}
+\caption{Does a second source pay? Fusion gain is the fused arm minus the
+better single source, at matched data. Sorted by data fraction. Three seeds
+per cell, ResNet-18; the champion configuration is used verbatim
+throughout. Splitting one instrument's bands pays at every fraction;
+pairing two satellites does not pay at any.}
 \label{tab:sensorfusion}
 \centering\scriptsize
-\setlength{\tabcolsep}{2.6pt}
-\zebra{2}
-\begin{tabular}{@{}P{0.24\columnwidth}rrrr@{}}
+\setlength{\tabcolsep}{3.2pt}
+\zebra{3}
+\begin{tabular}{@{}rrrrrr@{}}
 \toprule
-Source & Baseline~\up & + Prior~\up & $\Delta$~\up & $G$~\up \\
+& \multicolumn{2}{c}{EuroSAT-MS (one instrument)}
+& \multicolumn{2}{c}{So2Sat (two satellites)} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Data & $|\Delta_{\mathrm{acc}}|$~\down & Fusion~\up
+     & $|\Delta_{\mathrm{acc}}|$~\down & Fusion~\up \\
 \midrule
-\multicolumn{5}{@{}l}{\emph{ResNet-18, 5\% (1{,}080 tiles)}} \\
-Visible (3 bands) & 89.56 & 91.19 & $+1.63$ & $+0.98$ \\
-Non-visible (10) & 90.14 & 92.73 & $+2.60$ & $+1.29$ \\
-Sensor-fused (13) & \textbf{91.48} & \textbf{94.78} & $\mathbf{+3.30}$ & $+1.16$ \\
-\midrule
-\multicolumn{5}{@{}l}{\emph{ResNet-18, 25\%}} \\
-Visible (3 bands) & 97.88 & 97.85 & $-0.02$ & $-0.02$ \\
-Non-visible (10) & 97.77 & 98.19 & $+0.43$ & $+0.28$ \\
-Sensor-fused (13) & \textbf{98.33} & \textbf{98.65} & $+0.33$ & $+0.37$ \\
-\midrule
-\multicolumn{5}{@{}l}{\emph{ViT-tiny, 10\% (AdamW, diagnostic)}} \\
-Visible (3 bands) & 84.80 & 89.94 & $\mathbf{+5.14}$ & -- \\
-Non-visible (10) & 90.19 & 92.88 & $+2.69$ & -- \\
-Sensor-fused (13) & \textbf{91.52} & 93.27 & $+1.75$ & -- \\
+1\%  &  6.68 & $+1.40$ & 26.31 & $-0.57$ \\
+2\%  &  1.07 & $+2.96$ & 33.77 & $-0.14$ \\
+5\%  &  0.58 & $+1.34$ & 30.61 & $-0.73$ \\
+10\% &  0.66 & $+1.15$ & 28.51 & $-0.11$ \\
+25\% &  0.11 & $+0.45$ & 25.98 & $\pm0.00$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:sensorfusion} reports three things.
+\emph{One instrument's bands are complementary; two satellites are not.}
+Fusing EuroSAT's band sets beats the better single source at every
+fraction, by $+0.45$ to $+2.96$. Fusing So2Sat's two satellites never
+does: the 18-channel arm lands between $-0.73$ and $\pm0.00$, at or below
+optical alone throughout. Radar is not uninformative in isolation, reaching
+$35$--$53\%$ against a $5.9\%$ chance rate, but adding it to optical buys
+nothing here. Had we run only the multispectral population we would have
+concluded that a second sensor stacks, and reported a result that the first
+genuinely cross-modality test contradicts.
 
-\emph{The two band sets are complementary.} Fusing them beats the better
-single sensor by $+1.34$ at 5\%, $+1.15$ at 10\% and $+0.45$ at 25\%. This
-is the stack outcome, measured on the data rather than on a training
-intervention, and it decays with data exactly as every other effect in this
-study does: by 25\% of a 21{,}600-tile archive there is little left for a
-second sensor to contribute. Measured on the arms that carry the prior, the
-same quantity is $+2.04$, $+1.01$ and $+0.46$: at the scarcest fraction the
-prior makes the second sensor \emph{more} valuable than it is without it,
-by $+0.70$, and by 10\% the two are level. A source that substituted for
-spectral coverage would have done the opposite.
+\emph{The variable that separates them is the one our decision-level
+analysis already identified.} Equation~\ref{eq:ensgain}, fitted on
+CIFAR-100 classifier ensembles, is dominated not by diversity but by the
+accuracy asymmetry between the arms. Measured on these sensors, that
+asymmetry is $0.11$--$6.68$ points on EuroSAT and $25.98$--$33.77$ on
+So2Sat, and across the ten points of Table~\ref{tab:sensorfusion} it
+correlates with fusion gain at $r = -0.80$. We state the limit of this
+plainly: channel concatenation is feature-level fusion and
+Equation~\ref{eq:ensgain} was fitted at decision level, so the coefficients
+do not transfer and we do not apply them. What transfers is the variable.
+A source too much weaker than its partner does not contribute to the
+combination even when it is informative alone, and that holds whether the
+combination happens at the input or at the posterior.
 
-\emph{On ResNet-18 the prior's gain grows with the number of sensors,
-and on ViT-tiny it does not.} At 5\% the ResNet gain is $+1.63$ on the
-visible bands, $+2.60$ on the non-visible and $+3.30$ on both: adding
-detectors does not absorb the prior, the two compound. We expected that
-ordering to be a property of the sources. It is not. On ViT-tiny at 10\%
-the ordering \emph{inverts}, $+5.14$, $+2.69$, $+1.75$, and the inversion
-tracks the baselines, which run $84.80$, $90.19$, $91.52$: the prior helps
-most where the backbone is weakest, which is the pattern seen everywhere
-else in this study. The ResNet ordering is the anomaly, since there the
-gain rises with the baseline. We report both and claim only the weaker,
-better-supported statement: \textbf{a second sensor does not absorb the
-prior on either backbone}. Whether it amplifies it is
-backbone-dependent, and one architecture is not enough to say why.
+\emph{The prior itself transplants to both sensors, including radar.} On
+optical it produces the study's usual envelope, $+1.13$, $+1.91$, $+1.19$,
+$+0.68$ and $-0.56$ at 1, 2, 5, 10 and 25\%: positive while data is scarce,
+decaying to neutral at sufficiency. On SAR it gives $+1.24$ at 1\% and
+$+2.59$ at 5\%, its largest So2Sat gain, then $-0.46$ and $-0.24$ at 10 and
+25\%. We had registered in advance that radar was where a fixed
+oriented-energy target might fail, being speckle-dominated and carrying no
+photographic edge statistics, with a falsifier at $\Delta \le -1.0$ on two
+fractions. It did not fire. Only the 2\% SAR cell falls below that, and
+both of its arms are unstable (seed spreads of $3.5$ and $5.5$ points
+against $0.1$--$1.1$ everywhere else in the column), so we read it as
+variance rather than as effect and flag it as such. On the multispectral
+population the picture is the same at 5\%, where the prior adds $+1.63$,
+$+2.60$ and $+3.30$ on the visible, non-visible and fused sources.
 
-\emph{The feature side carries part of it, not all of it.} Under identical
-frozen-feature evaluation $G$ is $+0.98$, $+1.29$ and $+1.16$ at 5\%, so
-the prior genuinely improves the representation on every source, but at
-that fraction $\Delta$ runs two to three times larger and the balance sits
-in the readout term. By 25\% the two converge ($\Delta$ $-0.02$, $+0.43$,
-$+0.33$ against $G$ $-0.02$, $+0.28$, $+0.37$). Our earlier reading of the
-25\% column alone as ``a feature-level effect'' was too strong: it is a
-feature effect that the readout amplifies while data is scarce.
-Sign-wise, every baseline here sits between $89.6$ and $98.3$, far above
-the crossing, where the account predicts a small positive readout; six of
-the nine cells comply and the three that do not are $-0.05$, $-0.01$ and
-$-0.05$, i.e. zero to within the residual spread the account itself
-reports.
+\emph{Whether the prior amplifies a second sensor is
+backbone-dependent, and we claim only what both backbones support.} On
+EuroSAT the ResNet gain rises with sensor count while on ViT-tiny it
+inverts, $+5.14$, $+2.69$, $+1.75$, tracking baseline weakness ($84.80$,
+$90.19$, $91.52$) as the rest of this study does. The defensible statement
+is that a second source does not absorb the prior on either backbone. On
+the arms that carry the prior, EuroSAT's fusion gain is $+1.92$, $+1.46$,
+$+2.04$, $+1.01$ and $+0.46$ against the baseline arms' $+1.40$, $+2.96$,
+$+1.34$, $+1.15$ and $+0.45$: the prior and the second sensor coexist
+rather than substituting.
+
+\emph{The feature side carries part of it.} Under identical frozen-feature
+evaluation the prior's $G$ on So2Sat at 5\% is $+1.31$, $+1.54$ and $+0.88$
+on radar, optical and fused, against end-to-end gains of $+2.59$, $+1.19$
+and $+1.35$; on EuroSAT at 5\% $G$ is $+0.98$, $+1.29$ and $+1.16$ against
+$+1.63$, $+2.60$ and $+3.30$. So the gain is genuinely feature-level in
+part, and while data is scarce the readout term supplies the rest. Every
+baseline in these two populations sits between $43.5$ and $98.3$, far above
+the crossing, which is exactly the regime where Section~\ref{sec:lawaudit}
+reports the readout term decayed to nothing and its sign consequently
+uninformative; the residuals here run from $-0.96$ to $+1.28$ and we do not
+read signs from them.
 
 \subsection{Two classifiers: decision-level fusion}\label{sec:decisionfusion}
 Multi-classifier fusion is a different level again, and the rule was not
@@ -167,16 +186,22 @@ cost beyond training each source once is two frozen-feature evaluations.}
 2 & Evaluate all three frozen representations with an identical linear
     protocol. This gives $G_A$ and $G_B$, each source's feature-level
     contribution. \\
-3 & If either source's gain is ${\approx}0$, it supplies nothing to
+3 & Compare the two arms' accuracies. If one is far weaker, expect no
+    benefit from combining regardless of what it carries: across our two
+    sensor populations the asymmetry predicts the fusion gain at
+    $r = -0.80$, and it dominates the decision-level fit of
+    Equation~\ref{eq:ensgain}. This is the cheapest of the checks and it
+    screens out the clearest failures. \\
+4 & If either source's gain is ${\approx}0$, it supplies nothing to
     overlap: the other source's gain is available in full, and the
     combination is not the question. \\
-4 & If $G_A \approx G_B$ \emph{and} both arms improve the same cells,
+5 & If $G_A \approx G_B$ \emph{and} both arms improve the same cells,
     the sources carry the same currency. Expect \textbf{substitution}:
     the combination will not exceed the better single arm. Take the
     cheaper source. \\
-5 & If $G_A$ and $G_B$ differ in kind, expect \textbf{stacking}, and a
+6 & If $G_A$ and $G_B$ differ in kind, expect \textbf{stacking}, and a
     combined gain larger than either alone. \\
-6 & If one source is a mature initialization, do not inject a shaping
+7 & If one source is a mature initialization, do not inject a shaping
     prior on top of it. Expect a \textbf{tax} proportional to what the
     initialization was contributing, measurable in advance as that
     source's advantage over training from scratch. \\
@@ -191,13 +216,13 @@ that took hours to train. It is \emph{predictive rather than
 retrospective}, which places it alongside transferability estimation
 \citep{nguyen2020leep,you2021logme}, with the difference that those methods
 score a single pre-trained source for a target task while this scores a
-\emph{pair} for combination. And it is \emph{falsifiable}: step 4 asserts
+\emph{pair} for combination. And it is \emph{falsifiable}: step 5 asserts
 that equal feature gains imply no benefit from combining, which
 Sections~\ref{sec:substitute} and \ref{sec:decisionfusion} both test and
 which the training-time-versus-decision-time discrepancy above already
 qualifies.
 
-The honest limit is step 4's antecedent. We compare feature gains by
+The honest limit is step 5's antecedent. We compare feature gains by
 magnitude and by which cells improve, not by a formal decomposition of the
 information each source carries. Partial information decomposition
 \citep{williams2010nonnegative,liang2023quantifying} is the principled
