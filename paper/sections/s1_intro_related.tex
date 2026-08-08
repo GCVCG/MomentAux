@@ -234,13 +234,28 @@ The outcomes we measure are not new categories, and we set out the prior
 claims before our own. \citet{durrantwhyte1988sensor} classified the
 interactions between disparate information sources as \emph{cooperative},
 \emph{competitive} and \emph{complementary}; the surveyed form now standard
-in the field \citep{khaleghi2013multisensor} states the triple as
+in the field \citep{khaleghi2013multisensor,shaik2024survey} states the triple as
 complementary, redundant and cooperative, where complementary sources
 describe different aspects of the target, redundant sources describe the
 same aspect, and cooperative sources jointly yield what neither yields
 alone. Our \emph{stack} is complementary combination and our
 \emph{substitute} is redundant combination. We adopt that vocabulary here
 and use our own terms only as informal labels for it.
+
+\citet{dasarathy2001what} organizes the field's questions as what, where,
+why, when and how to fuse, and observes that the \emph{when} has received
+least attention because it is the one that cannot be answered from the
+architecture. That is the question this paper takes up, in the specific
+setting where one source is hand-crafted and the other is learned from the
+data. Nor is knowledge fusion itself a new object: \citet{smirnov2019knowledge}
+surveys the patterns by which knowledge and data are combined, and catalogs
+the same three outcomes we recover. What that survey records as patterns to
+be chosen by a designer, we measure as outcomes to be predicted from the
+sources, which is the difference between a taxonomy and a decision
+procedure. The field's benchmarks have generally compared \emph{algorithms}
+for a fixed fusion problem \citep{zhang2021benchmarking}; ours compares
+\emph{sources} under a fixed algorithm, holding the recipe frozen so that
+what varies is the knowledge injected rather than the method injecting it.
 
 One difference is substantive rather than terminological, and it sharpens
 what a representation-learning setting adds. In sensor fusion redundancy is
@@ -299,7 +314,7 @@ scientific knowledge about early vision, represented as a pinned filter
 bank, integrated at the learning algorithm; the nearest existing method is
 their own informed pre-training \citep{vonrueden2022informedpre}, which
 condenses knowledge into prototypes for initialization rather than into a
-decaying auxiliary target. That survey catalogues where knowledge can be
+decaying auxiliary target. That survey catalogs where knowledge can be
 injected. What it does not settle, and what a practitioner must decide, is
 \emph{when} injecting it is worth anything given what the data and the
 available pre-trained artifacts already supply. That is the question this
