@@ -16,3 +16,12 @@ __pycache__/
 *.pt
 *.egg-info/
 .hf_cache
+
+# Operational files carrying machine addresses and absolute home paths.
+# These are scheduling glue for our two workstations, not part of the
+# released artifact; the released harness is the configs, the single training
+# entry point and the audit scripts, which are machine-independent.
+scripts/queue_sf_*.txt
+scripts/sync_sf_*.sh
+logs/sync_sf_*.log
+logs/so2sat_push.log

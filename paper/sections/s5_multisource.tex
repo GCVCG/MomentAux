@@ -24,27 +24,33 @@ prior under the frozen recipe.
 
 \begin{table}[t]
 \caption{Multispectral EuroSAT. Identical tiles and identical subset
-indices; only the band set differs. Three seeds per cell, ResNet-18. The
-prior's gain \emph{grows} with the number of sensors present rather than
-being absorbed by them, and the same ordering appears in the frozen-feature
-evaluation, so it is a feature-level effect.}
+indices; only the band set differs. Three seeds per cell, ResNet-18. A second sensor
+does not absorb the prior on either backbone, but whether it amplifies the
+prior is backbone-dependent: the ordering rises with sensor count on
+ResNet-18 and inverts on ViT-tiny, where it instead tracks baseline
+weakness. ViT cells use AdamW and are diagnostic.}
 \label{tab:sensorfusion}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \zebra{2}
-\begin{tabular}{@{}P{0.26\columnwidth}rrrr@{}}
+\begin{tabular}{@{}P{0.24\columnwidth}rrrr@{}}
 \toprule
 Source & Baseline~\up & + Prior~\up & $\Delta$~\up & $G$~\up \\
 \midrule
-\multicolumn{5}{@{}l}{\emph{5\% of the training split (1{,}080 tiles)}} \\
-Visible (3 bands) & 89.56 & 91.19 & $+1.63$ & -- \\
-Non-visible (10) & 90.14 & 92.73 & $+2.60$ & -- \\
-Sensor-fused (13) & \textbf{91.48} & \textbf{94.78} & $\mathbf{+3.30}$ & -- \\
+\multicolumn{5}{@{}l}{\emph{ResNet-18, 5\% (1{,}080 tiles)}} \\
+Visible (3 bands) & 89.56 & 91.19 & $+1.63$ & $+0.98$ \\
+Non-visible (10) & 90.14 & 92.73 & $+2.59$ & $+1.29$ \\
+Sensor-fused (13) & \textbf{91.48} & \textbf{94.78} & $\mathbf{+3.30}$ & $+1.16$ \\
 \midrule
-\multicolumn{5}{@{}l}{\emph{25\% of the training split}} \\
-Visible (3 bands) & 97.88 & 97.85 & $-0.02$ & $-0.02$ \\
-Non-visible (10) & 97.77 & 98.19 & $+0.43$ & $+0.28$ \\
-Sensor-fused (13) & \textbf{98.33} & \textbf{98.65} & $+0.33$ & $+0.37$ \\
+\multicolumn{5}{@{}l}{\emph{ResNet-18, 25\%}} \\
+Visible (3 bands) & 97.88 & 97.85 & $-0.03$ & $-0.02$ \\
+Non-visible (10) & 97.77 & 98.19 & $+0.42$ & $+0.28$ \\
+Sensor-fused (13) & \textbf{98.33} & \textbf{98.65} & $+0.32$ & $+0.37$ \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{ViT-tiny, 10\% (AdamW, diagnostic)}} \\
+Visible (3 bands) & 84.80 & 89.94 & $\mathbf{+5.14}$ & -- \\
+Non-visible (10) & 90.19 & 92.88 & $+2.69$ & -- \\
+Sensor-fused (13) & \textbf{91.52} & 93.27 & $+1.75$ & -- \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -58,20 +64,33 @@ intervention, and it decays with data exactly as every other effect in this
 study does: by 25\% of a 21{,}600-tile archive there is little left for a
 second sensor to contribute.
 
-\emph{The prior's gain grows with the number of sensors.} At 5\% it is
-$+1.63$ on the visible bands, $+2.60$ on the non-visible, and $+3.30$ on
-both. Had oriented-energy structure been a substitute for spectral
-coverage, adding detectors would have absorbed it; instead the two
-compound. This is the sharpest available statement of the currency account,
-because the second source here is a physical sensor rather than another
-training trick, and its currency is unambiguously not the prior's.
+\emph{On ResNet-18 the prior's gain grows with the number of sensors,
+and on ViT-tiny it does not.} At 5\% the ResNet gain is $+1.63$ on the
+visible bands, $+2.59$ on the non-visible and $+3.30$ on both: adding
+detectors does not absorb the prior, the two compound. We expected that
+ordering to be a property of the sources. It is not. On ViT-tiny at 10\%
+the ordering \emph{inverts}, $+5.14$, $+2.69$, $+1.75$, and the inversion
+tracks the baselines, which run $84.80$, $90.19$, $91.52$: the prior helps
+most where the backbone is weakest, which is the pattern seen everywhere
+else in this study. The ResNet ordering is the anomaly, since there the
+gain rises with the baseline. We report both and claim only the weaker,
+better-supported statement: \textbf{a second sensor does not absorb the
+prior on either backbone}. Whether it amplifies it is
+backbone-dependent, and one architecture is not enough to say why.
 
-\emph{And it is a feature-level effect.} Under identical frozen-feature
-evaluation, $G$ moves in the same order as $\Delta$: $-0.02$, $+0.28$,
-$+0.37$. The law's arithmetic also holds where it should. All three
-baselines sit near 98\%, far above the crossing bracket, where the account
-predicts a readout term of ${\approx}0$; the measured residuals are
-$0.00$, $+0.15$ and $-0.04$.
+\emph{The feature side carries part of it, not all of it.} Under identical
+frozen-feature evaluation $G$ is $+0.98$, $+1.29$ and $+1.16$ at 5\%, so
+the prior genuinely improves the representation on every source, but at
+that fraction $\Delta$ runs two to three times larger and the balance sits
+in the readout term. By 25\% the two converge ($\Delta$ $-0.03$, $+0.42$,
+$+0.32$ against $G$ $-0.02$, $+0.28$, $+0.37$). Our earlier reading of the
+25\% column alone as ``a feature-level effect'' was too strong: it is a
+feature effect that the readout amplifies while data is scarce.
+Sign-wise, every baseline here sits between $89.6$ and $98.3$, far above
+the crossing, where the account predicts a small positive readout; six of
+the nine cells comply and the three that do not are $-0.05$, $-0.01$ and
+$-0.05$, i.e. zero to within the residual spread the account itself
+reports.
 
 \subsection{Two classifiers: decision-level fusion}\label{sec:decisionfusion}
 Multi-classifier fusion is a different level again, and the rule was not

@@ -146,8 +146,29 @@ SimSiam *at this budget*, and that readers optimizing for attainable
 accuracy rather than accuracy per unit compute should treat our
 self-supervised numbers as lower bounds.
 
-The pre-training epoch sweep the referee marks optional is not in this
-revision. We will run it if the editor wishes.
+**The pre-training epoch sweep the referee marks optional is now in the
+revision, and it went partly against us.** We re-ran SimSiam, our weakest
+comparator, at four times its pre-training budget (new Table 4,
+Section 3.7):
+
+| CIFAR-100 | cost | 5% | Δ | 10% | Δ |
+|---|---:|---:|---:|---:|---:|
+| Baseline | 1.00× | 25.36 | — | 40.28 | — |
+| **Prior (ours)** | **1.02×** | **30.51** | **+5.15** | **44.03** | **+3.75** |
+| SimSiam, 200 ep | 2.00× | 25.49 | +0.13 | 40.89 | +0.61 |
+| SimCLR, 200 ep | 2.00× | 34.41 | +9.05 | 49.04 | +8.76 |
+| SimSiam, 800 ep | 5.00× | 27.26 | +1.90 | 44.61 | +4.33 |
+
+The referee was right. SimSiam's near-null result is a property of its
+budget, not of the method: four times the pre-training multiplies its gain
+by four to seven. **We withdraw "SimSiam learns almost nothing at this
+scale"** and now say it is budget-starved at the cost we normalized to.
+
+The ordering survives, but only partly, and we state which part. At 5% the
+prior still leads five-fold-cost SimSiam by 3.25 ± 0.38 at a fiftieth of
+the overhead. At 10% the two are level (+0.58 ± 0.42, unresolvable), and we
+record a tie rather than claim a win. We also say plainly that this tests
+one method at one multiple and cannot bound the question in general.
 
 ---
 

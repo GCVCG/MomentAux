@@ -62,3 +62,24 @@ as the pre-registration trail. Read it once end to end first.
       Tables 2 and 3 still match.
 - [ ] Confirm no LaTeX source comment records venue-framing or internal
       instructions (this was caught once already).
+
+## Going public (run in this order, at submission, not before)
+
+1. `bash scripts/scrub_for_release.sh --check` — lists what carries a machine
+   address, a home path or a cluster account. Read the list.
+2. `bash scripts/scrub_for_release.sh` — rewrites them to environment
+   variables. **Then read the diff by hand**; a sed pass is not a review.
+   Do not run this while the cron keeper is still feeding the cluster, since
+   it rewrites the scripts that keeper invokes.
+3. Verified already, and worth re-running after any rebase:
+   `git log --all -p | grep -E 'sshpass|BEGIN .* PRIVATE KEY|(PASS|TOKEN|SECRET|API_KEY)[[:space:]]*='`
+   returned nothing across all 243 commits. No credential has ever been
+   committed. The credential that was once pasted in a working transcript
+   was rotated on 2026-07-22 and never entered the repository.
+4. Decide on `CLAUDE.md`. Recommendation: **publish it**. It is the
+   pre-registration record, and the paper claims predictions were recorded
+   before results existed. That claim is worth much more with the ledger
+   visible than with it withheld, including the entries where a prediction
+   missed. It contains no credentials, by (3).
+5. Flip the repository to public, then mint the Zenodo DOI from the tag and
+   add the DOI to the paper's data-availability statement.

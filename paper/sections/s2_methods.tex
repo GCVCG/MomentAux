@@ -289,6 +289,57 @@ protocol, by construction. Readers who care about the best attainable
 accuracy rather than the best accuracy per unit compute should treat our
 self-supervised numbers as lower bounds.
 
+Because that reservation bears directly on one of our findings, we
+measured it rather than leaving it as a caveat. We re-ran the weakest
+comparator, SimSiam, at four times its pre-training budget and report the
+result in Table~\ref{tab:budget}. It changes the reading.
+
+\begin{table}[t]
+\caption{Buying the comparator more compute. CIFAR-100, ResNet-18, three
+seeds for the pre-trained arms and ten for the other two; sorted by
+training cost. SimSiam's near-null result is a statement about its
+\emph{budget}, not about the method: at four times the pre-training it
+gains four to seven times as much.}
+\label{tab:budget}
+\centering\scriptsize
+\setlength{\tabcolsep}{2.6pt}
+\zebra{3}
+\begin{tabular}{@{}P{0.30\columnwidth}rrrrr@{}}
+\toprule
+& & \multicolumn{2}{c}{5\%} & \multicolumn{2}{c}{10\%} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}
+Intervention & Cost~\down & Acc.~\up & $\Delta$~\up & Acc.~\up & $\Delta$~\up \\
+\midrule
+Baseline & $1.00\times$ & 25.36 & -- & 40.28 & -- \\
+\textbf{Prior (this work)} & $\mathbf{1.02\times}$ & \textbf{30.51} & $\mathbf{+5.15}$ & \textbf{44.03} & $\mathbf{+3.75}$ \\
+SimSiam, 200 pre-epochs & $2.00\times$ & 25.49 & $+0.13$ & 40.89 & $+0.61$ \\
+SimCLR, 200 pre-epochs & $2.00\times$ & \textbf{34.41} & $+9.05$ & \textbf{49.04} & $+8.76$ \\
+SimSiam, 800 pre-epochs & $5.00\times$ & 27.26 & $+1.90$ & 44.61 & $+4.33$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+At its published 200-epoch budget SimSiam gains $+0.13$ and $+0.61$, which
+is what led us to describe it as learning almost nothing at this scale. At
+800 epochs it gains $+1.90$ and $+4.33$. The concern was therefore
+well founded and we withdraw the stronger reading: negative-free
+self-supervision is not inert at these data scales, it is
+budget-starved at the cost we normalized to, and its published default is a
+poor guide to what it can do on 2{,}500 images.
+
+What the extra compute does not do is overturn the comparison. At 5\% the
+prior still leads the five-fold-cost SimSiam by $3.25 \pm 0.38$ points at a
+fiftieth of the overhead. At 10\% the two are level: SimSiam's $44.61$
+against the prior's $44.03$ is $+0.58 \pm 0.42$, which the seed
+uncertainty cannot resolve, and we record it as a tie rather than as a
+win for either. So the ranking we report is robust to a four-fold budget
+increase for the comparator at the scarcer fraction and becomes a tie at
+the less scarce one, which is the same data-dependence every other effect
+in this study shows. It remains true that we cannot bound this in general;
+a comparator can always be given more compute, and the honest statement is
+that our numbers are lower bounds whose ordering we have now tested once,
+at one multiple, on one method.
+
 \subsection{Pre-registration}\label{sec:prereg}
 Each experimental wave was launched with numeric prediction bands and
 explicit falsifiers recorded in a project ledger before any result
