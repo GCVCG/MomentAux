@@ -2,7 +2,7 @@
 # cost-normalised budget) before the frozen supervised recipe. Tests whether
 # 'SimSiam learns almost nothing at this scale' is a statement about the
 # METHOD or only about the BUDGET a cost-normalised protocol allows it.
-name: sslbudget_simsiam800_c100_10pct
+name: diagsslbudget_simsiam800_c100_10pct
 dataset: cifar100
 backbone: resnet18
 epochs: 200

@@ -13,12 +13,12 @@ for pct in ${PCTS:-5 10}; do
     if [ ! -f "$out/pretrain.pt" ]; then
       mkdir -p "$out"
       $PY scripts/simsiam_pretrain.py --data-root ${DATA_ROOT:-data} \
-          --config "configs/sslbudget/sslbudget_simsiam800_c100_${pct}pct.yaml" \
+          --config "configs/sslbudget/diagsslbudget_simsiam800_c100_${pct}pct.yaml" \
           --epochs 800 --seed "$seed" --out "$out/pretrain.pt" \
           >> "logs/simsiam_pre800_c100_${pct}pct_s${seed}.log" 2>&1
       echo "$(date -Is) pretrain ${pct}pct seed$seed rc=$?" >> "$LOG"
     fi
-    $PY train.py --config "configs/sslbudget/sslbudget_simsiam800_c100_${pct}pct.yaml" \
+    $PY train.py --config "configs/sslbudget/diagsslbudget_simsiam800_c100_${pct}pct.yaml" \
         --seed "$seed" >> "logs/sslbudget_${pct}pct_s${seed}.log" 2>&1
     echo "$(date -Is) supervised ${pct}pct seed$seed rc=$?" >> "$LOG"
   done
