@@ -127,7 +127,7 @@ fall on the predicted side (Wilson 95\% CI $[75.1, 82.3]$; one-sided exact
 binomial against an even coin, $p \approx 10^{-40}$). Below the crossing,
 where the account makes a strong prediction, it is $291/332 = 87.7\%$;
 above it, where it predicts only that the term is small, $102/166 =
-61.4\%$. The ten exceptions are not scattered noise;
+61.4\%$. The 105 exceptions are not scattered noise;
 a recurring group carries one signature, $G$ clearly positive while
 $\Delta$ is negative at ${\geq}20\%$ data on Food-101 and PathMNIST,
 ``better features, worse accuracy at sufficiency''.
@@ -380,7 +380,7 @@ ViT-tiny & $\Delta \geq +3$ & $+3.23$ & $+2.84$ & $0.39$ & deficit persists \\
 Swin-T &--& \multicolumn{3}{l}{baseline collapses at chance} & stabilized by prior \\
 \midrule
 \multicolumn{6}{@{}l}{\emph{ImageNet-100 @ 224\,px, DeiT recipe on ViTs}} \\
-ResNet-50 & $\Delta$: $0.0{\pm}1.0$ & $-0.14$ & $+0.03$ & $0.17$ & neutral at 224\,px \\
+ResNet-50 & $\Delta$: $0.0{\pm}1.0$ & $-0.02$ & $+0.03$ & $0.05$ & neutral at 224\,px \\
 ViT-S/16 & $\Delta$: $+2..{+}8$; $G$: $12.0..12.6$ & $+13.00$ & $+11.95$ & $1.05$ & above band \\
 ViT-B/16 & $\Delta \geq \Delta_{\mathrm{ViT\mbox{-}S}}$ & $+26.01$ & $+22.89^{*}$ & $3.12^{*}$ & grows with scale \\
 \bottomrule
@@ -395,9 +395,13 @@ Table~\ref{tab:scale} reports the block. Three conclusions.
 
 \emph{Convolutional redundancy at sufficiency is exact and scale-stable.}
 ResNet-18 at 1.28M images gains $+0.04 \pm 0.07$ end-to-end and
-$+0.05 \pm 0.10$ feature-side; the law's neutral regime measured to a
-hundredth of a point at the largest data scale in the study, and again at
-native resolution with ResNet-50.
+$+0.05 \pm 0.10$ feature-side; the neutral regime measured to a hundredth
+of a point at the largest data scale in the study. ResNet-50 at native
+$224$\,px repeats it: on three seeds matched across both arms the
+seed-paired difference is $-0.02 \pm 0.35$, so the pre-registered band
+($0.0 \pm 1.0$) holds and its falsifier, which would have fired at
+$\Delta \geq +1.5$ and made convolutional redundancy a low-resolution
+artifact, is dead.
 
 \emph{The attention deficit is real, persistent, and grows with model
 scale.} ViT-tiny still gains $+3.2$ points at 1.28M images. At $224$\,px
