@@ -1,0 +1,18 @@
+# Multispectral EuroSAT sensor fusion on ViT-tiny -- is the sensor-level
+# stack result specific to ResNet-18? AdamW => diagnostic namespace.
+# SOURCE A: 3 visible bands.
+name: diagsfvit_eurosatms_rgb_none_5pct
+dataset: eurosatms_rgb
+backbone: vit_tiny
+optimizer: adamw
+epochs: 200
+batch_size: 128
+lr: 0.001
+weight_decay: 0.05
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 5
+stem: none
+stem_calibrate: true

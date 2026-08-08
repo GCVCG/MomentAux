@@ -229,6 +229,9 @@ def main():
             head=cfg.get("head"),
             moment_aux=cfg.get("moment_aux"),
             image_size=data_mod.IMAGE_SIZE[cfg["dataset"]],
+            # >3 only for the multispectral sensor-fusion cells; without this
+            # their checkpoints fail to load (conv1 is 13-channel, not 3).
+            in_channels=data_mod.INPUT_CHANNELS.get(cfg["dataset"], 3),
         ).to(device)
         model.load_state_dict(torch.load(ckpt, map_location=device))
         model.eval()

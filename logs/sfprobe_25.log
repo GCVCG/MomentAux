@@ -1,0 +1,21 @@
+sf_eurosatms_rgb_none_25pct seed0: probe train 98.95  test 98.15
+sf_eurosatms_rgb_none_25pct seed1: probe train 98.91  test 98.11
+sf_eurosatms_rgb_none_25pct seed2: probe train 98.89  test 98.09
+PROBE_RESULT sf_eurosatms_rgb_none_25pct test 98.12+/-0.03 over 3 seeds -> runs/sf_eurosatms_rgb_none_25pct/linear_probe.json
+sf_eurosatms_rgb_aux_25pct seed0: probe train 98.87  test 98.11
+sf_eurosatms_rgb_aux_25pct seed1: probe train 98.83  test 98.06
+sf_eurosatms_rgb_aux_25pct seed2: probe train 98.99  test 98.11
+PROBE_RESULT sf_eurosatms_rgb_aux_25pct test 98.09+/-0.03 over 3 seeds -> runs/sf_eurosatms_rgb_aux_25pct/linear_probe.json
+sf_eurosatms_nir_none_25pct seed0: probe train 99.00  test 97.87
+sf_eurosatms_nir_none_25pct seed1: probe train 99.12  test 98.15
+sf_eurosatms_nir_none_25pct seed2: probe train 99.00  test 97.91
+PROBE_RESULT sf_eurosatms_nir_none_25pct test 97.98+/-0.15 over 3 seeds -> runs/sf_eurosatms_nir_none_25pct/linear_probe.json
+sf_eurosatms_nir_aux_25pct seed0: probe train 99.08  test 98.22
+sf_eurosatms_nir_aux_25pct seed1: probe train 99.15  test 98.33
+sf_eurosatms_nir_aux_25pct seed2: probe train 99.15  test 98.22
+PROBE_RESULT sf_eurosatms_nir_aux_25pct test 98.26+/-0.06 over 3 seeds -> runs/sf_eurosatms_nir_aux_25pct/linear_probe.json
+sf_eurosatms_all_aux_25pct seed0: probe train 99.29  test 98.83
+sf_eurosatms_all_aux_25pct seed1: probe train 99.30  test 99.02
+sf_eurosatms_all_aux_25pct seed2: probe train 99.31  test 98.83
+PROBE_RESULT sf_eurosatms_all_aux_25pct test 98.90+/-0.11 over 3 seeds -> runs/sf_eurosatms_all_aux_25pct/linear_probe.json
+SFPROBE25_DONE

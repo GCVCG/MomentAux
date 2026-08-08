@@ -1,75 +1,203 @@
 moment-aux target calibrated on 1024 images
 [diagdepth_r50_food_aux_25pct seed0] {"params_trainable": 23715501, "params_stem_trainable": 0, "params_stem_fixed_filters": 0, "flops_total": 5219035136, "flops_stem": 0, "flops_image_size": 64}
-Traceback (most recent call last):
-  File "/home/amughrabi/projects/MomentsCNNEncoder/train.py", line 436, in <module>
-    main()
-  File "/home/amughrabi/projects/MomentsCNNEncoder/train.py", line 385, in main
-    test_acc = evaluate(model, test_loader, device, num_classes)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
-    return func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/projects/MomentsCNNEncoder/train.py", line 115, in evaluate
-    metric.update(model(x), y)
-                  ^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/projects/MomentsCNNEncoder/momentstem/aux.py", line 269, in forward
-    logits = self.net(self.stem(x))
-             ^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/timm/models/resnet.py", line 776, in forward
-    x = self.forward_features(x)
-        ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/timm/models/resnet.py", line 753, in forward_features
-    x = self.layer1(x)
-        ^^^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/container.py", line 240, in forward
-    input = module(input)
-            ^^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/timm/models/resnet.py", line 267, in forward
-    shortcut = self.downsample(shortcut)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/container.py", line 240, in forward
-    input = module(input)
-            ^^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/batchnorm.py", line 193, in forward
-    return F.batch_norm(
-           ^^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/functional.py", line 2822, in batch_norm
-    return torch.batch_norm(
-           ^^^^^^^^^^^^^^^^^
-torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 GiB. GPU 0 has a total capacity of 23.56 GiB of which 1.18 GiB is free. Process 1604820 has 7.00 GiB memory in use. Including non-PyTorch memory, this process has 7.16 GiB memory in use. Process 1604821 has 8.17 GiB memory in use. Of the allocated memory 4.87 GiB is allocated by PyTorch, and 1.97 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+epoch 1/200 loss 5.6898 train 0.0239 test 0.0526
+epoch 2/200 loss 4.3606 train 0.0608 test 0.0627
+epoch 3/200 loss 4.1502 train 0.0857 test 0.0851
+epoch 4/200 loss 3.9616 train 0.1131 test 0.1063
+epoch 5/200 loss 3.7921 train 0.1414 test 0.1189
+epoch 6/200 loss 3.6391 train 0.1637 test 0.1478
+epoch 7/200 loss 3.4807 train 0.1957 test 0.1677
+epoch 8/200 loss 3.3508 train 0.2145 test 0.1970
+epoch 9/200 loss 3.2212 train 0.2387 test 0.1948
+epoch 10/200 loss 3.0939 train 0.2658 test 0.2355
+epoch 11/200 loss 2.9896 train 0.2842 test 0.2456
+epoch 12/200 loss 2.8699 train 0.3117 test 0.2704
+epoch 13/200 loss 2.8023 train 0.3216 test 0.2841
+epoch 14/200 loss 2.7035 train 0.3459 test 0.2532
+epoch 15/200 loss 2.6032 train 0.3692 test 0.2680
+epoch 16/200 loss 2.5595 train 0.3767 test 0.3293
+epoch 17/200 loss 2.4699 train 0.3975 test 0.2892
+epoch 18/200 loss 2.3839 train 0.4136 test 0.2691
+epoch 19/200 loss 2.3469 train 0.4189 test 0.2981
+epoch 20/200 loss 2.2928 train 0.4334 test 0.2564
+epoch 21/200 loss 2.2536 train 0.4419 test 0.3344
+epoch 22/200 loss 2.1695 train 0.4606 test 0.3303
+epoch 23/200 loss 2.1406 train 0.4642 test 0.3212
+epoch 24/200 loss 2.0949 train 0.4705 test 0.3430
+epoch 25/200 loss 2.0565 train 0.4793 test 0.3246
+epoch 26/200 loss 2.0120 train 0.4938 test 0.3654
+epoch 27/200 loss 1.9688 train 0.5013 test 0.3605
+epoch 28/200 loss 1.9373 train 0.5083 test 0.3716
+epoch 29/200 loss 1.9029 train 0.5153 test 0.4084
+epoch 30/200 loss 1.8777 train 0.5248 test 0.3624
+epoch 31/200 loss 1.8212 train 0.5359 test 0.3704
+epoch 32/200 loss 1.8014 train 0.5385 test 0.3346
+epoch 33/200 loss 1.7601 train 0.5497 test 0.3931
+epoch 34/200 loss 1.7331 train 0.5563 test 0.3421
+epoch 35/200 loss 1.6754 train 0.5685 test 0.3931
+epoch 36/200 loss 1.6609 train 0.5645 test 0.3878
+epoch 37/200 loss 1.6403 train 0.5747 test 0.3905
+epoch 38/200 loss 1.6201 train 0.5770 test 0.4142
+epoch 39/200 loss 1.5662 train 0.5872 test 0.4237
+epoch 40/200 loss 1.5656 train 0.5910 test 0.3322
+epoch 41/200 loss 1.5227 train 0.6026 test 0.3905
+epoch 42/200 loss 1.4893 train 0.6117 test 0.4408
+epoch 43/200 loss 1.4773 train 0.6112 test 0.4173
+epoch 44/200 loss 1.4455 train 0.6218 test 0.3669
+epoch 45/200 loss 1.4163 train 0.6226 test 0.4625
+epoch 46/200 loss 1.4013 train 0.6304 test 0.3668
+epoch 47/200 loss 1.3908 train 0.6306 test 0.3346
+epoch 48/200 loss 1.3301 train 0.6461 test 0.3252
+epoch 49/200 loss 1.3320 train 0.6451 test 0.3969
+epoch 50/200 loss 1.3126 train 0.6491 test 0.3349
+epoch 51/200 loss 1.2811 train 0.6551 test 0.3908
+epoch 52/200 loss 1.2300 train 0.6732 test 0.3965
+epoch 53/200 loss 1.2322 train 0.6721 test 0.4385
+epoch 54/200 loss 1.2272 train 0.6669 test 0.3990
+epoch 55/200 loss 1.1586 train 0.6872 test 0.4350
+epoch 56/200 loss 1.1678 train 0.6838 test 0.4250
+epoch 57/200 loss 1.1381 train 0.6932 test 0.3915
+epoch 58/200 loss 1.1308 train 0.6924 test 0.3272
+epoch 59/200 loss 1.0888 train 0.7054 test 0.3786
+epoch 60/200 loss 1.0825 train 0.7049 test 0.4230
+epoch 61/200 loss 1.0781 train 0.7050 test 0.4155
+epoch 62/200 loss 1.0191 train 0.7200 test 0.4269
+epoch 63/200 loss 1.0394 train 0.7188 test 0.4199
+epoch 64/200 loss 1.0037 train 0.7276 test 0.4276
+epoch 65/200 loss 0.9519 train 0.7398 test 0.3880
+epoch 66/200 loss 0.9751 train 0.7333 test 0.4284
+epoch 67/200 loss 0.9116 train 0.7467 test 0.4358
+epoch 68/200 loss 0.9383 train 0.7403 test 0.4536
+epoch 69/200 loss 0.8785 train 0.7557 test 0.4826
+epoch 70/200 loss 0.8763 train 0.7578 test 0.4192
+epoch 71/200 loss 0.8341 train 0.7717 test 0.4391
+epoch 72/200 loss 0.8464 train 0.7653 test 0.3897
+epoch 73/200 loss 0.8095 train 0.7760 test 0.4014
+epoch 74/200 loss 0.7952 train 0.7776 test 0.4589
+epoch 75/200 loss 0.7926 train 0.7805 test 0.4427
+epoch 76/200 loss 0.7293 train 0.7969 test 0.4434
+epoch 77/200 loss 0.7564 train 0.7889 test 0.4184
+epoch 78/200 loss 0.7377 train 0.7962 test 0.4569
+epoch 79/200 loss 0.6646 train 0.8194 test 0.4694
+epoch 80/200 loss 0.7056 train 0.8029 test 0.4364
+epoch 81/200 loss 0.6689 train 0.8119 test 0.4311
+epoch 82/200 loss 0.6800 train 0.8093 test 0.4096
+epoch 83/200 loss 0.6180 train 0.8280 test 0.4594
+epoch 84/200 loss 0.5955 train 0.8289 test 0.4506
+epoch 85/200 loss 0.5908 train 0.8383 test 0.4422
+epoch 86/200 loss 0.5918 train 0.8348 test 0.4362
+epoch 87/200 loss 0.5741 train 0.8408 test 0.4647
+epoch 88/200 loss 0.5179 train 0.8544 test 0.4699
+epoch 89/200 loss 0.5175 train 0.8545 test 0.4933
+epoch 90/200 loss 0.4895 train 0.8638 test 0.4333
+epoch 91/200 loss 0.5079 train 0.8573 test 0.4752
+epoch 92/200 loss 0.4847 train 0.8626 test 0.4777
+epoch 93/200 loss 0.4815 train 0.8663 test 0.4753
+epoch 94/200 loss 0.4559 train 0.8743 test 0.4739
+epoch 95/200 loss 0.4209 train 0.8823 test 0.4627
+epoch 96/200 loss 0.4019 train 0.8895 test 0.4634
+epoch 97/200 loss 0.3997 train 0.8921 test 0.4694
+epoch 98/200 loss 0.4086 train 0.8871 test 0.5005
+epoch 99/200 loss 0.3767 train 0.8957 test 0.5021
+epoch 100/200 loss 0.3595 train 0.9028 test 0.4640
+epoch 101/200 loss 0.3695 train 0.9002 test 0.4726
+epoch 102/200 loss 0.3146 train 0.9183 test 0.4941
+epoch 103/200 loss 0.2820 train 0.9271 test 0.4486
+epoch 104/200 loss 0.3254 train 0.9155 test 0.5149
+epoch 105/200 loss 0.2978 train 0.9202 test 0.4518
+epoch 106/200 loss 0.2475 train 0.9379 test 0.4978
+epoch 107/200 loss 0.2616 train 0.9317 test 0.4992
+epoch 108/200 loss 0.2865 train 0.9245 test 0.4874
+epoch 109/200 loss 0.2614 train 0.9332 test 0.4824
+epoch 110/200 loss 0.2523 train 0.9363 test 0.5139
+epoch 111/200 loss 0.2559 train 0.9346 test 0.5137
+epoch 112/200 loss 0.1572 train 0.9656 test 0.5475
+epoch 113/200 loss 0.1476 train 0.9666 test 0.5308
+epoch 114/200 loss 0.1601 train 0.9636 test 0.5452
+epoch 115/200 loss 0.1205 train 0.9747 test 0.5604
+epoch 116/200 loss 0.1160 train 0.9755 test 0.5412
+epoch 117/200 loss 0.1341 train 0.9715 test 0.5409
+epoch 118/200 loss 0.1334 train 0.9728 test 0.5523
+epoch 119/200 loss 0.1272 train 0.9732 test 0.5375
+epoch 120/200 loss 0.1192 train 0.9782 test 0.5584
+epoch 121/200 loss 0.1071 train 0.9794 test 0.5561
+epoch 122/200 loss 0.1093 train 0.9783 test 0.5314
+epoch 123/200 loss 0.1518 train 0.9659 test 0.5393
+epoch 124/200 loss 0.1924 train 0.9538 test 0.4627
+epoch 125/200 loss 0.2140 train 0.9488 test 0.5208
+epoch 126/200 loss 0.1657 train 0.9622 test 0.5309
+epoch 127/200 loss 0.1116 train 0.9783 test 0.5642
+epoch 128/200 loss 0.0576 train 0.9931 test 0.6197
+epoch 129/200 loss 0.0359 train 0.9961 test 0.6011
+epoch 130/200 loss 0.0298 train 0.9977 test 0.6280
+epoch 131/200 loss 0.0175 train 0.9996 test 0.6468
+epoch 132/200 loss 0.0137 train 0.9998 test 0.6521
+epoch 133/200 loss 0.0127 train 0.9998 test 0.6581
+epoch 134/200 loss 0.0116 train 0.9999 test 0.6584
+epoch 135/200 loss 0.0106 train 1.0000 test 0.6602
+epoch 136/200 loss 0.0105 train 1.0000 test 0.6609
+epoch 137/200 loss 0.0109 train 1.0000 test 0.6614
+epoch 138/200 loss 0.0114 train 1.0000 test 0.6600
+epoch 139/200 loss 0.0118 train 1.0000 test 0.6633
+epoch 140/200 loss 0.0112 train 1.0000 test 0.6644
+epoch 141/200 loss 0.0113 train 1.0000 test 0.6617
+epoch 142/200 loss 0.0115 train 1.0000 test 0.6647
+epoch 143/200 loss 0.0127 train 0.9999 test 0.6635
+epoch 144/200 loss 0.0115 train 1.0000 test 0.6620
+epoch 145/200 loss 0.0121 train 1.0000 test 0.6640
+epoch 146/200 loss 0.0124 train 0.9999 test 0.6622
+epoch 147/200 loss 0.0120 train 0.9999 test 0.6644
+epoch 148/200 loss 0.0120 train 0.9999 test 0.6621
+epoch 149/200 loss 0.0118 train 1.0000 test 0.6663
+epoch 150/200 loss 0.0112 train 1.0000 test 0.6680
+epoch 151/200 loss 0.0114 train 1.0000 test 0.6663
+epoch 152/200 loss 0.0114 train 1.0000 test 0.6670
+epoch 153/200 loss 0.0115 train 1.0000 test 0.6685
+epoch 154/200 loss 0.0112 train 1.0000 test 0.6680
+epoch 155/200 loss 0.0113 train 1.0000 test 0.6692
+epoch 156/200 loss 0.0110 train 1.0000 test 0.6693
+epoch 157/200 loss 0.0110 train 1.0000 test 0.6697
+epoch 158/200 loss 0.0110 train 1.0000 test 0.6666
+epoch 159/200 loss 0.0109 train 1.0000 test 0.6682
+epoch 160/200 loss 0.0108 train 1.0000 test 0.6654
+epoch 161/200 loss 0.0106 train 1.0000 test 0.6668
+epoch 162/200 loss 0.0106 train 0.9999 test 0.6665
+epoch 163/200 loss 0.0101 train 1.0000 test 0.6684
+epoch 164/200 loss 0.0100 train 1.0000 test 0.6710
+epoch 165/200 loss 0.0101 train 1.0000 test 0.6695
+epoch 166/200 loss 0.0099 train 1.0000 test 0.6705
+epoch 167/200 loss 0.0096 train 1.0000 test 0.6718
+epoch 168/200 loss 0.0096 train 1.0000 test 0.6731
+epoch 169/200 loss 0.0096 train 1.0000 test 0.6723
+epoch 170/200 loss 0.0096 train 1.0000 test 0.6705
+epoch 171/200 loss 0.0097 train 1.0000 test 0.6723
+epoch 172/200 loss 0.0094 train 1.0000 test 0.6708
+epoch 173/200 loss 0.0094 train 1.0000 test 0.6719
+epoch 174/200 loss 0.0094 train 0.9999 test 0.6719
+epoch 175/200 loss 0.0094 train 1.0000 test 0.6709
+epoch 176/200 loss 0.0091 train 1.0000 test 0.6719
+epoch 177/200 loss 0.0089 train 1.0000 test 0.6724
+epoch 178/200 loss 0.0090 train 1.0000 test 0.6701
+epoch 179/200 loss 0.0090 train 1.0000 test 0.6732
+epoch 180/200 loss 0.0088 train 1.0000 test 0.6707
+epoch 181/200 loss 0.0089 train 1.0000 test 0.6731
+epoch 182/200 loss 0.0087 train 1.0000 test 0.6720
+epoch 183/200 loss 0.0087 train 1.0000 test 0.6726
+epoch 184/200 loss 0.0087 train 1.0000 test 0.6719
+epoch 185/200 loss 0.0083 train 1.0000 test 0.6707
+epoch 186/200 loss 0.0084 train 1.0000 test 0.6726
+epoch 187/200 loss 0.0081 train 1.0000 test 0.6707
+epoch 188/200 loss 0.0083 train 1.0000 test 0.6716
+epoch 189/200 loss 0.0084 train 1.0000 test 0.6729
+epoch 190/200 loss 0.0082 train 1.0000 test 0.6725
+epoch 191/200 loss 0.0081 train 1.0000 test 0.6731
+epoch 192/200 loss 0.0083 train 1.0000 test 0.6727
+epoch 193/200 loss 0.0081 train 1.0000 test 0.6712
+epoch 194/200 loss 0.0081 train 1.0000 test 0.6728
+epoch 195/200 loss 0.0084 train 1.0000 test 0.6708
+epoch 196/200 loss 0.0083 train 1.0000 test 0.6725
+epoch 197/200 loss 0.0080 train 1.0000 test 0.6719
+epoch 198/200 loss 0.0080 train 1.0000 test 0.6726
+epoch 199/200 loss 0.0081 train 1.0000 test 0.6704
+epoch 200/200 loss 0.0081 train 1.0000 test 0.6714
+done: final 0.6714 best 0.6732 -> runs/diagdepth_r50_food_aux_25pct/seed0

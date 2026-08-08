@@ -40,12 +40,12 @@
 \def\floatpagepagefraction{1}
 \def\textpagefraction{.001}
 
-\shorttitle{Fusing fixed spectral priors with learned representations}
+\shorttitle{When does fusing knowledge with learned representations pay?}
 \shortauthors{A. AlMughrabi et~al.}
 
-\title[mode = title]{When does fusing hand-crafted spectral knowledge with
-  learned representations pay? A controlled, cost-normalized benchmark and
-  its organizing law}
+\title[mode = title]{When does fusing hand-crafted knowledge with learned
+  representations pay? A controlled, cost-normalized benchmark and a
+  measurable rule for stacking, substitution and interference}
 
 \author[1]{Ahmad AlMughrabi}[orcid=0000-0002-9336-3200]
 \ead{ahmad.almughrabi@ub.edu}
@@ -74,28 +74,24 @@ Fusing prior knowledge with data-driven learning is attractive precisely
 where data is scarce, yet no controlled account says when such fusion helps,
 when it is redundant, and when it harms. We present a
 benchmark that measures one fixed, hand-crafted source of knowledge, a
-pinned bank of Gabor and moment spectral targets, injected only during training
-through an auxiliary regression head at $\sim$2\% compute overhead, against
-the leading data-driven alternatives (self-supervised learning with
-SimCLR, SimSiam and DINO, ImageNet transfer, heavy augmentation, and
-learned teachers) under one frozen recipe with
-committed data subsets: 12 datasets, 9 backbones, data scales from
+pinned bank of Gabor targets injected only during training at $\sim$2\%
+compute overhead, against the data-driven alternatives (SimCLR, SimSiam and
+DINO pre-training, ImageNet transfer, heavy augmentation, learned teachers)
+under one frozen recipe with committed subsets: 12 datasets, 9 backbones, data scales from
 500 to 1.28M images, resolutions from 32 to 224\,px, and models from 5.7M to
-86M parameters ($2{,}800$ experimental cells). The grid is organized by a
-single empirical law, $\Delta = G + \mathrm{readout}(\mathrm{base})$,
-separating each intervention's feature-level gain $G$ from a readout term
-depending only on baseline accuracy. Registered in advance, it
-called the feature gain of an unseen backbone family and of ImageNet-scale
-cells from baseline heights alone ($|\Delta-G| \le 1.1$ points on five of
-six ImageNet-scale pairs); its sign holds on $79\%$ of the cells where
-measurement uncertainty permits a test, and $88\%$ below the crossing. It yields
-a sharp fusion taxonomy: sources supplying different currencies stack (prior
-with augmentation), same-currency sources substitute (the prior against
-effective self-supervised pre-training), and fusing into an already-informed
-initialization taxes in proportion to what that initialization carries
-(ImageNet transfer). A decision guide maps regime to the cheapest
-intervention. Harness, configurations, subset indices, per-run records and
-result tables are released at
+86M parameters ($2{,}800$ experimental cells). Every pairwise combination
+is measured too, and follow one rule: different-\emph{currency}
+sources stack (prior with augmentation), same-currency sources substitute
+(prior against effective self-supervised pre-training), and fusing into an
+already-informed initialization interferes in proportion to what it carries
+(ImageNet transfer, up to $-17$ points). Because each source's currency is
+measurable on frozen features before the combination is built, the outcome
+is predictable in advance, which we state as a procedure. The rule holds
+where the sources are two Sentinel-2 sensor sets and where they are two
+trained classifiers, not only where one is a prior. Underlying it is an empirical decomposition,
+$\Delta = G + \mathrm{readout}(\mathrm{base})$, whose sign holds on $79\%$
+of testable cells and which, registered in advance, called an unseen
+backbone family's feature gain from baseline heights alone. All artifacts are released at
 \href{https://github.com/GCVCG/MomentAux}{\texttt{github.com/\allowbreak GCVCG/MomentAux}}.
 \end{abstract}
 
@@ -108,8 +104,8 @@ result tables are released at
 
 \begin{highlights}
 \item A 2,800-cell, cost-normalized benchmark of data-efficiency interventions
-\item Feature gain and readout separate: sign correct on 79\% of testable cells
-\item Different-currency fusions stack; same-currency fusions substitute
+\item Verified on two Sentinel-2 sensor sets and on decision-level fusion
+\item A measurable rule predicts stacking, substitution or interference
 \item Free spectral prior beats 2$\times$-compute SSL on ViTs under modern recipes
 \item Attention's feature deficit persists at 1.28M images and grows with scale
 \end{highlights}
@@ -126,6 +122,7 @@ self-supervised learning \sep auxiliary losses \sep benchmark
 \input{sections/s1_intro_related}
 \input{sections/s2_methods}
 \input{sections/s3_results}
+\input{sections/s5_multisource}
 \input{sections/s4_ablations_discussion}
 
 %% ------------------------------------------------------------------
