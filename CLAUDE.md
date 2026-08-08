@@ -3322,3 +3322,37 @@ ported vs corrected and why.
   is settled ("learned teacher does ~NOTHING while the free hand-crafted
   moment gives +3.3/+2.8") — these cells were shipped only so the queue can
   reach GRID_COMPLETE instead of crash-looping forever.
+
+## So2Sat LCZ42 — the cross-modality population (2026-08-08)
+
+- WHY THIS POPULATION: every multi-source cell so far (EuroSAT-MS) splits ONE
+  instrument's bands. So2Sat pairs **Sentinel-1 SAR (8 ch) with Sentinel-2
+  optical (10 ch)**, 17 LCZ classes, 32px: different satellites, different
+  physics (backscatter vs reflectance), no shared detector. Configs are the
+  champion VERBATIM; only `dataset` differs across sar/opt/all, so the sensor
+  comparison carries no recipe confound. 90 cells, split 54 solarflare /
+  36 local.
+- PREDICTIONS RECORDED WITH ONE CELL ALREADY SEEN, and that is stated rather
+  than hidden: sf_so2sat_sar_none_10pct = 49.12±0.38 (n=3) and
+  sf_so2sat_sar_aux_10pct seed0 = 48.85 were on disk when these were written.
+  So the SAR band below is a POST-hoc reading of one seed, not a prediction,
+  and must not be scored as one. The optical and fused bands are untouched.
+    SAR-only: Δ ~ −0.5..+0.5 (neutral). REASONING, and it is a real
+      mechanism claim: the aux target is oriented-energy magnitude, and SAR
+      is speckle-dominated with no photographic edge statistics. If the
+      prior is genuinely domain-agnostic it should still help; if it is
+      really an *optical-image* prior, SAR is where that shows.
+    Optical-only: Δ +1.0..+2.5 (EuroSAT-MS non-visible gave +2.31 at 10%).
+    Fused: Δ ≥ optical-only if the currencies differ.
+- THE CONFOUND, recorded BEFORE the result so it cannot be invented after:
+  momentstem/energy.py builds its scalar field from a LUMA weighting, and
+  for N != 3 channels I generalized that to a uniform 1/N mean. For optical
+  bands that is defensible; for SAR it averages backscatter channels, which
+  has no photometric meaning. So a NULL on SAR is ambiguous between "the
+  prior does not suit radar statistics" and "the channel reduction is wrong
+  for radar", and a null must be reported with that ambiguity intact. The
+  disambiguating run (a SAR-specific reduction) is NOT queued and would be a
+  new design decision, not a bug fix.
+- FALSIFIER for "the prior is domain-agnostic": Δ(SAR) ≤ −1.0 at 3 seeds on
+  two fractions => the prior is an optical-image prior and every
+  cross-domain claim must name its modality.
