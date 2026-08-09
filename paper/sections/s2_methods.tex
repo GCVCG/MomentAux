@@ -110,7 +110,7 @@ mapping them to $N$ channels. Training minimizes
   \begin{aligned}
     \mathcal{L}(t) &\;=\; \mathcal{L}_{\mathrm{CE}}
       \;+\; \lambda(t)\,
-      \bigl\lVert\, W f_3(x) - \mathbf{m}(x) \,\bigr\rVert_2^2 ,\\[2pt]
+      \bigl\lVert\, W f_3(x) - \mathbf{m}(x) \,\bigr\rVert_2^2,\\[2pt]
     \lambda(t) &\;=\; \tfrac{\lambda_0}{2}
       \Bigl(1+\cos\tfrac{\pi t}{T}\Bigr),
   \end{aligned}
@@ -170,7 +170,7 @@ regression using the limited-memory BFGS optimizer (L-BFGS) and fixed
 hyper-parameters:
 \begin{equation}
   \min_{V}\; \tfrac{1}{n}\!\sum_{i} \mathrm{CE}\bigl(Vz_i, y_i\bigr)
-    \;+\; 10^{-4}\lVert V\rVert_2^2 .
+    \;+\; 10^{-4}\lVert V\rVert_2^2.
   \label{eq:probe}
 \end{equation}
 Only the features differ between arms; everything else is identical. We
@@ -447,7 +447,7 @@ a Spanish grid carbon intensity of $0.17$\,kg\,CO$_2$eq per kWh, this
 corresponds to approximately $2{,}600$\,kWh and \textbf{450\,kg
 CO$_2$eq}, about $50$\,g CO$_2$eq per training run. We report this as an
 order-of-magnitude accounting following the methodology of the Machine
-Learning Impact calculator \citep{lacoste2019quantifying}, not a
+Learning Impact calculator, not a
 measurement. Its known omissions should be read with it: it assumes
 sustained peak GPU power and uniform throughput, ignores idle and host-side
 draw, excludes embodied (manufacturing) carbon and storage, and applies a

@@ -84,30 +84,46 @@ as the pre-registration trail. Read it once end to end first.
 5. Flip the repository to public, then mint the Zenodo DOI from the tag and
    add the DOI to the paper's data-availability statement.
 
-## Guide-for-authors compliance (status as of 2026-08-09)
+## Guide-for-authors compliance (VERIFIED against the downloaded guide, 2026-08-10)
 
-The live ScienceDirect guide is bot-blocked from this environment (HTTP 403
-on every route, verified again today), so the items below are confirmed from
-Elsevier's published summary of the journal's requirements rather than read
-off the page. **Open the guide in a browser and re-check before submitting**
-— this list is evidence, not proof.
+Checked against the journal's own PDF, not a third-party summary. The
+mandatory LaTeX requirements are enforced by desk rejection, so they are
+listed first.
 
-| Requirement | Status |
-|---|---|
-| Abstract <= 250 words | MET (250) |
-| Highlights: 3-5 bullets, <= 85 chars each | MET (5 bullets, 65-73 chars) |
-| Highlights as a SEPARATE editable file, "highlights" in the filename | MET (`paper/highlights.txt`) |
-| Graphical abstract | MET (`figs/graphical_abstract.pdf`) |
-| CRediT author contribution statement | MET |
-| Declaration of competing interest | MET |
-| Data availability statement | MET |
-| Declaration of generative AI in writing | MET (Elsevier's exact wording) |
-| Numbered references | MET (`unsrtnat`) |
-| Cover letter | MET (`paper/cover_letter.md`) |
-| Format-free first submission ("your paper your way") | ASSUMED, verify |
-| Page limit | UNKNOWN, verify (currently 27 pages, CAS double column) |
+| Mandatory requirement | Limit | Ours | Status |
+|---|---|---|---|
+| Manuscript length, final formatted | 10-35 pages | 27 | MET |
+| **References, research article** | **max 50** | **50** | **MET (was 74)** |
+| Must use the journal LaTeX template | cas-dc | cas-dc | MET |
+| Editable source files at submission (.tex, figures) | required | prepared | MET |
+| PDF alone | not accepted | n/a | MET |
 
-STILL TO VERIFY BY HAND, because they cannot be confirmed from a summary:
-whether the journal caps pages or references, whether the graphical abstract
-has a required aspect ratio or minimum size, and whether suggested reviewers
-are requested at submission.
+| Other requirement | Ours | Status |
+|---|---|---|
+| Abstract | 243 words (max 250) | MET |
+| Highlights: 3-5 bullets, <=85 chars, separate file with "highlights" in the name | 5 bullets, 65-73 chars, `paper/highlights.txt` | MET |
+| Graphical abstract, separate file | `figs/graphical_abstract_submission.png`, 1889x755 (2.5:1, >=1328x531) | MET |
+| Artwork as separate files, logical names | figures are separate PDFs | MET |
+| CRediT statement | present | MET |
+| Declaration of competing interests | present | MET |
+| Declaration of generative AI use | present, Elsevier wording | MET |
+| Funding sources | in acknowledgments | MET |
+| Cover letter | `paper/cover_letter.md` | MET |
+
+NOT FOUND anywhere in the guide: any request for suggested reviewers, and
+any structured-abstract or keyword-count requirement. Treated as not
+required.
+
+THE REFERENCE CUT (2026-08-10). The guide caps research articles at 50
+references and we had 74. Twenty-four were removed, chosen by protecting
+every load-bearing citation first: datasets we train on, backbones and
+optimizers we run, comparators we run, the method's own lineage, the
+measurements we use, the fusion-theory citations that carry the venue case,
+and the references the reviewer specifically asked us to add. What was cut
+came from the discretionary remainder, preferring one of each redundant
+pair (`vonrueden2022informedpre` where the 2023 survey stays;
+`wightman2021resnet` where `musgrave2020metric` stays) and single-use
+decorative citations. Two swaps were made after inspection:
+`newell2020useful` was retained because it states the standing criticism of
+linear evaluation that our methodology has to answer, and
+`kornblith2019better` was cut in its place.
