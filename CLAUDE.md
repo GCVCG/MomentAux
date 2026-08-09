@@ -3425,3 +3425,82 @@ ported vs corrected and why.
   -- the reverse of the plain-aug ViT pattern (prior won BELOW 10%) and the
   reverse of conv (where 5x SSL wins everywhere). Three regimes, three
   different orderings; state each with its budget attached.
+
+## BUDGET-CELL G PROBES + SECOND POPULATION (2026-08-09)
+
+- WHY: the budget envelope is e2e-only. The currency account says SimCLR and
+  the prior fill the SAME feature deficit (that is why they never stack), so
+  giving SimCLR 5x should show up as MORE OF THE SAME CURRENCY on the
+  feature side, not a different one. That is a falsifiable prediction and it
+  has never been measured on a budget axis.
+- PROTOCOL: every G is a matched pair probed on ONE machine under the
+  identical linear protocol; solarflare's budget checkpoints were pulled
+  local for exactly this reason. Baselines abl{5,10}_none and
+  diagdeit_none_{5,10,25}pct are already probed under the same protocol.
+- SCOPE CAVEAT, stated first: the sign law was derived on aux-from-scratch
+  cells. SSL-init cells are a NON-AUX intervention and are scored
+  separately, as the 2026-07-20 entry requires. They have complied before
+  (conv simclr: Delta +9.18 vs G +9.02) but a miss here is not a sign-law
+  violation.
+- PREDICTIONS RECORDED IN ADVANCE (readout read off the measured curve at
+  matched baseline height; G_pred = Delta - readout_pred):
+      cell                    base    Delta   readout_pred  G_pred  BAND
+      simclr800 C100@5%      25.36   +14.38     -1.1        15.5   [13.5,17.5]
+      simclr800 C100@10%     40.28   +10.92     +0.1        10.8   [ 9.0,12.5]
+      simclr800 ViT-deit@5%  12.55   +17.42     -3.8        21.2   [18.5,24.0]
+      simclr800 ViT-deit@10% 20.28   +20.29     -1.2        21.5   [19.5,23.5]
+      simclr800 ViT-deit@25% 32.27   +23.58     +2.0        21.6   [19.5,24.0]
+- THE CURRENCY PREDICTION, which is the point of the pass: G(simclr-5x)
+  should track G(prior) wherever the two are level e2e, and fall BELOW it
+  where the prior wins e2e. Measured prior G on ViT-deit: 21.35@5%,
+  22.20@10%, 23.05@25%. So the prediction is
+      @5%:  G(ssl5x) >= G(prior)  (SSL wins e2e by 1.08)
+      @10%: G(ssl5x) ~= G(prior)  (level e2e)
+      @25%: G(ssl5x) <  G(prior)  (prior wins e2e by 1.47, 7.2 sigma)
+  FALSIFIER for "budget buys more of the same currency": G(ssl5x) ABOVE
+  G(prior) at 25% while losing e2e by 7.2 sigma => the 25% loss is
+  readout-side, not feature-side, and "same currency, more of it" is the
+  wrong account of what extra pre-training budget buys.
+- SECOND POPULATION (solarflare, in parallel): diagdeitsslbudget_simclr800
+  on **tin@10%** vs the measured tin comparators (deit-none 10.49,
+  deit-ssl-2x 25.45, deit-aux 27.43). The C100 result — SSL wins at 5%,
+  level at 10%, prior wins at 25% — rests on ONE population.
+  PREDICTION: tin@10% is 10k images, i.e. between C100's 5% and 25% in
+  image count, and the C100 ordering is image-count-driven, so expect
+  ssl5x NEAR deit-aux: band **26..29**, i.e. level or slightly below.
+  FALSIFIER: ssl5x >= 29 on tin => the budget flip is population-specific
+  and the attention claim must be scoped to CIFAR-100.
+
+- *** BUDGET-CELL G PROBES SCORED (2026-08-09, matched pairs, one machine):
+      cell            base    Delta      G   readout   band        verdict
+      conv C100@5%   25.36   +14.38  +11.27   +3.11   13.5..17.5  LOW
+      conv C100@10%  40.28   +10.92   +8.68   +2.23    9.0..12.5  LOW
+      ViT-deit@5%    12.55   +17.42  +22.24   -4.83   18.5..24.0  IN
+      ViT-deit@10%   20.28   +20.29  +21.27   -0.98   19.5..23.5  IN
+      ViT-deit@25%   32.27   +23.58  +20.77   +2.81   19.5..24.0  IN
+  (1) THE CURRENCY PREDICTION HELD, 3/3, and it was the point of the pass.
+      Predicted G(ssl5x) >= G(prior) @5%, ~= @10%, < @25%, tracking the e2e
+      ordering. Measured against G(prior) 21.37/22.19/23.05:
+        @5%  +22.24 vs 21.37 = ssl5x HIGHER (+0.87) -- SSL wins e2e (+1.08)
+        @10% +21.27 vs 22.19 = ssl5x lower  (-0.92) -- e2e level
+        @25% +20.77 vs 23.05 = ssl5x LOWER  (-2.28) -- prior wins e2e (+1.47)
+      The recorded falsifier (G(ssl5x) ABOVE G(prior) at 25% while losing
+      e2e by 7.2 sigma => the loss is readout-side and "same currency, more
+      of it" is wrong) did NOT fire. Extra pre-training budget buys MORE OF
+      THE SAME CURRENCY, and the whole ViT budget ordering is FEATURE-SIDE.
+      Note G(prior) RISES with data (21.4/22.2/23.1) while G(ssl5x) FALLS
+      (22.2/21.3/20.8) -- they cross between 5 and 10%, which is exactly
+      where the e2e ordering crosses. Two independent measurements agreeing
+      on the crossover location.
+  (2) THE CONV CELLS MISSED LOW, BOTH OF THEM, and produced POSITIVE readout
+      (+3.11, +2.23). At base 25.36 that is on the wrong side of the
+      aux-derived branch (below the crossing, readout should be negative).
+      SCORED AS RECORDED: the scope caveat written before this pass says
+      SSL-init cells are a NON-AUX intervention outside the law's derived
+      scope, so this is NOT a sign-law violation and is not counted as one.
+      But it IS a finding: on conv, 5x-SSL cells sit ABOVE the aux readout
+      branch, i.e. they cash MORE accuracy per unit of feature gain than the
+      prior does at the same baseline height. On ViT the same cells sit ON
+      the branch (-4.83/-0.98 below the crossing, correct sign). So the
+      readout term is intervention-dependent on conv and not on attention --
+      unexplained, recorded, and a real open thread rather than a tidy one.
