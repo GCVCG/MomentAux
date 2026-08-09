@@ -3552,3 +3552,30 @@ ported vs corrected and why.
   difference is NOT monotone in data and the tin envelope has a crossover
   after all, which would make the C100 and tin stories the same shape with
   a shifted crossing rather than different stories.
+
+- *** THE POPULATION DISAGREEMENT IS FEATURE-SIDE, AND THE MECHANISM IS THE
+  PRIOR'S G FALLING FURTHER THAN THE COMPARATOR'S (2026-08-09/10, tin budget
+  probes; tin comparators' probes were computed on the cluster, so these are
+  CROSS-MACHINE pairs -- verified elsewhere to agree to 0.01-0.05, and stated
+  as a caveat rather than hidden):
+      pop    imgs | G(ssl5x)  G(prior)  Gssl-Gpr | e2e aux-ssl
+      C100   2500 |  +22.24    +21.37    +0.87   |   -1.08
+      tin    5000 |  +17.72    +15.67    +2.05   |   -1.35
+      C100   5000 |  +21.27    +22.19    -0.93   |   +0.71
+      tin   10000 |  +20.92    +19.72    +1.19   |   -0.31
+      C100  12500 |  +20.77    +23.05    -2.28   |   +1.47
+  **5/5 SIGN AGREEMENT** between (G_ssl - G_prior) and the e2e ordering:
+  whichever intervention has the larger feature gain wins end to end, on both
+  populations, at every fraction. So the budget comparison is feature-side
+  throughout and not a readout artifact -- the same conclusion the C100-only
+  probes reached, now with the second population included.
+  AND IT EXPLAINS THE DISAGREEMENT. At a MATCHED 5,000 images the two
+  populations differ because the PRIOR's feature gain differs: G(prior) is
+  +22.19 on C100 and only +15.67 on tin, while G(ssl5x) is +21.27 and +17.72.
+  The comparator loses ~3.5 points of G moving to tin; the prior loses ~6.5.
+  So the free spectral target contributes LESS on the 200-way 64px task
+  relative to what contrastive pre-training contributes there, which is
+  exactly why tin favours the comparator at every matched count.
+  This is the honest mechanism for the narrowed claim, and it is measured
+  rather than argued: the population term is not a mystery, it is G(prior)
+  degrading faster than G(SSL) as the label space gets finer.
