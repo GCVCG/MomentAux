@@ -83,3 +83,31 @@ as the pre-registration trail. Read it once end to end first.
    missed. It contains no credentials, by (3).
 5. Flip the repository to public, then mint the Zenodo DOI from the tag and
    add the DOI to the paper's data-availability statement.
+
+## Guide-for-authors compliance (status as of 2026-08-09)
+
+The live ScienceDirect guide is bot-blocked from this environment (HTTP 403
+on every route, verified again today), so the items below are confirmed from
+Elsevier's published summary of the journal's requirements rather than read
+off the page. **Open the guide in a browser and re-check before submitting**
+— this list is evidence, not proof.
+
+| Requirement | Status |
+|---|---|
+| Abstract <= 250 words | MET (250) |
+| Highlights: 3-5 bullets, <= 85 chars each | MET (5 bullets, 65-73 chars) |
+| Highlights as a SEPARATE editable file, "highlights" in the filename | MET (`paper/highlights.txt`) |
+| Graphical abstract | MET (`figs/graphical_abstract.pdf`) |
+| CRediT author contribution statement | MET |
+| Declaration of competing interest | MET |
+| Data availability statement | MET |
+| Declaration of generative AI in writing | MET (Elsevier's exact wording) |
+| Numbered references | MET (`unsrtnat`) |
+| Cover letter | MET (`paper/cover_letter.md`) |
+| Format-free first submission ("your paper your way") | ASSUMED, verify |
+| Page limit | UNKNOWN, verify (currently 27 pages, CAS double column) |
+
+STILL TO VERIFY BY HAND, because they cannot be confirmed from a summary:
+whether the journal caps pages or references, whether the graphical abstract
+has a required aspect ratio or minimum size, and whether suggested reviewers
+are requested at submission.
