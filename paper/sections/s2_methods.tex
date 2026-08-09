@@ -369,6 +369,27 @@ the prior is not overturned on attention as it is on convolutions, but the
 honest form of the claim names its budget: at $2\times$ the prior leads at
 every fraction, and at $5\times$ it leads only from about 10\% upward.
 
+It also has to name its population. Repeating the comparison on
+Tiny-ImageNet gives $19.81$ and $27.73$ at 5 and 10\% against the prior's
+$18.46$ and $27.43$, so at $5\times$ the comparator is ahead at 5\% by
+$1.35$ ($3.7$ standard errors) and level at 10\%: on that dataset the
+prior leads nowhere we measured. At $2\times$ it leads on both populations
+($16.67$ and $25.45$ against $18.46$ and $27.43$). The claim we are willing
+to make is therefore that a fixed spectral target beats contrastive
+pre-training on small attention models under a modern augmentation recipe
+\emph{at equal-ish cost}, and that buying the comparator five times the
+pre-training erases that lead entirely on Tiny-ImageNet and above
+${\sim}10\%$ of CIFAR-100 leaves it intact.
+
+We had expected the two populations to line up by image count, since the
+CIFAR-100 ordering moves from comparator-ahead at 2{,}500 images to
+prior-ahead at 12{,}500. They do not. At a matched 5{,}000 images CIFAR-100
+is level while Tiny-ImageNet has the comparator ahead by $3.7$ standard
+errors, and Tiny-ImageNet favours the comparator at every matched count.
+Both cells landed inside the bands we had recorded, but the reasoning that
+produced those bands is wrong, and we prefer to report that than to let a
+band hit stand in for a confirmed mechanism.
+
 The shape of that result contradicted our own prediction, which we had
 recorded before running it, and the error is worth stating because it is
 diagnostic. We expected the prior to hold at the scarce fractions and 25\%
@@ -395,14 +416,19 @@ the flip is a property of the representations rather than of the classifier
 that reads them. This is the substitution outcome measured on a budget axis,
 which is the one axis the taxonomy had not been tested on.
 
-One result in this pass we report without an account. On the two
-convolutional budget cells the residual comes out positive ($+3.11$ at a
-baseline of $25.36$, $+2.23$ at $40.28$) where the branch fitted to
-prior-trained cells is negative below the crossing. We had recorded in
-advance that self-supervised initializations lie outside the scope in which
-that branch was estimated, so we do not count this against it; but the same
-intervention sits on the branch on attention backbones and off it on
-convolutional ones, and we have no explanation for the difference.
+One result in this pass we report without an account. Probing the
+convolutional budget envelope at all eight fractions shows the prior's own
+residual tracking the fitted branch closely ($-2.76$, $-2.65$, $-2.07$,
+$-1.11$ below the crossing, then $+0.06$, $+0.21$, $-0.18$, $-0.28$ above
+it), while the $5\times$ comparator's residual follows it only at the two
+scarcest cells ($-6.11$, $-1.21$) and then departs, running positive from
+3\% to 15\% ($+1.32$, $+3.11$, $+3.58$, $+2.23$, $+1.81$) at baselines
+where the branch is negative or near zero. We recorded in advance that
+self-supervised initializations lie outside the scope in which that branch
+was estimated, so we do not count this against it. But the departure is
+systematic rather than incidental, it is confined to the mid-data band, and
+the same intervention sits on the branch on attention backbones. We have no
+explanation, and prefer to leave it as a measured anomaly than to fit one.
 
 \emph{Two fractions would have misled us, which is the methodological
 point.} Had we run only 5 and 10\% we would have reported that the prior

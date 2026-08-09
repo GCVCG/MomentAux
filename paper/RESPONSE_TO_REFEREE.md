@@ -194,6 +194,12 @@ Three consequences, and we accept all of them.
    we now state it with its budget attached: the prior leads at every
    fraction at 2×, and from about 10% upward at 5%.
 
+   Repeating it on Tiny-ImageNet narrows the claim further: at 5× the
+   comparator is ahead at 5% (3.7 SEM) and level at 10%, so on that dataset
+   the prior leads nowhere we measured, while at 2× it leads on both
+   populations. The manuscript now states the modern-recipe claim with both
+   its budget and its population attached.
+
    We also record that this contradicted our own pre-registered prediction —
    we expected 25% to be the cell that flipped and it was 5% — and why: the
    extra budget buys the comparator +8.32 / +4.51 / +3.53 at 5 / 10 / 25%,

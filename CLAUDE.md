@@ -3538,3 +3538,17 @@ ported vs corrected and why.
   recipe" is a **2x** statement on BOTH populations (deit-ssl2x is below aux
   on both: 16.67 vs 18.46, 25.45 vs 27.43) and, at 5x, a C100-only statement
   in the measured range. State it with both the budget AND the population.
+- tin@25% BUDGET CELL LAUNCHED (2026-08-09) — the sharp remaining question:
+  does the prior beat 5x SimCLR ANYWHERE on tin? On C100 it wins at 25% by
+  7.2 sigma; on tin it lost at 5% and tied at 10%.
+  tin@25% comparators: deit-none 23.14, deit-ssl-2x **38.48**, deit-aux
+  **38.24** — note SSL already TIES the prior at 2x here, unlike C100 where
+  2x SSL is 5 points behind at the same fraction.
+  PREDICTION RECORDED IN ADVANCE, and it is a bet AGAINST our own method:
+  **40..44**, i.e. 5x SSL WINS at tin@25% and the prior beats 5x SimCLR
+  nowhere on this population. Reasoning: the 2x arms are already level, and
+  4x more pre-training bought SimCLR +3.5 to +8.3 everywhere else measured.
+  FALSIFIER: ssl5x <= 38.24 (prior wins or ties) => the population
+  difference is NOT monotone in data and the tin envelope has a crossover
+  after all, which would make the C100 and tin stories the same shape with
+  a shifted crossing rather than different stories.
