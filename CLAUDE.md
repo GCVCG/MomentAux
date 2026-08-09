@@ -3504,3 +3504,11 @@ ported vs corrected and why.
       the branch (-4.83/-0.98 below the crossing, correct sign). So the
       readout term is intervention-dependent on conv and not on attention --
       unexplained, recorded, and a real open thread rather than a tidy one.
+- SECOND-POPULATION ENVELOPE (2026-08-09): tin@10% on solarflare (band
+  26..29 recorded above) and tin@5% chained on local. PREDICTION for tin@5%,
+  recorded before it runs: the C100 budget ordering is IMAGE-COUNT-driven
+  (SSL wins at 2.5k, level at 5k, prior wins at 12.5k), so tin@5% = 5k
+  images should land LEVEL with deit-aux 18.46 -> band **17..20**.
+  Together with tin@10% (10k imgs, band 26..29, at-or-below aux 27.43) this
+  gives the second population two points that test the image-count account
+  rather than one point that merely repeats it.
