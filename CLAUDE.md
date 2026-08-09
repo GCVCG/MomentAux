@@ -3356,3 +3356,43 @@ ported vs corrected and why.
 - FALSIFIER for "the prior is domain-agnostic": Δ(SAR) ≤ −1.0 at 3 seeds on
   two fractions => the prior is an optical-image prior and every
   cross-domain claim must name its modality.
+
+## ViT BUDGET FALSIFIER (2026-08-09) — the paper's last accuracy claim
+
+- WHY NOW: the conv budget envelope (SimCLR/SimSiam at 800 pre-epochs, 8
+  fractions, landed 2026-08-09) showed **SimCLR at 5x beats the prior at
+  EVERY conv fraction 1-25%** (+3.12..+9.24, 8-37 sigma). The conv accuracy
+  claim is therefore withdrawn and restated as a COST claim. The paper's
+  ONLY surviving accuracy claim is the ATTENTION regime under DeiT
+  augmentation — and that was measured against SimCLR at 2x ONLY. Leaving it
+  there would be exactly the asymmetry the referee flagged: the comparator
+  gets its published budget where it loses, and never gets more.
+- CELLS: diagdeitsslbudget_simclr800_vit_{5,10,25}pct — ViT-tiny, DeiT aug,
+  SimCLR init at 800 pre-epochs, 3 seeds. Comparators (all measured):
+      pct   deit-base  deit-ssl(2x)  deit-aux(1.02x)
+        5     12.55       21.64         28.89
+       10     20.28       36.06         41.29
+       25     32.27       52.31         57.32
+- PREDICTIONS RECORDED IN ADVANCE (nothing from these cells seen):
+    @10%: **38..44**. Reasoning, and it is a real mechanism claim rather
+      than a hedge: on CONV, 4x budget moved SimCLR by +2.2..+5.3 with the
+      largest moves in the mid band. Applying the same increment to
+      deit-ssl's 36.06 lands 38-41, i.e. BELOW deit-aux's 41.29 but close.
+      The mechanism says it should move LESS than on conv: under DeiT
+      augmentation SimCLR's currency (nuisance invariance) is already
+      supplied by the supervised augmentation, which is why deit-ssl2b
+      showed stronger views HURT (-4..-12). More of a substituted currency
+      should buy little.
+    @5%:  **23..28** (deit-aux 28.89)   @25%: **54..59** (deit-aux 57.32).
+    So the recorded bet is: the prior HOLDS at 5 and 10%, and 25% is the
+    cell most likely to flip (its conv counterpart flipped, and deit-ssl is
+    already within 5.0 there).
+- FALSIFIER, and it is the paper's last one: deit-ssl800 >= deit-aux at
+  BOTH 10% and 25% => 5x compute overturns the prior on attention too, the
+  attention accuracy claim is withdrawn like the conv one, and MomentAux's
+  case becomes PURELY cost (+2% vs +400%) on every backbone measured. That
+  outcome must be reported as plainly as this entry states it.
+- HONEST NOTE ON WHAT IS NOT TESTED: the prior gets no extra budget in this
+  comparison because it has none to spend — it is a fixed target with no
+  pretraining stage. The comparison is "free prior vs SSL at 5x", not
+  "equal budgets", and the paper must say so.

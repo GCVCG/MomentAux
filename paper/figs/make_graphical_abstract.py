@@ -248,7 +248,7 @@ cx = BX + BW / 2
 for dy, txt, fs0, col, bold in [
         (1.86, "Headline: Small ViTs", 5.2, BLUE, True),
         (1.26, "+13.0 (ViT-S) and +26.0 (ViT-B) at 224 px", 4.5, INK, False),
-        (0.78, "+3.2 at 1.28M Images; Every CNN Neutral", 4.5, INK, False)]:
+        (0.78, "+3.2 at 1.28M Images; ResNets Neutral", 4.5, INK, False)]:
     axC.text(cx, dy, txt, ha="center", va="top",
              fontsize=fit_fontsize(txt, (BW - 0.5) * UNIT_C, fs0, bold=bold),
              fontweight="bold" if bold else "normal", color=col)
