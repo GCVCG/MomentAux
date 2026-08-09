@@ -3512,3 +3512,29 @@ ported vs corrected and why.
   Together with tin@10% (10k imgs, band 26..29, at-or-below aux 27.43) this
   gives the second population two points that test the image-count account
   rather than one point that merely repeats it.
+
+- *** SECOND POPULATION SCORED (2026-08-09, tin, ViT-tiny + DeiT, 3 seeds).
+  BOTH BANDS HIT, THE ACCOUNT BEHIND THEM DID NOT:
+      pct  deit-base  ssl-2x  aux-1.02x  ssl-5x | aux-ssl5x  sigma  band
+       5%    8.29      16.67    18.46    19.81  |   -1.35    -3.7   17..20 IN
+      10%   10.49      25.45    27.43    27.73  |   -0.31    -0.6   26..29 IN
+  The recorded falsifier (ssl5x >= 29 at tin@10% => the budget flip is
+  population-specific) did NOT fire. But the bands were set from an
+  IMAGE-COUNT account, and testing that account at MATCHED image counts
+  falsifies it:
+      C100  2500 imgs  aux-ssl5x  -1.08 (-2.0 s)  tie/SSL
+      tin   5000 imgs             -1.35 (-3.7 s)  SSL WINS
+      C100  5000 imgs             +0.71 (+1.2 s)  tie
+      tin  10000 imgs             -0.31 (-0.6 s)  tie
+      C100 12500 imgs             +1.47 (+7.2 s)  PRIOR WINS
+  At 5,000 images the two populations DISAGREE (C100 level, tin SSL-wins by
+  3.7 sigma), so the ordering is NOT a function of image count. tin favours
+  the comparator at every matched count. The bands hit because they were
+  wide, not because the reasoning was right -- recorded as a band hit and an
+  ACCOUNT MISS, which is the same distinction the deepen wave forced.
+  CONSEQUENCE FOR THE PAPER, and it narrows a claim: at 5x comparator budget
+  the prior leads on C100 from ~10% upward but leads NOWHERE measured on tin
+  (SSL wins at 5%, ties at 10%). So "the prior beats SimCLR under a modern
+  recipe" is a **2x** statement on BOTH populations (deit-ssl2x is below aux
+  on both: 16.67 vs 18.46, 25.45 vs 27.43) and, at 5x, a C100-only statement
+  in the measured range. State it with both the budget AND the population.
