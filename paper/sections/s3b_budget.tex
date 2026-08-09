@@ -166,16 +166,29 @@ different machine from the cells they pair with. Cross-machine agreement
 under this protocol was verified elsewhere in the study to within $0.05$
 points, but we note the mixed provenance rather than leave it implicit.}
 
+The second comparator extends the same agreement. Probing SimSiam at
+$5\times$ across all eight fractions gives a feature gain that sits below
+the prior's from 1 to 7\% ($-5.3$ to $-1.9$ points of difference), crosses
+at 10\%, and rises above it at 15\%, matching the end-to-end ordering
+reported in Section~\ref{sec:budget:simsiam} at seven of eight cells; the
+two that are ambiguous are the ones where both quantities are near zero.
+Across two self-supervised methods and two backbone families, the source
+with the larger frozen-feature gain is the one that wins.
+
 One result in this pass we report without an account. Probing the
-convolutional budget envelope at all eight fractions shows the prior's own
-residual tracking the fitted branch closely ($-2.76$, $-2.65$, $-2.07$,
-$-1.11$ below the crossing, then $+0.06$, $+0.21$, $-0.18$, $-0.28$ above
-it), while the $5\times$ comparator's residual follows it only at the two
-scarcest cells ($-6.11$, $-1.21$) and then departs, running positive from 3
-to 15\% ($+1.32$, $+3.11$, $+3.58$, $+2.23$, $+1.81$) at baselines where the
-branch is negative or near zero. We recorded in advance that self-supervised
-initializations lie outside the scope in which that branch was estimated, so
-we do not count this against it. But the departure is systematic rather than
-incidental, it is confined to the mid-data band, and the same intervention
-sits on the branch on attention backbones. We have no explanation, and
-prefer to leave it as a measured anomaly than to fit one.
+convolutional budget envelope shows the prior's own residual tracking the
+fitted branch closely ($-2.76$, $-2.65$, $-2.07$, $-1.11$ below the
+crossing, then $+0.06$, $+0.21$, $-0.18$, $-0.28$ above it), while
+$5\times$ SimCLR departs from it, running positive from 3 to 15\%
+($+1.32$, $+3.11$, $+3.58$, $+2.23$, $+1.81$) at baselines where the branch
+is negative or near zero. Two things narrow what the anomaly can be. It is
+not a property of self-supervised initialization as such: $5\times$
+SimSiam, initialized the same way and evaluated identically, stays within
+$[-0.42, +0.86]$ at every fraction. And across all sixteen self-supervised
+convolutional cells the residual correlates with the size of the
+intervention itself ($r = +0.52$ between $\Delta$ and the residual), so
+what departs from the branch is large gains rather than a particular
+method. We recorded in advance that these initializations lie outside the
+scope in which the branch was estimated, so we do not count the departure
+against it, and we prefer to leave it as a measured regularity than to fit
+an explanation to sixteen points.
