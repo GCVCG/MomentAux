@@ -380,6 +380,30 @@ data-starved at 5\% beyond what compute could fix; it was step-starved.
 On convolutional backbones the same increment instead peaks in the mid band,
 so even the budget response is backbone-dependent.
 
+We also probed these cells, because the comparison so far is end-to-end and
+the taxonomy is a claim about \emph{what} a source supplies rather than how
+much accuracy it yields. Under identical frozen-feature evaluation the
+feature gain of $5\times$ SimCLR is $+22.24$, $+21.27$ and $+20.77$ at 5,
+10 and 25\%, against the prior's $+21.37$, $+22.19$ and $+23.05$. The two
+orderings agree cell by cell: the comparator's feature gain is larger where
+it wins end-to-end, level where the two are level, and smaller where the
+prior wins. The prior's feature gain \emph{rises} with data while the
+comparator's \emph{falls}, and the two cross between 5 and 10\%, which is
+where the accuracy ordering crosses as well. Extra pre-training budget
+therefore buys more of the same currency rather than a different one, and
+the flip is a property of the representations rather than of the classifier
+that reads them. This is the substitution outcome measured on a budget axis,
+which is the one axis the taxonomy had not been tested on.
+
+One result in this pass we report without an account. On the two
+convolutional budget cells the residual comes out positive ($+3.11$ at a
+baseline of $25.36$, $+2.23$ at $40.28$) where the branch fitted to
+prior-trained cells is negative below the crossing. We had recorded in
+advance that self-supervised initializations lie outside the scope in which
+that branch was estimated, so we do not count this against it; but the same
+intervention sits on the branch on attention backbones and off it on
+convolutional ones, and we have no explanation for the difference.
+
 \emph{Two fractions would have misled us, which is the methodological
 point.} Had we run only 5 and 10\% we would have reported that the prior
 beats $5\times$ SimSiam at the scarcer fraction and ties at the other. The
