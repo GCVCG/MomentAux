@@ -1,0 +1,181 @@
+%% ---------------------------------------------------------------------
+\section{Buying the comparator more compute}\label{sec:budget}
+
+Cost normalization is what makes the comparisons in
+Section~\ref{sec:law} interpretable, and Section~\ref{sec:parity} states
+the price it charges: a comparator held to its published budget inside our
+recipe may be undertrained rather than weak, and the two are not separable
+by construction. That reservation bears directly on our results, so we
+measured it instead of leaving it as a caveat. Both self-supervised
+comparators were re-run with four times their pre-training budget, at every
+fraction from 1 to 25\% rather than at one or two, since every other effect
+in this study moves with the data regime and there is no reason a budget
+effect should not. Table~\ref{tab:budget} reports the result. It revises
+two of our claims and confirms one objection outright.
+
+\begin{table}[t]
+\caption{Buying the comparators more compute. CIFAR-100, ResNet-18, gain
+over the baseline; three seeds per pre-trained cell, ten for the baseline
+and the prior at 1, 5 and 10\%. Sorted by training cost. The last two rows
+give the prior minus each comparator at $5\times$ budget, where positive
+means the free prior still wins.}
+\label{tab:budget}
+\centering\scriptsize
+\setlength{\tabcolsep}{2.4pt}
+\zebra{3}
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Intervention & Cost~\down & 1\% & 2\% & 3\% & 5\% \\
+\midrule
+\textbf{Prior (this work)} & $\mathbf{1.02\times}$ & $+1.40$ & $+2.50$ & $+3.68$ & $+5.15$ \\
+SimSiam, 200 ep & $2.00\times$ & $-0.04$ & $-0.11$ & $+0.11$ & $+0.13$ \\
+SimCLR, 200 ep  & $2.00\times$ & $+2.25$ & $+4.88$ & $+5.99$ & $+9.05$ \\
+SimSiam, 800 ep & $5.00\times$ & $-0.11$ & $+0.19$ & $+0.54$ & $+1.90$ \\
+SimCLR, 800 ep  & $5.00\times$ & $\mathbf{+4.52}$ & $\mathbf{+8.33}$ & $\mathbf{+10.82}$ & $\mathbf{+14.38}$ \\
+\midrule
+Prior $-$ SimSiam-800 & & $+1.51$ & $+2.31$ & $+3.14$ & $+3.25$ \\
+Prior $-$ SimCLR-800  & & $-3.12$ & $-5.83$ & $-7.14$ & $-9.24$ \\
+\bottomrule
+\end{tabular}
+
+\vspace{2pt}
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Intervention & Cost~\down & 7\% & 10\% & 15\% & 25\% \\
+\midrule
+\textbf{Prior (this work)} & $\mathbf{1.02\times}$ & $+4.87$ & $+3.75$ & $+2.55$ & $+0.16$ \\
+SimSiam, 200 ep & $2.00\times$ & $+0.87$ & $+0.61$ & $+0.17$ & $-0.03$ \\
+SimCLR, 200 ep  & $2.00\times$ & $+9.86$ & $+8.76$ & $+6.64$ & $+2.81$ \\
+SimSiam, 800 ep & $5.00\times$ & $+3.39$ & $\mathbf{+4.33}$ & $+3.65$ & $+0.79$ \\
+SimCLR, 800 ep  & $5.00\times$ & $\mathbf{+13.88}$ & $\mathbf{+10.92}$ & $\mathbf{+8.36}$ & $\mathbf{+2.77}$ \\
+\midrule
+Prior $-$ SimSiam-800 & & $+1.48$ & $-0.58$ & $-1.10$ & $-0.63$ \\
+Prior $-$ SimCLR-800  & & $-9.01$ & $-7.17$ & $-5.82$ & $-2.61$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{The near-null was a budget artifact}\label{sec:budget:simsiam}
+SimSiam at its published 200-epoch budget gains nothing anywhere on the
+envelope, $-0.11$ to $+0.87$. At 800 epochs it gains up to $+4.33$. We
+therefore withdraw the statement that negative-free self-supervision learns
+almost nothing at this scale: it is budget-starved at the cost we
+normalized to, and its published default is a poor guide to what it can do
+on a few thousand images. Its budget response is itself data-dependent,
+buying most in the mid band ($+3.7$ at 10\%) and nothing at 1\%.
+
+That data-dependence is why the envelope was necessary, and the point is
+methodological rather than incidental. Had we run only 5 and 10\%, the two
+fractions where the objection bites hardest, we would have reported that the
+prior beats $5\times$ SimSiam at the scarcer fraction and ties at the other.
+The full envelope shows a crossover instead: the prior wins from 1 to 7\% by
+up to $3.25$ ($2.6$ to $12.2$ standard errors) and \emph{loses} from 10 to
+25\%, most clearly at 15\% ($-1.10$, $5.2$ standard errors). A two-point
+read would have missed a significant reversal, which is the same sparse-grid
+error we identify in our own earlier readings elsewhere in this paper.
+
+\subsection{On convolutions the prior's case becomes a cost
+case}\label{sec:budget:conv}
+Against the stronger comparator the prior loses at every fraction, including
+the scarcest. SimCLR at $5\times$ beats it by $3.12$ to $9.24$ points, at 8
+to 37 standard errors, from 500 images to 12{,}500. Our earlier positioning
+noted near-parity with self-supervision at 1\%; that was a statement at
+$2\times$ and it does not survive $5\times$. On convolutional backbones the
+prior's case is therefore a cost case and not an accuracy case, and we say
+so without qualification.
+
+\subsection{Attention, given the same test}\label{sec:budget:vit}
+Leaving the attention comparison at $2\times$ while raising the
+convolutional one to $5\times$ would reproduce exactly the asymmetry this
+section exists to remove, so we ran it there too. Against ViT-tiny under the
+DeiT recipe, $5\times$ SimCLR gives $29.97$, $40.57$ and $55.85$ at 5, 10
+and 25\%, against the prior's $28.89$, $41.29$ and $57.32$. The comparator
+\emph{wins} at 5\% by $1.08$ ($2.0$ standard errors), the two are level at
+10\% ($+0.71$, $1.2$), and the prior wins at 25\% by $1.47$ ($7.2$). The
+prior is not overturned on attention as it is on convolutions, but the
+honest form of the claim names its budget: at $2\times$ the prior leads at
+every fraction, and at $5\times$ only from about 10\% upward.
+
+The shape of that result contradicted a prediction we had recorded before
+running it, and the error is diagnostic rather than embarrassing. We
+expected the prior to hold at the scarce fractions and 25\% to be the cell
+most likely to flip; the reverse happened. What the extra budget buys makes
+the reason visible: $+8.32$, $+4.51$ and $+3.53$ at 5, 10 and 25\%,
+decreasing with data, because 200 epochs over 2{,}500 images is fewer than
+four thousand steps. We had assumed the comparator was data-starved at 5\%
+beyond what compute could fix; it was step-starved. On convolutional
+backbones the same increment peaks in the mid band instead, so even the
+budget response is backbone-dependent.
+
+\subsection{A second population, and the account that
+failed}\label{sec:budget:tin}
+The claim has to name its population as well as its budget. Repeating the
+comparison on Tiny-ImageNet gives $19.81$ and $27.73$ at 5 and 10\% against
+the prior's $18.46$ and $27.43$: at $5\times$ the comparator is ahead at
+5\% by $1.35$ ($3.7$ standard errors) and level at 10\%, so on that dataset
+the prior leads nowhere we measured. At $2\times$ it leads on both
+populations ($16.67$ and $25.45$ against $18.46$ and $27.43$). What we are
+willing to claim is therefore that a fixed spectral target beats contrastive
+pre-training on small attention models under a modern augmentation recipe
+\emph{at comparable cost}, and that five times the pre-training erases that
+lead entirely on Tiny-ImageNet while leaving it intact above ${\sim}10\%$ of
+CIFAR-100.
+
+We had expected the two populations to line up by image count, since the
+CIFAR-100 ordering moves from comparator-ahead at 2{,}500 images to
+prior-ahead at 12{,}500. They do not. At a matched 5{,}000 images CIFAR-100
+is level while Tiny-ImageNet has the comparator ahead by $3.7$ standard
+errors, and Tiny-ImageNet favours the comparator at every matched count.
+Both cells landed inside the bands we had recorded in advance, but the
+reasoning that produced those bands is wrong, and we would rather report
+that than let a band hit stand in for a confirmed mechanism.
+
+\subsection{What the budget actually buys}\label{sec:budget:features}
+The comparison so far is end-to-end, while the taxonomy is a claim about
+\emph{what} a source supplies rather than how much accuracy it yields, so we
+probed these cells under the frozen-feature protocol used throughout.
+
+On CIFAR-100 the feature gain of $5\times$ SimCLR is $+22.24$, $+21.27$ and
+$+20.77$ at 5, 10 and 25\%, against the prior's $+21.37$, $+22.19$ and
+$+23.05$. The two orderings agree cell by cell: the comparator's feature
+gain is larger where it wins end-to-end, level where the two are level, and
+smaller where the prior wins. The prior's feature gain \emph{rises} with
+data while the comparator's \emph{falls}, and they cross between 5 and
+10\%, which is where the accuracy ordering crosses. Extra pre-training
+budget therefore buys more of the same currency rather than a different one,
+and the flip is a property of the representations rather than of the
+classifier reading them. This is the substitution outcome measured on a
+budget axis, the one axis the taxonomy had not been tested on.
+
+Including the second population makes the agreement stronger and supplies
+the mechanism the image-count account failed to give. Across both datasets
+and all five fractions, whichever intervention has the larger frozen-feature
+gain is the one that wins end-to-end: the sign of $G_{\mathrm{SSL}} -
+G_{\mathrm{prior}}$ matches the sign of the accuracy difference at five
+cells out of five. And the population term is not mysterious once measured.
+At a matched 5{,}000 images the two datasets diverge because the
+\emph{prior's} contribution diverges: its feature gain is $+22.19$ on
+CIFAR-100 and $+15.67$ on Tiny-ImageNet, while the comparator's is $+21.27$
+and $+17.72$. Moving to the 200-way $64$\,px task costs contrastive
+pre-training about $3.5$ points of feature gain and costs the fixed spectral
+target about $6.5$. A hand-crafted oriented-energy prior supplies
+proportionally less of what a finer label space at higher resolution
+requires, and that, rather than the number of images, decides which source
+wins.\footnote{The Tiny-ImageNet comparator probes were computed on a
+different machine from the cells they pair with. Cross-machine agreement
+under this protocol was verified elsewhere in the study to within $0.05$
+points, but we note the mixed provenance rather than leave it implicit.}
+
+One result in this pass we report without an account. Probing the
+convolutional budget envelope at all eight fractions shows the prior's own
+residual tracking the fitted branch closely ($-2.76$, $-2.65$, $-2.07$,
+$-1.11$ below the crossing, then $+0.06$, $+0.21$, $-0.18$, $-0.28$ above
+it), while the $5\times$ comparator's residual follows it only at the two
+scarcest cells ($-6.11$, $-1.21$) and then departs, running positive from 3
+to 15\% ($+1.32$, $+3.11$, $+3.58$, $+2.23$, $+1.81$) at baselines where the
+branch is negative or near zero. We recorded in advance that self-supervised
+initializations lie outside the scope in which that branch was estimated, so
+we do not count this against it. But the departure is systematic rather than
+incidental, it is confined to the mid-data band, and the same intervention
+sits on the branch on attention backbones. We have no explanation, and
+prefer to leave it as a measured anomaly than to fit one.
