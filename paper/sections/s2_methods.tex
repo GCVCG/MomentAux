@@ -390,6 +390,22 @@ Both cells landed inside the bands we had recorded, but the reasoning that
 produced those bands is wrong, and we prefer to report that than to let a
 band hit stand in for a confirmed mechanism.
 
+Probing these cells supplies the mechanism the image-count account failed to
+give. Across both populations and all five fractions, whichever intervention
+has the larger frozen-feature gain is the one that wins end to end: the sign
+of $G_{\mathrm{SSL}} - G_{\mathrm{prior}}$ matches the sign of the accuracy
+difference at five cells out of five. The budget comparison is therefore
+feature-side throughout. And the population term is not mysterious once
+measured. At a matched 5{,}000 images the two datasets diverge because the
+\emph{prior's} contribution diverges: its feature gain is $+22.19$ on
+CIFAR-100 and $+15.67$ on Tiny-ImageNet, while the comparator's is $+21.27$
+and $+17.72$. Moving to the 200-way $64$\,px task costs contrastive
+pre-training about $3.5$ points of feature gain and costs the fixed
+spectral target about $6.5$. A hand-crafted oriented-energy prior supplies
+proportionally less of what a finer label space at higher resolution
+requires, and that, rather than the number of images, is what decides which
+source wins.
+
 The shape of that result contradicted our own prediction, which we had
 recorded before running it, and the error is worth stating because it is
 diagnostic. We expected the prior to hold at the scarce fractions and 25\%
