@@ -79,9 +79,13 @@ million training images, where the ResNet baseline we measure is
 exactly neutral ($+0.04$). Second, the fashionable remedy is not always the
 right one: under plain augmentation SimCLR beats the prior across the
 mid-data band on photographic datasets, but under the modern DeiT recipe
-the comparison flips at every fraction we measure, because the recipe
-itself supplies the invariance SimCLR was being paid $2\times$ compute to
-learn.
+the comparison flips at every fraction we measure at matched
+${\sim}2\times$ cost, because the recipe itself supplies the invariance
+SimCLR was being paid that compute to learn. Buying the comparator
+$5\times$ instead removes the flip on Tiny-ImageNet and leaves it only
+above ${\sim}10\%$ of CIFAR-100 (Section~\ref{sec:budget}), so the
+comparison is a statement about budget and population, not a ranking of
+methods.
 
 \paragraph{Contributions.}
 \begin{enumerate}
@@ -160,11 +164,13 @@ guidance exists for large-scale use \citep{balestriero2023cookbook}. Much
 less is measured about the small-data, from-scratch regime we target. Our
 grid contributes three facts to that gap: negative-free SimSiam learns
 essentially nothing at $2.5$--$25$k images under its published CIFAR
-recipe; SimCLR is strong on photographic statistics but loses to a free
-domain-agnostic prior on satellite imagery in the low-data band; and the
-entire SSL-versus-prior comparison inverts under a modern supervised
-recipe, because the augmentation stack substitutes for the invariance SSL
-sells (Section~\ref{sec:fusion}).
+recipe, though four times that budget recovers up to $+4.3$ and we report
+it as a property of the budget rather than of the method; SimCLR is strong
+on photographic statistics but loses to a free domain-agnostic prior on
+satellite imagery in the low-data band; and the SSL-versus-prior comparison
+inverts under a modern supervised recipe at matched cost, because the
+augmentation stack substitutes for the invariance SSL sells
+(Sections~\ref{sec:fusion} and \ref{sec:budget}).
 
 \paragraph{Transfer learning.}
 ImageNet initialization remains the strongest single intervention on
