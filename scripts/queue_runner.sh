@@ -37,7 +37,15 @@ while IFS= read -r cmd <&3; do   # read on FD 3, not stdin
   # stdin MUST be /dev/null: a task that reads stdin otherwise swallows the
   # rest of the task file and the queue silently stops after one item.
   ( eval "$cmd" >/dev/null 2>&1 </dev/null
-    echo "$(date -Is) [$n] rc=$? :: ${cmd:0:110}" >> "$LOG" ) &
+    # Capture the status IMMEDIATELY. Writing rc=$? inside a string that also
+    # contains $(date -Is) reports DATE's status, because bash runs the
+    # command substitution during expansion and that overwrites $?. Every
+    # queue this runner drove logged rc=0 unconditionally, so "failures=0"
+    # meant nothing. Found 2026-08-09 after four probe tasks with a wrong
+    # config path were all recorded as successes.
+    rc=$?
+    ts=$(date -Is)
+    echo "$ts [$n] rc=$rc :: ${cmd:0:110}" >> "$LOG" ) &
 done 3< "$TASKS"
 wait
 ok=$(grep -c 'rc=0 ::' "$LOG"); bad=$(grep -c 'rc=[1-9]' "$LOG")
