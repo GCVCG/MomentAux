@@ -147,64 +147,42 @@ accuracy rather than accuracy per unit compute should treat our
 self-supervised numbers as lower bounds.
 
 **The pre-training epoch sweep the referee marks optional is now in the
-revision, and it went partly against us.** We re-ran SimSiam, our weakest
-comparator, at four times its pre-training budget (new Table 4,
-Section 3.7):
+revision, run across the whole data envelope, and it went against us in a
+way two fractions would have hidden.** Both self-supervised comparators
+were re-run at four times their pre-training budget at every fraction from
+1 to 25% (new Table 4, Section 3.7). Gains over the baseline:
 
-| CIFAR-100 | cost | 5% | Δ | 10% | Δ |
-|---|---:|---:|---:|---:|---:|
-| Baseline | 1.00× | 25.36 | — | 40.28 | — |
-| **Prior (ours)** | **1.02×** | **30.51** | **+5.15** | **44.03** | **+3.75** |
-| SimSiam, 200 ep | 2.00× | 25.49 | +0.13 | 40.89 | +0.61 |
-| SimCLR, 200 ep | 2.00× | 34.41 | +9.05 | 49.04 | +8.76 |
-| SimSiam, 800 ep | 5.00× | 27.26 | +1.90 | 44.61 | +4.33 |
+| CIFAR-100 | cost | 1% | 2% | 3% | 5% | 7% | 10% | 15% | 25% |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| **Prior (ours)** | **1.02×** | +1.40 | +2.50 | +3.68 | +5.15 | +4.87 | +3.75 | +2.55 | +0.16 |
+| SimSiam, 200 ep | 2.00× | −0.04 | −0.11 | +0.11 | +0.13 | +0.87 | +0.61 | +0.17 | −0.03 |
+| SimCLR, 200 ep | 2.00× | +2.25 | +4.88 | +5.99 | +9.05 | +9.86 | +8.76 | +6.64 | +2.81 |
+| SimSiam, 800 ep | 5.00× | −0.11 | +0.19 | +0.54 | +1.90 | +3.39 | **+4.33** | +3.65 | +0.79 |
+| SimCLR, 800 ep | 5.00× | **+4.52** | **+8.33** | **+10.82** | **+14.38** | **+13.88** | **+10.92** | **+8.36** | **+2.77** |
 
-The referee was right. SimSiam's near-null result is a property of its
-budget, not of the method: four times the pre-training multiplies its gain
-by four to seven. **We withdraw "SimSiam learns almost nothing at this
-scale"** and now say it is budget-starved at the cost we normalized to.
+Three consequences, and we accept all of them.
 
-The ordering survives, but only partly, and we state which part. At 5% the
-prior still leads five-fold-cost SimSiam by 3.25 ± 0.38 at a fiftieth of
-the overhead. At 10% the two are level (+0.58 ± 0.42, unresolvable), and we
-record a tie rather than claim a win. We also say plainly that this tests
-one method at one multiple and cannot bound the question in general.
+1. **The referee was right about the budget.** SimSiam gains nothing at its
+   published budget anywhere on the envelope, and up to +4.33 at four times
+   it. We withdraw "SimSiam learns almost nothing at this scale."
 
----
+2. **Against the stronger comparator the prior now loses everywhere,
+   including at 1%.** SimCLR at 5× beats it by 3.12 to 9.24 points, at 8 to
+   37 standard errors. Our earlier claim of near-parity with
+   self-supervision at 1% was a statement at 2× and does not survive 5×. We
+   have rewritten the convolutional positioning accordingly: **on conv
+   backbones the prior's case is cost, not accuracy**. The attention
+   results are measured at 2× and are unaffected; whether 5× SimCLR would
+   also overturn the prior on ViT under a modern recipe is a question this
+   experiment does not answer, and we do not claim it either way.
 
-## Non-blocking issues
-
-1. **Dataset and backbone counts.** Corrected throughout. The grid holds
-   **12 datasets** (one evaluation-only) plus **five relabelled controls**,
-   giving 16 dataset identities, 15 in the law's scope; and **9 backbones
-   across 5 architecture families**. "14 datasets" and "7 backbone
-   families" were both unsupported.
-2. **Backbone families.** As above; the audit table now reads 9 (5), and
-   the appendix explains why the identity count exceeds the image-source
-   count.
-3. **GPU-hour components.** Corrected to 3,281, the sum of its parts.
-4. **Table 15 versus Table 5.** The table now names its backbone
-   (ResNet-18) and states that these cells predate the champion's final
-   weight schedule, so they are internally comparable to each other, which
-   is what an ablation requires, but not to the envelope.
-5. **Section 6.3's unnamed cell.** Now named: CIFAR-100 at 10%, the
-   head-norm cells of the backbone sweep.
-6. **Equation 2.** Rewritten as a pointwise complex modulus.
-7. **Appendix B's readout branch provenance.** Addressed by the new
-   variance decomposition, which states the residual spread directly.
-8. **CIFAR-10 unimodality.** Softened to a plateau across 1–2% whose
-   difference (0.29) the seed uncertainty cannot resolve.
-9. **Uncited references.** ResNet, Swin, ConvNeXt, MobileNetV3, AdamW,
-   Raghu et al. and Ulyanov et al. are now cited in the text.
-10. **Anonymization contradiction.** Removed.
-11. **PathMNIST ethics.** A sentence now confirms it is a public,
-    de-identified benchmark requiring no ethics approval.
-
-**Minor.** The duplicated dataset table is deleted. The 123.6 pt overfull
-box is reproduced by the *unmodified* `cas-dc-template.tex` shipped with
-the Elsevier template; it is a defect in the class file, marks an empty
-box, and no visible text overflows. We have left it rather than patch the
-publisher's class.
+3. **Two fractions would have misled us.** At 5% and 10% alone — the points
+   we would naturally have chosen, being where the referee's objection bit
+   — the story reads "prior beats 5× SimSiam at the scarcer fraction, ties
+   at the other." The envelope instead shows a crossover: the prior wins
+   from 1 to 7% and loses at 10 to 25%, most clearly at 15% (−1.10, 5.2
+   standard errors). We flag this because it is the same sparse-grid error
+   we identify in our own earlier readings elsewhere in the paper.
 
 ---
 
