@@ -358,11 +358,27 @@ $9.24$ points, at 8 to 37 standard errors, from 500 images to 12{,}500. Our
 earlier positioning noted near-parity with self-supervision at 1\%; that
 was a statement at $2\times$, and it does not survive $5\times$. On
 convolutional backbones, then, the prior's case is a cost case and not an
-accuracy case, and we now say so without qualification. What is unaffected
-is the attention regime, measured throughout at $2\times$; whether a
-$5\times$ SimCLR would also overturn the prior on ViT under a modern
-augmentation recipe is a question this experiment does not answer and we do
-not claim it either way.
+accuracy case, and we now say so without qualification. The attention regime we measured
+separately, since leaving it at $2\times$ would reproduce exactly the
+asymmetry this section is about. Running SimCLR at $5\times$ against
+ViT-tiny under the DeiT recipe gives $29.97$, $40.57$ and $55.85$ at 5, 10
+and 25\%, against the prior's $28.89$, $41.29$ and $57.32$: the comparator
+\emph{wins} at 5\% by $1.08$ ($2.0$ standard errors), the two are level at
+10\% ($+0.71$, $1.2$), and the prior wins at 25\% by $1.47$ ($7.2$). So
+the prior is not overturned on attention as it is on convolutions, but the
+honest form of the claim names its budget: at $2\times$ the prior leads at
+every fraction, and at $5\times$ it leads only from about 10\% upward.
+
+The shape of that result contradicted our own prediction, which we had
+recorded before running it, and the error is worth stating because it is
+diagnostic. We expected the prior to hold at the scarce fractions and 25\%
+to be the cell most likely to flip. The reverse happened. The reason is
+visible in what the extra budget buys: $+8.32$, $+4.51$ and $+3.53$ at 5,
+10 and 25\%, decreasing with data, because 200 epochs over 2{,}500 images
+is under four thousand steps. We had assumed the comparator was
+data-starved at 5\% beyond what compute could fix; it was step-starved.
+On convolutional backbones the same increment instead peaks in the mid band,
+so even the budget response is backbone-dependent.
 
 \emph{Two fractions would have misled us, which is the methodological
 point.} Had we run only 5 and 10\% we would have reported that the prior
@@ -415,7 +431,7 @@ Resolution & 32, 64, 96, 224\,px \\
 Interventions & MomentAux ($1.02\times$); SimCLR, SimSiam and DINO
   ($2\times$); ImageNet transfer; DeiT augmentation; FitNets teacher
   ($2\times$); HOG target; pairwise combinations \\
-Measured & $2{,}888$ cells; the campaign recorded $8{,}887$ timed runs
+Measured & $2{,}891$ cells; the campaign recorded $8{,}887$ timed runs
   including exploration and repeats \\
 \bottomrule
 \end{tabular}

@@ -184,6 +184,23 @@ Three consequences, and we accept all of them.
    standard errors). We flag this because it is the same sparse-grid error
    we identify in our own earlier readings elsewhere in the paper.
 
+4. **We ran the same test on the attention regime, unprompted.** Leaving
+   that comparison at 2× while raising the convolutional one to 5× would
+   have reproduced the very asymmetry the referee identified. Against
+   ViT-tiny under the DeiT recipe, 5× SimCLR gives 29.97 / 40.57 / 55.85 at
+   5 / 10 / 25%, against the prior's 28.89 / 41.29 / 57.32. The comparator
+   **wins at 5%** (−1.08, 2.0 SEM), the two are level at 10%, and the prior
+   wins at 25% (+1.47, 7.2 SEM). The attention claim therefore survives, but
+   we now state it with its budget attached: the prior leads at every
+   fraction at 2×, and from about 10% upward at 5%.
+
+   We also record that this contradicted our own pre-registered prediction —
+   we expected 25% to be the cell that flipped and it was 5% — and why: the
+   extra budget buys the comparator +8.32 / +4.51 / +3.53 at 5 / 10 / 25%,
+   decreasing with data, because 200 epochs over 2,500 images is fewer than
+   four thousand steps. We had assumed the comparator was data-starved where
+   it was in fact step-starved.
+
 ---
 
 ## The scope question

@@ -65,7 +65,11 @@ opposite. Second, when we gave the self-supervised comparators four times
 their pre-training budget across the whole data envelope, contrastive
 pre-training beat our prior at every convolutional cell. We withdrew the
 corresponding accuracy claim and restated the convolutional case as one of
-cost rather than accuracy.
+cost rather than accuracy. We then applied the same test to the one regime
+where our method still led, rather than leaving that comparison at the
+budget where it looked best; the claim survived there, but only from about
+10% of the data upward, and the manuscript now states it with its budget
+attached.
 
 The manuscript is explicit about these reversals rather than quiet about
 them, and about three further limitations a reader would otherwise have to
