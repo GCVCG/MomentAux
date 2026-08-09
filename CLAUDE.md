@@ -3396,3 +3396,32 @@ ported vs corrected and why.
   comparison because it has none to spend — it is a fixed target with no
   pretraining stage. The comparison is "free prior vs SSL at 5x", not
   "equal budgets", and the paper must say so.
+
+- *** ViT BUDGET FALSIFIER SCORED (2026-08-09, 3 seeds/cell, both GPUs).
+  THE FALSIFIER DID NOT FIRE, BUT MY DIRECTIONAL BET WAS EXACTLY BACKWARDS:
+      pct  deit-base  ssl-2x  aux-1.02x  ssl-5x | aux-ssl5x  sigma  band
+       5%    12.55     21.64    28.89    29.97  |   -1.08    -2.0   23..28 HIGH
+      10%    20.28     36.06    41.29    40.57  |   +0.71    +1.2   38..44 IN
+      25%    32.27     52.31    57.32    55.85  |   +1.47    +7.2   54..59 IN
+  RECORDED FALSIFIER: ssl800 >= aux at BOTH 10% and 25% => attention accuracy
+  claim withdrawn. It did NOT fire: ssl-5x is below aux at both (tie at 10%,
+  and the prior wins 25% by 7.2 sigma). The attention claim SURVIVES.
+  BUT THE SHAPE IS THE OPPOSITE OF MY PREDICTION. I wrote "the prior HOLDS at
+  5 and 10%, and 25% is the cell most likely to flip". In fact 5% FLIPPED
+  (SSL wins by 1.08, 2.0 sigma; band missed HIGH at 29.97 vs 23..28), 10% is
+  a TIE (1.2 sigma), and 25% is where the prior is STRONGEST (+1.47, 7.2
+  sigma). I had the data-ordering inverted.
+  WHY, and it is measurable rather than a story: 4x budget buys SimCLR
+  +8.32/+4.51/+3.53 at 5/10/25% -- DECREASING with data. At 2500 images
+  200 epochs is only ~3900 steps, so the comparator was step-starved exactly
+  where I assumed it was data-starved beyond rescue. On CONV the same budget
+  increment peaked in the MID band (+5.3 at 5%, +2.2 at 10%, -0.04 at 25%),
+  so the budget response differs by backbone family too.
+  HONEST RESTATEMENT REQUIRED, and made: "the prior beats SimCLR at every
+  C100 fraction once a small ViT is trained the modern way" is a 2x
+  statement (2x SSL is below aux at all three: 21.64/36.06/52.31). At 5x it
+  becomes SSL WINS at 5%, TIE at 10%, PRIOR WINS at 25%. So on attention the
+  prior's advantage at high comparator budget lives in the HIGHER-data band
+  -- the reverse of the plain-aug ViT pattern (prior won BELOW 10%) and the
+  reverse of conv (where 5x SSL wins everywhere). Three regimes, three
+  different orderings; state each with its budget attached.
