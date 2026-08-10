@@ -3727,3 +3727,45 @@ ported vs corrected and why.
     this is data, not a scored prediction. The early 2-seed "aux below
     baseline" I declined to score at 1% survives at 3v3 as a small real
     negative, and it turns positive by 3%.
+
+- *** IMAGENET ENVELOPE SCORED AT 127/252 CELLS (2026-08-10, 3v3 each, still
+  0 failures). The three backbones have THREE DIFFERENT ENVELOPE SHAPES at
+  1000-way, which is the finding:
+      pct    r18 base  D_r18  |  vit base  D_vit  |  mnet base  D_mnet
+       1%      5.47    +1.90  |    1.88    +2.14  |    4.33    -0.52
+       2%     13.19    +1.59  |    2.63    +3.80  |    7.61    +0.01
+       3%     18.94    +1.38  |    3.43    +4.76  |    9.68    +0.49
+       5%     27.26    +0.56  |    5.89    +5.22  |   12.94    +1.46
+       7%     32.31    +0.42  |    7.59    +5.63  |   15.29    +2.28
+      10%      (run)          |    9.67    +6.31  |   18.60    +2.61
+      15%     42.27    -0.01  |   13.07    +6.72  |   22.49    +2.75
+     100%     55.38    +0.04  |   48.24    +3.24  |   32.93    +1.95
+  (E1) **FALSIFIED, and the falsifier is mine.** I predicted a UNIMODAL conv
+    envelope with an interior peak at 5-20%. r18 is MONOTONE FALLING from the
+    smallest runnable fraction to zero by 15% (+1.90 -> -0.01) with no
+    interior peak anywhere. The recorded falsifier ("monotone in fraction, no
+    interior peak => the shape claim must be scoped to <=100k images") FIRES.
+    POST-MORTEM, and it is the same error class as the tin@25% budget miss: I
+    predicted in FRACTION space when the operative axis is IMAGE COUNT. 1% of
+    ImageNet64 is 12,820 images -- on Tiny-ImageNet that is the 10% cell,
+    already past its peak. The smallest fraction runnable at ImageNet scale
+    sits on the RIGHT FLANK. The envelope is not absent; its peak is below
+    anything this dataset can express, exactly as CIFAR-10's is.
+  (E2) **HIT**: D(r18@1%) = +1.90, band +0.5..+2.5, at 13 images per class
+    over 1000 classes -- the finest label space in the study at genuine
+    scarcity. Base 5.47 is far below the crossing bracket, so the sign law
+    demands negative readout; the G probes test it.
+  (E3) **IN BAND**: D(vit) >= +3 at every fraction >= 5% as predicted, and
+    +6.31 @10% / +6.72 @15% are inside the +6..+14 peak band. Peak location
+    (predicted 10-25%) awaits 20/25%.
+  *** THE SHAPE IS A BACKBONE PROPERTY, NOT A DATASET PROPERTY. At the SAME
+  images, same label space, same recipe: r18 falls monotonically, while vit
+  and mnet RISE monotonically through 15%. The account that fits: the peak
+  sits where the baseline crosses the readout bracket, and only r18's
+  baseline reaches it within the measured range (5.5 -> 42.3, crossing
+  [31.8,40.3] at 7-15%) -- which is exactly where its Delta reaches zero
+  (+0.42 at base 32.3, -0.01 at base 42.3). vit (1.9->13.1) and mnet
+  (4.3->22.5) never get near it, so both are still on their rising limb at
+  the largest fraction measured. This is a sharper statement of "the peak
+  tracks task difficulty" than the classification grid could make, because
+  here the dataset is held fixed and only the backbone varies.
