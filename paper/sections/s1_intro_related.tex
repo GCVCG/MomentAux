@@ -16,8 +16,10 @@ discovered anecdotally, one paper and one setting at a time, under training
 recipes that differ in a dozen uncontrolled ways.
 
 This paper treats the question as a measurement problem. We build a single
-instrument, one frozen training recipe, byte-identical data subsets
-committed to version control, and a numerically pinned bank of Gabor and moment
+instrument, one frozen training recipe, data subsets whose per-class image
+indices are drawn once and checked into version control so that every run
+trains on byte-identical images (we call these \emph{committed} subsets
+throughout), and a numerically pinned bank of Gabor and moment
 spectral filters, and use it to measure one deliberately austere source of
 prior knowledge against the strongest data-driven alternatives at matched or
 declared compute. The prior, which we call \emph{MomentAux}, could hardly be
