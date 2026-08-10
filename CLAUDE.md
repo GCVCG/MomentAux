@@ -3579,3 +3579,38 @@ ported vs corrected and why.
   This is the honest mechanism for the narrowed claim, and it is measured
   rather than argued: the population term is not a mystery, it is G(prior)
   degrading faster than G(SSL) as the label space gets finer.
+
+- *** tin@25% SCORED — THE FALSIFIER FIRED, MY BET LOST, AND THE TWO
+  POPULATIONS TURN OUT TO AGREE (2026-08-10, 3 seeds):
+      deit-base 23.14 | deit-ssl2x 38.48 | deit-aux 38.24 | deit-ssl5x 36.53
+      ssl5x band was 40..44 -> MISSED LOW by 3.5
+      aux - ssl5x = **+1.71 +-0.33 = +5.1 sigma: THE PRIOR WINS**
+  I predicted 40..44, explicitly betting AGAINST our own method ("5x SSL
+  wins and the prior beats it nowhere on tin"). Wrong by 5.1 sigma in the
+  method's favour. The recorded falsifier -- "ssl5x <= 38.24 => the
+  population difference is NOT monotone and the tin envelope has a crossover
+  after all, making the two populations the same shape with a shifted
+  crossing" -- FIRED, and its stated consequence is exactly what the data
+  now show.
+  *** THE MATCHED-FRACTION TABLE, and it is the clean result:
+      pct      C100 (aux-ssl5x)        tin (aux-ssl5x)
+       5%   -1.57 (-3.9 s) SSL      -1.35 (-3.7 s) SSL
+      10%   +0.71 (+1.2 s) tie      -0.31 (-0.6 s) tie
+      25%   +1.47 (+7.2 s) prior    +1.71 (+5.1 s) prior
+  IDENTICAL ordering at every matched FRACTION on both populations. The
+  earlier "tin favours the comparator everywhere / different stories"
+  reading was an artifact of having only 5 and 10% on tin, and MUST BE
+  WITHDRAWN from the paper. The correct statement: the ordering tracks the
+  data FRACTION -- where a cell sits on its own dataset's learning curve --
+  not the absolute image count. That is why matching on image count made
+  the populations look like they disagreed (5k images is 10% of C100 but 5%
+  of tin, i.e. different points on their own curves).
+  *** AND A GENUINE ODDITY, 4.6 sigma: at tin@25%, 4x MORE pre-training made
+  SimCLR WORSE -- ssl2x 38.48 vs ssl5x 36.53, a drop of 1.95 +-0.42. First
+  cell in the study where extra pre-training budget hurts. Echoes the
+  deitssl2b finding that stronger contrastive views hurt; do not explain it,
+  report it.
+- *** ViT@5% DEEPENED 3 -> 6 SEEDS: aux 28.87+-0.26, ssl5x 30.45+-0.31,
+  aux-ssl5x = **-1.57 +-0.41 = -3.9 sigma** (3-seed value was -1.08, 2.0
+  sigma). The one marginal cell in the budget story STRENGTHENED under
+  power rather than regressing -- SSL genuinely wins that cell.
