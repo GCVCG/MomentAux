@@ -1,6 +1,6 @@
 Highlights
 
-- A 2,894-cell, cost-normalized benchmark of data-efficiency interventions
+- A 2,894-configuration benchmark of data-efficiency interventions
 - Source asymmetry predicts when a second sensor pays, and when it does not
 - A measurable rule predicts stacking, substitution or interference
 - Free spectral prior beats 2x-compute SSL on ViTs under modern recipes

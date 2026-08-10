@@ -309,6 +309,28 @@ predictions cannot fail is not measuring anything.
 %% ---------------------------------------------------------------------
 \section{The grid}\label{sec:grid}
 
+\paragraph{What a cell is.} We report the grid in \emph{cells}, and the
+term carries a specific meaning throughout. A cell is one configuration,
+identified by its configuration name, aggregated over the seeds trained
+under it: a dataset, a data fraction, a backbone, and one intervention with
+its hyper-parameters fixed. Every number we quote for a cell is a mean over
+its seeds, and every uncertainty is the standard error of that mean.
+
+Two consequences are worth stating because they affect how the counts
+should be read. First, cells are grouped by configuration name and never by
+parsed fields, since two configurations can agree on dataset, backbone and
+intervention while differing in a filter-bank argument or a calibration
+setting; grouping on fields would silently average different variants
+together. Second, a cell is not a run. The 2{,}894 cells reported here rest
+on \textbf{8{,}827 individual training runs}, and the pairing that gives
+every $\Delta$ its meaning is between cells that share a dataset, fraction
+and backbone and differ in exactly one intervention.
+
+The count includes every cell we trained, diagnostics and ablations
+included, not only those that appear in a headline table; cells that deviate
+from the frozen recipe are named so in their configuration and are never
+mixed into headline comparisons (Section~\ref{sec:recipe}).
+
 \begin{table}[t]
 \caption{The benchmark at a glance. Every cell trains the frozen recipe
 of Section~\ref{sec:recipe}; costs are declared multiples of baseline
