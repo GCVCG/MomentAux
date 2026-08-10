@@ -58,6 +58,24 @@ PCTS = {
     "dtd": (5, 7, 10, 15, 20, 25, 50),
     "pathmnist": FULL,
     "food101": FULL,
+    # ImageNet stages (2026-08-10). These were originally run at 100% only, to
+    # test whether the scale falsifiers fire; the envelope -- peak location and
+    # left-flank suppression -- was left untested above 100k images, which the
+    # limitations section flags as the cheapest open gap. It is cheap because
+    # the diagnostic epoch budget is FIXED (40 for imagenet64, 100 for
+    # imagenet100) regardless of fraction, so a 1% cell costs ~1% of its 100%
+    # cell.
+    # imagenet64: 1,281,167 train / 1000 classes -> 1% = 12,811 images, 13 per
+    # class. That is the FINEST label space in the study at genuine scarcity,
+    # which is exactly where the readout term is largest. 50% is omitted: it
+    # would cost as much as every other fraction combined while the 100% cell
+    # already anchors the right flank.
+    "imagenet64": (1, 2, 3, 5, 7, 10, 15, 20, 25),
+    # imagenet100: 126,689 train / 100 classes at NATIVE 224px, so each cell is
+    # far more expensive per image; carry the five fractions that resolve the
+    # envelope shape rather than the full grid. 1% = 1,267 images (13 per
+    # class), still ten batches of 128.
+    "imagenet100": (1, 2, 5, 10, 25),
 }
 
 
@@ -93,6 +111,21 @@ def get_labels(dataset, data_root):
 
         return build_dataset(dataset, data_root, train=True,
                              download=False).targets
+    if dataset == "imagenet64":
+        # Read the label array directly rather than constructing ImageNet64:
+        # the constructor memory-maps a 15.7GB image array this does not need.
+        # `os` is re-imported because the tin branches above import it inside
+        # this function, which makes the name function-local throughout.
+        import os
+
+        import numpy as np
+
+        return [int(t) for t in
+                np.load(os.path.join(data_root, "imagenet64", "train_y.npy"))]
+    if dataset == "imagenet100":
+        from data import ImageNet100
+
+        return ImageNet100(data_root, train=True).targets
     raise ValueError(f"unknown dataset {dataset!r}")
 
 

@@ -3614,3 +3614,80 @@ ported vs corrected and why.
   aux-ssl5x = **-1.57 +-0.41 = -3.9 sigma** (3-seed value was -1.08, 2.0
   sigma). The one marginal cell in the budget story STRENGTHENED under
   power rather than regressing -- SSL genuinely wins that cell.
+
+## IMAGENET ENVELOPE CAMPAIGN (2026-08-10, user: "use BSC to do all missing
+## runs, test the training before you submit, maximize the GPU utilization")
+
+- WHY: Table 3 showed dashes at every fraction for both ImageNet stages, and
+  the reason was upstream of the table -- scripts/make_subsets.py had NO entry
+  for imagenet64/imagenet100, so no index file existed and no fraction cell
+  could ever be launched. The 100% stages (14 cells, 3 seeds, 164 GPU-hours)
+  were built to fire the pre-registered SCALE falsifiers, which they did (F1,
+  F2, F3, G1-G4 all dead). What they never tested is the ENVELOPE: peak
+  location and left-flank suppression are established on eleven populations,
+  none above 100k images. Section 9 already concedes this as "a cost decision
+  rather than a considered one, and the cheapest gap to close".
+- IT IS CHEAP FOR A STRUCTURAL REASON: the diagnostic epoch budget is FIXED
+  (40 for imagenet64, 100 for imagenet100) regardless of fraction, so cost
+  scales ~linearly with the fraction. Measured 100% wall-clocks: in64 r18 7.9
+  h/seed-pair, vit 4.4, mnet 5.6; in100 vits 6.1, vitb 10.6, r50 11.9. The
+  whole envelope is ~85 GPU-hours against the 164 already spent at 100%.
+- CELLS (84 configs, 3 seeds = 252 runs). Both arms of every pair are
+  byte-identical except the moment_aux block (verified by diff), and every
+  fraction keeps its parent's num_workers so the augmentation stream stays
+  comparable to the 100% anchor:
+    imagenet64  @1/2/3/5/7/10/15/20/25%  x {r18, vit_tiny, mnet} x {none,aux}
+    imagenet100 @1/2/5/10/25%            x {vit_s, vit_b, r50}   x {none,aux}
+  50% is omitted on both: it costs as much as every other fraction combined
+  and the 100% cell already anchors the right flank.
+  diagin64_swin is DELIBERATELY EXCLUDED -- its 100% baseline is bistable at
+  chance ({16.12, 0.10, 0.10}), so a fraction envelope there would measure
+  training failure, not feature gain. Same scope rule as the swin G-probes.
+- SUBSETS: imagenet64 (1,000 classes) and imagenet100 added to PCTS with the
+  same deterministic stratified draw as every other dataset; --check
+  reproduces all 14 files byte-identically. 1% of imagenet64 = 12,820 images =
+  13 per class, the FINEST label space in the study at genuine scarcity.
+- PREDICTIONS RECORDED IN ADVANCE (nothing from these cells seen; anchors are
+  the measured 100% cells: r18 base 55.38 D +0.04 | vit 48.24 +3.24 | mnet
+  32.93 +1.95 | vits 65.39 +13.00 | vitb 43.33 +26.01 | r50 85.85 -0.02):
+    (E1) THE CONV ENVELOPE SHAPE RECURS AT 1000-WAY: Delta(r18,in64) is
+      UNIMODAL in fraction -- an interior peak exceeding both ends by >= 0.5
+      -- peaking at 5-20% with magnitude **+1.5..+4.0**, decaying to the
+      measured +0.04 at 100%.
+      FALSIFIER: monotone in fraction (no interior peak), or peak > +6 =>
+      the unimodal envelope is a small-dataset regularity, and the shape
+      claim must be scoped to <= 100k images.
+    (E2) LEFT-FLANK SUPPRESSION AT THE FINEST LABEL SPACE: at 1% the baseline
+      sits far below the crossing bracket [31.8, 40.3], so the sign law
+      demands NEGATIVE readout and Delta < G. Band **Delta(r18,in64@1%) =
+      +0.5..+2.5**, i.e. BELOW the envelope peak.
+      FALSIFIER: readout POSITIVE at 1% (base far below 31.8) => the first
+      sign-law failure on a resolvable left-flank cell at scale.
+    (E3) THE ATTENTION DEFICIT SPANS THE ENVELOPE: Delta(vit,in64) >= +3 at
+      every fraction >= 5%, peaking **+6..+14** at 10-25% (C100-ViT peaks at
+      15% with +14.44, tin-ViT at 15% with +10.73), and above the conv
+      envelope everywhere.
+      FALSIFIER: Delta(vit) <= +1 at any fraction >= 5% => the attention
+      deficit is fraction-bounded at 1000-way, not a property of attention
+      at small data.
+    (E4) CONV GAINS SURVIVE NATIVE RESOLUTION: R50 on in100 is neutral at
+      100% (-0.02) but every conv population measured is POSITIVE at low
+      data, so **Delta(r50,in100@1-5%) = +1..+6**, decaying through 25%.
+      FALSIFIER: Delta(r50) <= 0 at EVERY fraction => conv gains do not
+      survive 224px and the low-data conv claim is a low-resolution claim.
+    (E5) THE MODEL-SCALE ORDERING PERSISTS: Delta(vitb) > Delta(vits) at
+      every fraction (it is +26.01 vs +13.00 at 100%).
+      FALSIFIER: the ordering inverts at any fraction >= 5%.
+  NOT PREDICTED, recorded as data: mnet on in64 (base 32.93 sits INSIDE the
+  crossing bracket, so the law makes no sign call there -- same treatment as
+  the mnet shots cell), and the in100 ViT-B baselines at 1-2%, which may be
+  at or near chance on 1,267 images (the bistable flag applies if a seed
+  collapses; sigma was already 3.29 at 100%).
+- GPU UTILIZATION (user asked explicitly). The worker already runs SLOTS
+  trainings per GPU because these cells are DATALOADER-bound; SLOTS=3 was set
+  after 8 slots OOM'd on 19.5GB diagin64 cells. The binding constraints are
+  measured, not assumed: CPU budget SLOTS*4*(num_workers+1) <= 80 caps in64
+  (num_workers 3) at SLOTS=5, and in100 (num_workers 5) at SLOTS=3. Memory is
+  measured per cell in the smoke pass and the slot count set from it, so the
+  two queues are submitted SEPARATELY -- a mixed queue would have to be sized
+  for its heaviest member, which is exactly how the OOM incident happened.

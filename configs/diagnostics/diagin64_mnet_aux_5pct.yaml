@@ -1,0 +1,32 @@
+# ImageNet64 ENVELOPE cell (5% of 1,281,167 images = 64,062 images,
+# 64 per class over 1000 classes).
+#
+# WHY THIS EXISTS: the two ImageNet stages were originally run at 100% only,
+# to test whether the pre-registered scale falsifiers fire. That validated the
+# law and the RIGHT flank but left the envelope -- where the peak sits, and how
+# far the left-flank readout penalty suppresses the gain -- untested above 100k
+# images, which Section 9 flags as the cheapest open gap. These cells close it.
+# The 40-epoch budget is FIXED across fractions (so a 1% cell costs ~1% of the
+# 100% cell) and IDENTICAL across the two arms, which is what keeps Delta valid.
+# diag-only: NEVER mixed into frozen-recipe headline tables.
+name: diagin64_mnet_aux_5pct
+dataset: imagenet64
+backbone: mobilenetv3_small_100
+epochs: 40
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 3
+small_input: true
+pretrained: false
+subset_pct: 5
+stem: none
+stem_calibrate: true
+moment_aux:
+  stem: energy-magnitude
+  tap: blocks.3
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine
+  head_norm: true
