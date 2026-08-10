@@ -187,10 +187,20 @@ Three consequences, and we accept all of them.
 4. **We ran the same test on the attention regime, unprompted.** Leaving
    that comparison at 2× while raising the convolutional one to 5× would
    have reproduced the very asymmetry the referee identified. Against
-   ViT-tiny under the DeiT recipe, 5× SimCLR gives 29.97 / 40.57 / 55.85 at
-   5 / 10 / 25%, against the prior's 28.89 / 41.29 / 57.32. The comparator
-   **wins at 5%** (−1.08, 2.0 SEM), the two are level at 10%, and the prior
-   wins at 25% (+1.47, 7.2 SEM). The attention claim therefore survives, but
+   ViT-tiny under the DeiT recipe, 5× SimCLR gives 30.45 / 40.57 / 55.85 at
+   5 / 10 / 25%, against the prior's 28.87 / 41.29 / 57.32. The comparator
+   **wins at 5%** (−1.57, 3.9 SEM), the two are level at 10%, and the prior
+   wins at 25% (+1.47, 7.2 SEM).
+
+   *Correction to an earlier draft of this letter, which quoted 29.97
+   against 28.89 for a margin of −1.08 at 2.0 SEM.* That 5% cell was the
+   one marginal result in the comparison, so we deepened both of its arms
+   from three seeds to six. The margin **strengthened** rather than
+   regressing, from −1.08 (2.0 SEM) to −1.57 (3.9 SEM), and the manuscript
+   reports the six-seed values throughout. We flag it because the earlier
+   number made this cell look marginal when it is not: the comparator
+   genuinely wins there, and we would rather the record be unambiguous
+   about a result that goes against us. The attention claim therefore survives, but
    we now state it with its budget attached: the prior leads at every
    fraction at 2×, and only in the higher-data band at 5×.
 

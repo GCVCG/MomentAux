@@ -1,7 +1,7 @@
 Highlights
 
 - A 2,894-configuration benchmark of data-efficiency interventions
-- Source asymmetry predicts when a second sensor pays, and when it does not
+- Splitting one instrument's bands pays; pairing two satellites does not
 - A measurable rule predicts stacking, substitution or interference
-- Free spectral prior beats 2x-compute SSL on ViTs under modern recipes
+- Free prior beats 2x-compute SSL on small ViTs at every data fraction
 - Attention's feature deficit persists at 1.28M images and grows with scale

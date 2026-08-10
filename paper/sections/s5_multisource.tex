@@ -63,19 +63,34 @@ nothing here. Had we run only the multispectral population we would have
 concluded that a second sensor stacks, and reported a result that the first
 genuinely cross-modality test contradicts.
 
-\emph{The variable that separates them is the one our decision-level
-analysis already identified.} Equation~\ref{eq:ensgain}, fitted on
-CIFAR-100 classifier ensembles, is dominated not by diversity but by the
-accuracy asymmetry between the arms. Measured on these sensors, that
-asymmetry is $0.11$--$6.68$ points on EuroSAT and $25.98$--$33.77$ on
-So2Sat, and across the ten points of Table~\ref{tab:sensorfusion} it
-correlates with fusion gain at $r = -0.80$. We state the limit of this
-plainly: channel concatenation is feature-level fusion and
-Equation~\ref{eq:ensgain} was fitted at decision level, so the coefficients
-do not transfer and we do not apply them. What transfers is the variable.
-A source too much weaker than its partner does not contribute to the
-combination even when it is informative alone, and that holds whether the
-combination happens at the input or at the posterior.
+\emph{What separates the two populations, and what we cannot yet
+separate.} The arms differ enormously in how well matched they are: the
+accuracy asymmetry between the two sources is $0.11$--$6.68$ points on
+EuroSAT-MS and $25.98$--$33.77$ on So2Sat, and the population with the
+matched arms is the one where fusion pays. That is consistent with
+Equation~\ref{eq:ensgain}, our decision-level fit on CIFAR-100 classifier
+ensembles, which is dominated not by diversity but by exactly this
+asymmetry term.
+
+We had reported a correlation of $r = -0.80$ between asymmetry and fusion
+gain across the ten cells of Table~\ref{tab:sensorfusion}, and we withdraw
+it. The arithmetic is right but the statistic is not: within EuroSAT-MS the
+correlation is $+0.08$ and within So2Sat it is $-0.05$, so it is carried
+entirely by the gap between two clusters that do not overlap on either
+axis. Its effective sample size is two populations, not ten points. And
+those two populations differ in \emph{two} ways at once, since the
+low-asymmetry population splits one instrument's bands while the
+high-asymmetry population pairs two satellites with no shared detector or
+physics. Nothing in this design separates ``the sources are too unequal''
+from ``the sources are cross-modal'', and we should not have offered a
+correlation coefficient as though it did.
+
+What the experiment supports is therefore a contrast, not a predictor:
+fusion paid at every data scale within one instrument and never paid across
+two satellites, and the two settings differ in both source asymmetry and
+modality. Distinguishing the two would need a third population that breaks
+the confound, such as two well-matched cross-modal sources or two badly
+matched same-instrument ones, and we have not run it.
 
 \emph{The prior itself transplants to both sensors, including radar.} On
 optical it produces the study's usual envelope, $+1.13$, $+1.91$, $+1.19$,
@@ -121,7 +136,14 @@ derived there. Using trained checkpoints from the CIFAR-100 5\% cells and
 no further training, we average class posteriors for every pair of arms and
 record the gain over the better single arm together with the pair's
 disagreement rate, the classical diversity measure
-\citep{brown2005diversity}.
+\citep{brown2005diversity}. The self-supervised arm here is a
+50-epoch pre-training checkpoint rather than the 200- or 800-epoch ones of
+Section~\ref{sec:budget}, because this analysis needs two arms of
+\emph{matched accuracy} so that the asymmetry term does not dominate, and
+that is the budget at which SimCLR lands within a point of the prior. The
+budget lesson of Section~\ref{sec:budget} applies here too: a
+longer-pre-trained arm would ensemble differently, and we have not
+measured that.
 
 The first thing the data say is a caution rather than a confirmation.
 Ensemble gain is well explained ($R^2 = 0.74$) by two terms, and the
@@ -166,7 +188,7 @@ and it is what the classical account would predict.
 We report the qualification with equal weight, because it bounds the
 taxonomy rather than extending it. The prior and SimCLR do \emph{not} stack
 at training time (Section~\ref{sec:substitute}), yet they ensemble usefully
-at decision time ($+1.24$). Redundancy in the sense of ``jointly training on
+at decision time ($+1.20$). Redundancy in the sense of ``jointly training on
 both adds nothing'' therefore does not imply redundancy in the sense of
 ``their errors are correlated''. The substitution result is a statement
 about training-time fusion, and we do not claim it transfers to decision
@@ -196,12 +218,13 @@ cost beyond training each source once is two frozen-feature evaluations.}
 2 & Evaluate all three frozen representations with an identical linear
     protocol. This gives $G_A$ and $G_B$, each source's feature-level
     contribution. \\
-3 & Compare the two arms' accuracies. If one is far weaker, expect no
-    benefit from combining regardless of what it carries: across our two
-    sensor populations the asymmetry predicts the fusion gain at
-    $r = -0.80$, and it dominates the decision-level fit of
-    Equation~\ref{eq:ensgain}. This is the cheapest of the checks and it
-    screens out the clearest failures. \\
+3 & Compare the two arms' accuracies. If one is far weaker, treat the
+    combination as unpromising: this term dominates our decision-level
+    fit (Eq.~\ref{eq:ensgain}), and the sensor population whose arms are
+    matched is the one where fusion paid. Weakest-supported step, since
+    our two sensor populations differ in modality as well as in
+    asymmetry (Section~\ref{sec:multisensor}); use it to rank candidates,
+    not to reject one. \\
 4 & If either source's gain is ${\approx}0$, it supplies nothing to
     overlap: the other source's gain is available in full, and the
     combination is not the question. \\

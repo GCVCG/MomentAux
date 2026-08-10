@@ -174,8 +174,8 @@ its standard views are its best shot at this scale.
 
 \subsection{Measuring features: linear evaluation}\label{sec:probe}
 The law needs a feature-side quantity, and we obtain it by \emph{linear
-evaluation} of frozen representations, the protocol introduced as linear
-classifier probing by \citet{alain2016understanding}. For each trained
+evaluation} of frozen representations, the standard linear-probe
+protocol. For each trained
 checkpoint we freeze the network, extract penultimate features
 $z = \mathrm{pool}(f_L(x))$ for the full training split under the
 deterministic (no-augmentation) transform, and fit a multinomial logistic
@@ -246,7 +246,7 @@ easier.
 
 \emph{Cells are not independent.} A baseline arm is shared by every
 variant paired against it, and cells recur across the same datasets and
-backbones, so the 498 resolvable cells come from 247 distinct
+backbones, so the 511 resolvable cells come from 258 distinct
 (dataset, backbone, fraction) groups. We
 therefore report a cluster-level audit alongside the cell-level one, and
 treat exact $p$-values as indicative rather than literal.
@@ -282,6 +282,18 @@ ImageNet-scale stages that played no part in its selection, and its
 behavior there is not selection-contaminated. Where this paper makes a
 general claim, it should be read as resting on those populations, with
 CIFAR-100 as the development set that produced the candidate.
+
+We considered re-selecting the configuration on a held-out validation
+split and decided against it, and state that here rather than leave a
+reader wondering. Re-selection would invalidate every cell in the grid,
+since the selected configuration is the one 2{,}894 cells were trained
+with, so the honest choices were to disclose the contamination or to
+retrain the study. Given that the general claims already rest on eleven
+populations that took no part in selection, we judged disclosure to carry
+the information a reader needs at a fraction of the cost. A future
+benchmark built on this harness should split a validation fold from the
+start; ours did not, and that is a design defect rather than a
+defensible choice.
 
 \subsection{Comparator parity}\label{sec:parity}
 Cost normalization fixes the comparators' budget, and that cuts both ways.
@@ -369,7 +381,7 @@ Resolution & 32, 64, 96, 224\,px \\
 Interventions & MomentAux ($1.02\times$); SimCLR, SimSiam and DINO
   ($2\times$); ImageNet transfer; DeiT augmentation; FitNets teacher
   ($2\times$); HOG target; pairwise combinations \\
-Measured & $2{,}894$ cells; the campaign recorded $8{,}887$ timed runs
+Measured & $2{,}894$ cells over $8{,}827$ retained run records
   including exploration and repeats \\
 \bottomrule
 \end{tabular}
@@ -449,21 +461,23 @@ passes and analysis. Because these small-image cells are dataloader-bound
 rather than compute-bound, we run two to three trainings per GPU, sized
 so that the heaviest cells still fit in memory.
 
-Aggregating the wall-clock recorded in all 8{,}887 timed run records, the
-study consumed \textbf{3{,}281 GPU-hours}: 2{,}901 on H100, 141 on H100~NVL and
-H200~NVL, and 239 on RTX 3090. Taking device thermal design power as an
+Aggregating the wall-clock recorded in all 8{,}827 retained run records, the
+study consumed \textbf{3{,}341 GPU-hours}: 2{,}901 on H100, 82 on H100~NVL and
+H200~NVL, and 356 on RTX 3090. Taking device thermal design power as an
 upper bound on draw, a data-center power usage effectiveness of $1.2$, and
 a Spanish grid carbon intensity of $0.17$\,kg\,CO$_2$eq per kWh, this
-corresponds to approximately $2{,}600$\,kWh and \textbf{450\,kg
-CO$_2$eq}, about $50$\,g CO$_2$eq per training run. We report this as an
+corresponds to approximately $2{,}660$\,kWh and \textbf{450\,kg
+CO$_2$eq}, about $51$\,g CO$_2$eq per training run. We report this as an
 order-of-magnitude accounting following the methodology of the Machine
-Learning Impact calculator, not a
+Learning Impact calculator \citep{lacoste2019quantifying}, not a
 measurement. Its known omissions should be read with it: it assumes
 sustained peak GPU power and uniform throughput, ignores idle and host-side
 draw, excludes embodied (manufacturing) carbon and storage, and applies a
 single national grid intensity rather than the regional and hourly value at
-the time each job ran. The figure covers every run the campaign executed,
-including exploration and repeats, not only the runs reported here. Two aspects of the study's design lower
+the time each job ran. The figure covers every run whose record we retain, which is every run
+whose cell survives in the released grid; runs superseded during the
+campaign leave no record, because the training entry point refuses to
+overwrite a completed cell and so never re-times one. Two aspects of the study's design lower
 this figure materially. The intervention under test adds only about $2\%$
 to a run, so the comparison itself is cheap; the expense lies in the
 comparators, since every self-supervised arm doubles the cost of its cell.
@@ -599,6 +613,6 @@ ViT-tiny trained from scratch gains $+9.9$ points from the prior even at
 neutral, and under the standard DeiT recipe the gains grow to
 $+25$ points, peaking later in the data axis. The best ViT number in the
 study, $75.3\%$ at full CIFAR-100, is DeiT augmentation \emph{plus} the
-prior, against $61.4\%$ for the recipe alone. Sections~\ref{sec:law} and
+prior, against $62.7\%$ for the recipe alone. Sections~\ref{sec:law} and
 \ref{sec:scale} show this is a feature-side phenomenon that persists to
 ImageNet scale and grows with model size.

@@ -10,7 +10,7 @@ conv populations, panel (b) ViT-tiny under plain vs DeiT recipe.
 
 Colors: Okabe-Ito (CVD-safe), fixed assignment.
 """
-import csv, math, os
+import csv, math, os, sys
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -29,22 +29,22 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CSV = os.path.join(HERE, "..", "..", "results", "all_results.csv")
 LO, HI = 31.8, 40.3
 
-# ---------------------------------------------------------------- fig 1
+# The readout term's uncertainty MUST be formed per seed pair: Delta and G are
+# computed from the same checkpoints, so their errors are correlated and the
+# independent form hypot(delta_sem, G_sem) overstates the SEM by a median
+# factor of ~1.8, admitting far too few cells. This figure used the
+# independent form and therefore drew the retracted 96% audit under a caption
+# that had already been corrected to 79%. analysis/audit_law_paired.py is the
+# single source of truth for the audit, so the figure now calls it rather than
+# re-deriving the classification.
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                "..", "..", "analysis"))
+import audit_law_paired as ALP   # noqa: E402
+
+REPO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 pts = {"correct": [], "wrong": [], "unres": [], "bracket": []}
-for r in csv.DictReader(open(CSV)):
-    if not r.get("aux_target") or r.get("init_from") or r.get("pretrained"):
-        continue
-    if (r.get("stem") or "none") != "none":
-        continue
-    try:
-        d, g, base = float(r["delta"]), float(r["G"]), float(r["base_acc"])
-        ns, nps = int(r["n_seeds"]), int(r["n_probe_seeds"])
-        sem = math.hypot(float(r["delta_sem"] or 0), float(r["G_sem"] or 0))
-    except (ValueError, KeyError):
-        continue
-    if ns < 3 or nps < 3:
-        continue
-    ro = d - g
+for _r in ALP.load(os.path.join(REPO, "runs"), CSV):
+    base, ro, sem = _r["base"], _r["ro"], _r["sem"]
     if LO <= base <= HI:
         pts["bracket"].append((base, ro))
     elif sem <= 0 or abs(ro) <= 2 * sem:

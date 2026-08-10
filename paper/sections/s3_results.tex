@@ -41,12 +41,12 @@ fit no parametric form and use only the measured curve for prediction.
 \centering
 \includegraphics[width=\linewidth]{figs/law_scatter.pdf}
 \caption{The law, in full: readout $=\Delta-G$ against baseline accuracy
-for all 989 law-scope cells with ${\geq}3$ seeds on both arms. Shaded
+for all 1{,}100 law-scope cells with ${\geq}3$ seeds on both arms. Shaded
 band: the measured crossing bracket $[31.8,40.3]$, inside which no sign
-is predicted. Of the 498 cells whose readout is resolvable against its
-own seed-paired uncertainty, 393 fall on the predicted side of zero.
+is predicted. Of the 511 cells whose readout is resolvable against its
+own seed-paired uncertainty, 404 fall on the predicted side of zero.
 The scatter at fixed baseline is substantial ($R^2 = 0.18$, residual SD
-$2.2$ points): the account predicts the sign of this term, not its value.}
+$2.1$ points): the account predicts the sign of this term, not its value.}
 \label{fig:law}
 \end{figure}
 
@@ -80,15 +80,15 @@ account.}
 Population & Cells \\
 \midrule
 Cells with paired $\Delta$ and $G$ (all interventions) & 1{,}660 \\
-\quad in scope, ${\geq}3$ seed-matched arms & 1{,}075 \\
+\quad in scope, ${\geq}3$ seed-matched arms & 1{,}100 \\
 Backbone variants in scope (architecture families) & 9 (5) \\
-Dataset identities in scope & 15 \\
+Dataset identities in scope & 21 \\
 Inside crossing bracket (no prediction) & 102 \\
-Unresolved ($|\mathrm{readout}| \le 2$\,SEM) & 475 \\
+Unresolved ($|\mathrm{readout}| \le 2$\,SEM) & 487 \\
 \midrule
-\textbf{Resolvable (these test the account)} & \textbf{498} \\
-\quad Sign as predicted & \textbf{393 (78.9\%)} \\
-\quad Wrong side & 105 \\
+\textbf{Resolvable (these test the account)} & \textbf{511} \\
+\quad Sign as predicted & \textbf{404 (79.1\%)} \\
+\quad Wrong side & 107 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -109,27 +109,30 @@ Intervals are Wilson 95\%.}
 \toprule
 Audit variant & Cells & Correct & Rate & 95\% CI \\
 \midrule
-$|\mathrm{readout}| > 1$\,SEM & 691 & 517 & 74.8\% & [71.5, 77.9] \\
-$>1.5$\,SEM & 581 & 451 & 77.6\% & [74.1, 80.8] \\
-\textbf{$>2$\,SEM (declared)} & \textbf{498} & \textbf{393} & \textbf{78.9\%} & \textbf{[75.1, 82.3]} \\
-$>3$\,SEM & 372 & 301 & 80.9\% & [76.6, 84.6] \\
+$|\mathrm{readout}| > 1$\,SEM & 709 & 530 & 74.8\% & [71.4, 77.8] \\
+$>1.5$\,SEM & 597 & 463 & 77.6\% & [74.0, 80.7] \\
+\textbf{$>2$\,SEM (declared)} & \textbf{511} & \textbf{404} & \textbf{79.1\%} & \textbf{[75.3, 82.4]} \\
+$>3$\,SEM & 382 & 310 & 81.2\% & [76.9, 84.8] \\
 \midrule
-One vote per (dataset, backbone, fraction) & 247 & 191 & 77.3\% & [71.7, 82.1] \\
-Held out: bracket fitted without the audited dataset & 273 & 218 & 79.9\% & [74.7, 84.2] \\
+One vote per (dataset, backbone, fraction) & 258 & 200 & 77.5\% & [72.0, 82.2] \\
+Held out: bracket fitted without the audited dataset & 272 & 218 & 80.1\% & [75.0, 84.5] \\
 \midrule
-Below the crossing & 332 & 291 & 87.7\% & [83.7, 90.8] \\
-Above the crossing & 166 & 102 & 61.4\% & [53.9, 68.5] \\
+Below the crossing & 334 & 293 & 87.7\% & [83.8, 90.8] \\
+Above the crossing & 177 & 111 & 62.7\% & [55.4, 69.5] \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:audit} summarizes the audit: of 498 resolvable cells
-spanning nine backbones and fifteen dataset identities, 393 ($78.9\%$)
-fall on the predicted side (Wilson 95\% CI $[75.1, 82.3]$; one-sided exact
+Table~\ref{tab:audit} summarizes the audit: of 511 resolvable cells
+spanning nine backbones and twenty-one dataset identities (the 13 image
+sources of Table~\ref{tab:partitions} plus the relabeled controls and
+multi-source views, which share their parent's pixels but are separate
+label spaces and so are audited separately), 404 ($79.1\%$)
+fall on the predicted side (Wilson 95\% CI $[75.3, 82.4]$; one-sided exact
 binomial against an even coin, $p \approx 10^{-40}$). Below the crossing,
-where the account makes a strong prediction, it is $291/332 = 87.7\%$;
-above it, where it predicts only that the term is small, $102/166 =
-61.4\%$. The 105 exceptions are not scattered noise;
+where the account makes a strong prediction, it is $293/334 = 87.7\%$;
+above it, where it predicts only that the term is small, $111/177 =
+62.7\%$. The 107 exceptions are not scattered noise;
 a recurring group carries one signature, $G$ clearly positive while
 $\Delta$ is negative at ${\geq}20\%$ data on Food-101 and PathMNIST,
 ``better features, worse accuracy at sufficiency''.
@@ -169,22 +172,39 @@ CIFAR-100 & R18 & L4-$\lambda.3$ & 50\% & 71.8 & $-0.73$ & $-0.21$ & $-0.52$ \\
 
 Table~\ref{tab:robust} reports what that number does and does not survive.
 It is not an artifact of where the resolvability threshold was set: the
-rate moves only from $74.8\%$ over 691 cells at one SEM to $80.9\%$ over
-372 at three, so a reader who prefers a stricter or looser criterion
+rate moves only from $74.8\%$ over 709 cells at one SEM to $81.2\%$ over
+382 at three, so a reader who prefers a stricter or looser criterion
 reaches the same conclusion. It is not an artifact of the dependence
 between cells, since collapsing to one vote per (dataset, backbone,
-fraction) group leaves $191/247 = 77.3\%$. And, the check that matters
+fraction) group leaves $200/258 = 77.5\%$. And, the check that matters
 most, it is not an artifact of estimating the crossing bracket on the same
 cells we then audit: re-fitting the bracket on the other datasets and
-auditing each dataset out of sample gives $218/273 = 79.9\%$,
-statistically indistinguishable from the in-sample figure. The account
+auditing each dataset out of sample gives $218/272 = 80.1\%$,
+statistically indistinguishable from the in-sample figure.
+
+That row audits 272 cells rather than all 511, and the arithmetic is worth
+stating because the shortfall is not a sampling choice. Re-fitting the
+bracket on the other datasets makes it \emph{much wider} than the pooled
+$[31.8, 40.3]$, since a single dataset's cells no longer pin either edge:
+for CIFAR-100 the re-fitted bracket is $[13.7, 86.8]$. Cells inside a
+bracket make no sign prediction by construction, so a wider bracket
+swallows them, and $193$ of the $511$ leave the held-out set that way,
+125 of them CIFAR-100's. A further $46$ sit in datasets that cannot
+receive a fold at all, either because the remaining data cannot bracket
+them or because fewer than five of their cells survive, which is every
+population outside the eight largest. The three groups exhaust the total
+($272 + 193 + 46 = 511$). Note the direction of the bias this introduces:
+the held-out row keeps the cells furthest from the crossing, where the
+account is most confident, so its agreement rate should be read as an
+upper bound on out-of-sample performance rather than a like-for-like
+comparison with the in-sample row. The account
 generalizes across datasets at the rate it fits within them, which is the
 one thing about it we can state without qualification.
 
 What the number does \emph{not} survive is disaggregation, and we would
 rather say so than let a reader discover it. The evidence is
 overwhelmingly left-flank: below the crossing the sign is right $87.7\%$
-of the time, above it $61.4\%$, barely better than a coin once the term it
+of the time, above it $62.7\%$, barely better than a coin once the term it
 predicts has shrunk to nothing. Two datasets behave badly out of sample,
 CIFAR-10 at $50\%$ and PathMNIST at $44\%$; PathMNIST's linear evaluation
 is a known compressed measuring stick, since its frozen-feature accuracy
