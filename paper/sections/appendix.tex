@@ -164,7 +164,10 @@ baseline's is diffuse at this data scale.}
 \centering
 \includegraphics[width=\linewidth]{figs_explain/tsne_auxmag_5pct_sched0.png}
 \caption{t-SNE of frozen penultimate test features, first eight classes,
-baseline (left) and prior arm (right) at the CIFAR-100 5\% cell. Reported
+baseline (top) and prior arm (bottom) at the CIFAR-100 5\% cell. The
+silhouette in each title is computed over \emph{all} classes in the
+\emph{full} feature space, not on the two projected dimensions shown.
+Reported
 with its own limitation: the silhouette score over all classes at full
 dimension moves only from $-0.072$ to $-0.064$, so this projection does
 \emph{not} show the $+6.3$-point feature gap that the linear evaluation

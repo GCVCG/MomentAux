@@ -210,10 +210,17 @@ def denorm(x, dataset):
 
 
 def fig_tsne(models, loader, device, out, cell, n_classes, names=None):
+    """Two panels STACKED, single column: side by side at 3.33in each panel was
+    1.6in wide, too small to read a projection from, and the silhouette had to
+    be abbreviated to fit. Stacking gives each panel the full column width and
+    room for the statement that makes the panel scientific rather than
+    decorative -- the silhouette is computed on ALL classes in the FULL feature
+    space, not on the two projected dimensions being displayed."""
     from sklearn.manifold import TSNE
     from sklearn.metrics import silhouette_score
 
-    fig, axes = plt.subplots(1, 2, figsize=(FIGW, FIGW * 0.52))
+    fig, axes = plt.subplots(2, 1, figsize=(FIGW, FIGW * 1.02))
+    sils, handles = {}, None
     for ax, (name, (model, cfg)) in zip(axes, models.items()):
         feats, ys = penultimate(model, loader, device)
         # silhouette on the FULL feature space, ALL classes (the real statement)
@@ -224,22 +231,26 @@ def fig_tsne(models, loader, device, out, cell, n_classes, names=None):
                    random_state=0).fit_transform(feats[mask])
         for i, c in enumerate(keep_cls):
             m = ys[mask] == c
-            lbl = names[c] if names else f"class {c}"
-            ax.scatter(emb[m, 0], emb[m, 1], s=7, color=OKABE_ITO[i],
+            lbl = (names[c].replace("_", " ") if names else f"class {c}")
+            ax.scatter(emb[m, 0], emb[m, 1], s=3.5, color=OKABE_ITO[i],
                        label=lbl, linewidths=0)
-        kind = "aux" if cfg.get("moment_aux") else "baseline"
-        ax.set_title(f"{kind}\nsilhouette = {sil:.3f}", fontsize=7)
+        kind = "prior" if cfg.get("moment_aux") else "baseline"
+        sils[kind] = sil
+        ax.set_title(f"{kind}: silhouette (all classes, full dim) $=$ "
+                     f"{sil:+.3f}", fontsize=6.5, pad=2)
         ax.set_xticks([]), ax.set_yticks([])
-        for s in ax.spines.values():
-            s.set_alpha(0.25)
-    axes[0].legend(loc="best", fontsize=4.6, framealpha=0.6, handletextpad=0.2,
-                   borderpad=0.2, labelspacing=0.2)
-    fig.suptitle(f"penultimate test features, t-SNE "
-                 f"(first {n_classes} classes)", fontsize=7.5)
-    fig.tight_layout()
-    fig.savefig(os.path.join(out, f"tsne_{cell}.png"), dpi=150)
+        for sp in ax.spines.values():
+            sp.set_alpha(0.25)
+        handles = ax.get_legend_handles_labels()
+
+    fig.legend(*handles, loc="lower center", ncol=4, fontsize=5.4,
+               frameon=False, handletextpad=0.15, columnspacing=0.8,
+               markerscale=2.2, bbox_to_anchor=(0.5, -0.005))
+    fig.subplots_adjust(left=0.02, right=0.98, top=0.955, bottom=0.115,
+                        hspace=0.16)
+    fig.savefig(os.path.join(out, f"tsne_{cell}.png"), dpi=300)
     plt.close(fig)
-    return sil
+    return sils.get("baseline", 0.0)
 
 
 @torch.no_grad()
