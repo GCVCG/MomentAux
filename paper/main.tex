@@ -66,7 +66,7 @@
 \cortext[1]{Corresponding author.}
 \fntext[1]{These authors contributed equally to the supervision of this
 work.}
-\nonumnote{Code, configurations, committed subset indices, per-run records
+\nonumnote{Code, configurations, fixed subset indices, per-run records
 and all result tables: \url{https://github.com/GCVCG/MomentAux}}
 
 \begin{abstract}
@@ -77,7 +77,7 @@ benchmark that measures one fixed, hand-crafted source of knowledge, a
 pinned bank of Gabor targets injected only during training at $\sim$2\%
 compute overhead, against the data-driven alternatives (SimCLR, SimSiam and
 DINO pre-training, ImageNet transfer, heavy augmentation, learned teachers)
-under one frozen recipe with committed subsets: 13 datasets, 9 backbones,
+under one frozen recipe with fixed subsets: 13 datasets, 9 backbones,
 500 to 1.28M images, 32 to 224\,px, and 5.7M to 86M parameters
 ($2{,}894$ configurations over $8{,}827$ runs). Every pairwise
 combination is measured too, and all
@@ -162,7 +162,7 @@ reported in this paper.
 \section*{Data availability}
 All artifacts needed to reproduce every number in this paper are released
 at \url{https://github.com/GCVCG/MomentAux}: the training and
-evaluation harness (configs for all 2{,}894 cells, the committed subset
+evaluation harness (configs for all 2{,}894 cells, the subset
 indices, the fingerprinted filter banks, the single training entry point,
 the aggregation and audit scripts), and the complete result tables in open
 formats. The tagged release additionally carries the \emph{raw} evidence as
@@ -181,7 +181,7 @@ Table~\ref{tab:audit} is itself a released script rather than a manual
 query. Public datasets are cited in Section~\ref{sec:datasets}; the
 subset indices we release make the exact image selection reproducible
 without redistributing the images. Model checkpoints (223\,GB) are not
-distributed; every cell retrains from its committed configuration.
+distributed; every cell retrains from its released configuration.
 
 \section*{Declaration of generative AI and AI-assisted technologies in the
 manuscript preparation process}

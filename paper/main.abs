@@ -5,7 +5,7 @@ benchmark that measures one fixed, hand-crafted source of knowledge, a
 pinned bank of Gabor targets injected only during training at $\sim$2\%
 compute overhead, against the data-driven alternatives (SimCLR, SimSiam and
 DINO pre-training, ImageNet transfer, heavy augmentation, learned teachers)
-under one frozen recipe with committed subsets: 13 datasets, 9 backbones,
+under one frozen recipe with fixed subsets: 13 datasets, 9 backbones,
 500 to 1.28M images, 32 to 224\,px, and 5.7M to 86M parameters
 ($2{,}894$ configurations over $8{,}827$ runs). Every pairwise
 combination is measured too, and all

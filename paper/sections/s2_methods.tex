@@ -5,7 +5,7 @@
 \centering
 \includegraphics[width=\linewidth]{figs/method.pdf}
 \caption{The study in one picture. \textbf{(a)} One frozen recipe and
-committed subset indices, so every intervention is measured on
+fixed subset indices, so every intervention is measured on
 byte-identical images; deviations are quarantined under a diagnostic
 namespace and never enter headline tables. \textbf{(b)} MomentAux, the
 fused knowledge source: a pinned bank of oriented-energy targets
@@ -26,7 +26,7 @@ The benchmark's claims rest on the comparisons being controlled, so we
 describe the controls before the results (Fig.~\ref{fig:method}). This
 section is organized as the instrument's six components, in the order a
 reader would need to trust a single number.
-Section~\ref{sec:recipe} fixes the training recipe and the committed data
+Section~\ref{sec:recipe} fixes the training recipe and the fixed data
 subsets that make any two cells comparable.
 Section~\ref{sec:momentaux} specifies the knowledge source under study,
 the pinned spectral bank and the auxiliary head that injects it.
@@ -42,7 +42,7 @@ relative to the comparators, and Section~\ref{sec:prereg} describes the
 pre-registration discipline that turns the grid's predictions into
 falsifiable ones.
 
-\subsection{Frozen recipe and committed subsets}\label{sec:recipe}
+\subsection{Frozen recipe and fixed subsets}\label{sec:recipe}
 Every headline cell trains with an identical recipe: stochastic gradient descent (SGD) with momentum
 $0.9$, learning rate $0.1$, weight decay $5{\times}10^{-4}$, cosine
 schedule, 200 epochs, batch size 128, and random-crop + horizontal-flip
@@ -58,7 +58,7 @@ frozen-recipe cells.
 Data fractions are not sampled at run time. For each dataset $\mathcal{D}$
 and fraction $p$ we precompute a stratified index set
 $S_{\mathcal{D},p}$ by drawing, per class, a seeded permutation truncated
-to $p\%$, and commit it to version control. Every intervention therefore
+to $p\%$, and fix it once for the whole study. Every intervention therefore
 consumes byte-identical images, which is what makes an accuracy
 difference attributable to the intervention rather than to the draw.
 Because the recipe fixes epochs rather than steps, the optimization
@@ -150,7 +150,7 @@ compute but a modern recipe change; FitNets teachers $2\times$; HOG
 targets ${\approx}1.02\times$; ImageNet transfer amortized, but flagged
 throughout as the one comparator with an external-data advantage.
 
-Every self-supervised stage runs on the committed subset images of the
+Every self-supervised stage runs on the same subset images of the
 cell it initializes, never on extra data, for 200 epochs at batch
 128 with that method's own published view augmentations, and is followed
 by the unchanged frozen recipe. Because a weak comparator would flatter
@@ -386,7 +386,7 @@ measure.
 \subsection{Datasets}\label{sec:datasets}
 \begin{table}[t]
 \caption{The 13 datasets, grouped by domain. Fractions are drawn from the
-committed subset indices of Section~\ref{sec:recipe}; sources with
+fixed subset indices of Section~\ref{sec:recipe}; sources with
 variable native resolution are squash-resized once, offline, and the
 resized copies are what every arm consumes.}
 \label{tab:maindatasets}

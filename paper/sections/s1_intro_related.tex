@@ -16,10 +16,8 @@ discovered anecdotally, one paper and one setting at a time, under training
 recipes that differ in a dozen uncontrolled ways.
 
 This paper treats the question as a measurement problem. We build a single
-instrument, one frozen training recipe, data subsets whose per-class image
-indices are drawn once and checked into version control so that every run
-trains on byte-identical images (we call these \emph{committed} subsets
-throughout), and a numerically pinned bank of Gabor and moment
+instrument, one frozen training recipe, fixed data subsets shared by every
+run, and a numerically pinned bank of Gabor and moment
 spectral filters, and use it to measure one deliberately austere source of
 prior knowledge against the strongest data-driven alternatives at matched or
 declared compute. The prior, which we call \emph{MomentAux}, could hardly be
@@ -93,7 +91,7 @@ methods.
 \paragraph{Contributions.}
 \begin{enumerate}
   \item \textbf{An instrument, not just experiments} (Section~\ref{sec:instrument}):
-    a frozen recipe with committed subsets, pinned filter banks, declared
+    a frozen recipe with fixed subsets, pinned filter banks, declared
     cost normalization, and pre-registered predictions with falsifiers,
     every headline table regenerable by one command from released artifacts.
   \item \textbf{The grid} (Section~\ref{sec:grid}): $2{,}894$ configurations,
@@ -387,7 +385,7 @@ preferred recipe cannot attribute a difference to the method. Benchmarks
 of pretrained backbones \citep{goldblum2023battle,marks2025closer} inherit
 whatever recipe produced each checkpoint, and \citet{marks2025closer}
 show directly that the evaluation protocol can change the conclusion. We
-instead hold one recipe and one set of committed image indices fixed and
+instead hold one recipe and one set of fixed image indices fixed and
 vary only the intervention.
 
 The second is rarely reported at all. Self-supervised pre-training costs
@@ -423,7 +421,7 @@ Reality-check studies have repeatedly shown that uncontrolled recipes
 manufacture illusory progress, and reproducibility in machine learning
 remains fragile. We adopt
 the strictest discipline we could operationalize: a single frozen recipe;
-committed per-subset indices so every intervention sees byte-identical
+fixed per-subset indices so every intervention sees byte-identical
 images; numerically fingerprinted filter banks; deviations quarantined
 under a separate namespace and never mixed into headline tables; and,
 unusual in this literature, predictions with explicit falsifiers
