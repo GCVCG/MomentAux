@@ -3769,3 +3769,60 @@ ported vs corrected and why.
   the largest fraction measured. This is a sharper statement of "the peak
   tracks task difficulty" than the classification grid could make, because
   here the dataset is held fixed and only the backbone varies.
+
+## DENSE-PREDICTION TRANSPLANT (2026-08-10, user: "run the experiments and
+## having them and later we decide to include them to the paper")
+
+- WHY: every number in the study is top-1 ACCURACY. The auxiliary target is a
+  dense oriented-energy map m(x) in R^{NxHxW}, so a dense task asks whether
+  the fusion rule and Delta = G + readout are properties of the METHOD or of
+  the METRIC. PASCAL VOC-2012 segmentation, augmented (SBD) train split:
+  10,582 train / 1,449 val, 21 classes, ResNet-18 at output stride 8 with an
+  FCN head, fractions 1/2/5/10/25/100%, 3 seeds, both arms.
+- WHAT TRANSFERS WITH NO REDESIGN, which is why this is cheap: MomentAuxModel
+  pools its target to the tapped stage's size, so the SAME pinned bank, tap,
+  lambda schedule and head_norm apply. At a 512 crop and stride 8 the target
+  is matched at 32x32 instead of the 8x8 of a classification cell.
+- STATE THE BIAS FIRST: a dense spatial target on a dense spatial task is the
+  most favourable venue this prior could be given. A win here is WEAKER
+  evidence of generality than a win on a task with no such alignment.
+  Detection is the harder test and is deliberately not what this starts with.
+- UNITS CAVEAT, recorded before any result: mIoU points are NOT accuracy
+  points. Any comparison of a Delta here to a Delta in the classification
+  grid is a comparison across units and must be stated as such rather than
+  read as "bigger". The readout crossing bracket [31.8, 40.3] is an ACCURACY
+  bracket and is NOT transplanted; what these cells can test is the FORM of
+  the sign law, and with enough fractions they can ESTIMATE a crossing in
+  mIoU space.
+- PREDICTIONS RECORDED IN ADVANCE (nothing beyond 2-epoch smoke runs seen):
+    (D1) THE ENVELOPE IS POSITIVE across 1-25%, with a peak magnitude of
+      **+2..+8 mIoU**. PEAK LOCATION IS DELIBERATELY NOT PREDICTED: E1 on
+      ImageNet64 just failed for exactly that, and the lesson (predict the
+      axis you can measure, not the one you assume) is worth applying
+      immediately rather than after a second miss.
+    (D2) STRUCTURAL NEUTRALITY SURVIVES THE TASK CHANGE:
+      **Delta(100%) = 0 +- 1.5 mIoU**. lambda reaches exactly zero at the
+      final epoch, so late training is pure cross-entropy; this is the one
+      property that should hold regardless of metric.
+      FALSIFIER: |Delta(100%)| > 2.5 => structural neutrality is an artifact
+      of the classification setting, which would be a real limitation and
+      would need saying in the paper whether or not these cells are included.
+    (D3) THE SIGN LAW'S FORM TRANSPLANTS: readout = Delta - G is NEGATIVE at
+      1% (baseline mIoU deep on the left flank) and RISES toward zero as the
+      baseline rises.
+      FALSIFIER: the ORDERING inverts (readout positive at 1% and negative at
+      25%) => the law's form is metric-specific, not a property of the method.
+    (D4) THE ALIGNMENT QUESTION, and the point of running this at all. VOC@1%
+      is 107 images = 5 per class over 20 classes, the same per-class regime
+      as CIFAR-100@1% (+1.42) and tin@1% (+1.49), where the classification
+      grid finds a universal ~+1.5 floor. If the prior pays MORE when the
+      task is dense, **Delta(VOC@1%) = +2..+6 mIoU**.
+      FALSIFIER, and it is the more interesting branch: Delta(VOC@1%) <= +1.5
+      => target-task alignment is NOT where the value comes from, and the
+      claim becomes cleaner (the prior supplies the same feature structure
+      whatever the head does with it) rather than weaker.
+- COST, measured on the local 3090 rather than estimated: a 1% cell is ~3s
+  per epoch and the 1,449-image native-resolution validation is ~18s, so
+  evaluation was costing more than the training it measured. Validation now
+  runs every 5 epochs plus the final one, identically for both arms. The full
+  6-fraction envelope is ~6-10 GPU-hours on an H100 for 36 runs.
