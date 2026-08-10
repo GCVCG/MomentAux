@@ -1,19 +1,40 @@
 %% ---------------------------------------------------------------------
 \section{Introduction}\label{sec:intro}
 
-Every practitioner who has trained a network on a small dataset has faced
-the same menu of remedies: pre-train on ImageNet, run a self-supervised
-stage, augment more aggressively, or inject some form of prior knowledge
-into the model. Each remedy fuses an external source of information,
-weights learned elsewhere, invariances distilled from augmented views,
-hand-crafted structure, with whatever the labeled data can teach on its
-own. What the field lacks is not remedies but a controlled account of how
-these information sources \emph{combine}: when does adding a second source
-help, when is it redundant with what the first already supplies, and when
-does the fusion actively destroy value? These three outcomes, we will
-call them \emph{stack}, \emph{substitute}, and \emph{tax}, are usually
-discovered anecdotally, one paper and one setting at a time, under training
-recipes that differ in a dozen uncontrolled ways.
+A bank of Gabor filters, fixed before training and free to compute, is
+worth $+26$ accuracy points to a ViT-B/16 at $224$\,px. Injected exactly
+the same way into a network that has already had contrastive
+pre-training, it is worth nothing. Injected into one initialized from
+ImageNet, it costs $17$ points. One intervention, one frozen recipe, one
+code path: three outcomes spanning forty accuracy points. The useful
+question is not which number is representative, because none of them is.
+It is what distinguishes the three cases, and whether that can be
+determined \emph{before} the combination is trained.
+
+This is the general situation, not a curiosity of one prior. Every
+practitioner who has trained a network on a small dataset faces the same
+menu of remedies: pre-train on ImageNet, run a self-supervised stage,
+augment more aggressively, or inject prior knowledge into the model. Each
+fuses an external source of information, weights learned elsewhere,
+invariances distilled from augmented views, hand-crafted structure, with
+whatever the labeled data can teach on its own. What the field lacks is
+not remedies but a controlled account of how these sources
+\emph{combine}: when does adding a second source help, when is it
+redundant with what the first already supplies, and when does the fusion
+actively destroy value? These three outcomes, we will call them
+\emph{stack}, \emph{substitute}, and \emph{tax}, are usually discovered
+anecdotally, one paper and one setting at a time, under training recipes
+that differ in a dozen uncontrolled ways.
+
+Our answer is that sources trade in identifiable \emph{currencies}, and
+that what a source is worth depends on which currency is scarce rather
+than on how modern the method is. Two sources add only when their
+currencies differ. This is not a metaphor we impose after the fact: each
+source's currency is measurable, on frozen features, from each source
+\emph{alone}, before any combination is trained. That is what makes the
+three outcomes above predictable instead of anecdotal, and it is why the
+same free prior can be the most valuable intervention we measure in one
+setting and the most damaging in another.
 
 This paper treats the question as a measurement problem. We build a single
 instrument, one frozen training recipe, fixed data subsets shared by every
@@ -56,8 +77,9 @@ had never seen (Swin) from baseline heights alone, and at ImageNet scale it
 tied end-to-end gains to feature gains within $1.1$ accuracy points on five
 of six backbone pairs (Section~\ref{sec:scale}).
 
-The law converts the grid into an explanation. Interventions turn out to
-carry identifiable \emph{currencies}: heavy augmentation supplies
+The law converts the grid into an explanation, and it is where the
+currencies stop being a metaphor and become the term $G$. Each
+intervention's is legible in what it does to frozen features: heavy augmentation supplies
 nuisance-invariance, contrastive pre-training supplies much the same
 invariance at greater expense, ImageNet weights supply mature photographic
 features, and the moment prior supplies oriented-energy structure.
@@ -109,6 +131,35 @@ methods.
   \item \textbf{A decision guide} (Section~\ref{sec:guide}): a
     regime-indexed recommendation table distilled from the grid, with
     honest costs attached.
+\end{enumerate}
+
+\paragraph{Takeaways.} For a reader who reads no further:
+\begin{enumerate}
+  \item \textbf{Measure the currency, not the method.} A linear
+    evaluation of each source \emph{alone} predicts whether combining
+    them will stack, do nothing, or hurt. Sources whose feature gains are
+    close are substitutes, however different their machinery
+    (Section~\ref{sec:fusion}).
+  \item \textbf{Never fuse a shaping prior into a strong
+    initialization.} The tax is feature-side and proportional to what the
+    initialization already supplied: $-17$ points where ImageNet transfer
+    is worth the most, and indistinguishable from zero on
+    histopathology, where it is worth least (Section~\ref{sec:taxsub}).
+  \item \textbf{Modern augmentation does not replace structure, it
+    amplifies it.} The same recipe that makes $2\times$-compute
+    contrastive pre-training nearly redundant makes the free prior worth
+    $1.4$--$2.4\times$ more, because the two supply different currencies
+    (Section~\ref{sec:stack}).
+  \item \textbf{Attention's deficit grows with model scale.} $+13.0$ for
+    ViT-S/16 and $+26.0$ for ViT-B/16 at $224$\,px, and still $+3.2$ after
+    1.28M images, where our ResNet-18 is neutral ($+0.04$). Scaling the
+    model does not remove the need for the prior; it increases it
+    (Section~\ref{sec:scale}).
+  \item \textbf{Declare the comparator's budget, or the conclusion is
+    about the budget.} SimSiam appears to learn nothing at its published
+    budget and gains $+4.3$ at four times that; two of our own accuracy
+    claims did not survive the same test and are restated as cost claims
+    (Section~\ref{sec:budget}).
 \end{enumerate}
 
 %% ---------------------------------------------------------------------

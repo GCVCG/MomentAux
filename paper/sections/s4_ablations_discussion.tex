@@ -343,21 +343,36 @@ warmup for large-ViT pre-training proper.
 %% ---------------------------------------------------------------------
 \section{Conclusion}\label{sec:conclusion}
 
-We built an instrument, one recipe, fixed data, pinned filters,
-pre-registered predictions, and used it to measure how a nearly free
-structural prior fuses with the modern menu of data-efficiency
-interventions across 13 datasets, 9 backbones and four orders of
-magnitude in data. The measurements organize under one empirical
-decomposition separating feature gain from readout, which predicted an
-unseen backbone family's feature gain in advance and tied accuracy to
-features within about a point at ImageNet scale, and whose sign holds on
-$79\%$ of testable cells overall and $88\%$ in the scarce-data regime it
-describes best; and they support a three-way fusion taxonomy, stack,
-substitute, tax, decided by whether the fused sources carry the same
-information currency. The
-practical residue is a decision guide whose strongest entry is also the
-study's headline: for vision transformers trained the way practitioners
-actually train them, a fixed spectral target costing $2\%$ of training
-compute and nothing at inference is worth between $+13$ and $+26$
-accuracy points, and no $2\times$-compute alternative we measured matches
-it.
+We opened with one intervention worth $+26$ points, nothing, and $-17$
+points in three different settings, and asked what distinguishes the
+cases. The answer this study supports is that information sources trade
+in currencies, that what a source is worth is set by which currency is
+scarce rather than by how modern the source is, and, the part that makes
+it useful rather than merely descriptive, that each source's currency is
+measurable on frozen features from that source \emph{alone}, before any
+combination is trained. Same currency, and the second source is
+redundant however sophisticated it is; different currencies, and the
+gains compound; a shaping prior poured into an initialization that
+already carries mature features destroys them in proportion to what they
+were worth.
+
+We reached this through an instrument rather than a set of experiments:
+one recipe, fixed data, pinned filters, declared comparator budgets and
+pre-registered predictions, across 13 datasets, 9 backbones and four
+orders of magnitude in data. The measurements organize under one
+empirical decomposition separating feature gain from readout, which
+predicted an unseen backbone family's feature gain in advance and tied
+accuracy to features within about a point at ImageNet scale, and whose
+sign holds on $79\%$ of testable cells overall and $88\%$ in the
+scarce-data regime it describes best. The same discipline cost us two
+accuracy claims, which the comparator-budget experiment overturned and
+which we restate here as cost claims.
+
+The most surprising thing the instrument found is the direction of the
+attention result. A bank of oriented filters that predates deep learning
+is worth $+13$ points to ViT-S/16 and $+26$ to ViT-B/16 at $224$\,px, it
+is worth \emph{more} to the larger model, and it is still worth $+3.2$
+after 1.28 million images, in a regime where our convolutional baseline
+is neutral to within $0.04$. Whatever small transformers fail to learn
+about oriented structure at these scales, more parameters and more data
+did not supply it, and $2\%$ of a training run did.
