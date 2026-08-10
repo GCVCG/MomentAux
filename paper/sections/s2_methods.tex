@@ -397,44 +397,9 @@ such a difference is better a priori. A dash marks a cell we did not
 measure.
 
 \subsection{Datasets}\label{sec:datasets}
-\begin{table}[t]
-\caption{The 13 datasets, grouped by domain. Fractions are drawn from the
-fixed subset indices of Section~\ref{sec:recipe}; sources with
-variable native resolution are squash-resized once, offline, and the
-resized copies are what every arm consumes.}
-\label{tab:maindatasets}
-\centering\scriptsize
-\setlength{\tabcolsep}{2.6pt}
-\zebra{2}
-\begin{tabular}{@{}llrrr@{}}
-\toprule
-Domain & Dataset & Train & Cls. & Px \\
-\midrule
-Photographic & CIFAR-10 \citep{krizhevsky2009cifar}      & 50{,}000    & 10   & 32 \\
- & CIFAR-100 \citep{krizhevsky2009cifar}     & 50{,}000    & 100  & 32 \\
- & ciFAIR-100 \citep{barz2020cifair}         & (test only) & 100  & 32 \\
- & STL-10 \citep{coates2011stl10}            & 5{,}000     & 10   & 96 \\
- & Tiny-ImageNet \citep{le2015tinyimagenet}  & 100{,}000   & 200  & 64 \\
-\midrule
-Satellite      & EuroSAT \citep{helber2019eurosat}   & 21{,}600 & 10  & 64 \\
-Multi-sensor   & So2Sat LCZ42 \citep{zhu2020so2sat}  & 352{,}366 & 17 & 32 \\
-Texture        & DTD \citep{cimpoi2014dtd}           & 1{,}880  & 47  & 64 \\
-Food           & Food-101 \citep{bossard2014food101} & 75{,}750 & 101 & 64 \\
-Histopathology & PathMNIST \citep{yang2023medmnist}  & 89{,}996 & 9   & 64 \\
-Fine-grained   & CUB-200 \citep{wah2011cub}          & 5{,}994  & 200 & 64 \\
-\midrule
-ImageNet scale & ImageNet64 \citep{chrabaszcz2017downsampled} & 1{,}281{,}167 & 1000 & 64 \\
- & ImageNet-100 \citep{deng2009imagenet}        & 126{,}689     & 100  & 224 \\
-\midrule
-\multicolumn{5}{@{}l}{relabeled controls: CIFAR-100-super (20 coarse),}\\
-\multicolumn{5}{@{}l}{Tiny-ImageNet-20, -20b, -super and -semantic}\\
-\multicolumn{5}{@{}l}{multi-source views: EuroSAT-MS visible, non-visible, all;}\\
-\multicolumn{5}{@{}l}{So2Sat SAR, optical, both (Section~\ref{sec:multisensor})}\\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/partitions}
 
-Table~\ref{tab:maindatasets} lists the datasets. The selection is
+Table~\ref{tab:partitions} lists the datasets. The selection is
 deliberate rather than convenient. Five visual domains are represented
 because the currency account predicts that which information source is
 scarce depends on image statistics, and a benchmark drawn only from
@@ -448,6 +413,16 @@ collection and required no ethics approval.
 The two ImageNet stages buy the axes small datasets cannot: ImageNet64
 supplies data and label scale at fixed resolution, while ImageNet-100
 supplies native $224$\,px resolution and a model-scale curve.
+
+Two training pools differ from the sizes usually quoted for those
+datasets, and Table~\ref{tab:partitions} reports the pool we actually
+drew from rather than the headline split. For DTD we follow the standard
+protocol and train on train${+}$val ($3{,}760$ images, 80 per class),
+testing on the held-out test split. For So2Sat we train on the v4
+\emph{validation} split ($24{,}119$) and test on the v4 test split: both
+are held out from the training cities, which makes this a harder
+generalization setting than the canonical split and is why the
+$352{,}366$-image training split plays no part here.
 
 A second group exists purely as controls. CIFAR-100-super relabels
 byte-identical CIFAR-100 subsets with 20 coarse classes, so class count

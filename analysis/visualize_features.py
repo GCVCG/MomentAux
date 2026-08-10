@@ -276,10 +276,10 @@ def fig_heatmaps(models, test_ds, device, out, cell, dataset, loader,
                 ax.set_xlabel(nm(int(ys[idx])), fontsize=8)
             elif c == 1:
                 m = t.numpy()
-                ax.imshow((m - m.min()) / (m.ptp() + 1e-9), cmap="magma")
+                ax.imshow((m - m.min()) / (np.ptp(m) + 1e-9), cmap="magma")
             else:
                 m = maps[c].float().numpy()
-                ax.imshow((m - m.min()) / (m.ptp() + 1e-9), cmap="magma")
+                ax.imshow((m - m.min()) / (np.ptp(m) + 1e-9), cmap="magma")
                 r_t = _corr(maps[c], t)
                 pred = pb[idx] if c == 2 else pa[idx]
                 ok = "\u2713" if pred == ys[idx] else "\u2717"
@@ -325,7 +325,7 @@ def fig_cam(models, test_ds, device, out, cell, dataset, loader,
         cam = torch.einsum("bchw,bc->bhw", fmap, w[pred])
         for r, idx in enumerate(adv):
             m = cam[r].float().cpu().numpy()
-            m = (m - m.min()) / (m.ptp() + 1e-9)
+            m = (m - m.min()) / (np.ptp(m) + 1e-9)
             m = np.array(torch.nn.functional.interpolate(
                 torch.tensor(m)[None, None], size=xs.shape[-2:],
                 mode="bilinear", align_corners=False)[0, 0])
