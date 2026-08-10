@@ -25,3 +25,8 @@ scripts/queue_sf_*.txt
 scripts/sync_sf_*.sh
 logs/sync_sf_*.log
 logs/so2sat_push.log
+# build artefacts inside the assembled submission package
+paper/submission/*.aux
+paper/submission/*.log
+paper/submission/*.blg
+paper/submission/*.out
