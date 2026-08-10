@@ -365,27 +365,35 @@ def fig_cam(models, test_ds, device, out, cell, dataset, loader,
 
 
 def fig_bank(out):
-    """The prior itself: 9 quadrature pairs of the energy-magnitude bank."""
+    """The prior itself: the quadrature pairs of the energy-magnitude bank.
+
+    Single-column, and the panels are packed nearly edge to edge: at 3.33in
+    every point of inter-axes padding is a point the 11x11 kernels do not get,
+    and the kernels are the content. tight_layout is deliberately NOT used
+    here -- it reserves space for labels that the shared row/column headings
+    have already made unnecessary.
+    """
     from momentstem import EnergyStem
 
     stem = EnergyStem(feature_type="magnitude")
     even, odd = stem.even.squeeze(1), stem.odd.squeeze(1)   # (n_pairs, k, k)
     n = even.shape[0]
-    fig, axes = plt.subplots(2, n, figsize=(FIGW_WIDE, FIGW_WIDE * 0.30))
+    fig, axes = plt.subplots(2, n, figsize=(FIGW, FIGW * 0.30))
     lim = float(max(even.abs().max(), odd.abs().max()))
     for i in range(n):
         for r, bank in enumerate((even, odd)):
             ax = axes[r, i]
             ax.imshow(bank[i].numpy(), cmap="RdBu_r", vmin=-lim, vmax=lim)
             ax.set_xticks([]), ax.set_yticks([])
-        axes[0, i].set_title(f"pair {i}", fontsize=8)
-    axes[0, 0].set_ylabel("even", fontsize=8.5)
-    axes[1, 0].set_ylabel("odd", fontsize=8.5)
-    fig.suptitle(f"energy-magnitude bank: {n} complex-Gabor quadrature pairs "
-                 "(the aux target is the magnitude of each pair's response)",
-                 fontsize=9)
-    fig.tight_layout()
-    fig.savefig(os.path.join(out, "bank_gabor.png"), dpi=150)
+            for sp in ax.spines.values():
+                sp.set_linewidth(0.3)
+        axes[0, i].set_title(f"{i}", fontsize=6, pad=1.5)
+    axes[0, 0].set_ylabel("even", fontsize=6, labelpad=1.5)
+    axes[1, 0].set_ylabel("odd", fontsize=6, labelpad=1.5)
+    fig.text(0.5, 0.035, "quadrature pair", ha="center", fontsize=6)
+    fig.subplots_adjust(left=0.055, right=0.995, top=0.90, bottom=0.13,
+                        wspace=0.04, hspace=0.04)
+    fig.savefig(os.path.join(out, "bank_gabor.png"), dpi=300)
     plt.close(fig)
 
 
