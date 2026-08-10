@@ -6,8 +6,8 @@
 \includegraphics[width=\linewidth]{figs/method.pdf}
 \caption{The study in one picture. \textbf{(a)} One frozen recipe and
 fixed subset indices, so every intervention is measured on
-byte-identical images; deviations are quarantined under a diagnostic
-namespace and never enter headline tables. \textbf{(b)} MomentAux, the
+byte-identical images; cells that must deviate are marked diagnostic and
+never enter headline tables. \textbf{(b)} MomentAux, the
 fused knowledge source: a pinned bank of oriented-energy targets
 regressed from a tap at the third of the backbone's four feature stages,
 during training only, with the loss
@@ -49,8 +49,8 @@ schedule, 200 epochs, batch size 128, and random-crop + horizontal-flip
 augmentation only. The recipe is frozen in the strict sense: no cell
 tunes it. Configurations that must deviate, AdamW \citep{loshchilov2019adamw} for architectures the
 SGD recipe cannot train, reduced epochs at ImageNet scale, added
-augmentation stacks, carry a diagnostic namespace enforced by a guard
-in the training entry point, and never enter a headline table. Within
+augmentation stacks, are marked as diagnostic in their configuration
+name, which the training code enforces, and never enter a headline table. Within
 such cells both arms share the deviation, so the paired difference
 remains valid even though the absolute numbers are not comparable to
 frozen-recipe cells.
@@ -454,7 +454,7 @@ model definitions, pinned per machine and recorded in every run record
 rather than hand-rolled implementations. The study ran on three systems:
 the MareNostrum5 accelerated partition at the Barcelona Supercomputing
 Center, using up to 40 NVIDIA H100 GPUs concurrently (ten four-GPU nodes)
-under a shared work-queue that pulls cells atomically so heterogeneous
+under a shared work queue so that heterogeneous
 cell costs do not idle accelerators; a university cluster with H100 and
 H200 nodes; and two local NVIDIA RTX 3090 workstations used for evaluation
 passes and analysis. Because these small-image cells are dataloader-bound
@@ -479,7 +479,7 @@ including exploration and repeats, not only the runs reported here. Two aspects 
 this figure materially. The intervention under test adds only about $2\%$
 to a run, so the comparison itself is cheap; the expense lies in the
 comparators, since every self-supervised arm doubles the cost of its cell.
-And the completed-run guard makes re-running an existing cell a no-op,
+And re-running an existing cell has no effect,
 which matters more than it sounds: several queue faults during the
 campaign would otherwise have silently recomputed finished work.
 
