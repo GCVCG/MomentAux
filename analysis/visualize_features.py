@@ -286,7 +286,7 @@ def fig_heatmaps(models, test_ds, device, out, cell, dataset, loader,
     def nm(c):
         return names[c] if names else f"class {c}"
 
-    cols = ["input (true label)", "moment target", "baseline layer3", "aux layer3"]
+    cols = ["input (true label)", "moment target", "baseline tap", "prior tap"]
     fig, axes = plt.subplots(len(adv), 4,
                              figsize=(FIGW, FIGW / 4 * 1.30 * len(adv)))
     axes = np.atleast_2d(axes)
@@ -340,9 +340,9 @@ def fig_cam(models, test_ds, device, out, cell, dataset, loader,
         return names[c] if names else f"class {c}"
 
     fig, axes = plt.subplots(len(adv), 3,
-                             figsize=(FIGW, FIGW / 3 * 1.28 * len(adv)))
+                             figsize=(FIGW, FIGW / 3 * 1.22 * len(adv)))
     axes = np.atleast_2d(axes)
-    cols = ["input (true label)", "baseline CAM", "aux CAM"]
+    cols = ["input (true label)", "baseline CAM", "prior CAM"]
     for col, (name, (model, cfg)) in enumerate(items, start=1):
         fmap = model.net.forward_features(model.stem(xs))
         pred = model.net.get_classifier()(model.net.global_pool(fmap)).argmax(1)
@@ -358,20 +358,26 @@ def fig_cam(models, test_ds, device, out, cell, dataset, loader,
             ax.imshow(denorm(xs[r], dataset))
             ax.imshow(m, cmap="magma", alpha=0.5)
             p = int(pred[r]); ok = "\u2713" if p == ys[idx] else "\u2717"
-            ax.set_xlabel(f"{nm(p)} {ok}", fontsize=5.5)
+            ax.text(0.5, -0.02, f"{nm(p)} {ok}", transform=ax.transAxes,
+                    ha="center", va="top", fontsize=5.5)
             ax.set_xticks([]), ax.set_yticks([])
             if r == 0:
                 ax.set_title(cols[col], fontsize=6.5)
     for r, idx in enumerate(adv):
         ax = axes[r, 0]
         ax.imshow(denorm(xs[r], dataset))
-        ax.set_xlabel(nm(int(ys[idx])), fontsize=6)
+        ax.text(0.5, -0.02, nm(int(ys[idx])), transform=ax.transAxes,
+                ha="center", va="top", fontsize=5.5)
         ax.set_xticks([]), ax.set_yticks([])
         if r == 0:
             ax.set_title(cols[0], fontsize=6.5)
-    fig.suptitle("class-activation maps", fontsize=6.5)
-    fig.tight_layout()
-    fig.savefig(os.path.join(out, f"cam_{cell}.png"), dpi=150)
+    # Packed, as for the bank: the images ARE the content, and at column width
+    # every point of padding is a point they do not get. The per-panel labels
+    # are drawn as annotations rather than xlabels precisely so that no axes
+    # space is reserved for them.
+    fig.subplots_adjust(left=0.005, right=0.995, top=0.955, bottom=0.028,
+                        wspace=0.03, hspace=0.20)
+    fig.savefig(os.path.join(out, f"cam_{cell}.png"), dpi=300)
     plt.close(fig)
 
 
