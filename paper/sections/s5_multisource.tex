@@ -132,11 +132,27 @@ read signs from them.
 
 \subsection{Two classifiers: decision-level fusion}\label{sec:decisionfusion}
 Multi-classifier fusion is a different level again, and the rule was not
-derived there. Using trained checkpoints from the CIFAR-100 5\% cells and
-no further training, we average class posteriors for every pair of arms and
-record the gain over the better single arm together with the pair's
-disagreement rate, the classical diversity measure
-\citep{brown2005diversity}. The self-supervised arm here is a
+derived there. From the CIFAR-100 5\% checkpoints, with no further training,
+we fuse every pair of arms $(i,j)$ by averaging their class posteriors, $p_{ij}(y \mid x) = \tfrac{1}{2}\bigl(p_i(y \mid x) + p_j(y \mid
+x)\bigr)$, and characterize each pair by three scalars on the test set
+$\mathcal{T}$: the \emph{gain} over the better single arm,
+\begin{equation}
+  g_{ij} \;=\; \mathrm{acc}(p_{ij}) \;-\; \max\bigl(\mathrm{acc}(p_i),\,
+  \mathrm{acc}(p_j)\bigr),
+  \label{eq:ensgaindef}
+\end{equation}
+the \emph{disagreement} rate, the classical diversity measure
+\citep{brown2005diversity},
+\begin{equation}
+  d_{ij} \;=\; \frac{1}{|\mathcal{T}|} \sum_{x \in \mathcal{T}}
+  \mathbf{1}\bigl[\, \hat{y}_i(x) \neq \hat{y}_j(x) \,\bigr],
+  \label{eq:disagree}
+\end{equation}
+where $\hat{y}_i(x) = \arg\max_y p_i(y \mid x)$, and the \emph{accuracy
+asymmetry} $a_{ij} = \lvert \mathrm{acc}(p_i) -
+\mathrm{acc}(p_j) \rvert$. Here $g_{ij}$ and $a_{ij}$ are accuracy points
+and $d_{ij}$ is a percentage of test images, so $\beta_d$ below converts
+one into the other. The self-supervised arm here is a
 50-epoch pre-training checkpoint rather than the 200- or 800-epoch ones of
 Section~\ref{sec:budget}, because this analysis needs two arms of
 \emph{matched accuracy} so that the asymmetry term does not dominate, and
@@ -146,15 +162,19 @@ longer-pre-trained arm would ensemble differently, and we have not
 measured that.
 
 The first thing the data say is a caution rather than a confirmation.
-Ensemble gain is well explained ($R^2 = 0.74$) by two terms, and the
-dominant one is not diversity:
+Least squares over the $n = 28$ pairs gives
 \begin{equation}
-  \mathrm{gain} \;=\; -2.74 \;+\; 0.089\,\mathrm{disagreement}
-                       \;-\; 0.341\,|\Delta_{\mathrm{acc}}|,
+  \hat{g}_{ij} \;=\; \beta_0 \;+\; \beta_d\, d_{ij} \;+\;
+  \beta_a\, a_{ij},
   \label{eq:ensgain}
 \end{equation}
-so pairing a strong arm with a weak one destroys the gain regardless of
-what either contributes. Restricting to pairs within one point of each
+with $\beta_0 = -2.74 \pm 0.48$, $\beta_d = +0.089 \pm 0.011$ and
+$\beta_a = -0.341 \pm 0.047$ ($R^2 = 0.74$, residual standard deviation
+$0.42$ points, every coefficient resolved at $\lvert t \rvert > 5$). Both terms matter, but the dominant one
+is not diversity: a one-point accuracy gap costs $\lvert \beta_a \rvert =
+0.34$ points of gain, which four points of extra disagreement are needed to
+recover. Pairing a strong arm with a weak one destroys the gain regardless
+of what either contributes. Restricting to pairs within one point of each
 other, where currency is actually the free variable, leaves the three
 pairs of Table~\ref{tab:ensemble}.
 

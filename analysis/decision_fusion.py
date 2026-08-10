@@ -90,12 +90,59 @@ def probs_for_cell(cell, device, batch=256):
     return np.stack(acc_p), y_ref
 
 
+
+def fit_gain_model(pairs):
+    """OLS of ensemble gain on disagreement and accuracy asymmetry.
+
+    Eq. (5) of the paper was fitted once, by hand, and reported without
+    uncertainty -- the only equation in the study with no script behind it.
+    It is refitted here from the released pair records, so a reader can
+    reproduce the coefficients and see how well determined they are.
+
+        g_ij = b0 + b_d * d_ij + b_a * a_ij
+
+    with g the gain over the better single arm (points), d the disagreement
+    rate (percent of test images on which the two arms predict different
+    classes) and a = |acc_i - acc_j| the accuracy asymmetry (points).
+    """
+    X = np.array([[1.0, r["disagreement"], abs(r["acc_a"] - r["acc_b"])]
+                  for r in pairs])
+    y = np.array([r["gain_over_best"] for r in pairs])
+    n, k = X.shape
+    beta, *_ = np.linalg.lstsq(X, y, rcond=None)
+    resid = y - X @ beta
+    rss = float(resid @ resid)
+    tss = float(((y - y.mean()) ** 2).sum())
+    s2 = rss / (n - k)
+    se = np.sqrt(np.diag(s2 * np.linalg.inv(X.T @ X)))
+    return {"n": n, "r2": 1 - rss / tss, "residual_sd": float(np.sqrt(s2)),
+            "terms": {name: {"coef": float(b), "se": float(e), "t": float(b / e)}
+                      for name, b, e in zip(("intercept", "disagreement",
+                                             "acc_asymmetry"), beta, se)}}
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--cells", required=True, help="file, one cell name per line")
+    ap.add_argument("--cells", help="file, one cell name per line")
+    ap.add_argument("--fit", metavar="JSON",
+                    help="refit the gain model from an existing results file "
+                         "and print the coefficients; runs no networks")
     ap.add_argument("--out", default="results/decision_fusion.json")
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     a = ap.parse_args()
+
+    if a.fit:
+        with open(a.fit) as f:
+            r = fit_gain_model(json.load(f)["pairs"])
+        print(f"n = {r['n']}   R^2 = {r['r2']:.3f}   "
+              f"residual SD = {r['residual_sd']:.3f} points")
+        for name, t in r["terms"].items():
+            print(f"  {name:<14s} {t['coef']:+8.4f} +- {t['se']:.4f}  "
+                  f"(t = {t['t']:+.2f})")
+        return
+
+    if not a.cells:
+        ap.error("--cells is required unless --fit is given")
     cells = [l.strip() for l in open(a.cells) if l.strip() and not l.startswith("#")]
     dev = torch.device(a.device)
 
