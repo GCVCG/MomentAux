@@ -133,19 +133,29 @@ dominant one is not diversity:
 \end{equation}
 so pairing a strong arm with a weak one destroys the gain regardless of
 what either contributes. Restricting to pairs within one point of each
-other, where currency is actually the free variable, leaves three:
+other, where currency is actually the free variable, leaves the three
+pairs of Table~\ref{tab:ensemble}.
 
-\begin{center}\scriptsize
-\begin{tabular}{@{}P{0.34\columnwidth}rr@{}}
+\begin{table}[t]
+\caption{Decision-level fusion on CIFAR-100 at 5\%, restricted to pairs whose
+two arms are within one accuracy point of each other so that the information
+source, rather than an accuracy gap, is what differs. Gain is over the better
+single arm; disagreement is the fraction of test images on which the two arms
+predict different classes. Averaging posteriors requires no further training.}
+\label{tab:ensemble}
+\centering\scriptsize
+\setlength{\tabcolsep}{2.6pt}
+\zebra{2}
+\begin{tabular}{@{}P{0.42\columnwidth}rr@{}}
 \toprule
 Pair & Gain~\up & Disagreement \\
 \midrule
-Prior + SimCLR (50 ep) & $+1.20$ & 47.2\% \\
+Prior + SimCLR (50 ep)            & $+1.20$ & 47.2\% \\
 SimCLR (50 ep) + prior, wide bank & $+1.13$ & 47.2\% \\
-Prior + prior, wide bank & $-0.04$ & 28.1\% \\
+Prior + prior, wide bank          & $-0.04$ & 28.1\% \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
 Two models built on the same knowledge source disagree on 28\% of test
 images and ensembling them buys nothing; pair either with a

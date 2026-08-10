@@ -43,8 +43,10 @@ def main():
         r = json.load(f)
     pairs = list(PAIR_LABEL)
 
+    # Column width (3.33in), panels STACKED: authored at the width it is
+    # placed at, so the font sizes below are what the reader sees.
     fig, (ax, ax2) = plt.subplots(
-        1, 2, figsize=(7.0, 2.5), gridspec_kw={"width_ratios": [1.55, 1.0]})
+        2, 1, figsize=(3.33, 3.5), gridspec_kw={"height_ratios": [1.45, 1.0]})
 
     # ---- (a) normalized agreement, all four measures ----------------------
     x = np.arange(len(pairs))
@@ -55,15 +57,15 @@ def main():
         ax.bar(x + (k - 1.5) * w, vals, w, label=name, color=colors[k],
                edgecolor="white", linewidth=0.4)
     ax.axhline(1.0, color="#b0413e", lw=1.0, ls="--", zorder=0)
-    ax.text(len(pairs) - 0.42, 1.02, "same-seed level", color="#b0413e",
-            fontsize=6.5, va="bottom", ha="right")
+    ax.text(len(pairs) - 0.45, 1.03, "same-seed level", color="#b0413e",
+            fontsize=6, va="bottom", ha="right")
     ax.set_xticks(x)
-    ax.set_xticklabels([PAIR_LABEL[p] for p in pairs], fontsize=7)
-    ax.set_ylabel("agreement / own seed-to-seed\nagreement", fontsize=7.5)
-    ax.set_ylim(0, 1.35)
-    ax.tick_params(labelsize=7)
-    ax.legend(fontsize=6.2, ncol=2, frameon=False, loc="upper right")
-    ax.set_title("(a) do they change the same things?", fontsize=8, loc="left")
+    ax.set_xticklabels([PAIR_LABEL[p] for p in pairs], fontsize=6.5)
+    ax.set_ylabel("agreement / own seed-to-seed\nagreement", fontsize=7)
+    ax.set_ylim(0, 1.42)
+    ax.tick_params(labelsize=6.5)
+    ax.legend(fontsize=5.6, ncol=2, frameon=False, loc="upper right")
+    ax.set_title("(a) do they change the same things?", fontsize=7.5, loc="left")
     for s in ("top", "right"):
         ax.spines[s].set_visible(False)
 
@@ -75,14 +77,14 @@ def main():
     y = np.arange(len(arms))
     ax2.barh(y, n_fixed, 0.55, color="#468faf", edgecolor="white", linewidth=0.4)
     for i, (n, d) in enumerate(zip(n_fixed, deltas)):
-        ax2.text(n + 40, i, f"{n:.0f}  ({d:+.1f} pts)", va="center", fontsize=6.8)
+        ax2.text(n + 45, i, f"{n:.0f} ({d:+.1f})", va="center", fontsize=6)
     ax2.set_yticks(y)
-    ax2.set_yticklabels([names[a] for a in arms], fontsize=7)
-    ax2.set_xlabel("test images fixed vs. the shared baseline", fontsize=7.5)
+    ax2.set_yticklabels([names[a] for a in arms], fontsize=6.5)
+    ax2.set_xlabel("test images fixed vs. the shared baseline", fontsize=7)
     ax2.set_xlim(0, max(n_fixed) * 1.55)
-    ax2.tick_params(labelsize=7)
+    ax2.tick_params(labelsize=6.5)
     ax2.invert_yaxis()
-    ax2.set_title("(b) how much they change", fontsize=8, loc="left")
+    ax2.set_title("(b) how much they change", fontsize=7.5, loc="left")
     for s in ("top", "right"):
         ax2.spines[s].set_visible(False)
 

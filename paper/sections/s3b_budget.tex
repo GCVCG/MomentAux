@@ -117,9 +117,18 @@ budget response is backbone-dependent.
 \subsection{A second population, and the account that
 failed}\label{sec:budget:tin}
 Repeating the comparison on Tiny-ImageNet gives the same ordering at every
-matched fraction:
+matched fraction (Table~\ref{tab:budgetpop}).
 
-\begin{center}\scriptsize
+\begin{table}[t]
+\caption{The prior minus a $5\times$-budget SimCLR initialization, on both
+populations, under DeiT augmentation on ViT-tiny. Positive means the free
+prior wins. The ordering tracks the data fraction, not the absolute image
+count: $5{,}000$ images is 10\% of CIFAR-100 but 5\% of Tiny-ImageNet, and
+the two disagree there while agreeing at every matched fraction.}
+\label{tab:budgetpop}
+\centering\scriptsize
+\setlength{\tabcolsep}{2.6pt}
+\zebra{2}
 \begin{tabular}{@{}lrrr@{}}
 \toprule
 Prior $-$ SimCLR-800 & 5\% & 10\% & 25\% \\
@@ -130,7 +139,7 @@ Tiny-ImageNet  & $-1.35$ & $-0.31$ & $+1.71$ \\
 verdict & comparator & level & prior \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
 \noindent The comparator wins at 5\% on both ($3.9$ and $3.7$ standard
 errors), the two are level at 10\% on both, and the prior wins at 25\% on

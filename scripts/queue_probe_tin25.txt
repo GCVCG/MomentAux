@@ -1,0 +1,1 @@
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagdeitsslbudget_simclr800_vit_tin_25pct.yaml --run runs/diagdeitsslbudget_simclr800_vit_tin_25pct --ckpt best.pt

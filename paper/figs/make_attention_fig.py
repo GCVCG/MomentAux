@@ -35,16 +35,17 @@ def main():
         r = json.load(f)
     ref = uniform_distance()
 
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.6), sharey=True)
+    fig, axes = plt.subplots(2, 1, figsize=(3.33, 3.9), sharex=True, sharey=True)
     for ax, key, title in (
         (axes[0], "block_mean", "(a) mean over all heads"),
-        (axes[1], "block_min_head", "(b) the most local head in each block"),
+        (axes[1], "block_min_head", "(b) most local head per block"),
     ):
         ax.axhline(ref, color="#333", lw=0.9, ls=":", zorder=0)
-        ax.text(0.15, ref + 0.03, "uniform attention", fontsize=6.5, color="#333")
+        ax.text(0.15, ref + 0.03, "uniform attention", fontsize=6, color="#333")
         ax.axvline(TAP, color="#b0413e", lw=0.8, ls="--", alpha=0.45, zorder=0)
-        ax.text(TAP - 0.15, 2.63, "tap", fontsize=6.5, color="#b0413e",
-                ha="right", rotation=90, va="bottom")
+        if key == "block_min_head":      # label it once; the line is in both
+            ax.text(TAP - 0.18, 2.62, "tap", fontsize=6, color="#b0413e",
+                    ha="right", rotation=90, va="bottom")
         for label in ("baseline", "simclr", "prior"):
             if label not in r["arms"]:
                 continue
@@ -55,15 +56,17 @@ def main():
             x = np.arange(1, m.size + 1)
             ax.plot(x, m, marker=marker, ms=3.2, lw=1.3, color=colour, label=name)
             ax.fill_between(x, m - sd, m + sd, color=colour, alpha=0.15, lw=0)
-        ax.set_xlabel("transformer block", fontsize=7.5)
-        ax.set_title(title, fontsize=8, loc="left")
-        ax.tick_params(labelsize=7)
+        if key == "block_min_head":
+            ax.set_xlabel("transformer block", fontsize=7)
+        ax.set_title(title, fontsize=7.5, loc="left")
+        ax.tick_params(labelsize=6.5)
         ax.set_xticks(range(1, 13, 2))
         for s in ("top", "right"):
             ax.spines[s].set_visible(False)
-    axes[0].set_ylabel("mean attention distance\n(patch units)", fontsize=7.5)
+    for a_ in axes:
+        a_.set_ylabel("attn. distance", fontsize=7)
     axes[0].set_ylim(2.55, 4.45)
-    axes[0].legend(fontsize=6.4, frameon=False, loc="lower right")
+    axes[0].legend(fontsize=6, frameon=False, loc="lower right")
 
     fig.tight_layout()
     out = os.path.join(HERE, "attention_locality.pdf")

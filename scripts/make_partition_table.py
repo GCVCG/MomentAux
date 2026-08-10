@@ -83,7 +83,10 @@ def main():
           r" ImageNet stages were run at full data only. The relabeled controls"
           r" (CIFAR-100-super, Tiny-ImageNet-20, -20b, -super, -semantic) and the"
           r" multi-source views (EuroSAT-MS, So2Sat SAR/optical/both) reuse their"
-          r" parent's indices exactly, so they share its row.}")
+          r" parent's indices exactly, so they share its row. ciFAIR-100"
+          r" \citep{barz2020cifair} is not listed: it replaces the CIFAR-100"
+          r" \emph{test} set only, as a check that low-data gains are not"
+          r" memorized train/test duplicates, and has no training partition.}")
     print(r"\label{tab:partitions}")
     print(r"\centering\scriptsize")
     print(r"\setlength{\tabcolsep}{3.4pt}")
@@ -119,12 +122,6 @@ def main():
         print(f"{domain} & {label} \\citep{{{cite}}} & {ncls} & {px} & "
               + " & ".join(cells) + r" \\")
 
-    print(r"\midrule")
-    print(r"\multicolumn{9}{@{}p{0.97\textwidth}@{}}{\footnotesize ciFAIR-100"
-          r" \citep{barz2020cifair} is a drop-in replacement for the CIFAR-100"
-          r" \emph{test} set only, used to check that low-data gains are not"
-          r" memorized train/test duplicates; it has no training partition of its"
-          r" own.} \\")
     print(r"\bottomrule")
     print(r"\end{tabular}")
     print(r"\end{table*}")
