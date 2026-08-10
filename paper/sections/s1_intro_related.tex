@@ -133,33 +133,18 @@ methods.
     honest costs attached.
 \end{enumerate}
 
-\paragraph{Takeaways.} For a reader who reads no further:
+\paragraph{Takeaways.}
 \begin{enumerate}
-  \item \textbf{Measure the currency, not the method.} A linear
-    evaluation of each source \emph{alone} predicts whether combining
-    them will stack, do nothing, or hurt. Sources whose feature gains are
-    close are substitutes, however different their machinery
-    (Section~\ref{sec:fusion}).
-  \item \textbf{Never fuse a shaping prior into a strong
-    initialization.} The tax is feature-side and proportional to what the
-    initialization already supplied: $-17$ points where ImageNet transfer
-    is worth the most, and indistinguishable from zero on
-    histopathology, where it is worth least (Section~\ref{sec:taxsub}).
-  \item \textbf{Modern augmentation does not replace structure, it
-    amplifies it.} The same recipe that makes $2\times$-compute
-    contrastive pre-training nearly redundant makes the free prior worth
-    $1.4$--$2.4\times$ more, because the two supply different currencies
-    (Section~\ref{sec:stack}).
-  \item \textbf{Attention's deficit grows with model scale.} $+13.0$ for
-    ViT-S/16 and $+26.0$ for ViT-B/16 at $224$\,px, and still $+3.2$ after
-    1.28M images, where our ResNet-18 is neutral ($+0.04$). Scaling the
-    model does not remove the need for the prior; it increases it
-    (Section~\ref{sec:scale}).
-  \item \textbf{Declare the comparator's budget, or the conclusion is
-    about the budget.} SimSiam appears to learn nothing at its published
-    budget and gains $+4.3$ at four times that; two of our own accuracy
-    claims did not survive the same test and are restated as cost claims
-    (Section~\ref{sec:budget}).
+  \item Measure each source's currency alone, and the outcome of fusing
+    them is known before training (Section~\ref{sec:fusion}).
+  \item Never fuse a shaping prior into a strong initialization: the tax
+    scales with what the initialization was worth (Section~\ref{sec:taxsub}).
+  \item Modern augmentation does not replace structure, it amplifies it
+    $1.4$--$2.4\times$ (Section~\ref{sec:stack}).
+  \item Attention's feature deficit grows with model scale rather than
+    shrinking (Section~\ref{sec:scale}).
+  \item A comparator's budget is part of the claim; two of ours did not
+    survive raising it (Section~\ref{sec:budget}).
 \end{enumerate}
 
 %% ---------------------------------------------------------------------

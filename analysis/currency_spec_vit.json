@@ -1,0 +1,15 @@
+{
+  "_design": "ViT-tiny, CIFAR-100 @10%, ONE shared baseline. The only thing that varies across arms is which information source was fused in, so any difference in WHAT they fix is attributable to the source.",
+  "_predictions_recorded_before_running": {
+    "same_currency_pair": "prior|simclr -- these tie end-to-end (29.74 vs 29.77), have near-equal feature gain (14.85 vs 13.46), and their combination is neutral (29.93). If 'same currency' is real, they should fix OVERLAPPING images and learn SIMILAR representations: fixed-similarity and CKA-similarity HIGH.",
+    "different_currency_pair": "prior|augmentation -- these STACK (the prior's gain grows 1.6x under DeiT augmentation). If 'different currency' is real, they should fix DIFFERENT images: fixed-similarity and CKA-similarity LOWER than the same-currency pair.",
+    "band": "S(prior,simclr) - S(prior,augmentation) > 0 on the fixed-set measure. No magnitude is predicted; the measure is new and has no prior scale.",
+    "falsifier": "S(prior,augmentation) >= S(prior,simclr) => 'same currency' does not show up in WHICH images are fixed or WHICH representations are learned, and the taxonomy's mechanism rests on the equality of G magnitudes alone. That would have to be said in the paper."
+  },
+  "baseline": {"cell": "diagvit_none_10pct", "config": "configs/diagnostics/diagvit_none_10pct.yaml"},
+  "arms": {
+    "prior":        {"cell": "diagvit_aux_10pct",         "config": "configs/diagnostics/diagvit_aux_10pct.yaml"},
+    "simclr":       {"cell": "diagsslvit_simclr_10pct",   "config": "configs/diagnostics/diagsslvit_simclr_10pct.yaml"},
+    "augmentation": {"cell": "diagdeit_none_10pct",       "config": "configs/diagnostics/diagdeit_none_10pct.yaml"}
+  }
+}

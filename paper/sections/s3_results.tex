@@ -260,6 +260,46 @@ noting, because the auxiliary weight decays to exactly zero well before
 training ends: what the prior changes is where the representation
 settles, not what the loss is pulling on at the finish.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/attention_locality.pdf}
+\caption{What the prior gives a small transformer: locality. Mean
+attention distance per block, ViT-tiny on CIFAR-100 at 10\%, three seeds
+(band: $\pm$1 SD). The dotted line is the distance a \emph{uniform}
+attention map would give on this $8\times8$ token grid ($4.14$ patch
+units), computed rather than assumed. The baseline sits on that line at
+every depth: trained from scratch on 5{,}000 images it never learns to
+attend locally. The prior pulls the middle blocks well below it, most
+sharply \emph{upstream} of the tap where its target is imposed, and its
+most local head reaches $2.80$. A SimCLR initialization at $2\times$ the
+compute produces the same effect, more weakly.}
+\label{fig:attention}
+\end{figure}
+The same question can be put to the backbone where the prior matters
+most, and there the answer is unusually legible. A vision transformer has
+no built-in notion that nearby patches belong together; the standard
+diagnostic for whether it has learned one is mean attention distance, the
+average distance between a query patch and the patches it attends to.
+Fig.~\ref{fig:attention} measures it for ViT-tiny at CIFAR-100 10\%. The
+baseline's heads sit at $3.79$--$4.21$ patch units across all twelve
+blocks, straddling the $4.14$ that uniform attention would give: on
+5{,}000 images it never discovers locality at any depth. Adding the prior
+moves the middle blocks to $3.26$--$3.58$ and its most local head to
+$2.80$. The prior does not merely improve the features; it supplies the
+spatial inductive bias the architecture lacks, which is what a
+convolutional backbone gets for free and is why the same intervention is
+worth several times more here.
+
+We had predicted this effect in the \emph{early} blocks, decaying with
+depth, and that is not what happened: at block~1 the ordering is nominally
+reversed, the effect peaks at blocks~3--7, and the curves rejoin by
+block~11. The location is interpretable after the fact, since the target
+is regressed from block~8 and the locality appears in the blocks that feed
+it, but we did not predict it and record it as a missed call on a held
+prediction rather than as a confirmation. A SimCLR initialization produces
+the same signature at about half the depth-integrated magnitude, which is
+consistent with the two being substitutes on this backbone.
+
 We are deliberate about how far the qualitative evidence goes. Maps of
 individual images (Appendix~\ref{app:explain}) show the prior arm
 concentrating on contours and texture boundaries where the baseline's are
@@ -413,6 +453,57 @@ Table~\ref{tab:taxonomy} states the taxonomy compactly. Its practical
 force is that the fusion outcome can be anticipated \emph{before}
 training: measure (or look up) what each source contributes at the feature
 level, and same-currency pairs will not add.
+
+\subsection{Same currency, same images}\label{sec:samecurrency}
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/currency_evidence.pdf}
+\caption{Currency tested directly rather than inferred from magnitudes.
+All arms are ViT-tiny on CIFAR-100 at 10\% with one shared baseline, so
+the only thing that varies is the fused source. \textbf{(a)} agreement
+between two interventions in \emph{which} test images they fix and
+\emph{which} representations they learn, each normalized by that
+intervention's own seed-to-seed agreement, so $1.0$ means the two sources
+differ no more than two seeds of one of them. Four measures are shown
+because they do not agree on the size of the effect. \textbf{(b)} the
+number of images each intervention fixes: the two same-currency sources
+fix all but one the same number.}
+\label{fig:currency}
+\end{figure}
+Everything above infers currency from the \emph{magnitude} of a source's
+feature gain. That is indirect: two sources could each add fourteen points
+while improving entirely different images, and calling them the same
+currency would then be an artifact of comparing scalars. The claim can be
+tested directly, and we recorded the prediction before running it.
+
+Take three interventions on one backbone, one dataset and one baseline
+(ViT-tiny, CIFAR-100 at 10\%): the prior, a SimCLR initialization, and
+DeiT-strength augmentation. The taxonomy calls the first two the same
+currency (they tie end to end, their feature gains are close, and their
+combination is neutral) and calls the prior and augmentation different
+currencies (they stack). If that is right, the first pair should fix the
+same test images and learn more similar representations than the second.
+The confound is that easy images are fixed by everything, so we normalize
+every cross-intervention agreement by that intervention's own agreement
+across seeds, which is the most same-currency comparison available.
+
+The prediction held on all four measures (Fig.~\ref{fig:currency}). The
+prior and SimCLR fix $1793$ and $1794$ test images respectively, and their
+normalized agreement on \emph{which} images is $1.13$ against $0.72$ for
+the prior with augmentation; centred kernel alignment between their
+representations gives $0.85$ against $0.54$. A value above one is worth
+stating plainly: for the question of which images get fixed, it matters
+less whether you used a fixed spectral target or contrastive
+pre-training than which seed you used. That is what a substitute is.
+
+Two honest qualifications. Augmentation fixes far fewer images ($1057$),
+and the Jaccard measure penalizes a small set for being small; on the
+size-robust overlap coefficient the separation shrinks to $1.08$ against
+$0.97$, so part of the headline gap is a magnitude effect and only the
+representation-level measure separates the pairs decisively. And this is
+one cell on one backbone; it corroborates the taxonomy where the taxonomy
+already had its cleanest end-to-end evidence, rather than testing it
+somewhere new.
 
 \emph{Takeaway.} What a source is worth depends on which currency is
 scarce, not on how modern the source is: the same free prior is the most
