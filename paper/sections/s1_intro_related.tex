@@ -133,19 +133,16 @@ methods.
     honest costs attached.
 \end{enumerate}
 
-\paragraph{Takeaways.}
-\begin{enumerate}
-  \item Measure each source's currency alone, and the outcome of fusing
-    them is known before training (Section~\ref{sec:fusion}).
-  \item Never fuse a shaping prior into a strong initialization: the tax
-    scales with what the initialization was worth (Section~\ref{sec:taxsub}).
-  \item Modern augmentation does not replace structure, it amplifies it
-    $1.4$--$2.4\times$ (Section~\ref{sec:stack}).
-  \item Attention's feature deficit grows with model scale rather than
-    shrinking (Section~\ref{sec:scale}).
-  \item A comparator's budget is part of the claim; two of ours did not
-    survive raising it (Section~\ref{sec:budget}).
-\end{enumerate}
+In one line, what the grid says: measure each source's currency alone and
+the result of fusing them is known in advance
+(Section~\ref{sec:fusion}); never pour a shaping prior into a strong
+initialization, because the tax scales with what that initialization was
+worth (Section~\ref{sec:taxsub}); modern augmentation does not replace
+structure but amplifies it (Section~\ref{sec:stack}); attention's feature
+deficit grows with model scale rather than shrinking
+(Section~\ref{sec:scale}); and a comparator's budget is part of the claim,
+since two of ours did not survive raising it
+(Section~\ref{sec:budget}).
 
 %% ---------------------------------------------------------------------
 \section{Related work}\label{sec:related}
