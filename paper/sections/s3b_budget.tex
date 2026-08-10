@@ -88,13 +88,16 @@ so without qualification.
 Leaving the attention comparison at $2\times$ while raising the
 convolutional one to $5\times$ would reproduce exactly the asymmetry this
 section exists to remove, so we ran it there too. Against ViT-tiny under the
-DeiT recipe, $5\times$ SimCLR gives $29.97$, $40.57$ and $55.85$ at 5, 10
-and 25\%, against the prior's $28.89$, $41.29$ and $57.32$. The comparator
-\emph{wins} at 5\% by $1.08$ ($2.0$ standard errors), the two are level at
-10\% ($+0.71$, $1.2$), and the prior wins at 25\% by $1.47$ ($7.2$). The
+DeiT recipe, $5\times$ SimCLR gives $30.45$, $40.57$ and $55.85$ at 5, 10
+and 25\%, against the prior's $28.87$, $41.29$ and $57.32$. The comparator
+\emph{wins} at 5\% by $1.57$ ($3.9$ standard errors, six seeds), the two
+are level at 10\% ($+0.71$, $1.2$), and the prior wins at 25\% by $1.47$
+($7.2$). The
 prior is not overturned on attention as it is on convolutions, but the
 honest form of the claim names its budget: at $2\times$ the prior leads at
-every fraction, and at $5\times$ only from about 10\% upward.
+every fraction, and at $5\times$ only in the higher-data band.
+Section~\ref{sec:budget:tin} shows the same boundary on a second
+population.
 
 The shape of that result contradicted a prediction we had recorded before
 running it, and the error is diagnostic rather than embarrassing. We
@@ -109,26 +112,55 @@ budget response is backbone-dependent.
 
 \subsection{A second population, and the account that
 failed}\label{sec:budget:tin}
-The claim has to name its population as well as its budget. Repeating the
-comparison on Tiny-ImageNet gives $19.81$ and $27.73$ at 5 and 10\% against
-the prior's $18.46$ and $27.43$: at $5\times$ the comparator is ahead at
-5\% by $1.35$ ($3.7$ standard errors) and level at 10\%, so on that dataset
-the prior leads nowhere we measured. At $2\times$ it leads on both
-populations ($16.67$ and $25.45$ against $18.46$ and $27.43$). What we are
-willing to claim is therefore that a fixed spectral target beats contrastive
-pre-training on small attention models under a modern augmentation recipe
-\emph{at comparable cost}, and that five times the pre-training erases that
-lead entirely on Tiny-ImageNet while leaving it intact above ${\sim}10\%$ of
-CIFAR-100.
+Repeating the comparison on Tiny-ImageNet gives the same ordering at every
+matched fraction:
 
-We had expected the two populations to line up by image count, since the
-CIFAR-100 ordering moves from comparator-ahead at 2{,}500 images to
-prior-ahead at 12{,}500. They do not. At a matched 5{,}000 images CIFAR-100
-is level while Tiny-ImageNet has the comparator ahead by $3.7$ standard
-errors, and Tiny-ImageNet favours the comparator at every matched count.
-Both cells landed inside the bands we had recorded in advance, but the
-reasoning that produced those bands is wrong, and we would rather report
-that than let a band hit stand in for a confirmed mechanism.
+\begin{center}\scriptsize
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Prior $-$ SimCLR-800 & 5\% & 10\% & 25\% \\
+\midrule
+CIFAR-100      & $-1.57$ & $+0.71$ & $+1.47$ \\
+Tiny-ImageNet  & $-1.35$ & $-0.31$ & $+1.71$ \\
+\midrule
+verdict & comparator & level & prior \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The comparator wins at 5\% on both ($3.9$ and $3.7$ standard
+errors), the two are level at 10\% on both, and the prior wins at 25\% on
+both ($7.2$ and $5.1$). So at five times the comparator's pre-training
+budget the prior leads in the higher-data band and loses in the scarcer one,
+and that pattern is not specific to a dataset.
+
+Getting there cost us a prediction and an account, and both are worth
+reporting. Having measured only 5 and 10\% on Tiny-ImageNet, where the
+comparator was ahead and level, we wrote that the prior led nowhere on that
+population and that the two datasets told different stories. We then
+predicted the 25\% cell at $40$--$44$, explicitly against our own method.
+It landed at $36.53$: the prior wins by $1.71$, our band missed low by
+$3.5$, and the falsifier we had recorded for that cell fired. The tin
+envelope has a crossover after all, and the ``different stories'' reading
+was an artifact of a two-point grid, which is the same error this section
+has already documented once.
+
+The account we had proposed also fails, and its replacement is what the
+matched-fraction table shows. We had expected the two populations to line up
+by \emph{image count}. They do not: at a matched 5{,}000 images CIFAR-100 is
+level while Tiny-ImageNet has the comparator ahead. They line up by
+\emph{fraction} instead. Five thousand images is 10\% of CIFAR-100 but 5\%
+of Tiny-ImageNet, so matching on image count compares different points on
+two different learning curves. What determines which source wins is where a
+cell sits on its own dataset's curve, not how many images it holds.
+
+One measurement in this pass we report without explaining. At
+Tiny-ImageNet 25\%, four times the pre-training made the comparator
+\emph{worse}: $38.48$ at $2\times$ against $36.53$ at $5\times$, a drop of
+$1.95 \pm 0.42$. It is the only cell in the study where extra pre-training
+budget costs accuracy, and it echoes our earlier finding that
+DeiT-strength contrastive views also hurt. We note it rather than fit an
+explanation to one cell.
 
 \subsection{What the budget actually buys}\label{sec:budget:features}
 The comparison so far is end-to-end, while the taxonomy is a claim about

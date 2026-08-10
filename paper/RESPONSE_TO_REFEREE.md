@@ -192,13 +192,15 @@ Three consequences, and we accept all of them.
    **wins at 5%** (−1.08, 2.0 SEM), the two are level at 10%, and the prior
    wins at 25% (+1.47, 7.2 SEM). The attention claim therefore survives, but
    we now state it with its budget attached: the prior leads at every
-   fraction at 2×, and from about 10% upward at 5%.
+   fraction at 2×, and only in the higher-data band at 5×.
 
-   Repeating it on Tiny-ImageNet narrows the claim further: at 5× the
-   comparator is ahead at 5% (3.7 SEM) and level at 10%, so on that dataset
-   the prior leads nowhere we measured, while at 2× it leads on both
-   populations. The manuscript now states the modern-recipe claim with both
-   its budget and its population attached.
+   Repeating it on Tiny-ImageNet at 5, 10 and 25% gives the same ordering
+   at every matched fraction as CIFAR-100: the comparator wins at 5% (3.9
+   and 3.7 SEM), the two are level at 10%, and the prior wins at 25% (7.2
+   and 5.1 SEM). We report that we first measured only 5 and 10% there,
+   concluded the populations told different stories, predicted the 25% cell
+   against our own method, and were wrong by 5.1 SEM — the same two-point
+   error the budget envelope itself was run to avoid.
 
    We also record that this contradicted our own pre-registered prediction —
    we expected 25% to be the cell that flipped and it was 5% — and why: the
