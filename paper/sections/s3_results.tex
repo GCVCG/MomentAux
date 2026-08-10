@@ -131,8 +131,39 @@ above it, where it predicts only that the term is small, $102/166 =
 a recurring group carries one signature, $G$ clearly positive while
 $\Delta$ is negative at ${\geq}20\%$ data on Food-101 and PathMNIST,
 ``better features, worse accuracy at sufficiency''.
-Appendix~\ref{app:exceptions} lists the largest-magnitude exceptions
-individually.
+Table~\ref{tab:exceptions} lists the largest-magnitude exceptions
+individually, in the main text rather than an appendix, because where an
+account fails is part of what it claims.
+
+\begin{table}[t]
+\caption{The ten largest-magnitude resolvable exceptions. Five share the
+``better features, worse accuracy at sufficiency'' signature ($G$ clearly
+positive, $\Delta$ negative, top block); two are PathMNIST cells whose
+linear evaluation is a known compressed measuring stick on that dataset;
+three are small-magnitude singletons.}
+\label{tab:exceptions}
+\centering\scriptsize
+\setlength{\tabcolsep}{2.6pt}
+\zebra{2}
+\begin{tabular}{@{}lllrrrr@{}}
+\toprule
+Dataset & Backbone & Cell & Base & $\Delta$ & $G$ & Readout \\
+\midrule
+Food-101 & R18 & mag3@50\% & 71.8 & $-1.30$ & $+4.66$ & $-5.96$ \\
+Food-101 & R18 & mag6o@50\% & 71.8 & $-0.91$ & $+4.97$ & $-5.88$ \\
+Food-101 & MNet & aux@50\% & 55.1 & $-0.23$ & $+3.70$ & $-3.93$ \\
+PathMNIST & MNet & aux@20\% & 89.0 & $-0.48$ & $+1.88$ & $-2.36$ \\
+PathMNIST & R18 & mag3@50\% & 89.8 & $-1.36$ & $+0.71$ & $-2.07$ \\
+\midrule
+PathMNIST & R18 & mag6o@1\% & 80.8 & $+5.80$ & $+9.90$ & $-4.10$ \\
+PathMNIST & R18 & mag3@1\% & 80.8 & $+5.62$ & $+9.60$ & $-3.98$ \\
+\midrule
+DTD & ViT & deit-aux@50\% & 14.2 & $+17.30$ & $+14.73$ & $+2.57$ \\
+CIFAR-100 & R50 & L3@2\% & 13.1 & $-0.95$ & $-2.96$ & $+2.01$ \\
+CIFAR-100 & R18 & L4-$\lambda.3$@50\% & 71.8 & $-0.73$ & $-0.21$ & $-0.52$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 Table~\ref{tab:robust} reports what that number does and does not survive.
 It is not an artifact of where the resolvability threshold was set: the
@@ -159,8 +190,8 @@ sits \emph{below} its own end-to-end accuracy, so we treat its $G$ as
 unreliable rather than the account as refuted there, but we report both
 failures rather than excluding the datasets. We do not
 explain this cluster; we name it as the law's known boundary
-(Section~\ref{sec:limits}) and list every exception in
-Appendix~\ref{app:exceptions}.
+(Section~\ref{sec:limits}), and the released audit script enumerates
+every exception, of which Table~\ref{tab:exceptions} gives the largest.
 
 \subsection{Prediction, not description}\label{sec:lawpredict}
 Three pre-registered episodes distinguish the law from a post-hoc fit.
@@ -201,6 +232,45 @@ as on the data: at the same Tiny-ImageNet cell, ResNet-18 carries
 $G = +2.67$ while MobileNetV3 carries $G = +0.01 \pm 0.23$, a measured
 zero on the weaker network, so ``how much a prior can add'' is not a
 dataset property but a (dataset, architecture) property.
+
+\subsection{What the prior leaves in the representation}\label{sec:imprint}
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs_explain/heatmaps_auxmag_5pct_sched0.png}
+\caption{The spectral imprint at the tap, CIFAR-100 at 5\%. Columns:
+input, the fixed moment target, and the tapped-stage energy of the
+baseline and prior arms. Over the \emph{whole} test set the alignment
+between tapped features and the target is $+0.215$ for the baseline and
+$+0.525$ for the prior arm; the per-row values are printed beneath each
+map. The four rows are \emph{selected} cases where the prior arm predicts
+correctly and the baseline does not, so they illustrate the alignment
+difference rather than sample it, and only the test-set-wide figure
+should be read as evidence.}
+\label{fig:heatmap}
+\end{figure}
+$G$ is a number, and it is worth seeing what in the representation it
+corresponds to. The prior's target is a fixed bank
+(Fig.~\ref{fig:bank}), and its imprint survives to the end of training:
+at the CIFAR-100 5\% cell, where the feature gap is largest on this
+dataset ($+6.3$ points), the alignment between tapped features and the
+bank's oriented-energy target measured over the whole test set is
+$+0.525$ for the prior arm against $+0.215$ for the baseline
+(Fig.~\ref{fig:heatmap}). That it survives at all is the part worth
+noting, because the auxiliary weight decays to exactly zero well before
+training ends: what the prior changes is where the representation
+settles, not what the loss is pulling on at the finish.
+
+We are deliberate about how far the qualitative evidence goes. Maps of
+individual images (Appendix~\ref{app:explain}) show the prior arm
+concentrating on contours and texture boundaries where the baseline's are
+diffuse, but those panels are selected on cases the prior gets right and
+the baseline wrong, so they illustrate rather than demonstrate. A t-SNE
+of frozen penultimate features shows the same direction and is honest
+about its size: the silhouette score over all classes moves only from
+$-0.072$ to $-0.064$, so the embedding is \emph{not} visibly better
+clustered, and a $+6.3$-point feature gap need not be legible in two
+projected dimensions. The alignment statistic and the linear evaluation
+are the measurements; the pictures are illustrations of them.
 
 %% ---------------------------------------------------------------------
 \section{Fusion outcomes: stack, substitute, tax}\label{sec:fusion}

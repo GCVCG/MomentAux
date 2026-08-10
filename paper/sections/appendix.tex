@@ -4,52 +4,25 @@
 \section*{Appendix}
 \noindent The appendices hold the material a reader may want to check but
 which would interrupt the argument. Appendix~\ref{app:envelopes} gives the
-complete measured envelopes behind the summary tables of
-Section~\ref{sec:grid}; Appendix~\ref{app:law} the component curves ($G$
-and readout) that the law decomposes; Appendix~\ref{app:exceptions} every
-one of the ten sign-law violations, individually; Appendix~\ref{app:controls}
+self-supervised margin at every measured fraction;
+Appendix~\ref{app:law} the component curves ($G$
+and readout) that the law decomposes; Appendix~\ref{app:controls}
 the controls cited in passing in the main text;
 Appendix~\ref{app:domains} the per-domain notes, including the PathMNIST
 confound; Appendix~\ref{app:datasets} the dataset table;
 Appendix~\ref{app:repro} the reproduction commands and released artifacts;
-and Appendix~\ref{app:explain} the explainability panels.
+and Appendix~\ref{app:explain} illustrative panels for the feature effect
+measured in Section~\ref{sec:imprint}.
 
-\section{Full envelopes}\label{app:envelopes}
+\section{The self-supervised margin}\label{app:envelopes}
 
-Tables~\ref{tab:appenv} and \ref{tab:appssl} give the two envelopes the
-main text summarizes: the champion prior's gain at every measured fraction
-on both convolutional and attention backbones, and the margin of a
-$2\times$-compute SimCLR initialization over that prior. Both are the raw
-material for Fig.~\ref{fig:envelopes}, and every cell in them is a paired
-difference against its own baseline arm under the frozen recipe.
-
-\begin{table}[t]
-\caption{Complete measured envelopes for the champion prior ($\Delta$ vs.\
-shared baseline; bold = 10 seeds per arm). Blank = not measured. ViT rows
-are CIFAR-100 unless marked tin (Tiny-ImageNet), whose fractions are
-1, 2, 5, 10, 15, 25 and 100\%.}
-\label{tab:appenv}
-\centering\scriptsize
-\setlength{\tabcolsep}{1.7pt}
-\zebra{4}
-\begin{tabular}{@{}lrrrrrr@{}}
-\toprule
- & \multicolumn{3}{c}{ResNet-18~\up} & \multicolumn{3}{c}{ViT-tiny~\up} \\
-\cmidrule(lr){2-4}\cmidrule(l){5-7}
-Frac. & C100 & C10 & Tin & C100 & +DeiT & Tin \\
-\midrule
-1\%   & $\mathbf{+1.42}$ & $\mathbf{+6.37}$ & $+1.49$ & $+1.35$ & $+3.20$ & $+1.39$ \\
-2\%   & $+2.50$ & $\mathbf{+6.66}$ & $+1.81$ & $+3.25$ & $+6.01$ & $+3.29$ \\
-3\%   & $+3.68$ & $+5.38$ & -- & $+6.21$ & $+9.48$ & -- \\
-5\%   & $\mathbf{+5.15}$ & $+4.41$ & $\mathbf{+2.12}$ & $+9.35$ & $+16.34$ & $+6.77$ \\
-7\%   & $+4.87$ & $+2.21$ & -- & $+10.99$ & $+18.69$ & -- \\
-10\%  & $\mathbf{+3.75}$ & $+1.09$ & $+1.65$ & $+13.26$ & $+21.00$ & $+9.15$ \\
-15\%  & $+2.55$ & $-0.66$ & -- & $+14.44$ & $+24.59$ & $+10.73$ \\
-25\%  & $+0.25$ & $-0.83$ & $+0.10$ & $+13.67$ & $+25.05$ & $+10.48$ \\
-100\% & $+0.08$ & $-0.26$ & $-0.42$ & $+9.88$ & $+13.86$ & $+7.17$ \\
-\bottomrule
-\end{tabular}
-\end{table}
+The prior's own envelopes are in the main text
+(Tables~\ref{tab:envelope}, \ref{tab:domainenv} and
+\ref{tab:vitenvelope}). Table~\ref{tab:appssl} gives the remaining
+envelope those tables summarize in prose: the margin of a
+$2\times$-compute SimCLR initialization over the prior at every measured
+fraction. Every entry is a paired difference against a shared baseline
+arm under the frozen recipe.
 
 \begin{table}[t]
 \caption{SimCLR initialization ($2\times$ compute) minus the prior
@@ -102,38 +75,6 @@ Tiny-ImageNet the same crossing finds two real, opposing effects
 cancel on the diagonal; $G$ comparisons in the paper therefore always fix
 the evaluation space.
 
-\section{Sign-law exceptions}\label{app:exceptions}
-
-\begin{table}[t]
-\caption{All ten resolvable sign-law violations at the current audit.
-Five share the ``better features, worse accuracy at sufficiency''
-signature (top block); two are PathMNIST@1\% cells whose linear evaluation is a
-known compressed measuring stick on that dataset; three are
-small-magnitude singletons.}
-\label{tab:exceptions}
-\centering\scriptsize
-\setlength{\tabcolsep}{2.6pt}
-\zebra{2}
-\begin{tabular}{@{}lllrrrr@{}}
-\toprule
-Dataset & Backbone & Cell & Base & $\Delta$ & $G$ & Readout \\
-\midrule
-Food-101 & R18 & mag3@50\% & 71.8 & $-1.30$ & $+4.66$ & $-5.96$ \\
-Food-101 & R18 & mag6o@50\% & 71.8 & $-0.91$ & $+4.97$ & $-5.88$ \\
-Food-101 & MNet & aux@50\% & 55.1 & $-0.23$ & $+3.70$ & $-3.93$ \\
-PathMNIST & MNet & aux@20\% & 89.0 & $-0.48$ & $+1.88$ & $-2.36$ \\
-PathMNIST & R18 & mag3@50\% & 89.8 & $-1.36$ & $+0.71$ & $-2.07$ \\
-\midrule
-PathMNIST & R18 & mag6o@1\% & 80.8 & $+5.80$ & $+9.90$ & $-4.10$ \\
-PathMNIST & R18 & mag3@1\% & 80.8 & $+5.62$ & $+9.60$ & $-3.98$ \\
-\midrule
-DTD & ViT & deit-aux@50\% & 14.2 & $+17.30$ & $+14.73$ & $+2.57$ \\
-CIFAR-100 & R50 & L3@2\% & 13.1 & $-0.95$ & $-2.96$ & $+2.01$ \\
-CIFAR-100 & R18 & L4-$\lambda.3$@50\% & 71.8 & $-0.73$ & $-0.21$ & $-0.52$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
 \section{Selected controls}\label{app:controls}
 
 \paragraph{Contamination.} Re-evaluating the low-data CIFAR-100 cells on
@@ -185,48 +126,49 @@ in the label space; they are listed at the foot of that table and are what
 make the dataset-identity count in Table~\ref{tab:audit} exceed the number
 of image sources.
 
-Table~\ref{tab:maindatasets} in the main text lists every dataset,
-grouped by domain, with its training-set size, class count and the
-resolution at which it was trained. We do not repeat it here.
-
 \section{Reproducibility}\label{app:repro}
 
 One entry point trains any cell (\texttt{train.py --config <cell> --seed
 N}); one command regenerates every table from run records; one command
 re-runs the sign-law audit. Subset indices, filter-bank fingerprints, and
-per-run environment records (library versions, worker counts) are
-committed. Training refuses to overwrite a completed cell, holds an
+per-run environment records (library versions, worker counts) are released
+with the runs they describe. Training refuses to overwrite a completed cell, holds an
 exclusive per-run lock (two of this study's incident classes made these
 guards necessary), and writes checkpoints atomically; mirrors are
 verified by \emph{loading and evaluating} checkpoints against their
 recorded accuracies, not by file listing. The full harness, configs,
 subsets, banks, runner, aggregation, audit, is released with the paper at the repository cited on the title page; an archival DOI will be minted on acceptance.
 
-\section{Explainability analyses}\label{app:explain}
+\section{Illustrative panels}\label{app:explain}
 
-The prior's mechanism is visible directly in the learned features
-(Fig.~\ref{fig:explain}, CIFAR-100 @5\% champion pair). Class-activation
-maps of the prior arm concentrate on object contours and texture
-boundaries where the baseline's maps at this data scale are diffuse;
-tapped-stage feature energy shows the same contrast; and t-SNE of
-penultimate features shows visibly tighter class structure, the
-qualitative face of the $+6.3$-point feature gap at this cell.
-Quantitatively, the cosine alignment between tapped features and the
-bank's oriented-energy targets is $0.53$ for the prior arm against
-$0.22$ for the baseline: the auxiliary loss leaves a measurable spectral
-imprint on the representation even though its weight has decayed to zero
-by the end of training.
+The measurements behind the prior's feature effect are the alignment
+statistic and the linear evaluation reported in
+Section~\ref{sec:imprint}; the two panels here illustrate them.
+Fig.~\ref{fig:cam} is \emph{selected} on test images the prior arm
+classifies correctly and the baseline does not, so it shows what the
+difference looks like where it is present, not how often it is present.
+Fig.~\ref{fig:tsne} is not selected, and is included precisely because it
+shows the effect less clearly than the numbers do.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.48\linewidth]{figs_explain/cam_auxmag_5pct_sched0.png}\hfill
-\includegraphics[width=0.48\linewidth]{figs_explain/heatmaps_auxmag_5pct_sched0.png}\\[2pt]
-\includegraphics[width=0.48\linewidth]{figs_explain/tsne_auxmag_5pct_sched0.png}\hfill
-\includegraphics[width=0.48\linewidth]{figs_explain/bank_gabor.png}
-\caption{Explainability panels for the CIFAR-100 @5\% champion pair.
-Top: class-activation maps (left) and tapped-stage feature-energy
-heatmaps (right), baseline vs.\ prior arm. Bottom left: t-SNE of frozen
-penultimate features. Bottom right: the pinned 8-pair oriented-energy
-bank that serves as the auxiliary target.}
-\label{fig:explain}
+\includegraphics[width=0.86\linewidth]{figs_explain/cam_auxmag_5pct_sched0.png}
+\caption{Class-activation maps, CIFAR-100 at 5\%, for four selected test
+images (prior arm correct, baseline wrong). The prior arm's evidence
+concentrates on object contours and texture boundaries where the
+baseline's is diffuse at this data scale.}
+\label{fig:cam}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs_explain/tsne_auxmag_5pct_sched0.png}
+\caption{t-SNE of frozen penultimate test features, first eight classes,
+baseline (left) and prior arm (right) at the CIFAR-100 5\% cell. Reported
+with its own limitation: the silhouette score over all classes at full
+dimension moves only from $-0.072$ to $-0.064$, so this projection does
+\emph{not} show the $+6.3$-point feature gap that the linear evaluation
+measures at this cell. We include it because a reader would otherwise
+reasonably wonder whether it does.}
+\label{fig:tsne}
 \end{figure}
