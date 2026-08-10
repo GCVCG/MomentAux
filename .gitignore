@@ -25,8 +25,7 @@ scripts/queue_sf_*.txt
 scripts/sync_sf_*.sh
 logs/sync_sf_*.log
 logs/so2sat_push.log
-# build artefacts inside the assembled submission package
-paper/submission/*.aux
-paper/submission/*.log
-paper/submission/*.blg
-paper/submission/*.out
+# no separate submission copy: paper/ is the single source, and a duplicate
+# tree drifts from it the moment either side is edited. See
+# paper/SUBMISSION_FILES.md for what to upload.
+paper/submission/
