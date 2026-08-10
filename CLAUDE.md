@@ -3691,3 +3691,39 @@ ported vs corrected and why.
   measured per cell in the smoke pass and the slot count set from it, so the
   two queues are submitted SEPARATELY -- a mixed queue would have to be sized
   for its heaviest member, which is exactly how the OOM incident happened.
+
+- *** IMAGENET ENVELOPE, FIRST LANDINGS (2026-08-10, 3v3 each, 60/252 done,
+  0 failures). Scored against the bands recorded before any cell ran:
+      cell            base     aux    delta
+      in64_r18  @1%    5.47    7.37   +1.90 +-0.06
+      in64_r18  @2%   13.19   14.78   +1.59 +-0.12
+      in64_r18  @3%   18.94   20.33   +1.38 +-0.12
+      in64_vit  @1%    1.88    4.02   +2.14 +-0.06
+      in64_vit  @2%    2.63    6.43   +3.80 +-0.07
+      in64_vit  @3%    3.43    8.19   +4.76 +-0.17
+      in64_mnet @1%    4.33    3.82   -0.52 +-0.11
+      in64_mnet @2%    7.61    7.62   +0.01 +-0.13
+      in64_mnet @3%    9.68   10.17   +0.49 +-0.13
+  (E2) HIT: Delta(r18@1%) = +1.90, band +0.5..+2.5. The premise holds too --
+    base 5.47 sits far below the crossing bracket [31.8,40.3], so the sign
+    law demands NEGATIVE readout here; the G probes will test it.
+  (E1) TRENDING AGAINST ME, and I am recording that now rather than after
+    the fact. I predicted a UNIMODAL envelope with an interior peak at
+    5-20%. r18 is MONOTONE FALLING so far (+1.90/+1.59/+1.38 at 1/2/3%
+    toward the measured +0.04 at 100%), i.e. the peak is at or below 1%.
+    If 5/7/10% continue the fall, the recorded falsifier ("monotone in
+    fraction, no interior peak") FIRES and the interior-peak claim must be
+    scoped to <=100k images. NOTE this is not the same as the envelope
+    disappearing: a peak at or below the smallest runnable fraction is what
+    C10 shows too (plateau at 1-2%, falling after). What would be wrong is
+    my having predicted WHERE it peaks at 1000-way.
+  (E3) ON TRACK: ViT is RISING steeply (+2.14/+3.80/+4.76) and already
+    above the conv envelope at every fraction, as predicted. The >=5% cells
+    test the +6..+14 band. The attention signature is stark at 1000 classes:
+    vit baselines 1.88/2.63/3.43 are barely above chance (0.1%) and the
+    prior more than doubles them.
+  mnet: -0.52/+0.01/+0.49 at 1/2/3%. No band was recorded (its 100% base
+    sits INSIDE the crossing bracket, where the law makes no sign call), so
+    this is data, not a scored prediction. The early 2-seed "aux below
+    baseline" I declined to score at 1% survives at 3v3 as a small real
+    negative, and it turns positive by 3%.
