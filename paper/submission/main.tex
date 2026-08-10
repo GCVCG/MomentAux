@@ -79,7 +79,7 @@ compute overhead, against the data-driven alternatives (SimCLR, SimSiam and
 DINO pre-training, ImageNet transfer, heavy augmentation, learned teachers)
 under one frozen recipe with committed subsets: 13 datasets, 9 backbones,
 500 to 1.28M images, 32 to 224\,px, and 5.7M to 86M parameters
-($2{,}891$ cells). Every pairwise combination is measured too, and all
+($2{,}894$ cells). Every pairwise combination is measured too, and all
 follow one rule: different-\emph{currency} sources stack (prior with
 augmentation), same-currency sources substitute (prior against effective
 self-supervised pre-training), and fusing into an already-informed
@@ -106,7 +106,7 @@ backbone family's feature gain from baseline heights alone. All artifacts are re
 \end{graphicalabstract}
 
 \begin{highlights}
-\item A 2,891-cell, cost-normalized benchmark of data-efficiency interventions
+\item A 2,894-cell, cost-normalized benchmark of data-efficiency interventions
 \item Source asymmetry predicts when a second sensor pays, and when it does not
 \item A measurable rule predicts stacking, substitution or interference
 \item Free spectral prior beats 2$\times$-compute SSL on ViTs under modern recipes
@@ -161,7 +161,7 @@ reported in this paper.
 \section*{Data availability}
 All artifacts needed to reproduce every number in this paper are released
 at \url{https://github.com/GCVCG/MomentAux}: the training and
-evaluation harness (configs for all 2{,}891 cells, the committed subset
+evaluation harness (configs for all 2{,}894 cells, the committed subset
 indices, the fingerprinted filter banks, the single training entry point,
 the aggregation and audit scripts), and the complete result tables in open
 formats. The tagged release additionally carries the \emph{raw} evidence as
@@ -169,7 +169,7 @@ downloadable assets: every run's \texttt{final.json} record (configuration
 as executed, accuracy, parameter and floating-point-operation accounting,
 environment), every linear-probe record, every per-epoch training curve, and
 the campaign logs, with \texttt{SHA256} checksums. The latter comprise a per-cell
-table (\texttt{all\_results.csv}: 2{,}891 rows with dataset, backbone,
+table (\texttt{all\_results.csv}: 2{,}894 rows with dataset, backbone,
 intervention, fraction, seed count, accuracy mean and standard deviation,
 probe accuracy, paired baseline, $\Delta$, its standard error, $G$ and
 readout), a configuration-by-fraction view

@@ -7,7 +7,7 @@ compute overhead, against the data-driven alternatives (SimCLR, SimSiam and
 DINO pre-training, ImageNet transfer, heavy augmentation, learned teachers)
 under one frozen recipe with committed subsets: 13 datasets, 9 backbones,
 500 to 1.28M images, 32 to 224\,px, and 5.7M to 86M parameters
-($2{,}891$ cells). Every pairwise combination is measured too, and all
+($2{,}894$ cells). Every pairwise combination is measured too, and all
 follow one rule: different-\emph{currency} sources stack (prior with
 augmentation), same-currency sources substitute (prior against effective
 self-supervised pre-training), and fusing into an already-informed
