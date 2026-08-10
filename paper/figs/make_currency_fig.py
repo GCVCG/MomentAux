@@ -16,6 +16,7 @@ the result.
 """
 import json
 import os
+import sys
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -24,6 +25,9 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 SRC = os.path.join(ROOT, "results", "currency_vit_c100_10pct.json")
+
+sys.path.insert(0, HERE)
+import pubstyle as PS   # noqa: E402
 
 PAIR_LABEL = {
     "prior|simclr": "prior + SimCLR\n(same currency)",
@@ -45,29 +49,31 @@ def main():
 
     # Column width (3.33in), panels STACKED: authored at the width it is
     # placed at, so the font sizes below are what the reader sees.
+    PS.use()
     fig, (ax, ax2) = plt.subplots(
-        2, 1, figsize=(3.33, 3.5), gridspec_kw={"height_ratios": [1.45, 1.0]})
+        2, 1, figsize=(PS.COL, 3.5), gridspec_kw={"height_ratios": [1.45, 1.0]})
 
     # ---- (a) normalized agreement, all four measures ----------------------
     x = np.arange(len(pairs))
     w = 0.2
-    colors = ["#2a6f97", "#468faf", "#89c2d9", "#a9d6e5"]
+    # one ordered ramp around the shared blue: these are four measures of
+    # ONE quantity, not four arms, so they read as a family rather than
+    # borrowing the arm colours.
+    colors = ["#00548A", PS.OI["blue"], "#4C9FD4", PS.OI["sky"]]
     for k, (key, name) in enumerate(MEASURES):
         vals = [r["pairwise"][p][key] for p in pairs]
         ax.bar(x + (k - 1.5) * w, vals, w, label=name, color=colors[k],
                edgecolor="white", linewidth=0.4)
-    ax.axhline(1.0, color="#b0413e", lw=1.0, ls="--", zorder=0)
-    ax.text(len(pairs) - 0.45, 1.03, "same-seed level", color="#b0413e",
-            fontsize=6, va="bottom", ha="right")
+    ax.axhline(1.0, color=PS.ARM["prior"], lw=1.0, ls="--", zorder=0)
+    ax.text(len(pairs) - 0.45, 1.03, "same-seed level", color=PS.ARM["prior"],
+            fontsize=PS.SMALL, va="bottom", ha="right")
     ax.set_xticks(x)
-    ax.set_xticklabels([PAIR_LABEL[p] for p in pairs], fontsize=6.5)
-    ax.set_ylabel("agreement / own seed-to-seed\nagreement", fontsize=7)
+    ax.set_xticklabels([PAIR_LABEL[p] for p in pairs], fontsize=PS.SMALL)
+    ax.set_ylabel("agreement / own seed-to-seed\nagreement", fontsize=PS.LABEL)
     ax.set_ylim(0, 1.42)
-    ax.tick_params(labelsize=6.5)
-    ax.legend(fontsize=5.6, ncol=2, frameon=False, loc="upper right")
-    ax.set_title("(a) do they change the same things?", fontsize=7.5, loc="left")
-    for s in ("top", "right"):
-        ax.spines[s].set_visible(False)
+    ax.tick_params(labelsize=PS.TICK)
+    ax.legend(fontsize=PS.SMALL, ncol=2, frameon=False, loc="upper right")
+    PS.panel(ax, "(a) do they change the same things?")
 
     # ---- (b) how many images each fixes, and the shared part --------------
     arms = ["prior", "simclr", "augmentation"]
@@ -75,18 +81,17 @@ def main():
     n_fixed = [r["arms"][a]["n_fixed_mean"] for a in arms]
     deltas = [r["arms"][a]["delta"] for a in arms]
     y = np.arange(len(arms))
-    ax2.barh(y, n_fixed, 0.55, color="#468faf", edgecolor="white", linewidth=0.4)
+    ax2.barh(y, n_fixed, 0.55, color=[PS.ARM[a] for a in arms],
+         edgecolor="white", linewidth=0.4)
     for i, (n, d) in enumerate(zip(n_fixed, deltas)):
-        ax2.text(n + 45, i, f"{n:.0f} ({d:+.1f})", va="center", fontsize=6)
+        ax2.text(n + 45, i, f"{n:.0f} ({d:+.1f})", va="center", fontsize=PS.SMALL)
     ax2.set_yticks(y)
-    ax2.set_yticklabels([names[a] for a in arms], fontsize=6.5)
-    ax2.set_xlabel("test images fixed vs. the shared baseline", fontsize=7)
+    ax2.set_yticklabels([names[a] for a in arms], fontsize=PS.SMALL)
+    ax2.set_xlabel("test images fixed vs. the shared baseline", fontsize=PS.LABEL)
     ax2.set_xlim(0, max(n_fixed) * 1.55)
-    ax2.tick_params(labelsize=6.5)
+    ax2.tick_params(labelsize=PS.TICK)
     ax2.invert_yaxis()
-    ax2.set_title("(b) how much they change", fontsize=7.5, loc="left")
-    for s in ("top", "right"):
-        ax2.spines[s].set_visible(False)
+    PS.panel(ax2, "(b) how much they change")
 
     fig.tight_layout()
     out = os.path.join(HERE, "currency_evidence.pdf")

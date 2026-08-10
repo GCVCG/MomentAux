@@ -150,9 +150,9 @@ difference looks like where it is present, not how often it is present.
 Fig.~\ref{fig:tsne} is not selected, and is included precisely because it
 shows the effect less clearly than the numbers do.
 
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
-\includegraphics[width=0.86\linewidth]{figs_explain/cam_auxmag_5pct_sched0.png}
+\includegraphics[width=\linewidth]{figs_explain/cam_auxmag_5pct_sched0.png}
 \caption{Class-activation maps, CIFAR-100 at 5\%, for four selected test
 images (prior arm correct, baseline wrong). The prior arm's evidence
 concentrates on object contours and texture boundaries where the
@@ -160,7 +160,7 @@ baseline's is diffuse at this data scale.}
 \label{fig:cam}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=\linewidth]{figs_explain/tsne_auxmag_5pct_sched0.png}
 \caption{t-SNE of frozen penultimate test features, first eight classes,
