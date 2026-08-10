@@ -325,7 +325,17 @@ bistability, itself a finding, limits headline claims. PathMNIST's
 shifted test split confounds its high-data cells for every method. Linear
 evaluations lose interpretability at 100\% cells (the evaluation ceiling)
 and at ImageNet64
-are budget-bound by construction. One prior family (Gabor and moment energy)
+are budget-bound by construction. The two ImageNet stages were run at
+\emph{full data only}, so what we validate at scale is the law and the
+right flank, not the envelope: the peak location and the left-flank
+suppression that Section~\ref{sec:ownenvelope} establishes on eleven
+smaller populations are untested above $100$k images. That is a cost
+decision rather than a considered one, and it is the cheapest gap to
+close, since a $1\%$ ImageNet64 cell is $12{,}811$ images over $1000$
+classes, i.e.\ thirteen per class in a label space five times finer than
+anything else here, exactly the scarce, fine-grained corner where the
+readout term is largest and where our account is therefore easiest to
+falsify. One prior family (Gabor and moment energy)
 is tested as the knowledge source; the taxonomy predicts, but does not
 yet demonstrate, that other structural priors will slot into the same
 currency logic.
