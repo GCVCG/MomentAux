@@ -160,8 +160,7 @@ properties a controlled fusion study requires and which of them each line
 of work currently provides.
 
 \paragraph{Hand-crafted structure inside learned networks.}
-Fixed oriented filters predate deep learning as models of early visual
-cortex \citep{jones1987gabor} and as image descriptors
+Fixed oriented filters predate deep learning as image descriptors
 \citep{dalal2005hog}. Scattering networks showed that
 cascades of fixed wavelets rival learned features in small-data regimes
 \citep{bruna2013scattering}, and Gabor-structured
@@ -221,12 +220,14 @@ supplied, in proportion to how much that structure was worth
 That ViTs underperform without large data or heavy regularization is well
 documented \citep{dosovitskiy2021vit,touvron2021deit},
 and a family of remedies exists: distillation tokens
-\citep{touvron2021deit}, hierarchical and convolutional inductive biases
-\citep{liu2021swin}, and auxiliary self-supervised objectives, of which
-the fixed target studied here is one. That the deficit
-is representational rather than merely optimizational is supported by
-representation-level comparisons of attention and convolution
-\citep{raghu2021vision}. Our contribution
+\citep{touvron2021deit}; architectures that reintroduce the hierarchical,
+local inductive bias attention lacks, such as Swin \citep{liu2021swin},
+which we include as a backbone for that reason; and auxiliary
+self-supervised objectives trained jointly with the classifier, of which
+\citet{liu2021efficientvit} is the closest antecedent to this work --- a
+dense relative-localization task added for exactly this deficit, differing
+from ours in that its target is computed from the images themselves rather
+than pinned in advance. Our contribution
 to this literature is quantitative and comparative: we measure the deficit
 as a feature quantity ($G \approx 13$--$15$ points for ViT-tiny across
 $2.5$--$12.5$k images, roughly $2.3\times$ any convolutional backbone),

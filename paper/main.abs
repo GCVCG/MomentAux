@@ -1,6 +1,6 @@
-Fusing prior knowledge with data-driven learning is attractive precisely
-where data is scarce, yet no controlled account says when such fusion helps,
-is redundant, or harms. We present a
+Fusing prior knowledge with data-driven learning is attractive where data
+is scarce, yet no controlled account says when such fusion helps, is
+redundant, or harms. We present a
 benchmark that measures one fixed, hand-crafted source of knowledge, a
 pinned bank of Gabor targets injected only during training at $\sim$2\%
 compute overhead, against the data-driven alternatives (SimCLR, SimSiam and
@@ -9,11 +9,11 @@ under one frozen recipe with fixed subsets: 13 datasets, 9 backbones,
 500 to 1.28M images, 32 to 224\,px, and 5.7M to 86M parameters
 ($2{,}894$ configurations over $8{,}827$ runs). Every pairwise
 combination is measured, and all follow one rule at training time
-(decision-level fusion is a separate case, and behaves differently): different-\emph{currency} sources stack (prior with
-augmentation), same-currency sources substitute (prior against effective
-self-supervised pre-training), and fusing into an already-informed
-initialization interferes in proportion to what it carries (ImageNet
-transfer, up to $-17$ points). Because each source's currency is
+(decision-level fusion behaves differently): different-\emph{currency}
+sources stack (prior with augmentation), same-currency sources substitute
+(prior against effective self-supervised pre-training), and fusing into an
+already-informed initialization interferes in proportion to what it carries
+(ImageNet transfer, up to $-17$ points). Because each source's currency is
 measurable on frozen features beforehand, the outcome is predictable; we
 state this as a procedure. Two sensor tests bound it:
 splitting one instrument's bands pays at every data scale, whereas pairing

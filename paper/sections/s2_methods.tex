@@ -174,8 +174,8 @@ its standard views are its best shot at this scale.
 
 \subsection{Measuring features: linear evaluation}\label{sec:probe}
 The law needs a feature-side quantity, and we obtain it by \emph{linear
-evaluation} of frozen representations, the standard linear-probe
-protocol. For each trained
+evaluation} of frozen representations, the standard linear-probe protocol
+\citep{alain2016understanding}. For each trained
 checkpoint we freeze the network, extract penultimate features
 $z = \mathrm{pool}(f_L(x))$ for the full training split under the
 deterministic (no-augmentation) transform, and fit a multinomial logistic
@@ -461,13 +461,13 @@ passes and analysis. Because these small-image cells are dataloader-bound
 rather than compute-bound, we run two to three trainings per GPU, sized
 so that the heaviest cells still fit in memory.
 
-Aggregating the wall-clock recorded in all 8{,}827 retained run records, the
-study consumed \textbf{3{,}341 GPU-hours}: 2{,}901 on H100, 82 on H100~NVL and
-H200~NVL, and 356 on RTX 3090. Taking device thermal design power as an
+Aggregating the wall-clock recorded in all \computeRuns{} retained run records, the
+study consumed \textbf{\computeGpuHours{} GPU-hours}: \computeHhundred{} on H100, \computeNvl{} on H100~NVL and
+H200~NVL, and \computeAmpere{} on RTX 3090. Taking device thermal design power as an
 upper bound on draw, a data-center power usage effectiveness of $1.2$, and
 a Spanish grid carbon intensity of $0.17$\,kg\,CO$_2$eq per kWh, this
-corresponds to approximately $2{,}660$\,kWh and \textbf{450\,kg
-CO$_2$eq}, about $51$\,g CO$_2$eq per training run. We report this as an
+corresponds to approximately $\computeKwh$\,kWh and \textbf{\computeCarbon\,kg
+CO$_2$eq}, about $\computePerRun$\,g CO$_2$eq per training run. We report this as an
 order-of-magnitude accounting following the methodology of the Machine
 Learning Impact calculator \citep{lacoste2019quantifying}, not a
 measurement. Its known omissions should be read with it: it assumes
@@ -612,7 +612,7 @@ ViT-tiny trained from scratch gains $+9.9$ points from the prior even at
 \emph{full} CIFAR-100, a scale at which the ResNet backbones are
 neutral, and under the standard DeiT recipe the gains grow to
 $+25$ points, peaking later in the data axis. The best ViT number in the
-study, $75.3\%$ at full CIFAR-100, is DeiT augmentation \emph{plus} the
-prior, against $62.7\%$ for the recipe alone. Sections~\ref{sec:law} and
+study, $\vitBest\%$ at full CIFAR-100, is DeiT augmentation \emph{plus} the
+prior, against $\vitBestBase\%$ for the recipe alone. Sections~\ref{sec:law} and
 \ref{sec:scale} show this is a feature-side phenomenon that persists to
 ImageNet scale and grows with model size.

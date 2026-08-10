@@ -22,7 +22,19 @@ above the 1328x531 minimum) with:
 
     GA_SUBMISSION=1 python figs/make_graphical_abstract.py
 
-Verified against the journal guide on 2026-08-10: 28 pages (limit 10-35),
-50 references (limit 50), 243-word abstract (limit 250), 5 highlights at
-most 73 characters (limits 3-5 and 85). Suggested reviewers are not
-requested by this journal.
+Verified by `python paper/check_submission.py`, which is the authority here
+rather than this sentence. It checks the compiled PDF is present and not
+older than its sources, that `main.pdf` is not excluded by `.gitignore` (it
+was, which is why three submissions reached the referee without one), and
+every limit the guide sets: pages 10-35, at most 50 references, abstract at
+most 250 words, 3-5 highlights of at most 85 characters. Run it before
+uploading; it exits non-zero with `--strict`.
+
+Two companion checks are worth running with it:
+
+    python paper/check_citations.py     # uncited entries, missing keys, cap
+    python scripts/make_paper_numbers.py > paper/tables/numbers.tex
+
+The second regenerates the numbers the prose cites by macro, so a figure in
+the text cannot disagree with the table beside it. Suggested reviewers are
+not requested by this journal.
