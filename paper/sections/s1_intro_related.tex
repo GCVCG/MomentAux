@@ -129,7 +129,7 @@ of work currently provides.
 \paragraph{Hand-crafted structure inside learned networks.}
 Fixed oriented filters predate deep learning as models of early visual
 cortex \citep{jones1987gabor} and as image descriptors
-\citep{dalal2005hog,teague1980zernike}. Scattering networks showed that
+\citep{dalal2005hog}. Scattering networks showed that
 cascades of fixed wavelets rival learned features in small-data regimes
 \citep{bruna2013scattering}, and Gabor-structured
 convolutions have been used to regularize or cheapen early layers
@@ -144,7 +144,7 @@ than pay for it.
 
 \paragraph{Auxiliary targets, deep supervision, and distillation.}
 Regressing intermediate features onto targets is the mechanism of FitNets
-\citep{romero2015fitnets} and deep supervision; HOG
+\citep{romero2015fitnets} and deep supervision \citep{lee2015deeply}; HOG
 targets power MaskFeat's self-supervised pre-training
 \citep{wei2022maskfeat}. What distinguishes our setting is the
 \emph{fixedness and cost} of the target: no teacher network is trained, no
@@ -188,9 +188,8 @@ supplied, in proportion to how much that structure was worth
 That ViTs underperform without large data or heavy regularization is well
 documented \citep{dosovitskiy2021vit,touvron2021deit},
 and a family of remedies exists: distillation tokens
-\citep{touvron2021deit}, soft convolutional biases,
-compact hybrid designs, and auxiliary
-self-supervision. That the deficit
+\citep{touvron2021deit}, convolutional biases and hybrid designs, and
+auxiliary self-supervision. That the deficit
 is representational rather than merely optimizational is supported by
 representation-level comparisons of attention and convolution
 \citep{raghu2021vision}, and the broader observation that architecture
@@ -223,9 +222,9 @@ answerable at all.
 
 \paragraph{Spectral structure inside transformers.}
 A parallel line injects spectral structure into attention architectures:
-the Scattering Vision Transformer  performs
+a scattering-based transformer performs
 spectral decomposition with dual-tree complex wavelets inside the token
-mixer, and FViT  adds a \emph{learnable} Gabor filter
+mixer, and FViT \citep{shi2026fvit} adds a \emph{learnable} Gabor filter
 to focus attention across scales and orientations. These are
 architectural changes that persist at inference, and each is evaluated as
 a model proposal against published baselines. Our object is the
@@ -299,7 +298,7 @@ decomposition those authors formalize, not as an estimate of it.
 Two further connections position the predictor rather than the taxonomy.
 Predicting a downstream outcome from a cheap measurement, without training
 the combined system, is the programme of transferability estimation
-\citep{nguyen2020leep,you2021logme}, which scores a single pre-trained
+\citep{nguyen2020leep}, which scores a single pre-trained
 source; ours asks the same question of a \emph{pair}. And the challenge
 that programme raises for us is direct:
 \citet{newell2020useful} report that linear evaluation does not correlate
@@ -349,10 +348,10 @@ Line of work & \rotbox{one frozen recipe} & \rotbox{cost-normalized} &
   \rotbox{feature-side} & \rotbox{combinations} & \rotbox{predictive model} \\
 \midrule
 Fixed spectral filters in the forward path
-  \citep{bruna2013scattering,luan2018gaborcnn}
+  \citep{bruna2013scattering,luan2018gaborcnn,shi2026fvit}
   & \pmark & \xmark & \xmark & \xmark & \xmark \\
 Auxiliary and distillation targets
-  \citep{romero2015fitnets,wei2022maskfeat}
+  \citep{romero2015fitnets,lee2015deeply,wei2022maskfeat}
   & \pmark & \xmark & \pmark & \xmark & \xmark \\
 Self-supervised pre-training
   \citep{chen2020simclr,chen2021simsiam,caron2021dino}
@@ -417,8 +416,8 @@ data-efficiency interventions.
 
 \paragraph{Benchmark methodology.}
 Reality-check studies have repeatedly shown that uncontrolled recipes
-manufacture illusory progress,
-and reproducibility in ML remains fragile. We adopt
+manufacture illusory progress, and reproducibility in machine learning
+remains fragile. We adopt
 the strictest discipline we could operationalize: a single frozen recipe;
 committed per-subset indices so every intervention sees byte-identical
 images; numerically fingerprinted filter banks; deviations quarantined
