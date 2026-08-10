@@ -197,6 +197,11 @@ def target_alignment(base, aux, test_ds, device, n=512):
 # rather than promoting them to figure* matters for placement: full-width
 # floats this tall cannot be set near the text that discusses them.
 FIGW = 3.33
+# The bank is the one panel authored at the FULL text width: it is only ~2in
+# tall, so spanning both columns costs nothing in placement, while at column
+# width each of the 16 filters was under half an inch and unreadable. The tall
+# panels stay single-column for exactly the opposite reason.
+FIGW_WIDE = 6.86
 
 def denorm(x, dataset):
     mean, std = data_mod.STATS[dataset]
@@ -366,18 +371,19 @@ def fig_bank(out):
     stem = EnergyStem(feature_type="magnitude")
     even, odd = stem.even.squeeze(1), stem.odd.squeeze(1)   # (n_pairs, k, k)
     n = even.shape[0]
-    fig, axes = plt.subplots(2, n, figsize=(FIGW, FIGW * 0.34))
+    fig, axes = plt.subplots(2, n, figsize=(FIGW_WIDE, FIGW_WIDE * 0.30))
     lim = float(max(even.abs().max(), odd.abs().max()))
     for i in range(n):
         for r, bank in enumerate((even, odd)):
             ax = axes[r, i]
             ax.imshow(bank[i].numpy(), cmap="RdBu_r", vmin=-lim, vmax=lim)
             ax.set_xticks([]), ax.set_yticks([])
-        axes[0, i].set_title(f"pair {i}", fontsize=6)
-    axes[0, 0].set_ylabel("even", fontsize=6.5)
-    axes[1, 0].set_ylabel("odd", fontsize=6.5)
-    fig.suptitle(f"{n} complex-Gabor quadrature pairs; the aux target is\n"
-                 "the magnitude of each pair's response", fontsize=7)
+        axes[0, i].set_title(f"pair {i}", fontsize=8)
+    axes[0, 0].set_ylabel("even", fontsize=8.5)
+    axes[1, 0].set_ylabel("odd", fontsize=8.5)
+    fig.suptitle(f"energy-magnitude bank: {n} complex-Gabor quadrature pairs "
+                 "(the aux target is the magnitude of each pair's response)",
+                 fontsize=9)
     fig.tight_layout()
     fig.savefig(os.path.join(out, "bank_gabor.png"), dpi=150)
     plt.close(fig)

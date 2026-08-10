@@ -49,7 +49,9 @@ ROWS = [
     ("ImageNet scale", "ImageNet64",    "chrabaszcz2017downsampled", None,       "imagenet64", 1_281_167),
     ("",               "ImageNet-100",  "deng2009imagenet",        None,         "imagenet100",  126_689),
 ]
-SHOW = [1, 5, 10, 25]        # subset columns; 100% is the full split
+SHOW = [1, 2, 3, 5, 7, 10, 15, 20, 25, 50]   # every fraction the grid uses
+BATCH = 128   # frozen recipe, drop_last=True: a fraction yielding fewer than
+              # one full batch has an EMPTY loader and cannot be trained at all
 
 
 def load(prefix):
@@ -86,10 +88,16 @@ def main():
           r" parent's indices exactly, so they share its row. ciFAIR-100"
           r" \citep{barz2020cifair} is not listed: it replaces the CIFAR-100"
           r" \emph{test} set only, as a check that low-data gains are not"
-          r" memorized train/test duplicates, and has no training partition.}")
+          r" memorized train/test duplicates, and has no training partition."
+          r" Two kinds of blank are distinguished: $\times$ marks a fraction"
+          r" that \emph{cannot} be trained under the frozen recipe, because it"
+          r" yields fewer than one batch of 128 images and the loader is empty"
+          r" (the reason no dataset smaller than DTD has a 1\% cell); a dash"
+          r" marks a fraction that is runnable but that we did not run.}")
     print(r"\label{tab:partitions}")
     print(r"\centering\scriptsize")
-    print(r"\setlength{\tabcolsep}{3.4pt}")
+    print(r"\setlength{\tabcolsep}{1.9pt}")
+    print(r"\renewcommand{\cellalign}{r}")
     print(r"\zebra{3}")
     print(r"\begin{tabular}{@{}llrr" + "r" * (len(SHOW) + 1) + r"@{}}")
     print(r"\toprule")
@@ -117,8 +125,13 @@ def main():
         cells = []
         for p in SHOW:
             n = sizes.get(p)
-            cells.append("--" if n is None else f"{num(n)} ({n / ncls:.0f})")
-        cells.append(f"{num(train)} ({train / ncls:.0f})")
+            if n is not None:
+                cells.append(rf"\makecell[r]{{{num(n)}\\({n / ncls:.0f})}}")
+            elif round(train * p / 100) < BATCH:
+                cells.append(r"$\times$")      # under one batch: unrunnable
+            else:
+                cells.append("--")             # runnable, not run
+        cells.append(rf"\makecell[r]{{{num(train)}\\({train / ncls:.0f})}}")
         print(f"{domain} & {label} \\citep{{{cite}}} & {ncls} & {px} & "
               + " & ".join(cells) + r" \\")
 
