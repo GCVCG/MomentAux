@@ -23,5 +23,7 @@ as it also does for two trained classifiers. Underlying it is an empirical
 decomposition,
 $\Delta = G + \mathrm{readout}(\mathrm{base})$, whose sign holds on $79\%$
 of testable cells and which, registered in advance, called an unseen
-backbone family's feature gain from baseline heights alone. All artifacts are released at
+backbone family's feature gain from baseline heights alone. Project page:
+\href{https://amughrabi.github.io/MomentAux}{\texttt{amughrabi.github.io/\allowbreak MomentAux}};
+all artifacts at
 \href{https://github.com/GCVCG/MomentAux}{\texttt{github.com/\allowbreak GCVCG/MomentAux}}.
