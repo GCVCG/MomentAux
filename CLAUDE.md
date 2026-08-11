@@ -4673,3 +4673,82 @@ ported vs corrected and why.
   200-epoch checkpoints (the recorded G values are all 50-epoch), and D4, the
   label-space effect and the dense attention result must be re-scored. Their
   50-epoch values stand as the 1x arm, not as the headline.
+
+- *** L2 AT voc@10% — THE SCHEDULE MOVED THE BASELINE ENORMOUSLY AND DELTA
+  NOT AT ALL (2026-08-11, 3 seeds both arms; the 100% cells, which are the
+  pre-registered fork point, are still in flight so this is NOT a formal L2
+  scoring):
+        200e  none 18.42 +-0.05  aux 20.02 +-0.12  D +1.61 +-0.13
+         50e  none  7.23         aux  8.68         D +1.46 +-0.13
+      baseline  7.23 -> 18.42  = +155% relative
+      Delta    +1.46 -> +1.61  = +0.15 +-0.18 = 0.8 sigma (UNCHANGED)
+      Delta_rel  20.2% -> 8.7%
+  Quadrupling the schedule left absolute Delta statistically identical while
+  more than doubling the baseline, so RELATIVE gain fell by more than half.
+  That is the H-UNDERFIT signature exactly: the prior helps underfit models
+  and its value decays as the baseline strengthens -- the same behaviour as
+  every classification population measured.
+  CONSEQUENCE IF IT HOLDS AT 100%: the re-run CONFIRMS rather than overturns
+  the dense conclusions. The small dense Delta would be a property of the
+  prior on dense tasks, not of a weak recipe, and D4 survives on properly
+  trained models with the schedule objection REMOVED rather than merely
+  unaddressed. That is what the re-run buys in either branch, and it is why
+  it had to be run: L1 alone made the old evidence inadmissible without
+  saying which way the answer would go.
+  NOTE the two results are not in tension. L1 (+155% baseline) says the
+  50-epoch INSTRUMENT was bad; L2-at-10% says the CONCLUSION it produced was
+  nevertheless about right. Both had to be measured; neither implies the
+  other.
+
+- *** GPU UTILIZATION AUDIT — HALF THE ALLOCATED GPUs WERE IDLE, AND THE CAUSE
+  IS A DESIGN PROPERTY OF PER-WAVE LANES (2026-08-11, user: "are the gpus
+  fully utalized?"). Measured with nvidia-smi on every running node rather
+  than inferred from slot counts (these jobs are dataloader-bound, so a full
+  slot count does not imply a busy GPU):
+      as02r4b28   0% 0% 100% 100%      as05r5b31   0% 0% 100% 100%
+      as06r2b23   0% 0% 100% 100%   => 6 of 12 GPUs at 0%, 0 MiB
+  NOT a GPU-assignment bug (the launcher's `for g in 0 1 2 3` is correct). It
+  is an **END-OF-QUEUE DRAIN**: dense7 had 24 tasks and 24 slots, so each slot
+  took exactly one. The cheap voc@10% cells landed on the GPU0/GPU1 slots and
+  finished in ~40 min; those workers then found the list exhausted and EXITED,
+  while the 100%/pascalcontext cells on the GPU2/GPU3 slots kept the node.
+  Half of every node went dark with 216 tasks queued in a lane that could not
+  start.
+  THE GENERAL LESSON: a per-wave lane with its own short worklist GUARANTEES
+  this every time a wave ends. Long-lived lanes fed by a reconcile do not have
+  it. Waves are convenient to launch and structurally wasteful to finish.
+  *** THREE FIXES, and the first one contained the trap:
+  (1) FEEDING THE DRAINED LANE. dense7's counter had run to 138 on a 24-line
+      list (drained workers spinning on empty lines). Appending the grid
+      naively would have started the next claim at 139 and SILENTLY SKIPPED
+      the first ~114 appended tasks -- the 2026-08-03 skip incident exactly.
+      So the new worklist is 168 no-op pad lines followed by the 216 real
+      tasks, putting the work where the counter actually is. One node
+      recovered within seconds (GPUs 0/1 went 0% -> 82%/26%).
+      SAFE TO SHARE TASKS ACROSS LANES because train_dense.py carries BOTH
+      guards shipped after the wrong-epoch damage: final.json => SKIP, and a
+      non-blocking flock run lock that aborts a second trainer on the same
+      (config, seed) instead of racing it. Verified present before doing this,
+      not assumed.
+  (2) LONGEST-JOB-FIRST. The worklist was ordered cheap-fractions-first, which
+      GUARANTEES the tail: with 84 slots and 216 tasks the 100% cells are all
+      claimed last and then run for hours with most slots idle. The unclaimed
+      portion is now sorted 100% -> 1%, so the long poles start immediately and
+      cheap cells fill in around them; makespan ~= the longest single cell.
+      Both arms of a pair stay ADJACENT, which is the property the cheap-first
+      order was really protecting (a partial drain never leaves a one-armed
+      cell). Only lines ABOVE the counter were touched, so the SET of remaining
+      tasks is unchanged and a claim racing the swap can neither lose nor
+      duplicate a task -- asserted in the script, not argued.
+  (3) ONE LANE, ONE COUNTER. The 7 pending ms_dense8 jobs were cancelled and
+      resubmitted as ms_dense7. Two lanes over the same task set have separate
+      counters, so each would have re-claimed everything the other already ran
+      -- safe under the guards, but pure churn. slurm/bsc_dense8.sbatch stays
+      in the repo, unused, for the record.
+  POST-SURGERY INTEGRITY, verified rather than assumed: 384 lines = 168 pad +
+  216 tasks, 0 duplicate (config, seed) pairs, 72/72 configs covered.
+  WHAT COULD NOT BE FIXED: the allocation is 3 of 10 permitted nodes, and it is
+  NOT us hoarding -- account ub234 had exactly these 3 jobs running.
+  QOSGrpNodeLimit is a limit across EVERY user of the acc_resc QOS, so other
+  projects hold it. Holding our nodes with work queued beats draining them and
+  hoping to re-acquire.
