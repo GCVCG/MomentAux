@@ -1,0 +1,9 @@
+{
+  "_question": "Does the prior give ViT-tiny the spatial locality a small ViT fails to learn from 5000 images?",
+  "_prediction_recorded_before_running": "The prior's early blocks should show SMALLER mean attention distance than the baseline's (more local heads), and the gap should shrink with depth. FALSIFIER: the two curves coincide within seed spread at every block => the prior's ViT gain is not delivered through spatial locality, and the mechanism sentence in the paper must be softened to 'a feature deficit' without naming what kind.",
+  "arms": {
+    "baseline": {"cell": "diagvit_none_10pct", "config": "configs/diagnostics/diagvit_none_10pct.yaml"},
+    "prior":    {"cell": "diagvit_aux_10pct",  "config": "configs/diagnostics/diagvit_aux_10pct.yaml"},
+    "simclr":   {"cell": "diagsslvit_simclr_10pct", "config": "configs/diagnostics/diagsslvit_simclr_10pct.yaml"}
+  }
+}

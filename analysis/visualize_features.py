@@ -191,6 +191,18 @@ def target_alignment(base, aux, test_ds, device, n=512):
     return {t: sum(v) / len(v) for t, v in rs.items()}
 
 
+# Authored at the CAS single-COLUMN width, which is where these figures are
+# placed. Authoring wide (9-11.6in) and letting \includegraphics shrink into a
+# 3.33in column rendered 8pt labels at under 3pt. Keeping them single-column
+# rather than promoting them to figure* matters for placement: full-width
+# floats this tall cannot be set near the text that discusses them.
+FIGW = 3.33
+# The bank is the one panel authored at the FULL text width: it is only ~2in
+# tall, so spanning both columns costs nothing in placement, while at column
+# width each of the 16 filters was under half an inch and unreadable. The tall
+# panels stay single-column for exactly the opposite reason.
+FIGW_WIDE = 6.86
+
 def denorm(x, dataset):
     mean, std = data_mod.STATS[dataset]
     img = x.cpu() * torch.tensor(std).view(3, 1, 1) + torch.tensor(mean).view(3, 1, 1)
@@ -198,10 +210,17 @@ def denorm(x, dataset):
 
 
 def fig_tsne(models, loader, device, out, cell, n_classes, names=None):
+    """Two panels STACKED, single column: side by side at 3.33in each panel was
+    1.6in wide, too small to read a projection from, and the silhouette had to
+    be abbreviated to fit. Stacking gives each panel the full column width and
+    room for the statement that makes the panel scientific rather than
+    decorative -- the silhouette is computed on ALL classes in the FULL feature
+    space, not on the two projected dimensions being displayed."""
     from sklearn.manifold import TSNE
     from sklearn.metrics import silhouette_score
 
-    fig, axes = plt.subplots(1, 2, figsize=(11, 5.2))
+    fig, axes = plt.subplots(2, 1, figsize=(FIGW, FIGW * 1.02))
+    sils, handles = {}, None
     for ax, (name, (model, cfg)) in zip(axes, models.items()):
         feats, ys = penultimate(model, loader, device)
         # silhouette on the FULL feature space, ALL classes (the real statement)
@@ -212,21 +231,26 @@ def fig_tsne(models, loader, device, out, cell, n_classes, names=None):
                    random_state=0).fit_transform(feats[mask])
         for i, c in enumerate(keep_cls):
             m = ys[mask] == c
-            lbl = names[c] if names else f"class {c}"
-            ax.scatter(emb[m, 0], emb[m, 1], s=7, color=OKABE_ITO[i],
+            lbl = (names[c].replace("_", " ") if names else f"class {c}")
+            ax.scatter(emb[m, 0], emb[m, 1], s=3.5, color=OKABE_ITO[i],
                        label=lbl, linewidths=0)
-        kind = "aux" if cfg.get("moment_aux") else "baseline"
-        ax.set_title(f"{kind}: silhouette (all classes, full dim) = {sil:.3f}")
+        kind = "prior" if cfg.get("moment_aux") else "baseline"
+        sils[kind] = sil
+        ax.set_title(f"{kind}: silhouette (all classes, full dim) $=$ "
+                     f"{sil:+.3f}", fontsize=6.5, pad=2)
         ax.set_xticks([]), ax.set_yticks([])
-        for s in ax.spines.values():
-            s.set_alpha(0.25)
-    axes[0].legend(loc="best", fontsize=7, framealpha=0.6, handletextpad=0.2)
-    fig.suptitle(f"{cell}: penultimate test features, t-SNE "
-                 f"(first {n_classes} classes shown)")
-    fig.tight_layout()
-    fig.savefig(os.path.join(out, f"tsne_{cell}.png"), dpi=150)
+        for sp in ax.spines.values():
+            sp.set_alpha(0.25)
+        handles = ax.get_legend_handles_labels()
+
+    fig.legend(*handles, loc="lower center", ncol=4, fontsize=5.4,
+               frameon=False, handletextpad=0.15, columnspacing=0.8,
+               markerscale=2.2, bbox_to_anchor=(0.5, -0.005))
+    fig.subplots_adjust(left=0.02, right=0.98, top=0.955, bottom=0.115,
+                        hspace=0.16)
+    fig.savefig(os.path.join(out, f"tsne_{cell}.png"), dpi=300)
     plt.close(fig)
-    return sil
+    return sils.get("baseline", 0.0)
 
 
 @torch.no_grad()
@@ -262,8 +286,9 @@ def fig_heatmaps(models, test_ds, device, out, cell, dataset, loader,
     def nm(c):
         return names[c] if names else f"class {c}"
 
-    cols = ["input (true label)", "moment target", "baseline layer3", "aux layer3"]
-    fig, axes = plt.subplots(len(adv), 4, figsize=(11.5, 2.9 * len(adv)))
+    cols = ["input (true label)", "moment target", "baseline tap", "prior tap"]
+    fig, axes = plt.subplots(len(adv), 4,
+                             figsize=(FIGW, FIGW / 4 * 1.30 * len(adv)))
     axes = np.atleast_2d(axes)
     for r, idx in enumerate(adv):
         t = tgt[r].mean(0).cpu()
@@ -273,25 +298,24 @@ def fig_heatmaps(models, test_ds, device, out, cell, dataset, loader,
             ax = axes[r, c]
             if c == 0:
                 ax.imshow(denorm(xs[r], dataset))
-                ax.set_xlabel(nm(int(ys[idx])), fontsize=8)
+                ax.set_xlabel(nm(int(ys[idx])), fontsize=6)
             elif c == 1:
                 m = t.numpy()
-                ax.imshow((m - m.min()) / (m.ptp() + 1e-9), cmap="magma")
+                ax.imshow((m - m.min()) / (np.ptp(m) + 1e-9), cmap="magma")
             else:
                 m = maps[c].float().numpy()
-                ax.imshow((m - m.min()) / (m.ptp() + 1e-9), cmap="magma")
+                ax.imshow((m - m.min()) / (np.ptp(m) + 1e-9), cmap="magma")
                 r_t = _corr(maps[c], t)
                 pred = pb[idx] if c == 2 else pa[idx]
                 ok = "\u2713" if pred == ys[idx] else "\u2717"
-                ax.set_xlabel(f"pred: {nm(int(pred))} {ok}   r(target)={r_t:+.2f}",
-                              fontsize=8)
+                ax.set_xlabel(f"{nm(int(pred))} {ok}\n$r$={r_t:+.2f}",
+                              fontsize=5.5, linespacing=1.15)
             ax.set_xticks([]), ax.set_yticks([])
             if r == 0:
-                ax.set_title(cols[c], fontsize=9)
+                ax.set_title(cols[c], fontsize=6.5)
     fig.suptitle(
-        f"{cell} — rows: aux RIGHT / baseline WRONG.  Test-set mean alignment "
-        f"r(layer3, target): baseline {align['base']:+.3f}  vs  aux "
-        f"{align['aux']:+.3f}", fontsize=10)
+        f"test-set mean alignment $r$:  baseline {align['base']:+.3f}"
+        f"    prior {align['aux']:+.3f}", fontsize=6.5)
     fig.tight_layout()
     fig.savefig(os.path.join(out, f"heatmaps_{cell}.png"), dpi=150)
     plt.close(fig)
@@ -315,9 +339,10 @@ def fig_cam(models, test_ds, device, out, cell, dataset, loader,
     def nm(c):
         return names[c] if names else f"class {c}"
 
-    fig, axes = plt.subplots(len(adv), 3, figsize=(9, 2.9 * len(adv)))
+    fig, axes = plt.subplots(len(adv), 3,
+                             figsize=(FIGW, FIGW / 3 * 1.22 * len(adv)))
     axes = np.atleast_2d(axes)
-    cols = ["input (true label)", "baseline CAM", "aux CAM"]
+    cols = ["input (true label)", "baseline CAM", "prior CAM"]
     for col, (name, (model, cfg)) in enumerate(items, start=1):
         fmap = model.net.forward_features(model.stem(xs))
         pred = model.net.get_classifier()(model.net.global_pool(fmap)).argmax(1)
@@ -325,7 +350,7 @@ def fig_cam(models, test_ds, device, out, cell, dataset, loader,
         cam = torch.einsum("bchw,bc->bhw", fmap, w[pred])
         for r, idx in enumerate(adv):
             m = cam[r].float().cpu().numpy()
-            m = (m - m.min()) / (m.ptp() + 1e-9)
+            m = (m - m.min()) / (np.ptp(m) + 1e-9)
             m = np.array(torch.nn.functional.interpolate(
                 torch.tensor(m)[None, None], size=xs.shape[-2:],
                 mode="bilinear", align_corners=False)[0, 0])
@@ -333,44 +358,59 @@ def fig_cam(models, test_ds, device, out, cell, dataset, loader,
             ax.imshow(denorm(xs[r], dataset))
             ax.imshow(m, cmap="magma", alpha=0.5)
             p = int(pred[r]); ok = "\u2713" if p == ys[idx] else "\u2717"
-            ax.set_xlabel(f"pred: {nm(p)} {ok}", fontsize=8)
+            ax.text(0.5, -0.02, f"{nm(p)} {ok}", transform=ax.transAxes,
+                    ha="center", va="top", fontsize=5.5)
             ax.set_xticks([]), ax.set_yticks([])
             if r == 0:
-                ax.set_title(cols[col], fontsize=9)
+                ax.set_title(cols[col], fontsize=6.5)
     for r, idx in enumerate(adv):
         ax = axes[r, 0]
         ax.imshow(denorm(xs[r], dataset))
-        ax.set_xlabel(nm(int(ys[idx])), fontsize=8)
+        ax.text(0.5, -0.02, nm(int(ys[idx])), transform=ax.transAxes,
+                ha="center", va="top", fontsize=5.5)
         ax.set_xticks([]), ax.set_yticks([])
         if r == 0:
-            ax.set_title(cols[0], fontsize=9)
-    fig.suptitle(f"{cell}: CAMs on aux-right / baseline-wrong cases", fontsize=10)
-    fig.tight_layout()
-    fig.savefig(os.path.join(out, f"cam_{cell}.png"), dpi=150)
+            ax.set_title(cols[0], fontsize=6.5)
+    # Packed, as for the bank: the images ARE the content, and at column width
+    # every point of padding is a point they do not get. The per-panel labels
+    # are drawn as annotations rather than xlabels precisely so that no axes
+    # space is reserved for them.
+    fig.subplots_adjust(left=0.005, right=0.995, top=0.955, bottom=0.028,
+                        wspace=0.03, hspace=0.20)
+    fig.savefig(os.path.join(out, f"cam_{cell}.png"), dpi=300)
     plt.close(fig)
 
 
 def fig_bank(out):
-    """The prior itself: 9 quadrature pairs of the energy-magnitude bank."""
+    """The prior itself: the quadrature pairs of the energy-magnitude bank.
+
+    Single-column, and the panels are packed nearly edge to edge: at 3.33in
+    every point of inter-axes padding is a point the 11x11 kernels do not get,
+    and the kernels are the content. tight_layout is deliberately NOT used
+    here -- it reserves space for labels that the shared row/column headings
+    have already made unnecessary.
+    """
     from momentstem import EnergyStem
 
     stem = EnergyStem(feature_type="magnitude")
     even, odd = stem.even.squeeze(1), stem.odd.squeeze(1)   # (n_pairs, k, k)
     n = even.shape[0]
-    fig, axes = plt.subplots(2, n, figsize=(1.45 * n, 3.4))
+    fig, axes = plt.subplots(2, n, figsize=(FIGW, FIGW * 0.30))
     lim = float(max(even.abs().max(), odd.abs().max()))
     for i in range(n):
         for r, bank in enumerate((even, odd)):
             ax = axes[r, i]
             ax.imshow(bank[i].numpy(), cmap="RdBu_r", vmin=-lim, vmax=lim)
             ax.set_xticks([]), ax.set_yticks([])
-        axes[0, i].set_title(f"pair {i}", fontsize=8)
-    axes[0, 0].set_ylabel("even", fontsize=9)
-    axes[1, 0].set_ylabel("odd", fontsize=9)
-    fig.suptitle(f"energy-magnitude bank: {n} complex-Gabor quadrature pairs "
-                 "(magnitude of pair responses = the aux target)")
-    fig.tight_layout()
-    fig.savefig(os.path.join(out, "bank_gabor.png"), dpi=150)
+            for sp in ax.spines.values():
+                sp.set_linewidth(0.3)
+        axes[0, i].set_title(f"{i}", fontsize=6, pad=1.5)
+    axes[0, 0].set_ylabel("even", fontsize=6, labelpad=1.5)
+    axes[1, 0].set_ylabel("odd", fontsize=6, labelpad=1.5)
+    fig.text(0.5, 0.035, "quadrature pair", ha="center", fontsize=6)
+    fig.subplots_adjust(left=0.055, right=0.995, top=0.90, bottom=0.13,
+                        wspace=0.04, hspace=0.04)
+    fig.savefig(os.path.join(out, "bank_gabor.png"), dpi=300)
     plt.close(fig)
 
 

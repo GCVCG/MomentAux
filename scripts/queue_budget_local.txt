@@ -1,0 +1,6 @@
+METHOD=simclr PCT=1 bash scripts/sslbudget_par_any.sh
+METHOD=simclr PCT=2 bash scripts/sslbudget_par_any.sh
+METHOD=simclr PCT=3 bash scripts/sslbudget_par_any.sh
+METHOD=simclr PCT=7 bash scripts/sslbudget_par_any.sh
+METHOD=simclr PCT=15 bash scripts/sslbudget_par_any.sh
+METHOD=simclr PCT=25 bash scripts/sslbudget_par_any.sh

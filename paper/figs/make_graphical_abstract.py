@@ -23,7 +23,7 @@ Layout rules enforced here (revision 2026-08-07):
 NOTE: no LaTeX escapes in labels -- matplotlib mathtext is not LaTeX, so
 "\\%" and "\\," render literally. Use plain % and unicode dashes.
 """
-import csv, math, os
+import csv, math, os, sys
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -43,10 +43,19 @@ plt.rcParams.update({
     "pdf.fonttype": 42, "text.color": INK, "axes.labelcolor": INK})
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+REPO = os.path.dirname(os.path.dirname(HERE))
 CSV = os.path.join(HERE, "..", "..", "results", "all_results.csv")
 LO, HI = 31.8, 40.3
 
+# In-paper size fits the CAS abstract box (ratio ~2.03:1). Elsevier wants the
+# SUBMITTED graphical abstract at 500x200, i.e. 2.5:1, minimum 1328x531 px at
+# 300 dpi, because ScienceDirect scales it into a fixed 500x200 window. Set
+# GA_SUBMISSION=1 to widen (never to shorten -- compressing the height would
+# re-break the box layout this figure was already fixed for).
 FIG_W_CM, FIG_H_CM = 13.0, 6.4
+if os.environ.get("GA_SUBMISSION") == "1":
+    FIG_H_CM = 6.4
+    FIG_W_CM = FIG_H_CM * 2.5          # 16.0 x 6.4 cm -> 1890 x 756 px at 300 dpi
 fig = plt.figure(figsize=(FIG_W_CM / 2.54, FIG_H_CM / 2.54), dpi=300)
 fig.patch.set_facecolor("white")
 
@@ -153,29 +162,29 @@ fig.text(PB_L, 0.901, "2  The Law", fontsize=6.4, fontweight="bold",
          color=INK, va="top")
 fig.text(PB_L, 0.843, "Δ = G + readout(base)", fontsize=5.0, color=INK,
          va="top")
-fig.text(PB_L, 0.794, "Sign Correct on 79% of Testable Cells", fontsize=4.6,
-         color=MUTED, va="top")
 
 axB = fig.add_axes([PB_L + 0.028, 0.165, 0.283, 0.545])
 
+# Classification MUST use the seed-paired readout SEM, not hypot(delta_sem,
+# G_sem). Delta and G come from the same checkpoints and are positively
+# correlated across seeds, so the independent form overstates the uncertainty
+# by a median factor of ~1.8 and admits far too few cells. This figure used
+# the independent form and therefore reported 96% under a 79% caption.
+# analysis/audit_law_paired.py is the single source of truth; we call it.
+sys.path.insert(0, os.path.join(REPO, "analysis"))
+import audit_law_paired as ALP   # noqa: E402
+
 pts = {"ok": [], "bad": [], "un": [], "br": []}
-for r in csv.DictReader(open(CSV)):
-    if not r.get("aux_target") or r.get("init_from") or r.get("pretrained"):
-        continue
-    if (r.get("stem") or "none") != "none":
-        continue
-    try:
-        d, g, base = float(r["delta"]), float(r["G"]), float(r["base_acc"])
-        if int(r["n_seeds"]) < 3 or int(r["n_probe_seeds"]) < 3:
-            continue
-        sem = math.hypot(float(r["delta_sem"] or 0), float(r["G_sem"] or 0))
-    except (ValueError, KeyError):
-        continue
-    ro = d - g
+for _r in ALP.load(os.path.join(REPO, "runs"), CSV):
+    base, ro, sem = _r["base"], _r["ro"], _r["sem"]
     if LO <= base <= HI: pts["br"].append((base, ro))
     elif sem <= 0 or abs(ro) <= 2 * sem: pts["un"].append((base, ro))
     elif (base < LO and ro < 0) or (base > HI and ro > 0): pts["ok"].append((base, ro))
     else: pts["bad"].append((base, ro))
+
+_RATE = 100.0 * len(pts["ok"]) / max(1, len(pts["ok"]) + len(pts["bad"]))
+fig.text(PB_L, 0.794, f"Sign Correct on {_RATE:.0f}% of Testable Cells", fontsize=4.6,
+         color=MUTED, va="top")
 
 axB.axvspan(LO, HI, color="#000000", alpha=0.07, lw=0)
 axB.axhline(0, color="#777777", lw=0.5)
@@ -193,9 +202,9 @@ axB.text(3.5, -8.4, "Left Flank: Features Gained,\nAccuracy Cannot Cash "
 
 handles = [
     Line2D([], [], ls="", marker="o", ms=1.9, mfc=BLUE, mec="none",
-           label="Sign as Predicted (268)"),
+           label=f"Sign as Predicted ({len(pts['ok'])})"),
     Line2D([], [], ls="", marker="x", ms=2.4, mec=VERM, mew=0.65,
-           label="Exception (10)"),
+           label=f"Exception ({len(pts['bad'])})"),
     Line2D([], [], ls="", marker="o", ms=1.9, mfc=PALE, mec="none",
            label="Not Resolvable"),
     Line2D([], [], ls="", marker="s", ms=2.4, mfc="#e4e4e4", mec="none",
@@ -248,13 +257,14 @@ cx = BX + BW / 2
 for dy, txt, fs0, col, bold in [
         (1.86, "Headline: Small ViTs", 5.2, BLUE, True),
         (1.26, "+13.0 (ViT-S) and +26.0 (ViT-B) at 224 px", 4.5, INK, False),
-        (0.78, "+3.2 at 1.28M Images; Every CNN Neutral", 4.5, INK, False)]:
+        (0.78, "+3.2 at 1.28M Images; ResNets Neutral", 4.5, INK, False)]:
     axC.text(cx, dy, txt, ha="center", va="top",
              fontsize=fit_fontsize(txt, (BW - 0.5) * UNIT_C, fs0, bold=bold),
              fontweight="bold" if bold else "normal", color=col)
 
+_stem = "graphical_abstract_submission" if os.environ.get("GA_SUBMISSION") == "1" \
+        else "graphical_abstract"
 for ext in ("pdf", "png"):
-    fig.savefig(os.path.join(HERE, f"graphical_abstract.{ext}"),
-                facecolor="white")
+    fig.savefig(os.path.join(HERE, f"{_stem}.{ext}"), facecolor="white")
 print("graphical abstract written; law-scope points:",
       {k: len(v) for k, v in pts.items()})

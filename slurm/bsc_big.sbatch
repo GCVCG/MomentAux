@@ -64,6 +64,10 @@ nvidia-smi --query-gpu=index,name --format=csv,noheader
 
 DEADLINE=$(( $(date +%s) + 22*3600 ))   # stop CLAIMING new work at 4.5h
 
+# Initialize the counter ONCE, under the lock, and only if it is absent or
+# empty -- so a worker starting late never resets a counter already in use.
+flock "$LOCK" bash -c "[ -s '$CTR' ] || echo 0 > '$CTR'"
+
 IDLE_MAX=${MS_IDLE_MAX:-15}      # ~15 min of polling before a drained worker exits
 
 worker () {                              # $1 = GPU index
@@ -71,9 +75,21 @@ worker () {                              # $1 = GPU index
     IDLE=0
     while :; do
         [ "$(date +%s)" -ge "$DEADLINE" ] && { echo "[gpu$1] deadline"; break; }
-        # atomically claim the next line number
-        i=$(flock "$LOCK" bash -c "read -r v < '$CTR' 2>/dev/null || v=0;
-                                   echo \$((v+1)) > '$CTR'; echo \$v")
+        # Atomically claim the next line number.
+        #
+        # NEVER default an unreadable counter to 0. The original form was
+        #     read -r v < "$CTR" 2>/dev/null || v=0
+        # and on 2026-08-02 that REWOUND the shared counter from 7024 to 1:
+        # one transient read failure made a worker write 1, after which the
+        # whole 32-GPU cluster spent ~20h re-running already-finished cells
+        # (sampled 12/13 redundant). A claim we cannot make safely must FAIL,
+        # never silently restart the queue from the top.
+        i=$(flock "$LOCK" bash -c "
+                v=\$(cat '$CTR' 2>/dev/null)
+                case \"\$v\" in ''|*[!0-9]*) exit 1 ;; esac
+                echo \$((v+1)) > '$CTR'
+                echo \$v") \
+            || { echo "[gpu$1] counter unreadable/corrupt, backing off"; sleep 10; continue; }
         i=$((i+1))
         if [ "$i" -gt "$N" ]; then
             # Queue empty. Do NOT exit immediately: on 2026-08-05 two of four

@@ -1,0 +1,23 @@
+# THE DECISIVE POSITIONING CELL. The conv budget envelope showed SimCLR at
+# 5x beats the prior at every fraction, so the prior's conv case is cost and
+# not accuracy. The paper's surviving accuracy claim is the ATTENTION regime
+# under a modern augmentation recipe, and it was measured against SimCLR at
+# 2x only. This cell asks the same budget question there: ViT-tiny, DeiT
+# augmentation, SimCLR initialisation at 800 pre-epochs.
+name: diagdeitsslbudget_simclr800_vit_25pct
+dataset: cifar100
+backbone: vit_tiny
+optimizer: adamw
+epochs: 200
+batch_size: 128
+lr: 0.001
+weight_decay: 0.05
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 25
+stem: none
+stem_calibrate: true
+augment: deit
+init_from: runs/simclr_pre800_vit_25pct/seed{seed}/pretrain.pt

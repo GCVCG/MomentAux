@@ -1,23 +1,44 @@
 %% ---------------------------------------------------------------------
 \section{Introduction}\label{sec:intro}
 
-Every practitioner who has trained a network on a small dataset has faced
-the same menu of remedies: pre-train on ImageNet, run a self-supervised
-stage, augment more aggressively, or inject some form of prior knowledge
-into the model. Each remedy fuses an external source of information,
-weights learned elsewhere, invariances distilled from augmented views,
-hand-crafted structure, with whatever the labeled data can teach on its
-own. What the field lacks is not remedies but a controlled account of how
-these information sources \emph{combine}: when does adding a second source
-help, when is it redundant with what the first already supplies, and when
-does the fusion actively destroy value? These three outcomes, we will
-call them \emph{stack}, \emph{substitute}, and \emph{tax}, are usually
-discovered anecdotally, one paper and one setting at a time, under training
-recipes that differ in a dozen uncontrolled ways.
+A bank of Gabor filters, fixed before training and free to compute, is
+worth $+26$ accuracy points to a ViT-B/16 at $224$\,px. Injected exactly
+the same way into a network that has already had contrastive
+pre-training, it is worth nothing. Injected into one initialized from
+ImageNet, it costs $17$ points. One intervention, one frozen recipe, one
+code path: three outcomes spanning forty accuracy points. The useful
+question is not which number is representative, because none of them is.
+It is what distinguishes the three cases, and whether that can be
+determined \emph{before} the combination is trained.
+
+This is the general situation, not a curiosity of one prior. Every
+practitioner who has trained a network on a small dataset faces the same
+menu of remedies: pre-train on ImageNet, run a self-supervised stage,
+augment more aggressively, or inject prior knowledge into the model. Each
+fuses an external source of information, weights learned elsewhere,
+invariances distilled from augmented views, hand-crafted structure, with
+whatever the labeled data can teach on its own. What the field lacks is
+not remedies but a controlled account of how these sources
+\emph{combine}: when does adding a second source help, when is it
+redundant with what the first already supplies, and when does the fusion
+actively destroy value? These three outcomes, we will call them
+\emph{stack}, \emph{substitute}, and \emph{tax}, are usually discovered
+anecdotally, one paper and one setting at a time, under training recipes
+that differ in a dozen uncontrolled ways.
+
+Our answer is that sources trade in identifiable \emph{currencies}, and
+that what a source is worth depends on which currency is scarce rather
+than on how modern the method is. Two sources add only when their
+currencies differ. This is not a metaphor we impose after the fact: each
+source's currency is measurable, on frozen features, from each source
+\emph{alone}, before any combination is trained. That is what makes the
+three outcomes above predictable instead of anecdotal, and it is why the
+same free prior can be the most valuable intervention we measure in one
+setting and the most damaging in another.
 
 This paper treats the question as a measurement problem. We build a single
-instrument, one frozen training recipe, byte-identical data subsets
-committed to version control, and a numerically pinned bank of Gabor and moment
+instrument, one frozen training recipe, fixed data subsets shared by every
+run, and a numerically pinned bank of Gabor and moment
 spectral filters, and use it to measure one deliberately austere source of
 prior knowledge against the strongest data-driven alternatives at matched or
 declared compute. The prior, which we call \emph{MomentAux}, could hardly be
@@ -27,11 +48,10 @@ to exactly zero, adding ${\sim}2\%$ training compute and \emph{nothing} at
 inference. Against it we field SimCLR, SimSiam, and DINO initializations
 (each ${\sim}2\times$ compute), ImageNet transfer, DeiT-strength
 augmentation, learned FitNets-style teachers, and targets built from histograms of oriented gradients (HOG). The
-resulting grid spans 12 datasets across five visual domains, nine backbone
+resulting grid spans 13 datasets across six visual domains, nine backbone
 families from ResNet-18 to ViT-B/16, data scales from 500 to 1.28M images,
-resolutions from $32$ to $224$\,px, and 2{,}800 experimental cells. The
-campaign that produced them, including exploration and repeats, recorded
-8{,}887 timed runs.
+resolutions from $32$ to $224$\,px, and 2{,}894 configurations trained
+over 8{,}827 runs, each with a retained run record.
 
 A grid of this size threatens to be a table dump. It is rescued by an
 empirical law that we did not assume but found, and then tested the way
@@ -47,7 +67,7 @@ where the readout term depends, to a good approximation, only on the
 \emph{baseline accuracy} of the cell: it is negative below a crossing
 located at ${\sim}32$--$40\%$ accuracy, near zero at the crossing, and
 small and positive above it. The sign prediction holds in $79\%$ of the
-498 cells where measurement uncertainty allows it to be tested at all, and
+511 cells where measurement uncertainty allows it to be tested at all, and
 in $88\%$ of those below the crossing
 (Section~\ref{sec:law}), and its quantitative form survived our hardest
 pre-registered tests: it predicted the feature gain of a backbone family it
@@ -55,8 +75,9 @@ had never seen (Swin) from baseline heights alone, and at ImageNet scale it
 tied end-to-end gains to feature gains within $1.1$ accuracy points on five
 of six backbone pairs (Section~\ref{sec:scale}).
 
-The law converts the grid into an explanation. Interventions turn out to
-carry identifiable \emph{currencies}: heavy augmentation supplies
+The law converts the grid into an explanation, and it is where the
+currencies stop being a metaphor and become the term $G$. Each
+intervention's is legible in what it does to frozen features: heavy augmentation supplies
 nuisance-invariance, contrastive pre-training supplies much the same
 invariance at greater expense, ImageNet weights supply mature photographic
 features, and the moment prior supplies oriented-energy structure.
@@ -79,19 +100,24 @@ million training images, where the ResNet baseline we measure is
 exactly neutral ($+0.04$). Second, the fashionable remedy is not always the
 right one: under plain augmentation SimCLR beats the prior across the
 mid-data band on photographic datasets, but under the modern DeiT recipe
-the comparison flips at every fraction we measure, because the recipe
-itself supplies the invariance SimCLR was being paid $2\times$ compute to
-learn.
+the comparison flips at every fraction we measure at matched
+${\sim}2\times$ cost, because the recipe itself supplies the invariance
+SimCLR was being paid that compute to learn. Buying the comparator
+$5\times$ instead removes the flip on Tiny-ImageNet and leaves it only
+above ${\sim}10\%$ of CIFAR-100 (Section~\ref{sec:budget}), so the
+comparison is a statement about budget and population, not a ranking of
+methods.
 
 \paragraph{Contributions.}
 \begin{enumerate}
   \item \textbf{An instrument, not just experiments} (Section~\ref{sec:instrument}):
-    a frozen recipe with committed subsets, pinned filter banks, declared
+    a frozen recipe with fixed subsets, pinned filter banks, declared
     cost normalization, and pre-registered predictions with falsifiers,
     every headline table regenerable by one command from released artifacts.
-  \item \textbf{The grid} (Section~\ref{sec:grid}): $2{,}800$ cells
+  \item \textbf{The grid} (Section~\ref{sec:grid}): $2{,}894$ configurations,
+  $8{,}827$ runs,
     comparing a free spectral prior against SSL, transfer, augmentation and
-    learned teachers across 12 datasets, 9 backbones and
+    learned teachers across 13 datasets, 9 backbones and
     500 to 1.28M images.
   \item \textbf{The law} (Section~\ref{sec:law}): $\Delta = G +
     \mathrm{readout}(\mathrm{base})$, validated from CIFAR scale to
@@ -104,6 +130,17 @@ learn.
     regime-indexed recommendation table distilled from the grid, with
     honest costs attached.
 \end{enumerate}
+
+In one line, what the grid says: measure each source's currency alone and
+the result of fusing them is known in advance
+(Section~\ref{sec:fusion}); never pour a shaping prior into a strong
+initialization, because the tax scales with what that initialization was
+worth (Section~\ref{sec:taxsub}); modern augmentation does not replace
+structure but amplifies it (Section~\ref{sec:stack}); attention's feature
+deficit grows with model scale rather than shrinking
+(Section~\ref{sec:scale}); and a comparator's budget is part of the claim,
+since two of ours did not survive raising it
+(Section~\ref{sec:budget}).
 
 %% ---------------------------------------------------------------------
 \section{Related work}\label{sec:related}
@@ -123,13 +160,12 @@ properties a controlled fusion study requires and which of them each line
 of work currently provides.
 
 \paragraph{Hand-crafted structure inside learned networks.}
-Fixed oriented filters predate deep learning as models of early visual
-cortex \citep{jones1987gabor} and as image descriptors
-\citep{dalal2005hog,teague1980zernike}. Scattering networks showed that
+Fixed oriented filters predate deep learning as image descriptors
+\citep{dalal2005hog}. Scattering networks showed that
 cascades of fixed wavelets rival learned features in small-data regimes
-\citep{bruna2013scattering,oyallon2017scaling}, and Gabor-structured
+\citep{bruna2013scattering}, and Gabor-structured
 convolutions have been used to regularize or cheapen early layers
-\citep{luan2018gaborcnn,sarwar2017gabor}. These lines place the structure
+\citep{luan2018gaborcnn}. These lines place the structure
 \emph{in the forward path}, where it occupies input bandwidth permanently.
 Our forward-path baselines reproduce their known failure mode, a
 mid-data penalty band that no filter choice escapes
@@ -154,21 +190,23 @@ regression as a mechanism.
 
 \paragraph{Self-supervised learning (SSL) as initialization.}
 Contrastive and self-distilling pre-training
-\citep{chen2020simclr,chen2021simsiam,caron2021dino,grill2020byol,he2022mae}
+\citep{chen2020simclr,chen2021simsiam,caron2021dino}
 is the modern default source of ``free'' features, and cookbook-level
-guidance exists for large-scale use \citep{balestriero2023cookbook}. Much
+guidance exists for large-scale use. Much
 less is measured about the small-data, from-scratch regime we target. Our
 grid contributes three facts to that gap: negative-free SimSiam learns
 essentially nothing at $2.5$--$25$k images under its published CIFAR
-recipe; SimCLR is strong on photographic statistics but loses to a free
-domain-agnostic prior on satellite imagery in the low-data band; and the
-entire SSL-versus-prior comparison inverts under a modern supervised
-recipe, because the augmentation stack substitutes for the invariance SSL
-sells (Section~\ref{sec:fusion}).
+recipe, though four times that budget recovers up to $+4.3$ and we report
+it as a property of the budget rather than of the method; SimCLR is strong
+on photographic statistics but loses to a free domain-agnostic prior on
+satellite imagery in the low-data band; and the SSL-versus-prior comparison
+inverts under a modern supervised recipe at matched cost, because the
+augmentation stack substitutes for the invariance SSL sells
+(Sections~\ref{sec:fusion} and \ref{sec:budget}).
 
 \paragraph{Transfer learning.}
 ImageNet initialization remains the strongest single intervention on
-photo-like data \citep{kornblith2019better}, with known caveats under
+photo-like data, with known caveats under
 domain shift and with training-from-scratch competitive given enough data
 \citep{he2019rethinking}. We use transfer both as a comparator and as a
 test of fusion: injecting the spectral prior \emph{on top of} ImageNet
@@ -180,16 +218,16 @@ supplied, in proportion to how much that structure was worth
 
 \paragraph{Small-data vision transformers.}
 That ViTs underperform without large data or heavy regularization is well
-documented \citep{dosovitskiy2021vit,touvron2021deit,steiner2022train},
+documented \citep{dosovitskiy2021vit,touvron2021deit},
 and a family of remedies exists: distillation tokens
-\citep{touvron2021deit}, soft convolutional biases \citep{dascoli2021convit},
-compact hybrid designs \citep{hassani2021compact}, and auxiliary
-self-supervision \citep{liu2021efficient,gani2022train}. That the deficit
-is representational rather than merely optimizational is supported by
-representation-level comparisons of attention and convolution
-\citep{raghu2021vision}, and the broader observation that architecture
-alone can encode a useful image prior \citep{ulyanov2018deep} is the
-premise our fixed target makes explicit. Our contribution
+\citep{touvron2021deit}; architectures that reintroduce the hierarchical,
+local inductive bias attention lacks, such as Swin \citep{liu2021swin},
+which we include as a backbone for that reason; and auxiliary
+self-supervised objectives trained jointly with the classifier, of which
+\citet{liu2021efficientvit} is the closest antecedent to this work --- a
+dense relative-localization task added for exactly this deficit, differing
+from ours in that its target is computed from the images themselves rather
+than pinned in advance. Our contribution
 to this literature is quantitative and comparative: we measure the deficit
 as a feature quantity ($G \approx 13$--$15$ points for ViT-tiny across
 $2.5$--$12.5$k images, roughly $2.3\times$ any convolutional backbone),
@@ -217,7 +255,7 @@ answerable at all.
 
 \paragraph{Spectral structure inside transformers.}
 A parallel line injects spectral structure into attention architectures:
-the Scattering Vision Transformer \citep{patro2023scattering} performs
+a scattering-based transformer \citep{patro2023scattering} performs
 spectral decomposition with dual-tree complex wavelets inside the token
 mixer, and FViT \citep{shi2026fvit} adds a \emph{learnable} Gabor filter
 to focus attention across scales and orientations. These are
@@ -242,6 +280,21 @@ alone. Our \emph{stack} is complementary combination and our
 \emph{substitute} is redundant combination. We adopt that vocabulary here
 and use our own terms only as informal labels for it.
 
+\citet{dasarathy2001what} organizes the field's questions as what, where,
+why, when and how to fuse, and observes that the \emph{when} has received
+least attention because it is the one that cannot be answered from the
+architecture. That is the question this paper takes up, in the specific
+setting where one source is hand-crafted and the other is learned from the
+data. Nor is knowledge fusion itself a new object: \citet{smirnov2019knowledge}
+surveys the patterns by which knowledge and data are combined, and catalogs
+the same three outcomes we recover. What that survey records as patterns to
+be chosen by a designer, we measure as outcomes to be predicted from the
+sources, which is the difference between a taxonomy and a decision
+procedure. The field's benchmarks have generally compared \emph{algorithms}
+for a fixed fusion problem; ours compares
+\emph{sources} under a fixed algorithm, holding the recipe frozen so that
+what varies is the knowledge injected rather than the method injecting it.
+
 One difference is substantive rather than terminological, and it sharpens
 what a representation-learning setting adds. In sensor fusion redundancy is
 a \emph{virtue}: two instruments measuring the same quantity reduce
@@ -256,7 +309,7 @@ is likewise not new, and has at least three names. It is \emph{catastrophic
 fusion} in the sense of \citet{movellan1997catastrophic}, where modules
 combined under mismatched assumptions do worse than the better module
 alone; it is a form of negative transfer
-\citep{wang2019negative,zhang2023negative}; and on the multimodal side it
+\citep{wang2019negative}; and on the multimodal side it
 is the modality competition of \citet{wang2020multimodal}, who report that
 the best unimodal network often beats the jointly trained multimodal one
 despite the latter receiving strictly more information. What we add is not
@@ -270,7 +323,7 @@ sources tell us about a target into unique, redundant and synergistic
 atoms, and which \citet{liang2023quantifying} have already carried into
 deep multimodal learning with estimators that scale and with a-priori model
 selection as the application. We do not compute it. Our measurement is a
-linear-evaluation gap on frozen features: cheap enough for 2{,}800 cells,
+linear-evaluation gap on frozen features: cheap enough for 2{,}894 cells,
 ordinal rather than an information quantity, and blind to anything not
 linearly decodable. Read our result as an empirical instance of the
 decomposition those authors formalize, not as an estimate of it.
@@ -278,7 +331,7 @@ decomposition those authors formalize, not as an estimate of it.
 Two further connections position the predictor rather than the taxonomy.
 Predicting a downstream outcome from a cheap measurement, without training
 the combined system, is the programme of transferability estimation
-\citep{nguyen2020leep,you2021logme}, which scores a single pre-trained
+\citep{nguyen2020leep}, which scores a single pre-trained
 source; ours asks the same question of a \emph{pair}. And the challenge
 that programme raises for us is direct:
 \citet{newell2020useful} report that linear evaluation does not correlate
@@ -297,9 +350,9 @@ information, data and prior knowledge, which is the reading of ``two
 sources'' under which this study is a fusion study at all. Ours is
 scientific knowledge about early vision, represented as a pinned filter
 bank, integrated at the learning algorithm; the nearest existing method is
-their own informed pre-training \citep{vonrueden2022informedpre}, which
+their own informed pre-training, which
 condenses knowledge into prototypes for initialization rather than into a
-decaying auxiliary target. That survey catalogues where knowledge can be
+decaying auxiliary target. That survey catalogs where knowledge can be
 injected. What it does not settle, and what a practitioner must decide, is
 \emph{when} injecting it is worth anything given what the data and the
 available pre-trained artifacts already supply. That is the question this
@@ -328,22 +381,22 @@ Line of work & \rotbox{one frozen recipe} & \rotbox{cost-normalized} &
   \rotbox{feature-side} & \rotbox{combinations} & \rotbox{predictive model} \\
 \midrule
 Fixed spectral filters in the forward path
-  \citep{bruna2013scattering,oyallon2017scaling,luan2018gaborcnn,patro2023scattering,shi2026fvit}
+  \citep{bruna2013scattering,luan2018gaborcnn,shi2026fvit}
   & \pmark & \xmark & \xmark & \xmark & \xmark \\
 Auxiliary and distillation targets
   \citep{romero2015fitnets,lee2015deeply,wei2022maskfeat}
   & \pmark & \xmark & \pmark & \xmark & \xmark \\
 Self-supervised pre-training
-  \citep{chen2020simclr,chen2021simsiam,caron2021dino,he2022mae}
+  \citep{chen2020simclr,chen2021simsiam,caron2021dino}
   & \xmark & \xmark & \cmark & \xmark & \xmark \\
 Transfer learning studies
-  \citep{kornblith2019better,he2019rethinking}
+  \citep{he2019rethinking}
   & \pmark & \xmark & \pmark & \xmark & \xmark \\
 Small-data ViT recipes
-  \citep{touvron2021deit,steiner2022train,liu2021efficient,gani2022train}
+  \citep{touvron2021deit}
   & \xmark & \pmark & \xmark & \pmark & \xmark \\
 Backbone and self-supervised benchmarks
-  \citep{goldblum2023battle,marks2025closer,zhai2019vtab}
+  \citep{goldblum2023battle,marks2025closer}
   & \pmark & \xmark & \cmark & \xmark & \xmark \\
 Classical fusion taxonomy
   \citep{durrantwhyte1988sensor,williams2010nonnegative}
@@ -363,7 +416,7 @@ preferred recipe cannot attribute a difference to the method. Benchmarks
 of pretrained backbones \citep{goldblum2023battle,marks2025closer} inherit
 whatever recipe produced each checkpoint, and \citet{marks2025closer}
 show directly that the evaluation protocol can change the conclusion. We
-instead hold one recipe and one set of committed image indices fixed and
+instead hold one recipe and one set of fixed image indices fixed and
 vary only the intervention.
 
 The second is rarely reported at all. Self-supervised pre-training costs
@@ -396,12 +449,12 @@ data-efficiency interventions.
 
 \paragraph{Benchmark methodology.}
 Reality-check studies have repeatedly shown that uncontrolled recipes
-manufacture illusory progress \citep{musgrave2020metric,wightman2021resnet},
-and reproducibility in ML remains fragile \citep{raff2019step}. We adopt
+manufacture illusory progress, and reproducibility in machine learning
+remains fragile. We adopt
 the strictest discipline we could operationalize: a single frozen recipe;
-committed per-subset indices so every intervention sees byte-identical
+fixed per-subset indices so every intervention sees byte-identical
 images; numerically fingerprinted filter banks; deviations quarantined
-under a separate namespace and never mixed into headline tables; and,
+marked as such and never mixed into headline tables; and,
 unusual in this literature, predictions with explicit falsifiers
 registered \emph{before} each wave of runs, with misses reported as
 plainly as hits (Sections~\ref{sec:instrument}, \ref{sec:scale}).

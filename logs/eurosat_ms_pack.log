@@ -1,0 +1,13 @@
+10 classes: ['AnnualCrop', 'Forest', 'HerbaceousVegetation', 'Highway', 'Industrial', 'Pasture', 'PermanentCrop', 'Residential', 'River', 'SeaLake']
+27000 tiles
+  5000/27000
+  10000/27000
+  15000/27000
+  20000/27000
+  25000/27000
+train 21600  test 5400
+per-band mean: [0.1354 0.1117 0.1043 0.0947 0.12   0.2004 0.2374 0.2302 0.0732 0.0012
+ 0.1822 0.1119 0.26  ]
+per-band std : [0.0244 0.0333 0.0395 0.0593 0.0565 0.0859 0.1085 0.1117 0.0403 0.0005
+ 0.1002 0.076  0.123 ]
+wrote data/eurosat_ms_64.npz (1.78 GB)

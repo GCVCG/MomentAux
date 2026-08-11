@@ -1,27 +1,27 @@
-Fusing prior knowledge with data-driven learning is attractive precisely
-where data is scarce, yet no controlled account says when such fusion helps,
-when it is redundant, and when it harms. We present a
+Fusing prior knowledge with data-driven learning is attractive where data
+is scarce, yet no controlled account says when such fusion helps, is
+redundant, or harms. We present a
 benchmark that measures one fixed, hand-crafted source of knowledge, a
-pinned bank of Gabor and moment spectral targets, injected only during training
-through an auxiliary regression head at $\sim$2\% compute overhead, against
-the leading data-driven alternatives (self-supervised learning with
-SimCLR, SimSiam and DINO, ImageNet transfer, heavy augmentation, and
-learned teachers) under one frozen recipe with
-committed data subsets: 12 datasets, 9 backbones, data scales from
-500 to 1.28M images, resolutions from 32 to 224\,px, and models from 5.7M to
-86M parameters ($2{,}800$ experimental cells). The grid is organized by a
-single empirical law, $\Delta = G + \mathrm{readout}(\mathrm{base})$,
-separating each intervention's feature-level gain $G$ from a readout term
-depending only on baseline accuracy. Registered in advance, it
-called the feature gain of an unseen backbone family and of ImageNet-scale
-cells from baseline heights alone ($|\Delta-G| \le 1.1$ points on five of
-six ImageNet-scale pairs); its sign holds on $79\%$ of the cells where
-measurement uncertainty permits a test, and $88\%$ below the crossing. It yields
-a sharp fusion taxonomy: sources supplying different currencies stack (prior
-with augmentation), same-currency sources substitute (the prior against
-effective self-supervised pre-training), and fusing into an already-informed
-initialization taxes in proportion to what that initialization carries
-(ImageNet transfer). A decision guide maps regime to the cheapest
-intervention. Harness, configurations, subset indices, per-run records and
-result tables are released at
-\href{https://github.com/GCVCG/MomentAux}{\texttt{github.com/\allowbreak GCVCG/MomentAux}}.
+pinned bank of Gabor targets injected only during training at $\sim$2\%
+compute overhead, against the data-driven alternatives (SimCLR, SimSiam and
+DINO pre-training, ImageNet transfer, heavy augmentation, learned teachers)
+under one frozen recipe with fixed subsets: 13 datasets, 9 backbones,
+500 to 1.28M images, 32 to 224\,px, and 5.7M to 86M parameters
+($2{,}894$ configurations over $8{,}827$ runs). Every pairwise
+combination is measured, and all follow one rule at training time
+(decision-level fusion behaves differently): different-\emph{currency}
+sources stack (prior with augmentation), same-currency sources substitute
+(prior against effective self-supervised pre-training), and fusing into an
+already-informed initialization interferes in proportion to what it carries
+(ImageNet transfer, up to $-17$ points). Because each source's currency is
+measurable on frozen features beforehand, the outcome is predictable; we
+state this as a procedure. Two sensor tests bound it:
+splitting one instrument's bands pays at every data scale, whereas pairing
+two satellites (Sentinel-1 radar with Sentinel-2 optical) never does; the
+two settings differ in both source asymmetry and modality, and our design
+cannot say which is operative. Underlying it is an empirical
+decomposition,
+$\Delta = G + \mathrm{readout}(\mathrm{base})$, whose sign holds on $79\%$
+of testable cells and which, registered in advance, called an unseen
+backbone family's feature gain from baseline heights alone. Code and data:
+\href{https://amughrabi.github.io/MomentAux}{\texttt{amughrabi.github.io/\allowbreak MomentAux}}.

@@ -1,0 +1,6 @@
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_so2sat_opt_none_5pct.yaml --run runs/sf_so2sat_opt_none_5pct --ckpt best.pt
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_so2sat_opt_aux_5pct.yaml --run runs/sf_so2sat_opt_aux_5pct --ckpt best.pt
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_so2sat_sar_none_5pct.yaml --run runs/sf_so2sat_sar_none_5pct --ckpt best.pt
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_so2sat_sar_aux_5pct.yaml --run runs/sf_so2sat_sar_aux_5pct --ckpt best.pt
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_so2sat_all_none_5pct.yaml --run runs/sf_so2sat_all_none_5pct --ckpt best.pt
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_so2sat_all_aux_5pct.yaml --run runs/sf_so2sat_all_aux_5pct --ckpt best.pt

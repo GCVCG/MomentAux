@@ -10,6 +10,7 @@
 \usepackage{booktabs}
 \usepackage{graphicx}
 \usepackage{multirow}
+\usepackage{makecell}
 \usepackage{rotating}
 \usepackage{pifont}
 \newcommand{\cmark}{\ding{51}}
@@ -35,68 +36,80 @@
 %% \raggedright suppresses (long tokens like "ImageNet-transferable" then
 %% overflow no matter how the column is sized)
 
+%% Generated numbers, derived from the run records and the audit, so a
+%% number in prose cannot drift from the table beside it.
+\input{tables/numbers}
+
 \begin{document}
 \let\WriteBookmarks\relax
 \def\floatpagepagefraction{1}
 \def\textpagefraction{.001}
 
-\shorttitle{Fusing fixed spectral priors with learned representations}
+\shorttitle{When does fusing knowledge with learned representations pay?}
 \shortauthors{A. AlMughrabi et~al.}
 
-\title[mode = title]{When does fusing hand-crafted spectral knowledge with
-  learned representations pay? A controlled, cost-normalized benchmark and
-  its organizing law}
+\title[mode = title]{When does fusing hand-crafted knowledge with learned
+  representations pay? A controlled, cost-normalized benchmark and a
+  measurable rule for stacking, substitution and interference}
 
 \author[1]{Ahmad AlMughrabi}[orcid=0000-0002-9336-3200]
 \ead{ahmad.almughrabi@ub.edu}
 \cormark[1]
 
-\author[2]{Ricardo Marques}[orcid=0000-0001-8261-4409]
+\author[1]{Albert Clop}[orcid=0000-0002-0187-6288]
+\ead{albert.clop@ub.edu}
+
+\author[2]{Benjamin Busam}[orcid=0000-0002-0620-5774]
+\ead{b.busam@tum.de}
+
+\author[3]{Ricardo Marques}[orcid=0000-0001-8261-4409]
 \ead{ricardo.marques@upf.edu}
-\fnmark[1]
 
 \author[1]{Petia Radeva}[orcid=0000-0003-0047-5172]
 \ead{petia.ivanova@ub.edu}
-\fnmark[1]
 
+% Affiliations are numbered by order of FIRST APPEARANCE in the author list,
+% which is the Elsevier convention. Adding TUM in third position therefore
+% renumbers Universitat Pompeu Fabra from 2 to 3.
 \affiliation[1]{organization={Universitat de Barcelona},
                 city={Barcelona}, country={Spain}}
-\affiliation[2]{organization={Universitat Pompeu Fabra},
+\affiliation[2]{organization={Technical University of Munich},
+                city={Munich}, country={Germany}}
+\affiliation[3]{organization={Universitat Pompeu Fabra},
                 city={Barcelona}, country={Spain}}
 \cortext[1]{Corresponding author.}
-\fntext[1]{These authors contributed equally to the supervision of this
-work.}
-\nonumnote{Code, configurations, committed subset indices, per-run records
-and all result tables: \url{https://github.com/GCVCG/MomentAux}}
+\nonumnote{Project page: \url{https://amughrabi.github.io/MomentAux}.
+Code, configurations, fixed subset indices, per-run records and all result
+tables: \url{https://github.com/GCVCG/MomentAux}}
 
 \begin{abstract}
-Fusing prior knowledge with data-driven learning is attractive precisely
-where data is scarce, yet no controlled account says when such fusion helps,
-when it is redundant, and when it harms. We present a
+Fusing prior knowledge with data-driven learning is attractive where data
+is scarce, yet no controlled account says when such fusion helps, is
+redundant, or harms. We present a
 benchmark that measures one fixed, hand-crafted source of knowledge, a
-pinned bank of Gabor and moment spectral targets, injected only during training
-through an auxiliary regression head at $\sim$2\% compute overhead, against
-the leading data-driven alternatives (self-supervised learning with
-SimCLR, SimSiam and DINO, ImageNet transfer, heavy augmentation, and
-learned teachers) under one frozen recipe with
-committed data subsets: 12 datasets, 9 backbones, data scales from
-500 to 1.28M images, resolutions from 32 to 224\,px, and models from 5.7M to
-86M parameters ($2{,}800$ experimental cells). The grid is organized by a
-single empirical law, $\Delta = G + \mathrm{readout}(\mathrm{base})$,
-separating each intervention's feature-level gain $G$ from a readout term
-depending only on baseline accuracy. Registered in advance, it
-called the feature gain of an unseen backbone family and of ImageNet-scale
-cells from baseline heights alone ($|\Delta-G| \le 1.1$ points on five of
-six ImageNet-scale pairs); its sign holds on $79\%$ of the cells where
-measurement uncertainty permits a test, and $88\%$ below the crossing. It yields
-a sharp fusion taxonomy: sources supplying different currencies stack (prior
-with augmentation), same-currency sources substitute (the prior against
-effective self-supervised pre-training), and fusing into an already-informed
-initialization taxes in proportion to what that initialization carries
-(ImageNet transfer). A decision guide maps regime to the cheapest
-intervention. Harness, configurations, subset indices, per-run records and
-result tables are released at
-\href{https://github.com/GCVCG/MomentAux}{\texttt{github.com/\allowbreak GCVCG/MomentAux}}.
+pinned bank of Gabor targets injected only during training at $\sim$2\%
+compute overhead, against the data-driven alternatives (SimCLR, SimSiam and
+DINO pre-training, ImageNet transfer, heavy augmentation, learned teachers)
+under one frozen recipe with fixed subsets: 13 datasets, 9 backbones,
+500 to 1.28M images, 32 to 224\,px, and 5.7M to 86M parameters
+($2{,}894$ configurations over $8{,}827$ runs). Every pairwise
+combination is measured, and all follow one rule at training time
+(decision-level fusion behaves differently): different-\emph{currency}
+sources stack (prior with augmentation), same-currency sources substitute
+(prior against effective self-supervised pre-training), and fusing into an
+already-informed initialization interferes in proportion to what it carries
+(ImageNet transfer, up to $-17$ points). Because each source's currency is
+measurable on frozen features beforehand, the outcome is predictable; we
+state this as a procedure. Two sensor tests bound it:
+splitting one instrument's bands pays at every data scale, whereas pairing
+two satellites (Sentinel-1 radar with Sentinel-2 optical) never does; the
+two settings differ in both source asymmetry and modality, and our design
+cannot say which is operative. Underlying it is an empirical
+decomposition,
+$\Delta = G + \mathrm{readout}(\mathrm{base})$, whose sign holds on $79\%$
+of testable cells and which, registered in advance, called an unseen
+backbone family's feature gain from baseline heights alone. Code and data:
+\href{https://amughrabi.github.io/MomentAux}{\texttt{amughrabi.github.io/\allowbreak MomentAux}}.
 \end{abstract}
 
 \begin{graphicalabstract}
@@ -107,10 +120,10 @@ result tables are released at
 \end{graphicalabstract}
 
 \begin{highlights}
-\item A 2,800-cell, cost-normalized benchmark of data-efficiency interventions
-\item Feature gain and readout separate: sign correct on 79\% of testable cells
-\item Different-currency fusions stack; same-currency fusions substitute
-\item Free spectral prior beats 2$\times$-compute SSL on ViTs under modern recipes
+\item A 2,894-configuration benchmark of data-efficiency interventions
+\item Splitting one instrument's bands pays; pairing two satellites does not
+\item A measurable rule predicts stacking, substitution or interference
+\item Free prior beats 2$\times$-compute SSL on small ViTs; at 5$\times$ the ordering flips with data
 \item Attention's feature deficit persists at 1.28M images and grows with scale
 \end{highlights}
 
@@ -126,6 +139,8 @@ self-supervised learning \sep auxiliary losses \sep benchmark
 \input{sections/s1_intro_related}
 \input{sections/s2_methods}
 \input{sections/s3_results}
+\input{sections/s3b_budget}
+\input{sections/s5_multisource}
 \input{sections/s4_ablations_discussion}
 
 %% ------------------------------------------------------------------
@@ -144,13 +159,13 @@ MareNostrum5 for IM-2025-3-0008.
 Validation, Formal analysis, Investigation, Data curation, Writing,
 original draft, Writing, review \& editing, Visualization, Project
 administration.
+\textbf{Albert Clop}: Methodology, Supervision, Writing, review \& editing.
+\textbf{Benjamin Busam}: Supervision, Writing, review \& editing.
 \textbf{Ricardo Marques}: Supervision, Conceptualization, Writing,
 review \& editing.
 \textbf{Petia Radeva}: Supervision, Conceptualization, Resources,
 Project administration, Funding acquisition, Writing, review \&
 editing.
-R.~Marques and P.~Radeva contributed equally to the supervision of this
-work.
 
 \section*{Declaration of competing interest}
 The authors declare that they have no known competing financial interests or
@@ -160,15 +175,15 @@ reported in this paper.
 \section*{Data availability}
 All artifacts needed to reproduce every number in this paper are released
 at \url{https://github.com/GCVCG/MomentAux}: the training and
-evaluation harness (configs for all 2{,}800 cells, the committed subset
-indices, the fingerprinted filter banks, the single training entry point,
+evaluation harness (configs for all 2{,}894 cells, the subset
+indices, the fingerprinted filter banks, the single training command,
 the aggregation and audit scripts), and the complete result tables in open
 formats. The tagged release additionally carries the \emph{raw} evidence as
 downloadable assets: every run's \texttt{final.json} record (configuration
 as executed, accuracy, parameter and floating-point-operation accounting,
 environment), every linear-probe record, every per-epoch training curve, and
 the campaign logs, with \texttt{SHA256} checksums. The latter comprise a per-cell
-table (\texttt{all\_results.csv}: 2{,}800 rows with dataset, backbone,
+table (\texttt{all\_results.csv}: 2{,}894 rows with dataset, backbone,
 intervention, fraction, seed count, accuracy mean and standard deviation,
 probe accuracy, paired baseline, $\Delta$, its standard error, $G$ and
 readout), a configuration-by-fraction view
@@ -179,14 +194,14 @@ Table~\ref{tab:audit} is itself a released script rather than a manual
 query. Public datasets are cited in Section~\ref{sec:datasets}; the
 subset indices we release make the exact image selection reproducible
 without redistributing the images. Model checkpoints (223\,GB) are not
-distributed; every cell retrains from its committed configuration.
+distributed; every cell retrains from its released configuration.
 
 \section*{Declaration of generative AI and AI-assisted technologies in the
-writing process}
+manuscript preparation process}
 During the preparation of this work the authors used Claude (Anthropic) in
-order to assist with drafting, editing and figure generation. After using
-this tool, the authors reviewed and edited the content as needed and take
-full responsibility for the content of the publication.
+order to improve the language and readability of the manuscript. After
+using this tool, the authors reviewed and edited the content as needed and
+take full responsibility for the content of the published article.
 
 \bibliographystyle{unsrtnat}
 \bibliography{refs}

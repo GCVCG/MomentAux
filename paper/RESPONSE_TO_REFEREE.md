@@ -1,20 +1,231 @@
 # Response to the referee
 
-We thank the referee for a review of unusual care. Several points were not
-stylistic disagreements but errors on our part, and one of them changes the
-paper's central number. We have made every change we could make from
-existing records, and we say plainly where a criticism stands and we have
-only disclosed rather than removed the problem.
+This letter is cumulative and is organized newest first: round 3, then
+round 2, then round 1. The referee was right in round 3 that our previous
+letter answered only the first review and carried numbers the manuscript
+had superseded; every figure below is now the manuscript's current value,
+and where a round 1 table predates a change in the audit's scope, both
+values are shown rather than the old one quietly overwritten.
 
-**Summary of what changed.** The headline sign-law agreement falls from
-96.4% to **78.9%**, because the referee is right that our uncertainty
-formula was wrong. The claim that the readout term depends on baseline
-accuracy alone is **withdrawn**. Configuration selection used the test
-split and this is now disclosed, with the general claims re-based on the
-populations that played no part in selection. Six factual overstatements,
-all of which the referee caught by checking our own tables, are corrected.
+Across three rounds we have not disputed a point, because we have not yet
+found one that was wrong. Two of the referee's objections cost us the
+paper's headline number and one of its claims: the sign-law agreement fell
+from 96.4% to **79.1%** when we accepted that our uncertainty formula
+assumed an independence that does not hold, and the correlation between
+source asymmetry and fusion gain was **withdrawn from the abstract** rather
+than defended. Both changes are in the paper.
+
+**What changed in round 3.** The two blocking issues, both clerical: the
+letter is rewritten (this document), and the ViT baseline in Section 3.5 is
+corrected from 62.7% to **61.4%**, which is what the records say and what
+makes Table 8's +13.9 consistent. Beyond those, we took the referee's
+closing observation — that our corrections land item by item rather than by
+class — as the substantive criticism of this round, and answered it with
+two build steps: the recurring numbers are now generated from the run
+records as LaTeX macros, and citation hygiene is now a script. Both are
+described under round 3 below, and both caught defects that had not been
+reported.
 
 ---
+
+# Round 3
+
+Two blocking issues, both clerical, both ours. We also treat the referee's
+closing observation — that our corrections have landed item by item rather
+than by class — as the most useful criticism in this round, and have
+answered it with two build steps rather than two more fixes.
+
+### R3-1. The response letter was not updated for round 2
+
+**Accepted without qualification.** The referee is right that the letter
+answered a review it had outgrown, and right that it contradicted the
+manuscript it accompanied. This document is now cumulative: round 3 first,
+then round 2, then round 1, each with its own headings. Every number in it
+has been brought to the manuscript's current values, and where a round 1
+table was written before the audit's scope expanded, both figures are shown
+rather than the old one silently overwritten.
+
+We note the specific contradiction the referee found and confirm the
+direction: the letter said 498 / 393 / 78.9% and held-out 273 at 79.9%; the
+manuscript says **511 / 404 / 79.1%** and held-out **272 at 80.1%**. The
+manuscript was right. The letter was stale.
+
+### R3-2. The 62.7% in Section 3.5
+
+**Correct, and the mechanism is worth stating because it is diagnostic.**
+The manuscript's own records give the DeiT-augmented ViT-tiny pair at full
+CIFAR-100 as **75.25 → 61.39**, a gain of **+13.86**, which is Table 8's
++13.9. The correct sentence is 75.3% against **61.4%**, as in the previous
+two versions. The 62.7% we typed is the *above-crossing sign-agreement rate*
+from Table 3 — a number from a different table on a different quantity that
+happened to be in the same working buffer. It is now fixed, and both numbers
+in that sentence are generated from the records rather than typed (below).
+
+### The class-level answer
+
+The referee observes that "the habit of checking every claim against its
+table has not fully generalized". That is fair, and the pattern is visible
+across rounds: six table contradictions in round 1, three lost citations in
+round 2, one lost citation and one table contradiction in round 3. Each was
+fixed properly and individually; nothing stopped the next one. We have
+therefore made both classes into build steps.
+
+**Numbers.** `scripts/make_paper_numbers.py` emits every recurring figure —
+the audit partition, the compute accounting, the headline ViT cell — as
+LaTeX macros derived from the run records and the audit. The prose now uses
+`\vitBest`, `\computeGpuHours`, `\auditResidSD` and so on by name, so a
+prose number and its table read one definition and cannot disagree. This
+retires R3-2, NB1 and NB2 at the source rather than one at a time. It
+immediately caught a fourth instance nobody had reported: Python rounds
+half to **even**, so 75.25 became 75.2 and 2.15 became 2.1 in some places
+and 2.2 in others. The generator rounds half up throughout.
+
+**Citations.** `paper/check_citations.py` reports any bibliography entry no
+`\cite` reaches, any citation without an entry, and the count against the
+journal's hard 50-reference limit. Run on the round 3 sources it reproduces
+exactly what the referee found by hand: `alain2016understanding` and
+`ulyanov2018deep` uncited, 50 of 52 entries printing.
+
+### Non-blocking items
+
+**NB1, the GPU-hour split.** Correct: the components summed to 3,339
+against 3,341. They are now recomputed per device class from the retained
+run records, so the split sums to the total by construction. The device
+figures move slightly (2,903 / 82 / 356) because the energy is now
+integrated per device rather than at one average draw.
+
+**NB2, 2.2 against 2.1.** Both were roundings of the audit's 2.15. The
+manuscript now uses one generated macro in all three places; it reads 2.2.
+
+**NB3, the linear-probe attribution.** Restored. Alain and Bengio are cited
+where the protocol is defined, which is the right place, since that
+protocol produces G.
+
+**NB4, small-data ViT remedies.** Fixed, and the referee's sharper point —
+that the closest competitors to our headline claim were unfindable — is
+taken. The paragraph now cites Liu et al. (NeurIPS 2021), which adds a
+dense relative-localization auxiliary task for exactly this deficit, and
+says how it differs from ours: their target is computed from the images,
+ours is pinned in advance. Swin is no longer offered as a small-data
+remedy; it is described as an architecture that reintroduces the
+hierarchical bias attention lacks, which is why we include it as a backbone.
+
+*Both restorations required removing something, and we would rather say so
+than have it noticed.* The journal caps research articles at 50 references
+and states that non-compliance may lead to desk rejection; we were at 50.
+We removed the historical attribution for Gabor filters as models of early
+visual cortex, deleting the clause with it rather than leaving it
+unsupported, and the corroborating citation for the ViT deficit being
+representational rather than optimizational — a claim this paper measures
+directly on 909 cells, so it now rests on our own evidence. Method and
+competitor attributions outrank corroborating ones under a hard cap. We
+would restore both if the editor can grant even two references.
+
+**NB5, the 50-epoch ensemble checkpoint.** This one we believe is already
+addressed, and we point rather than argue. Section 8.2 reads: "The
+self-supervised arm here is a 50-epoch pre-training checkpoint rather than
+the 200- or 800-epoch ones of Section 3.7, because this analysis needs two
+arms of *matched accuracy* so that the asymmetry term does not dominate,
+and that is the budget at which SimCLR lands within a point of the prior.
+The budget lesson of Section 3.7 applies here too: a longer-pre-trained arm
+would ensemble differently, and we have not measured that." That text was
+added in the round 2 revision. If the referee read it and found it
+insufficient we will expand it; if it was simply buried mid-paragraph, we
+are happy to move it to the head of the subsection where it will be seen.
+
+**NB6, highlight 4.** Accepted. Naming the budget at which we win is still
+choosing the budget. It now reads: "Free prior beats 2×-compute SSL on
+small ViTs; at 5× the ordering flips with data" (81 characters).
+
+**NB7, the compiled PDF.** Supplied with this submission. Our apology for
+three rounds without one.
+
+### On what the referee could not verify
+
+The referee notes, correctly, that whether the numbers in the tables come
+from the records they claim is the one thing a referee cannot establish
+from the paper alone. We cannot fix that within the manuscript, but we can
+narrow it: every table and figure is regenerated by one command from the
+released records, the audit is a committed script rather than a query, and
+the two new checkers above are in the same repository. We would welcome the
+editor appointing a reproducibility reviewer with access to the artifact.
+
+---
+
+# Round 2
+
+Six blocking issues. All were accepted; five were fixed by re-running an
+analysis, and the sixth by deleting a claim.
+
+### R2-1. Figure 3 was drawn from the retracted audit
+
+**Confirmed and fixed.** `paper/figs/make_figs.py` still computed the
+readout SEM as `hypot(delta_sem, G_sem)` — the independent form that round 1
+retracted — so the figure drew the old classification beneath a caption
+already corrected to the new one. It now calls
+`analysis/audit_law_paired.py`, the same source of truth as the graphical
+abstract, which had been fixed while this generator was missed.
+
+Regenerating it exposed that the tables were stale in the *other*
+direction, because cells had landed since they were written. Every audit
+number in the paper is now re-derived from one run of the audit: **1,100**
+in scope, **511** resolvable, **404** correct = **79.1%**, **107** wrong,
+**487** unresolved, **102** in the crossing bracket, held out **218 / 272 =
+80.1%**, clustered **200 / 258**. The caption's stale 989 is now 1,100.
+
+### R2-2. The r = −0.80 is a two-cluster artifact
+
+**Accepted, and withdrawn rather than softened.** We recomputed it: pooled
+r = −0.801, but **within** EuroSAT-MS it is **+0.08** and within So2Sat
+**−0.05**, and the two clusters are disjoint on both axes. Its effective
+sample size is two populations, not ten points, and those populations
+differ in modality as well as in asymmetry, so nothing in our design
+separates "too unequal" from "cross-modal".
+
+It is removed from the abstract, restated in Section 8.1 as a contrast with
+the confound named and the third population that would break it specified,
+and demoted in the decision procedure to a ranking heuristic explicitly
+flagged as the weakest-supported step. Highlight 2 was advertising the same
+withdrawn claim and was rewritten.
+
+### R2-3. The held-out count was unexplained
+
+**Fixed, with the bias declared.** 272 of 511, and the shortfall is not a
+sampling choice: re-fitting the bracket without a dataset makes it much
+wider (for CIFAR-100, [13.7, 86.8]), and a cell inside a bracket makes no
+prediction, so **193** are swallowed; **46** more sit in datasets too small
+to receive a fold. 272 + 193 + 46 = 511. We also state what this does to
+the comparison — it keeps the cells furthest from the crossing, where the
+account is most confident — so the held-out rate reads as an upper bound
+rather than as like-for-like.
+
+### R2-4. Compute accounting not regenerated
+
+**Rebuilt from the run records:** 3,341 GPU-hours over 8,827 records, with
+the device split re-derived, 2,639 kWh and 51 g CO₂eq per run. The
+8,827-against-8,887 discrepancy resolves by deletion: every retained record
+carries a wall-clock field, so there is no second population of timed runs.
+
+### R2-5. Three uncited claims
+
+**Restored:** the scattering transformer described in technical detail now
+cites Patro et al.; the carbon methodology cites Lacoste et al.; the
+small-data ViT paragraph cites Swin for hierarchical bias. Staying inside
+the 50-reference cap meant trading two attributions out rather than
+conceding priority to Smirnov, which we judged the more valuable citation.
+
+### R2-6. The letter contradicted the manuscript on the ViT 5% cell
+
+**Fixed, and the manuscript was right.** That cell was deepened from 3 to 6
+seeds after the letter was drafted, and the margin **strengthened** from
+−1.08 (2.0 SEM) to **−1.57 (3.9 SEM)**. The letter now carries both and
+says which is current. We note the irony that our fix for a stale letter in
+round 2 was itself item-level, which is how the whole letter came to be
+stale in round 3.
+
+---
+
+# Round 1
 
 ## Blocking issues
 
@@ -29,8 +240,14 @@ dataset's cells are then audited against it.
 
 | | cells | correct | rate | 95% CI |
 |---|---:|---:|---:|---|
-| in sample | 498 | 393 | 78.9% | [75.1, 82.3] |
-| **held out** | **273** | **218** | **79.9%** | **[74.7, 84.2]** |
+| in sample | 511 | 404 | 79.1% | [75.3, 82.4] |
+| **held out** | **272** | **218** | **80.1%** | **[75.0, 84.5]** |
+
+*(These are the current manuscript's values. When this response was first
+written the same query returned 498 / 393 / 78.9% in sample and 273 / 218 /
+79.9% held out; the multi-source cells entered the law's scope in round 2,
+which moved the audit to the figures above. Nothing else about the analysis
+changed.)*
 
 The two are statistically indistinguishable. We therefore report, and now
 state in Section 4.2, that the account **generalizes across datasets at the
@@ -60,7 +277,7 @@ ones the old bar excluded. As the referee predicted, the rate falls:
 | | cells | correct | rate |
 |---|---:|---:|---:|
 | as published | 278 | 268 | 96.4% |
-| **corrected** | **498** | **393** | **78.9%** |
+| **corrected** | **511** | **404** | **79.1%** |
 
 The readout *values* are unchanged (median difference 0.003 points); this
 is entirely the uncertainty formula. Every dependent number has been
@@ -146,44 +363,78 @@ SimSiam *at this budget*, and that readers optimizing for attainable
 accuracy rather than accuracy per unit compute should treat our
 self-supervised numbers as lower bounds.
 
-The pre-training epoch sweep the referee marks optional is not in this
-revision. We will run it if the editor wishes.
+**The pre-training epoch sweep the referee marks optional is now in the
+revision, run across the whole data envelope, and it went against us in a
+way two fractions would have hidden.** Both self-supervised comparators
+were re-run at four times their pre-training budget at every fraction from
+1 to 25% (new Table 4, Section 3.7). Gains over the baseline:
 
----
+| CIFAR-100 | cost | 1% | 2% | 3% | 5% | 7% | 10% | 15% | 25% |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| **Prior (ours)** | **1.02×** | +1.40 | +2.50 | +3.68 | +5.15 | +4.87 | +3.75 | +2.55 | +0.16 |
+| SimSiam, 200 ep | 2.00× | −0.04 | −0.11 | +0.11 | +0.13 | +0.87 | +0.61 | +0.17 | −0.03 |
+| SimCLR, 200 ep | 2.00× | +2.25 | +4.88 | +5.99 | +9.05 | +9.86 | +8.76 | +6.64 | +2.81 |
+| SimSiam, 800 ep | 5.00× | −0.11 | +0.19 | +0.54 | +1.90 | +3.39 | **+4.33** | +3.65 | +0.79 |
+| SimCLR, 800 ep | 5.00× | **+4.52** | **+8.33** | **+10.82** | **+14.38** | **+13.88** | **+10.92** | **+8.36** | **+2.77** |
 
-## Non-blocking issues
+Three consequences, and we accept all of them.
 
-1. **Dataset and backbone counts.** Corrected throughout. The grid holds
-   **12 datasets** (one evaluation-only) plus **five relabelled controls**,
-   giving 16 dataset identities, 15 in the law's scope; and **9 backbones
-   across 5 architecture families**. "14 datasets" and "7 backbone
-   families" were both unsupported.
-2. **Backbone families.** As above; the audit table now reads 9 (5), and
-   the appendix explains why the identity count exceeds the image-source
-   count.
-3. **GPU-hour components.** Corrected to 3,281, the sum of its parts.
-4. **Table 15 versus Table 5.** The table now names its backbone
-   (ResNet-18) and states that these cells predate the champion's final
-   weight schedule, so they are internally comparable to each other, which
-   is what an ablation requires, but not to the envelope.
-5. **Section 6.3's unnamed cell.** Now named: CIFAR-100 at 10%, the
-   head-norm cells of the backbone sweep.
-6. **Equation 2.** Rewritten as a pointwise complex modulus.
-7. **Appendix B's readout branch provenance.** Addressed by the new
-   variance decomposition, which states the residual spread directly.
-8. **CIFAR-10 unimodality.** Softened to a plateau across 1–2% whose
-   difference (0.29) the seed uncertainty cannot resolve.
-9. **Uncited references.** ResNet, Swin, ConvNeXt, MobileNetV3, AdamW,
-   Raghu et al. and Ulyanov et al. are now cited in the text.
-10. **Anonymization contradiction.** Removed.
-11. **PathMNIST ethics.** A sentence now confirms it is a public,
-    de-identified benchmark requiring no ethics approval.
+1. **The referee was right about the budget.** SimSiam gains nothing at its
+   published budget anywhere on the envelope, and up to +4.33 at four times
+   it. We withdraw "SimSiam learns almost nothing at this scale."
 
-**Minor.** The duplicated dataset table is deleted. The 123.6 pt overfull
-box is reproduced by the *unmodified* `cas-dc-template.tex` shipped with
-the Elsevier template; it is a defect in the class file, marks an empty
-box, and no visible text overflows. We have left it rather than patch the
-publisher's class.
+2. **Against the stronger comparator the prior now loses everywhere,
+   including at 1%.** SimCLR at 5× beats it by 3.12 to 9.24 points, at 8 to
+   37 standard errors. Our earlier claim of near-parity with
+   self-supervision at 1% was a statement at 2× and does not survive 5×. We
+   have rewritten the convolutional positioning accordingly: **on conv
+   backbones the prior's case is cost, not accuracy**. The attention
+   results are measured at 2× and are unaffected; whether 5× SimCLR would
+   also overturn the prior on ViT under a modern recipe is a question this
+   experiment does not answer, and we do not claim it either way.
+
+3. **Two fractions would have misled us.** At 5% and 10% alone — the points
+   we would naturally have chosen, being where the referee's objection bit
+   — the story reads "prior beats 5× SimSiam at the scarcer fraction, ties
+   at the other." The envelope instead shows a crossover: the prior wins
+   from 1 to 7% and loses at 10 to 25%, most clearly at 15% (−1.10, 5.2
+   standard errors). We flag this because it is the same sparse-grid error
+   we identify in our own earlier readings elsewhere in the paper.
+
+4. **We ran the same test on the attention regime, unprompted.** Leaving
+   that comparison at 2× while raising the convolutional one to 5× would
+   have reproduced the very asymmetry the referee identified. Against
+   ViT-tiny under the DeiT recipe, 5× SimCLR gives 30.45 / 40.57 / 55.85 at
+   5 / 10 / 25%, against the prior's 28.87 / 41.29 / 57.32. The comparator
+   **wins at 5%** (−1.57, 3.9 SEM), the two are level at 10%, and the prior
+   wins at 25% (+1.47, 7.2 SEM).
+
+   *Correction to an earlier draft of this letter, which quoted 29.97
+   against 28.89 for a margin of −1.08 at 2.0 SEM.* That 5% cell was the
+   one marginal result in the comparison, so we deepened both of its arms
+   from three seeds to six. The margin **strengthened** rather than
+   regressing, from −1.08 (2.0 SEM) to −1.57 (3.9 SEM), and the manuscript
+   reports the six-seed values throughout. We flag it because the earlier
+   number made this cell look marginal when it is not: the comparator
+   genuinely wins there, and we would rather the record be unambiguous
+   about a result that goes against us. The attention claim therefore survives, but
+   we now state it with its budget attached: the prior leads at every
+   fraction at 2×, and only in the higher-data band at 5×.
+
+   Repeating it on Tiny-ImageNet at 5, 10 and 25% gives the same ordering
+   at every matched fraction as CIFAR-100: the comparator wins at 5% (3.9
+   and 3.7 SEM), the two are level at 10%, and the prior wins at 25% (7.2
+   and 5.1 SEM). We report that we first measured only 5 and 10% there,
+   concluded the populations told different stories, predicted the 25% cell
+   against our own method, and were wrong by 5.1 SEM — the same two-point
+   error the budget envelope itself was run to avoid.
+
+   We also record that this contradicted our own pre-registered prediction —
+   we expected 25% to be the cell that flipped and it was 5% — and why: the
+   extra budget buys the comparator +8.32 / +4.51 / +3.53 at 5 / 10 / 25%,
+   decreasing with data, because 200 epochs over 2,500 images is fewer than
+   four thousand steps. We had assumed the comparator was data-starved where
+   it was in fact step-starved.
 
 ---
 

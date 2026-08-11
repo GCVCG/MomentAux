@@ -1,0 +1,7 @@
+Highlights
+
+- A 2,894-configuration benchmark of data-efficiency interventions
+- Splitting one instrument's bands pays; pairing two satellites does not
+- A measurable rule predicts stacking, substitution or interference
+- Free prior beats 2x-compute SSL on small ViTs at every data fraction
+- Attention's feature deficit persists at 1.28M images and grows with scale

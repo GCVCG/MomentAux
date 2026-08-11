@@ -35,7 +35,9 @@ descriptor recovers about half.}
 \zebra{2}
 \begin{tabular}{@{}P{0.33\columnwidth}rrP{0.31\columnwidth}@{}}
 \toprule
-Aux target & @5\%~\up & @10\%~\up & Note \\
+ & \multicolumn{2}{c}{$\Delta$ at fraction~\up} & \\
+\cmidrule(lr){2-3}
+Aux target & 5\% & 10\% & Note \\
 \midrule
 Moment magnitude (ours) & $+3.31$ & $+2.81$ & phase-invariant energy \\
 Structure tensor &--& $+1.78$ & mild nonlinearity \\
@@ -91,7 +93,8 @@ sweep confirms one $\lambda_0$ across ResNet-34 and -50 on six further
 domains ($+0.4$ to $+9.0$
 at 5--10\% everywhere except CUB's deep-scarcity floor, decaying on the
 right flank as the law requires). Head \emph{form} is irrelevant where it
-plausibly might not have been: linear, cosine, and nearest-class-mean
+plausibly might not have been: linear, cosine
+, and nearest-class-mean
 readouts measure the same aux-vs-baseline gap to within $0.3$ points,
 the left-flank bottleneck is label information, not classifier
 expressivity.
@@ -116,7 +119,7 @@ Widening the pinned 8-pair bank to 12 channels (via a third octave or two
 extra orientations, indistinguishable at $10{\times}10$ seeds) buys a
 real but local $+0.3$--$0.5$ at Tiny-ImageNet's 64\,px and nothing at
 32\,px; across five further 64\,px domains the pooled excess fails our
-pre-registered re-pin criterion. The committed 8-pair bank therefore
+pre-registered re-pin criterion. The pinned 8-pair bank therefore
 stays, with cross-domain evidence rather than convenience behind it.
 
 \subsection{Stabilization as a second, distinct effect}\label{abl:stab}
@@ -187,7 +190,7 @@ Conv backbone, photo-like data, mid band (2--15\%), $2\times$ affordable & SimCL
 Conv, photo-like, $2\times$ \emph{not} affordable & prior & $1.02\times$ & $+1.4..{+}6.7$; ${\sim}$SSL parity at extremes \\
 Conv, extreme scarcity (${\leq}1$--$2\%$) & prior (or fwd stem) & $1.02\times$ & SSL margin ${\leq}1$ pt; forward stem best ${\leq}2\%$ \\
 Satellite-like statistics, low data & prior & $1.02\times$ & beats SimCLR at 7 of 11 EuroSAT fractions \\
-Any ViT trained the modern way (DeiT aug) & prior \emph{and} augmentation & $1.02\times$ & flip: beats SSL at every fraction; $+14..{+}25$ over recipe alone \\
+Any ViT trained the modern way (DeiT aug) & prior \emph{and} augmentation & $1.02\times$ & flip: beats SSL at every fraction at $2\times$; at $5\times$ only in the higher-data band (both populations); $+14..{+}25$ over recipe alone \\
 ViT and Swin from scratch, any scale & prior & $1.02\times$ & $+3.2$ at 1.28M imgs; $+13$ and $+26$ at 224\,px; stabilizes Swin \\
 ImageNet-transferable task & transfer; \textbf{never} add prior &--& tax up to $-17$, feature-side \\
 Domain-shifted from ImageNet (e.g.\ stains) & prior from scratch competitive & $1.02\times$ & transfer advantage shrinks to $+2..{+}3$ \\
@@ -210,7 +213,7 @@ rather than competing with it.
 The grid's size is not its point; its point is that a single
 low-dimensional structure organizes a large part of it. We are careful
 with ``explains'': binned on baseline accuracy the readout term has
-$R^2 = 0.18$ and a residual spread of $2.2$ points, so this is an
+$R^2 = 0.18$ and a residual spread of $\auditResidSD$ points, so this is an
 account of a trend and of a \emph{sign}, not a predictor of a cell's
 value. The decomposition in Eq.~\ref{eq:law} says that an
 intervention's visible benefit is feature gain passed through a
@@ -286,7 +289,7 @@ that cannot be wrong is not measuring anything.
 \emph{empirical} regularity, not a theorem, and we state its measured scope
 plainly so that it is not read as more than it is. It was fitted to nothing:
 we report the measured readout curve and use it directly. Its demonstrated
-domain is 12 datasets across five visual domains, backbones from 5.7M to 86M
+domain is 13 datasets across six visual domains, backbones from 5.7M to 86M
 parameters, images from $32$ to $224$\,px, and training sets from 500 to
 $1.28$M images, all under one supervised recipe with an auxiliary prior
 trained from scratch. Cells initialized from self-supervised or ImageNet
@@ -297,8 +300,8 @@ family's feature gain from baseline heights alone (four of four in band),
 eight cells on four unseen domains (seven in band, eight of eight correct in
 sign), and the ImageNet-scale residual. Where the law is weakest is equally
 explicit: on the right flank it predicts readout ${\approx}0$ and gets it,
-which is true but not discriminating, so 475 of 1{,}075 in-scope cells
-cannot test it at all, and of the 498 that can, those above the crossing
+which is true but not discriminating, so 487 of 1{,}100 in-scope cells
+cannot test it at all, and of the 511 that can, those above the crossing
 are right only $61\%$ of the time. Nothing here licenses
 extrapolation to web-scale pre-training, to architectures whose baselines do
 not train under this recipe, or to tasks other than classification.
@@ -322,7 +325,17 @@ bistability, itself a finding, limits headline claims. PathMNIST's
 shifted test split confounds its high-data cells for every method. Linear
 evaluations lose interpretability at 100\% cells (the evaluation ceiling)
 and at ImageNet64
-are budget-bound by construction. One prior family (Gabor and moment energy)
+are budget-bound by construction. The two ImageNet stages were run at
+\emph{full data only}, so what we validate at scale is the law and the
+right flank, not the envelope: the peak location and the left-flank
+suppression that Section~\ref{sec:ownenvelope} establishes on eleven
+smaller populations are untested above $100$k images. That is a cost
+decision rather than a considered one, and it is the cheapest gap to
+close, since a $1\%$ ImageNet64 cell is $12{,}811$ images over $1000$
+classes, i.e.\ thirteen per class in a label space five times finer than
+anything else here, exactly the scarce, fine-grained corner where the
+readout term is largest and where our account is therefore easiest to
+falsify. One prior family (Gabor and moment energy)
 is tested as the knowledge source; the taxonomy predicts, but does not
 yet demonstrate, that other structural priors will slot into the same
 currency logic.
@@ -342,21 +355,36 @@ warmup for large-ViT pre-training proper.
 %% ---------------------------------------------------------------------
 \section{Conclusion}\label{sec:conclusion}
 
-We built an instrument, one recipe, committed data, pinned filters,
-pre-registered predictions, and used it to measure how a nearly free
-structural prior fuses with the modern menu of data-efficiency
-interventions across 12 datasets, 9 backbones and four orders of
-magnitude in data. The measurements organize under one empirical
-decomposition separating feature gain from readout, which predicted an
-unseen backbone family's feature gain in advance and tied accuracy to
-features within about a point at ImageNet scale, and whose sign holds on
-$79\%$ of testable cells overall and $88\%$ in the scarce-data regime it
-describes best; and they support a three-way fusion taxonomy, stack,
-substitute, tax, decided by whether the fused sources carry the same
-information currency. The
-practical residue is a decision guide whose strongest entry is also the
-study's headline: for vision transformers trained the way practitioners
-actually train them, a fixed spectral target costing $2\%$ of training
-compute and nothing at inference is worth between $+13$ and $+26$
-accuracy points, and no $2\times$-compute alternative we measured matches
-it.
+We opened with one intervention worth $+26$ points, nothing, and $-17$
+points in three different settings, and asked what distinguishes the
+cases. The answer this study supports is that information sources trade
+in currencies, that what a source is worth is set by which currency is
+scarce rather than by how modern the source is, and, the part that makes
+it useful rather than merely descriptive, that each source's currency is
+measurable on frozen features from that source \emph{alone}, before any
+combination is trained. Same currency, and the second source is
+redundant however sophisticated it is; different currencies, and the
+gains compound; a shaping prior poured into an initialization that
+already carries mature features destroys them in proportion to what they
+were worth.
+
+We reached this through an instrument rather than a set of experiments:
+one recipe, fixed data, pinned filters, declared comparator budgets and
+pre-registered predictions, across 13 datasets, 9 backbones and four
+orders of magnitude in data. The measurements organize under one
+empirical decomposition separating feature gain from readout, which
+predicted an unseen backbone family's feature gain in advance and tied
+accuracy to features within about a point at ImageNet scale, and whose
+sign holds on $79\%$ of testable cells overall and $88\%$ in the
+scarce-data regime it describes best. The same discipline cost us two
+accuracy claims, which the comparator-budget experiment overturned and
+which we restate here as cost claims.
+
+The most surprising thing the instrument found is the direction of the
+attention result. A bank of oriented filters that predates deep learning
+is worth $+13$ points to ViT-S/16 and $+26$ to ViT-B/16 at $224$\,px, it
+is worth \emph{more} to the larger model, and it is still worth $+3.2$
+after 1.28 million images, in a regime where our convolutional baseline
+is neutral to within $0.04$. Whatever small transformers fail to learn
+about oriented structure at these scales, more parameters and more data
+did not supply it, and $2\%$ of a training run did.

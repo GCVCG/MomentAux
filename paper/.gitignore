@@ -7,4 +7,10 @@
 *.fls
 *.fdb_latexmk
 build.log
-main.pdf
+
+# main.pdf is NOT ignored, deliberately. It was, and that is why three
+# submissions reached the referee without a compiled manuscript even though
+# SUBMISSION_FILES.md listed it: a package assembled from the repository
+# silently omitted the one file the rule excluded. The guide requires
+# editable sources AND a compiled PDF; paper/check_submission.py now fails
+# if the PDF is absent or older than the sources it was built from.

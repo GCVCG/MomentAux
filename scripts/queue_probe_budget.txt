@@ -1,0 +1,5 @@
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagsslbudget_simclr800_c100_5pct.yaml --run runs/diagsslbudget_simclr800_c100_5pct --ckpt best.pt
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagsslbudget_simclr800_c100_10pct.yaml --run runs/diagsslbudget_simclr800_c100_10pct --ckpt best.pt
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagdeitsslbudget_simclr800_vit_5pct.yaml --run runs/diagdeitsslbudget_simclr800_vit_5pct --ckpt best.pt
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagdeitsslbudget_simclr800_vit_10pct.yaml --run runs/diagdeitsslbudget_simclr800_vit_10pct --ckpt best.pt
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagdeitsslbudget_simclr800_vit_25pct.yaml --run runs/diagdeitsslbudget_simclr800_vit_25pct --ckpt best.pt

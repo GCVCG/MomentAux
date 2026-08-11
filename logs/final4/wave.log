@@ -1,2 +1,7 @@
 FAIL diagdepth_r50_food_aux_25pct seed0
 FAIL diagdepth_r50_path_aux_25pct seed1
+OK diagdepth_r50_path_aux_25pct seed1
+OK diagin100_r50_aux seed1
+FINAL4_LOCAL_COMPLETE 2026-08-08T04:58:13+02:00
+OK diagdepth_r50_food_aux_25pct seed0
+DEPTH_SEQ_COMPLETE 2026-08-08T05:21:37+02:00

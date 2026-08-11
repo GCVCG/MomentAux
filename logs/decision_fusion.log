@@ -1,0 +1,20 @@
+  abl5_none                                    seeds=10  seed-ens acc=27.60
+  auxmag_5pct_sched0                           seeds=10  seed-ens acc=33.45
+  diagssl_simclr_5pct                          seeds=3  seed-ens acc=37.42
+  diagssl_simclraux_5pct                       seeds=3  seed-ens acc=35.31
+  diagssl_none400_5pct                         seeds=3  seed-ens acc=29.38
+  diagssl_simclr50_5pct                        seeds=3  seed-ens acc=33.25
+  auxmag3_c100_5pct                            seeds=3  seed-ens acc=32.64
+  enmag_5pct                                   seeds=3  seed-ens acc=30.80
+
+wrote results/decision_fusion_c100_5.json: 8 cells, 28 pairs
+  + 2.34  diagssl_none400_5pct               + enmag_5pct                         (disagree 60.3%)
+  + 2.09  diagssl_simclraux_5pct             + diagssl_none400_5pct               (disagree 67.0%)
+  + 2.06  auxmag_5pct_sched0                 + diagssl_simclraux_5pct             (disagree 55.6%)
+  + 1.39  diagssl_simclraux_5pct             + auxmag3_c100_5pct                  (disagree 56.8%)
+  + 1.28  diagssl_simclraux_5pct             + diagssl_simclr50_5pct              (disagree 51.6%)
+  + 1.25  diagssl_simclr_5pct                + diagssl_none400_5pct               (disagree 67.4%)
+  + 1.24  auxmag_5pct_sched0                 + diagssl_simclr_5pct                (disagree 57.7%)
+  + 1.21  abl5_none                          + enmag_5pct                         (disagree 60.5%)
+  + 1.20  auxmag_5pct_sched0                 + diagssl_simclr50_5pct              (disagree 47.2%)
+  + 1.19  abl5_none                          + diagssl_simclraux_5pct             (disagree 68.8%)

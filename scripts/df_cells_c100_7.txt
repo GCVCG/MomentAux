@@ -1,0 +1,7 @@
+diagtransfer2_c100_none_7pct
+diagssl_simclr_7pct
+diaggrid_c100_r18_e800_5c8bbf_7pct
+grid_c100_r18_axmagnitudeL3_l10to00_hn_d94ac5_7pct
+auxmag_7pct_sched0
+grid_c100_r18_axmagnitudeL3_l20to00_461755_7pct
+abl7_gaboronly_calib

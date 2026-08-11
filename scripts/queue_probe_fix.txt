@@ -1,0 +1,4 @@
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/diagnostics/auxmag_2pct_sched0.yaml --run runs/auxmag_2pct_sched0 --ckpt best.pt
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/diagnostics/auxmag_3pct_sched0.yaml --run runs/auxmag_3pct_sched0 --ckpt best.pt
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/diagnostics/auxmag_15pct_sched0.yaml --run runs/auxmag_15pct_sched0 --ckpt best.pt
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/diagnostics/auxmag_25pct_sched0.yaml --run runs/auxmag_25pct_sched0 --ckpt best.pt

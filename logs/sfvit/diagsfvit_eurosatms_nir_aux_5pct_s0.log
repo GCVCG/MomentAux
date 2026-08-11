@@ -1,0 +1,2 @@
+moment-aux target calibrated on 1024 images
+[diagsfvit_eurosatms_nir_aux_5pct seed0] {"params_trainable": 5477970, "params_stem_trainable": 0, "params_stem_fixed_filters": 0, "flops_total": 354473280, "flops_stem": 0, "flops_image_size": 64}

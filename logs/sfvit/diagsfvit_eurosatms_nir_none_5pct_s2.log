@@ -1,0 +1,3 @@
+[diagsfvit_eurosatms_nir_none_5pct seed2] {"params_trainable": 5476426, "params_stem_trainable": 0, "params_stem_fixed_filters": 0, "flops_total": 354473280, "flops_stem": 0, "flops_image_size": 64}
+epoch 1/200 loss 1.7982 train 0.3486 test 0.5191
+epoch 2/200 loss 1.3588 train 0.5342 test 0.5261

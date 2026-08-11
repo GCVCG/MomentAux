@@ -95,8 +95,26 @@ tar -tzf run-records.tar.gz | head
 
 ## Regenerating the paper's tables from the release
 
+Run all three. They write different things, and the one with the most
+reassuring console output is not the one that writes the released CSVs:
+
 ```bash
-tar -xzf run-records.tar.gz          # restores runs/<cell>/seed<N>/final.json
-python analysis/aggregate.py         # regenerates every table
-python analysis/audit_sign_law.py    # re-runs the audit reported in the paper
+tar -xzf run-records.tar.gz            # restores runs/<cell>/seed<N>/final.json
+python analysis/aggregate.py           # -> results/summary.{md,tex}
+python analysis/export_results_csv.py  # -> results/all_results.csv,
+                                       #    results/results_by_portion.csv
+python analysis/audit_law_paired.py    # -> the sign-law numbers in the paper,
+                                       #    with the seed-paired uncertainty
 ```
+
+`aggregate.py` prints a long table and writes only the summary files, so it
+is easy to run it, see the new cells scroll past, and conclude the released
+CSVs are current when they are not. We made exactly that mistake and record
+it here rather than only fixing it.
+
+`audit_law_paired.py` supersedes `audit_sign_law.py`. The older script forms
+the readout's uncertainty as if the end-to-end gain and the feature gain
+were independent; they come from the same checkpoints and are correlated,
+which overstates the uncertainty by a median factor of 1.8 and admits too
+few cells to the audit. Both are kept so the difference is inspectable, but
+the paper reports the paired version.

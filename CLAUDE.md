@@ -74,9 +74,11 @@ ported vs corrected and why.
 - **CLUSTER SPLIT CONFIRMED**: turing runs the LIVE work (envelope completion,
   new waves); BSC fills the missing numbers of the results grid, including the
   1,467 already-closed-configuration runs. Unchanged from the 2026-07-22 split.
-- BSC password ROTATED 2026-07-22 (the old one had been pasted in plaintext).
-  New value in ~/.bsc_password (0600) on the local machine, never echoed to a
-  transcript; SSH key auth is what the automation actually uses.
+- BSC credentials were rotated 2026-07-22 after an earlier one was pasted in
+  plaintext. Credentials live only in a 0600 file on the local machine, are
+  never echoed to a transcript, and SSH key auth is what the automation
+  actually uses. (Details deliberately omitted: this file is released with
+  the paper.)
 
 ## Active campaign (2026-07-18, user-approved "run the whole needed experiments")
 
@@ -2017,7 +2019,7 @@ ported vs corrected and why.
             quantity; the substantive claim (conv feature-neutrality at
             224px) lands exactly. Re-probe at 3v3 when the heals finish.
   CROSS-MACHINE REPRODUCTION (2026-08-07): the in100 probes were run
-  REDUNDANTLY on solarflare (161.116.84.52, second RTX 3090, fresh venv
+  REDUNDANTLY on a second workstation ("solarflare", second RTX 3090, fresh venv
   built that day: torch 2.7.0+cu126 / timm 1.0.27). Probe means agree with
   the local machine to 0.01-0.05 on all four cells; G(vits) = +11.91 vs
   +11.95 local. The S1 headline number reproduces on independent hardware
@@ -3320,3 +3322,507 @@ ported vs corrected and why.
   is settled ("learned teacher does ~NOTHING while the free hand-crafted
   moment gives +3.3/+2.8") — these cells were shipped only so the queue can
   reach GRID_COMPLETE instead of crash-looping forever.
+
+## So2Sat LCZ42 — the cross-modality population (2026-08-08)
+
+- WHY THIS POPULATION: every multi-source cell so far (EuroSAT-MS) splits ONE
+  instrument's bands. So2Sat pairs **Sentinel-1 SAR (8 ch) with Sentinel-2
+  optical (10 ch)**, 17 LCZ classes, 32px: different satellites, different
+  physics (backscatter vs reflectance), no shared detector. Configs are the
+  champion VERBATIM; only `dataset` differs across sar/opt/all, so the sensor
+  comparison carries no recipe confound. 90 cells, split 54 solarflare /
+  36 local.
+- PREDICTIONS RECORDED WITH ONE CELL ALREADY SEEN, and that is stated rather
+  than hidden: sf_so2sat_sar_none_10pct = 49.12±0.38 (n=3) and
+  sf_so2sat_sar_aux_10pct seed0 = 48.85 were on disk when these were written.
+  So the SAR band below is a POST-hoc reading of one seed, not a prediction,
+  and must not be scored as one. The optical and fused bands are untouched.
+    SAR-only: Δ ~ −0.5..+0.5 (neutral). REASONING, and it is a real
+      mechanism claim: the aux target is oriented-energy magnitude, and SAR
+      is speckle-dominated with no photographic edge statistics. If the
+      prior is genuinely domain-agnostic it should still help; if it is
+      really an *optical-image* prior, SAR is where that shows.
+    Optical-only: Δ +1.0..+2.5 (EuroSAT-MS non-visible gave +2.31 at 10%).
+    Fused: Δ ≥ optical-only if the currencies differ.
+- THE CONFOUND, recorded BEFORE the result so it cannot be invented after:
+  momentstem/energy.py builds its scalar field from a LUMA weighting, and
+  for N != 3 channels I generalized that to a uniform 1/N mean. For optical
+  bands that is defensible; for SAR it averages backscatter channels, which
+  has no photometric meaning. So a NULL on SAR is ambiguous between "the
+  prior does not suit radar statistics" and "the channel reduction is wrong
+  for radar", and a null must be reported with that ambiguity intact. The
+  disambiguating run (a SAR-specific reduction) is NOT queued and would be a
+  new design decision, not a bug fix.
+- FALSIFIER for "the prior is domain-agnostic": Δ(SAR) ≤ −1.0 at 3 seeds on
+  two fractions => the prior is an optical-image prior and every
+  cross-domain claim must name its modality.
+
+## ViT BUDGET FALSIFIER (2026-08-09) — the paper's last accuracy claim
+
+- WHY NOW: the conv budget envelope (SimCLR/SimSiam at 800 pre-epochs, 8
+  fractions, landed 2026-08-09) showed **SimCLR at 5x beats the prior at
+  EVERY conv fraction 1-25%** (+3.12..+9.24, 8-37 sigma). The conv accuracy
+  claim is therefore withdrawn and restated as a COST claim. The paper's
+  ONLY surviving accuracy claim is the ATTENTION regime under DeiT
+  augmentation — and that was measured against SimCLR at 2x ONLY. Leaving it
+  there would be exactly the asymmetry the referee flagged: the comparator
+  gets its published budget where it loses, and never gets more.
+- CELLS: diagdeitsslbudget_simclr800_vit_{5,10,25}pct — ViT-tiny, DeiT aug,
+  SimCLR init at 800 pre-epochs, 3 seeds. Comparators (all measured):
+      pct   deit-base  deit-ssl(2x)  deit-aux(1.02x)
+        5     12.55       21.64         28.89
+       10     20.28       36.06         41.29
+       25     32.27       52.31         57.32
+- PREDICTIONS RECORDED IN ADVANCE (nothing from these cells seen):
+    @10%: **38..44**. Reasoning, and it is a real mechanism claim rather
+      than a hedge: on CONV, 4x budget moved SimCLR by +2.2..+5.3 with the
+      largest moves in the mid band. Applying the same increment to
+      deit-ssl's 36.06 lands 38-41, i.e. BELOW deit-aux's 41.29 but close.
+      The mechanism says it should move LESS than on conv: under DeiT
+      augmentation SimCLR's currency (nuisance invariance) is already
+      supplied by the supervised augmentation, which is why deit-ssl2b
+      showed stronger views HURT (-4..-12). More of a substituted currency
+      should buy little.
+    @5%:  **23..28** (deit-aux 28.89)   @25%: **54..59** (deit-aux 57.32).
+    So the recorded bet is: the prior HOLDS at 5 and 10%, and 25% is the
+    cell most likely to flip (its conv counterpart flipped, and deit-ssl is
+    already within 5.0 there).
+- FALSIFIER, and it is the paper's last one: deit-ssl800 >= deit-aux at
+  BOTH 10% and 25% => 5x compute overturns the prior on attention too, the
+  attention accuracy claim is withdrawn like the conv one, and MomentAux's
+  case becomes PURELY cost (+2% vs +400%) on every backbone measured. That
+  outcome must be reported as plainly as this entry states it.
+- HONEST NOTE ON WHAT IS NOT TESTED: the prior gets no extra budget in this
+  comparison because it has none to spend — it is a fixed target with no
+  pretraining stage. The comparison is "free prior vs SSL at 5x", not
+  "equal budgets", and the paper must say so.
+
+- *** ViT BUDGET FALSIFIER SCORED (2026-08-09, 3 seeds/cell, both GPUs).
+  THE FALSIFIER DID NOT FIRE, BUT MY DIRECTIONAL BET WAS EXACTLY BACKWARDS:
+      pct  deit-base  ssl-2x  aux-1.02x  ssl-5x | aux-ssl5x  sigma  band
+       5%    12.55     21.64    28.89    29.97  |   -1.08    -2.0   23..28 HIGH
+      10%    20.28     36.06    41.29    40.57  |   +0.71    +1.2   38..44 IN
+      25%    32.27     52.31    57.32    55.85  |   +1.47    +7.2   54..59 IN
+  RECORDED FALSIFIER: ssl800 >= aux at BOTH 10% and 25% => attention accuracy
+  claim withdrawn. It did NOT fire: ssl-5x is below aux at both (tie at 10%,
+  and the prior wins 25% by 7.2 sigma). The attention claim SURVIVES.
+  BUT THE SHAPE IS THE OPPOSITE OF MY PREDICTION. I wrote "the prior HOLDS at
+  5 and 10%, and 25% is the cell most likely to flip". In fact 5% FLIPPED
+  (SSL wins by 1.08, 2.0 sigma; band missed HIGH at 29.97 vs 23..28), 10% is
+  a TIE (1.2 sigma), and 25% is where the prior is STRONGEST (+1.47, 7.2
+  sigma). I had the data-ordering inverted.
+  WHY, and it is measurable rather than a story: 4x budget buys SimCLR
+  +8.32/+4.51/+3.53 at 5/10/25% -- DECREASING with data. At 2500 images
+  200 epochs is only ~3900 steps, so the comparator was step-starved exactly
+  where I assumed it was data-starved beyond rescue. On CONV the same budget
+  increment peaked in the MID band (+5.3 at 5%, +2.2 at 10%, -0.04 at 25%),
+  so the budget response differs by backbone family too.
+  HONEST RESTATEMENT REQUIRED, and made: "the prior beats SimCLR at every
+  C100 fraction once a small ViT is trained the modern way" is a 2x
+  statement (2x SSL is below aux at all three: 21.64/36.06/52.31). At 5x it
+  becomes SSL WINS at 5%, TIE at 10%, PRIOR WINS at 25%. So on attention the
+  prior's advantage at high comparator budget lives in the HIGHER-data band
+  -- the reverse of the plain-aug ViT pattern (prior won BELOW 10%) and the
+  reverse of conv (where 5x SSL wins everywhere). Three regimes, three
+  different orderings; state each with its budget attached.
+
+## BUDGET-CELL G PROBES + SECOND POPULATION (2026-08-09)
+
+- WHY: the budget envelope is e2e-only. The currency account says SimCLR and
+  the prior fill the SAME feature deficit (that is why they never stack), so
+  giving SimCLR 5x should show up as MORE OF THE SAME CURRENCY on the
+  feature side, not a different one. That is a falsifiable prediction and it
+  has never been measured on a budget axis.
+- PROTOCOL: every G is a matched pair probed on ONE machine under the
+  identical linear protocol; solarflare's budget checkpoints were pulled
+  local for exactly this reason. Baselines abl{5,10}_none and
+  diagdeit_none_{5,10,25}pct are already probed under the same protocol.
+- SCOPE CAVEAT, stated first: the sign law was derived on aux-from-scratch
+  cells. SSL-init cells are a NON-AUX intervention and are scored
+  separately, as the 2026-07-20 entry requires. They have complied before
+  (conv simclr: Delta +9.18 vs G +9.02) but a miss here is not a sign-law
+  violation.
+- PREDICTIONS RECORDED IN ADVANCE (readout read off the measured curve at
+  matched baseline height; G_pred = Delta - readout_pred):
+      cell                    base    Delta   readout_pred  G_pred  BAND
+      simclr800 C100@5%      25.36   +14.38     -1.1        15.5   [13.5,17.5]
+      simclr800 C100@10%     40.28   +10.92     +0.1        10.8   [ 9.0,12.5]
+      simclr800 ViT-deit@5%  12.55   +17.42     -3.8        21.2   [18.5,24.0]
+      simclr800 ViT-deit@10% 20.28   +20.29     -1.2        21.5   [19.5,23.5]
+      simclr800 ViT-deit@25% 32.27   +23.58     +2.0        21.6   [19.5,24.0]
+- THE CURRENCY PREDICTION, which is the point of the pass: G(simclr-5x)
+  should track G(prior) wherever the two are level e2e, and fall BELOW it
+  where the prior wins e2e. Measured prior G on ViT-deit: 21.35@5%,
+  22.20@10%, 23.05@25%. So the prediction is
+      @5%:  G(ssl5x) >= G(prior)  (SSL wins e2e by 1.08)
+      @10%: G(ssl5x) ~= G(prior)  (level e2e)
+      @25%: G(ssl5x) <  G(prior)  (prior wins e2e by 1.47, 7.2 sigma)
+  FALSIFIER for "budget buys more of the same currency": G(ssl5x) ABOVE
+  G(prior) at 25% while losing e2e by 7.2 sigma => the 25% loss is
+  readout-side, not feature-side, and "same currency, more of it" is the
+  wrong account of what extra pre-training budget buys.
+- SECOND POPULATION (solarflare, in parallel): diagdeitsslbudget_simclr800
+  on **tin@10%** vs the measured tin comparators (deit-none 10.49,
+  deit-ssl-2x 25.45, deit-aux 27.43). The C100 result — SSL wins at 5%,
+  level at 10%, prior wins at 25% — rests on ONE population.
+  PREDICTION: tin@10% is 10k images, i.e. between C100's 5% and 25% in
+  image count, and the C100 ordering is image-count-driven, so expect
+  ssl5x NEAR deit-aux: band **26..29**, i.e. level or slightly below.
+  FALSIFIER: ssl5x >= 29 on tin => the budget flip is population-specific
+  and the attention claim must be scoped to CIFAR-100.
+
+- *** BUDGET-CELL G PROBES SCORED (2026-08-09, matched pairs, one machine):
+      cell            base    Delta      G   readout   band        verdict
+      conv C100@5%   25.36   +14.38  +11.27   +3.11   13.5..17.5  LOW
+      conv C100@10%  40.28   +10.92   +8.68   +2.23    9.0..12.5  LOW
+      ViT-deit@5%    12.55   +17.42  +22.24   -4.83   18.5..24.0  IN
+      ViT-deit@10%   20.28   +20.29  +21.27   -0.98   19.5..23.5  IN
+      ViT-deit@25%   32.27   +23.58  +20.77   +2.81   19.5..24.0  IN
+  (1) THE CURRENCY PREDICTION HELD, 3/3, and it was the point of the pass.
+      Predicted G(ssl5x) >= G(prior) @5%, ~= @10%, < @25%, tracking the e2e
+      ordering. Measured against G(prior) 21.37/22.19/23.05:
+        @5%  +22.24 vs 21.37 = ssl5x HIGHER (+0.87) -- SSL wins e2e (+1.08)
+        @10% +21.27 vs 22.19 = ssl5x lower  (-0.92) -- e2e level
+        @25% +20.77 vs 23.05 = ssl5x LOWER  (-2.28) -- prior wins e2e (+1.47)
+      The recorded falsifier (G(ssl5x) ABOVE G(prior) at 25% while losing
+      e2e by 7.2 sigma => the loss is readout-side and "same currency, more
+      of it" is wrong) did NOT fire. Extra pre-training budget buys MORE OF
+      THE SAME CURRENCY, and the whole ViT budget ordering is FEATURE-SIDE.
+      Note G(prior) RISES with data (21.4/22.2/23.1) while G(ssl5x) FALLS
+      (22.2/21.3/20.8) -- they cross between 5 and 10%, which is exactly
+      where the e2e ordering crosses. Two independent measurements agreeing
+      on the crossover location.
+  (2) THE CONV CELLS MISSED LOW, BOTH OF THEM, and produced POSITIVE readout
+      (+3.11, +2.23). At base 25.36 that is on the wrong side of the
+      aux-derived branch (below the crossing, readout should be negative).
+      SCORED AS RECORDED: the scope caveat written before this pass says
+      SSL-init cells are a NON-AUX intervention outside the law's derived
+      scope, so this is NOT a sign-law violation and is not counted as one.
+      But it IS a finding: on conv, 5x-SSL cells sit ABOVE the aux readout
+      branch, i.e. they cash MORE accuracy per unit of feature gain than the
+      prior does at the same baseline height. On ViT the same cells sit ON
+      the branch (-4.83/-0.98 below the crossing, correct sign). So the
+      readout term is intervention-dependent on conv and not on attention --
+      unexplained, recorded, and a real open thread rather than a tidy one.
+- SECOND-POPULATION ENVELOPE (2026-08-09): tin@10% on solarflare (band
+  26..29 recorded above) and tin@5% chained on local. PREDICTION for tin@5%,
+  recorded before it runs: the C100 budget ordering is IMAGE-COUNT-driven
+  (SSL wins at 2.5k, level at 5k, prior wins at 12.5k), so tin@5% = 5k
+  images should land LEVEL with deit-aux 18.46 -> band **17..20**.
+  Together with tin@10% (10k imgs, band 26..29, at-or-below aux 27.43) this
+  gives the second population two points that test the image-count account
+  rather than one point that merely repeats it.
+
+- *** SECOND POPULATION SCORED (2026-08-09, tin, ViT-tiny + DeiT, 3 seeds).
+  BOTH BANDS HIT, THE ACCOUNT BEHIND THEM DID NOT:
+      pct  deit-base  ssl-2x  aux-1.02x  ssl-5x | aux-ssl5x  sigma  band
+       5%    8.29      16.67    18.46    19.81  |   -1.35    -3.7   17..20 IN
+      10%   10.49      25.45    27.43    27.73  |   -0.31    -0.6   26..29 IN
+  The recorded falsifier (ssl5x >= 29 at tin@10% => the budget flip is
+  population-specific) did NOT fire. But the bands were set from an
+  IMAGE-COUNT account, and testing that account at MATCHED image counts
+  falsifies it:
+      C100  2500 imgs  aux-ssl5x  -1.08 (-2.0 s)  tie/SSL
+      tin   5000 imgs             -1.35 (-3.7 s)  SSL WINS
+      C100  5000 imgs             +0.71 (+1.2 s)  tie
+      tin  10000 imgs             -0.31 (-0.6 s)  tie
+      C100 12500 imgs             +1.47 (+7.2 s)  PRIOR WINS
+  At 5,000 images the two populations DISAGREE (C100 level, tin SSL-wins by
+  3.7 sigma), so the ordering is NOT a function of image count. tin favours
+  the comparator at every matched count. The bands hit because they were
+  wide, not because the reasoning was right -- recorded as a band hit and an
+  ACCOUNT MISS, which is the same distinction the deepen wave forced.
+  CONSEQUENCE FOR THE PAPER, and it narrows a claim: at 5x comparator budget
+  the prior leads on C100 from ~10% upward but leads NOWHERE measured on tin
+  (SSL wins at 5%, ties at 10%). So "the prior beats SimCLR under a modern
+  recipe" is a **2x** statement on BOTH populations (deit-ssl2x is below aux
+  on both: 16.67 vs 18.46, 25.45 vs 27.43) and, at 5x, a C100-only statement
+  in the measured range. State it with both the budget AND the population.
+- tin@25% BUDGET CELL LAUNCHED (2026-08-09) — the sharp remaining question:
+  does the prior beat 5x SimCLR ANYWHERE on tin? On C100 it wins at 25% by
+  7.2 sigma; on tin it lost at 5% and tied at 10%.
+  tin@25% comparators: deit-none 23.14, deit-ssl-2x **38.48**, deit-aux
+  **38.24** — note SSL already TIES the prior at 2x here, unlike C100 where
+  2x SSL is 5 points behind at the same fraction.
+  PREDICTION RECORDED IN ADVANCE, and it is a bet AGAINST our own method:
+  **40..44**, i.e. 5x SSL WINS at tin@25% and the prior beats 5x SimCLR
+  nowhere on this population. Reasoning: the 2x arms are already level, and
+  4x more pre-training bought SimCLR +3.5 to +8.3 everywhere else measured.
+  FALSIFIER: ssl5x <= 38.24 (prior wins or ties) => the population
+  difference is NOT monotone in data and the tin envelope has a crossover
+  after all, which would make the C100 and tin stories the same shape with
+  a shifted crossing rather than different stories.
+
+- *** THE POPULATION DISAGREEMENT IS FEATURE-SIDE, AND THE MECHANISM IS THE
+  PRIOR'S G FALLING FURTHER THAN THE COMPARATOR'S (2026-08-09/10, tin budget
+  probes; tin comparators' probes were computed on the cluster, so these are
+  CROSS-MACHINE pairs -- verified elsewhere to agree to 0.01-0.05, and stated
+  as a caveat rather than hidden):
+      pop    imgs | G(ssl5x)  G(prior)  Gssl-Gpr | e2e aux-ssl
+      C100   2500 |  +22.24    +21.37    +0.87   |   -1.08
+      tin    5000 |  +17.72    +15.67    +2.05   |   -1.35
+      C100   5000 |  +21.27    +22.19    -0.93   |   +0.71
+      tin   10000 |  +20.92    +19.72    +1.19   |   -0.31
+      C100  12500 |  +20.77    +23.05    -2.28   |   +1.47
+  **5/5 SIGN AGREEMENT** between (G_ssl - G_prior) and the e2e ordering:
+  whichever intervention has the larger feature gain wins end to end, on both
+  populations, at every fraction. So the budget comparison is feature-side
+  throughout and not a readout artifact -- the same conclusion the C100-only
+  probes reached, now with the second population included.
+  AND IT EXPLAINS THE DISAGREEMENT. At a MATCHED 5,000 images the two
+  populations differ because the PRIOR's feature gain differs: G(prior) is
+  +22.19 on C100 and only +15.67 on tin, while G(ssl5x) is +21.27 and +17.72.
+  The comparator loses ~3.5 points of G moving to tin; the prior loses ~6.5.
+  So the free spectral target contributes LESS on the 200-way 64px task
+  relative to what contrastive pre-training contributes there, which is
+  exactly why tin favours the comparator at every matched count.
+  This is the honest mechanism for the narrowed claim, and it is measured
+  rather than argued: the population term is not a mystery, it is G(prior)
+  degrading faster than G(SSL) as the label space gets finer.
+
+- *** tin@25% SCORED — THE FALSIFIER FIRED, MY BET LOST, AND THE TWO
+  POPULATIONS TURN OUT TO AGREE (2026-08-10, 3 seeds):
+      deit-base 23.14 | deit-ssl2x 38.48 | deit-aux 38.24 | deit-ssl5x 36.53
+      ssl5x band was 40..44 -> MISSED LOW by 3.5
+      aux - ssl5x = **+1.71 +-0.33 = +5.1 sigma: THE PRIOR WINS**
+  I predicted 40..44, explicitly betting AGAINST our own method ("5x SSL
+  wins and the prior beats it nowhere on tin"). Wrong by 5.1 sigma in the
+  method's favour. The recorded falsifier -- "ssl5x <= 38.24 => the
+  population difference is NOT monotone and the tin envelope has a crossover
+  after all, making the two populations the same shape with a shifted
+  crossing" -- FIRED, and its stated consequence is exactly what the data
+  now show.
+  *** THE MATCHED-FRACTION TABLE, and it is the clean result:
+      pct      C100 (aux-ssl5x)        tin (aux-ssl5x)
+       5%   -1.57 (-3.9 s) SSL      -1.35 (-3.7 s) SSL
+      10%   +0.71 (+1.2 s) tie      -0.31 (-0.6 s) tie
+      25%   +1.47 (+7.2 s) prior    +1.71 (+5.1 s) prior
+  IDENTICAL ordering at every matched FRACTION on both populations. The
+  earlier "tin favours the comparator everywhere / different stories"
+  reading was an artifact of having only 5 and 10% on tin, and MUST BE
+  WITHDRAWN from the paper. The correct statement: the ordering tracks the
+  data FRACTION -- where a cell sits on its own dataset's learning curve --
+  not the absolute image count. That is why matching on image count made
+  the populations look like they disagreed (5k images is 10% of C100 but 5%
+  of tin, i.e. different points on their own curves).
+  *** AND A GENUINE ODDITY, 4.6 sigma: at tin@25%, 4x MORE pre-training made
+  SimCLR WORSE -- ssl2x 38.48 vs ssl5x 36.53, a drop of 1.95 +-0.42. First
+  cell in the study where extra pre-training budget hurts. Echoes the
+  deitssl2b finding that stronger contrastive views hurt; do not explain it,
+  report it.
+- *** ViT@5% DEEPENED 3 -> 6 SEEDS: aux 28.87+-0.26, ssl5x 30.45+-0.31,
+  aux-ssl5x = **-1.57 +-0.41 = -3.9 sigma** (3-seed value was -1.08, 2.0
+  sigma). The one marginal cell in the budget story STRENGTHENED under
+  power rather than regressing -- SSL genuinely wins that cell.
+
+## IMAGENET ENVELOPE CAMPAIGN (2026-08-10, user: "use BSC to do all missing
+## runs, test the training before you submit, maximize the GPU utilization")
+
+- WHY: Table 3 showed dashes at every fraction for both ImageNet stages, and
+  the reason was upstream of the table -- scripts/make_subsets.py had NO entry
+  for imagenet64/imagenet100, so no index file existed and no fraction cell
+  could ever be launched. The 100% stages (14 cells, 3 seeds, 164 GPU-hours)
+  were built to fire the pre-registered SCALE falsifiers, which they did (F1,
+  F2, F3, G1-G4 all dead). What they never tested is the ENVELOPE: peak
+  location and left-flank suppression are established on eleven populations,
+  none above 100k images. Section 9 already concedes this as "a cost decision
+  rather than a considered one, and the cheapest gap to close".
+- IT IS CHEAP FOR A STRUCTURAL REASON: the diagnostic epoch budget is FIXED
+  (40 for imagenet64, 100 for imagenet100) regardless of fraction, so cost
+  scales ~linearly with the fraction. Measured 100% wall-clocks: in64 r18 7.9
+  h/seed-pair, vit 4.4, mnet 5.6; in100 vits 6.1, vitb 10.6, r50 11.9. The
+  whole envelope is ~85 GPU-hours against the 164 already spent at 100%.
+- CELLS (84 configs, 3 seeds = 252 runs). Both arms of every pair are
+  byte-identical except the moment_aux block (verified by diff), and every
+  fraction keeps its parent's num_workers so the augmentation stream stays
+  comparable to the 100% anchor:
+    imagenet64  @1/2/3/5/7/10/15/20/25%  x {r18, vit_tiny, mnet} x {none,aux}
+    imagenet100 @1/2/5/10/25%            x {vit_s, vit_b, r50}   x {none,aux}
+  50% is omitted on both: it costs as much as every other fraction combined
+  and the 100% cell already anchors the right flank.
+  diagin64_swin is DELIBERATELY EXCLUDED -- its 100% baseline is bistable at
+  chance ({16.12, 0.10, 0.10}), so a fraction envelope there would measure
+  training failure, not feature gain. Same scope rule as the swin G-probes.
+- SUBSETS: imagenet64 (1,000 classes) and imagenet100 added to PCTS with the
+  same deterministic stratified draw as every other dataset; --check
+  reproduces all 14 files byte-identically. 1% of imagenet64 = 12,820 images =
+  13 per class, the FINEST label space in the study at genuine scarcity.
+- PREDICTIONS RECORDED IN ADVANCE (nothing from these cells seen; anchors are
+  the measured 100% cells: r18 base 55.38 D +0.04 | vit 48.24 +3.24 | mnet
+  32.93 +1.95 | vits 65.39 +13.00 | vitb 43.33 +26.01 | r50 85.85 -0.02):
+    (E1) THE CONV ENVELOPE SHAPE RECURS AT 1000-WAY: Delta(r18,in64) is
+      UNIMODAL in fraction -- an interior peak exceeding both ends by >= 0.5
+      -- peaking at 5-20% with magnitude **+1.5..+4.0**, decaying to the
+      measured +0.04 at 100%.
+      FALSIFIER: monotone in fraction (no interior peak), or peak > +6 =>
+      the unimodal envelope is a small-dataset regularity, and the shape
+      claim must be scoped to <= 100k images.
+    (E2) LEFT-FLANK SUPPRESSION AT THE FINEST LABEL SPACE: at 1% the baseline
+      sits far below the crossing bracket [31.8, 40.3], so the sign law
+      demands NEGATIVE readout and Delta < G. Band **Delta(r18,in64@1%) =
+      +0.5..+2.5**, i.e. BELOW the envelope peak.
+      FALSIFIER: readout POSITIVE at 1% (base far below 31.8) => the first
+      sign-law failure on a resolvable left-flank cell at scale.
+    (E3) THE ATTENTION DEFICIT SPANS THE ENVELOPE: Delta(vit,in64) >= +3 at
+      every fraction >= 5%, peaking **+6..+14** at 10-25% (C100-ViT peaks at
+      15% with +14.44, tin-ViT at 15% with +10.73), and above the conv
+      envelope everywhere.
+      FALSIFIER: Delta(vit) <= +1 at any fraction >= 5% => the attention
+      deficit is fraction-bounded at 1000-way, not a property of attention
+      at small data.
+    (E4) CONV GAINS SURVIVE NATIVE RESOLUTION: R50 on in100 is neutral at
+      100% (-0.02) but every conv population measured is POSITIVE at low
+      data, so **Delta(r50,in100@1-5%) = +1..+6**, decaying through 25%.
+      FALSIFIER: Delta(r50) <= 0 at EVERY fraction => conv gains do not
+      survive 224px and the low-data conv claim is a low-resolution claim.
+    (E5) THE MODEL-SCALE ORDERING PERSISTS: Delta(vitb) > Delta(vits) at
+      every fraction (it is +26.01 vs +13.00 at 100%).
+      FALSIFIER: the ordering inverts at any fraction >= 5%.
+  NOT PREDICTED, recorded as data: mnet on in64 (base 32.93 sits INSIDE the
+  crossing bracket, so the law makes no sign call there -- same treatment as
+  the mnet shots cell), and the in100 ViT-B baselines at 1-2%, which may be
+  at or near chance on 1,267 images (the bistable flag applies if a seed
+  collapses; sigma was already 3.29 at 100%).
+- GPU UTILIZATION (user asked explicitly). The worker already runs SLOTS
+  trainings per GPU because these cells are DATALOADER-bound; SLOTS=3 was set
+  after 8 slots OOM'd on 19.5GB diagin64 cells. The binding constraints are
+  measured, not assumed: CPU budget SLOTS*4*(num_workers+1) <= 80 caps in64
+  (num_workers 3) at SLOTS=5, and in100 (num_workers 5) at SLOTS=3. Memory is
+  measured per cell in the smoke pass and the slot count set from it, so the
+  two queues are submitted SEPARATELY -- a mixed queue would have to be sized
+  for its heaviest member, which is exactly how the OOM incident happened.
+
+- *** IMAGENET ENVELOPE, FIRST LANDINGS (2026-08-10, 3v3 each, 60/252 done,
+  0 failures). Scored against the bands recorded before any cell ran:
+      cell            base     aux    delta
+      in64_r18  @1%    5.47    7.37   +1.90 +-0.06
+      in64_r18  @2%   13.19   14.78   +1.59 +-0.12
+      in64_r18  @3%   18.94   20.33   +1.38 +-0.12
+      in64_vit  @1%    1.88    4.02   +2.14 +-0.06
+      in64_vit  @2%    2.63    6.43   +3.80 +-0.07
+      in64_vit  @3%    3.43    8.19   +4.76 +-0.17
+      in64_mnet @1%    4.33    3.82   -0.52 +-0.11
+      in64_mnet @2%    7.61    7.62   +0.01 +-0.13
+      in64_mnet @3%    9.68   10.17   +0.49 +-0.13
+  (E2) HIT: Delta(r18@1%) = +1.90, band +0.5..+2.5. The premise holds too --
+    base 5.47 sits far below the crossing bracket [31.8,40.3], so the sign
+    law demands NEGATIVE readout here; the G probes will test it.
+  (E1) TRENDING AGAINST ME, and I am recording that now rather than after
+    the fact. I predicted a UNIMODAL envelope with an interior peak at
+    5-20%. r18 is MONOTONE FALLING so far (+1.90/+1.59/+1.38 at 1/2/3%
+    toward the measured +0.04 at 100%), i.e. the peak is at or below 1%.
+    If 5/7/10% continue the fall, the recorded falsifier ("monotone in
+    fraction, no interior peak") FIRES and the interior-peak claim must be
+    scoped to <=100k images. NOTE this is not the same as the envelope
+    disappearing: a peak at or below the smallest runnable fraction is what
+    C10 shows too (plateau at 1-2%, falling after). What would be wrong is
+    my having predicted WHERE it peaks at 1000-way.
+  (E3) ON TRACK: ViT is RISING steeply (+2.14/+3.80/+4.76) and already
+    above the conv envelope at every fraction, as predicted. The >=5% cells
+    test the +6..+14 band. The attention signature is stark at 1000 classes:
+    vit baselines 1.88/2.63/3.43 are barely above chance (0.1%) and the
+    prior more than doubles them.
+  mnet: -0.52/+0.01/+0.49 at 1/2/3%. No band was recorded (its 100% base
+    sits INSIDE the crossing bracket, where the law makes no sign call), so
+    this is data, not a scored prediction. The early 2-seed "aux below
+    baseline" I declined to score at 1% survives at 3v3 as a small real
+    negative, and it turns positive by 3%.
+
+- *** IMAGENET ENVELOPE SCORED AT 127/252 CELLS (2026-08-10, 3v3 each, still
+  0 failures). The three backbones have THREE DIFFERENT ENVELOPE SHAPES at
+  1000-way, which is the finding:
+      pct    r18 base  D_r18  |  vit base  D_vit  |  mnet base  D_mnet
+       1%      5.47    +1.90  |    1.88    +2.14  |    4.33    -0.52
+       2%     13.19    +1.59  |    2.63    +3.80  |    7.61    +0.01
+       3%     18.94    +1.38  |    3.43    +4.76  |    9.68    +0.49
+       5%     27.26    +0.56  |    5.89    +5.22  |   12.94    +1.46
+       7%     32.31    +0.42  |    7.59    +5.63  |   15.29    +2.28
+      10%      (run)          |    9.67    +6.31  |   18.60    +2.61
+      15%     42.27    -0.01  |   13.07    +6.72  |   22.49    +2.75
+     100%     55.38    +0.04  |   48.24    +3.24  |   32.93    +1.95
+  (E1) **FALSIFIED, and the falsifier is mine.** I predicted a UNIMODAL conv
+    envelope with an interior peak at 5-20%. r18 is MONOTONE FALLING from the
+    smallest runnable fraction to zero by 15% (+1.90 -> -0.01) with no
+    interior peak anywhere. The recorded falsifier ("monotone in fraction, no
+    interior peak => the shape claim must be scoped to <=100k images") FIRES.
+    POST-MORTEM, and it is the same error class as the tin@25% budget miss: I
+    predicted in FRACTION space when the operative axis is IMAGE COUNT. 1% of
+    ImageNet64 is 12,820 images -- on Tiny-ImageNet that is the 10% cell,
+    already past its peak. The smallest fraction runnable at ImageNet scale
+    sits on the RIGHT FLANK. The envelope is not absent; its peak is below
+    anything this dataset can express, exactly as CIFAR-10's is.
+  (E2) **HIT**: D(r18@1%) = +1.90, band +0.5..+2.5, at 13 images per class
+    over 1000 classes -- the finest label space in the study at genuine
+    scarcity. Base 5.47 is far below the crossing bracket, so the sign law
+    demands negative readout; the G probes test it.
+  (E3) **IN BAND**: D(vit) >= +3 at every fraction >= 5% as predicted, and
+    +6.31 @10% / +6.72 @15% are inside the +6..+14 peak band. Peak location
+    (predicted 10-25%) awaits 20/25%.
+  *** THE SHAPE IS A BACKBONE PROPERTY, NOT A DATASET PROPERTY. At the SAME
+  images, same label space, same recipe: r18 falls monotonically, while vit
+  and mnet RISE monotonically through 15%. The account that fits: the peak
+  sits where the baseline crosses the readout bracket, and only r18's
+  baseline reaches it within the measured range (5.5 -> 42.3, crossing
+  [31.8,40.3] at 7-15%) -- which is exactly where its Delta reaches zero
+  (+0.42 at base 32.3, -0.01 at base 42.3). vit (1.9->13.1) and mnet
+  (4.3->22.5) never get near it, so both are still on their rising limb at
+  the largest fraction measured. This is a sharper statement of "the peak
+  tracks task difficulty" than the classification grid could make, because
+  here the dataset is held fixed and only the backbone varies.
+
+## DENSE-PREDICTION TRANSPLANT (2026-08-10, user: "run the experiments and
+## having them and later we decide to include them to the paper")
+
+- WHY: every number in the study is top-1 ACCURACY. The auxiliary target is a
+  dense oriented-energy map m(x) in R^{NxHxW}, so a dense task asks whether
+  the fusion rule and Delta = G + readout are properties of the METHOD or of
+  the METRIC. PASCAL VOC-2012 segmentation, augmented (SBD) train split:
+  10,582 train / 1,449 val, 21 classes, ResNet-18 at output stride 8 with an
+  FCN head, fractions 1/2/5/10/25/100%, 3 seeds, both arms.
+- WHAT TRANSFERS WITH NO REDESIGN, which is why this is cheap: MomentAuxModel
+  pools its target to the tapped stage's size, so the SAME pinned bank, tap,
+  lambda schedule and head_norm apply. At a 512 crop and stride 8 the target
+  is matched at 32x32 instead of the 8x8 of a classification cell.
+- STATE THE BIAS FIRST: a dense spatial target on a dense spatial task is the
+  most favourable venue this prior could be given. A win here is WEAKER
+  evidence of generality than a win on a task with no such alignment.
+  Detection is the harder test and is deliberately not what this starts with.
+- UNITS CAVEAT, recorded before any result: mIoU points are NOT accuracy
+  points. Any comparison of a Delta here to a Delta in the classification
+  grid is a comparison across units and must be stated as such rather than
+  read as "bigger". The readout crossing bracket [31.8, 40.3] is an ACCURACY
+  bracket and is NOT transplanted; what these cells can test is the FORM of
+  the sign law, and with enough fractions they can ESTIMATE a crossing in
+  mIoU space.
+- PREDICTIONS RECORDED IN ADVANCE (nothing beyond 2-epoch smoke runs seen):
+    (D1) THE ENVELOPE IS POSITIVE across 1-25%, with a peak magnitude of
+      **+2..+8 mIoU**. PEAK LOCATION IS DELIBERATELY NOT PREDICTED: E1 on
+      ImageNet64 just failed for exactly that, and the lesson (predict the
+      axis you can measure, not the one you assume) is worth applying
+      immediately rather than after a second miss.
+    (D2) STRUCTURAL NEUTRALITY SURVIVES THE TASK CHANGE:
+      **Delta(100%) = 0 +- 1.5 mIoU**. lambda reaches exactly zero at the
+      final epoch, so late training is pure cross-entropy; this is the one
+      property that should hold regardless of metric.
+      FALSIFIER: |Delta(100%)| > 2.5 => structural neutrality is an artifact
+      of the classification setting, which would be a real limitation and
+      would need saying in the paper whether or not these cells are included.
+    (D3) THE SIGN LAW'S FORM TRANSPLANTS: readout = Delta - G is NEGATIVE at
+      1% (baseline mIoU deep on the left flank) and RISES toward zero as the
+      baseline rises.
+      FALSIFIER: the ORDERING inverts (readout positive at 1% and negative at
+      25%) => the law's form is metric-specific, not a property of the method.
+    (D4) THE ALIGNMENT QUESTION, and the point of running this at all. VOC@1%
+      is 107 images = 5 per class over 20 classes, the same per-class regime
+      as CIFAR-100@1% (+1.42) and tin@1% (+1.49), where the classification
+      grid finds a universal ~+1.5 floor. If the prior pays MORE when the
+      task is dense, **Delta(VOC@1%) = +2..+6 mIoU**.
+      FALSIFIER, and it is the more interesting branch: Delta(VOC@1%) <= +1.5
+      => target-task alignment is NOT where the value comes from, and the
+      claim becomes cleaner (the prior supplies the same feature structure
+      whatever the head does with it) rather than weaker.
+- COST, measured on the local 3090 rather than estimated: a 1% cell is ~3s
+  per epoch and the 1,449-image native-resolution validation is ~18s, so
+  evaluation was costing more than the training it measured. Validation now
+  runs every 5 epochs plus the final one, identically for both arms. The full
+  6-fraction envelope is ~6-10 GPU-hours on an H100 for 36 runs.

@@ -1,0 +1,22 @@
+# 1. feature gain for the multispectral grid at 5% and 10% (checkpoints live here)
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_eurosatms_rgb_none_5pct.yaml --run runs/sf_eurosatms_rgb_none_5pct --ckpt best.pt --data-root data_sf
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_eurosatms_rgb_aux_5pct.yaml --run runs/sf_eurosatms_rgb_aux_5pct --ckpt best.pt --data-root data_sf
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_eurosatms_nir_none_5pct.yaml --run runs/sf_eurosatms_nir_none_5pct --ckpt best.pt --data-root data_sf
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_eurosatms_nir_aux_5pct.yaml --run runs/sf_eurosatms_nir_aux_5pct --ckpt best.pt --data-root data_sf
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_eurosatms_all_none_5pct.yaml --run runs/sf_eurosatms_all_none_5pct --ckpt best.pt --data-root data_sf
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_eurosatms_all_aux_5pct.yaml --run runs/sf_eurosatms_all_aux_5pct --ckpt best.pt --data-root data_sf
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_eurosatms_rgb_none_10pct.yaml --run runs/sf_eurosatms_rgb_none_10pct --ckpt best.pt --data-root data_sf
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_eurosatms_rgb_aux_10pct.yaml --run runs/sf_eurosatms_rgb_aux_10pct --ckpt best.pt --data-root data_sf
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_eurosatms_nir_none_10pct.yaml --run runs/sf_eurosatms_nir_none_10pct --ckpt best.pt --data-root data_sf
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_eurosatms_nir_aux_10pct.yaml --run runs/sf_eurosatms_nir_aux_10pct --ckpt best.pt --data-root data_sf
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_eurosatms_all_none_10pct.yaml --run runs/sf_eurosatms_all_none_10pct --ckpt best.pt --data-root data_sf
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_eurosatms_all_aux_10pct.yaml --run runs/sf_eurosatms_all_aux_10pct --ckpt best.pt --data-root data_sf
+# 2. feature gain for Experiment C at 10%
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sslbudget/diagsslbudget_simsiam800_c100_10pct.yaml --run runs/diagsslbudget_simsiam800_c100_10pct --ckpt best.pt --data-root data_sf
+# 3. probes for the ViT multispectral grid at 10%
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/diagsfvit_eurosatms_rgb_none_10pct.yaml --run runs/diagsfvit_eurosatms_rgb_none_10pct --ckpt best.pt --data-root data_sf
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/diagsfvit_eurosatms_rgb_aux_10pct.yaml --run runs/diagsfvit_eurosatms_rgb_aux_10pct --ckpt best.pt --data-root data_sf
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/diagsfvit_eurosatms_nir_none_10pct.yaml --run runs/diagsfvit_eurosatms_nir_none_10pct --ckpt best.pt --data-root data_sf
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/diagsfvit_eurosatms_nir_aux_10pct.yaml --run runs/diagsfvit_eurosatms_nir_aux_10pct --ckpt best.pt --data-root data_sf
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/diagsfvit_eurosatms_all_none_10pct.yaml --run runs/diagsfvit_eurosatms_all_none_10pct --ckpt best.pt --data-root data_sf
+/media/HDD_4TB/amughrabi/momentstem/venv/bin/python analysis/linear_probe.py --config configs/sensorfusion/diagsfvit_eurosatms_all_aux_10pct.yaml --run runs/diagsfvit_eurosatms_all_aux_10pct --ckpt best.pt --data-root data_sf

@@ -89,12 +89,27 @@ NUM_CLASSES = {"cifar100": 100, "cifar100super": 20, "cifar10": 10, "stl10": 10,
                "tin": 200, "tin20": 20, "tin20b": 20, "tinsuper": 20,
                "tinsem": 20, "cub": 200,
                "eurosat": 10, "dtd": 47, "pathmnist": 9, "food101": 101,
-               "imagenet64": 1000, "imagenet100": 100}
+               "imagenet64": 1000, "imagenet100": 100,
+               # EuroSAT multispectral sensor-fusion variants (13-band
+               # Sentinel-2): rgb = the 3 visible bands, nir = the 10
+               # non-visible bands, all = both fused.
+               "eurosatms_rgb": 10, "eurosatms_nir": 10, "eurosatms_all": 10,
+               "so2sat_sar": 17, "so2sat_opt": 17, "so2sat_all": 17}
 IMAGE_SIZE = {"cifar100": 32, "cifar100super": 32, "cifar10": 32, "stl10": 96,
               "tin": 64, "tin20": 64, "tin20b": 64, "tinsuper": 64,
               "tinsem": 64, "cub": 64,
               "eurosat": 64, "dtd": 64, "pathmnist": 64, "food101": 64,
-              "imagenet64": 64, "imagenet100": 224}
+              "imagenet64": 64, "imagenet100": 224,
+              "eurosatms_rgb": 64, "eurosatms_nir": 64, "eurosatms_all": 64,
+              # So2Sat LCZ42: the CROSS-MODALITY population, 32px patches,
+              # Sentinel-1 SAR against Sentinel-2 optical.
+              "so2sat_sar": 32, "so2sat_opt": 32, "so2sat_all": 32}
+
+# Input channel count. 3 everywhere except the multispectral sensor-fusion
+# variants, whose whole point is that the sources differ in band coverage.
+INPUT_CHANNELS = {"eurosatms_rgb": 3, "eurosatms_nir": 10, "eurosatms_all": 13,
+                  # So2Sat: 8 SAR channels, 10 optical, 18 fused.
+                  "so2sat_sar": 8, "so2sat_opt": 10, "so2sat_all": 18}
 
 # cifar100super is CIFAR-100's IMAGES with its 20 official coarse labels, and it
 # deliberately reuses CIFAR-100's COMMITTED subset indices (data/subsets/
@@ -116,6 +131,11 @@ CIFAR_C_CORRUPTIONS = (
 
 
 def build_transforms(dataset, train, augment=None):
+    # The multispectral EuroSAT variants are tensor-native and carry their own
+    # per-band normalisation inside the Dataset, so the PIL pipeline (and its
+    # STATS lookup) does not apply to them.
+    if dataset.startswith(("eurosatms_", "so2sat_")):
+        return None
     """Standard crop+flip only (recipe v1: minimal and identical for all).
 
     :param augment "deit" ADDS the DeiT (Touvron et al. 2021) augmentation
@@ -514,6 +534,129 @@ class ImageNet100(Dataset):
         return (self.transform(img) if self.transform else img), self.targets[i]
 
 
+EUROSAT_MS_BANDS = {
+    # Sentinel-2 L1C band indices as shipped in EuroSAT_MS.
+    "rgb": (3, 2, 1),                                   # B04 red, B03 green, B02 blue
+    "nir": (0, 4, 5, 6, 7, 8, 9, 10, 11, 12),           # everything non-visible
+    "all": tuple(range(13)),
+}
+
+
+SO2SAT_BANDS = {
+    "sar": tuple(range(0, 8)),     # Sentinel-1: VV/VH real+imag, intensities, PolSAR
+    "opt": tuple(range(8, 18)),    # Sentinel-2: 10 surface-reflectance bands
+    "all": tuple(range(0, 18)),    # cross-modality fusion
+}
+
+
+class So2Sat(Dataset):
+    """So2Sat LCZ42: the study's CROSS-MODALITY fusion population.
+
+    Each 32px patch carries co-registered Sentinel-1 SAR and Sentinel-2
+    optical data with one of 17 Local Climate Zone labels. Where the
+    multispectral EuroSAT grid splits ONE instrument into band groups, this
+    splits two different SENSING PRINCIPLES: active radar backscatter
+    against passive surface reflectance. ``band_set`` selects "sar" (8
+    channels), "opt" (10) or "all" (18, fused).
+
+    Train is the v4 validation split and test the v4 testing split; both are
+    held out from the training cities, so this is a harder generalisation
+    setting than the canonical split.
+    """
+
+    def __init__(self, data_root, train=True, band_set="all", transform=None,
+                 pack="so2sat_32"):
+        img_p = os.path.join(data_root, pack + "_images.npy")
+        meta_p = os.path.join(data_root, pack + "_meta.npz")
+        if not (os.path.isfile(img_p) and os.path.isfile(meta_p)):
+            raise FileNotFoundError(
+                f"{img_p} / {meta_p} not found; build with scripts/make_so2sat.py")
+        z = np.load(meta_p, allow_pickle=False)
+        self._all = np.load(img_p, mmap_mode="r")
+        self.index = z["train_idx"] if train else z["test_idx"]
+        self.bands = list(SO2SAT_BANDS[band_set])
+        self.targets = z["labels"][self.index].tolist()
+        self.mean = torch.tensor(z["mean"][self.bands]).view(-1, 1, 1)
+        self.std = torch.tensor(z["std"][self.bands]).view(-1, 1, 1).clamp_min(1e-6)
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.targets)
+
+    def __getitem__(self, i):
+        raw = np.asarray(self._all[self.index[i]][self.bands], dtype=np.float32)
+        x = (torch.from_numpy(raw) - self.mean) / self.std
+        if self.transform is not None:
+            x = self.transform(x)
+        return x, self.targets[i]
+
+
+class EuroSATMS(Dataset):
+    """EuroSAT MULTISPECTRAL: the same 27000 Sentinel-2 tiles as EuroSAT64,
+    but with all 13 bands rather than the 3 visible ones.
+
+    This is the study's only genuinely MULTI-SENSOR setting. The visible
+    bands and the near-infrared, red-edge and short-wave infrared bands come
+    from different detectors on the same platform and carry different
+    physical information, so the classical complementary-versus-redundant
+    question can be asked of the data itself rather than only of training
+    interventions.
+
+    ``band_set`` selects the source: "rgb" (3 channels), "nir" (the 10
+    non-visible bands) or "all" (13, i.e. sensor-fused input). The split is
+    the same deterministic stratified 80/20 used by the packer, so the three
+    variants see identical tiles and differ only in which bands they read.
+
+    Pixels are divided by 10000 (Sentinel-2 reflectance scaling) and then
+    standardised per band using train-split statistics.
+    """
+
+    def __init__(self, data_root, train=True, band_set="all", transform=None,
+                 pack="eurosat_ms_64"):
+        # MEMMAP, deliberately. The compressed .npz decompresses ~3 GB on every
+        # instantiation, which is ~30 s of startup per run and 3 GB of private
+        # RAM per concurrent worker. The raw .npy is memmapped instead: startup
+        # is instant and the page cache is SHARED across concurrent runs, which
+        # is what makes several cells fit on one machine.
+        img_p = os.path.join(data_root, pack + "_images.npy")
+        meta_p = os.path.join(data_root, pack + "_meta.npz")
+        if not (os.path.isfile(img_p) and os.path.isfile(meta_p)):
+            raise FileNotFoundError(
+                f"{img_p} / {meta_p} not found; build them with "
+                "scripts/make_eurosat_ms.py")
+        z = np.load(meta_p, allow_pickle=False)
+        self._all = np.load(img_p, mmap_mode="r")         # (27000, 13, 64, 64)
+        self.index = z["train_idx"] if train else z["test_idx"]
+        self.bands = list(EUROSAT_MS_BANDS[band_set])
+        self.targets = z["labels"][self.index].tolist()
+        self.mean = torch.tensor(z["mean"][self.bands]).view(-1, 1, 1)
+        self.std = torch.tensor(z["std"][self.bands]).view(-1, 1, 1).clamp_min(1e-6)
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.targets)
+
+    def __getitem__(self, i):
+        raw = np.asarray(self._all[self.index[i]][self.bands], dtype=np.float32)
+        x = torch.from_numpy(raw / 10000.0)
+        x = (x - self.mean) / self.std
+        if self.transform is not None:
+            x = self.transform(x)
+        return x, self.targets[i]
+
+
+def _ms_transform(train, size):
+    """Crop+flip on a CHW float tensor, identical in effect to the frozen
+    recipe's RandomCrop(pad=size//8) + RandomHorizontalFlip."""
+    if not train:
+        return None
+    pad = size // 8
+    return transforms.Compose([
+        transforms.RandomCrop(size, padding=pad),
+        transforms.RandomHorizontalFlip(),
+    ])
+
+
 def dtd64(data_root, train, transform=None):
     """DTD (Cimpoi et al. 2014) at 64px: 47 texture classes, partition 1,
     train+val (3760, 80/cls) as train -- the standard DTD protocol -- and
@@ -690,6 +833,18 @@ def build_dataset(dataset, data_root, train, subset_pct=None, download=True,
         ds = CUB200(data_root, train=train, transform=tf)
     elif dataset == "eurosat":
         ds = EuroSAT64(data_root, train=train, transform=tf)
+    elif dataset.startswith("so2sat_"):
+        ds = So2Sat(data_root, train=train,
+                    band_set=dataset.split("_", 1)[1],
+                    transform=_ms_transform(train, IMAGE_SIZE[dataset]))
+    elif dataset.startswith("eurosatms_"):
+        # tensor-native: the multispectral pack is already a float tensor, so
+        # the PIL-based transform pipeline does not apply. Crop and flip are
+        # applied directly on the tensor, matching the frozen recipe's
+        # augmentation exactly.
+        ds = EuroSATMS(data_root, train=train,
+                       band_set=dataset.split("_", 1)[1],
+                       transform=_ms_transform(train, IMAGE_SIZE[dataset]))
     elif dataset == "dtd":
         ds = dtd64(data_root, train=train, transform=tf)
     elif dataset == "pathmnist":
@@ -729,6 +884,14 @@ def calibration_batch(dataset, data_root, n=1024):
         ds = datasets.ImageFolder(os.path.join(tin_root(data_root), "train"), transform=tf)
     elif dataset == "cub":
         ds = CUB200(data_root, train=True, transform=tf)
+    elif dataset.startswith(("eurosatms_", "so2sat_")):
+        # tensor-native and already per-band standardised; the calibration
+        # batch is just the first n training tiles in index order, as for the
+        # other 64px sets.
+        ds = build_dataset(dataset, data_root, train=True, subset_pct=None,
+                           download=False)
+        ds = Subset(ds, list(range(min(n, len(ds)))))
+        return torch.stack([ds[i][0] for i in range(len(ds))])
     elif dataset in ("eurosat", "dtd", "pathmnist", "food101", "imagenet64",
                      "imagenet100"):
         ds = build_dataset(dataset, data_root, train=True, subset_pct=None,

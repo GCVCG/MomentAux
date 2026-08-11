@@ -1,0 +1,4 @@
+diagin100_r50_aux seed0: probe train 99.50  test 84.82
+diagin100_r50_aux seed1: probe train 99.55  test 85.18
+diagin100_r50_aux seed2: probe train 99.50  test 85.24
+PROBE_RESULT diagin100_r50_aux test 85.08+/-0.23 over 3 seeds -> runs/diagin100_r50_aux/linear_probe.json

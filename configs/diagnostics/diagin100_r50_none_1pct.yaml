@@ -1,0 +1,21 @@
+# ImageNet-100 @224px NATIVE ENVELOPE cell (1% of 126,689 images =
+# 1,270 images, 13 per class over 100 classes).
+#
+# WHY THIS EXISTS: as for the imagenet64 envelope cells -- the 100% stage
+# tested the scale falsifiers, not the envelope shape. Same 100-epoch budget
+# and native-res pipeline as the 100% cells, identical across both arms.
+# diag-only: NEVER mixed into frozen-recipe headline tables.
+name: diagin100_r50_none_1pct
+dataset: imagenet100
+backbone: resnet50
+epochs: 100
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 5
+small_input: false
+pretrained: false
+subset_pct: 1
+stem: none
+stem_calibrate: true

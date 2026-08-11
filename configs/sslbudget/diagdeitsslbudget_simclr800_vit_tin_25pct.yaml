@@ -1,0 +1,21 @@
+# SECOND POPULATION for the ViT budget result. The C100 finding (5x SimCLR
+# wins at 5%, level at 10%, prior wins at 25%) rests on one dataset; tin at
+# 10% is 10k images, between C100's 5% and 25% in image count, so if the
+# ordering is image-count-driven this should land near the prior.
+name: diagdeitsslbudget_simclr800_vit_tin_25pct
+dataset: tin
+backbone: vit_tiny
+optimizer: adamw
+epochs: 200
+batch_size: 128
+lr: 0.001
+weight_decay: 0.05
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 25
+stem: none
+stem_calibrate: true
+augment: deit
+init_from: runs/simclr_pre800_vit_tin_25pct/seed{seed}/pretrain.pt

@@ -1,7 +1,7 @@
 %% ---------------------------------------------------------------------
 \section{The organizing law}\label{sec:law}
 
-A grid of $2{,}800$ cells is only as useful as the account that organizes
+A grid of $2{,}894$ cells is only as useful as the account that organizes
 it, and this section builds that account in four steps.
 Section~\ref{sec:lawform} states the law's form, how the end-to-end gain
 $\Delta$ decomposes into a feature term $G$ and a readout term governed
@@ -24,7 +24,7 @@ effect is consistent in sign across datasets and backbones. We are
 deliberate about how strong that claim is: binned on baseline accuracy
 alone the readout term has $R^2 = 0.18$, dataset identity explains a
 further $0.10$ of the residual, backbone essentially none ($0.004$), and
-the residual standard deviation at fixed baseline is $2.2$ points. So this
+the residual standard deviation at fixed baseline is $\auditResidSD$ points. So this
 is a first-order trend with substantial scatter, not a curve that pins a
 cell's readout. What is robust is its \emph{sign}, which is what the rest
 of this section audits. The term is
@@ -41,12 +41,12 @@ fit no parametric form and use only the measured curve for prediction.
 \centering
 \includegraphics[width=\linewidth]{figs/law_scatter.pdf}
 \caption{The law, in full: readout $=\Delta-G$ against baseline accuracy
-for all 989 law-scope cells with ${\geq}3$ seeds on both arms. Shaded
+for all 1{,}100 law-scope cells with ${\geq}3$ seeds on both arms. Shaded
 band: the measured crossing bracket $[31.8,40.3]$, inside which no sign
-is predicted. Of the 498 cells whose readout is resolvable against its
-own seed-paired uncertainty, 393 fall on the predicted side of zero.
+is predicted. Of the 511 cells whose readout is resolvable against its
+own seed-paired uncertainty, 404 fall on the predicted side of zero.
 The scatter at fixed baseline is substantial ($R^2 = 0.18$, residual SD
-$2.2$ points): the account predicts the sign of this term, not its value.}
+$2.1$ points): the account predicts the sign of this term, not its value.}
 \label{fig:law}
 \end{figure}
 
@@ -74,19 +74,21 @@ account.}
 \label{tab:audit}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
-\zebra{1}
+\zebra{2}
 \begin{tabular}{@{}lr@{}}
 \toprule
-Cells with paired $\Delta$ and $G$ (all interventions) & 1{,}660 \\
-\quad in scope, ${\geq}3$ seed-matched arms & 1{,}075 \\
-Backbone variants in scope (architecture families) & 9 (5) \\
-Dataset identities in scope & 15 \\
-Inside crossing bracket (no prediction) & 102 \\
-Unresolved ($|\mathrm{readout}| \le 2$\,SEM) & 475 \\
+Population & Cells \\
 \midrule
-\textbf{Resolvable (these test the account)} & \textbf{498} \\
-\quad Sign as predicted & \textbf{393 (78.9\%)} \\
-\quad Wrong side & 105 \\
+Cells with paired $\Delta$ and $G$ (all interventions) & 1{,}660 \\
+\quad in scope, ${\geq}3$ seed-matched arms & 1{,}100 \\
+Backbone variants in scope (architecture families) & 9 (5) \\
+Dataset identities in scope & 21 \\
+Inside crossing bracket (no prediction) & 102 \\
+Unresolved ($|\mathrm{readout}| \le 2$\,SEM) & 487 \\
+\midrule
+\textbf{Resolvable (these test the account)} & \textbf{511} \\
+\quad Sign as predicted & \textbf{404 (79.1\%)} \\
+\quad Wrong side & 107 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -107,51 +109,102 @@ Intervals are Wilson 95\%.}
 \toprule
 Audit variant & Cells & Correct & Rate & 95\% CI \\
 \midrule
-$|\mathrm{readout}| > 1$\,SEM & 691 & 517 & 74.8\% & [71.5, 77.9] \\
-$>1.5$\,SEM & 581 & 451 & 77.6\% & [74.1, 80.8] \\
-\textbf{$>2$\,SEM (declared)} & \textbf{498} & \textbf{393} & \textbf{78.9\%} & \textbf{[75.1, 82.3]} \\
-$>3$\,SEM & 372 & 301 & 80.9\% & [76.6, 84.6] \\
+$|\mathrm{readout}| > 1$\,SEM & 709 & 530 & 74.8\% & [71.4, 77.8] \\
+$>1.5$\,SEM & 597 & 463 & 77.6\% & [74.0, 80.7] \\
+\textbf{$>2$\,SEM (declared)} & \textbf{511} & \textbf{404} & \textbf{79.1\%} & \textbf{[75.3, 82.4]} \\
+$>3$\,SEM & 382 & 310 & 81.2\% & [76.9, 84.8] \\
 \midrule
-One vote per (dataset, backbone, fraction) & 247 & 191 & 77.3\% & [71.7, 82.1] \\
-Held out: bracket fitted without the audited dataset & 273 & 218 & 79.9\% & [74.7, 84.2] \\
+One vote per (dataset, backbone, fraction) & 258 & 200 & 77.5\% & [72.0, 82.2] \\
+Held out: bracket fitted without the audited dataset & 272 & 218 & 80.1\% & [75.0, 84.5] \\
 \midrule
-Below the crossing & 332 & 291 & 87.7\% & [83.7, 90.8] \\
-Above the crossing & 166 & 102 & 61.4\% & [53.9, 68.5] \\
+Below the crossing & 334 & 293 & 87.7\% & [83.8, 90.8] \\
+Above the crossing & 177 & 111 & 62.7\% & [55.4, 69.5] \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:audit} summarizes the audit: of 498 resolvable cells
-spanning nine backbones and fifteen dataset identities, 393 ($78.9\%$)
-fall on the predicted side (Wilson 95\% CI $[75.1, 82.3]$; one-sided exact
+Table~\ref{tab:audit} summarizes the audit: of 511 resolvable cells
+spanning nine backbones and twenty-one dataset identities (the 13 image
+sources of Table~\ref{tab:partitions} plus the relabeled controls and
+multi-source views, which share their parent's pixels but are separate
+label spaces and so are audited separately), 404 ($79.1\%$)
+fall on the predicted side (Wilson 95\% CI $[75.3, 82.4]$; one-sided exact
 binomial against an even coin, $p \approx 10^{-40}$). Below the crossing,
-where the account makes a strong prediction, it is $291/332 = 87.7\%$;
-above it, where it predicts only that the term is small, $102/166 =
-61.4\%$. The ten exceptions are not scattered noise;
+where the account makes a strong prediction, it is $293/334 = 87.7\%$;
+above it, where it predicts only that the term is small, $111/177 =
+62.7\%$. The 107 exceptions are not scattered noise;
 a recurring group carries one signature, $G$ clearly positive while
 $\Delta$ is negative at ${\geq}20\%$ data on Food-101 and PathMNIST,
 ``better features, worse accuracy at sufficiency''.
-Appendix~\ref{app:exceptions} lists the largest-magnitude exceptions
-individually.
+Table~\ref{tab:exceptions} lists the largest-magnitude exceptions
+individually, in the main text rather than an appendix, because where an
+account fails is part of what it claims.
+
+\begin{table}[t]
+\caption{The ten largest-magnitude resolvable exceptions. Five share the
+``better features, worse accuracy at sufficiency'' signature ($G$ clearly
+positive, $\Delta$ negative, top block); two are PathMNIST cells whose
+linear evaluation is a known compressed measuring stick on that dataset;
+three are small-magnitude singletons.}
+\label{tab:exceptions}
+\centering\scriptsize
+\setlength{\tabcolsep}{2.6pt}
+\zebra{2}
+\begin{tabular}{@{}lllrrrrr@{}}
+\toprule
+Dataset & Backbone & Variant & Frac. & Base & $\Delta$ & $G$ & Readout \\
+\midrule
+Food-101 & R18 & mag3 & 50\% & 71.8 & $-1.30$ & $+4.66$ & $-5.96$ \\
+Food-101 & R18 & mag6o & 50\% & 71.8 & $-0.91$ & $+4.97$ & $-5.88$ \\
+Food-101 & MNet & aux & 50\% & 55.1 & $-0.23$ & $+3.70$ & $-3.93$ \\
+PathMNIST & MNet & aux & 20\% & 89.0 & $-0.48$ & $+1.88$ & $-2.36$ \\
+PathMNIST & R18 & mag3 & 50\% & 89.8 & $-1.36$ & $+0.71$ & $-2.07$ \\
+\midrule
+PathMNIST & R18 & mag6o & 1\% & 80.8 & $+5.80$ & $+9.90$ & $-4.10$ \\
+PathMNIST & R18 & mag3 & 1\% & 80.8 & $+5.62$ & $+9.60$ & $-3.98$ \\
+\midrule
+DTD & ViT & deit-aux & 50\% & 14.2 & $+17.30$ & $+14.73$ & $+2.57$ \\
+CIFAR-100 & R50 & L3 & 2\% & 13.1 & $-0.95$ & $-2.96$ & $+2.01$ \\
+CIFAR-100 & R18 & L4-$\lambda.3$ & 50\% & 71.8 & $-0.73$ & $-0.21$ & $-0.52$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 Table~\ref{tab:robust} reports what that number does and does not survive.
 It is not an artifact of where the resolvability threshold was set: the
-rate moves only from $74.8\%$ over 691 cells at one SEM to $80.9\%$ over
-372 at three, so a reader who prefers a stricter or looser criterion
+rate moves only from $74.8\%$ over 709 cells at one SEM to $81.2\%$ over
+382 at three, so a reader who prefers a stricter or looser criterion
 reaches the same conclusion. It is not an artifact of the dependence
 between cells, since collapsing to one vote per (dataset, backbone,
-fraction) group leaves $191/247 = 77.3\%$. And, the check that matters
+fraction) group leaves $200/258 = 77.5\%$. And, the check that matters
 most, it is not an artifact of estimating the crossing bracket on the same
 cells we then audit: re-fitting the bracket on the other datasets and
-auditing each dataset out of sample gives $218/273 = 79.9\%$,
-statistically indistinguishable from the in-sample figure. The account
+auditing each dataset out of sample gives $218/272 = 80.1\%$,
+statistically indistinguishable from the in-sample figure.
+
+That row audits 272 cells rather than all 511, and the arithmetic is worth
+stating because the shortfall is not a sampling choice. Re-fitting the
+bracket on the other datasets makes it \emph{much wider} than the pooled
+$[31.8, 40.3]$, since a single dataset's cells no longer pin either edge:
+for CIFAR-100 the re-fitted bracket is $[13.7, 86.8]$. Cells inside a
+bracket make no sign prediction by construction, so a wider bracket
+swallows them, and $193$ of the $511$ leave the held-out set that way,
+125 of them CIFAR-100's. A further $46$ sit in datasets that cannot
+receive a fold at all, either because the remaining data cannot bracket
+them or because fewer than five of their cells survive, which is every
+population outside the eight largest. The three groups exhaust the total
+($272 + 193 + 46 = 511$). Note the direction of the bias this introduces:
+the held-out row keeps the cells furthest from the crossing, where the
+account is most confident, so its agreement rate should be read as an
+upper bound on out-of-sample performance rather than a like-for-like
+comparison with the in-sample row. The account
 generalizes across datasets at the rate it fits within them, which is the
 one thing about it we can state without qualification.
 
 What the number does \emph{not} survive is disaggregation, and we would
 rather say so than let a reader discover it. The evidence is
 overwhelmingly left-flank: below the crossing the sign is right $87.7\%$
-of the time, above it $61.4\%$, barely better than a coin once the term it
+of the time, above it $62.7\%$, barely better than a coin once the term it
 predicts has shrunk to nothing. Two datasets behave badly out of sample,
 CIFAR-10 at $50\%$ and PathMNIST at $44\%$; PathMNIST's linear evaluation
 is a known compressed measuring stick, since its frozen-feature accuracy
@@ -159,8 +212,8 @@ sits \emph{below} its own end-to-end accuracy, so we treat its $G$ as
 unreliable rather than the account as refuted there, but we report both
 failures rather than excluding the datasets. We do not
 explain this cluster; we name it as the law's known boundary
-(Section~\ref{sec:limits}) and list every exception in
-Appendix~\ref{app:exceptions}.
+(Section~\ref{sec:limits}), and the released audit script enumerates
+every exception, of which Table~\ref{tab:exceptions} gives the largest.
 
 \subsection{Prediction, not description}\label{sec:lawpredict}
 Three pre-registered episodes distinguish the law from a post-hoc fit.
@@ -201,6 +254,85 @@ as on the data: at the same Tiny-ImageNet cell, ResNet-18 carries
 $G = +2.67$ while MobileNetV3 carries $G = +0.01 \pm 0.23$, a measured
 zero on the weaker network, so ``how much a prior can add'' is not a
 dataset property but a (dataset, architecture) property.
+
+\subsection{What the prior leaves in the representation}\label{sec:imprint}
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs_explain/heatmaps_auxmag_5pct_sched0.png}
+\caption{The spectral imprint at the tap, CIFAR-100 at 5\%. Columns:
+input, the fixed moment target, and the tapped-stage energy of the
+baseline and prior arms. Over the \emph{whole} test set the alignment
+between tapped features and the target is $+0.215$ for the baseline and
+$+0.525$ for the prior arm; the per-row values are printed beneath each
+map. The four rows are \emph{selected} cases where the prior arm predicts
+correctly and the baseline does not, so they illustrate the alignment
+difference rather than sample it, and only the test-set-wide figure
+should be read as evidence.}
+\label{fig:heatmap}
+\end{figure}
+$G$ is a number, and it is worth seeing what in the representation it
+corresponds to. The prior's target is a fixed bank
+(Fig.~\ref{fig:bank}), and its imprint survives to the end of training:
+at the CIFAR-100 5\% cell, where the feature gap is largest on this
+dataset ($+6.3$ points), the alignment between tapped features and the
+bank's oriented-energy target measured over the whole test set is
+$+0.525$ for the prior arm against $+0.215$ for the baseline
+(Fig.~\ref{fig:heatmap}). That it survives at all is the part worth
+noting, because the auxiliary weight decays to exactly zero well before
+training ends: what the prior changes is where the representation
+settles, not what the loss is pulling on at the finish.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/attention_locality.pdf}
+\caption{What the prior gives a small transformer: locality. Mean
+attention distance per block, ViT-tiny on CIFAR-100 at 10\%, three seeds
+(band: $\pm$1 SD). The dotted line is the distance a \emph{uniform}
+attention map would give on this $8\times8$ token grid ($4.14$ patch
+units), computed rather than assumed. The baseline sits on that line at
+every depth: trained from scratch on 5{,}000 images it never learns to
+attend locally. The prior pulls the middle blocks well below it, most
+sharply \emph{upstream} of the tap where its target is imposed, and its
+most local head reaches $2.80$. A SimCLR initialization at $2\times$ the
+compute produces the same effect, more weakly.}
+\label{fig:attention}
+\end{figure}
+The same question can be put to the backbone where the prior matters
+most, and there the answer is unusually legible. A vision transformer has
+no built-in notion that nearby patches belong together; the standard
+diagnostic for whether it has learned one is mean attention distance, the
+average distance between a query patch and the patches it attends to.
+Fig.~\ref{fig:attention} measures it for ViT-tiny at CIFAR-100 10\%. The
+baseline's heads sit at $3.79$--$4.21$ patch units across all twelve
+blocks, straddling the $4.14$ that uniform attention would give: on
+5{,}000 images it never discovers locality at any depth. Adding the prior
+moves the middle blocks to $3.26$--$3.58$ and its most local head to
+$2.80$. The prior does not merely improve the features; it supplies the
+spatial inductive bias the architecture lacks, which is what a
+convolutional backbone gets for free and is why the same intervention is
+worth several times more here.
+
+We had predicted this effect in the \emph{early} blocks, decaying with
+depth, and that is not what happened: at block~1 the ordering is nominally
+reversed, the effect peaks at blocks~3--7, and the curves rejoin by
+block~11. The location is interpretable after the fact, since the target
+is regressed from block~8 and the locality appears in the blocks that feed
+it, but we did not predict it and record it as a missed call on a held
+prediction rather than as a confirmation. A SimCLR initialization produces
+the same signature at about half the depth-integrated magnitude, which is
+consistent with the two being substitutes on this backbone.
+
+We are deliberate about how far the qualitative evidence goes. Maps of
+individual images (Appendix~\ref{app:explain}) show the prior arm
+concentrating on contours and texture boundaries where the baseline's are
+diffuse, but those panels are selected on cases the prior gets right and
+the baseline wrong, so they illustrate rather than demonstrate. A t-SNE
+of frozen penultimate features shows the same direction and is honest
+about its size: the silhouette score over all classes moves only from
+$-0.072$ to $-0.064$, so the embedding is \emph{not} visibly better
+clustered, and a $+6.3$-point feature gap need not be legible in two
+projected dimensions. The alignment statistic and the linear evaluation
+are the measurements; the pictures are illustrations of them.
 
 %% ---------------------------------------------------------------------
 \section{Fusion outcomes: stack, substitute, tax}\label{sec:fusion}
@@ -292,13 +424,13 @@ ImageNet features barely transfer, is the null control. Three seeds.}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \zebra{2}
-\begin{tabular}{@{}lrrrr@{}}
+\begin{tabular}{@{}lrrrrr@{}}
 \toprule
-Cell & Transfer adv. & $\Delta$ (tax)~\up & $G$~\up & Readout \\
+Dataset & Frac. & Transfer adv. & $\Delta$ (tax)~\up & $G$~\up & Readout \\
 \midrule
-CIFAR-10 @5\% & $+13..{+}18$ & $-17.1$ & $-15.8 \pm 1.7$ & $-1.3$ \\
-CIFAR-100 @7\% & $+10..{+}18$ & $-16.4$ & $-16.3 \pm 3.1$ & $-0.1$ \\
-PathMNIST @10\% & $+1.8..{+}2.9$ & $-0.4$ & $+0.3 \pm 0.6$ & $-0.7$ \\
+CIFAR-10 & 5\% & $+13..{+}18$ & $-17.1$ & $-15.8 \pm 1.7$ & $-1.3$ \\
+CIFAR-100 & 7\% & $+10..{+}18$ & $-16.4$ & $-16.3 \pm 3.1$ & $-0.1$ \\
+PathMNIST & 10\% & $+1.8..{+}2.9$ & $-0.4$ & $+0.3 \pm 0.6$ & $-0.7$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -344,6 +476,62 @@ force is that the fusion outcome can be anticipated \emph{before}
 training: measure (or look up) what each source contributes at the feature
 level, and same-currency pairs will not add.
 
+\subsection{Same currency, same images}\label{sec:samecurrency}
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/currency_evidence.pdf}
+\caption{Currency tested directly rather than inferred from magnitudes.
+All arms are ViT-tiny on CIFAR-100 at 10\% with one shared baseline, so
+the only thing that varies is the fused source. \textbf{(a)} agreement
+between two interventions in \emph{which} test images they fix and
+\emph{which} representations they learn, each normalized by that
+intervention's own seed-to-seed agreement, so $1.0$ means the two sources
+differ no more than two seeds of one of them. Four measures are shown
+because they do not agree on the size of the effect. \textbf{(b)} the
+number of images each intervention fixes: the two same-currency sources
+fix all but one the same number.}
+\label{fig:currency}
+\end{figure}
+Everything above infers currency from the \emph{magnitude} of a source's
+feature gain. That is indirect: two sources could each add fourteen points
+while improving entirely different images, and calling them the same
+currency would then be an artifact of comparing scalars. The claim can be
+tested directly, and we recorded the prediction before running it.
+
+Take three interventions on one backbone, one dataset and one baseline
+(ViT-tiny, CIFAR-100 at 10\%): the prior, a SimCLR initialization, and
+DeiT-strength augmentation. The taxonomy calls the first two the same
+currency (they tie end to end, their feature gains are close, and their
+combination is neutral) and calls the prior and augmentation different
+currencies (they stack). If that is right, the first pair should fix the
+same test images and learn more similar representations than the second.
+The confound is that easy images are fixed by everything, so we normalize
+every cross-intervention agreement by that intervention's own agreement
+across seeds, which is the most same-currency comparison available.
+
+The prediction held on all four measures (Fig.~\ref{fig:currency}). The
+prior and SimCLR fix $1793$ and $1794$ test images respectively, and their
+normalized agreement on \emph{which} images is $1.13$ against $0.72$ for
+the prior with augmentation; centred kernel alignment between their
+representations gives $0.85$ against $0.54$. A value above one is worth
+stating plainly: for the question of which images get fixed, it matters
+less whether you used a fixed spectral target or contrastive
+pre-training than which seed you used. That is what a substitute is.
+
+Two honest qualifications. Augmentation fixes far fewer images ($1057$),
+and the Jaccard measure penalizes a small set for being small; on the
+size-robust overlap coefficient the separation shrinks to $1.08$ against
+$0.97$, so part of the headline gap is a magnitude effect and only the
+representation-level measure separates the pairs decisively. And this is
+one cell on one backbone; it corroborates the taxonomy where the taxonomy
+already had its cleanest end-to-end evidence, rather than testing it
+somewhere new.
+
+\emph{Takeaway.} What a source is worth depends on which currency is
+scarce, not on how modern the source is: the same free prior is the most
+valuable intervention we measure on an augmented ViT and the most
+damaging one on an ImageNet-initialized ResNet.
+
 %% ---------------------------------------------------------------------
 \section{Validation at scale}\label{sec:scale}
 
@@ -380,7 +568,7 @@ ViT-tiny & $\Delta \geq +3$ & $+3.23$ & $+2.84$ & $0.39$ & deficit persists \\
 Swin-T &--& \multicolumn{3}{l}{baseline collapses at chance} & stabilized by prior \\
 \midrule
 \multicolumn{6}{@{}l}{\emph{ImageNet-100 @ 224\,px, DeiT recipe on ViTs}} \\
-ResNet-50 & $\Delta$: $0.0{\pm}1.0$ & $-0.14$ & $+0.03$ & $0.17$ & neutral at 224\,px \\
+ResNet-50 & $\Delta$: $0.0{\pm}1.0$ & $-0.02$ & $+0.19$ & $0.21$ & neutral at 224\,px \\
 ViT-S/16 & $\Delta$: $+2..{+}8$; $G$: $12.0..12.6$ & $+13.00$ & $+11.95$ & $1.05$ & above band \\
 ViT-B/16 & $\Delta \geq \Delta_{\mathrm{ViT\mbox{-}S}}$ & $+26.01$ & $+22.89^{*}$ & $3.12^{*}$ & grows with scale \\
 \bottomrule
@@ -395,9 +583,13 @@ Table~\ref{tab:scale} reports the block. Three conclusions.
 
 \emph{Convolutional redundancy at sufficiency is exact and scale-stable.}
 ResNet-18 at 1.28M images gains $+0.04 \pm 0.07$ end-to-end and
-$+0.05 \pm 0.10$ feature-side; the law's neutral regime measured to a
-hundredth of a point at the largest data scale in the study, and again at
-native resolution with ResNet-50.
+$+0.05 \pm 0.10$ feature-side; the neutral regime measured to a hundredth
+of a point at the largest data scale in the study. ResNet-50 at native
+$224$\,px repeats it: on three seeds matched across both arms the
+seed-paired difference is $-0.02 \pm 0.35$, so the pre-registered band
+($0.0 \pm 1.0$) holds and its falsifier, which would have fired at
+$\Delta \geq +1.5$ and made convolutional redundancy a low-resolution
+artifact, is dead.
 
 \emph{The attention deficit is real, persistent, and grows with model
 scale.} ViT-tiny still gains $+3.2$ points at 1.28M images. At $224$\,px
@@ -417,3 +609,7 @@ edge ($11.95$ vs.\ $12.0$--$12.6$). As an additional robustness check,
 the ViT-S and ResNet-50 evaluations were independently re-run on a second
 machine with a from-scratch environment; their means agree with the
 primary measurement to $0.01$--$0.05$ points.
+
+\emph{Takeaway.} Scale does not retire the prior: convolutional
+redundancy at sufficiency survives 1.28M images, while attention's
+deficit grows with model size rather than shrinking.

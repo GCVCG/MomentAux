@@ -1,0 +1,10 @@
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagsslbudget_simclr800_c100_1pct.yaml --run runs/diagsslbudget_simclr800_c100_1pct --ckpt best.pt
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagsslbudget_simclr800_c100_2pct.yaml --run runs/diagsslbudget_simclr800_c100_2pct --ckpt best.pt
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagsslbudget_simclr800_c100_3pct.yaml --run runs/diagsslbudget_simclr800_c100_3pct --ckpt best.pt
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagsslbudget_simclr800_c100_7pct.yaml --run runs/diagsslbudget_simclr800_c100_7pct --ckpt best.pt
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagsslbudget_simclr800_c100_15pct.yaml --run runs/diagsslbudget_simclr800_c100_15pct --ckpt best.pt
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagsslbudget_simclr800_c100_25pct.yaml --run runs/diagsslbudget_simclr800_c100_25pct --ckpt best.pt
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/ablations_full/auxmag_2pct_sched0.yaml --run runs/auxmag_2pct_sched0 --ckpt best.pt
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/ablations_full/auxmag_3pct_sched0.yaml --run runs/auxmag_3pct_sched0 --ckpt best.pt
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/ablations_full/auxmag_15pct_sched0.yaml --run runs/auxmag_15pct_sched0 --ckpt best.pt
+~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/ablations_full/auxmag_25pct_sched0.yaml --run runs/auxmag_25pct_sched0 --ckpt best.pt
