@@ -4752,3 +4752,41 @@ ported vs corrected and why.
   QOSGrpNodeLimit is a limit across EVERY user of the acc_resc QOS, so other
   projects hold it. Holding our nodes with work queued beats draining them and
   hoping to re-acquire.
+
+- *** L2 SCORED AT 100% — BOTH MY BANDS MISSED, AND THE RE-PIN RESCUED A
+  FALSIFIER THAT HAD NOMINALLY FIRED AGAINST THE METHOD (2026-08-11, all 18
+  voc/pc 10%+voc100% diag200e finals; pc@100% still training):
+      cell        base_50e base_200e |  D_50e   D_200e         | Drel_50e Drel_200e pixAcc
+      voc@10%        7.23    18.42   |  +1.46  +1.61 +-0.13    |  20.2%    8.7%     76.9
+      voc@100%      33.63    51.64   |  +2.57  +0.13 +-0.24    |   7.6%    0.3%     88.4
+      pc@10%         1.83     2.43   |  +0.12  +0.10 +-0.01    |   6.6%    4.2%     37.5
+  L1 at voc@100%: band 45..58 mIoU -> **51.64 HIT** (the voc@10% leg missed
+  HIGH at 18.42 vs 10..16, scored earlier).
+  L2 FORK, both branches WRONG: H-RECIPE (+3.5..+7.0) is dead by ~14 sigma.
+  H-UNDERFIT (+1.0..+3.0) has the DIRECTION right -- Delta falls as the
+  baseline rises -- but badly understated it: measured **+0.13 +-0.24, i.e.
+  statistically ZERO**, below my own floor. Recorded as a direction hit and a
+  BAND MISS on both branches, not as a win for H-UNDERFIT.
+  *** D2 IS RESCUED, and this is the substantive consequence. D2 predicted
+  "structural neutrality survives the task change: Delta(100%) = 0 +-1.5",
+  falsifier |Delta| > 2.5. At 50 epochs it read +2.57 -- NOMINALLY FIRING
+  against the method's core structural claim (lambda reaching exactly 0 is
+  what makes high-data neutrality structural rather than tuned). At 200 epochs
+  it reads **+0.13, squarely inside the D2 band**. So structural neutrality
+  DOES hold on dense prediction; the 50-epoch cell simply was not at
+  sufficiency. My post-mortem at the time said the premise was wrong because
+  "VOC@100% is a low-data cell in this study's terms" -- right in spirit, but
+  the mechanism was the SCHEDULE, and it is now measured rather than argued.
+  At 200 epochs voc@100% is a properly trained cell (51.64 mIoU, 88.4 pixAcc)
+  and the lambda->0 schedule delivers neutrality exactly as it does at 100% on
+  every classification population.
+  THIS IS THE STRONGEST ARGUMENT THAT THE RE-PIN WAS NECESSARY: the 50-epoch
+  recipe was not merely imprecise, it MANUFACTURED A FALSIFIER HIT against the
+  method's structural claim.
+  SHAPE: the dense envelope steepens into the familiar form -- relative gain
+  20.2% -> 8.7% at 10% and 7.6% -> 0.3% at 100%. A low-data phenomenon, same
+  as every classification population.
+  OPERATIONAL NOTE: job 44508854 COMPLETED cleanly (5h37, exit 0:0, 0 FAIL)
+  and pc@100% is still training on 855, so nothing was lost when that node
+  released; the canonical pascalcontext@100% pair is in the grid regardless
+  and is ordered first under longest-job-first.
