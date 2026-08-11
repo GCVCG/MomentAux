@@ -1,0 +1,58 @@
+# FoodSeg103 semantic segmentation, the full training set.
+#
+# THE FOURTH DENSE POPULATION, and the only one with a CLASSIFICATION TWIN
+# already in the study. food101 is an existing classification population
+# (where SimCLR beats the prior by +2.4..+4.3, one of the few places it does),
+# so FoodSeg103 is the single place where the same visual domain can be
+# compared across the two TASKS -- dense vs classification -- rather than only
+# across datasets. 103 food classes plus background, texture-dominated, and
+# the objects have no canonical shape, which is as far from VOC's
+# object-centric photos as a non-driving segmentation set gets.
+#
+# Recorded 2026-07-23 as "a SEGMENTATION set, wrong task for the frozen
+# classification recipe" and set aside in favour of Food-101. That was right
+# then; a dense task now exists, so it is exactly the right set.
+#
+# Masks need NO remapping: they are already mode-L with values 0..103, with 0
+# a real background class as in VOC. n_classes is 104, not the 103 the name
+# suggests -- category_id.txt has no trailing newline, so the obvious line
+# count is short by one and would silently drop "other ingredients".
+#
+# The dense recipe (SGD 0.01, batch 16, 512 crops with scale 0.5-2.0 and flip,
+# 200 epochs, cosine) is FROZEN across every dense cell on every population.
+# Both arms of this pair are identical except the moment_aux block.
+#
+# *** SCHEDULE RE-PINNED 50 -> 200 EPOCHS (2026-08-11, user decision).
+# The original dense recipe used 50 epochs. The pre-registered L1 control
+# measured what that cost: voc@10% baseline 7.23 -> 18.42 mIoU at 200 epochs,
+# a +155% rise, so the 50-epoch envelope was measured on segmentors that were
+# nowhere near trained and its absolute numbers reported a WEAK RECIPE as much
+# as a weak prior. 200 epochs is not a tuned value -- it is the SAME budget the
+# frozen classification recipe uses at every fraction, which is what makes a
+# cross-task comparison (e.g. dense-vs-classification at matched images per
+# class) legitimate rather than confounded by schedule. Choosing the dense
+# budget by inspecting convergence curves was explicitly rejected: that would
+# tune the recipe to the task, which this study does nowhere else.
+# eval_every 5 -> 20 keeps the number of validation passes per run at 10.
+# The 50-epoch runs are preserved as the 1x arm of a schedule axis.
+name: foodseg103_aux_100pct
+task: segmentation
+dataset: foodseg103
+backbone: resnet18
+output_stride: 8
+epochs: 200
+batch_size: 16
+lr: 0.01
+weight_decay: 0.0001
+crop: 512
+num_workers: 4
+eval_every: 20
+pretrained: false
+stem_calibrate: true
+moment_aux:
+  stem: energy-magnitude
+  tap: backbone.layer3
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine
+  head_norm: true

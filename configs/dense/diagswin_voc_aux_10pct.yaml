@@ -1,0 +1,61 @@
+# VOC segmentation with a SWIN-TINY encoder, 10% of the training set. DIAGNOSTIC.
+#
+# WHY: the study's strongest claim is the ATTENTION regime -- ViT-B gains
+# +26.01 at ImageNet-100, the largest Delta measured, while every conv is
+# neutral at full data. The entire dense transplant so far uses ResNet-18, so
+# that claim has NO dense evidence at all. This pair asks whether the
+# attention deficit is a property of the BACKBONE or of the classification
+# TASK, which is a headline question rather than another data point.
+#
+# Swin rather than ViT for a structural reason: Swin is hierarchical, so its
+# stride-8 stage is a drop-in analog of the dilated ResNet's stride-8 output
+# and BOTH backbones wear the IDENTICAL FCN head. A plain ViT would need its
+# own upsampling decoder, and that decoder's capacity would become a variable
+# between the conv and attention arms.
+#
+# TWO REASONS THIS IS A DIAGNOSTIC AND NEVER A HEADLINE ROW:
+#   * AdamW, not the frozen recipe's SGD. The classification study found
+#     swin-none seed-bistable or at chance under frozen SGD on most datasets;
+#     a dense Swin pair under SGD would measure a training failure, not a
+#     feature deficit. Both arms share the optimizer, so Delta stays valid.
+#   * The bistability caveat travels with it. If swin-none collapses on any
+#     seed here, these cells are reported with that flag, exactly as the
+#     classification swin cells are.
+#
+# *** SCHEDULE RE-PINNED 50 -> 200 EPOCHS (2026-08-11, user decision).
+# The original dense recipe used 50 epochs. The pre-registered L1 control
+# measured what that cost: voc@10% baseline 7.23 -> 18.42 mIoU at 200 epochs,
+# a +155% rise, so the 50-epoch envelope was measured on segmentors that were
+# nowhere near trained and its absolute numbers reported a WEAK RECIPE as much
+# as a weak prior. 200 epochs is not a tuned value -- it is the SAME budget the
+# frozen classification recipe uses at every fraction, which is what makes a
+# cross-task comparison (e.g. dense-vs-classification at matched images per
+# class) legitimate rather than confounded by schedule. Choosing the dense
+# budget by inspecting convergence curves was explicitly rejected: that would
+# tune the recipe to the task, which this study does nowhere else.
+# eval_every 5 -> 20 keeps the number of validation passes per run at 10.
+# The 50-epoch runs are preserved as the 1x arm of a schedule axis.
+name: diagswin_voc_aux_10pct
+task: segmentation
+dataset: voc_seg
+split: train_aug
+backbone: swin_tiny_patch4_window7_224
+output_stride: 8
+optimizer: adamw
+epochs: 200
+batch_size: 16
+lr: 0.0001
+weight_decay: 0.05
+crop: 512
+num_workers: 4
+eval_every: 20
+pretrained: false
+subset_pct: 10
+stem_calibrate: true
+moment_aux:
+  stem: energy-magnitude
+  tap: backbone.layers_1
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine
+  head_norm: true
