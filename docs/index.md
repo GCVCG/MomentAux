@@ -1,5 +1,22 @@
 # MomentStem — fixed moment priors for data-efficient CNNs
 
+**Ahmad AlMughrabi**<sup>1,\*</sup>
+([0000-0002-9336-3200](https://orcid.org/0000-0002-9336-3200)) ·
+**Albert Clop**<sup>1</sup>
+([0000-0002-0187-6288](https://orcid.org/0000-0002-0187-6288)) ·
+**Benjamin Busam**<sup>2</sup>
+([0000-0002-0620-5774](https://orcid.org/0000-0002-0620-5774)) ·
+**Ricardo Marques**<sup>3</sup>
+([0000-0001-8261-4409](https://orcid.org/0000-0001-8261-4409)) ·
+**Petia Radeva**<sup>1</sup>
+([0000-0003-0047-5172](https://orcid.org/0000-0003-0047-5172))
+
+<sup>1</sup> Universitat de Barcelona ·
+<sup>2</sup> Technical University of Munich ·
+<sup>3</sup> Universitat Pompeu Fabra ·
+<sup>\*</sup> corresponding author
+([ahmad.almughrabi@ub.edu](mailto:ahmad.almughrabi@ub.edu))
+
 Fixed Gabor/Zernike moment filters as *training-time priors* on standard CNN
 backbones. The champion method, **MomentAux**, regresses an intermediate
 layer onto fixed moment-magnitude maps during training only — the deployed
@@ -42,8 +59,8 @@ is positive at every data scale up to 25%, neutral at 100% by construction.
 The law behind every cell: **Δ = G(features) + readout(baseline accuracy)**
 — `G` measured by linear probes on frozen features, readout negative below
 the measured crossing bracket `[31.8, 40.3]` and positive above it. Of the
-278 cells whose readout is resolvable against its own uncertainty, **268
-(96%) fall on the predicted side**. Machine-verified by
+511 cells whose readout is resolvable against its own uncertainty, **404
+(79%) fall on the predicted side**. Machine-verified by
 `analysis/audit_sign_law.py`.
 
 The law is predictive: registered in advance it called an unseen backbone
