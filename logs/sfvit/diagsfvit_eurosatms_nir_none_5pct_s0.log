@@ -198,3 +198,5 @@ epoch 196/200 loss 0.0010 train 1.0000 test 0.8713
 epoch 197/200 loss 0.0010 train 1.0000 test 0.8713
 epoch 198/200 loss 0.0010 train 1.0000 test 0.8713
 epoch 199/200 loss 0.0018 train 0.9990 test 0.8713
+epoch 200/200 loss 0.0010 train 1.0000 test 0.8713
+done: final 0.8713 best 0.8737 -> ./runs/diagsfvit_eurosatms_nir_none_5pct/seed0
