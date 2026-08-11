@@ -2,6 +2,9 @@
 data/*
 !data/subsets/
 runs/
+runs_dense/
+runs_dense_50e/
+runs_turing/
 results/
 !results/*.csv
 !results/*.md
