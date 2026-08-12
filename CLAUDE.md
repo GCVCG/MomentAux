@@ -4790,3 +4790,70 @@ ported vs corrected and why.
   and pc@100% is still training on 855, so nothing was lost when that node
   released; the canonical pascalcontext@100% pair is in the grid regardless
   and is ordered first under longest-job-first.
+
+## THE 200-EPOCH DENSE GRID (2026-08-12, 212/216 cells; ade20k@100% aux and
+## three singles still in flight). Delta mIoU, [50e] beside it, rel% of baseline
+
+      pop            1%        2%        5%       10%       25%      100%
+      voc          +0.39     +0.97     +1.15     +1.61     +2.34     +0.46
+                   [+0.38]   [+0.50]   [+0.72]   [+1.46]   [+2.06]   [+2.57]
+                     6%        12%       9%        9%        8%        1%
+      cityscapes   +0.49     +0.41     +0.20     +0.68     +0.73     +0.48
+      foodseg103   +0.12     +0.20     +0.26     +0.43     +0.56     -0.12
+      ade20k       +0.18     +0.20     +0.37     +0.48     +0.37       --
+      pascalctx    +0.11     +0.13     +0.16     +0.10     +0.16     +0.17
+                     11%       10%       9%        4%        5%        3%
+      diagswin_voc +0.42     +1.29     +1.76     +0.90     +0.75     +1.33
+                   [-0.03]   [+0.01]   [+0.38]   [+1.49]   [+1.05]   [+1.08]
+                     9%        21%       22%       8%        5%        5%
+  baselines(200e) voc 6.23/8.21/13.03/18.28/29.05/51.53 (pixAcc@100% 88.3);
+  pc 1.07/1.28/1.82/2.42/3.49/6.44 (56.4); swin 4.91/6.07/8.14/11.16/16.02/
+  26.26 (80.9); foodseg ... 17.88 (69.6); ade20k ... 27.49 (72.3);
+  cityscapes ... 49.43 (91.2).
+
+- *** D4 SURVIVES EXACTLY, WHICH IS THE POINT OF HAVING RE-RUN: voc@1% =
+  **+0.39 +-0.04** at 200 epochs against +0.38 at 50. The dense study's
+  headline negative -- a dense target on a dense task, the most favourable
+  venue this prior could be given, pays +0.39 at ~5 images per class where
+  classification shows a universal ~+1.5 floor -- now rests on properly
+  trained models with the schedule objection REMOVED rather than merely
+  unaddressed. Target-task alignment is not where the value comes from.
+- *** THE DENSE ENVELOPE GREW AN INTERIOR PEAK. At 50 epochs every population
+  was monotone rising with no right flank, which is what made me call VOC@100%
+  "a low-data cell in this study's terms". At 200 epochs voc PEAKS AT 25%
+  (+2.34) and falls to +0.46 at 100%; foodseg peaks at 25% (+0.56) and goes
+  **-0.12** at 100%; ade20k peaks at 10%. So the dense envelope is unimodal
+  like every classification population, AND neutral at sufficiency on two
+  populations. The 50-epoch monotonicity was a schedule artifact, not a
+  property of dense prediction. (E-A is not scorable until ade20k@100% lands.)
+- *** THE DENSE ATTENTION CONCLUSION IS WITHDRAWN -- IT WAS A CONVERGENCE
+  ARTIFACT, AND THIS RESTORES THE PAPER'S STRONGEST CLAIM.
+  At 50 epochs Swin was <= ResNet-18 at every fraction (-0.03/+0.01/+0.38 at
+  1/2/5%), and I reported that the attention deficit does NOT transplant to
+  dense prediction and that the ViT headline must be scoped to classification.
+  At 200 epochs Swin is **+0.42/+1.29/+1.76** at 1/2/5% against voc's
+  +0.39/+0.97/+1.15 -- ABOVE conv at 4 of 6 fractions, and in RELATIVE terms
+  (the fair comparison, since swin is the weaker segmentor: 26.26 vs 51.53
+  mIoU at 100%) **21-22% vs 12%/9% in the 2-5% band, i.e. ~2x**.
+  That 2x is the SAME ratio classification measures: G(swin) 7.6-10.5 vs
+  G(r18) 3.55-6.26 on C100. E-M's recorded falsifier -- "Delta(swin) <=
+  Delta(r18) at EVERY fraction => the attention deficit is a property of the
+  classification TASK" -- substantively held at 50 epochs and clearly does NOT
+  hold at 200. Swin under AdamW was simply much further from convergence than
+  the conv cells, so the 50-epoch recipe produced the OPPOSITE conclusion.
+  E-M's BAND (+2..+10 at 5-25%) still MISSES LOW (max +1.76), so the size was
+  over-predicted; the DIRECTION reverses.
+  ALSO MIRRORS CLASSIFICATION AT FULL DATA: swin@100% +1.33 (5% rel) vs
+  voc@100% +0.46 (1% rel) -- the attention backbone still gains where conv is
+  ~neutral, exactly as ViT-tiny gains +9.88 at full C100 where every conv is
+  neutral.
+- *** THE LABEL-SPACE EFFECT LARGELY DISSOLVES ONCE NORMALISED. voc vs
+  pascalcontext are BYTE-IDENTICAL pixels at 21 vs 254 classes. In absolute
+  mIoU voc's peak (+2.34) is 14x pascalcontext's (+0.17) -- but their
+  baselines differ 8x, which is the metric-scale artifact already corrected
+  once on 2026-08-11. In RELATIVE terms: 6% vs 11% @1%, 12% vs 10% @2%,
+  9% vs 9% @5%, 9% vs 4% @10%, 8% vs 5% @25%, 1% vs 3% @100% -- voc higher in
+  the mid-band, pascalcontext higher at BOTH ends, ~1.6x at most. The
+  same-pixels control therefore shows a MUCH weaker and less consistent
+  label-space effect than the 50-epoch reading claimed. State it as a mid-band
+  tendency, not as the 13x collapse first recorded nor the clean 1.6x.
