@@ -4857,3 +4857,56 @@ ported vs corrected and why.
   same-pixels control therefore shows a MUCH weaker and less consistent
   label-space effect than the 50-epoch reading claimed. State it as a mid-band
   tendency, not as the 13x collapse first recorded nor the clean 1.6x.
+
+- *** THE DENSE STUDY IS COMPLETE AND HAS A COMMITTED EXPORTER (2026-08-13):
+  216/216 cells, 60/60 probes, and `analysis/aggregate_dense.py` regenerates
+  every dense table from runs_dense/. WORTH RECORDING WHY IT WAS MISSING: the
+  project's own non-negotiable is that tables regenerate from run records, and
+  until now EVERY dense number in this ledger came from an ad-hoc query in a
+  scratchpad. aggregate.py has no knowledge of runs_dense at all. That is the
+  exact fragility the rule exists to prevent, and the Data Availability
+  statement promises released tables.
+  THE EXPORTER EMITS RELATIVE DELTA ALONGSIDE ABSOLUTE, deliberately: absolute
+  mIoU is not comparable across populations whose baselines differ 8x, and
+  reading it as if it were produced the "13x label-space collapse" that was
+  really ~1.6x. It also evaluates readout against PIXEL ACCURACY rather than
+  mIoU, and declines to make a sign call for cells INSIDE the crossing bracket
+  (the mnet precedent).
+  *** THE LAW ON DENSE PREDICTION: 30 cells with both Delta and G (1-25%; 100%
+  excluded by the probe-ceiling rule):
+      inside the bracket (no prediction):  2
+      unresolvable (|readout| <= 2 SEM):  21
+      RESOLVABLE (these test the law):     9  -> 9 as predicted, 0 wrong
+  ALL NINE ARE ON THE POSITIVE BRANCH (pixAcc 52-78, above the bracket), which
+  is the honest limitation: dense confirms the law on a new TASK and a new
+  METRIC, but has ZERO resolvable cells below the crossing. That is exactly
+  what E-K was built to test.
+  *** E-K IS UNRESOLVED, NOT PASSED, AND THE REASON IS MINE. pascalcontext@1-2%
+  has trained pixel accuracy 21.1/25.9 -- clearly below the bracket, where the
+  law demands NEGATIVE readout. Measured: +0.02 and +0.00, i.e. ZERO. The
+  recorded falsifier needed readout clearly POSITIVE there, so it did not fire;
+  but the prediction was not confirmed either. When the long-schedule cells
+  were queued I wrote that L3 would make E-K answerable once baselines rose.
+  It did not: the re-pin more than doubled pascalcontext's baseline and left
+  Delta at +0.11..+0.16, so readout is still a difference of two tiny numbers.
+  The units test needs a population with abundant labels AND low pixel accuracy
+  AND a material Delta, and no dense population in this study has all three.
+  State it as a limitation rather than working around it a fourth time.
+  *** THE ATTENTION CLAIM, IN ITS FINAL AND NARROWEST FORM. I have now stated
+  this three ways and only the third is right. Relative G, swin vs r18 on VOC:
+      pct     1%     2%     5%    10%    25%
+      swin   4.6%  20.7%  17.4%   7.0%   2.0%
+      r18    6.3%  13.4%  10.8%   8.1%   5.8%
+  Swin's relative feature gain exceeds conv's ONLY at 2% and 5% (~1.6x), and
+  conv is HIGHER at 1%, 10% and 25%; at 25% swin's G collapses to +0.27 against
+  conv's +1.51. So the 50-epoch conclusion (swin <= conv at EVERY fraction) is
+  still withdrawn -- swin clearly wins the 2-5% band on both accuracy and
+  features -- but "~2x, the same ratio classification measures" was an overread
+  from the 4 fractions available at the time. It is a NARROW-BAND effect.
+  *** E-A SCORED: ade20k Delta(100%) = **-0.29** against a band of +1.5..+4.0,
+  MISSED LOW. The recorded falsifier (an interior peak exceeding both ends by
+  >= 0.5 mIoU) did NOT fire on the letter -- ade20k's peak is +0.38 against
+  +0.18 at 1%, only 0.20 above -- but the "monotone rising" premise it was
+  built on is false: the envelope falls to negative at 100%. Three populations
+  now go neutral-or-negative at full data (voc +0.46/0.9%, foodseg -0.12,
+  ade20k -0.29), which is the classification right flank reproduced on dense.
