@@ -140,8 +140,14 @@ worker () {                              # $1 = GPU index
 # 24h walltime and orphaning it. Parallelism pays for MANY SHORT tasks.
 SLOTS=${MS_SLOTS:-3}
 echo "concurrency: $SLOTS training(s) per GPU = $((SLOTS*4)) per node"
-for g in 0 1 2 3; do
-    for k in $(seq 1 "$SLOTS"); do worker "$g" & done
+# ROUND-ROBIN over GPUs, not GPU-major. The loops used to nest the other way
+# (all of gpu0's slots, then gpu1's ...), so slots claim in spawn order and a
+# queue with fewer tasks than slots puts EVERY task on GPU 0. Measured on the
+# ImageNet lane: 2 tasks left, both on gpu0 at 100% while gpus 1-3 sat at 0 MiB,
+# running 3-5x slower than the same cells had on a free GPU. Interleaving means
+# the first 4 claims land on 4 different GPUs.
+for k in $(seq 1 "$SLOTS"); do
+    for g in 0 1 2 3; do worker "$g" & done
 done
 wait
 echo "BSC_WORKER_COMPLETE"

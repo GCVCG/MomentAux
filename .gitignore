@@ -5,7 +5,7 @@ runs/
 runs_dense/
 runs_dense_50e/
 runs_turing/
-results/
+results/*
 !results/*.csv
 !results/*.md
 !results/*.tex
