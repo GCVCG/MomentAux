@@ -135,8 +135,8 @@ worker () {                              # $1 = GPU index
         echo "[gpu$1] TASK $i/$N :: ${cmd:0:110}"
         # LANE-PREFIXED (2026-08-06): see bsc_big.sbatch -- both lanes wrote
         # logs/task_${i}.log and clobbered each other's failure diagnostics.
-        eval "$cmd" > "$MS_ROOT/logs/grid_task_${i}.log" 2>&1 \
-            && echo "[gpu$1] OK   $i" || echo "[gpu$1] FAIL $i (see logs/grid_task_${i}.log)"
+        eval "$cmd" > "$MS_ROOT/logs/${SLURM_JOB_NAME}_task_${i}.log" 2>&1 \
+            && echo "[gpu$1] OK   $i" || echo "[gpu$1] FAIL $i (see logs/${SLURM_JOB_NAME}_task_${i}.log)"
     done
 }
 
@@ -169,8 +169,14 @@ SLOTS=${MS_SLOTS:-3}
 # the regime here (the OOM trace recommended it explicitly).
 export PYTORCH_CUDA_ALLOC_CONF=${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}
 echo "concurrency: $SLOTS training(s) per GPU = $((SLOTS*4)) per node"
-for g in 0 1 2 3; do
-    for k in $(seq 1 "$SLOTS"); do worker "$g" & done
+# ROUND-ROBIN over GPUs, not GPU-major. The loops used to nest the other way
+# (all of gpu0's slots, then gpu1's ...), so slots claim in spawn order and a
+# queue with fewer tasks than slots puts EVERY task on GPU 0. Measured on the
+# ImageNet lane: 2 tasks left, both on gpu0 at 100% while gpus 1-3 sat at 0 MiB,
+# running 3-5x slower than the same cells had on a free GPU. Interleaving means
+# the first 4 claims land on 4 different GPUs.
+for k in $(seq 1 "$SLOTS"); do
+    for g in 0 1 2 3; do worker "$g" & done
 done
 wait
 echo "BSC_WORKER_COMPLETE"
