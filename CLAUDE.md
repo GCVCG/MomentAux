@@ -4910,3 +4910,36 @@ ported vs corrected and why.
   built on is false: the envelope falls to negative at 100%. Three populations
   now go neutral-or-negative at full data (voc +0.46/0.9%, foodseg -0.12,
   ade20k -0.29), which is the classification right flank reproduced on dense.
+
+- *** THE IMAGENET-100 WEDGE, FINALLY MEASURED (2026-08-13). A diagin100 cell
+  hanging mid-run was recorded earlier as an unexplained incident whose task
+  logs had been overwritten. It recurred -- diagin100_r50_none/seed0 stopped at
+  epoch 44 (previously another cell stopped at 99) -- and this time it was
+  characterised rather than guessed at:
+      state              R (running), NOT D/S -- so not a deadlock or IO stall
+      CPU time           advancing normally (~1.1 cores, same as its healthy
+                         sibling on the same node)
+      READ SYSCALLS      **frozen**: syscr 655970 -> 655970 over 25s, while the
+                         healthy aux cell did syscr +4658 in the same window
+      stime              +1 jiffy vs the sibling's +238 -- essentially no
+                         syscalls of any kind
+      metrics.csv        no write for 33 min on a cell whose epochs take 75s
+  So it burns CPU in a compute/spin loop and loads NO data. That rules out the
+  three cheap explanations (deadlock, GPFS stall, OOM) and points at the
+  dataloader/worker path rather than the model. syscr-vs-CPU-time over a short
+  window is the discriminator worth reusing: it separates "slow" from "stuck"
+  without py-spy, which is not installed on the compute nodes.
+  RECOVERY: killed and re-queued. num_workers deliberately NOT changed on the
+  retry even though a dataloader cause is plausible -- it is part of the
+  reproducibility contract and the AUX arm of this pair already ran with the
+  recorded value, so re-drawing the augmentation stream on one arm only would
+  put the recipe inside the Delta.
+  *** NEAR-MISS WORTH RECORDING: the first retry worklist listed BOTH cells of
+  the pair, including aux/seed1 which was alive and healthy at epoch 67 on
+  another node. Because the flock run lock is NODE-LOCAL on GPFS (established
+  hours earlier, when six trainings ran for three seeds across two nodes),
+  nothing would have stopped the new job from starting a duplicate and
+  overwriting its checkpoints mid-run. Caught before the job started; the
+  worklist now contains only the cell that actually needs running. Third time
+  in one day that the node-local flock assumption has mattered -- the guard
+  train.py advertises as "exclusive" is only exclusive within a node.
