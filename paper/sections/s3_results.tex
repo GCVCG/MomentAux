@@ -279,6 +279,24 @@ $+0.525$ for the prior arm against $+0.215$ for the baseline
 training ends: what the prior changes is where the representation
 settles, not what the loss is pulling on at the finish.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs_explain/cam_auxmag_5pct_sched0.png}
+\caption{Where the class evidence sits, CIFAR-100 at $5\%$. The four rows are
+\emph{selected} cases (prior arm correct, baseline wrong), so they show what the
+difference looks like where it is present, not how often. The quantity to read
+as evidence is measured over the whole test set instead: normalizing each
+class-activation map to sum one and taking its Gini coefficient, which is $0$
+for evidence spread uniformly and approaches $1$ for evidence concentrated at a
+few locations, gives $\camBase$ for the baseline against $\camAux$ for the prior
+arm over $\camN$ images ($\camSigma\,\sigma$). Both arms are scored on the same
+images rather than on the advantage cases, since scoring only where the prior
+wins would build the selection back into the number. The prior's evidence is
+therefore measurably more concentrated, by a modest amount --- not the
+categorical difference the four rows suggest.}
+\label{fig:cam}
+\end{figure}
+
 \paragraph{Is that imprint specific, or is it what good features look like?}
 One cell cannot tell the two apart, and any intervention that improves
 features might show the same alignment, so we measured the same statistic

@@ -143,22 +143,11 @@ subsets, banks, runner, aggregation, audit, is released with the paper at the re
 
 The measurements behind the prior's feature effect are the alignment
 statistic and the linear evaluation reported in
-Section~\ref{sec:imprint}; the two panels here illustrate them.
-Fig.~\ref{fig:cam} is \emph{selected} on test images the prior arm
-classifies correctly and the baseline does not, so it shows what the
-difference looks like where it is present, not how often it is present.
+Section~\ref{sec:imprint}; the panel here illustrates them.
 Fig.~\ref{fig:tsne} is not selected, and is included precisely because it
-shows the effect less clearly than the numbers do.
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=\linewidth]{figs_explain/cam_auxmag_5pct_sched0.png}
-\caption{Class-activation maps, CIFAR-100 at 5\%, for four selected test
-images (prior arm correct, baseline wrong). The prior arm's evidence
-concentrates on object contours and texture boundaries where the
-baseline's is diffuse at this data scale.}
-\label{fig:cam}
-\end{figure}
+shows the effect less clearly than the numbers do --- a reader would
+otherwise reasonably wonder whether a projection shows what the linear
+evaluation measures.
 
 \begin{figure}[htbp]
 \centering

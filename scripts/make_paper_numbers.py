@@ -243,6 +243,17 @@ def main():
         _, gap, _ = _grp(lambda r: "simclraux" in r["cell"])
         macro("imprintCombo", dec(gap, 2), "same SSL init, plus the target")
 
+    # ---- CAM concentration, from analysis/cam_concentration.py -----------
+    _cam = os.path.join(ROOT, "results", "cam_concentration.json")
+    if os.path.exists(_cam):
+        _c = json.load(open(_cam))[0]
+        macro("camBase", dec(_c["gini_base"], 3))
+        macro("camAux", dec(_c["gini_aux"], 3))
+        macro("camDelta", dec(_c["delta"], 3), "whole test set, not the panel")
+        macro("camN", num(_c["n_images"]))
+        _sem = (_c["gini_base_sem"] ** 2 + _c["gini_aux_sem"] ** 2) ** 0.5
+        macro("camSigma", dec(_c["delta"] / _sem, 1))
+
     print("\n".join(out))
 
 
