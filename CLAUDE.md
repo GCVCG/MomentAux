@@ -5027,3 +5027,44 @@ ported vs corrected and why.
   images may put both arms under the floor rule, in which case the 1% cell is
   reported as uninterpretable rather than as a null -- that is a limitation of
   the instrument at that scale, not evidence about the prior.
+
+- *** "THE LAW IS NOT TESTABLE ON DETECTION" IS WITHDRAWN, SAME DAY, BEFORE ANY
+  CELL RAN (2026-08-13; the user asked "why is it not testable? do we have a
+  solution?" and the answer is yes). My registration above was too quick, and
+  the argument behind it was weaker than I made it sound: I said detection's
+  per-location classification is ~99% background so it has no analogue of pixel
+  accuracy -- but SEGMENTATION's pixel accuracy also counts background (VOC is
+  ~70% background, pixAcc 72-88 against mIoU 6-51) and the law worked fine on
+  that inflated scale. The difference is degree, not kind.
+  THE SOLUTION, registered before any result: condition on foreground. Ground
+  truth says which locations hold which class; measure the head's 20-way
+  accuracy over exactly those locations (**fg_acc**). The conditioning comes
+  from GT boxes, not from predictions, so it is not circular, and it is
+  literally "the classification the head performs" -- which is what the dense
+  units lesson says readout tracks.
+  MEASURED, not argued (synthetic check before any GPU cell, 4096 locations,
+  0.37% foreground):
+      perfect head          loc_acc 100.00   fg_acc 100.00
+      all-background head   loc_acc  99.63   fg_acc   0.00
+  So raw location accuracy has 0.37 points of dynamic range between a useless
+  head and a perfect one -- it saturates and tests nothing -- while fg_acc
+  spans the full range. Both are logged every eval so the saturation claim
+  stays measured rather than assumed.
+  WHY THIS MATTERS BEYOND BOOKKEEPING: all nine resolvable cells in the
+  segmentation grid sat ABOVE the crossing, so dense confirmed the law's
+  POSITIVE branch and tested its negative branch not at all -- the gap E-K was
+  built for and failed to close. If fg_acc at 1-5% lands below the bracket,
+  detection supplies the negative-branch test segmentation could not.
+  PREDICTIONS RECORDED IN ADVANCE:
+    (T4) fg_acc RISES with data fraction and STRADDLES the crossing bracket
+      [31.8, 40.3] somewhere in 1-25%; cells below it must show NEGATIVE
+      readout, cells above it POSITIVE, exactly as on every other population.
+    FALSIFIER: readout POSITIVE at a detection cell whose fg_acc is clearly
+      below 31.8, or NEGATIVE below -1 at one clearly above 40.3 => the
+      readout term does not transplant to a coordinate-regression task and
+      the law's scope must be stated as labeling and dense-labeling tasks.
+  CAVEAT STATED WITH IT: this transplants an accuracy bracket measured on
+  whole-image classification to a differently-constructed accuracy scalar. The
+  same assumption held on segmentation's pixel accuracy, but it is an
+  assumption, and a miss here is ambiguous between "the law does not transfer"
+  and "fg_acc is the wrong scalar".

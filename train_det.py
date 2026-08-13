@@ -14,11 +14,20 @@ specific budget from convergence curves is exactly the per-task tuning the
 frozen-recipe discipline exists to prevent (see the 50-epoch dense re-pin,
 which produced two reversed conclusions before it was caught).
 
-WHAT THIS CANNOT DO, registered before any result: the sign law is not testable
-here. Readout must be read on the head's own classification scale, and
-detection's per-location classification is ~99% background, so it has no
-analogue of the pixel accuracy that made the law scorable on segmentation. We
-therefore report Delta and G for detection and decline to score readout.
+THE READOUT SCALE, decided before any cell ran. Readout is a function of the
+classification the head actually performs, not of the task metric -- scoring it
+on mIoU is what put every segmentation cell on the wrong flank. Detection's raw
+per-location accuracy is ~99% because ~99.7% of locations are background, so it
+saturates and tests nothing. The scale we register as PRIMARY is instead
+accuracy over the locations ground truth assigns to an object: a genuine 20-way
+accuracy, conditioned on GT boxes rather than on predictions. Both are logged
+so the saturation claim is measured rather than assumed.
+
+This matters beyond bookkeeping. All nine resolvable cells in the segmentation
+grid sat ABOVE the crossing, so that task confirmed the law's positive branch
+and tested its negative branch not at all. If foreground accuracy at low
+fractions lands below the bracket, detection supplies the test segmentation
+could not.
 """
 import argparse
 import fcntl
@@ -105,12 +114,36 @@ def voc_ap(rec, prec):
 
 
 def evaluate(model, loader, device, n_classes, stride, iou_thr=0.5):
-    """VOC AP50. `difficult` ground truth is neither required as a recall nor
-    penalised as a false positive, per the VOC protocol."""
+    """VOC AP50, plus the two candidate scales for the readout term.
+
+    WHY TWO. The dense pass established that readout is a property of the
+    classification the head ACTUALLY PERFORMS, not of the task metric -- scoring
+    it on mIoU put every segmentation cell on the wrong flank. Detection needs
+    the same treatment, and it has two defensible scalars:
+
+      loc_acc  -- per-location accuracy over ALL locations, the direct analogue
+                  of segmentation's pixel accuracy (which also counts
+                  background). Detection is ~99.7% background, so we expect this
+                  to saturate near 99 and be NON-DISCRIMINATING: the law would
+                  predict readout ~ 0 everywhere, which is true but tests
+                  nothing. Recorded so that claim is measured rather than
+                  assumed.
+
+      fg_acc   -- accuracy over the locations ground truth assigns to an object,
+                  i.e. a genuine 20-way classification accuracy. The
+                  conditioning comes from GT boxes and not from predictions, so
+                  it is not circular.
+
+    PRE-REGISTERED: fg_acc is the PRIMARY readout scale for detection, chosen
+    before any cell ran and for the stated reason. If it lands below the
+    crossing bracket at low fractions it supplies the negative-branch test that
+    segmentation could not -- all nine resolvable dense cells sat above the
+    crossing."""
     from torchvision.ops import batched_nms, box_iou
     model.eval()
     dets = {c: [] for c in range(n_classes)}
     gts = {}
+    acc_all = [0, 0]; acc_fg = [0, 0]
     with torch.no_grad():
         for imgs, tgts in loader:
             imgs_l = imgs if isinstance(imgs, list) else list(imgs)
@@ -128,6 +161,24 @@ def evaluate(model, loader, device, n_classes, stride, iou_thr=0.5):
                 if b.numel():
                     k = batched_nms(b, s, c, 0.5)[:100]
                     b, s, c = b[k], s[k], c[k]
+                # readout scales: compare the head's argmax against the
+                # SAME assignment the training targets use, so the quantity is
+                # defined identically at train and eval time.
+                Hf, Wf = cls_l.shape[-2:]
+                locs_e = locations(Hf, Wf, stride, device)
+                ct_e, _, _ = assign_targets(locs_e, tg["boxes"].to(device),
+                                            tg["labels"].to(device), n_classes,
+                                            stride=stride)
+                pred_e = cls_l[0].permute(1, 2, 0).reshape(-1, n_classes)
+                bg = pred_e.sigmoid().max(dim=1).values < 0.05
+                arg = pred_e.argmax(dim=1)
+                arg[bg] = n_classes
+                acc_all[0] += int((arg == ct_e).sum()); acc_all[1] += ct_e.numel()
+                fgm = ct_e < n_classes
+                if fgm.any():
+                    acc_fg[0] += int((arg[fgm] == ct_e[fgm]).sum())
+                    acc_fg[1] += int(fgm.sum())
+
                 iid = tg["image_id"]
                 gts[iid] = tg
                 for bb, ss, cc in zip(b.cpu().numpy(), s.cpu().numpy(), c.cpu().numpy()):
@@ -162,7 +213,10 @@ def evaluate(model, loader, device, n_classes, stride, iou_thr=0.5):
                 fp[i] = 1
         tp, fp = np.cumsum(tp), np.cumsum(fp)
         aps.append(voc_ap(tp / max(npos, 1), tp / np.maximum(tp + fp, 1e-9)))
-    return 100.0 * float(np.mean(aps)) if aps else 0.0
+    ap50 = 100.0 * float(np.mean(aps)) if aps else 0.0
+    loc_acc = 100.0 * acc_all[0] / max(acc_all[1], 1)
+    fg_acc = 100.0 * acc_fg[0] / max(acc_fg[1], 1)
+    return ap50, loc_acc, fg_acc
 
 
 def main():
@@ -223,7 +277,7 @@ def main():
 
     mpath = os.path.join(out_dir, "metrics.csv")
     with open(mpath, "w") as f:
-        f.write("epoch,loss,cls,reg,ctr,ap50,lr,aux_lambda\n")
+        f.write("epoch,loss,cls,reg,ctr,ap50,loc_acc,fg_acc,lr,aux_lambda\n")
     best, t0 = 0.0, time.time()
     for ep in range(epochs):
         # lambda(t): cosine to EXACTLY lam_f at the final epoch. That is what
@@ -267,18 +321,23 @@ def main():
             agg += [float(loss), float(l_cls), float(l_reg), float(l_ctr)]
         sched.step()
         agg /= max(len(ltr), 1)
-        ap50 = evaluate(model, lva, dev, dq.NUM_CLASSES, stride) \
-            if (ep % eval_every == 0 or ep == epochs - 1) else float("nan")
+        if ep % eval_every == 0 or ep == epochs - 1:
+            ap50, loc_acc, fg_acc = evaluate(model, lva, dev, dq.NUM_CLASSES, stride)
+        else:
+            ap50 = loc_acc = fg_acc = float("nan")
         with open(mpath, "a") as f:
             f.write(f"{ep},{agg[0]:.4f},{agg[1]:.4f},{agg[2]:.4f},{agg[3]:.4f},"
-                    f"{ap50:.4f},{opt.param_groups[0]['lr']:.6f},{lam:.4f}\n")
-        print(f"ep {ep:3d}  loss {agg[0]:.4f}  AP50 {ap50:6.2f}  lam {lam:.3f}", flush=True)
+                    f"{ap50:.4f},{loc_acc:.4f},{fg_acc:.4f},"
+                    f"{opt.param_groups[0]['lr']:.6f},{lam:.4f}\n")
+        print(f"ep {ep:3d}  loss {agg[0]:.4f}  AP50 {ap50:6.2f}  "
+              f"fgAcc {fg_acc:5.1f}  lam {lam:.3f}", flush=True)
         if ap50 == ap50 and ap50 > best:
             best = ap50
             atomic_save(model.state_dict(), os.path.join(out_dir, "best.pt"))
     atomic_save(model.state_dict(), os.path.join(out_dir, "last.pt"))
     json.dump({"config": cfg, "seed": a.seed, "epochs": epochs,
                "final_ap50": ap50, "best_ap50": best,
+               "final_loc_acc": loc_acc, "final_fg_acc": fg_acc,
                "n_train": len(tr), "n_val": len(va),
                "wall_seconds": time.time() - t0,
                "gpu_name": torch.cuda.get_device_name(0) if torch.cuda.is_available() else "cpu",
