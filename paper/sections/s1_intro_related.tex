@@ -41,8 +41,7 @@ instrument, one frozen training recipe, fixed data subsets shared by every
 run, and a numerically pinned bank of Gabor and moment
 spectral filters, and use it to measure one deliberately austere source of
 prior knowledge against the strongest data-driven alternatives at matched or
-declared compute. The prior, which we call \emph{MomentAux}, could hardly be
-cheaper: a fixed bank of oriented-energy targets, injected only during
+declared compute. The prior, which we call \emph{MomentAux}, could hardly cost less: a fixed bank of oriented-energy targets, injected only during
 training through a small auxiliary regression head whose loss weight decays
 to exactly zero, adding ${\sim}2\%$ training compute and \emph{nothing} at
 inference. Against it we field SimCLR, SimSiam, and DINO initializations
@@ -67,7 +66,7 @@ where the readout term depends, to a good approximation, only on the
 \emph{baseline accuracy} of the cell: it is negative below a crossing
 located at ${\sim}32$--$40\%$ accuracy, near zero at the crossing, and
 small and positive above it. The sign prediction holds in $79\%$ of the
-511 cells where measurement uncertainty allows it to be tested at all, and
+511 cells where measurement uncertainty allows it to be tested, and
 in $88\%$ of those below the crossing
 (Section~\ref{sec:law}), and its quantitative form survived our hardest
 pre-registered tests: it predicted the feature gain of a backbone family it
@@ -128,7 +127,7 @@ methods.
     verified on the feature side, not just end-to-end.
   \item \textbf{A decision guide} (Section~\ref{sec:guide}): a
     regime-indexed recommendation table distilled from the grid, with
-    honest costs attached.
+    costs attached.
 \end{enumerate}
 
 In one line, what the grid says: measure each source's currency alone and
@@ -206,7 +205,7 @@ augmentation stack substitutes for the invariance SSL sells
 
 \paragraph{Transfer learning.}
 ImageNet initialization remains the strongest single intervention on
-photo-like data, with known caveats under
+photo-like data, with known limitations under
 domain shift and with training-from-scratch competitive given enough data
 \citep{he2019rethinking}. We use transfer both as a comparator and as a
 test of fusion: injecting the spectral prior \emph{on top of} ImageNet
@@ -231,7 +230,7 @@ than pinned in advance. Our contribution
 to this literature is quantitative and comparative: we measure the deficit
 as a feature quantity ($G \approx 13$--$15$ points for ViT-tiny across
 $2.5$--$12.5$k images, roughly $2.3\times$ any convolutional backbone),
-show a fixed spectral target fills it more cheaply than contrastive
+show a fixed spectral target fills it at lower cost than contrastive
 pre-training and more effectively than DeiT augmentation alone, and show
 the deficit \emph{grows} with model scale at fixed data
 (Section~\ref{sec:scale}), which argues it reflects data-hunger rather
@@ -251,7 +250,7 @@ checkpoint someone else produced, and neither normalizes by training
 cost nor asks what happens when two sources of information are combined.
 Our unit is instead the \emph{intervention applied to a fixed recipe},
 which is what makes cost normalization and the stacking question
-answerable at all.
+answerable.
 
 \paragraph{Spectral structure inside transformers.}
 A parallel line injects spectral structure into attention architectures:
@@ -323,13 +322,13 @@ sources tell us about a target into unique, redundant and synergistic
 atoms, and which \citet{liang2023quantifying} have already carried into
 deep multimodal learning with estimators that scale and with a-priori model
 selection as the application. We do not compute it. Our measurement is a
-linear-evaluation gap on frozen features: cheap enough for \computeCells{} cells,
+linear-evaluation gap on frozen features: inexpensive enough for \computeCells{} cells,
 ordinal rather than an information quantity, and blind to anything not
 linearly decodable. Read our result as an empirical instance of the
 decomposition those authors formalize, not as an estimate of it.
 
 Two further connections position the predictor rather than the taxonomy.
-Predicting a downstream outcome from a cheap measurement, without training
+Predicting a downstream outcome from an inexpensive measurement, without training
 the combined system, is the programme of transferability estimation
 \citep{nguyen2020leep}, which scores a single pre-trained
 source; ours asks the same question of a \emph{pair}. And the challenge
@@ -347,7 +346,7 @@ precise. Their taxonomy classifies informed learning by knowledge
 \emph{source}, \emph{representation} and \emph{integration point}, and
 states that informed learning requires two independent sources of
 information, data and prior knowledge, which is the reading of ``two
-sources'' under which this study is a fusion study at all. Ours is
+sources'' under which this study is a fusion study. Ours is
 scientific knowledge about early vision, represented as a pinned filter
 bank, integrated at the learning algorithm; the nearest existing method is
 their own informed pre-training, which
@@ -419,7 +418,7 @@ show directly that the evaluation protocol can change the conclusion. We
 instead hold one recipe and one set of fixed image indices fixed and
 vary only the intervention.
 
-The second is rarely reported at all. Self-supervised pre-training costs
+The second is rarely reported. Self-supervised pre-training costs
 roughly twice the training compute of the baseline it improves, but that
 factor almost never appears next to the accuracy it buys, which makes
 ``method A beats method B'' unanswerable for a practitioner with a fixed
@@ -449,8 +448,7 @@ data-efficiency interventions.
 
 \paragraph{Benchmark methodology.}
 Reality-check studies have repeatedly shown that uncontrolled recipes
-manufacture illusory progress, and reproducibility in machine learning
-remains fragile. We adopt
+manufacture illusory progress, and reproducibility in machine learning remains limited. We adopt
 the strictest discipline we could operationalize: a single frozen recipe;
 fixed per-subset indices so every intervention sees byte-identical
 images; numerically fingerprinted filter banks; deviations quarantined

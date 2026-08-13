@@ -58,7 +58,7 @@ retracted. Its content is asymmetric: below the crossing it makes strong,
 falsifiable predictions (large negative readout), while far above the
 crossing it predicts readout ${\approx}0$, which is true but weakly
 discriminating: a naive sign-count over high-data cells would produce a
-coin flip and wrongly suggest failure. The honest audit therefore counts
+coin flip and wrongly suggest failure. The audit therefore counts
 only cells whose readout is resolvable against its own propagated
 uncertainty.
 
@@ -182,15 +182,13 @@ cells we then audit: re-fitting the bracket on the other datasets and
 auditing each dataset out of sample gives $218/272 = 80.1\%$,
 statistically indistinguishable from the in-sample figure.
 
-That row audits 272 cells rather than all 511, and the arithmetic is worth
-stating because the shortfall is not a sampling choice. Re-fitting the
+That row audits 272 cells rather than all 511, and the arithmetic matters because the shortfall is not a sampling choice. Re-fitting the
 bracket on the other datasets makes it \emph{much wider} than the pooled
 $[31.8, 40.3]$, since a single dataset's cells no longer pin either edge:
 for CIFAR-100 the re-fitted bracket is $[13.7, 86.8]$. Cells inside a
 bracket make no sign prediction by construction, so a wider bracket
 swallows them, and $193$ of the $511$ leave the held-out set that way,
-125 of them CIFAR-100's. A further $46$ sit in datasets that cannot
-receive a fold at all, either because the remaining data cannot bracket
+125 of them CIFAR-100's. A further $46$ sit in datasets that cannot receive a fold, either because the remaining data cannot bracket
 them or because fewer than five of their cells survive, which is every
 population outside the eight largest. The three groups exhaust the total
 ($272 + 193 + 46 = 511$). Note the direction of the bias this introduces:
@@ -277,8 +275,7 @@ at the CIFAR-100 5\% cell, where the feature gap is largest on this
 dataset ($+6.3$ points), the alignment between tapped features and the
 bank's oriented-energy target measured over the whole test set is
 $+0.525$ for the prior arm against $+0.215$ for the baseline
-(Fig.~\ref{fig:heatmap}). That it survives at all is the part worth
-noting, because the auxiliary weight decays to exactly zero well before
+(Fig.~\ref{fig:heatmap}). That it survives is the part that matters, because the auxiliary weight decays to exactly zero well before
 training ends: what the prior changes is where the representation
 settles, not what the loss is pulling on at the finish.
 
@@ -335,7 +332,7 @@ $\imprintSSL$ rows, plus the moment target, shows $+\imprintCombo$, the
 largest gap we measure. Crossed, these give a $2\times2$ in which the
 imprint follows the target and $G$ follows the initialization.
 
-What this does \emph{not} establish is worth stating: alignment is a
+What this does \emph{not} establish : alignment is a
 correlation between channel-\emph{mean} energy maps, so it measures
 agreement in spatial layout rather than reproduction of the individual
 oriented channels, and a null on it would not rule out a finer imprint. The
@@ -386,8 +383,7 @@ individual images (Appendix~\ref{app:explain}) show the prior arm
 concentrating on contours and texture boundaries where the baseline's are
 diffuse, but those panels are selected on cases the prior gets right and
 the baseline wrong, so they illustrate rather than demonstrate. A t-SNE
-of frozen penultimate features shows the same direction and is honest
-about its size: the silhouette score over all classes moves only from
+of frozen penultimate features shows the same direction and does not overstate its size: the silhouette score over all classes moves only from
 $-0.072$ to $-0.064$, so the embedding is \emph{not} visibly better
 clustered, and a $+6.3$-point feature gap need not be legible in two
 projected dimensions. The alignment statistic and the linear evaluation
@@ -572,18 +568,17 @@ The prediction held on all four measures (Fig.~\ref{fig:currency}). The
 prior and SimCLR fix $1793$ and $1794$ test images respectively, and their
 normalized agreement on \emph{which} images is $1.13$ against $0.72$ for
 the prior with augmentation; centred kernel alignment between their
-representations gives $0.85$ against $0.54$. A value above one is worth
-stating plainly: for the question of which images get fixed, it matters
+representations gives $0.85$ against $0.54$. A value above one has a direct reading: for the question of which images get fixed, it matters
 less whether you used a fixed spectral target or contrastive
 pre-training than which seed you used. That is what a substitute is.
 
-Two honest qualifications. Augmentation fixes far fewer images ($1057$),
+Two qualifications. Augmentation fixes far fewer images ($1057$),
 and the Jaccard measure penalizes a small set for being small; on the
 size-robust overlap coefficient the separation shrinks to $1.08$ against
 $0.97$, so part of the headline gap is a magnitude effect and only the
 representation-level measure separates the pairs decisively. And this is
 one cell on one backbone; it corroborates the taxonomy where the taxonomy
-already had its cleanest end-to-end evidence, rather than testing it
+already had its strongest end-to-end evidence, rather than testing it
 somewhere new.
 
 \emph{Takeaway.} What a source is worth depends on which currency is
@@ -608,7 +603,7 @@ to both arms of every pair.
 before the first run and none fired, with two qualifications we keep in
 view: ViT-S's $G$ landed $0.05$ below its registered band, and ViT-B's
 $|\Delta-G|$ of $3.12$ exceeds the $1.5$ registered for the residual,
-though on a cell whose evaluation-ceiling caveat was also registered in
+though on a cell whose evaluation-ceiling limitation was also registered in
 advance and whose residual is not resolvable against its own uncertainty. $G$ at ImageNet64 uses the
 fixed-budget evaluation protocol (250 per class shown); ImageNet-100 uses
 the standard full-train evaluation. Three seeds per cell.}
@@ -633,7 +628,7 @@ ViT-B/16 & $\Delta \geq \Delta_{\mathrm{ViT\mbox{-}S}}$ & $+26.01$ & $+22.89^{*}
 \bottomrule
 \rowcolor{white}\multicolumn{6}{@{}p{0.95\linewidth}@{}}{\footnotesize $^{*}$The ViT-B
 aux arm evaluates at its own ceiling ($69.8$ vs.\ e2e $69.3$), a
-pre-registered caveat that compresses $G$; the residual is not resolvable
+pre-registered limitation that compresses $G$; the residual is not resolvable
 against its uncertainty ($\pm 2.4$).} \\
 \end{tabular}
 \end{table}
@@ -662,7 +657,7 @@ the larger gain. It does, by 13 points. Notably, with the prior the
 
 \emph{The law's predictive form survives.} Five of six pairs tie
 $\Delta$ to $G$ within $1.1$ points; the sixth (ViT-B) carries a
-pre-registered evaluation-ceiling caveat and an unresolvable residual. The
+pre-registered evaluation-ceiling limitation and an unresolvable residual. The
 ViT-S band, derived from the law before the evaluation ran, was hit on its
 edge ($11.95$ vs.\ $12.0$--$12.6$). As an additional robustness check,
 the ViT-S and ResNet-50 evaluations were independently re-run on a second

@@ -6,7 +6,7 @@ Section~\ref{sec:law} interpretable, and Section~\ref{sec:parity} states
 the price it charges: a comparator held to its published budget inside our
 recipe may be undertrained rather than weak, and the two are not separable
 by construction. That reservation bears directly on our results, so we
-measured it instead of leaving it as a caveat. Both self-supervised
+measured it instead of leaving it as a limitation. Both self-supervised
 comparators were re-run with four times their pre-training budget, at every
 fraction from 1 to 25\% rather than at one or two, since every other effect
 in this study moves with the data regime and there is no reason a budget
@@ -97,8 +97,7 @@ and 25\%, against the prior's $28.87$, $41.29$ and $57.32$. The comparator
 \emph{wins} at 5\% by $1.57$ ($3.9$ standard errors, six seeds), the two
 are level at 10\% ($+0.71$, $1.2$), and the prior wins at 25\% by $1.47$
 ($7.2$). The
-prior is not overturned on attention as it is on convolutions, but the
-honest form of the claim names its budget: at $2\times$ the prior leads at
+prior is not overturned on attention as it is on convolutions, but the claim must name its budget: at $2\times$ the prior leads at
 every fraction, and at $5\times$ only in the higher-data band.
 Section~\ref{sec:budget:tin} shows the same boundary on a second
 population.
@@ -197,7 +196,7 @@ the mechanism the image-count account failed to give. Across both datasets
 and all six measured fractions, whichever intervention has the larger
 frozen-feature gain is the one that wins end-to-end: the sign of
 $G_{\mathrm{SSL}} - G_{\mathrm{prior}}$ matches the sign of the accuracy
-difference at six cells out of six. The sharpest of these is the cell that
+difference at six cells out of six. The most pronounced of these is the cell that
 overturned our own prediction. At Tiny-ImageNet 25\%, where the prior wins
 by $1.71$, its feature gain is $+14.27$ against the comparator's $+12.43$;
 the difference of $1.84$ and the accuracy difference of $1.71$ agree to

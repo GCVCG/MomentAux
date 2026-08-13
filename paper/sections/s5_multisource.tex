@@ -20,7 +20,7 @@ red-edge, near-infrared, short-wave infrared and cirrus) and
 \textbf{sensor-fused} (all 13). \textbf{So2Sat LCZ42} pairs \emph{two
 satellites}: Sentinel-1 synthetic-aperture radar (8 channels) with
 Sentinel-2 optical (10 channels), over 17 local-climate-zone classes. The
-second is the harder and more honest test, since radar backscatter and
+second is the harder and more informative test, since radar backscatter and
 optical reflectance share no detector and no physics. In both, tiles and
 fixed subset indices are identical across the sources and the
 configuration is the champion verbatim with only the source changed, so
@@ -263,7 +263,7 @@ cost beyond training each source once is two frozen-feature evaluations.}
 \end{table}
 
 Table~\ref{tab:procedure} states it. Three properties are worth drawing
-out. It is \emph{cheap}: the only cost beyond training each source once is
+out. It is \emph{inexpensive}: the only cost beyond training each source once is
 two linear evaluations on frozen features, which run in minutes on cells
 that took hours to train. It is \emph{predictive rather than
 retrospective}, which places it alongside transferability estimation
@@ -275,7 +275,7 @@ Sections~\ref{sec:substitute} and \ref{sec:decisionfusion} both test and
 which the training-time-versus-decision-time discrepancy above already
 qualifies.
 
-The honest limit is step 5's antecedent. We compare feature gains by
+The limit is step 5's antecedent. We compare feature gains by
 magnitude and by which cells improve, not by a formal decomposition of the
 information each source carries. Partial information decomposition
 \citep{williams2010nonnegative,liang2023quantifying} is the principled

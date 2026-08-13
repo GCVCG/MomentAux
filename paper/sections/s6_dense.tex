@@ -46,7 +46,7 @@ learns dominate it --- and a cell at $4.7$ mIoU may be classifying $72\%$ of
 its pixels correctly. Scoring the law on mIoU places every dense cell deep on
 the left flank and predicts a negative readout everywhere; scoring it on
 pixel accuracy places them on the decayed positive branch, which is where
-they are. We registered this caveat in advance and then violated it in our
+they are. We registered this limitation in advance and then violated it in our
 own prediction, which is how it was found.
 
 \begin{table}[t]
@@ -107,7 +107,7 @@ frozen-feature probe agrees ($G = +0.31$), so it is not a readout artifact.
 So the venue built to flatter the prior --- a dense target supervising a
 dense task --- pays \emph{less}, not more. Whatever the prior supplies, it is
 not "structure that happens to match the output space." That makes the
-mechanism claim in Section~\ref{sec:fusion} cleaner rather than weaker: the
+mechanism claim in Section~\ref{sec:fusion} more precise rather than weaker: the
 prior injects oriented-energy structure into the representation, and what the
 head does with it afterwards is a separate question.
 
@@ -148,10 +148,10 @@ of their difference is noise. That leaves \denseLawResolvable{} cells that
 actually test the law, and \denseLawCorrect{} of \denseLawResolvable{} fall
 on the predicted side.
 
-The honest qualification is that all \denseLawResolvable{} sit
+The qualification is that all \denseLawResolvable{} sit
 \emph{above} the crossing (pixel accuracy \denseLawPixLo--\denseLawPixHi),
 so segmentation confirms the law's positive branch on a new task and a new
-metric and tests its negative branch not at all. Pascal-Context was built to
+metric and does not test its negative branch. Pascal-Context was built to
 supply exactly that test --- its trained pixel accuracy is $21.1$ and $25.9$
 at $1$--$2\%$, clearly below the bracket, where a negative readout is
 required. It returns $+0.02$ and $+0.00$: zero, not negative. The
@@ -176,7 +176,7 @@ near-neutral ($+0.46$, $1\%$), which does mirror the classification result.
 
 We state this narrowly on purpose. An earlier, under-trained version of this
 experiment supported the opposite conclusion --- that the attention deficit
-does not transfer to dense prediction at all --- and a four-fraction reading
+does not transfer to dense prediction --- and a four-fraction reading
 of the corrected data supported a broader one. Both were over-readings of the
 fractions then available. Swin is not ViT, this is one dataset, and these are
 AdamW diagnostic cells; what they establish is that the attention advantage

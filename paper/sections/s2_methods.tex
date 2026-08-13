@@ -34,7 +34,7 @@ Section~\ref{sec:comparators} defines the competing interventions and the
 cost normalization under which they are compared.
 Section~\ref{sec:probe} introduces the linear evaluation of frozen
 features that supplies the quantity $G$, without which the law of
-Section~\ref{sec:law} could not be measured at all.
+Section~\ref{sec:law} could not be measured.
 Section~\ref{sec:stats} states the seed and uncertainty protocol,
 Sections~\ref{sec:selection} and \ref{sec:parity} disclose how the
 configuration under test was selected and how that leaves it advantaged
@@ -230,7 +230,7 @@ conservative. Cells in which any seed collapses to chance are flagged
 \emph{bistable}, excluded from headline status, and reported as findings
 about trainability in their own right.
 
-Four properties of this protocol are worth stating plainly, because each
+Four properties of this protocol matter, because each
 bounds what the audit of Section~\ref{sec:lawaudit} can claim.
 
 \emph{The two-SEM rule is a declared magnitude threshold, not an exact
@@ -287,7 +287,7 @@ We considered re-selecting the configuration on a held-out validation
 split and decided against it, and state that here rather than leave a
 reader wondering. Re-selection would invalidate every cell in the grid,
 since the selected configuration is the one \computeCells{} cells were trained
-with, so the honest choices were to disclose the contamination or to
+with, so the available choices were to disclose the contamination or to
 retrain the study. Given that the general claims already rest on eleven
 populations that took no part in selection, we judged disclosure to carry
 the information a reader needs at a fraction of the cost. A future
@@ -302,7 +302,7 @@ at the declared multiple of the baseline's training cost, on the cell's own
 subset. The prior, by contrast, was developed here and therefore received
 the sweep just described. We did not sweep the comparators.
 
-The sharpest consequence is at the smallest fractions. Self-supervised
+The largest consequence is at the smallest fractions. Self-supervised
 pre-training at $1\%$ of CIFAR-100 means 200 epochs of contrastive learning
 over 500 images, which is far short of the schedules used in published
 small-data practice, and our check that strengthening SimCLR's views does
@@ -314,7 +314,7 @@ protocol, by construction. Readers who care about the best attainable
 accuracy rather than the best accuracy per unit compute should treat our
 self-supervised numbers as lower bounds.
 
-Rather than leave that as a caveat, we measured it.
+Rather than leave that as a limitation, we measured it.
 Section~\ref{sec:budget} re-runs both self-supervised comparators at four
 times their pre-training budget across the data envelope and reports what
 changes, including the two claims of ours that do not survive it.
@@ -341,7 +341,7 @@ under it: a dataset, a data fraction, a backbone, and one intervention with
 its hyper-parameters fixed. Every number we quote for a cell is a mean over
 its seeds, and every uncertainty is the standard error of that mean.
 
-Two consequences are worth stating because they affect how the counts
+Two consequences follow, because they affect how the counts
 should be read. First, cells are grouped by configuration name and never by
 parsed fields, since two configurations can agree on dataset, backbone and
 intervention while differing in a filter-bank argument or a calibration
@@ -479,7 +479,7 @@ whose cell survives in the released grid; runs superseded during the
 campaign leave no record, because the training entry point refuses to
 overwrite a completed cell and so never re-times one. Two aspects of the study's design lower
 this figure materially. The intervention under test adds only about $2\%$
-to a run, so the comparison itself is cheap; the expense lies in the
+to a run, so the comparison itself is inexpensive; the expense lies in the
 comparators, since every self-supervised arm doubles the cost of its cell.
 And re-running an existing cell has no effect,
 which matters more than it sounds: several queue faults during the
