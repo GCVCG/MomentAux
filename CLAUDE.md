@@ -4967,3 +4967,63 @@ ported vs corrected and why.
   so a reconcile cannot resurrect it.
   ALL COMPUTE FOR THE STUDY IS NOW DONE: dense 216/216 + 60/60 probes,
   ImageNet 293/294 (the 294th abandoned above), classification grid complete.
+
+## DETECTION: THE THIRD TASK (2026-08-13, user: "let's start with a full
+## training with 200 epochs on PASCAL VOC")
+
+- WHY DETECTION, and why it is not just a third data point: classification
+  pools the auxiliary target to 8x8, segmentation compares it against features
+  of the output's own extent, and detection is neither. It is the ONLY task in
+  the study with a coordinate REGRESSION head, so it asks whether
+  oriented-energy structure helps a network that must LOCALIZE rather than
+  label -- the most plausible remaining mechanism, since Gabor energy is about
+  edges and extents.
+- THE SPLIT IS NOT VOC 07+12, deliberately. All 10,582 train_aug and 1,449 val
+  images the segmentation cells use also carry box annotations (verified, zero
+  missing), so detection reuses the SAME images, splits and committed subset
+  indices. Classification/segmentation/detection on byte-identical pixels is a
+  control nothing else here can give. COST STATED: absolute AP is not
+  comparable to published VOC numbers (different split, and from scratch).
+- INSTRUMENT: dense recipe VERBATIM (SGD 0.01, batch 16, 512 crops, scale
+  0.5-2.0 + flip, 200 epochs, cosine), same dilated r18 at stride 8, same tap
+  backbone.layer3. So detection differs from segmentation in the head and the
+  loss and in NOTHING else. Head is single-level anchor-free FCOS -- minimal
+  for the reason FCNHead was; single-level costs absolute AP and that is said
+  up front, not discovered.
+- *** THE LAW IS NOT TESTABLE HERE, REGISTERED BEFORE ANY RUN. Readout must be
+  read on the head's own classification scale (the dense units lesson), and
+  detection's per-location classification is ~99% background, so there is no
+  analogue of pixel accuracy. We report Delta and G and DECLINE to score
+  readout. Anyone scoring a sign law on AP50 would be repeating the exact
+  error the dense pass caught.
+- FLOOR RULE, PRE-DECLARED (the mirror of the probe-ceiling rule): a cell where
+  BOTH arms land below 1.0 AP50 is uninterpretable -- a difference between two
+  near-zero detectors is not a measurement. Such cells are reported and
+  EXCLUDED from any Delta claim.
+- PREDICTIONS RECORDED IN ADVANCE. Anchors: voc_seg Delta = +0.39/+0.97/+1.15/
+  +1.61/+2.34/+0.46 mIoU (6/12/9/9/8/1% relative); classification C100@1%
+  +1.42 on 8.93 = 15.9% relative; the universal ~+1.5 floor at 5 images/class.
+    (T1) POSITIVE BUT SMALL AT 1%: Delta(det@1%) = **+0.2..+1.5 AP50**, i.e.
+      4-15% relative -- the same relative band the other two tasks occupy at
+      matched supervision density (107 images, ~5 per class over 20 classes).
+    (T2) UNIMODAL WITH A RIGHT FLANK: an interior peak at 10-25%, and
+      **Delta(100%) = -0.5..+1.5 AP50**, i.e. neutral at sufficiency, which is
+      what the lambda->0 schedule makes structural rather than tuned. This has
+      now held on classification (10 populations) and segmentation (3 of 6).
+    (T3) FEATURE-SIDE: G (a fresh detection head on frozen features) tracks
+      Delta in sign at every interpretable fraction, as on both other tasks.
+    FALSIFIER A (the prior does not transfer to localization): Delta <= 0 at
+      EVERY interpretable fraction => the claim must be scoped to labeling
+      tasks, and the paper must say the prior buys nothing where the head
+      regresses coordinates.
+    FALSIFIER B (alignment reopens): relative Delta(det@1%) >= 25%, i.e.
+      materially above BOTH other tasks => detection is a qualitatively richer
+      regime and the D4 conclusion ("target-task alignment is not where the
+      value comes from") needs restating, since detection is LESS aligned with
+      a dense target than segmentation is.
+    NOTE the asymmetry, built in on purpose: A and B are opposite-signed, so
+    no uniform outcome passes both. A flat result fires A; a large one fires B.
+  RISK ACKNOWLEDGED IN ADVANCE: from-scratch single-level detection at 107
+  images may put both arms under the floor rule, in which case the 1% cell is
+  reported as uninterpretable rather than as a null -- that is a limitation of
+  the instrument at that scale, not evidence about the prior.
