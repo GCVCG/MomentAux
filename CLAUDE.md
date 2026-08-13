@@ -5068,3 +5068,43 @@ ported vs corrected and why.
   same assumption held on segmentation's pixel accuracy, but it is an
   assumption, and a miss here is ambiguous between "the law does not transfer"
   and "fg_acc is the wrong scalar".
+
+## IMPRINT SPECIFICITY (2026-08-13, user: "run whatever you want to make the
+## paper stronger")
+
+- THE GAP THIS CLOSES. The paper's mechanistic evidence -- the spectral
+  imprint, alignment between tapped features and the moment target, +0.525 for
+  the prior arm against +0.215 for the baseline -- rests on ONE cell
+  (C100@5%). A single number cannot distinguish "the prior leaves an
+  oriented-energy imprint" from "good features on this dataset happen to look
+  like oriented energy". Any intervention that improves features might show
+  the same alignment, and that is the obvious referee objection.
+- THE DESIGN IS A SPECIFICITY TEST, NOT A CORRELATION, and the controls
+  already exist in the grid (C100/r18 cells with measured G and local
+  checkpoints): moment-prior cells (12), SimCLR-init cells (6), and the
+  random-fixed-target control. SimCLR-init is the decisive arm because it
+  buys LARGE G by a completely different route (G +6.15 at 1%, +10.63 at 5x
+  budget -- larger than the prior's).
+- PREDICTIONS RECORDED IN ADVANCE:
+    (I1) moment-prior cells show a LARGE alignment gap (aux minus its own
+      baseline), band **+0.15..+0.40**, and it should be present at every
+      fraction where G is positive.
+    (I2) SimCLR-init cells show LARGE G but a SMALL alignment gap: band
+      **-0.05..+0.10**, i.e. at most a third of the prior's at matched G.
+      This is the claim that makes the imprint specific rather than
+      incidental.
+    (I3) The random-fixed-target control, which already gives ~0 e2e gain,
+      shows ~0 alignment gap (**-0.05..+0.05**) -- so the imprint tracks the
+      TARGET'S CONTENT and not "any auxiliary loss".
+    FALSIFIER, and it costs the paper its mechanistic figure: SimCLR-init
+      cells show an alignment gap comparable to the moment-prior cells at
+      matched G (>= +0.15) => oriented-energy structure is simply what better
+      features look like on this data, the imprint is evidence only that
+      features improved, and Fig. heatmap must be demoted from mechanism to
+      illustration.
+    NOTE the falsifier is reachable and would be reported: the same measurement
+    produces it, and I2 and the falsifier are opposite readings of one number.
+  CAVEAT STATED IN ADVANCE: alignment is a Pearson r between channel-MEAN
+  energy maps, so it measures spatial layout agreement, not whether the
+  specific oriented channels are reproduced. A null on this measure would not
+  prove the absence of a finer imprint.
