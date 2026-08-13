@@ -111,6 +111,19 @@ def main():
     unres = [r for r in rest if r not in res]
     ok = [r for r in res
           if (r["base"] < LO and r["ro"] < 0) or (r["base"] > HI and r["ro"] > 0)]
+    # The widest population Table 7 narrows FROM: every paired cell carrying
+    # both Delta and G at >=3 seeds, regardless of intervention. It was a
+    # hand-typed 1,660 in the manuscript with no script behind it (and the
+    # hand-count was wrong), which is precisely the drift these macros exist to
+    # stop. Same criterion export_results_csv.py reports on its own last line.
+    n_all = 0
+    with open(os.path.join(ROOT, "results", "all_results.csv")) as fh:
+        for r in csv.DictReader(fh):
+            if (r.get("baseline_cell") and r.get("delta") and r.get("G")
+                    and int(r.get("n_seeds") or 0) >= 3):
+                n_all += 1
+    macro("auditAllPaired", num(n_all),
+          "every intervention, >=3 seeds; Table 7 row 1")
     macro("auditScope", num(n_scope))
     macro("auditResolvable", num(len(res)))
     macro("auditCorrect", num(len(ok)))
@@ -212,11 +225,61 @@ def main():
         macro("denseLawCorrect", num(len(ok)))
         macro("denseLawBracket",
               num(len([r for r in dlaw.values() if r["branch"] == "inside"])))
+        # The three groups must PARTITION the dense law cells, because the
+        # prose adds them up: bracket + unresolved + resolvable = total. The
+        # old test was `resolvable != "True"`, which also catches the
+        # in-bracket rows and so double-counted them -- 2 + 21 + 9 = 32
+        # against a stated 30. Exclude the bracket rows explicitly.
         macro("denseLawUnres",
-              num(len([r for r in dlaw.values() if r["resolvable"] != "True"])))
+              num(len([r for r in dlaw.values()
+                       if r["resolvable"] != "True" and r["branch"] != "inside"])))
         pa = [float(r["baseline_pixel_acc"]) for r in res]
         macro("denseLawPixLo", dec(min(pa), 0))
         macro("denseLawPixHi", dec(max(pa), 0))
+
+    # ---- detection, from analysis/aggregate_det.py -----------------------
+    # The detection result is a null, which makes the discipline matter MORE
+    # rather than less: a reader checking whether the zeros are really zeros
+    # should find the same numbers in the prose, the table and the CSV.
+    det = {}
+    dp = os.path.join(ROOT, "results", "det_results.csv")
+    if os.path.exists(dp):
+        with open(dp) as f:
+            for r in csv.DictReader(f):
+                det[int(r["pct"])] = r
+    if det:
+        macro("detCells", num(len(det) * 6),
+              "36 runs = 6 fractions x 2 arms x 3 seeds")
+        macro("detCellCount", num(len(det) * 2),
+              "a cell is a (config, fraction) pair, as in the dense tables")
+        macro("detFloorPcts", " and ".join(f"{p}\\%" for p in sorted(det)
+                                           if det[p]["ap50_interpretable"] != "True"),
+              "fractions where BOTH arms fall under the 1.0 AP50 floor")
+        v = det[1]
+        macro("detOneDelta", dec(float(v["delta_ap50"]), 2))
+        macro("detOneFgAcc", dec(float(v["none_fg_acc"]), 1),
+              "baseline fg_acc at 1%: below the crossing bracket")
+        macro("detOneGFgAcc", dec(float(v["G_fg_acc"]), 2),
+              "the falsifier needed >= +1.5 here")
+        v = det[10]
+        macro("detTenDelta", dec(float(v["delta_ap50"]), 2), "the one nonzero cell")
+        macro("detTenGFgIou", dec(float(v["G_fg_iou"]), 4),
+              "the only resolvable G in the detection grid")
+        macro("detTenGFgIouSem", dec(float(v["G_fg_iou_sem"]), 4))
+        v = det[100]
+        macro("detFullAPnone", dec(float(v["none_ap50"]), 1),
+              "instrument check: the pre-recorded FPN conditional was <= 15")
+        macro("detFullDelta", dec(float(v["delta_ap50"]), 2))
+        # The probe's OWN AP50 at 1% is what makes the law untestable here:
+        # it floors on the same side of the crossing where a negative readout
+        # would have to be read. No fallback literal -- if the probe records
+        # are missing the macro is absent and main.tex's staleness guard fires.
+        v = det[1]
+        if v.get("probe_ap50_none"):
+            macro("detProbeOneAP", dec(float(v["probe_ap50_none"]), 2),
+                  "the probe's own AP50 at 1%: floored, so no law cell")
+            macro("detProbeLiftOne", dec(float(v["probe_fg_acc_none"]), 1),
+                  "probe fg_acc at 1%, against the trained cell's own")
 
     # ---- imprint specificity, from analysis/imprint_specificity.py -------
     # The mechanistic claim quotes these rather than transcribing them, for the

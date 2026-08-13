@@ -6,7 +6,8 @@ the benchmark can claim, because the auxiliary target is itself a
 \emph{dense} map --- oriented energy at every location --- and a reader is
 entitled to ask whether the fusion outcomes and the law
 $\Delta = G + \mathrm{readout}$ are properties of the method or of the
-metric. This section answers that on semantic segmentation.
+metric. This section answers that on semantic segmentation, and then on
+object detection, where the answer changes.
 
 \textbf{State the bias before the result.} A dense spatial target on a dense
 spatial task is the most favourable venue this prior could be given. A
@@ -22,8 +23,10 @@ negative, and negatives are not flattered by a favourable venue.
 \textbf{Pascal-Context} (254), and a \textbf{Swin-Tiny} arm on VOC. The
 encoder is the study's ResNet-18 at output stride 8 with an FCN head, so the
 prior's bank, tap, $\lambda$ schedule and head normalization transfer with no
-re-design and no new hyper-parameter. Figure~\ref{fig:dense} summarises the result. \densePops{} populations $\times$ six
-fractions $\times$ two arms $\times$ three seeds $=$ \denseCells{} cells, all
+re-design and no new hyper-parameter. Table~\ref{tab:dense} gives the full
+envelope and Fig.~\ref{fig:dense} summarises it. \densePops{} populations
+$\times$ six fractions $\times$ two arms $\times$ three seeds $=$
+\denseCells{} runs (72 cells in the sense of Section~\ref{sec:stats}), all
 completed.
 
 Pascal-Context is the control that carries most of the weight: it
@@ -49,7 +52,7 @@ pixel accuracy places them on the decayed positive branch, which is where
 they are. We registered this limitation in advance and then violated it in our
 own prediction, which is how it was found.
 
-\begin{table}[tb]
+\begin{table}[pos=tbp]
 \caption{The dense envelope. $\Delta$ in mIoU points, with $\Delta$ as a
 percentage of that cell's own baseline beneath it. Three seeds per cell,
 ResNet-18 with an FCN head at output stride 8 (Swin-Tiny in the last block),
@@ -77,14 +80,14 @@ Swin-Tiny, VOC    & $+0.42$ & $+1.29$ & $+1.76$ & $+0.90$ & $+0.75$ & $+1.31$ \\
 \end{tabular}
 \end{table}
 
-\begin{figure*}[tb]
+\begin{figure*}[pos=tbp]
 \centering
 \includegraphics[width=\textwidth]{figs/dense_envelope.pdf}
 \caption{Semantic segmentation, six populations, 200 epochs, three seeds per
 cell. \textbf{(a)} $\Delta$ as a percentage of each cell's own baseline, not in
 absolute mIoU: the populations' baselines differ eightfold, so absolute deltas
 are not comparable across them. Read this way the envelopes are unimodal and
-occupy the same $5$--$20\%$ band classification does, and three populations go
+occupy the same \denseRelLo--\denseRelHi\% band classification does, and three populations go
 neutral or negative at full data. \textbf{(b)} The readout term against the
 head's own classification scale (pixel accuracy), not against mIoU --- the
 crossing bracket is an accuracy bracket, and scoring the law on mIoU places
@@ -193,3 +196,105 @@ $6\%$). Relative feature gain behaves the same way. The defensible statement
 is a mid-band tendency for the coarser label space, not the collapse the
 absolute numbers suggest --- and it is only visible as such because the
 control holds the pixels fixed.
+
+\subsection{Detection: the prior does not reach a coordinate
+regressor}\label{sec:detection}
+Segmentation still asks a network to \emph{label}, one decision per pixel.
+Detection is the only task here whose head \emph{regresses coordinates}, and
+oriented energy is about edges and extents, so if the prior were going to help
+anything localize this is where it would show. We run it on the same VOC images
+and the same committed subset indices the segmentation cells use, with the
+dense recipe verbatim --- 200 epochs, identical crops and augmentation --- and a
+single-level anchor-free FCOS head at stride 8 on the same tapped backbone.
+Detection therefore differs from segmentation in the head and the loss and in
+nothing else. \detCells{} runs (\detCellCount{} cells in the sense of
+Section~\ref{sec:stats}): six fractions, both arms, three seeds.
+
+\begin{table}[pos=tbp]
+\caption{Detection is a null. $\Delta$ is aux minus baseline on PASCAL VOC.
+AP50 is the task metric; fg\_acc and fg\_iou are the head's 20-way accuracy and
+its mean box IoU \emph{at ground-truth foreground locations}, so neither can
+collapse the way a ranked-precision integral does. $G$ is the same quantity
+under a frozen trunk with a fresh $1\times1$ head fitted on the full split.
+Cells marked $\dagger$ fall under the pre-declared floor rule: both arms below
+1.0 AP50, where a difference is not a measurement.}
+\label{tab:det}
+\centering\scriptsize
+\setlength{\tabcolsep}{3.6pt}
+\zebra{3}
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Data & $\Delta$AP50 & $\Delta$fg\_acc & $\Delta$fg\_iou & $G$(fg\_acc) & $G$(fg\_iou) \\
+\midrule
+1\%$^\dagger$  & $-0.04$ & $-0.23$ & $-0.0003$ & $-0.16$ & $+0.0017$ \\
+2\%$^\dagger$  & $-0.00$ & $-0.23$ & $-0.0001$ & $-0.37$ & $-0.0006$ \\
+5\%            & $-0.08$ & $+0.11$ & $-0.0048$ & $+0.34$ & $+0.0130$ \\
+10\%           & $+0.56$ & $-0.32$ & $+0.0032$ & $+0.08$ & $+0.0073$ \\
+25\%           & $-0.41$ & $+0.01$ & $+0.0017$ & $-0.47$ & $+0.0011$ \\
+100\%          & $-0.14$ & $+0.64$ & $+0.0031$ & ---     & ---       \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{The result, and one number that was not real.} Every measure is flat
+(Table~\ref{tab:det}). The single exception is $+\detTenDelta$ AP50 at 10\%, and
+we do not report it as a gain: its own components are all consistent with zero
+($\Delta$fg\_acc $-0.32$, $\Delta$fg\_iou $+0.0032$), and it does not survive a
+change of IoU threshold. A gain that is neither classification nor localization
+and vanishes at AP25 is ranking noise.
+
+We also had to withdraw a larger number. At 5\% the raw arithmetic gives
+$+0.84$ AP50, and it is entirely one collapsed baseline seed: its fg\_iou is
+\emph{exactly} $0.0000$ while its fg\_acc matches its siblings, and its
+regression loss pins at exactly $1.0000$ from epoch 40 to 199. The predicted
+boxes went to zero area, the GIoU term saturated, its gradient vanished, and
+that branch could never recover while the classification branch kept improving.
+This is a \emph{partial} collapse of one branch of a two-headed model, and the
+seed-level check used elsewhere in this study would not have caught it, because
+the cell still trains. Excluding it, $\Delta$ at 5\% is $-0.08$.
+
+\paragraph{The null is the prior, not the head.} A flat end-to-end result on a
+task with a weak head admits a second reading, and it is the one this study
+documents everywhere else: at five images per class the frozen-feature probe on
+CIFAR-100 sees $+4.70$ of feature gain where the trained classifier realizes
+$+1.91$. So we probed the detection trunks under the same protocol, and the
+answer is unambiguous: $G(\mathrm{fg\_acc}) = \detOneGFgAcc$ at 1\% and $-0.37$
+at 2\%, against a pre-registered falsifier at $+1.5$. A fresh head with a
+hundred times the cell's labels extracts nothing more from the prior's trunk
+than from the baseline's.
+
+What licenses that reading is that the probe demonstrably works here: at 1\% it
+lifts fg\_acc from the trained cell's \detOneFgAcc{} to \detProbeLiftOne. The
+trained detection head really is label-limited at 107 images, which is exactly
+the condition under which the classification left flank hides feature gain. The
+condition is met and there is nothing to find. One quantity does move ---
+$G(\mathrm{fg\_iou}) = +\detTenGFgIou \pm \detTenGFgIouSem$ at 10\%, resolvable
+and localization-side rather than classification-side --- and $0.007$ of IoU is
+not a result we will build on.
+
+\paragraph{Two things this cannot be blamed on.} The instrument is adequate: at
+full data the detector reaches \detFullAPnone{} AP50 from scratch, so the null
+is not a broken head, and the multi-level-FPN question we recorded as
+conditional on a weak full-data cell does not reopen. And the recipe is the
+segmentation recipe unchanged, on the same images, so this is not the
+undertrained-instrument error that the 50-epoch dense grid taught us to check
+for.
+
+\paragraph{What detection cannot do, stated as a limitation.} We had hoped it
+would supply the negative branch of the sign law, which segmentation could not:
+baseline fg\_acc is $\detOneFgAcc$--$28.9$ at 1--5\%, below the crossing
+bracket, and $\Delta \approx 0$ there, so $\mathrm{readout} = -G$. It does not,
+and the obstruction is structural. The law needs $G$ on the \emph{same} metric
+as $\Delta$, and the probe's own AP50 floors at exactly those fractions
+($\detProbeOneAP$ at 1\%). Above the crossing $\Delta$ and $G$ are both near
+zero, so their difference is unresolvable. Detection contributes no resolvable
+law cell --- the same outcome as Pascal-Context, for the same reason. The
+negative branch remains untested by either non-classification task, and we
+prefer to say so rather than construct a fifth instrument to chase it.
+
+\paragraph{The task axis.} Taken with Section~\ref{sec:densealign}, the three
+tasks order cleanly and the ordering is the sharpest limit we can put on the
+method: what the prior supplies is cashed \emph{fully} by a whole-image
+classifier, \emph{partly} by a per-pixel classifier, and \emph{not at all} by a
+coordinate regressor --- and in the last case we now know it is because the
+features are not there, not because the head cannot reach them.
