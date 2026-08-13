@@ -303,8 +303,11 @@ explicit: on the right flank it predicts readout ${\approx}0$ and gets it,
 which is true but not discriminating, so 487 of 1{,}100 in-scope cells
 cannot test it at all, and of the 511 that can, those above the crossing
 are right only $61\%$ of the time. Nothing here licenses
-extrapolation to web-scale pre-training, to architectures whose baselines do
-not train under this recipe, or to tasks other than classification.
+extrapolation to web-scale pre-training or to architectures whose baselines
+do not train under this recipe. The one non-classification test we run,
+semantic segmentation (Section~\ref{sec:dense}), confirms the law's
+positive branch on a different task and a different metric and cannot test
+its negative branch at all, for the reason given there.
 
 \paragraph{Known boundaries.} Two are worth naming. The first is
 regime: the sign prediction is right $88\%$ of the time below the crossing
@@ -325,17 +328,17 @@ bistability, itself a finding, limits headline claims. PathMNIST's
 shifted test split confounds its high-data cells for every method. Linear
 evaluations lose interpretability at 100\% cells (the evaluation ceiling)
 and at ImageNet64
-are budget-bound by construction. The two ImageNet stages were run at
-\emph{full data only}, so what we validate at scale is the law and the
-right flank, not the envelope: the peak location and the left-flank
-suppression that Section~\ref{sec:ownenvelope} establishes on eleven
-smaller populations are untested above $100$k images. That is a cost
-decision rather than a considered one, and it is the cheapest gap to
-close, since a $1\%$ ImageNet64 cell is $12{,}811$ images over $1000$
-classes, i.e.\ thirteen per class in a label space five times finer than
-anything else here, exactly the scarce, fine-grained corner where the
-readout term is largest and where our account is therefore easiest to
-falsify. One prior family (Gabor and moment energy)
+are budget-bound by construction. Both ImageNet stages were
+subsequently run across $1$--$25\%$ as well as at full data, so the envelope
+and not only the right flank is measured at scale; a $1\%$ ImageNet64 cell is
+$12{,}811$ images over $1000$ classes, thirteen per class in a label space
+five times finer than anything else here. That is the scarce, fine-grained
+corner where the readout term is largest, and it cost us a registered
+prediction: we called an interior peak at $5$--$20\%$ and the convolutional
+envelope is instead monotone falling from the smallest runnable fraction,
+because $1\%$ of ImageNet64 is already 12.8k images --- past the peak of
+every smaller population. The envelope is not absent at scale; its peak sits
+below anything this dataset can express. One prior family (Gabor and moment energy)
 is tested as the knowledge source; the taxonomy predicts, but does not
 yet demonstrate, that other structural priors will slot into the same
 currency logic.

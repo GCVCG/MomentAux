@@ -158,6 +158,59 @@ def main():
     macro("vitBestDelta", dec(best['delta']),
           "must equal vitBest - vitBestBase")
 
+    # ---- dense prediction, from analysis/aggregate_dense.py's tables ----
+    # Same discipline as above: the dense section quotes these macros rather
+    # than transcribing numbers, so prose cannot drift from the CSVs. Absolute
+    # AND relative delta are both exported, because absolute mIoU is not
+    # comparable across populations whose baselines differ eightfold -- reading
+    # it as if it were is what produced a "13x label-space collapse" that was
+    # really ~1.6x.
+    dres, dlaw = {}, {}
+    dr = os.path.join(ROOT, "results", "dense_results.csv")
+    dl = os.path.join(ROOT, "results", "dense_law.csv")
+    if os.path.exists(dr):
+        with open(dr) as f:
+            for r in csv.DictReader(f):
+                dres[(r["population"], int(r["pct"]))] = r
+    if os.path.exists(dl):
+        with open(dl) as f:
+            for r in csv.DictReader(f):
+                dlaw[(r["population"], int(r["pct"]))] = r
+    if dres:
+        macro("denseCells", num(len(dres) * 6),
+              "216 = 6 populations x 6 fractions x 2 arms x 3 seeds")
+        macro("densePops", num(len({k[0] for k in dres})))
+        v = dres[("voc", 1)]
+        macro("denseVocOneDelta", dec(float(v["delta_miou"]), 2),
+              "D4: dense at ~5 images/class")
+        macro("denseVocOneRel", dec(float(v["delta_rel_pct"]), 1))
+        v = dres[("voc", 25)]
+        macro("denseVocPeak", dec(float(v["delta_miou"]), 2), "voc envelope peak")
+        v = dres[("voc", 100)]
+        macro("denseVocFull", dec(float(v["delta_miou"]), 2))
+        macro("denseVocFullRel", dec(float(v["delta_rel_pct"]), 1))
+        v = dres[("pascalcontext", 100)]
+        macro("densePcFull", dec(float(v["delta_miou"]), 2),
+              "same pixels as voc, 254 classes not 21")
+        macro("densePcFullRel", dec(float(v["delta_rel_pct"]), 1))
+        rel = [abs(float(r["delta_rel_pct"])) for k, r in dres.items()
+               if k[1] <= 25 and r["delta_rel_pct"] != ""]
+        macro("denseRelLo", dec(min(rel), 0))
+        macro("denseRelHi", dec(max(rel), 0))
+    if dlaw:
+        res = [r for r in dlaw.values() if r["resolvable"] == "True" and r["predicted_sign"]]
+        ok = [r for r in res if r["sign_as_predicted"] == "True"]
+        macro("denseLawCells", num(len(dlaw)))
+        macro("denseLawResolvable", num(len(res)))
+        macro("denseLawCorrect", num(len(ok)))
+        macro("denseLawBracket",
+              num(len([r for r in dlaw.values() if r["branch"] == "inside"])))
+        macro("denseLawUnres",
+              num(len([r for r in dlaw.values() if r["resolvable"] != "True"])))
+        pa = [float(r["baseline_pixel_acc"]) for r in res]
+        macro("denseLawPixLo", dec(min(pa), 0))
+        macro("denseLawPixHi", dec(max(pa), 0))
+
     print("\n".join(out))
 
 
