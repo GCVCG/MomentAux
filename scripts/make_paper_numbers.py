@@ -218,6 +218,31 @@ def main():
         macro("denseLawPixLo", dec(min(pa), 0))
         macro("denseLawPixHi", dec(max(pa), 0))
 
+    # ---- imprint specificity, from analysis/imprint_specificity.py -------
+    # The mechanistic claim quotes these rather than transcribing them, for the
+    # same reason as everything else here: a number repeated in prose and a
+    # table must come from one place.
+    _imp = os.path.join(ROOT, "results", "imprint_specificity.json")
+    if os.path.exists(_imp):
+        import statistics as _st
+        _d = json.load(open(_imp))
+        def _grp(pred):
+            g = [r for r in _d if pred(r)]
+            return (len(g), _st.mean(r["align_gap"] for r in g),
+                    _st.mean(r["G"] for r in g)) if g else (0, 0.0, 0.0)
+        n, gap, G = _grp(lambda r: r["family"] == "moment prior" and "tap" not in r["cell"])
+        macro("imprintPriorN", num(n)); macro("imprintPrior", dec(gap, 2))
+        macro("imprintPriorG", dec(G, 2))
+        n, gap, G = _grp(lambda r: r["family"] == "SimCLR init" and "aux" not in r["cell"])
+        macro("imprintSSLN", num(n)); macro("imprintSSL", dec(gap, 2))
+        macro("imprintSSLG", dec(G, 2), "larger than the prior's, by a different route")
+        _, gap, _ = _grp(lambda r: r["family"] == "random target")
+        macro("imprintRand", dec(gap, 2))
+        _, gap, _ = _grp(lambda r: r["family"] == "moment prior" and "tap" in r["cell"])
+        macro("imprintTap", dec(gap, 2), "same target, imposed at L1/L2")
+        _, gap, _ = _grp(lambda r: "simclraux" in r["cell"])
+        macro("imprintCombo", dec(gap, 2), "same SSL init, plus the target")
+
     print("\n".join(out))
 
 

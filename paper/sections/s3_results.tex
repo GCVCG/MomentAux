@@ -282,6 +282,65 @@ noting, because the auxiliary weight decays to exactly zero well before
 training ends: what the prior changes is where the representation
 settles, not what the loss is pulling on at the finish.
 
+\paragraph{Is that imprint specific, or is it what good features look like?}
+One cell cannot tell the two apart, and any intervention that improves
+features might show the same alignment, so we measured the same statistic
+across families that reach a positive $G$ by \emph{different} routes ---
+against one pinned target for every model, since a self-supervised
+initialization has no auxiliary head and therefore no target of its own.
+Reporting the alignment gap, each arm minus its own baseline
+(Table~\ref{tab:imprint}):
+
+\begin{table}[t]
+\caption{The imprint follows the \emph{target}, not the feature gain.
+Alignment gap is the arm minus its own baseline, CIFAR-100/ResNet-18, one
+pinned target applied to every model. The lower block is a $2\times2$ that
+fell out of the design: crossing \{self-supervised initialization or not\}
+with \{moment target or not\}, the imprint tracks the target while $G$
+tracks the initialization.}
+\label{tab:imprint}
+\centering\scriptsize
+\setlength{\tabcolsep}{4pt}
+\zebra{3}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Family & $n$ & mean $G$ & alignment gap \\
+\midrule
+Moment prior (tap L3)        & \imprintPriorN & $+\imprintPriorG$ & $+\imprintPrior$ \\
+SimCLR init, no target       & \imprintSSLN   & $+\imprintSSLG$   & $\imprintSSL$ \\
+Random fixed target          & 1              & $+1.31$           & $\imprintRand$ \\
+\midrule
+Moment prior, tapped at L1/L2 & 2 & $+4.67$ & $\imprintTap$ \\
+SimCLR init $+$ moment target & 1 & $+8.08$ & $+\imprintCombo$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The self-supervised cells are the decisive comparison and they answer it in
+the strongest available direction: they carry \emph{more} feature gain than
+the prior ($G = +\imprintSSLG$ against $+\imprintPriorG$) and \emph{less}
+oriented-energy structure than their own baselines ($\imprintSSL$). We had
+registered a band of $-0.05$ to $+0.10$ for them and a falsifier at
+$\geq +0.15$; the measurement came back at the opposite sign, so
+oriented-energy alignment is not simply what better features look like on
+this data.
+
+Two controls fell out of the design unplanned, and each isolates one factor
+more sharply than the comparison we set out to make. Moment-prior cells
+\emph{tapped two stages earlier} use the identical target and show
+$\imprintTap$ when read at layer~3: the imprint is localised to where the
+target is imposed, which a mechanism predicts and an incidental correlation
+does not. And a cell with the same SimCLR initialization as the
+$\imprintSSL$ rows, plus the moment target, shows $+\imprintCombo$, the
+largest gap we measure. Crossed, these give a $2\times2$ in which the
+imprint follows the target and $G$ follows the initialization.
+
+What this does \emph{not} establish is worth stating: alignment is a
+correlation between channel-\emph{mean} energy maps, so it measures
+agreement in spatial layout rather than reproduction of the individual
+oriented channels, and a null on it would not rule out a finer imprint. The
+two control rows are single cells.
+
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figs/attention_locality.pdf}
