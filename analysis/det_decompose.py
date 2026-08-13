@@ -120,7 +120,14 @@ def main():
     ap.add_argument("--runs", default="runs_det")
     ap.add_argument("--configs", default="configs/det")
     ap.add_argument("--data-root", default="./data")
-    ap.add_argument("--ckpt", default="best.pt")
+    # last.pt, not best.pt, and the reason is consistency rather than taste:
+    # final.json's recorded AP50/fg_acc are FINAL-epoch values, while best.pt
+    # holds whichever epoch scored the best AP50 (0.44 against a recorded 0.31
+    # on vocdet_none_1pct/seed0). Reading fg_iou off best.pt and comparing it
+    # to a recorded final_ap50 would silently mix two sets of weights. AP50,
+    # loc_acc and fg_acc are recomputed here in the same pass anyway, so every
+    # number in the output comes from one checkpoint.
+    ap.add_argument("--ckpt", default="last.pt")
     ap.add_argument("--ap25", action="store_true",
                     help="also compute AP at IoU 0.25 (robustness check only)")
     ap.add_argument("--out", default="results/det_decompose.json")
@@ -148,16 +155,19 @@ def main():
             sd_state = torch.load(ck, map_location=dev)
             model.load_state_dict(sd_state.get("model", sd_state), strict=False)
             miou, rate, nloc = fg_iou(model, lva, dev, dq.NUM_CLASSES, stride)
-            r = {"cell": cell, "seed": os.path.basename(sd),
+            ap50, loc_acc, fg_acc = TD.evaluate(model, lva, dev, dq.NUM_CLASSES,
+                                                stride, iou_thr=0.5)
+            r = {"cell": cell, "seed": os.path.basename(sd), "ckpt": a.ckpt,
                  "pct": int(re.search(r"(\d+)pct", cell).group(1)),
                  "arm": "aux" if "_aux_" in cell else "none",
-                 "fg_iou": miou, "fg_iou50_rate": rate, "n_fg_locations": nloc}
+                 "fg_iou": miou, "fg_iou50_rate": rate, "n_fg_locations": nloc,
+                 "ap50": ap50, "loc_acc": loc_acc, "fg_acc": fg_acc}
             if a.ap25:
                 r["ap25"] = TD.evaluate(model, lva, dev, dq.NUM_CLASSES,
                                         stride, iou_thr=0.25)[0]
             recs.append(r)
             print(f"  {cell:24s} {r['seed']}  fg_iou {miou:.4f}  "
-                  f"IoU>=0.5 {100*rate:5.1f}%  ({nloc} locations)"
+                  f"IoU>=0.5 {100*rate:5.1f}%  AP50 {ap50:5.2f}  fg_acc {fg_acc:5.2f}"
                   + (f"  AP25 {r['ap25']:.2f}" if a.ap25 else ""))
 
     if not recs:
