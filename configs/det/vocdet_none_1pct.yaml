@@ -1,0 +1,33 @@
+# PASCAL VOC detection at 1% of the segmentation train split, baseline.
+#
+# The third task, and the only one with a coordinate REGRESSION head. It runs
+# on byte-identical images, splits and committed subset indices to the voc_seg
+# cells, so classification/segmentation/detection can be compared with the
+# pixels held fixed -- the cross-task control that motivated running it.
+#
+# The recipe is the dense one verbatim (SGD 0.01, batch 16, 512 crops, scale
+# 0.5-2.0 + flip, 200 epochs, cosine), so detection differs from segmentation
+# in the head and the loss and in nothing else. 200 epochs is the same budget
+# classification and segmentation use; it is not tuned to this task.
+#
+# Head: single-level anchor-free FCOS at stride 8. Deliberately minimal, for
+# the reason FCNHead was: the least expressive head that can do the task is
+# the one least able to launder an arm difference through its own capacity.
+# Absolute AP is therefore well below published VOC numbers, which is stated
+# rather than discovered -- only the arm difference is claimed.
+name: vocdet_none_1pct
+task: detection
+dataset: voc_det
+split: train_aug
+backbone: resnet18
+output_stride: 8
+epochs: 200
+batch_size: 16
+lr: 0.01
+weight_decay: 0.0001
+crop: 512
+num_workers: 4
+eval_every: 20
+pretrained: false
+subset_pct: 1
+stem_calibrate: true
