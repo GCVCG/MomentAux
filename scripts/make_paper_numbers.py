@@ -254,6 +254,11 @@ def main():
         _sem = (_c["gini_base_sem"] ** 2 + _c["gini_aux_sem"] ** 2) ** 0.5
         macro("camSigma", dec(_c["delta"] / _sem, 1))
 
+    # A sentinel the document checks. tables/numbers.tex is GENERATED and has to
+    # travel with the sections that use its macros; when it does not, LaTeX fails
+    # with "control sequence never \\def'ed", which says nothing about the cause.
+    macro("numbersStamp", "ok", "presence checked by main.tex")
+
     print("\n".join(out))
 
 

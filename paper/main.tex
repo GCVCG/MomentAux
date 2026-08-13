@@ -39,6 +39,19 @@
 %% Generated numbers, derived from the run records and the audit, so a
 %% number in prose cannot drift from the table beside it.
 \input{tables/numbers}
+%% tables/numbers.tex is GENERATED and must travel with the sections that quote
+%% its macros. When an older copy is used -- easy to do when syncing a subset of
+%% files to Overleaf -- LaTeX reports "control sequence never \def'ed" against
+%% whichever macro is missing, which does not name the cause. These two checks
+%% name it. Add the newest macro here whenever the generator gains one.
+\makeatletter
+\@ifundefined{camSigma}{\@latex@error{tables/numbers.tex is OUT OF DATE
+  (\string\camSigma\space missing). Regenerate it with:
+  python scripts/make_paper_numbers.py > paper/tables/numbers.tex}\@ehd}{}
+\@ifundefined{numbersStamp}{\@latex@error{tables/numbers.tex is OUT OF DATE
+  (no \string\numbersStamp). Regenerate it with:
+  python scripts/make_paper_numbers.py > paper/tables/numbers.tex}\@ehd}{}
+\makeatother
 
 %% Float placement is DISTRIBUTION-DEPENDENT: the same source kept figures
 %% in the body under TeX Live 2023 locally and deferred them to the appendix
