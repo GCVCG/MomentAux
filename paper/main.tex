@@ -40,6 +40,14 @@
 %% number in prose cannot drift from the table beside it.
 \input{tables/numbers}
 
+%% Float placement is DISTRIBUTION-DEPENDENT: the same source kept figures
+%% in the body under TeX Live 2023 locally and deferred them to the appendix
+%% on Overleaf. These make it deterministic; guarded because a minimal TeX
+%% Live does not ship the first two.
+\IfFileExists{placeins.sty}{\usepackage[section]{placeins}}{}   % barrier at each \section
+\IfFileExists{dblfloatfix.sty}{\usepackage{dblfloatfix}}{}      % figure* placement + no end-deferral
+\usepackage{flafter}                                            % never place a float before its definition
+
 \begin{document}
 \let\WriteBookmarks\relax
 %% FLOAT PLACEMENT. The two lines here were previously \def\floatpagepagefraction
@@ -49,6 +57,10 @@
 %% figures far past the text that cites them. The single-column parameters are
 %% relaxed below, and so are the DOUBLE-column ones (\dbl...), which are what
 %% actually govern the full-width figure* floats.
+%% Float placement is DISTRIBUTION-DEPENDENT: the same source put figures in
+%% the body under TeX Live 2023 locally and deferred them to the appendix on
+%% Overleaf. These packages make it deterministic, and are guarded because a
+%% minimal TeX Live does not ship them.
 \renewcommand{\topfraction}{0.92}
 \renewcommand{\bottomfraction}{0.70}
 \renewcommand{\textfraction}{0.06}
@@ -222,6 +234,10 @@ take full responsibility for the content of the published article.
 \bibliographystyle{unsrtnat}
 \bibliography{refs}
 
+%% Flush every pending float before the appendix starts. Without this a
+%% deferred body figure can be placed among the appendices, which is what was
+%% reported from Overleaf.
+\clearpage
 \input{sections/appendix}
 
 \end{document}
