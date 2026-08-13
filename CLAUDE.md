@@ -5211,3 +5211,71 @@ ported vs corrected and why.
   mid-study. CONDITIONAL ON RECORD: if the 100% cell lands very low (say
   <= 15 AP50), the instrument is weak WITH data as well as without, and the
   FPN question genuinely reopens.
+
+- *** DETECTION SCORED, 36/36 CELLS, AND IT IS A NULL (2026-08-13, 3 seeds/cell,
+  200 epochs, VOC on the segmentation splits; every quantity recomputed from
+  last.pt in one pass so AP50, fg_acc and fg_iou come from the same weights):
+      pct | dAP50   sigma | d_fg_iou   sigma | d_fg_acc | dAP25 | floor
+       1% | -0.04   -1.1  | -0.0003    -0.0  |  -0.23   | -0.19 | UNINTERPRETABLE
+       2% | -0.00   -0.1  | -0.0001    -0.0  |  -0.23   | -0.16 | UNINTERPRETABLE
+       5% | -0.08   -0.5  | -0.0048    -1.7  |  +0.11   | -0.16 |
+      10% | +0.56   +3.5  | +0.0032    +1.0  |  -0.32   | +0.35 |
+      25% | -0.41   -0.7  | +0.0017    +0.5  |  +0.01   | -0.03 |
+     100% | -0.14   -0.3  | +0.0031    +1.5  |  +0.64   | -0.04 |
+  *** THE +0.84 AT 5% WAS A COLLAPSED BASELINE SEED, NOT A GAIN, and the
+  decomposition is what exposed it. vocdet_none_5pct/seed2 returns fg_iou
+  EXACTLY 0.0000 and AP50 0.00 while its fg_acc is 27.86, in line with its
+  siblings' 29.19/28.59 -- classification trained, localization died. Its
+  metrics show the mechanism: reg loss pins at EXACTLY 1.0000 from epoch 40 to
+  199 (it was 0.678 at epoch 20, with AP50 0.34, so the head was working and
+  then failed), i.e. the predicted boxes went zero-area, GIoU saturated, the
+  gradient vanished and the branch could never recover. A NEW FAILURE MODE for
+  the study: a PARTIAL collapse, one branch of a two-headed model, where the
+  seed-level accuracy check used everywhere else would not flag it because the
+  cell still trains. With that seed excluded the 5% delta is -0.08 +-0.16.
+  I had already flagged its sigma (0.89) as "one bad seed" without knowing what
+  was wrong; fg_iou = 0.0000 is what made it unambiguous.
+  NOTED, NOT CLAIMED: the collapse is in the BASELINE arm, and 0 of 18 prior
+  runs collapsed against 1 of 18 baseline runs. That is the direction of the
+  instability-rescue signature (R50 no-hn, ConvNeXt, Swin) but n=1 is not
+  evidence; Fisher exact on 1-vs-0 is p ~ 1.
+  PREDICTIONS SCORED:
+    (T1) Delta(det@1%) = +0.2..+1.5 AP50 -- **MISSED**, measured -0.04, and the
+      cell is below the floor anyway. The decomposition answers it properly and
+      the answer is ZERO: d_fg_iou -0.0003 +-0.0067, d_fg_acc -0.23 +-0.33.
+    (T2) Delta(100%) = -0.5..+1.5 -- **HIT** (-0.14). The unimodal shape is
+      technically satisfied (10% is the only nonzero cell) but with five of six
+      fractions at zero there is no envelope to speak of.
+    (T4) fg_acc straddles the crossing bracket -- **HIT**: 15.3 / 21.6 / 28.9
+      below, 36.5 INSIDE (no sign call, the mnet precedent), 46.3 / 64.2 above.
+      The premise the negative-branch test needs therefore exists; the test
+      itself still needs detection G probes, which have not been run.
+    (T5) d_fg_iou = +0.005..+0.040 at 5% AND 10% -- **MISSED at both**
+      (-0.0048, +0.0032). Its falsifier required <= 0 at BOTH and did NOT fire,
+      since 10% is nominally positive.
+    (T6) d_fg_iou = +0.000..+0.015 at 1-2% -- measured -0.0003 and -0.0001,
+      i.e. statistically zero and a hair below the band floor. Scored as
+      substantively right (small) and nominally outside.
+    FALSIFIER A ("Delta <= 0 at EVERY interpretable fraction => scope the claim
+      to labeling tasks") did NOT fire on the letter: of the four interpretable
+      fractions (5/10/25/100) three are <= 0 and 10% is +0.56 at 3.5 sigma.
+    FALSIFIER B (relative Delta(det@1%) >= 25%) did not fire: it is -13%.
+  *** THE ONE POSITIVE CELL HAS NO MECHANISM BEHIND IT, which is why the honest
+  verdict is a null rather than "positive at 10%". At 10% AP50 moves +0.56
+  (3.5 sigma) while every component of it is flat: d_fg_iou +0.0032 (1.0),
+  d_fg_acc -0.32 (-0.2), and dAP25 +0.35 (0.6). A gain that is neither
+  classification nor localization and does not survive a threshold change is
+  ranking or calibration noise, not a finding.
+  *** THE INSTRUMENT CONDITIONAL IS CLOSED, AGAINST REOPENING FPN: I recorded
+  that if the 100% cell landed <= 15 AP50 the detector would be weak with data
+  as well as without, and the multi-level-FPN question would genuinely reopen.
+  It landed **48.87 AP50** (none) and 48.73 (aux) -- a from-scratch,
+  single-level, 200-epoch detector on VOC. The instrument is adequate, so the
+  null is about the prior and not about the head.
+  READING FOR THE PAPER: the prior transfers to SEGMENTATION (small, positive
+  at every population, unimodal, neutral at sufficiency) and does NOT transfer
+  to DETECTION (zero at every fraction on all four measures). Together with D4
+  -- a dense target on a dense task pays LESS than on classification -- the
+  task axis is now the sharpest limit in the study: whatever the prior supplies
+  is cashed by a whole-image classifier, partially by a per-pixel classifier,
+  and not at all by a coordinate regressor.
