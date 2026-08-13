@@ -286,7 +286,7 @@ across families that reach a positive $G$ by \emph{different} routes ---
 against one pinned target for every model, since a self-supervised
 initialization has no auxiliary head and therefore no target of its own.
 Reporting the alignment gap, each arm minus its own baseline
-(Table~\ref{tab:imprint}):
+(Table~\ref{tab:imprint}, Fig.~\ref{fig:imprint2}):
 
 \begin{table}[t]
 \caption{The imprint follows the \emph{target}, not the feature gain.
@@ -312,6 +312,21 @@ SimCLR init $+$ moment target & 1 & $+8.08$ & $+\imprintCombo$ \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/imprint_dissociation.pdf}
+\caption{Alignment gap against feature gain, one point per cell, CIFAR-100 /
+ResNet-18. Filled markers had the moment target during training. The two
+quantities are independent: every cell whose target was imposed at the tapped
+stage sits at $+0.31$ to $+0.51$ regardless of whether its $G$ is $2.7$ or
+$8.1$, and every cell without a target there sits below zero across the same
+range of $G$. The two labelled controls are what separate the accounts --- the
+same target imposed two stages earlier leaves no imprint at layer~3, and the
+same self-supervised initialization as the negative points, with the target
+added, gives the largest gap measured.}
+\label{fig:imprint2}
+\end{figure}
 
 The self-supervised cells are the decisive comparison and they answer it in
 the strongest available direction: they carry \emph{more} feature gain than
