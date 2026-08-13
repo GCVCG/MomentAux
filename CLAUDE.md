@@ -5279,3 +5279,95 @@ ported vs corrected and why.
   task axis is now the sharpest limit in the study: whatever the prior supplies
   is cashed by a whole-image classifier, partially by a per-pixel classifier,
   and not at all by a coordinate regressor.
+
+- DETECTION G PROBES LAUNCHED (2026-08-13, 30 runs, job 44579019): the grid is
+  an e2e null on all four measures, and that admits two readings the trained
+  model cannot separate, because fg_acc and fg_iou are both measured THROUGH
+  the trained head:
+    H-NO-FEATURES  the prior buys a detection backbone nothing -> the null is
+                   feature-side and detection is outside what the prior helps.
+    H-READOUT      the features ARE better and the detection head cannot cash
+                   them -- the documented classification left flank, where at
+                   5 images per class the probe sees +4.70 and the trained
+                   classifier realizes +1.91.
+  Only a frozen trunk with a fresh head separates them, and the two give
+  DIFFERENT sentences: a limit of the prior, or a limit of the head.
+  PROTOCOL: analysis/det_probe.py, mirroring dense_probe -- freeze everything,
+  fit 1x1 convolutions (cls/ctr/reg) on the FULL 10,582-image train split, 10
+  epochs, SGD 0.01 cosine, score on val. 1/2/5/10/25%, both arms, 3 seeds.
+  100% REFUSED IN CODE by the probe-ceiling rule (probe labels == cell labels).
+  PREDICTIONS RECORDED IN ADVANCE (G = probe(aux) - probe(none)):
+    G(fg_acc) at 1-5% = **+0.0..+1.0 points**, i.e. H-NO-FEATURES with at most
+      a hint. Reasoning: this trunk was shaped by a DETECTION loss, and the
+      oriented-energy imprint being present is not the same as the features
+      being better for localization.
+    G(fg_iou) at 1-5% = **+0.000..+0.010**.
+    AP50 under the probe may itself floor at the low fractions (a 1-epoch
+      smoke gave 0.05), so fg_acc and fg_iou are the primary readouts and AP50
+      is reported with the floor rule applied, exactly as in the e2e table.
+    FALSIFIER, and it rewrites the detection conclusion: G(fg_acc) >= +1.5 at
+      any fraction <= 5% => the features ARE better and the detection null is a
+      READOUT failure, so the paper must say the head is the limit rather than
+      the prior. It would also make detection a resolvable NEGATIVE-BRANCH law
+      cell (baseline fg_acc 15.3/21.6/28.9 sits below the crossing bracket and
+      e2e Delta ~ 0 there, so readout = -G), which is the test all nine
+      resolvable segmentation cells failed to supply and Pascal-Context
+      returned 0.00 on.
+
+- *** DETECTION G PROBES SCORED — H-NO-FEATURES CONFIRMED; THE NULL IS THE
+  PRIOR, NOT THE HEAD (2026-08-14, 30/30, frozen trunk + 1x1 head on the full
+  10,582-image split, both arms identical):
+      pct | G(fg_acc)        | G(fg_iou)          | probe AP50 none/aux
+       1% | -0.16 +-0.06 -2.4| +0.0017 +-0.0020 +0.8 |  0.22 / 0.26
+       2% | -0.37 +-0.21 -1.7| -0.0006 +-0.0024 -0.3 |  0.37 / 0.36
+       5% | +0.34 +-0.53 +0.6| +0.0130 +-0.0090 +1.4 |  0.97 / 1.15
+      10% | +0.08 +-0.35 +0.2| +0.0073 +-0.0024 +3.1 |  2.59 / 2.70
+      25% | -0.47 +-0.21 -2.3| +0.0011 +-0.0016 +0.6 |  8.28 / 7.97
+  THE FALSIFIER (G(fg_acc) >= +1.5 below 5% => the null is a READOUT failure
+  and the head is the limit) IS DEAD: measured -0.16 and -0.37, the wrong sign
+  entirely. A fresh head with 100x the cell's labels extracts NOTHING more from
+  the prior's trunk than from the baseline's. So the detection null is
+  feature-side: the prior does not improve detection features, full stop.
+  THE PROTOCOL IS DEMONSTRABLY WORKING, which is what licenses that reading:
+  at 1% the probe lifts fg_acc from the trained cell's 15.31 to 23.81, so the
+  trained detection head IS heavily label-limited at 107 images -- exactly the
+  condition under which the classification left flank hides +4.70 of feature
+  gain behind +1.91 of realized gain. The condition is met and there is still
+  nothing to find.
+  MY BANDS: G(fg_acc) +0.0..+1.0 at 1-5% -- 1% and 2% land NEGATIVE, outside on
+  the low side; 5% lands +0.34, in band. G(fg_iou) +0.000..+0.010 -- 1/2/25%
+  in, 10% in (+0.0073), 5% ABOVE at +0.0130. Scored as: right branch, wrong
+  numbers, and I over-predicted the classification side while under-predicting
+  the localization side.
+  *** THE ONE RESOLVABLE MOVEMENT IS LOCALIZATION, NOT CLASSIFICATION, AND IT
+  IS TINY: G(fg_iou) = +0.0073 +-0.0024 (3.1 sigma) at 10%, against a
+  classification G of +0.08 +-0.35 (0.2 sigma) at the same cell. The e2e
+  d_fg_iou there was +0.0032, so the probe reads about twice what the trained
+  head realizes -- the left-flank shape, at a magnitude far too small to
+  matter. State it as "the prior leaves detection classification features
+  untouched and its box-regression features very slightly better", and do not
+  dress 0.007 of IoU as a finding.
+  *** DETECTION CANNOT SUPPLY THE NEGATIVE-BRANCH LAW CELL AFTER ALL, and the
+  obstruction is structural rather than a shortfall of effort. The law needs G
+  on the SAME metric as Delta, i.e. AP50 -- and the PROBE's AP50 floors exactly
+  where the baseline sits below the crossing:
+      pct | base fg_acc | D AP50        | G AP50        | readout | branch
+       1% |    15.31    | -0.04 +-0.03  | +0.04 +-0.04  |  -0.07  | FLOOR (probe AP50 0.2)
+       2% |    21.57    | -0.00 +-0.04  | -0.01 +-0.04  |  +0.01  | FLOOR (probe AP50 0.4)
+       5% |    28.89    | -0.08 +-0.17  | +0.18 +-0.12  |  -0.26  | below -> NEG required
+      10% |    36.53    | +0.56 +-0.16  | +0.11 +-0.26  |  +0.45  | inside bracket, no call
+      25% |    46.27    | -0.41 +-0.60  | -0.31 +-0.19  |  -0.10  | above -> POS required
+  The two cells below the crossing whose probe clears the floor are 5% (readout
+  -0.26, correct sign, but |readout| is ~1 SEM so NOT resolvable) and nothing
+  else; 1-2% are floored on both sides, 10% is inside the bracket where the law
+  makes no call, and 25% gives -0.10 where a small positive was expected, again
+  unresolvable. SO: 0 resolvable law cells from detection, same structural
+  outcome as Pascal-Context (E-K), and for the same reason -- readout is a
+  difference of two numbers that are both ~0. THE NEGATIVE-BRANCH TEST REMAINS
+  UNSUPPLIED BY EITHER NON-CLASSIFICATION TASK, and that should be stated as a
+  limitation of the study rather than worked around a fifth time.
+  NET: detection contributes a clean feature-side NULL and no law cell. The
+  task axis now reads -- whatever the prior supplies is cashed fully by a
+  whole-image classifier, partly by a per-pixel classifier, and not at all by a
+  coordinate regressor, and the last of those is now known to be because the
+  features are not there rather than because the head cannot reach them.
