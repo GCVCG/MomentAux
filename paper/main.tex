@@ -45,7 +45,11 @@
 %% on Overleaf. These make it deterministic; guarded because a minimal TeX
 %% Live does not ship the first two.
 \IfFileExists{placeins.sty}{\usepackage[section]{placeins}}{}   % barrier at each \section
-\IfFileExists{dblfloatfix.sty}{\usepackage{dblfloatfix}}{}      % figure* placement + no end-deferral
+%% NOT dblfloatfix: cas-dc.cls already loads stfloats (see its \RequirePackage
+%% line), and the two both define \c@dblbotnumber, so loading it errors with
+%% "Command \c@dblbotnumber already defined" on any distribution that has it.
+%% stfloats supplies the double-column bottom-float placement dblfloatfix would
+%% have added, so nothing is lost.
 \usepackage{flafter}                                            % never place a float before its definition
 
 \begin{document}
@@ -57,10 +61,10 @@
 %% figures far past the text that cites them. The single-column parameters are
 %% relaxed below, and so are the DOUBLE-column ones (\dbl...), which are what
 %% actually govern the full-width figure* floats.
-%% Float placement is DISTRIBUTION-DEPENDENT: the same source put figures in
-%% the body under TeX Live 2023 locally and deferred them to the appendix on
-%% Overleaf. These packages make it deterministic, and are guarded because a
-%% minimal TeX Live does not ship them.
+%% These fractions were previously set as \floatpagepagefraction and
+%% \textpagefraction, neither of which is a LaTeX parameter, so the tuning had
+%% never taken effect. The \dbl... pair governs the full-width figure* floats,
+%% which the single-column parameters do not reach.
 \renewcommand{\topfraction}{0.92}
 \renewcommand{\bottomfraction}{0.70}
 \renewcommand{\textfraction}{0.06}
