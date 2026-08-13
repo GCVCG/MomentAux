@@ -42,8 +42,23 @@
 
 \begin{document}
 \let\WriteBookmarks\relax
-\def\floatpagepagefraction{1}
-\def\textpagefraction{.001}
+%% FLOAT PLACEMENT. The two lines here were previously \def\floatpagepagefraction
+%% and \def\textpagefraction, neither of which is a LaTeX parameter, so the
+%% intended tuning silently did nothing and floats ran on the defaults. With 32
+%% floats in a two-column layout the defaults defer aggressively and push
+%% figures far past the text that cites them. The single-column parameters are
+%% relaxed below, and so are the DOUBLE-column ones (\dbl...), which are what
+%% actually govern the full-width figure* floats.
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\bottomfraction}{0.70}
+\renewcommand{\textfraction}{0.06}
+\renewcommand{\floatpagefraction}{0.70}
+\renewcommand{\dbltopfraction}{0.92}
+\renewcommand{\dblfloatpagefraction}{0.70}
+\setcounter{topnumber}{4}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{6}
+\setcounter{dbltopnumber}{3}
 
 \shorttitle{When does fusing knowledge with learned representations pay?}
 \shortauthors{A. AlMughrabi et~al.}
