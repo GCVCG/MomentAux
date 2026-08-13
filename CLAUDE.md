@@ -4943,3 +4943,27 @@ ported vs corrected and why.
   worklist now contains only the cell that actually needs running. Third time
   in one day that the node-local flock assumption has mattered -- the guard
   train.py advertises as "exclusive" is only exclusive within a node.
+
+- *** S2 CLOSED AT 2v3, AND diagin100_r50_none/seed0 IS ABANDONED (2026-08-13,
+  user decision: "let's do what you recommend and stop wasting more resources
+  on this training"):
+      baseline 85.94 +-0.36 (n=2: 85.58, 86.30)
+      aux      85.89 +-0.16 (n=3: 86.02, 86.08, 85.58)
+      **Delta = -0.05 +-0.39**   [S2 band 0.0 +-1.0 -> HIT; G2 (>=+1.5) DEAD]
+  The earlier 2v2 read was -0.14; with the third aux seed it is -0.05, i.e.
+  dead neutral. CONV NEUTRALITY AT 224px CONFIRMED, and the claim does not
+  depend on the missing seed: the same neutrality holds at every other scale
+  measured (+0.04 ImageNet64 at 1.28M images, -0.42 tin@100%, +0.15 C100@100%).
+  A third baseline seed would sharpen the error bar; it cannot move the sign.
+  WHY IT WAS ABANDONED, recorded so nobody re-queues it: 8 starts, 8 wedges, at
+  epochs 99, 44 and 28 -- while EVERY other cell in the family completed
+  (none/seed1-2, aux/seed0-2). Not the ~5% random SIGABRT: one specific
+  (config, seed) hangs reproducibly. The varying epoch is the clue -- shuffling
+  reorders data each epoch, so a single pathological sample would hang at a
+  RANDOM epoch, which is what is observed -- but seeds 1-2 see the same images
+  and finish, so a plain corrupt file does not fully explain it either. Cost so
+  far ~80 GPU-hours for zero data. runs/diagin100_r50_none/seed0/ABANDONED.txt
+  records this next to the cell; BIG_COMPLETE is set and worklist.big emptied
+  so a reconcile cannot resurrect it.
+  ALL COMPUTE FOR THE STUDY IS NOW DONE: dense 216/216 + 60/60 probes,
+  ImageNet 293/294 (the 294th abandoned above), classification grid complete.
