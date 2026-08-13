@@ -5143,3 +5143,71 @@ ported vs corrected and why.
   between channel-MEAN energy maps, so it measures spatial-layout agreement,
   not whether the specific oriented channels are reproduced. And n=1 for both
   the random-target and combo controls.
+
+## THE DETECTION FLOOR HAS A FIX, AND IT IS A DECOMPOSITION (2026-08-13, user:
+## "for the uninterpretablity issue, do you think we have a solution for it?")
+
+- THE FLOOR FIRED, exactly as the pre-declared rule anticipated (3 seeds/cell,
+  200 epochs, VOC detection on the segmentation splits):
+      pct | AP50 none      AP50 aux       dAP50 | fg_acc none  fg_acc aux  d_fg
+       1% | 0.30 +-0.03    0.27 +-0.01    -0.04 | 15.31 +-0.17 15.08 +-0.28 -0.23
+       2% | 0.61 +-0.03    0.59 +-0.04    -0.02 | 21.57 +-0.13 21.42 +-0.84 -0.15
+       5% | 1.77 +-0.89    2.61 +-0.04    +0.84 | 28.55 +-0.38 28.98 +-0.43 +0.43
+      10% | 6.40 +-0.07    6.97 +-0.14    +0.56 | 36.53 +-0.41 36.21 +-1.35 -0.32
+  1% and 2% are UNINTERPRETABLE by the rule (both arms < 1.0 AP50). 25/100%
+  still training.
+- THE DIAGNOSIS: the floor is a property of AP50, NOT of the runs. The same
+  cells return fg_acc 15.3 and 21.6 against a 5% chance rate with SEMs of
+  0.13-0.84, so the detectors are demonstrably doing something. AP50 is a
+  ranked-precision integral: when precision is poor everywhere the integral is
+  ~0 however much better one arm's boxes are. Same COMPRESSIVE failure as mIoU
+  on dense prediction (a +1.62-point pixel-accuracy gain reported as "+0.09
+  mIoU") and as the pathmnist probe (probe_none BELOW its own e2e).
+- THE FIX IS TO DECOMPOSE WHAT AP50 CONFOUNDS, both components conditioned on
+  GROUND-TRUTH foreground where neither can collapse:
+    fg_acc -- 20-way accuracy at GT-assigned locations. ALREADY LOGGED and
+      PRE-REGISTERED as the readout scale before any cell ran.
+    fg_iou -- mean IoU between the predicted and GT box at those SAME
+      locations (analysis/det_decompose.py). NEW. This is the quantity
+      detection was added for: the only task in the study with a coordinate
+      REGRESSION head, and nothing has measured that head.
+  Conditioning comes from GT through the same assign_targets() the training
+  loss uses, never from predictions, so it is not circular: a detector that
+  predicts nothing still has a well-defined fg_iou. No retraining -- it reads
+  existing checkpoints.
+- STATE THE PROVENANCE HONESTLY: fg_acc predates the results, fg_iou does not.
+  It was added AFTER seeing the floor, which is why (a) AP50 stays the headline
+  metric with the floor rule enforced, (b) the bands below are recorded before
+  fg_iou is computed on any aux cell, and (c) AP25 is computed only as a
+  ROBUSTNESS CHECK on whether the arms' ORDERING depends on the threshold, and
+  is never reported as a headline -- loosening a threshold after the strict one
+  proved inconvenient is exactly the move a referee should distrust.
+- WHY IT IS ALREADY POINTED: at 5% and 10% the prior gains +0.84 and +0.56 AP50
+  while its fg_acc delta is +0.43 and -0.32. The AP50 gain is therefore NOT
+  coming from classification, and localization is the only other component.
+- SMOKE MEASUREMENT (vocdet_none_1pct/seed0, the cell whose AP50 is 0.31):
+  fg_iou = 0.3414 over 25,467 foreground locations, with 28.3% of them at
+  IoU >= 0.5. The 1% detector localizes; AP50 simply cannot say so.
+- PREDICTIONS RECORDED IN ADVANCE (no aux fg_iou seen):
+    (T5) LOCALIZATION CARRIES THE MID-BAND GAIN: d_fg_iou = **+0.005..+0.040**
+      at BOTH 5% and 10%, since AP50 rises there while fg_acc does not.
+    (T6) THE FLOOR CELLS ANSWER T1 AFTER ALL, and small: d_fg_iou =
+      **+0.000..+0.015** at 1-2%, i.e. at or below the mid-band value --
+      the detection analogue of dense's +0.39 mIoU at ~5 images per class.
+    FALSIFIER: d_fg_iou <= 0 at BOTH 5% and 10% => the AP50 gain is neither
+      classification nor localization, so it must be score CALIBRATION or
+      ranking, and the paper must say that rather than attribute the gain to
+      the regression head.
+  REPORTING RULE: fg_iou is a per-location mean over ~25k locations per seed,
+  so quote the ACROSS-SEED SEM. The location count buys no precision about a
+  cell and quoting it would be pseudo-precision.
+- WHAT WAS CONSIDERED AND REJECTED: strengthening the detector (multi-level
+  FPN) to lift absolute AP. The dense re-pin is the precedent that makes this
+  tempting -- an under-powered instrument there produced the OPPOSITE answer,
+  twice -- but the diagnosis differs. Dense was under-TRAINED (same
+  architecture, baseline +155% from schedule alone); detection at 1% has 107
+  images and ~1,200 optimizer steps, and no head design puts that above 1.0
+  AP50. It would also cost a full 36-run re-grid and change the instrument
+  mid-study. CONDITIONAL ON RECORD: if the 100% cell lands very low (say
+  <= 15 AP50), the instrument is weak WITH data as well as without, and the
+  FPN question genuinely reopens.
