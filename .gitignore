@@ -9,6 +9,7 @@ results/*
 !results/*.csv
 !results/*.md
 !results/*.tex
+!results/*.json
 release/
 slurm/logs/
 logs/*.pid
