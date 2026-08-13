@@ -5108,3 +5108,38 @@ ported vs corrected and why.
   energy maps, so it measures spatial layout agreement, not whether the
   specific oriented channels are reproduced. A null on this measure would not
   prove the absence of a finer imprint.
+
+- *** IMPRINT SPECIFICITY SCORED — THE FALSIFIER DID NOT FIRE, AND THE DESIGN
+  TURNED OUT TO CONTAIN A 2x2 I HAD NOT PLANNED (2026-08-13, CIFAR-100/r18,
+  one pinned target applied to every model, 256 test images/cell):
+      family                              n   mean G   align gap        band
+      moment prior, tap layer3 (I1)      10   +4.23   +0.396 [.31,.51]  +0.15..+0.40
+      SimCLR init, no moment target (I2)  5   +7.68   -0.156 [-.19,-.10] -0.05..+0.10
+      random fixed target (I3)            1   +1.31   -0.060            -0.05..+0.05
+    I1: mean lands exactly at the band top, all ten cells positive and tight.
+    I2: MISSED, in the STRONGER direction -- I predicted a small gap and the
+      measurement is consistently NEGATIVE. SimCLR-init cells carry MORE feature
+      gain than the prior (G +7.68 vs +4.23) and LESS oriented-energy structure
+      than their own baselines. The recorded falsifier needed >= +0.15 from this
+      family; it came back at the opposite sign.
+    I3: -0.060 against a band of -0.05..+0.05, i.e. 0.01 outside and
+      indistinguishable from zero at n=1.
+  *** THE TWO CONTROLS THAT FELL OUT, and they are worth more than the planned
+  comparison because each isolates one factor:
+      moment prior but tapped at L1/L2   n=2  G +4.67  gap **-0.181**
+      SimCLR init PLUS the moment aux    n=1  G +8.08  gap **+0.494**
+    The tap variants use the SAME target and the same family, imposed one or two
+    stages earlier; measured at layer3 the imprint is GONE. So it is localised
+    to where the target is applied, which a mechanism predicts and an incidental
+    correlation does not.
+    The combo cell has the SAME SimCLR initialization as the cells reading
+    -0.156, plus the moment target -- and shows the largest gap in the study.
+    Together these form a 2x2, {SimCLR init or not} x {moment target or not},
+    and the imprint follows the TARGET in both rows while G follows the
+    initialization. That separates "the prior leaves an oriented-energy
+    imprint" from "good features look like oriented energy" about as cleanly as
+    this study can.
+  CAVEAT REGISTERED IN ADVANCE AND STILL BINDING: alignment is a Pearson r
+  between channel-MEAN energy maps, so it measures spatial-layout agreement,
+  not whether the specific oriented channels are reproduced. And n=1 for both
+  the random-target and combo controls.
