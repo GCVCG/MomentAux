@@ -19,6 +19,7 @@ The compute figures are recomputed from every retained run record rather than
 carried forward, so the device split sums to the total by construction --
 that is the round 3 NB1 defect, removed at the source rather than corrected.
 """
+import csv
 import glob
 import json
 import os
@@ -132,6 +133,13 @@ def main():
     hours, runs, kwh = compute()
     total = sum(hours.values())
     macro("computeRuns", num(runs))
+    # The CELL count is quoted in the abstract, the highlights, the intro and
+    # Data Availability. It was hardcoded in all of them and went stale the
+    # moment the ImageNet envelope landed, so it is generated now: a number the
+    # paper repeats in five places is exactly the number that must not drift.
+    with open(os.path.join(ROOT, "results", "all_results.csv")) as _f:
+        n_cells = sum(1 for _ in csv.DictReader(_f))
+    macro("computeCells", num(n_cells), "rows in results/all_results.csv")
     macro("computeGpuHours", num(int(round(total))))
     for dev, key in (("H100", "computeHhundred"), ("H100 NVL", "computeHnvl"),
                      ("H200 NVL", "computeHtwo"), ("RTX 3090", "computeAmpere")):
@@ -144,7 +152,6 @@ def main():
     macro("computePerRun", dec(kwh * CARBON * 1000.0 / max(runs, 1), 0))
 
     # ---- headline cells that appear in prose AND in a table ----
-    import csv
     acc = {}
     with open(os.path.join(ROOT, "results", "all_results.csv")) as f:
         for r in csv.DictReader(f):

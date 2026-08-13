@@ -92,7 +92,7 @@ compute overhead, against the data-driven alternatives (SimCLR, SimSiam and
 DINO pre-training, ImageNet transfer, heavy augmentation, learned teachers)
 under one frozen recipe with fixed subsets: 13 datasets, 9 backbones,
 500 to 1.28M images, 32 to 224\,px, and 5.7M to 86M parameters
-($2{,}894$ configurations over $8{,}827$ runs). Every pairwise
+($\computeCells$ configurations over $\computeRuns$ runs). Every pairwise
 combination is measured, and all follow one rule at training time
 (decision-level fusion behaves differently): different-\emph{currency}
 sources stack (prior with augmentation), same-currency sources substitute
@@ -120,7 +120,7 @@ backbone family's feature gain from baseline heights alone. Code and data:
 \end{graphicalabstract}
 
 \begin{highlights}
-\item A 2,894-configuration benchmark of data-efficiency interventions
+\item A \computeCells-configuration benchmark of data-efficiency interventions
 \item Splitting one instrument's bands pays; pairing two satellites does not
 \item A measurable rule predicts stacking, substitution or interference
 \item Free prior beats 2$\times$-compute SSL on small ViTs; at 5$\times$ the ordering flips with data
@@ -176,7 +176,7 @@ reported in this paper.
 \section*{Data availability}
 All artifacts needed to reproduce every number in this paper are released
 at \url{https://github.com/GCVCG/MomentAux}: the training and
-evaluation harness (configs for all 2{,}894 cells, the subset
+evaluation harness (configs for all \computeCells{} cells, the subset
 indices, the fingerprinted filter banks, the single training command,
 the aggregation and audit scripts), and the complete result tables in open
 formats. The tagged release additionally carries the \emph{raw} evidence as
@@ -184,7 +184,7 @@ downloadable assets: every run's \texttt{final.json} record (configuration
 as executed, accuracy, parameter and floating-point-operation accounting,
 environment), every linear-probe record, every per-epoch training curve, and
 the campaign logs, with \texttt{SHA256} checksums. The latter comprise a per-cell
-table (\texttt{all\_results.csv}: 2{,}894 rows with dataset, backbone,
+table (\texttt{all\_results.csv}: \computeCells{} rows with dataset, backbone,
 intervention, fraction, seed count, accuracy mean and standard deviation,
 probe accuracy, paired baseline, $\Delta$, its standard error, $G$ and
 readout), a configuration-by-fraction view

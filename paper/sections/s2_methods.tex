@@ -286,7 +286,7 @@ CIFAR-100 as the development set that produced the candidate.
 We considered re-selecting the configuration on a held-out validation
 split and decided against it, and state that here rather than leave a
 reader wondering. Re-selection would invalidate every cell in the grid,
-since the selected configuration is the one 2{,}894 cells were trained
+since the selected configuration is the one \computeCells{} cells were trained
 with, so the honest choices were to disclose the contamination or to
 retrain the study. Given that the general claims already rest on eleven
 populations that took no part in selection, we judged disclosure to carry
@@ -346,8 +346,8 @@ should be read. First, cells are grouped by configuration name and never by
 parsed fields, since two configurations can agree on dataset, backbone and
 intervention while differing in a filter-bank argument or a calibration
 setting; grouping on fields would silently average different variants
-together. Second, a cell is not a run. The 2{,}894 cells reported here rest
-on \textbf{8{,}827 individual training runs}, and the pairing that gives
+together. Second, a cell is not a run. The \computeCells{} cells reported here rest
+on \textbf{\computeRuns{} individual training runs}, and the pairing that gives
 every $\Delta$ its meaning is between cells that share a dataset, fraction
 and backbone and differ in exactly one intervention.
 
@@ -381,7 +381,7 @@ Resolution & 32, 64, 96, 224\,px \\
 Interventions & MomentAux ($1.02\times$); SimCLR, SimSiam and DINO
   ($2\times$); ImageNet transfer; DeiT augmentation; FitNets teacher
   ($2\times$); HOG target; pairwise combinations \\
-Measured & $2{,}894$ cells over $8{,}827$ retained run records
+Measured & $\computeCells$ cells over $\computeRuns$ retained run records
   including exploration and repeats \\
 \bottomrule
 \end{tabular}
