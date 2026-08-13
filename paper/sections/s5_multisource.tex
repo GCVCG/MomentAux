@@ -26,7 +26,7 @@ fixed subset indices are identical across the sources and the
 configuration is the champion verbatim with only the source changed, so
 nothing but the input varies.
 
-\begin{table}[t]
+\begin{table}[tb]
 \caption{Does a second source pay? Fusion gain is the fused arm minus the
 better single source, at matched data. Sorted by data fraction. Three seeds
 per cell, ResNet-18; the champion configuration is used verbatim
@@ -178,7 +178,7 @@ of what either contributes. Restricting to pairs within one point of each
 other, where currency is actually the free variable, leaves the three
 pairs of Table~\ref{tab:ensemble}.
 
-\begin{table}[t]
+\begin{table}[tb]
 \caption{Decision-level fusion on CIFAR-100 at 5\%, restricted to pairs whose
 two arms are within one accuracy point of each other so that the information
 source, rather than an accuracy gap, is what differs. Gain is over the better
@@ -221,7 +221,7 @@ can be estimated \emph{before} the combined system is built, from
 measurements of each source alone. We state that as a procedure rather than
 as a finding, since it is what a practitioner would actually run.
 
-\begin{table}[t]
+\begin{table}[tb]
 \caption{Deciding whether to fuse two sources, before training the
 combination. Every quantity is measured on the sources separately; the only
 cost beyond training each source once is two frozen-feature evaluations.}

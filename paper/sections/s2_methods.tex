@@ -1,7 +1,7 @@
 %% ---------------------------------------------------------------------
 \section{The instrument}\label{sec:instrument}
 
-\begin{figure*}[t]
+\begin{figure*}[tb]
 \centering
 \includegraphics[width=\linewidth]{figs/method.pdf}
 \caption{The study in one picture. \textbf{(a)} One frozen recipe and
@@ -76,7 +76,7 @@ numerical values, so no measurement can silently drift with a library
 version.
 
 \subsection{The prior: MomentAux}\label{sec:momentaux}
-\begin{figure}[t]
+\begin{figure}[tb]
 \centering
 \includegraphics[width=\linewidth]{figs_explain/bank_gabor.png}
 \caption{The knowledge source, in full. The eight complex Gabor
@@ -356,7 +356,7 @@ included, not only those that appear in a headline table; cells that deviate
 from the frozen recipe are named so in their configuration and are never
 mixed into headline comparisons (Section~\ref{sec:recipe}).
 
-\begin{table}[t]
+\begin{table}[tb]
 \caption{The benchmark at a glance. Every cell trains the frozen recipe
 of Section~\ref{sec:recipe}; costs are declared multiples of baseline
 training compute.}
@@ -486,7 +486,7 @@ which matters more than it sounds: several queue faults during the
 campaign would otherwise have silently recomputed finished work.
 
 \subsection{The prior's own envelope}\label{sec:ownenvelope}
-\begin{table}[t]
+\begin{table}[tb]
 \caption{Complete envelopes: gain $\Delta$ of the champion prior over the
 shared baseline (points). Bold: ten seeds per arm; others three. Per-cell
 SEMs ($0.07$--$0.7$) ship with the released records.}
@@ -511,7 +511,7 @@ Fraction & CIFAR-100~\up & CIFAR-10~\up & Tiny-IN~\up \\
 \end{tabular}
 \end{table}
 
-\begin{table}[t]
+\begin{table}[tb]
 \caption{Domain datasets at representative fractions (points, three
 seeds). The unimodal shape recurs on satellite, texture, food,
 histopathology and fine-grained data. PathMNIST above ${\sim}15\%$ is
@@ -536,7 +536,7 @@ CUB-200   & --      & --      & --       & $+2.74$\rlap{$^{\ast}$} \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[t]
+\begin{figure}[tb]
 \centering
 \includegraphics[width=\linewidth]{figs/envelopes.pdf}
 \caption{The prior's gain across the data axis. (a) On convolutional
@@ -578,7 +578,7 @@ backbones, and on any backbone under a modern augmentation recipe, the
 ordering inverts (Section~\ref{sec:fusion}).
 
 \subsection{Attention: where the prior is dramatic}\label{sec:attention}
-\begin{table}[t]
+\begin{table}[tb]
 \caption{ViT-tiny: gain of the prior under the plain recipe and under
 DeiT-strength augmentation, with the amplification ratio, on CIFAR-100
 and (last column) Tiny-ImageNet under the plain recipe. Augmentation does

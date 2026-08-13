@@ -37,7 +37,7 @@ decaying toward zero with sufficiency ($+0.4$ by baselines of
 $70$--$80$). Fig.~\ref{fig:law} shows the full picture; we deliberately
 fit no parametric form and use only the measured curve for prediction.
 
-\begin{figure}[t]
+\begin{figure}[tb]
 \centering
 \includegraphics[width=\linewidth]{figs/law_scatter.pdf}
 \caption{The law, in full: readout $=\Delta-G$ against baseline accuracy
@@ -63,7 +63,7 @@ only cells whose readout is resolvable against its own propagated
 uncertainty.
 
 \subsection{The audit}\label{sec:lawaudit}
-\begin{table}[t]
+\begin{table}[tb]
 \caption{Scope-wide sign-law audit (regenerable by one command from the
 released artifact). A cell is resolvable when $|\mathrm{readout}| >
 2\,\mathrm{SEM}$; cells inside the crossing bracket make no sign
@@ -93,7 +93,7 @@ Unresolved ($|\mathrm{readout}| \le 2$\,SEM) & 487 \\
 \end{tabular}
 \end{table}
 
-\begin{table}[t]
+\begin{table}[tb]
 \caption{Robustness of the audit. The rate is stable against the
 resolvability threshold, survives clustering on the units that share a
 baseline arm, and survives re-fitting the crossing bracket without the
@@ -140,7 +140,7 @@ Table~\ref{tab:exceptions} lists the largest-magnitude exceptions
 individually, in the main text rather than an appendix, because where an
 account fails is part of what it claims.
 
-\begin{table}[t]
+\begin{table}[tb]
 \caption{The ten largest-magnitude resolvable exceptions. Five share the
 ``better features, worse accuracy at sufficiency'' signature ($G$ clearly
 positive, $\Delta$ negative, top block); two are PathMNIST cells whose
@@ -254,7 +254,7 @@ zero on the weaker network, so ``how much a prior can add'' is not a
 dataset property but a (dataset, architecture) property.
 
 \subsection{What the prior leaves in the representation}\label{sec:imprint}
-\begin{figure}[t]
+\begin{figure}[tb]
 \centering
 \includegraphics[width=\linewidth]{figs_explain/heatmaps_auxmag_5pct_sched0.png}
 \caption{The spectral imprint at the tap, CIFAR-100 at 5\%. Columns:
@@ -279,7 +279,7 @@ $+0.525$ for the prior arm against $+0.215$ for the baseline
 training ends: what the prior changes is where the representation
 settles, not what the loss is pulling on at the finish.
 
-\begin{figure}[t]
+\begin{figure}[tb]
 \centering
 \includegraphics[width=\linewidth]{figs_explain/cam_auxmag_5pct_sched0.png}
 \caption{Where the class evidence sits, CIFAR-100 at $5\%$. The four rows are
@@ -306,7 +306,7 @@ initialization has no auxiliary head and therefore no target of its own.
 Reporting the alignment gap, each arm minus its own baseline
 (Table~\ref{tab:imprint}, Fig.~\ref{fig:imprint2}):
 
-\begin{table}[t]
+\begin{table}[tb]
 \caption{The imprint follows the \emph{target}, not the feature gain.
 Alignment gap is the arm minus its own baseline, CIFAR-100/ResNet-18, one
 pinned target applied to every model. The lower block is a $2\times2$ that
@@ -331,7 +331,7 @@ SimCLR init $+$ moment target & 1 & $+8.08$ & $+\imprintCombo$ \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[t]
+\begin{figure}[tb]
 \centering
 \includegraphics[width=\linewidth]{figs/imprint_dissociation.pdf}
 \caption{Alignment gap against feature gain, one point per cell, CIFAR-100 /
@@ -371,7 +371,7 @@ agreement in spatial layout rather than reproduction of the individual
 oriented channels, and a null on it would not rule out a finer imprint. The
 two control rows are single cells.
 
-\begin{figure}[t]
+\begin{figure}[tb]
 \centering
 \includegraphics[width=\linewidth]{figs/attention_locality.pdf}
 \caption{What the prior gives a small transformer: locality. Mean
@@ -451,7 +451,7 @@ own pre-registered bet here was wrong in the pessimistic direction: we
 predicted partial substitution and measured strong complementarity.
 
 \subsection{Same currency substitutes}\label{sec:substitute}
-\begin{table}[t]
+\begin{table}[tb]
 \caption{Prior versus SimCLR initialization ($2\times$ compute) on
 ViT-tiny, CIFAR-100, and the effect of recipe. Under plain augmentation
 SSL catches the prior at ${\sim}5$k images; under the DeiT recipe the
@@ -502,7 +502,7 @@ bought the same features}, judged by the other source's own measured
 gain, not by its family name.
 
 \subsection{Fusing into mature features taxes}\label{sec:taxsub}
-\begin{table}[t]
+\begin{table}[tb]
 \caption{The transfer tax and its feature-side origin. Injecting the
 prior on top of ImageNet weights is destructive in proportion to what the
 initialization supplied; linear evaluation shows the loss is carried almost
@@ -536,7 +536,7 @@ partner must respect what the partner already encodes; a shaping prior
 does not.
 
 \subsection{The taxonomy}\label{sec:taxonomy}
-\begin{table}[t]
+\begin{table}[tb]
 \caption{The fusion taxonomy the grid supports, with the measurement that
 establishes each row.}
 \label{tab:taxonomy}
@@ -565,7 +565,7 @@ training: measure (or look up) what each source contributes at the feature
 level, and same-currency pairs will not add.
 
 \subsection{Same currency, same images}\label{sec:samecurrency}
-\begin{figure}[t]
+\begin{figure}[tb]
 \centering
 \includegraphics[width=\linewidth]{figs/currency_evidence.pdf}
 \caption{Currency tested directly rather than inferred from magnitudes.
@@ -631,7 +631,7 @@ the grid) and ImageNet-100 at native $224$\,px with a model-scale curve
 Deviations (reduced epochs; native-resolution transforms) apply equally
 to both arms of every pair.
 
-\begin{table}[t]
+\begin{table}[tb]
 \caption{The pre-registered scale block. Every falsifier was declared
 before the first run and none fired, with two qualifications we keep in
 view: ViT-S's $G$ landed $0.05$ below its registered band, and ViT-B's

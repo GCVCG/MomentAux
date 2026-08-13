@@ -55,10 +55,20 @@
 
 %% Float placement is DISTRIBUTION-DEPENDENT: the same source kept figures
 %% in the body under TeX Live 2023 locally and deferred them to the appendix
-%% on Overleaf. These make it deterministic; guarded because a minimal TeX
-%% Live does not ship the first two.
-\IfFileExists{placeins.sty}{\usepackage[section]{placeins}}{}   % barrier at each \section
-%% NOT dblfloatfix: cas-dc.cls already loads stfloats (see its \RequirePackage
+%% on Overleaf.
+%% NO placeins. \usepackage[section]{placeins} was tried and REMOVED: its
+%% \FloatBarrier flushes every pending float at each \section, and a flush
+%% ignores \floatpagefraction, so a small figure with nowhere to go claims a
+%% whole page and leaves the other column blank (Overleaf: 40pp with 6 such
+%% pages, against 36pp and none without it). It was also \IfFileExists-guarded
+%% and placeins is absent from this machine's TeX Live, so it loaded ONLY in
+%% the environment it was never tested in -- the same mistake as dblfloatfix.
+%% What keeps floats out of the appendix instead is deterministic and needs no
+%% package: the \clearpage before \input{sections/appendix} flushes every
+%% pending float while the body is still open, and floats carry [tb] rather
+%% than [t] so a column bottom is a second chance to place them before they
+%% start deferring.
+%% NOT dblfloatfix either: cas-dc.cls already loads stfloats (see its \RequirePackage
 %% line), and the two both define \c@dblbotnumber, so loading it errors with
 %% "Command \c@dblbotnumber already defined" on any distribution that has it.
 %% stfloats supplies the double-column bottom-float placement dblfloatfix would
