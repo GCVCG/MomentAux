@@ -22,7 +22,7 @@ negative, and negatives are not flattered by a favourable venue.
 \textbf{Pascal-Context} (254), and a \textbf{Swin-Tiny} arm on VOC. The
 encoder is the study's ResNet-18 at output stride 8 with an FCN head, so the
 prior's bank, tap, $\lambda$ schedule and head normalization transfer with no
-re-design and no new hyper-parameter. \densePops{} populations $\times$ six
+re-design and no new hyper-parameter. Figure~\ref{fig:dense} summarises the result. \densePops{} populations $\times$ six
 fractions $\times$ two arms $\times$ three seeds $=$ \denseCells{} cells, all
 completed.
 
@@ -76,6 +76,24 @@ Swin-Tiny, VOC    & $+0.42$ & $+1.29$ & $+1.76$ & $+0.90$ & $+0.75$ & $+1.31$ \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/dense_envelope.pdf}
+\caption{Semantic segmentation, six populations, 200 epochs, three seeds per
+cell. \textbf{(a)} $\Delta$ as a percentage of each cell's own baseline, not in
+absolute mIoU: the populations' baselines differ eightfold, so absolute deltas
+are not comparable across them. Read this way the envelopes are unimodal and
+occupy the same $5$--$20\%$ band classification does, and three populations go
+neutral or negative at full data. \textbf{(b)} The readout term against the
+head's own classification scale (pixel accuracy), not against mIoU --- the
+crossing bracket is an accuracy bracket, and scoring the law on mIoU places
+every dense cell on the wrong flank. Filled markers are the cells whose readout
+is resolvable against its own uncertainty. Every one of them sits above the
+bracket, which is why segmentation confirms the law's positive branch and
+cannot test its negative branch.}
+\label{fig:dense}
+\end{figure*}
 
 \subsection{Target--task alignment is not where the value comes
 from}\label{sec:densealign}
