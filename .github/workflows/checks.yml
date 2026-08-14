@@ -33,8 +33,31 @@ jobs:
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          pip install torch --index-url https://download.pytorch.org/whl/cpu
-          pip install numpy scipy scikit-learn torchmetrics timm pyyaml pandas pytest
+          # torch and torchvision MUST be installed together from the SAME
+          # index. The first version of this job took torch from the PyTorch
+          # CPU index and let timm pull torchvision from PyPI; the two builds
+          # are ABI-incompatible and the first casualty is the
+          # torchvision::nms custom op, which timm registers at import. All 14
+          # test files then failed at collection with "operator
+          # torchvision::nms does not exist" -- the same breakage this
+          # project's environment notes flag as the canary for an ABI split.
+          pip install torch==2.7.0 torchvision==0.22.0 \
+            --index-url https://download.pytorch.org/whl/cpu
+          # timm with --no-deps so it cannot replace that matched pair; its
+          # real runtime needs are listed explicitly instead.
+          pip install --no-deps timm==1.0.27
+          pip install numpy==1.26.4 scipy scikit-learn torchmetrics pyyaml \
+            pandas pytest safetensors huggingface_hub
+      - name: torchvision ops resolve (ABI canary)
+        # Fail here, with a one-line reason, rather than as 14 collection
+        # errors whose stack traces bury the cause.
+        run: |
+          python - <<'PY'
+          import torch, torchvision, timm
+          torch.ops.torchvision.nms
+          print(f"torch {torch.__version__} | torchvision {torchvision.__version__} "
+                f"| timm {timm.__version__} | torchvision::nms resolves")
+          PY
       - name: Unit suite (includes the pinned filter-bank fingerprints)
         run: python -m pytest tests/ -q
 
