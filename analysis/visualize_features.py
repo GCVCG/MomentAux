@@ -248,7 +248,11 @@ def fig_tsne(models, loader, device, out, cell, n_classes, names=None):
                markerscale=2.2, bbox_to_anchor=(0.5, -0.005))
     fig.subplots_adjust(left=0.02, right=0.98, top=0.955, bottom=0.115,
                         hspace=0.16)
-    fig.savefig(os.path.join(out, f"tsne_{cell}.png"), dpi=300)
+    # pad_inches=0.02 rather than matplotlib's default 0.1in: the default
+    # leaves a blank border that becomes a visible white band once the
+    # panel is placed at \linewidth in the manuscript.
+    fig.savefig(os.path.join(out, f"tsne_{cell}.png"), dpi=300,
+                bbox_inches="tight", pad_inches=0.02)
     plt.close(fig)
     return sils.get("baseline", 0.0)
 
@@ -317,7 +321,8 @@ def fig_heatmaps(models, test_ds, device, out, cell, dataset, loader,
         f"test-set mean alignment $r$:  baseline {align['base']:+.3f}"
         f"    prior {align['aux']:+.3f}", fontsize=6.5)
     fig.tight_layout()
-    fig.savefig(os.path.join(out, f"heatmaps_{cell}.png"), dpi=150)
+    fig.savefig(os.path.join(out, f"heatmaps_{cell}.png"), dpi=150,
+                bbox_inches="tight", pad_inches=0.02)
     plt.close(fig)
     return align
 
@@ -377,7 +382,8 @@ def fig_cam(models, test_ds, device, out, cell, dataset, loader,
     # space is reserved for them.
     fig.subplots_adjust(left=0.005, right=0.995, top=0.955, bottom=0.028,
                         wspace=0.03, hspace=0.20)
-    fig.savefig(os.path.join(out, f"cam_{cell}.png"), dpi=300)
+    fig.savefig(os.path.join(out, f"cam_{cell}.png"), dpi=300,
+                bbox_inches="tight", pad_inches=0.02)
     plt.close(fig)
 
 
@@ -410,7 +416,8 @@ def fig_bank(out):
     fig.text(0.5, 0.035, "quadrature pair", ha="center", fontsize=6)
     fig.subplots_adjust(left=0.055, right=0.995, top=0.90, bottom=0.13,
                         wspace=0.04, hspace=0.04)
-    fig.savefig(os.path.join(out, "bank_gabor.png"), dpi=300)
+    fig.savefig(os.path.join(out, "bank_gabor.png"), dpi=300,
+                bbox_inches="tight", pad_inches=0.02)
     plt.close(fig)
 
 

@@ -228,6 +228,13 @@ axd.text(0.15, 0.62, "All Fused Into the Same Frozen Recipe;\n"
          "Combinations Measured Too", fontsize=4.3, color=MUTED, va="top",
          linespacing=1.3)
 
-fig.savefig(os.path.join(HERE, "method.pdf"), facecolor="white")
-fig.savefig(os.path.join(HERE, "method.png"), facecolor="white")
+# bbox_inches="tight" matters here: without it matplotlib writes the whole
+# canvas, and this figure's hand-placed boxes leave ~23pt empty at the top and
+# ~23pt at the right. Included at \\linewidth that became a visible white band
+# above the diagram inside the float -- 17% of the graphic height was blank.
+# pad_inches keeps a hairline so strokes on the edge are not clipped.
+fig.savefig(os.path.join(HERE, "method.pdf"), facecolor="white",
+            bbox_inches="tight", pad_inches=0.02)
+fig.savefig(os.path.join(HERE, "method.png"), facecolor="white",
+            bbox_inches="tight", pad_inches=0.02)
 print("method figure written")

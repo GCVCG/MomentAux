@@ -1,0 +1,9 @@
+2026-08-09T00:30:58+02:00 queue start: 6 tasks, SLOTS=3, need 5000MiB
+2026-08-09T00:30:58+02:00 gpu free, running
+2026-08-09T00:31:23+02:00 [3] rc=0 :: ~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_so2sat_sar_none_5pct.y
+2026-08-09T00:31:24+02:00 [1] rc=0 :: ~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_so2sat_opt_none_5pct.y
+2026-08-09T00:31:24+02:00 [2] rc=0 :: ~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_so2sat_opt_aux_5pct.ya
+2026-08-09T00:31:52+02:00 [4] rc=0 :: ~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_so2sat_sar_aux_5pct.ya
+2026-08-09T00:31:54+02:00 [6] rc=0 :: ~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_so2sat_all_aux_5pct.ya
+2026-08-09T00:31:54+02:00 [5] rc=0 :: ~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sensorfusion/sf_so2sat_all_none_5pct.y
+2026-08-09T00:31:54+02:00 QUEUE_COMPLETE  ok=6 failed=0

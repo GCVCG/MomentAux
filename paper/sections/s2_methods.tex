@@ -1,24 +1,20 @@
 %% ---------------------------------------------------------------------
 \section{The instrument}\label{sec:instrument}
 
-\begin{figure*}[t]
+\begin{figure*}[pos=htbp]
 \centering
 \includegraphics[width=\linewidth]{figs/method.pdf}
-\caption{The study in one picture. \textbf{(a)} One frozen recipe and
-fixed subset indices, so every intervention is measured on
-byte-identical images; cells that must deviate are marked diagnostic and
-never enter headline tables. \textbf{(b)} MomentAux, the
-fused knowledge source: a pinned bank of oriented-energy targets
-regressed from a tap at the third of the backbone's four feature stages,
-during training only, with the loss
-weight $\lambda$ decaying to exactly zero, so the deployed network is
-byte-identical to the baseline and high-data neutrality is structural.
-\textbf{(c)} Each cell yields two measurements, the end-to-end gain
-$\Delta$ and the frozen-feature gain $G$ from an identically-configured
-linear evaluation, whose difference defines the readout term of
-Eq.~\ref{eq:law}. \textbf{(d)} The comparator ladder, ordered by declared
-training cost; all are fused into the same frozen recipe, and their
-pairwise combinations are measured as well.}
+\caption{The study in one picture. \textbf{(a)} One frozen recipe and fixed
+subset indices, so every intervention sees byte-identical images; cells that
+must deviate are marked diagnostic and never enter headline tables.
+\textbf{(b)} MomentAux, the fused knowledge source: a pinned bank of
+oriented-energy targets regressed from a tap at the third of four feature
+stages, during training only, with $\lambda$ decaying to exactly zero --- so
+the deployed network is byte-identical to the baseline. \textbf{(c)} Each cell
+yields two measurements, the end-to-end gain $\Delta$ and the frozen-feature
+gain $G$, whose difference is the readout term of Eq.~\ref{eq:law}.
+\textbf{(d)} The comparator ladder, ordered by declared training cost; all are
+fused into the same recipe, and their pairwise combinations are measured too.}
 \label{fig:method}
 \end{figure*}
 
@@ -34,7 +30,7 @@ Section~\ref{sec:comparators} defines the competing interventions and the
 cost normalization under which they are compared.
 Section~\ref{sec:probe} introduces the linear evaluation of frozen
 features that supplies the quantity $G$, without which the law of
-Section~\ref{sec:law} could not be measured at all.
+Section~\ref{sec:law} could not be measured.
 Section~\ref{sec:stats} states the seed and uncertainty protocol,
 Sections~\ref{sec:selection} and \ref{sec:parity} disclose how the
 configuration under test was selected and how that leaves it advantaged
@@ -76,7 +72,7 @@ numerical values, so no measurement can silently drift with a library
 version.
 
 \subsection{The prior: MomentAux}\label{sec:momentaux}
-\begin{figure}[t]
+\begin{figure}[pos=htbp]
 \centering
 \includegraphics[width=\linewidth]{figs_explain/bank_gabor.png}
 \caption{The knowledge source, in full. The eight complex Gabor
@@ -111,8 +107,8 @@ pairs and average-pooled to the tapped stage's
 spatial resolution, giving $\mathbf{m}(x)\in\mathbb{R}^{N\times h\times w}$.
 Magnitude rather than raw filter response is the operative choice: the
 ablation of Section~\ref{sec:ablations} shows oriented \emph{edges} are a
-poor target ($-0.24$) while their phase-invariant energy is the best one
-measured ($+2.81$ at the same cell).
+poor target ($-0.09$) while their phase-invariant energy is the best one
+measured ($+2.71$ at the same cell).
 
 \paragraph{The fusion mechanism.} Let $f_3(x)$ be the activations of the
 backbone's third feature stage, the third of four in every architecture we
@@ -230,7 +226,7 @@ conservative. Cells in which any seed collapses to chance are flagged
 \emph{bistable}, excluded from headline status, and reported as findings
 about trainability in their own right.
 
-Four properties of this protocol are worth stating plainly, because each
+Four properties of this protocol matter, because each
 bounds what the audit of Section~\ref{sec:lawaudit} can claim.
 
 \emph{The two-SEM rule is a declared magnitude threshold, not an exact
@@ -246,7 +242,7 @@ easier.
 
 \emph{Cells are not independent.} A baseline arm is shared by every
 variant paired against it, and cells recur across the same datasets and
-backbones, so the 511 resolvable cells come from 258 distinct
+backbones, so the \auditResolvable{} resolvable cells come from 247 distinct
 (dataset, backbone, fraction) groups. We
 therefore report a cluster-level audit alongside the cell-level one, and
 treat exact $p$-values as indicative rather than literal.
@@ -277,7 +273,7 @@ selected among a small number of pre-declared alternatives rather than
 searching a continuous space, and the chosen setting was fixed once and
 then applied verbatim everywhere else. That is what makes the transplant
 evidence the load-bearing evidence here: the same configuration, with no
-retuning, was applied to eleven further datasets, nine backbones and two
+retuning, was applied to ten further datasets, nine backbones and two
 ImageNet-scale stages that played no part in its selection, and its
 behavior there is not selection-contaminated. Where this paper makes a
 general claim, it should be read as resting on those populations, with
@@ -286,9 +282,9 @@ CIFAR-100 as the development set that produced the candidate.
 We considered re-selecting the configuration on a held-out validation
 split and decided against it, and state that here rather than leave a
 reader wondering. Re-selection would invalidate every cell in the grid,
-since the selected configuration is the one 2{,}894 cells were trained
-with, so the honest choices were to disclose the contamination or to
-retrain the study. Given that the general claims already rest on eleven
+since the selected configuration is the one \computeCells{} cells were trained
+with, so the available choices were to disclose the contamination or to
+retrain the study. Given that the general claims already rest on twelve
 populations that took no part in selection, we judged disclosure to carry
 the information a reader needs at a fraction of the cost. A future
 benchmark built on this harness should split a validation fold from the
@@ -302,7 +298,7 @@ at the declared multiple of the baseline's training cost, on the cell's own
 subset. The prior, by contrast, was developed here and therefore received
 the sweep just described. We did not sweep the comparators.
 
-The sharpest consequence is at the smallest fractions. Self-supervised
+The largest consequence is at the smallest fractions. Self-supervised
 pre-training at $1\%$ of CIFAR-100 means 200 epochs of contrastive learning
 over 500 images, which is far short of the schedules used in published
 small-data practice, and our check that strengthening SimCLR's views does
@@ -314,7 +310,7 @@ protocol, by construction. Readers who care about the best attainable
 accuracy rather than the best accuracy per unit compute should treat our
 self-supervised numbers as lower bounds.
 
-Rather than leave that as a caveat, we measured it.
+Rather than leave that as a limitation, we measured it.
 Section~\ref{sec:budget} re-runs both self-supervised comparators at four
 times their pre-training budget across the data envelope and reports what
 changes, including the two claims of ours that do not survive it.
@@ -341,13 +337,13 @@ under it: a dataset, a data fraction, a backbone, and one intervention with
 its hyper-parameters fixed. Every number we quote for a cell is a mean over
 its seeds, and every uncertainty is the standard error of that mean.
 
-Two consequences are worth stating because they affect how the counts
+Two consequences follow, because they affect how the counts
 should be read. First, cells are grouped by configuration name and never by
 parsed fields, since two configurations can agree on dataset, backbone and
 intervention while differing in a filter-bank argument or a calibration
 setting; grouping on fields would silently average different variants
-together. Second, a cell is not a run. The 2{,}894 cells reported here rest
-on \textbf{8{,}827 individual training runs}, and the pairing that gives
+together. Second, a cell is not a run. The \computeCells{} cells reported here rest
+on \textbf{\computeRuns{} individual training runs}, and the pairing that gives
 every $\Delta$ its meaning is between cells that share a dataset, fraction
 and backbone and differ in exactly one intervention.
 
@@ -356,7 +352,7 @@ included, not only those that appear in a headline table; cells that deviate
 from the frozen recipe are named so in their configuration and are never
 mixed into headline comparisons (Section~\ref{sec:recipe}).
 
-\begin{table}[t]
+\begin{table}[pos=htbp]
 \caption{The benchmark at a glance. Every cell trains the frozen recipe
 of Section~\ref{sec:recipe}; costs are declared multiples of baseline
 training compute.}
@@ -364,14 +360,15 @@ training compute.}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \zebra{2}
-\begin{tabular}{@{}lp{0.60\columnwidth}@{}}
+\begin{tabular}{lp{0.60\columnwidth}}
 \toprule
 \textbf{Axis} & \textbf{Coverage} \\
 \midrule
 Datasets & CIFAR-10, CIFAR-100, ciFAIR-100, STL-10, Tiny-ImageNet, coarse
-  variants; EuroSAT, DTD, Food-101, PathMNIST, CUB-200; ImageNet64,
-  ImageNet-100 \\
-Domains & photographic, satellite, texture, food, histopathology \\
+  variants; EuroSAT, So2Sat LCZ42, DTD, Food-101, PathMNIST, CUB-200;
+  ImageNet64, ImageNet-100 \\
+Domains & photographic, satellite (incl.\ radar/optical multi-sensor),
+  texture, food, histopathology, fine-grained \\
 Backbones & ResNet-18, -34 and -50 \citep{he2016resnet}, MobileNetV3
   \citep{howard2019mobilenetv3}, ConvNeXt-T \citep{liu2022convnext},
   ViT-tiny, -S and -B \citep{dosovitskiy2021vit}, Swin-T
@@ -381,7 +378,7 @@ Resolution & 32, 64, 96, 224\,px \\
 Interventions & MomentAux ($1.02\times$); SimCLR, SimSiam and DINO
   ($2\times$); ImageNet transfer; DeiT augmentation; FitNets teacher
   ($2\times$); HOG target; pairwise combinations \\
-Measured & $2{,}894$ cells over $8{,}827$ retained run records
+Measured & $\computeCells$ cells over $\computeRuns$ retained run records
   including exploration and repeats \\
 \bottomrule
 \end{tabular}
@@ -412,12 +409,13 @@ measure.
 \input{tables/partitions}
 
 Table~\ref{tab:partitions} lists the datasets. The selection is
-deliberate rather than convenient. Five visual domains are represented
+deliberate rather than convenient. Six visual domains are represented
 because the currency account predicts that which information source is
 scarce depends on image statistics, and a benchmark drawn only from
 photographic data could not test that: satellite imagery has
 non-photographic color statistics and meaningful rotations, texture
-lacks object-level structure, histopathology is stain-dominated, and
+lacks object-level structure, food is texture-rich but object-centred,
+histopathology is stain-dominated, and
 fine-grained birds require discriminating parts rather than categories.
 PathMNIST is a public, de-identified benchmark distributed as part of
 MedMNIST v2 \citep{yang2023medmnist}; its use here involves no new data
@@ -479,39 +477,41 @@ whose cell survives in the released grid; runs superseded during the
 campaign leave no record, because the training entry point refuses to
 overwrite a completed cell and so never re-times one. Two aspects of the study's design lower
 this figure materially. The intervention under test adds only about $2\%$
-to a run, so the comparison itself is cheap; the expense lies in the
+to a run, so the comparison itself is inexpensive; the expense lies in the
 comparators, since every self-supervised arm doubles the cost of its cell.
 And re-running an existing cell has no effect,
 which matters more than it sounds: several queue faults during the
 campaign would otherwise have silently recomputed finished work.
 
 \subsection{The prior's own envelope}\label{sec:ownenvelope}
-\begin{table}[t]
+\begin{table}[pos=htbp]
 \caption{Complete envelopes: gain $\Delta$ of the champion prior over the
-shared baseline (points). Bold: ten seeds per arm; others three. Per-cell
-SEMs ($0.07$--$0.7$) ship with the released records.}
+shared baseline (points), with the seed-paired standard error of each
+difference beside it. Bold: ten seeds per arm; others three. These errors are
+what decide which comparisons in this paper are readable at all, so they are
+printed here rather than deferred to the released records.}
 \label{tab:envelope}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \zebra{2}
-\begin{tabular}{@{}lrrr@{}}
+\begin{tabular}{lrrr}
 \toprule
 Fraction & CIFAR-100~\up & CIFAR-10~\up & Tiny-IN~\up \\
 \midrule
-1\%   & $\mathbf{+1.42}$ & $\mathbf{+6.37}$ & $+1.49$ \\
-2\%   & $+2.50$          & $\mathbf{+6.66}$ & $+1.81$ \\
-3\%   & $+3.68$          & $+5.38$          &-- \\
-5\%   & $\mathbf{+5.15}$ & $+4.41$          & $\mathbf{+2.12}$ \\
-7\%   & $+4.87$          & $+2.21$          &-- \\
-10\%  & $\mathbf{+3.75}$ & $+1.09$          & $+1.65$ \\
-15\%  & $+2.55$          & $-0.66$          &-- \\
-25\%  & $+0.25$          & $-0.83$          & $+0.10$ \\
-100\% & $+0.08$          & $-0.26$          & $-0.42$ \\
+1\%   & $\mathbf{+1.42}$\sem{0.07} & $\mathbf{+6.37}$\sem{0.15} & $\mathbf{+1.49}$\sem{0.09} \\
+2\%   & $+2.50$\sem{0.16} & $\mathbf{+6.66}$\sem{0.27} & $+1.81$\sem{0.19} \\
+3\%   & $+3.68$\sem{0.29} & $+5.38$\sem{0.65} & $+2.34$\sem{0.23} \\
+5\%   & $\mathbf{+5.15}$\sem{0.22} & $+4.41$\sem{0.15} & $\mathbf{+2.12}$\sem{0.12} \\
+7\%   & $+4.87$\sem{0.51} & $+2.21$\sem{0.42} & $+2.01$\sem{0.31} \\
+10\%  & $\mathbf{+3.75}$\sem{0.24} & $+1.09$\sem{0.57} & $+1.65$\sem{0.27} \\
+15\%  & $+2.55$\sem{0.30} & $-0.66$\sem{0.22} & $+1.44$\sem{0.11} \\
+25\%  & $+0.16$\sem{0.29} & $-0.83$\sem{0.20} & $+0.10$\sem{0.28} \\
+100\% & $-0.01$\sem{0.13} & $-0.26$\sem{0.18} & $-0.42$\sem{0.36} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\begin{table}[t]
+\begin{table}[pos=htbp]
 \caption{Domain datasets at representative fractions (points, three
 seeds). The unimodal shape recurs on satellite, texture, food,
 histopathology and fine-grained data. PathMNIST above ${\sim}15\%$ is
@@ -521,14 +521,14 @@ confounded by a shifted test split that penalizes \emph{all} methods
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \zebra{2}
-\begin{tabular}{@{}lrrrr@{}}
+\begin{tabular}{lrrrr}
 \toprule
 Dataset & 1\%~\up & 5\%~\up & 10--15\%~\up & $\geq$25\%~\up \\
 \midrule
-EuroSAT   & $+2.67$ & $+0.84$ & $+1.22$  & ${\sim}0$ \\
-PathMNIST & $+5.70$ & --      & $+1.74$  & conf. \\
-Food-101  & --      & $+5.63$ & $+3.18$  & $-0.47$ \\
-STL-10    & --      & --      & $+5.92$  & $+3.18$ \\
+EuroSAT   & $+2.47$ & $+0.84$ & $+1.22$  & ${\sim}0$ \\
+PathMNIST & $+5.62$ & --      & $+1.74$  & conf. \\
+Food-101  & --      & $+5.63$ & $+3.18$  & $-0.69$ \\
+STL-10    & --      & --      & $+5.92$  & $+4.77$ \\
 DTD       & --      & $+0.30$ & $+2.15$  & $+3.55$\rlap{$^{\ast}$} \\
 CUB-200   & --      & --      & --       & $+2.74$\rlap{$^{\ast}$} \\
 \bottomrule
@@ -536,7 +536,7 @@ CUB-200   & --      & --      & --       & $+2.74$\rlap{$^{\ast}$} \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[t]
+\begin{figure}[pos=htbp]
 \centering
 \includegraphics[width=\linewidth]{figs/envelopes.pdf}
 \caption{The prior's gain across the data axis. (a) On convolutional
@@ -556,10 +556,17 @@ the dataset's difficulty rather than its fraction, easy ten-way
 CIFAR-10 plateaus across 1--2\% (the two cells differ by $0.29$, which
 their seed uncertainty cannot resolve) and is already negative at 15\%,
 while
-hundred-way CIFAR-100 peaks at 5\%. And at full data the prior is neutral
-within noise on every one of ten populations, which is what the
-the decaying weight schedule is for: the fusion asks nothing when the data
-can pay for everything.
+hundred-way CIFAR-100 peaks at 5\%. And wherever a dataset is large enough
+for its $100\%$ cell to reach sufficiency, the prior is neutral there within
+noise: CIFAR-100 $-0.01$, CIFAR-10 $-0.26$, Tiny-ImageNet $-0.42$,
+Food-101 $-0.47$, EuroSAT ${\sim}0$, ImageNet64 $+0.04$ and ImageNet-100
+$-0.02$, which is what the decaying weight schedule is for --- the fusion
+asks nothing when the data can pay for everything. The qualifier is not
+cosmetic and we enforce it elsewhere too: DTD and CUB-200 are still
+positive at $100\%$ ($+3.55$, $+2.74$, Table~\ref{tab:domainenv}), but
+their full training sets are only $3{,}760$ and $5{,}994$ images, which by
+this study's own axis are low-data cells rather than sufficient ones. It is
+the image count that decides the flank, not the label ``$100\%$''.
 
 \subsection{The multi-method comparison}\label{sec:multimethod}
 The same envelope measured for every comparator produces the head-to-head
@@ -572,13 +579,13 @@ Table~\ref{tab:appssl}); SimSiam gains ${\leq}+0.9$ everywhere at that budget,
 though Section~\ref{sec:parity} shows this to be a property of the budget
 and not of the method; DINO trails the prior at every fraction below
 25\%. Raising both comparators to $5\times$ widens SimCLR's lead to
-$+3.1$ to $+9.2$ across the whole envelope, so on convolutional backbones
+$+3.1$ to $+9.2$ from 1\% to 15\% (and $+2.6$ at 25\%), so on convolutional backbones
 the prior's case is one of cost rather than of accuracy. On attention
 backbones, and on any backbone under a modern augmentation recipe, the
 ordering inverts (Section~\ref{sec:fusion}).
 
 \subsection{Attention: where the prior is dramatic}\label{sec:attention}
-\begin{table}[t]
+\begin{table}[pos=htbp]
 \caption{ViT-tiny: gain of the prior under the plain recipe and under
 DeiT-strength augmentation, with the amplification ratio, on CIFAR-100
 and (last column) Tiny-ImageNet under the plain recipe. Augmentation does
@@ -587,8 +594,8 @@ more data. Blank: not measured. Three seeds per cell.}
 \label{tab:vitenvelope}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
-\zebra{3}
-\begin{tabular}{@{}lrrrr@{}}
+\zebra{5}
+\begin{tabular}{lrrrr}
 \toprule
  & \multicolumn{3}{c}{CIFAR-100} & Tiny-IN \\
 \cmidrule(lr){2-4}\cmidrule(l){5-5}
@@ -613,6 +620,7 @@ ViT-tiny trained from scratch gains $+9.9$ points from the prior even at
 neutral, and under the standard DeiT recipe the gains grow to
 $+25$ points, peaking later in the data axis. The best ViT number in the
 study, $\vitBest\%$ at full CIFAR-100, is DeiT augmentation \emph{plus} the
-prior, against $\vitBestBase\%$ for the recipe alone. Sections~\ref{sec:law} and
+prior, against $\vitBestBase\%$ for the recipe alone --- the prior is worth
+$+\vitBestDelta$ points on top of the recipe the literature recommends. Sections~\ref{sec:law} and
 \ref{sec:scale} show this is a feature-side phenomenon that persists to
 ImageNet scale and grows with model size.

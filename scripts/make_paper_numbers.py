@@ -19,6 +19,7 @@ The compute figures are recomputed from every retained run record rather than
 carried forward, so the device split sums to the total by construction --
 that is the round 3 NB1 defect, removed at the source rather than corrected.
 """
+import csv
 import glob
 import json
 import os
@@ -110,6 +111,19 @@ def main():
     unres = [r for r in rest if r not in res]
     ok = [r for r in res
           if (r["base"] < LO and r["ro"] < 0) or (r["base"] > HI and r["ro"] > 0)]
+    # The widest population Table 7 narrows FROM: every paired cell carrying
+    # both Delta and G at >=3 seeds, regardless of intervention. It was a
+    # hand-typed 1,660 in the manuscript with no script behind it (and the
+    # hand-count was wrong), which is precisely the drift these macros exist to
+    # stop. Same criterion export_results_csv.py reports on its own last line.
+    n_all = 0
+    with open(os.path.join(ROOT, "results", "all_results.csv")) as fh:
+        for r in csv.DictReader(fh):
+            if (r.get("baseline_cell") and r.get("delta") and r.get("G")
+                    and int(r.get("n_seeds") or 0) >= 3):
+                n_all += 1
+    macro("auditAllPaired", num(n_all),
+          "every intervention, >=3 seeds; Table 7 row 1")
     macro("auditScope", num(n_scope))
     macro("auditResolvable", num(len(res)))
     macro("auditCorrect", num(len(ok)))
@@ -117,6 +131,47 @@ def main():
     macro("auditUnresolved", num(len(unres)))
     macro("auditBracket", num(len(bracket)))
     macro("auditRate", dec(100.0 * len(ok) / len(res)))
+    # THE RESCOPING DISCLOSURE (Section 4.2), generated rather than typed.
+    # An earlier version of in_scope() tested the exporter's `pretrained`
+    # column against the strings "true"/"1" while the exporter writes "yes",
+    # so the ImageNet-transfer cells -- which the law's scope has excluded
+    # since it was first stated -- were silently counted. Restoring the filter
+    # moved the headline rate, so the manuscript reports the previous figure,
+    # the excluded cells, and how those cells behave on their own. Recomputed
+    # here under the OLD predicate so the two numbers cannot drift apart.
+    old_pred = ALP.in_scope
+    ALP.in_scope = lambda r: (
+        r.get("aux_target") and not r.get("init_from")
+        and str(r.get("pretrained", "")).lower() not in ("true", "1")
+        and (r.get("stem") or "none") == "none")
+    prev = ALP.load(os.path.join(ROOT, "runs"),
+                    os.path.join(ROOT, "results", "all_results.csv"))
+    ALP.in_scope = old_pred
+
+    def _split(rr):
+        rest_ = [r for r in rr if not (LO <= r["base"] <= HI)]
+        res_ = [r for r in rest_ if r["sem"] > 0 and abs(r["ro"]) > 2 * r["sem"]]
+        ok_ = [r for r in res_ if (r["base"] < LO and r["ro"] < 0)
+               or (r["base"] > HI and r["ro"] > 0)]
+        below = [r for r in res_ if r["base"] < LO]
+        below_ok = [r for r in below if r["ro"] < 0]
+        return res_, ok_, below, below_ok
+    p_res, p_ok, p_below, p_below_ok = _split(prev)
+    _, _, n_below, n_below_ok = _split(rows)
+    key = lambda r: (r.get("cell"), r.get("dataset"), r.get("subset_pct"))
+    keep = set(map(key, rows))
+    excl = [r for r in prev if key(r) not in keep]
+    e_res, e_ok, _, _ = _split(excl)
+    macro("auditPrevScope", num(len(prev)), "scope before the filter was restored")
+    macro("auditPrevResolvable", num(len(p_res)))
+    macro("auditPrevRate", dec(100.0 * len(p_ok) / len(p_res)))
+    macro("auditPrevBelowRate", dec(100.0 * len(p_below_ok) / len(p_below)))
+    macro("auditBelowRate", dec(100.0 * len(n_below_ok) / len(n_below)))
+    macro("auditExclCells", num(len(excl)))
+    macro("auditExclResolvable", num(len(e_res)))
+    macro("auditExclCorrect", num(len(e_ok)))
+    macro("auditExclWrong", num(len(e_res) - len(e_ok)))
+    macro("auditExclRate", dec(100.0 * len(e_ok) / len(e_res)))
     # Take the residual spread from the audit's OWN output rather than
     # recomputing it here: two implementations of one statistic is exactly how
     # 2.1 and 2.2 came to coexist in the manuscript.
@@ -132,6 +187,13 @@ def main():
     hours, runs, kwh = compute()
     total = sum(hours.values())
     macro("computeRuns", num(runs))
+    # The CELL count is quoted in the abstract, the highlights, the intro and
+    # Data Availability. It was hardcoded in all of them and went stale the
+    # moment the ImageNet envelope landed, so it is generated now: a number the
+    # paper repeats in five places is exactly the number that must not drift.
+    with open(os.path.join(ROOT, "results", "all_results.csv")) as _f:
+        n_cells = sum(1 for _ in csv.DictReader(_f))
+    macro("computeCells", num(n_cells), "rows in results/all_results.csv")
     macro("computeGpuHours", num(int(round(total))))
     for dev, key in (("H100", "computeHhundred"), ("H100 NVL", "computeHnvl"),
                      ("H200 NVL", "computeHtwo"), ("RTX 3090", "computeAmpere")):
@@ -144,7 +206,6 @@ def main():
     macro("computePerRun", dec(kwh * CARBON * 1000.0 / max(runs, 1), 0))
 
     # ---- headline cells that appear in prose AND in a table ----
-    import csv
     acc = {}
     with open(os.path.join(ROOT, "results", "all_results.csv")) as f:
         for r in csv.DictReader(f):
@@ -157,6 +218,150 @@ def main():
           "same recipe without the prior")
     macro("vitBestDelta", dec(best['delta']),
           "must equal vitBest - vitBestBase")
+
+    # ---- dense prediction, from analysis/aggregate_dense.py's tables ----
+    # Same discipline as above: the dense section quotes these macros rather
+    # than transcribing numbers, so prose cannot drift from the CSVs. Absolute
+    # AND relative delta are both exported, because absolute mIoU is not
+    # comparable across populations whose baselines differ eightfold -- reading
+    # it as if it were is what produced a "13x label-space collapse" that was
+    # really ~1.6x.
+    dres, dlaw = {}, {}
+    dr = os.path.join(ROOT, "results", "dense_results.csv")
+    dl = os.path.join(ROOT, "results", "dense_law.csv")
+    if os.path.exists(dr):
+        with open(dr) as f:
+            for r in csv.DictReader(f):
+                dres[(r["population"], int(r["pct"]))] = r
+    if os.path.exists(dl):
+        with open(dl) as f:
+            for r in csv.DictReader(f):
+                dlaw[(r["population"], int(r["pct"]))] = r
+    if dres:
+        macro("denseCells", num(len(dres) * 6),
+              "216 = 6 populations x 6 fractions x 2 arms x 3 seeds")
+        macro("densePops", num(len({k[0] for k in dres})))
+        v = dres[("voc", 1)]
+        macro("denseVocOneDelta", dec(float(v["delta_miou"]), 2),
+              "D4: dense at ~5 images/class")
+        macro("denseVocOneRel", dec(float(v["delta_rel_pct"]), 1))
+        v = dres[("voc", 25)]
+        macro("denseVocPeak", dec(float(v["delta_miou"]), 2), "voc envelope peak")
+        v = dres[("voc", 100)]
+        macro("denseVocFull", dec(float(v["delta_miou"]), 2))
+        macro("denseVocFullRel", dec(float(v["delta_rel_pct"]), 1))
+        v = dres[("pascalcontext", 100)]
+        macro("densePcFull", dec(float(v["delta_miou"]), 2),
+              "same pixels as voc, 254 classes not 21")
+        macro("densePcFullRel", dec(float(v["delta_rel_pct"]), 1))
+        rel = [abs(float(r["delta_rel_pct"])) for k, r in dres.items()
+               if k[1] <= 25 and r["delta_rel_pct"] != ""]
+        macro("denseRelLo", dec(min(rel), 0))
+        macro("denseRelHi", dec(max(rel), 0))
+    if dlaw:
+        res = [r for r in dlaw.values() if r["resolvable"] == "True" and r["predicted_sign"]]
+        ok = [r for r in res if r["sign_as_predicted"] == "True"]
+        macro("denseLawCells", num(len(dlaw)))
+        macro("denseLawResolvable", num(len(res)))
+        macro("denseLawCorrect", num(len(ok)))
+        macro("denseLawBracket",
+              num(len([r for r in dlaw.values() if r["branch"] == "inside"])))
+        # The three groups must PARTITION the dense law cells, because the
+        # prose adds them up: bracket + unresolved + resolvable = total. The
+        # old test was `resolvable != "True"`, which also catches the
+        # in-bracket rows and so double-counted them -- 2 + 21 + 9 = 32
+        # against a stated 30. Exclude the bracket rows explicitly.
+        macro("denseLawUnres",
+              num(len([r for r in dlaw.values()
+                       if r["resolvable"] != "True" and r["branch"] != "inside"])))
+        pa = [float(r["baseline_pixel_acc"]) for r in res]
+        macro("denseLawPixLo", dec(min(pa), 0))
+        macro("denseLawPixHi", dec(max(pa), 0))
+
+    # ---- detection, from analysis/aggregate_det.py -----------------------
+    # The detection result is a null, which makes the discipline matter MORE
+    # rather than less: a reader checking whether the zeros are really zeros
+    # should find the same numbers in the prose, the table and the CSV.
+    det = {}
+    dp = os.path.join(ROOT, "results", "det_results.csv")
+    if os.path.exists(dp):
+        with open(dp) as f:
+            for r in csv.DictReader(f):
+                det[int(r["pct"])] = r
+    if det:
+        macro("detCells", num(len(det) * 6),
+              "36 runs = 6 fractions x 2 arms x 3 seeds")
+        macro("detCellCount", num(len(det) * 2),
+              "a cell is a (config, fraction) pair, as in the dense tables")
+        macro("detFloorPcts", " and ".join(f"{p}\\%" for p in sorted(det)
+                                           if det[p]["ap50_interpretable"] != "True"),
+              "fractions where BOTH arms fall under the 1.0 AP50 floor")
+        v = det[1]
+        macro("detOneDelta", dec(float(v["delta_ap50"]), 2))
+        macro("detOneFgAcc", dec(float(v["none_fg_acc"]), 1),
+              "baseline fg_acc at 1%: below the crossing bracket")
+        macro("detOneGFgAcc", dec(float(v["G_fg_acc"]), 2),
+              "the falsifier needed >= +1.5 here")
+        v = det[10]
+        macro("detTenDelta", dec(float(v["delta_ap50"]), 2), "the one nonzero cell")
+        macro("detTenGFgIou", dec(float(v["G_fg_iou"]), 4),
+              "the only resolvable G in the detection grid")
+        macro("detTenGFgIouSem", dec(float(v["G_fg_iou_sem"]), 4))
+        v = det[100]
+        macro("detFullAPnone", dec(float(v["none_ap50"]), 1),
+              "instrument check: the pre-recorded FPN conditional was <= 15")
+        macro("detFullDelta", dec(float(v["delta_ap50"]), 2))
+        # The probe's OWN AP50 at 1% is what makes the law untestable here:
+        # it floors on the same side of the crossing where a negative readout
+        # would have to be read. No fallback literal -- if the probe records
+        # are missing the macro is absent and main.tex's staleness guard fires.
+        v = det[1]
+        if v.get("probe_ap50_none"):
+            macro("detProbeOneAP", dec(float(v["probe_ap50_none"]), 2),
+                  "the probe's own AP50 at 1%: floored, so no law cell")
+            macro("detProbeLiftOne", dec(float(v["probe_fg_acc_none"]), 1),
+                  "probe fg_acc at 1%, against the trained cell's own")
+
+    # ---- imprint specificity, from analysis/imprint_specificity.py -------
+    # The mechanistic claim quotes these rather than transcribing them, for the
+    # same reason as everything else here: a number repeated in prose and a
+    # table must come from one place.
+    _imp = os.path.join(ROOT, "results", "imprint_specificity.json")
+    if os.path.exists(_imp):
+        import statistics as _st
+        _d = json.load(open(_imp))
+        def _grp(pred):
+            g = [r for r in _d if pred(r)]
+            return (len(g), _st.mean(r["align_gap"] for r in g),
+                    _st.mean(r["G"] for r in g)) if g else (0, 0.0, 0.0)
+        n, gap, G = _grp(lambda r: r["family"] == "moment prior" and "tap" not in r["cell"])
+        macro("imprintPriorN", num(n)); macro("imprintPrior", dec(gap, 2))
+        macro("imprintPriorG", dec(G, 2))
+        n, gap, G = _grp(lambda r: r["family"] == "SimCLR init" and "aux" not in r["cell"])
+        macro("imprintSSLN", num(n)); macro("imprintSSL", dec(gap, 2))
+        macro("imprintSSLG", dec(G, 2), "larger than the prior's, by a different route")
+        _, gap, _ = _grp(lambda r: r["family"] == "random target")
+        macro("imprintRand", dec(gap, 2))
+        _, gap, _ = _grp(lambda r: r["family"] == "moment prior" and "tap" in r["cell"])
+        macro("imprintTap", dec(gap, 2), "same target, imposed at L1/L2")
+        _, gap, _ = _grp(lambda r: "simclraux" in r["cell"])
+        macro("imprintCombo", dec(gap, 2), "same SSL init, plus the target")
+
+    # ---- CAM concentration, from analysis/cam_concentration.py -----------
+    _cam = os.path.join(ROOT, "results", "cam_concentration.json")
+    if os.path.exists(_cam):
+        _c = json.load(open(_cam))[0]
+        macro("camBase", dec(_c["gini_base"], 3))
+        macro("camAux", dec(_c["gini_aux"], 3))
+        macro("camDelta", dec(_c["delta"], 3), "whole test set, not the panel")
+        macro("camN", num(_c["n_images"]))
+        _sem = (_c["gini_base_sem"] ** 2 + _c["gini_aux_sem"] ** 2) ** 0.5
+        macro("camSigma", dec(_c["delta"] / _sem, 1))
+
+    # A sentinel the document checks. tables/numbers.tex is GENERATED and has to
+    # travel with the sections that use its macros; when it does not, LaTeX fails
+    # with "control sequence never \\def'ed", which says nothing about the cause.
+    macro("numbersStamp", "ok", "presence checked by main.tex")
 
     print("\n".join(out))
 

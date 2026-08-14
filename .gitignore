@@ -2,10 +2,15 @@
 data/*
 !data/subsets/
 runs/
-results/
+runs_dense/
+runs_det/
+runs_dense_50e/
+runs_turing/
+results/*
 !results/*.csv
 !results/*.md
 !results/*.tex
+!results/*.json
 release/
 slurm/logs/
 logs/*.pid
@@ -29,3 +34,6 @@ logs/so2sat_push.log
 # tree drifts from it the moment either side is edited. See
 # paper/SUBMISSION_FILES.md for what to upload.
 paper/submission/
+
+# release assets are built on demand, never committed
+dist/

@@ -20,13 +20,13 @@ red-edge, near-infrared, short-wave infrared and cirrus) and
 \textbf{sensor-fused} (all 13). \textbf{So2Sat LCZ42} pairs \emph{two
 satellites}: Sentinel-1 synthetic-aperture radar (8 channels) with
 Sentinel-2 optical (10 channels), over 17 local-climate-zone classes. The
-second is the harder and more honest test, since radar backscatter and
+second is the harder and more informative test, since radar backscatter and
 optical reflectance share no detector and no physics. In both, tiles and
 fixed subset indices are identical across the sources and the
 configuration is the champion verbatim with only the source changed, so
 nothing but the input varies.
 
-\begin{table}[t]
+\begin{table}[pos=htbp]
 \caption{Does a second source pay? Fusion gain is the fused arm minus the
 better single source, at matched data. Sorted by data fraction. Three seeds
 per cell, ResNet-18; the champion configuration is used verbatim
@@ -35,8 +35,8 @@ pairing two satellites does not pay at any.}
 \label{tab:sensorfusion}
 \centering\scriptsize
 \setlength{\tabcolsep}{3.2pt}
-\zebra{3}
-\begin{tabular}{@{}rrrrrr@{}}
+\zebra{5}
+\begin{tabular}{rrrrrr}
 \toprule
 & \multicolumn{2}{c}{EuroSAT-MS (one instrument)}
 & \multicolumn{2}{c}{So2Sat (two satellites)} \\
@@ -154,12 +154,18 @@ asymmetry} $a_{ij} = \lvert \mathrm{acc}(p_i) -
 and $d_{ij}$ is a percentage of test images, so $\beta_d$ below converts
 one into the other. The self-supervised arm here is a
 50-epoch pre-training checkpoint rather than the 200- or 800-epoch ones of
-Section~\ref{sec:budget}, because this analysis needs two arms of
-\emph{matched accuracy} so that the asymmetry term does not dominate, and
-that is the budget at which SimCLR lands within a point of the prior. The
-budget lesson of Section~\ref{sec:budget} applies here too: a
-longer-pre-trained arm would ensemble differently, and we have not
-measured that.
+Section~\ref{sec:budget}, and since that section is entirely about budget
+mattering, the choice needs its reason stated plainly. The regression above
+carries an asymmetry term, so a pair whose two members differ greatly in
+accuracy tells us about that gap rather than about diversity; the analysis
+therefore needs arms of \emph{matched} accuracy, and $50$ epochs is the
+budget at which SimCLR lands within a point of the prior on this cell
+($30.81$ against $30.53$) where $200$ and $800$ epochs put it $3.9$ and
+$9.2$ points ahead. The alternative --- pairing the strongest available
+arms --- would confound diversity with the very budget effect
+Section~\ref{sec:budget} isolates. The cost of the choice is that we have
+\emph{not} measured how a longer-pre-trained arm ensembles, and the budget
+lesson gives every reason to expect it would differ.
 
 The first thing the data say is a caution rather than a confirmation.
 Least squares over the $n = 28$ pairs gives
@@ -178,7 +184,7 @@ of what either contributes. Restricting to pairs within one point of each
 other, where currency is actually the free variable, leaves the three
 pairs of Table~\ref{tab:ensemble}.
 
-\begin{table}[t]
+\begin{table}[pos=htbp]
 \caption{Decision-level fusion on CIFAR-100 at 5\%, restricted to pairs whose
 two arms are within one accuracy point of each other so that the information
 source, rather than an accuracy gap, is what differs. Gain is over the better
@@ -188,7 +194,7 @@ predict different classes. Averaging posteriors requires no further training.}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \zebra{2}
-\begin{tabular}{@{}P{0.42\columnwidth}rr@{}}
+\begin{tabular}{P{0.42\columnwidth}rr}
 \toprule
 Pair & Gain~\up & Disagreement \\
 \midrule
@@ -221,61 +227,112 @@ can be estimated \emph{before} the combined system is built, from
 measurements of each source alone. We state that as a procedure rather than
 as a finding, since it is what a practitioner would actually run.
 
-\begin{table}[t]
-\caption{Deciding whether to fuse two sources, before training the
-combination. Every quantity is measured on the sources separately; the only
-cost beyond training each source once is two frozen-feature evaluations.}
-\label{tab:procedure}
-\centering\scriptsize
-\setlength{\tabcolsep}{2.6pt}
-\zebra{2}
-\begin{tabular}{@{}P{0.05\columnwidth}P{0.86\columnwidth}@{}}
-\toprule
-\multicolumn{2}{@{}l}{\textbf{Inputs}: sources $A$, $B$; a baseline arm; a labeled split} \\
-\midrule
-1 & Train the baseline, $A$ alone and $B$ alone. Record each arm's
-    end-to-end gain and declared compute multiple. \\
-2 & Evaluate all three frozen representations with an identical linear
-    protocol. This gives $G_A$ and $G_B$, each source's feature-level
-    contribution. \\
-3 & Compare the two arms' accuracies. If one is far weaker, treat the
-    combination as unpromising: this term dominates our decision-level
-    fit (Eq.~\ref{eq:ensgain}), and the sensor population whose arms are
-    matched is the one where fusion paid. Weakest-supported step, since
-    our two sensor populations differ in modality as well as in
-    asymmetry (Section~\ref{sec:multisensor}); use it to rank candidates,
-    not to reject one. \\
-4 & If either source's gain is ${\approx}0$, it supplies nothing to
-    overlap: the other source's gain is available in full, and the
-    combination is not the question. \\
-5 & If $G_A \approx G_B$ \emph{and} both arms improve the same cells,
-    the sources carry the same currency. Expect \textbf{substitution}:
-    the combination will not exceed the better single arm. Take the
-    cheaper source. \\
-6 & If $G_A$ and $G_B$ differ in kind, expect \textbf{stacking}, and a
-    combined gain larger than either alone. \\
-7 & If one source is a mature initialization, do not inject a shaping
-    prior on top of it. Expect a \textbf{tax} proportional to what the
-    initialization was contributing, measurable in advance as that
-    source's advantage over training from scratch. \\
-\bottomrule
-\end{tabular}
+%% A `table' float, not an `algorithm' float: see the note in main.tex on why
+%% float.sty is not loaded. \caption is not used, so this does not consume a
+%% Table number; \refstepcounter{algnum} gives \ref{alg:procedure} its value.
+\begin{table}[pos=htbp]
+\refstepcounter{algnum}
+\label{alg:procedure}
+\centering
+\begin{minipage}{\columnwidth}
+\rule{\linewidth}{0.8pt}\\[1pt]
+{\footnotesize\textbf{Algorithm \thealgnum}\hspace{0.6em}Predicting the outcome of fusing two sources, before the
+combination is trained. Every quantity is measured on the sources
+\emph{separately}; the only cost beyond training each source once is two
+frozen-feature evaluations, which run in minutes. Line~\ref{alg:asym} is
+the weakest-supported step: it dominates our decision-level fit
+(Eq.~\ref{eq:ensgain}), but our two sensor populations differ in modality
+as well as in asymmetry (Section~\ref{sec:multisensor}), so it should rank
+candidates rather than reject one. ``Differ in kind'' at
+line~\ref{alg:stack} means the two sources fix different test images and
+shape different directions in feature space, which
+Section~\ref{sec:samecurrency} measures directly.\par}
+\vspace{1pt}\rule{\linewidth}{0.4pt}\par
+\small
+%% RULE-TO-CODE SPACING. `algorithmic' sets \topsep 0.2em inside its own list
+%% setup, but 8pt of \topsep is still applied on both sides of the environment,
+%% which opened a two-line white band between the rule and \REQUIRE and another
+%% before the closing rule. Measured in a minimal cas-dc document rather than
+%% guessed at: removing \topsep alone pulls the text into the rule, so 2pt goes
+%% back. The same pair sits after \end{algorithmic}.
+\vspace*{-\topsep}\vspace*{4pt}
+%% Keywords are bold; CONNECTIVES are not. \algorithmicand/\algorithmicor ship
+%% as \textbf, which put three weights on one line ("if ... and ... then") and
+%% made the connective compete with the keyword it joins.
+\renewcommand{\algorithmicand}{\textnormal{and}}
+\renewcommand{\algorithmicor}{\textnormal{or}}
+\begin{algorithmic}[1]
+\REQUIRE sources $A$, $B$; a shared baseline arm; a labeled split
+\ENSURE one of \textsc{stack}, \textsc{substitute}, \textsc{tax}, \textsc{n/a}
+\STATE train the baseline, $A$ alone and $B$ alone; record gains
+  $\Delta_A, \Delta_B$ and declared compute multiples $c_A, c_B$
+\STATE $G_A, G_B \gets$ linear evaluation of the three frozen
+  representations under one identical protocol
+\IF{$A$ or $B$ is a mature (pre-trained) initialization}
+  \STATE \textbf{return} \textsc{tax}: do not inject a shaping prior on top
+    of it; the cost is proportional to that initialization's advantage over
+    training from scratch, which is already measured
+\ENDIF
+\IF{$G_A \approx 0$ \OR $G_B \approx 0$}
+  \STATE \textbf{return} \textsc{n/a}: a source supplying nothing cannot
+    overlap; the other's gain stands in full
+\ENDIF
+\IF{$|\Delta_A - \Delta_B|$ is large} \label{alg:asym}
+  \STATE deprioritize: matched arms are where fusion paid
+\ENDIF
+\IF{$G_A \approx G_B$ \AND both arms improve the same cells}
+  \STATE \textbf{return} \textsc{substitute}: the combination will not
+    exceed the better single arm; take the cheaper source,
+    $\arg\min(c_A, c_B)$
+\ELSE
+  \STATE \textbf{return} \textsc{stack}: expect a combined gain larger than
+    either alone \label{alg:stack}
+\ENDIF
+\end{algorithmic}
+\vspace*{-\topsep}\vspace*{4pt}
+\rule{\linewidth}{0.8pt}
+\end{minipage}
 \end{table}
 
-Table~\ref{tab:procedure} states it. Three properties are worth drawing
-out. It is \emph{cheap}: the only cost beyond training each source once is
+Algorithm~\ref{alg:procedure} states it. Three properties are worth drawing
+out. It is \emph{inexpensive}: the only cost beyond training each source once is
 two linear evaluations on frozen features, which run in minutes on cells
 that took hours to train. It is \emph{predictive rather than
 retrospective}, which places it alongside transferability estimation
 \citep{nguyen2020leep}, with the difference that those methods
 score a single pre-trained source for a target task while this scores a
-\emph{pair} for combination. And it is \emph{falsifiable}: step 5 asserts
+\emph{pair} for combination. And it is \emph{falsifiable}: the
+\textsc{substitute} branch asserts
 that equal feature gains imply no benefit from combining, which
 Sections~\ref{sec:substitute} and \ref{sec:decisionfusion} both test and
 which the training-time-versus-decision-time discrepancy above already
 qualifies.
 
-The honest limit is step 5's antecedent. We compare feature gains by
+\emph{The procedure run once, end to end.} Take the pair the paper measures
+most closely: the moment prior and a SimCLR initialization, on ViT-tiny at
+CIFAR-100 $10\%$. Step~1 trains the three arms and records
+$\Delta_{\mathrm{prior}} = +13.26$ at $1.02\times$ compute and
+$\Delta_{\mathrm{SimCLR}} = +13.30$ at $2\times$. Step~2 evaluates the frozen
+representations under one protocol: $G_{\mathrm{prior}} = +14.83$ and
+$G_{\mathrm{SimCLR}} = +13.46$. Neither arm is a pre-trained initialization in
+the ImageNet sense, so the \textsc{tax} branch does not fire; neither $G$ is
+near zero, so the \textsc{n/a} branch does not fire; the arms are level
+($|\Delta_A - \Delta_B| = 0.04$), so nothing is deprioritized. That leaves the
+test at the \textsc{substitute} branch, and the two feature gains agree to
+$1.4$ points on a scale where the effects themselves are $13$--$15$. The
+procedure therefore predicts \textsc{substitute}: the combination should not
+exceed the better single arm.
+It does not. Trained, the combination reaches $\Delta = +13.46$, within noise
+of both singles ($+0.16$ over SimCLR alone, $+0.20$ over the prior alone), and
+its feature gain $+14.14$ sits \emph{between} the two rather than above
+either. The prediction cost two linear evaluations; the confirmation cost a
+full training run that the prediction would have saved. Contrast the same
+procedure on the prior and DeiT-strength augmentation, where the feature
+gains differ in kind and the branch taken is \textsc{stack}: there the
+combination does exceed both, and $G$ rises from $14.83$ to $22.20$
+(Section~\ref{sec:stack}).
+
+The limit is that branch's antecedent. We compare feature gains by
 magnitude and by which cells improve, not by a formal decomposition of the
 information each source carries. Partial information decomposition
 \citep{williams2010nonnegative,liang2023quantifying} is the principled

@@ -6,6 +6,10 @@
 *.spl
 *.fls
 *.fdb_latexmk
+# main.abs is written by the cas class on every compile (it extracts the
+# abstract). It had been committed instead, so every build produced a
+# spurious tracked diff.
+*.abs
 build.log
 
 # main.pdf is NOT ignored, deliberately. It was, and that is why three

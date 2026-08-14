@@ -3826,3 +3826,1548 @@ ported vs corrected and why.
   evaluation was costing more than the training it measured. Validation now
   runs every 5 epochs plus the final one, identically for both arms. The full
   6-fraction envelope is ~6-10 GPU-hours on an H100 for 36 runs.
+
+- *** DENSE PRE-FLIGHT PASSED ON BSC AND THE VOC ENVELOPE IS LAUNCHED
+  (2026-08-10, ms_denssmoke 44477248, DENSE_SMOKE_COMPLETE failures=0). All
+  five checks green on the machine that will run the campaign:
+    (1) the committed dense subsets reproduce byte-identically from BSC's OWN
+        VOC/SBD copy (107/209/528/1059/2648 images) -- so the two machines
+        agree on which images each cell trains on, which is the check that
+        makes a cross-machine merge legitimate;
+    (2) the joint-transform CONTENT tests pass under BSC's library versions;
+    (3) both arms train and write a final.json -- and the aux arm logs
+        lam 1.000 -> 0.000, i.e. the lambda schedule is live and
+        MomentAuxModel BUILT under BSC's older aux.py via the in_channels
+        compatibility shim. That was the one thing that could have produced a
+        ONE-ARMED envelope (baseline fine, aux dead) and it is now measured,
+        not assumed;
+    (4) PEAK 4,367 MiB at the largest fraction;
+    (5) the dense probe path runs end to end.
+  LANE: the envelope runs on its OWN queue (worklist.dense /
+  queue.counter.dense / queue.lock.dense / runs_dense, slurm/bsc_dense.sbatch,
+  job ms_dense). NOT in the grid lane, deliberately: the grid reconcile
+  rebuilds worklist.bsc from missing CLASSIFICATION cells only, so dense lines
+  put there would be silently dropped at the next reconcile -- exactly how the
+  78 diagnostics tasks vanished on 2026-08-02. The worker eval()s each
+  worklist line, so a train_dense.py line needs no worker change.
+  SLOTS=4 per GPU, sized from the measurement rather than guessed: memory
+  allows far more (4.4GB each on an 80GB H100) but the cells are
+  dataloader-bound on 512px joint transforms and the node budget
+  SLOTS*4*(num_workers+1) <= 80 with num_workers=4 caps it at 4.
+  ORDER: 1/2/5% first (the left flank and D4, the alignment question that is
+  the point of running this), then 100% (D2, the structural-neutrality
+  falsifier), then 10/25%. Both arms of a fraction stay adjacent so a partial
+  drain never leaves a one-armed cell. 36 tasks, 2 workers.
+
+- *** LOCAL-MIRROR CHECKPOINT AUDIT -- 9 STALE LOCAL COPIES FOUND AND
+  REPAIRED; THE RECORDS AND THE CODE ARE BOTH CLEAN (2026-08-10, all 896
+  local cells, verify-by-IDENTITY). Run to answer "do the new changes break
+  previous checkpoints and reproducibility?". THE ANSWER IS NO -- aux.py is
+  git-clean and the only new file in momentstem/ is segmentation.py, which
+  nothing else imports -- but the sweep surfaced four separate things:
+  (a) NINE CHECKPOINTS WERE STALE LOCALLY WHILE BSC HELD THE GENUINE ONES,
+      the worst by 19 POINTS (auxmag_7pct_sched: recorded 36.90, local copy
+      evaluated 17.94). Every one of the nine BSC originals reproduced its
+      recorded accuracy to <=0.04 after pulling. Damage is SIGN-RANDOM
+      (-18.96 to +0.94), which is how it is distinguishable from (b).
+      Same class as the 2026-08-05 corruption and the 2026-08-06 wrong-epoch
+      race; rsync's size+mtime quick check cannot see any of it.
+  (b) A TIN-SPECIFIC RE-EVALUATION OFFSET, NOT DAMAGE: every locally-trained
+      tin cell re-evaluates slightly BELOW its recorded value (-0.06, -0.10,
+      -0.12, -0.24, -0.35, -0.38 on six independent cells). Six of six in the
+      SAME direction is not checkpoint damage; the likely cause is JPEG decode
+      drift across library versions over tin's 110k JPEGs (a few tens of
+      borderline predictions flipping out of 10,000). Recorded numbers stand
+      -- they were measured at train time -- and every Delta is a within-pair
+      difference under identical conditions, so nothing in the ledger moves.
+      RULE: a <=0.4 residual when re-verifying a tin cell is expected; treat
+      >0.5, or any residual on a non-tin cell, as damage.
+  (c) FIVE GENUINELY CORRUPT FILES (PytorchStreamReader, byte-identical size)
+      re-pulled and verified; all four affected cells that carry a probe had
+      probed all three seeds BEFORE the corruption, so no recorded G is built
+      on a damaged file. Checked rather than assumed.
+  (d) 26 CELLS CARRY LEGACY KEY NAMING: the original fixed-lambda aux family
+      (auxmag_*, auxgab_*, auxrand_*) stores the auxiliary target under
+      moment_stem. where the current model expects target.stem. -- a rename
+      from early in the study, and the tensors under it are the pinned bank
+      and its calibration, fixed and never trained. verify_checkpoints.py now
+      remaps the prefix on READ; aux.py is untouched, so no cell's training
+      behaviour can move, and the remap is only trustworthy because the
+      evaluation that follows CHECKS it.
+  NONE of the 11 discrepant cells is referenced by the manuscript -- they
+  appear only in the released results CSVs, which are generated from
+  final.json (values computed in-memory at train time, never re-derived from
+  a checkpoint). Verified explicitly rather than argued.
+  SCRIPT FIX, and it is the reusable lesson: the first sweep ABORTED at cell
+  10 of 896 because one legacy-format load raised. An audit that stops on its
+  first finding is worse than no audit -- it reports a clean bill for the 886
+  cells it never reached. verify_checkpoints.py now CLASSIFIES rather than
+  raises (ok / FAIL / CORRUPT / KEYS) and reports the four counts separately,
+  because lumping "unreadable" together with "old naming" hides the one that
+  matters.
+
+- *** THE VOC DENSE ENVELOPE LANDED — D4 FALSIFIED IN THE CLEANER DIRECTION,
+  D2 FALSIFIED BECAUSE MY PREMISE WAS WRONG (2026-08-10, 36/36 cells, 3 seeds
+  every point, ~4h on the dense lane):
+      pct    baseline         prior          Delta (mIoU)
+        1   4.65 ±0.04    5.03 ±0.03      +0.38 ±0.05
+        2   4.62 ±0.04    5.11 ±0.03      +0.50 ±0.05
+        5   5.01 ±0.03    5.73 ±0.08      +0.72 ±0.09
+       10   7.23 ±0.07    8.68 ±0.11      +1.46 ±0.13
+       25  13.54 ±0.16   15.60 ±0.07      +2.06 ±0.17
+      100  33.63 ±0.25   36.20 ±0.21      +2.57 ±0.32
+  (D1) HIT, at the bottom edge: positive across 1-25% as predicted, peak
+    magnitude in that range +2.06 vs the band +2..+8. I deliberately did NOT
+    predict the peak location after E1, and that restraint was right — there
+    is no peak in range at all (see D2).
+  (D4) **THE FALSIFIER FIRED, AND IT IS THE BRANCH THAT MAKES THE CLAIM
+    CLEANER.** I recorded: if the prior pays MORE when the task is dense,
+    Delta(VOC@1%) = +2..+6; if instead Delta <= +1.5, "target-task alignment
+    is NOT where the value comes from, and the claim becomes cleaner rather
+    than weaker". Measured **+0.38 ±0.05** — not merely below the tripwire but
+    an order of magnitude below the band. THE SHARP COMPARISON, at matched
+    supervision density: VOC@1% is 107 images over 20 classes = ~5 per class,
+    the same regime where classification shows a universal ~+1.5 floor
+    (C100@1% +1.42, tin@1% +1.49). Dense gives **+0.38**. So a dense spatial
+    target on a dense spatial task — the most favourable venue this prior
+    could be given, as recorded up front — pays LESS, not more. The gain is
+    not an artifact of target/task alignment.
+  (D2) **THE FALSIFIER NOMINALLY FIRED, AND THE POST-MORTEM IS THE REAL
+    RESULT.** Recorded: Delta(100%) = 0 ±1.5, falsifier |Delta| > 2.5 =>
+    "structural neutrality is an artifact of the classification setting".
+    Measured +2.57 ±0.32 — 3.3 sigma above the band top, and 0.07 past the
+    2.5 threshold (that last crossing is 0.2 sigma, i.e. NOT resolvable, and
+    must not be reported as a clean fire).
+    BUT THE PREMISE WAS WRONG, NOT THE MECHANISM. lambda still reaches
+    exactly 0 at the final epoch here, so structural neutrality is untouched
+    as a mechanism; what fails is my assumption that VOC@100% is a
+    SUFFICIENCY cell. It is 10,582 images at 21-way dense prediction with a
+    baseline of 33.6 mIoU — nowhere near saturation. The envelope is MONOTONE
+    RISING across every fraction (+0.38/+0.50/+0.72/+1.46/+2.06/+2.57) with
+    no peak and no right flank in range: VOC@100% is a LOW-DATA cell in this
+    study's terms, so the prior is still on its rising limb and neutrality was
+    never predicted there by the mechanism — only by my mislabelling of the
+    axis. SAME ERROR CLASS AS E1 on ImageNet64, four days apart: predicting in
+    FRACTION space when the operative axis is absolute data. Recorded as a
+    band miss and an ACCOUNT miss; "neutral at sufficiency" is NOT falsified,
+    because this envelope never reaches sufficiency.
+  UNITS CAVEAT, recorded before the run and still binding: mIoU points are not
+  accuracy points. +2.57 on a 33.63 baseline is +7.6% relative; do not compare
+  the magnitude to a classification Delta.
+  Variance asymmetry is mild here and mostly at 25% (baseline SEM 0.16 vs aux
+  0.07); it is not the dramatic stabilization seen on swin/ConvNeXt.
+  (D3) STILL OPEN — needs the dense G probes; bands recorded below.
+
+- DENSE G-PROBE PASS LAUNCHED (2026-08-10, dense lane, analysis/dense_probe.py:
+  frozen backbone, single 1x1 conv to 21 classes, full train_aug split, mIoU on
+  val — the dense analog of the linear probe, same protocol both arms).
+  SCOPE: 1/2/5/10/25% only. VOC@100% is EXCLUDED by the probe-ceiling rule
+  recorded in advance — there the probe's labels ARE the cell's labels, so no
+  G/readout split is interpretable (the cub@100% precedent).
+  *** THIS IS A FORK THE CLASSIFICATION GRID COULD NOT TEST, which is the best
+  reason to run it. Q6.9h established that "labels per class" was a PROXY for
+  BASELINE HEIGHT — the two are confounded in every classification cell. Dense
+  prediction DECOUPLES them: VOC@1% has a tiny baseline (4.65 mIoU) but
+  enormous supervision (107 images x ~262k labelled pixels). The two accounts
+  therefore make opposite predictions here:
+    H-BASELINE (the law as stated — readout is a function of task
+      performance): readout NEGATIVE and material at 1-5%, so G >> Delta.
+      BANDS: G(1%) = +1.0..+2.5 (vs Delta +0.38), G(5%) = +1.3..+3.0.
+    H-LABELS (readout really tracks the label budget, and baseline height only
+      ever stood in for it): dense supervision is abundant at every fraction,
+      so readout ~ 0 and G ~= Delta within +-0.3 at EVERY fraction.
+      BANDS: G(1%) = +0.1..+0.7, G(5%) = +0.4..+1.0.
+    BOTH predict G(25%) ~= Delta = +1.8..+2.6 (readout near zero as the
+      baseline rises), so the 25% cell is the CONTROL, not the discriminator —
+      it is the 1-5% cells that separate the accounts.
+  FALSIFIER for "the law's FORM transplants off accuracy" (recorded as D3
+  before any dense run): the ORDERING inverts — readout POSITIVE at 1% and
+  NEGATIVE at 25%. That would say the form is metric-specific rather than a
+  property of the method.
+  NOTE the units caveat still binds: the accuracy crossing bracket
+  [31.8, 40.3] is NOT transplanted, and no mIoU crossing is claimed in
+  advance. With five fractions this pass can ESTIMATE where one sits.
+
+- *** DENSE G-PROBES LANDED — THE LAW'S FORM TRANSPLANTS TO SEGMENTATION, BUT
+  MY D3 PREDICTION WAS WRONG AND THE REASON IS A UNITS ERROR I MADE MYSELF
+  (2026-08-10, 10 cells, 3 seeds each, full train_aug probe, both arms
+  identical protocol):
+      pct  base_e2e aux_e2e  Delta | probe_b probe_a      G      | readout
+        1    4.65    5.03   +0.38 |  4.26    4.34   +0.08 ±0.06 |  +0.29
+        2    4.62    5.11   +0.50 |  4.31    4.52   +0.21 ±0.08 |  +0.29
+        5    5.01    5.73   +0.72 |  4.83    5.37   +0.54 ±0.11 |  +0.18
+       10    7.23    8.68   +1.46 |  6.85    8.07   +1.22 ±0.18 |  +0.24
+       25   13.54   15.60   +2.06 | 12.30   13.83   +1.54 ±0.15 |  +0.52
+  (1) THE GAIN IS FEATURE-SIDE, as everywhere else in the study: G tracks
+      Delta at every fraction (0.08/0.21/0.54/1.22/1.54 vs 0.38/0.50/0.72/
+      1.46/2.06), and G(1%) = +0.08 ±0.06 is a measured ZERO — at 107 images
+      the prior barely moves the frozen features at all. That is the
+      feature-side confirmation of D4: dense-at-5-per-class really does get
+      almost nothing, and it is not a readout artifact.
+  (2) MY D3 CALL IS FALSIFIED AS STATED. I predicted readout NEGATIVE at 1%
+      and rising toward zero. Measured readout is POSITIVE at every fraction
+      and roughly FLAT: +0.29/+0.29/+0.18/+0.24/+0.52. The recorded FALSIFIER
+      was narrower than my claim — it required the ORDERING to invert
+      (positive at 1% AND negative at 25%) — and it did NOT fire, since
+      readout is positive at both ends. Scored honestly as: tripwire not
+      fired, prediction wrong.
+  (3) THE UNITS ERROR, and it is the useful part. I read "task performance" as
+      mIoU, saw baselines of 4.65 and put the cells deep on the left flank.
+      But readout is a property of the CLASSIFICATION THE HEAD ACTUALLY
+      PERFORMS, and per-pixel accuracy on these same cells is
+      **71.95 / 72.71 / 73.43 / 74.34 / 76.76 / 83.24** at 1/2/5/10/25/100%
+      — every cell sits FAR ABOVE the crossing bracket [31.8, 40.3], on the
+      decayed POSITIVE branch. There the measured classification mapping gives
+      +0.44 @ base 69.1 and +0.44 @ base 80.7. Dense returns +0.18..+0.52,
+      mean ~+0.30. Same sign, same small magnitude, same flatness. SO THE SIGN
+      LAW HOLDS HERE — I mis-scaled the input variable, not the law. mIoU is a
+      harsh metric and a 4.65 mIoU cell is NOT a low-task-performance cell.
+      This is exactly what the units caveat recorded in advance was warning
+      about ("the readout crossing bracket is an ACCURACY bracket and is NOT
+      transplanted"); I wrote the caveat and then violated it in my own
+      prediction one paragraph later.
+  (4) THE FORK WAS MIS-SPECIFIED, and I am recording that rather than claiming
+      a winner. H-LABELS' numeric bands (G ~= Delta, readout ~0 within +-0.3)
+      are hit at 4 of 5 fractions and H-BASELINE's (G >> Delta, G(1%)
+      +1.0..+2.5) is dead by 15 sigma. But once the baseline is read on the
+      PIXEL-ACCURACY scale, H-baseline ALSO predicts readout ~ +0.4 — so both
+      accounts collapse to the same prediction here and this pass CANNOT
+      discriminate them. The discriminating cell would need abundant labels
+      AND low per-pixel accuracy, which VOC cannot provide. Do not cite this
+      pass as evidence that readout tracks label budget rather than task
+      performance.
+  (5) The G(25%) "control" both accounts agreed on (+1.8..+2.6) came in at
+      +1.54 ±0.15 — MISSED LOW by 0.26 (1.7 sigma). A control that both
+      branches miss is a sign the readout term is slightly larger at 25% than
+      the positive branch predicts, consistent with its +0.52 there being the
+      largest of the five.
+  NET FOR THE PAPER: segmentation is now a 14th population where Delta = G +
+  readout holds, on a different METRIC and a different TASK — with the
+  explicit statement that the crossing must be evaluated on the head's own
+  classification scale, not on mIoU. That scale caveat is a genuine
+  contribution of running the dense transplant, and it was discovered by
+  getting it wrong first.
+
+## DENSE POPULATIONS 2 AND 3 (2026-08-11, user: "we need to deliver both")
+
+- WHY: the dense transplant's two findings currently rest on ONE dataset. D4
+  (alignment is not the source of the gain) draws its force from a comparison
+  with the classification grid and is fairly robust; the UNITS finding --
+  readout reads on the head's own classification scale, not on mIoU -- does
+  not. VOC is object-centric and background-dominated, so its pixel accuracy
+  sits at 72-83% while its mIoU is 4.6-33.6; the two scales never separate for
+  a reason other than the one I claimed. That is exactly the position the
+  classification story was in before the domain expansion.
+    ade20k      150 scene classes, NO background class, 20,210 train images.
+                Pixel accuracy and mIoU decouple sharply here, so this is the
+                population that can actually TEST the units reading.
+    cityscapes  19 classes, driving domain, near-fixed geometry, 2,975 train.
+                The DOMAIN test rather than the label-space one.
+- ACQUISITION, stated because it constrains what can be claimed: ADE20K comes
+  from the MIT release directly. **Cityscapes' official download is
+  ACCOUNT-GATED**, so its images come from an ungated HuggingFace mirror
+  (Chris1/cityscapes, image + semantic_segmentation as separate features).
+  scripts/prepare_seg_data.py does NOT trust that mirror's encoding: it
+  detects labelIds-vs-colour, maps through the official 19-class trainId
+  table, and --verify asserts that no staged mask carries a train id >=
+  n_classes and that every mask matches its image pixel for pixel. The VOC
+  palette bug (class 1 -> 38, class 15 -> 147, training broken while
+  validation stayed correct) is why this is asserted rather than assumed.
+- DEVIATIONS, both applied identically to both arms: Cityscapes is stored at
+  HALF resolution (512x1024), because a frozen 512 crop on a 2048-wide frame
+  samples a far smaller share of the scene than the same crop does on a ~500px
+  VOC image -- half-res keeps the RECIPE comparable across populations, not
+  merely nominally identical. The 50-epoch dense recipe is otherwise frozen on
+  all three populations, with no per-dataset tuning.
+- PREDICTIONS RECORDED IN ADVANCE (nothing beyond a 2-epoch smoke seen).
+  VOC anchors: Delta +0.38/+0.50/+0.72/+1.46/+2.06/+2.57 at 1/2/5/10/25/100%,
+  monotone rising, G tracking Delta, readout +0.18..+0.52 throughout.
+    (E-A) ADE20K IS MONOTONE RISING TOO, and for the same reason: 20,210
+      images at 150-way dense prediction is a low-data cell in this study's
+      terms, so no right flank should appear. Delta(ade@100%) = **+1.5..+4.0**
+      mIoU. FALSIFIER: an interior peak (some fraction exceeding BOTH 1% and
+      100% by >= 0.5) => the dense envelope does have a peak and VOC's
+      monotonicity was a VOC fact.
+    (E-B) THE DEEP-LEFT FLOOR TRANSPLANTS: ade@1% is 202 images over 150
+      classes (~1.3 per class), the thinnest supervision anywhere in the
+      study. Delta(ade@1%) = **+0.0..+0.5**, i.e. at or below VOC@1%'s +0.38.
+      FALSIFIER: >= +1.5 => scene-centric dense data gives the prior real
+      work to do even at ~1 image per class, which would reopen the dense
+      direction as a low-data claim rather than a scaling one.
+    (E-C) THE UNITS TEST, and it is the point of ADE20K. Its pixel accuracy
+      will be FAR below VOC's (no background class to inflate it; expect
+      ~30-55% at the fractions measured, vs VOC's 72-83%). The sign law then
+      makes a SHARP call the VOC cells could not: cells whose pixel accuracy
+      falls BELOW the crossing bracket [31.8, 40.3] must show NEGATIVE
+      readout, while VOC -- entirely above it -- showed positive readout at
+      every fraction (+0.18..+0.52). So: **readout(ade) < 0 wherever pixel
+      accuracy < 31.8, and > 0 wherever it exceeds 40.3.**
+      FALSIFIER, and this one costs the units finding: readout POSITIVE on an
+      ADE20K cell whose pixel accuracy is clearly below 31.8 => "read the
+      crossing on the head's own classification scale" is wrong, and the VOC
+      positive readouts had some other cause.
+    (E-D) CITYSCAPES: the domain transplant. 19 classes, 2,975 images, and a
+      scene layout so regular that a network learns most of it from very
+      little data -- so the baseline should be HIGH early and the prior should
+      have correspondingly little to add. Delta(city@100%) = **+0.5..+2.5**,
+      and the envelope RISING but flatter than VOC's.
+      FALSIFIER: Delta(city) <= 0 at every fraction => the dense gain does not
+      survive a domain change and the dense claim must name its domain.
+    (E-E) NOT PREDICTED, recorded as data: where each population's pixel
+      accuracy sits relative to the bracket, and whether Cityscapes' near-
+      fixed geometry produces the variance asymmetry (baseline sigma > aux
+      sigma) seen on unstable classification cells.
+  NOTE E-C is the one that matters. E-A/E-B/E-D are transplant checks; E-C is
+  a test the first dense population was structurally incapable of running, and
+  it can fire against a claim I made four days ago.
+
+- FOURTH DENSE POPULATION ADDED THE SAME DAY (2026-08-11, user: "There is also
+  FoodSeg103 ... /media/amughrabi/HDD_4TB_1/amughrabi/data/FoodSeg103").
+  **foodseg103**: 4,983 train / 2,135 test, 104 classes (103 foods +
+  background), texture-dominated, images ~512x384. Already local, so it costs
+  no acquisition at all.
+  WHY IT IS WORTH MORE THAN A FOURTH DATA POINT: food101 is an existing
+  CLASSIFICATION population -- and one of the few where SimCLR beats the prior
+  (+2.4..+4.3). FoodSeg103 is therefore the only place in the study where the
+  SAME VISUAL DOMAIN can be compared across TASKS rather than only across
+  datasets. The 2026-07-23 note ("a SEGMENTATION set, wrong task for the
+  frozen classification recipe") was correct then and is now obsolete.
+  TWO ENCODING TRAPS FOUND BY ASSERTING RATHER THAN ASSUMING, both of which
+  would have produced plausible numbers from wrong data:
+    (a) n_classes is **104, not 103**. category_id.txt has no trailing
+        newline, so `wc -l` returns 103 and the last class ("other
+        ingredients") would have been silently dropped from the confusion
+        matrix. Pinned by taking max(mask) over 600 masks instead.
+    (b) ONE training image in ~5,000 carries an EXIF orientation tag, so its
+        stored size is (384, 512) against a (512, 384) mask -- it would have
+        trained 90 degrees out of alignment with its own labels. Far too rare
+        to move a metric visibly and invisible to any count-based check; the
+        per-image size assertion is what surfaced it. Every image now goes
+        through ImageOps.exif_transpose.
+    Also 2 of 4,985 training images have NO mask; ids are read from the MASK
+    directory, so those can never enter a split.
+  PREDICTIONS RECORDED IN ADVANCE:
+    (E-F) MONOTONE RISING like VOC, no interior peak: 4,983 images at 104-way
+      dense prediction is a low-data cell in this study's terms.
+      Delta(food@100%) = **+1.0..+3.5** mIoU.
+    (E-G) DEEP-LEFT FLOOR: food@1% is ~1 image per class after stratification.
+      Delta(food@1%) = **+0.0..+0.6**, matching VOC@1%'s +0.38.
+    (E-H) PIXEL ACCURACY sits ABOVE the crossing bracket (plates and
+      background dominate; expect ~55-75%), so readout should be POSITIVE and
+      small at every fraction, as on VOC (+0.18..+0.52). This population is
+      therefore a CONFIRMATION of the units reading, not a test of it --
+      ADE20K remains the only population that can fire E-C.
+    (E-I) THE CROSS-TASK COMPARISON, recorded as the reason to run it and NOT
+      as a numeric prediction, because the two tasks' units do not convert:
+      on food101 CLASSIFICATION the prior is beaten by SimCLR; if the dense
+      food envelope is ordinarily positive, then "the domain where the prior
+      loses to SSL" and "the task where it wins" are the same pixels, which
+      would locate the SSL advantage in the TASK rather than the DOMAIN.
+      No band, because a mIoU delta and an accuracy delta are not comparable.
+
+- *** CITYSCAPES MASK-MAPPING BUG, CAUGHT BY ITS OWN VERIFIER ONLY AFTER THE
+  VERIFIER WAS FIXED (2026-08-11). The mirror stores masks as RGB with the
+  labelId REPLICATED across all three channels -- (7,7,7) road, (11,11,11)
+  building, (26,26,26) car -- not as the official colour palette.
+  _cs_mask_to_train saw ndim == 3, ran the palette LUT, matched NOTHING, and
+  mapped every pixel to ignore. The staged split contained zero classes.
+  *** AND verify() PRINTED "VERIFY OK" ON IT. The check was "no train id >=
+  n_classes", which an all-ignore mask satisfies trivially. That is the same
+  silent-guard family as the pretrain whitelists, the `|| v=0` counter
+  fallback and the suppressed reconcile generator -- a guard whose passing
+  condition is satisfied by the failure it exists to catch. EIGHTH incident.
+  TWO FIXES, and the second matters more than the first:
+    (a) a 3-channel mask whose channels are identical is now collapsed to
+        labelIds; the palette branch is used only when the channels DIFFER,
+        and it raises if the LUT matches nothing rather than returning an
+        empty mask.
+    (b) verify() now FAILS a split whose masks contain fewer than half the
+        label space in 400 samples. Tested against a synthetic all-ignore
+        tree, which it correctly REJECTS -- i.e. the guard now has a
+        regression test of its own failure mode, not just of the happy path.
+  After the fix: encoding detected as "labelId", 17/19 and 19/19 classes
+  present. This is the third encoding trap in one day across three datasets
+  (FoodSeg's 104-vs-103 and its EXIF-rotated image being the others), which
+  is an argument for asserting every assumption about a new dataset rather
+  than the two or three that seem risky.
+
+- *** THE FOUR DENSE POPULATIONS SPAN THE READOUT CROSSING, WHICH MAKES E-C A
+  LOCATION TEST RATHER THAN A YES/NO ONE (2026-08-11, from the 2-epoch smokes;
+  these are SMOKE numbers, not measurements, and are recorded only to show the
+  regime each population occupies):
+      ade20k      pixAcc ~22-27   BELOW the crossing bracket [31.8, 40.3]
+      cityscapes  pixAcc ~48-50   above
+      foodseg103  pixAcc ~51      above
+      voc_seg     pixAcc  72-83   far above (measured, full runs)
+  The dense study previously had ONE population, entirely above the bracket,
+  which is why it could only ever confirm the units reading. With ADE20K below
+  it and three above, the sign law now has to get the ORDER right across four
+  populations: readout NEGATIVE on ade20k and POSITIVE on the other three. If
+  the four readouts come back monotone in pixel accuracy and change sign
+  inside [31.8, 40.3], that is the accuracy-derived crossing REPRODUCED on a
+  different task and a different metric -- a much stronger statement than
+  "VOC's readouts were positive and its pixel accuracy was high".
+  Stated as a caveat now rather than after: the smokes are 2 epochs, and pixel
+  accuracy rises with training, so ade20k's full-run value could climb toward
+  the bracket. If it lands INSIDE [31.8, 40.3] the cell makes no prediction
+  (the same no-call rule used for mnet, whose baseline sat in the bracket) and
+  E-C would be answered only by its lowest fractions.
+
+- *** FIRST dense3 CELL, AND IT WEAKENS MY OWN E-C SETUP (2026-08-11):
+  cityscapes@1% (3 seeds): 14.56 ±0.30 -> 14.54 ±0.14 = **Delta -0.02 ±0.33**,
+  a dead null. Consistent with E-D's "flatter than VOC" (VOC@1% +0.38); one
+  fraction says nothing about E-D's falsifier, which needs Delta <= 0 at EVERY
+  fraction.
+  THE PART THAT MATTERS MORE: its pixel accuracy is **66.7 / 67.6**, against
+  the ~48-50 its 2-epoch smoke showed. So pixel accuracy climbs ~+18 points
+  between a 2-epoch smoke and a full 50-epoch run.
+  CONSEQUENCE FOR E-C, stated now rather than after ADE20K lands: I put ADE20K
+  "below the crossing bracket [31.8, 40.3]" on the strength of a smoke reading
+  22-27. If ADE20K moves like Cityscapes did, its trained pixel accuracy lands
+  ~40-45 -- INSIDE or ABOVE the bracket, where the pre-registered no-call rule
+  applies and E-C cannot fire at all. The caveat was recorded in advance
+  ("pixel accuracy rises with training ... if it lands INSIDE the bracket the
+  cell makes no prediction"), but I then described the four-population spread
+  as though the smoke values were the operating point, which overstated it.
+  WHAT STILL WORKS: ADE20K's LOW fractions have the lowest baselines of the
+  envelope, so if any cell sits below the bracket it is ade@1-2%. E-C is
+  therefore a test on 2-3 cells rather than a whole population, and its power
+  is correspondingly lower. Recorded as a weakening of the design, not of the
+  law -- and it is the reason the units question may still need a population
+  chosen for LOW trained pixel accuracy rather than low smoke accuracy.
+
+## DENSE FIXES: THE E-C RESCUE AND THE DENSE ATTENTION AXIS (2026-08-11,
+## user: "do the needed fixes and don't worry about the cost, we need to do
+## it right")
+
+- WHY BOTH. ADE20K's TRAINED pixel accuracy landed at 34.0 (@1%) and 38.5
+  (@2%) -- INSIDE the crossing bracket [31.8, 40.3], where the pre-registered
+  no-call rule applies -- so E-C had nothing to fire on and the units finding
+  stayed untested. Separately, the whole dense transplant used ResNet-18, so
+  the study's STRONGEST claim (the attention regime: ViT-B +26.01 at
+  ImageNet-100) had zero dense evidence.
+
+- FIX 1: **pascalcontext**, and it does two jobs at once.
+  (a) THE SAME-PIXELS CONTROL: it re-annotates the IDENTICAL VOC images
+      voc_seg trains on, read straight from VOCdevkit so "same pixels" is
+      literal. This is the dense analog of cifar100super, which is what
+      settled the granularity question on the classification side; nothing
+      else in the dense study can separate a PIXEL effect from a LABEL-SPACE
+      effect.
+  (b) THE LOW-PIXEL-ACCURACY POPULATION E-C needs: 254 classes over VOC
+      images, against voc_seg's 21.
+  PROTOCOL, stated rather than buried: 254 of the 459 classes, ranked by
+  pixel frequency on the TRAIN split ALONE (ranking on val would leak
+  held-out statistics into the label space itself), tail mapped to ignore.
+  The reason is mundane -- an 8-bit mask holds 255 values and 255 is the
+  ignore index -- and the cost is nil: the top 254 cover **100.00%** of
+  labelled pixels, because only ~253 of the 459 ever occur. Same protocol
+  SHAPE as Cityscapes' standard 19-of-34. The split is the OFFICIAL one, not
+  a re-draw: VOC2012 Main/train and Main/val intersected with the
+  Pascal-Context ids give exactly 4,998 / 5,105.
+  PREDICTIONS RECORDED IN ADVANCE:
+    (E-J) TRAINED pixel accuracy BELOW the bracket: **< 31.8 at 1-10%**.
+      This is the premise E-C needs, and it is itself falsifiable -- if
+      pascalcontext also lands inside or above the bracket, then no dense
+      population in this study can test the units reading, and that must be
+      reported as a limitation rather than worked around a third time.
+    (E-K) GIVEN the premise holds, the sign law demands **readout NEGATIVE**
+      on those cells -- the opposite sign from every dense cell measured so
+      far (voc +0.18..+0.52). THIS IS THE UNITS TEST.
+      FALSIFIER, and it costs the units finding: readout POSITIVE at a
+      pascalcontext cell whose trained pixel accuracy is clearly below 31.8.
+    (E-L) THE SAME-PIXELS COMPARISON, on byte-identical images: relabelling
+      VOC 21 -> 254 classes should LOWER Delta at matched fraction, because
+      it lowers task performance and the readout term follows task
+      performance. Band: **Delta(pc@100%) = 0.0..+2.0** against voc_seg's
+      +2.57. A pascalcontext Delta ABOVE voc's would say the label space,
+      not the pixels, drives the dense gain -- which the classification-side
+      G-is-label-space-invariant result (Q6.9h) says it should not.
+
+- FIX 2: **diagswin_voc**, the dense ATTENTION axis. Swin-Tiny encoder, FCN
+  head on its stride-8 stage, on VOC so it is directly comparable to the
+  reference dense population.
+  Swin rather than ViT for a STRUCTURAL reason, not a preference: Swin is
+  hierarchical, so its stride-8 stage is a drop-in analog of the dilated
+  ResNet's stride-8 output and BOTH backbones wear the IDENTICAL FCN head. A
+  plain ViT emits one stride-16 token grid and would need its own upsampling
+  decoder, whose capacity would then be a variable between the conv and
+  attention arms. Swin is also already a classification population here (91
+  law cells), so its dense behaviour is comparable to its OWN classification
+  behaviour rather than only to ResNet-18's.
+  DIAGNOSTIC, NEVER A HEADLINE ROW, for two stated reasons: it uses AdamW
+  rather than the frozen recipe's SGD (train_dense.py now REFUSES adamw on a
+  cell whose name lacks a diag prefix), because classification found
+  swin-none seed-bistable or at chance under frozen SGD -- a dense Swin pair
+  under SGD would measure a training failure, not a feature deficit; and the
+  bistability caveat travels with it.
+  PREDICTIONS RECORDED IN ADVANCE:
+    (E-M) THE ATTENTION DEFICIT TRANSPLANTS TO DENSE: Delta(swin) >
+      Delta(r18) at every matched fraction on VOC, and by a wide margin at
+      the low end -- band **+2..+10 mIoU at 5-25%**, against r18's
+      +0.72/+1.46/+2.06.
+      FALSIFIER, and it is the interesting branch: Delta(swin) <= Delta(r18)
+      at every fraction => the attention deficit is a property of the
+      CLASSIFICATION TASK rather than of attention, and the paper's ViT
+      headline must be scoped to classification. That would be a real
+      restriction of the strongest claim in the study.
+    (E-N) STABILIZATION SIGNATURE: baseline seed spread > aux seed spread,
+      as on every classification swin cell. If swin-none collapses on a seed
+      the cell carries the bistable flag and is excluded from any Delta.
+  COST is not the constraint (user directive); correctness is. Both fixes
+  are full 6-fraction envelopes, 3 seeds, 24 configs, 72 runs.
+
+- *** SWIN IS FIXED-RESOLUTION AND THE DENSE PROTOCOL IS NOT -- CAUGHT BY THE
+  SMOKE, FIXED BY PADDING RATHER THAN RESIZING (2026-08-11). The first dense
+  Swin smoke died on `Input height (366) doesn't match model (512)`: Swin's
+  windowed attention asserts the input matches the img_size it was built with,
+  and timm has NO dynamic_img_size for Swin (that is a ViT-only feature,
+  checked rather than assumed). Dense validation is native-resolution with
+  variable image sizes, so every validation image but a square 512 crashed it.
+  THE FIX AND WHY THE CHOICE MATTERS: SegSwin now PADS to the built size and
+  CROPS the logits back, instead of RESIZING to it. Resizing would rescale
+  every validation image and make these cells incomparable with the ResNet
+  cells, which are scored at native resolution -- the comparison the whole
+  experiment exists to make. Padding leaves every real pixel at its own scale
+  and scores exactly the same pixels; the only difference is that attention
+  can see a zero margin, and that is applied identically to both arms so it
+  cannot enter Delta. Verified across the native sizes VOC actually produces
+  (366x500, 375x500, 281x500, 500x500) and confirmed to leave the 512x512
+  training path untouched. Bounded deliberately: the forward RAISES if an
+  input exceeds the built size rather than silently downscaling, and VOC's
+  largest image is 500x500.
+  NOTE this is a constraint on which dense populations Swin can be run on at
+  all -- Cityscapes at 512x1024 would need a Swin built at 1024, which is a
+  different (and much more expensive) model. The dense attention axis is
+  therefore VOC-only for now, and that is a scope statement, not an oversight.
+
+- *** DENSE3 INTERIM SCORING — THE DENSE GAIN LOOKS VOC-SPECIFIC, AND THAT IS
+  THE MOST IMPORTANT THING THE THREE NEW POPULATIONS HAVE SAID (2026-08-11,
+  3 seeds every cell, 0 failures):
+      pct   voc      ade20k   cityscapes  foodseg103   diagswin_voc
+        1  +0.38     +0.15      -0.02       +0.16        -0.03
+        2  +0.50     +0.19      +0.21       +0.22        +0.01
+        5  +0.72     +0.25      +0.15       +0.14          --
+       10  +1.46     +0.26      +0.35       +0.14          --
+       25  +2.06      --        +0.36         --           --
+      100  +2.57      --          --          --           --
+  VOC is the ONLY population where the prior does material work, and its
+  advantage GROWS with data (+0.38 -> +2.57) while the other three sit at
+  +0.14..+0.36 and stay there. An order of magnitude, on the same recipe, the
+  same backbone and the same code path.
+  SCORED AGAINST THE RECORDED BANDS, at the fractions available:
+    (E-B) ade@1% band +0.0..+0.5 -> **+0.15 HIT**.
+    (E-G) food@1% band +0.0..+0.6 -> **+0.16 HIT**.
+    (E-A) ade "monotone rising, Delta(100%) +1.5..+4.0": rising, but at
+      +0.15/+0.19/+0.25/+0.26 it is nowhere near the band. TRACKING TOWARD A
+      MISS (low), and I am recording that before the 25/100% cells land
+      rather than after.
+    (E-F) food "Delta(100%) +1.0..+3.5": +0.16/+0.22/+0.14/+0.14 is FLAT, not
+      rising. TRACKING TOWARD A MISS (low).
+    (E-D) cityscapes: the falsifier was "Delta <= 0 at EVERY fraction"; it has
+      NOT fired (positive at 2/5/10/25%), but the envelope is far flatter than
+      the +0.5..+2.5 band expects.
+  THE HONEST READING, stated now: my dense predictions were anchored on VOC,
+  and three populations say VOC is the outlier rather than the representative
+  case. The D1/D2/D4 conclusions drawn from VOC alone therefore need
+  restating with their population attached -- exactly the correction the
+  classification side needed when it moved from 5 populations to 14. What
+  survives untouched is D4's negative result (alignment is not the source of
+  the gain), which is if anything STRENGTHENED: three more dense populations
+  give even less than VOC did.
+  NOT YET EXPLAINED, and worth not guessing at: VOC is object-centric with a
+  dominant background class and only 21 classes; ade20k (150) and foodseg103
+  (104) are fine-grained, cityscapes (19) is geometrically regular. Whether
+  the driver is class count, background dominance or something else is what
+  pascalcontext is positioned to answer -- it is VOC's own pixels at 254
+  classes, so it separates the label space from the images.
+
+- *** THE DENSE ATTENTION AXIS IS TRACKING TOWARD ITS FALSIFIER (2026-08-11,
+  first two fractions): diagswin_voc Delta = **-0.03 @1%, +0.01 @2%**, against
+  ResNet-18's +0.38 and +0.50 on the SAME dataset, fractions and head.
+  The recorded falsifier is E-M: "Delta(swin) <= Delta(r18) at every fraction
+  => the attention deficit is a property of the CLASSIFICATION TASK rather
+  than of attention, and the paper's ViT headline must be scoped to
+  classification." Two of six fractions in, it is firing. If 5-25% hold this
+  shape, the strongest claim in the study gets a task-scope qualifier, and
+  that must be reported as plainly as the +26.01 that motivated it.
+  E-N ALSO FAILED, in the interesting direction: swin-none does NOT collapse
+  here (base 4.24 +-0.02 @1%, tighter than its aux arm) and shows no variance
+  asymmetry at all. On classification, swin-none is seed-bistable or at chance
+  on most datasets and the prior's most visible effect is stabilization. On
+  dense VOC there is nothing to stabilize -- which is itself evidence that the
+  classification bistability was a property of that recipe/task rather than of
+  the backbone.
+
+- *** THE DENSE STUDY IS COMPLETE AT 6 POPULATIONS / 216 CELLS, 0 FAILURES,
+  AND THE SAME-PIXELS CONTROL ANSWERS THE VOC ANOMALY (2026-08-11, 3 seeds
+  every cell):
+      Delta by fraction        1%     2%     5%    10%    25%   100%   #cls
+      voc_seg               +0.38  +0.50  +0.72  +1.46  +2.06  +2.57    21
+      cityscapes            -0.02  +0.21  +0.15  +0.35  +0.36  +1.04    19
+      foodseg103            +0.16  +0.22  +0.14  +0.14  +0.29  +0.70   104
+      ade20k                +0.15  +0.19  +0.25  +0.26  +0.42  +0.58   150
+      pascalcontext         +0.09  +0.07  +0.09  +0.12  +0.15  +0.19   254
+      diagswin_voc (attn)   -0.03  +0.01  +0.38  +1.49  +1.05  +1.08    21
+  *** THE DECISIVE CELL, and it is exactly what pascalcontext was built for:
+  voc_seg and pascalcontext are BYTE-IDENTICAL PIXELS. The only difference is
+  the label space, 21 classes against 254. Delta at 100% goes **+2.57 -> +0.19**
+  -- a 13x collapse from relabelling alone. So the dense gain is a LABEL-SPACE
+  effect, not a property of these images, and "VOC is the outlier" has a
+  mechanism rather than being a bare observation. Every dense population with a
+  fine label space (104/150/254 classes) sits at +0.19..+0.70 at full data,
+  while the two coarse ones (19/21) reach +1.04 and +2.57.
+  NOTE this MIRRORS the classification side rather than contradicting it: there
+  the granularity effect ran through the READOUT term (tinsuper, tin20, the
+  2x2 crossing), with G itself label-space-invariant on matched pixels. The
+  dense probes now pending will say whether the same split holds here.
+  PREDICTIONS SCORED:
+    (E-A) ade20k monotone rising: **HIT** on shape (no interior peak, so the
+      falsifier did not fire), but Delta(100%) = +0.58 against a band of
+      +1.5..+4.0 -- **MISSED LOW**.
+    (E-B) ade@1% band +0.0..+0.5 -> +0.15 **HIT**.
+    (E-D) cityscapes Delta(100%) band +0.5..+2.5 -> **+1.04 HIT**; the
+      falsifier (Delta <= 0 at every fraction) did not fire.
+    (E-F) foodseg Delta(100%) band +1.0..+3.5 -> **+0.70 MISSED LOW**.
+    (E-G) food@1% band +0.0..+0.6 -> +0.16 **HIT**.
+    (E-J) pascalcontext trained pixel accuracy BELOW the bracket at 1-10%:
+      measured **20.33 / 23.87 / 26.96 / 30.27** -- **HIT 4/4**. The premise
+      E-C needed and ADE20K failed to supply now exists, so the units test is
+      finally runnable; it awaits the dense G probes (E-K).
+    (E-L) pascalcontext Delta(100%) band 0.0..+2.0 -> **+0.19 HIT** (bottom
+      edge), and far below voc's +2.57 exactly as the readout account
+      predicts.
+  SCORECARD: 5 hits, 2 misses (both LOW, both on my "the envelope will rise
+  like VOC's" reasoning), 0 falsifiers fired. The pattern in the misses is the
+  same one as D2 and E1: I extrapolated VOC's shape to populations whose label
+  spaces are 5-12x finer.
+
+- *** THE DENSE ATTENTION AXIS: THE ATTENTION DEFICIT DOES NOT TRANSPLANT TO
+  DENSE PREDICTION (2026-08-11, diagswin_voc, 3 seeds, same dataset/fractions/
+  head as the ResNet cells):
+      pct     r18     swin
+        1   +0.38   -0.03
+        2   +0.50   +0.01
+        5   +0.72   +0.38
+       10   +1.46   +1.49
+       25   +2.06   +1.05
+      100   +2.57   +1.08
+  E-M predicted Delta(swin) > Delta(r18) at EVERY fraction, band +2..+10 at
+  5-25%. Measured: swin is BELOW r18 at 1/2/5/25/100% and TIED at 10%
+  (+1.49 vs +1.46, 0.03 apart against SEMs of 0.06 and 0.13). The band is
+  **MISSED BY A WIDE MARGIN** -- swin never exceeds +1.49 where +2..+10 was
+  predicted.
+  THE RECORDED FALSIFIER, scored strictly and honestly: it required
+  Delta(swin) <= Delta(r18) at EVERY fraction, and at 10% swin is NOMINALLY
+  0.03 higher, so by the letter it did not fire. But 0.03 at those SEMs is a
+  tie, not a win, and the substance of the falsifier -- "the attention deficit
+  is a property of the CLASSIFICATION TASK rather than of attention" -- is
+  what the data show. Scored the same way as the deit-ssl tin@25% cell: the
+  tripwire did not fire in the letter, and the claim it guards must still be
+  restated.
+  CONSEQUENCE FOR THE PAPER, and it is a real narrowing of the strongest
+  claim: ViT-B gains +26.01 on ImageNet-100 CLASSIFICATION and every conv is
+  neutral there, but on dense prediction a Swin encoder gains LESS than
+  ResNet-18 on the same images. The attention headline must be scoped to
+  classification rather than stated as a property of attention.
+  CAVEAT that belongs with it: Swin is not ViT, this is one dataset, and the
+  cells are AdamW diagnostics. What they cannot be is evidence FOR a dense
+  attention deficit, which is what they were run to look for.
+  (E-N) FAILED, in the informative direction: swin-none does NOT collapse here
+  (4.24 +-0.02 at 1%, TIGHTER than its own aux arm) and shows no variance
+  asymmetry at any fraction. On classification swin-none is seed-bistable or
+  at chance on most datasets and stabilization is the prior's most visible
+  effect there. On dense VOC there is nothing to stabilize -- evidence that
+  the classification bistability was a property of that recipe and task, not
+  of the backbone.
+
+- *** CORRECTION TO THE SAME-PIXELS READING: THE "13x COLLAPSE" WAS A METRIC-
+  SCALE ARTIFACT, AND THE LABEL-SPACE EFFECT IS ~1.6x, NOT 13x (2026-08-11,
+  user asked why the segmentation gains look so small; the question exposed
+  the error). I recorded earlier today that relabelling VOC 21 -> 254 classes
+  collapses Delta from +2.57 to +0.19, "a 13x collapse from relabelling
+  alone". That comparison is in ABSOLUTE mIoU POINTS across two populations
+  whose mIoU SCALES differ by 8x (voc@100% base 33.63, pascalcontext@100%
+  base 4.01). In RELATIVE terms it is +7.6% vs +4.7% -- a **1.6x** effect.
+  The label-space effect is real and in the same direction, but I overstated
+  its size by a factor of ~8, and "VOC is the outlier" was largely an
+  artifact of VOC having the largest mIoU scale.
+  SAME ERROR CLASS the study has caught before: comparing raw Delta across
+  populations with very different baselines (the retracted "gain tracks the
+  deficit" law, 2026-07-16). Absolute Delta is the practitioner's number;
+  RELATIVE Delta is what compares across populations. Report both.
+  *** THE DENSE GAINS ARE NOT SMALL IN RELATIVE TERMS -- the mIoU SCALE is:
+      pop            pct  base_mIoU  Delta   Delta_rel | base_pixAcc  D_pixAcc
+      voc             10     7.23    +1.46   **+20.2%**    74.34      +0.31
+      voc            100    33.63    +2.57     +7.6%       83.24      +0.81
+      foodseg103     100     6.46    +0.70    +10.8%       60.82      +0.88
+      pascalcontext    1     0.76    +0.09    +11.9%       20.33   **+1.62**
+      ade20k           1     1.74    +0.15     +8.7%       34.04      +1.13
+  Relative gains run **+5% to +20%**, the same band as classification
+  (C100@5% is +5.15 on 25.36 = +20% relative). And pixel accuracy shows what
+  mIoU compresses: pascalcontext@1% gains **+1.62 points of pixel accuracy
+  (+8.0% relative)** where mIoU reports "+0.09".
+  WHY THE ABSOLUTE NUMBERS ARE TINY, and this is the substantive finding: the
+  segmentors are BARELY TRAINED. VOC@100% reaches 33.6 mIoU where a standard
+  ImageNet-pretrained R18-FCN reaches ~65-70; pascalcontext@1% has a baseline
+  of 0.76 mIoU. The dense recipe is 50 epochs, from scratch, untuned. mIoU
+  then punishes exactly that regime: it averages per-class IoU with EQUAL
+  weight, so on 254 classes where ~200 score near zero the mean is dominated
+  by classes no intervention can rescue.
+  CONSEQUENCE: the binding constraint on the dense numbers is RECIPE STRENGTH,
+  not the prior. It is also why E-K could not be scored -- readout is a
+  difference of two small numbers when Delta is +0.09.
+
+- LONG-SCHEDULE DENSE CELLS QUEUED (2026-08-11, user: "we are doing a real
+  research, so real numbers are super important"). diag200e_{voc,pc}_
+  {none,aux}_{10,100}pct -- 50 -> 200 epochs, everything else identical, both
+  arms, 3 seeds, 24 runs. DIAGNOSTIC (recipe deviation => diag prefix).
+  THE QUESTION, stated as a fork rather than a hope: is the small absolute
+  dense Delta a property of the PRIOR or of the RECIPE?
+  PREDICTIONS RECORDED IN ADVANCE:
+    (L1) BASELINES RISE SUBSTANTIALLY -- this is the premise, and it is
+      itself falsifiable. Band: voc@100% base **45..58 mIoU** (from 33.63);
+      voc@10% **10..16** (from 7.23); pascalcontext@100% **6..10** (from
+      4.01). FALSIFIER: baselines rise by less than 20% relative => the
+      50-epoch recipe was NOT the binding constraint, and the small dense
+      numbers are about the task, not the schedule.
+    (L2) THE FORK ON THE PRIOR'S VALUE, and the two branches say opposite
+      things about the paper:
+      H-RECIPE (the weak recipe was suppressing it): Delta_rel HOLDS or
+        GROWS, so Delta_abs grows more than proportionally --
+        Delta(voc@100%) = **+3.5..+7.0** mIoU.
+      H-UNDERFIT (the prior helps underfit models, exactly as on
+        classification): Delta_rel FALLS as the baseline rises, so
+        Delta(voc@100%) = **+1.0..+3.0**, i.e. flat or lower in absolute
+        terms despite a much higher baseline.
+      These bands overlap only at +3.0-3.5, so the cell discriminates.
+    (L3) NOT PREDICTED, recorded as the reason this is worth the GPU: if
+      baselines rise into a regime where Delta is several mIoU points,
+      READOUT BECOMES RESOLVABLE and E-K -- which failed today because
+      readout was a difference of two numbers near +0.09 -- becomes
+      answerable on pascalcontext, the one population below the crossing.
+    NOTE H-UNDERFIT is the outcome most consistent with the rest of the
+    study (the prior's gain decays as the baseline strengthens, on every
+    classification population measured). It is also the LESS convenient
+    outcome for the dense story, which is why the band is recorded before
+    the run rather than after.
+
+- *** THE DENSE ATTENTION RESULT IS CONFIRMED FEATURE-SIDE (2026-08-11, swin
+  dense probes, 3 seeds, same dataset/fractions/head as the ResNet cells):
+      pct   G(swin)        G(r18)        | Delta_swin  Delta_r18
+        1  -0.04 ±0.05   +0.08 ±0.06     |   -0.03      +0.38
+        2  +0.04 ±0.03   +0.21 ±0.08     |   +0.01      +0.50
+        5  +0.50 ±0.09   +0.54 ±0.11     |   +0.38      +0.72
+       10  +1.09 ±0.15   +1.22 ±0.18     |   +1.49      +1.46
+       25  +0.72 ±0.13   +1.54 ±0.15     |   +1.05      +2.06
+  G(swin) <= G(r18) at EVERY fraction. So the e2e finding -- that the
+  attention deficit does NOT transplant to dense prediction -- is not a
+  readout artifact: the prior genuinely buys the attention backbone LESS
+  feature gain than it buys ResNet-18 on the same images.
+  *** THE SHARP CONTRAST WITH CLASSIFICATION, and it is the cleanest
+  statement the dense study produces: on CLASSIFICATION the prior gives Swin
+  roughly TWICE the feature gain it gives conv (G(swin) 7.6-10.5 vs G(r18)
+  3.55-6.26 on C100). On DENSE PREDICTION it gives Swin LESS than conv. The
+  attention advantage is therefore TASK-SPECIFIC, and that is now established
+  on both the accuracy side and the feature side rather than on e2e alone.
+  Readout is small and mostly positive on both backbones (-0.12..+0.40 swin,
+  +0.18..+0.52 r18) at pixel accuracies of 72-76, i.e. well above the
+  crossing -- the decayed positive branch, consistent with VOC's other cells.
+  CAVEAT unchanged: Swin is not ViT, this is one dataset, and these are AdamW
+  diagnostics. What they cannot be is evidence FOR a dense attention deficit.
+
+- *** L1 SCORED — THE 50-EPOCH DENSE RECIPE WAS THE BINDING CONSTRAINT, AND
+  BY MUCH MORE THAN I ESTIMATED (2026-08-11, first 3 of 24 long-schedule
+  cells, 3 seeds): diag200e_voc_none_10pct = **18.42 +-0.05**
+  (18.47/18.46/18.32) against the 50-epoch baseline **7.23 +-0.07**.
+  L1's band was 10..16 mIoU -> **MISSED HIGH**. Its falsifier ("baselines
+  rise by less than 20% relative => the schedule was NOT the binding
+  constraint") is dead by an order of magnitude: the rise is **+155%
+  relative**. A 4x schedule at 10% data now beats HALF of what 10x the data
+  bought at 1x schedule (voc@100% at 50 epochs = 33.63).
+  CONSEQUENCE, and it is not small: every absolute number in the 6-population
+  dense envelope was measured on segmentors that were nowhere near trained.
+  The relative-vs-absolute correction recorded earlier today said the mIoU
+  SCALE was the problem; this says the SCALE ITSELF was an artifact of the
+  schedule. Both readings stand and they compound.
+  *** AND THE CURVE SHAPE ANSWERS "IS 200 ENOUGH?" FOR THIS CELL — YES, on
+  the evidence that was missing at 50 epochs:
+      ep     0    40    60    80   100   120   140   160   180   199
+      mIoU 3.62  7.20 10.58 12.25 13.80 16.19 16.32 18.47 18.34 18.47
+      lr   1.00e-2 ... 9.1e-4 @160 ... 2.2e-4 @180 ... 0 @199
+  It PLATEAUS at ~epoch 160 with LR still nonzero (9% of peak), and is dead
+  flat over the last 40 epochs. Contrast the 50-epoch run, which was gaining
+  ~0.72 mIoU/EPOCH at epoch 40 with LR at 8% of peak when the cosine killed
+  the step size -- there the flattening was an LR-SCHEDULE ARTIFACT, here it
+  is convergence. NOTE ep 40 of the 200e run (7.20) is almost exactly where
+  the entire 50-epoch run finished (7.23), which is the consistency check
+  that the two schedules are the same trajectory sampled differently.
+  CAVEAT: this is the 10% cell. The 100% cells carry 10x the images and may
+  not plateau as early; their curves get the same test.
+  L2 (the fork on what Delta does) needs the aux arm and is NOT yet scored.
+
+## DENSE RECIPE RE-PINNED TO 200 EPOCHS (2026-08-11, user decision: "we need
+## to make the number of epochs consistent in our study ... I don't like the
+## selective way you propose")
+
+- THE DECISION: the dense frozen recipe becomes **200 epochs at every
+  fraction**, matching the classification recipe exactly, and the FULL
+  6-population grid re-runs under it. No staging, no per-cell budget, no
+  subset of "claim-carrying" cells.
+- WHY THE USER IS RIGHT AND MY PROPOSAL WAS WRONG. I had proposed gating the
+  launch on inspecting the 100%-cell convergence curves and picking the budget
+  from them. That is PER-TASK TUNING -- choosing the dense recipe to suit the
+  dense task and then reporting it as frozen, which is precisely what the
+  frozen-recipe discipline exists to prevent and which this study does nowhere
+  else. 200 is not a tuned number; it is the SAME budget the classification
+  side has always used, so steps scale with data on both sides and a
+  cross-task comparison (dense-vs-classification at matched images-per-class,
+  i.e. D4) is no longer confounded by schedule.
+  DISTINCTION THAT SURVIVES: choosing the budget from curves is tuning;
+  REPORTING whether cells converged is a validity check and belongs in the
+  paper either way. If a 100% cell is still climbing at 200 epochs that is a
+  stated limitation, and any fix raises the budget UNIFORMLY.
+- WHY THE RE-RUN IS NOT OPTIONAL, and note it rests on L1 alone rather than on
+  the L2 fork: the +155% baseline rise means every absolute number in the
+  50-epoch envelope was measured on undertrained segmentors. The clearest
+  casualty is **D4**, the dense study's headline negative -- I compared
+  VOC@1% (+0.38, 50 epochs) against C100@1% (+1.42) and tin@1% (+1.49), both
+  of which got their frozen 200-epoch recipe, and concluded that a dense
+  target on a dense task pays LESS so alignment is not the source of the gain.
+  That put an undertrained cell against fully-trained ones. The conclusion may
+  well survive; the evidence for it currently does not. The label-space effect
+  (voc vs pascalcontext) and the dense attention result (swin vs r18) are
+  internally controlled at 50 epochs but carry the same exposure -- if fine
+  label spaces or attention backbones sit further from convergence, either
+  could be a convergence effect wearing a mechanism's clothes.
+- WHY THE FULL GRID RATHER THAN A SUBSET: the dense study's entire value is
+  COMPARISON ACROSS POPULATIONS, so a partial re-run leaves 50-epoch and
+  200-epoch populations in the same table and reintroduces exactly the
+  confound being removed.
+- WHAT SHIPPED: 72 canonical configs bumped epochs 50->200 and eval_every
+  5->20 (10 validation passes per run, unchanged); train_dense.py RECIPE
+  default and its frozen-recipe docstring re-pinned with the rationale; suite
+  **108 passed**. The 8 diag200e_* configs are now CONTENT-IDENTICAL to their
+  canonical counterparts except for `name`, so the running dense7 lane doubles
+  as a name-independent reproduction check.
+- ARCHIVE, and it is what makes the re-run possible at all: train.py's
+  completed-run guard SKIPS any cell with a final.json, so the 216 fifty-epoch
+  finals would have silently blocked every re-run. All 72 cell dirs moved
+  BSC-side to **runs_dense_50e/** (216 finals preserved). They are not waste:
+  they become the 1x arm of a schedule axis, and if the 200-epoch grid
+  reproduces the ORDERINGS that is a robustness result the study did not have.
+- LANE: a NEW lane dense8 (worklist.dense8 / queue.counter.dense8 /
+  queue.lock.dense8 / slurm/bsc_dense8.sbatch), 216 tasks, 2 workers, ordered
+  cheap-fractions-first with both arms of a pair adjacent so a partial drain
+  never leaves a one-armed cell. A new lane rather than swapping
+  worklist.dense7 under live workers -- that is the 2026-08-03
+  swap-under-running-workers incident, and dense7 is still mid-run delivering
+  L2.
+- REPO/DEPLOY DRIFT CLOSED IN PASSING: slurm/bsc_dense6.sbatch and
+  bsc_dense7.sbatch existed ONLY on BSC (created there directly), so the repo
+  copy was missing entirely. Both pulled back before dense8 was derived from
+  dense7, so the new lane is a diff of three lane-name lines against the
+  ACTUALLY-DEPLOYED file rather than against a stale ancestor. Same hazard
+  class as the 2026-08-03 worklist-path regression, caught before it bit.
+- STILL PENDING under the new recipe: dense G-probes must be re-run on the
+  200-epoch checkpoints (the recorded G values are all 50-epoch), and D4, the
+  label-space effect and the dense attention result must be re-scored. Their
+  50-epoch values stand as the 1x arm, not as the headline.
+
+- *** L2 AT voc@10% — THE SCHEDULE MOVED THE BASELINE ENORMOUSLY AND DELTA
+  NOT AT ALL (2026-08-11, 3 seeds both arms; the 100% cells, which are the
+  pre-registered fork point, are still in flight so this is NOT a formal L2
+  scoring):
+        200e  none 18.42 +-0.05  aux 20.02 +-0.12  D +1.61 +-0.13
+         50e  none  7.23         aux  8.68         D +1.46 +-0.13
+      baseline  7.23 -> 18.42  = +155% relative
+      Delta    +1.46 -> +1.61  = +0.15 +-0.18 = 0.8 sigma (UNCHANGED)
+      Delta_rel  20.2% -> 8.7%
+  Quadrupling the schedule left absolute Delta statistically identical while
+  more than doubling the baseline, so RELATIVE gain fell by more than half.
+  That is the H-UNDERFIT signature exactly: the prior helps underfit models
+  and its value decays as the baseline strengthens -- the same behaviour as
+  every classification population measured.
+  CONSEQUENCE IF IT HOLDS AT 100%: the re-run CONFIRMS rather than overturns
+  the dense conclusions. The small dense Delta would be a property of the
+  prior on dense tasks, not of a weak recipe, and D4 survives on properly
+  trained models with the schedule objection REMOVED rather than merely
+  unaddressed. That is what the re-run buys in either branch, and it is why
+  it had to be run: L1 alone made the old evidence inadmissible without
+  saying which way the answer would go.
+  NOTE the two results are not in tension. L1 (+155% baseline) says the
+  50-epoch INSTRUMENT was bad; L2-at-10% says the CONCLUSION it produced was
+  nevertheless about right. Both had to be measured; neither implies the
+  other.
+
+- *** GPU UTILIZATION AUDIT — HALF THE ALLOCATED GPUs WERE IDLE, AND THE CAUSE
+  IS A DESIGN PROPERTY OF PER-WAVE LANES (2026-08-11, user: "are the gpus
+  fully utalized?"). Measured with nvidia-smi on every running node rather
+  than inferred from slot counts (these jobs are dataloader-bound, so a full
+  slot count does not imply a busy GPU):
+      as02r4b28   0% 0% 100% 100%      as05r5b31   0% 0% 100% 100%
+      as06r2b23   0% 0% 100% 100%   => 6 of 12 GPUs at 0%, 0 MiB
+  NOT a GPU-assignment bug (the launcher's `for g in 0 1 2 3` is correct). It
+  is an **END-OF-QUEUE DRAIN**: dense7 had 24 tasks and 24 slots, so each slot
+  took exactly one. The cheap voc@10% cells landed on the GPU0/GPU1 slots and
+  finished in ~40 min; those workers then found the list exhausted and EXITED,
+  while the 100%/pascalcontext cells on the GPU2/GPU3 slots kept the node.
+  Half of every node went dark with 216 tasks queued in a lane that could not
+  start.
+  THE GENERAL LESSON: a per-wave lane with its own short worklist GUARANTEES
+  this every time a wave ends. Long-lived lanes fed by a reconcile do not have
+  it. Waves are convenient to launch and structurally wasteful to finish.
+  *** THREE FIXES, and the first one contained the trap:
+  (1) FEEDING THE DRAINED LANE. dense7's counter had run to 138 on a 24-line
+      list (drained workers spinning on empty lines). Appending the grid
+      naively would have started the next claim at 139 and SILENTLY SKIPPED
+      the first ~114 appended tasks -- the 2026-08-03 skip incident exactly.
+      So the new worklist is 168 no-op pad lines followed by the 216 real
+      tasks, putting the work where the counter actually is. One node
+      recovered within seconds (GPUs 0/1 went 0% -> 82%/26%).
+      SAFE TO SHARE TASKS ACROSS LANES because train_dense.py carries BOTH
+      guards shipped after the wrong-epoch damage: final.json => SKIP, and a
+      non-blocking flock run lock that aborts a second trainer on the same
+      (config, seed) instead of racing it. Verified present before doing this,
+      not assumed.
+  (2) LONGEST-JOB-FIRST. The worklist was ordered cheap-fractions-first, which
+      GUARANTEES the tail: with 84 slots and 216 tasks the 100% cells are all
+      claimed last and then run for hours with most slots idle. The unclaimed
+      portion is now sorted 100% -> 1%, so the long poles start immediately and
+      cheap cells fill in around them; makespan ~= the longest single cell.
+      Both arms of a pair stay ADJACENT, which is the property the cheap-first
+      order was really protecting (a partial drain never leaves a one-armed
+      cell). Only lines ABOVE the counter were touched, so the SET of remaining
+      tasks is unchanged and a claim racing the swap can neither lose nor
+      duplicate a task -- asserted in the script, not argued.
+  (3) ONE LANE, ONE COUNTER. The 7 pending ms_dense8 jobs were cancelled and
+      resubmitted as ms_dense7. Two lanes over the same task set have separate
+      counters, so each would have re-claimed everything the other already ran
+      -- safe under the guards, but pure churn. slurm/bsc_dense8.sbatch stays
+      in the repo, unused, for the record.
+  POST-SURGERY INTEGRITY, verified rather than assumed: 384 lines = 168 pad +
+  216 tasks, 0 duplicate (config, seed) pairs, 72/72 configs covered.
+  WHAT COULD NOT BE FIXED: the allocation is 3 of 10 permitted nodes, and it is
+  NOT us hoarding -- account ub234 had exactly these 3 jobs running.
+  QOSGrpNodeLimit is a limit across EVERY user of the acc_resc QOS, so other
+  projects hold it. Holding our nodes with work queued beats draining them and
+  hoping to re-acquire.
+
+- *** L2 SCORED AT 100% — BOTH MY BANDS MISSED, AND THE RE-PIN RESCUED A
+  FALSIFIER THAT HAD NOMINALLY FIRED AGAINST THE METHOD (2026-08-11, all 18
+  voc/pc 10%+voc100% diag200e finals; pc@100% still training):
+      cell        base_50e base_200e |  D_50e   D_200e         | Drel_50e Drel_200e pixAcc
+      voc@10%        7.23    18.42   |  +1.46  +1.61 +-0.13    |  20.2%    8.7%     76.9
+      voc@100%      33.63    51.64   |  +2.57  +0.13 +-0.24    |   7.6%    0.3%     88.4
+      pc@10%         1.83     2.43   |  +0.12  +0.10 +-0.01    |   6.6%    4.2%     37.5
+  L1 at voc@100%: band 45..58 mIoU -> **51.64 HIT** (the voc@10% leg missed
+  HIGH at 18.42 vs 10..16, scored earlier).
+  L2 FORK, both branches WRONG: H-RECIPE (+3.5..+7.0) is dead by ~14 sigma.
+  H-UNDERFIT (+1.0..+3.0) has the DIRECTION right -- Delta falls as the
+  baseline rises -- but badly understated it: measured **+0.13 +-0.24, i.e.
+  statistically ZERO**, below my own floor. Recorded as a direction hit and a
+  BAND MISS on both branches, not as a win for H-UNDERFIT.
+  *** D2 IS RESCUED, and this is the substantive consequence. D2 predicted
+  "structural neutrality survives the task change: Delta(100%) = 0 +-1.5",
+  falsifier |Delta| > 2.5. At 50 epochs it read +2.57 -- NOMINALLY FIRING
+  against the method's core structural claim (lambda reaching exactly 0 is
+  what makes high-data neutrality structural rather than tuned). At 200 epochs
+  it reads **+0.13, squarely inside the D2 band**. So structural neutrality
+  DOES hold on dense prediction; the 50-epoch cell simply was not at
+  sufficiency. My post-mortem at the time said the premise was wrong because
+  "VOC@100% is a low-data cell in this study's terms" -- right in spirit, but
+  the mechanism was the SCHEDULE, and it is now measured rather than argued.
+  At 200 epochs voc@100% is a properly trained cell (51.64 mIoU, 88.4 pixAcc)
+  and the lambda->0 schedule delivers neutrality exactly as it does at 100% on
+  every classification population.
+  THIS IS THE STRONGEST ARGUMENT THAT THE RE-PIN WAS NECESSARY: the 50-epoch
+  recipe was not merely imprecise, it MANUFACTURED A FALSIFIER HIT against the
+  method's structural claim.
+  SHAPE: the dense envelope steepens into the familiar form -- relative gain
+  20.2% -> 8.7% at 10% and 7.6% -> 0.3% at 100%. A low-data phenomenon, same
+  as every classification population.
+  OPERATIONAL NOTE: job 44508854 COMPLETED cleanly (5h37, exit 0:0, 0 FAIL)
+  and pc@100% is still training on 855, so nothing was lost when that node
+  released; the canonical pascalcontext@100% pair is in the grid regardless
+  and is ordered first under longest-job-first.
+
+## THE 200-EPOCH DENSE GRID (2026-08-12, 212/216 cells; ade20k@100% aux and
+## three singles still in flight). Delta mIoU, [50e] beside it, rel% of baseline
+
+      pop            1%        2%        5%       10%       25%      100%
+      voc          +0.39     +0.97     +1.15     +1.61     +2.34     +0.46
+                   [+0.38]   [+0.50]   [+0.72]   [+1.46]   [+2.06]   [+2.57]
+                     6%        12%       9%        9%        8%        1%
+      cityscapes   +0.49     +0.41     +0.20     +0.68     +0.73     +0.48
+      foodseg103   +0.12     +0.20     +0.26     +0.43     +0.56     -0.12
+      ade20k       +0.18     +0.20     +0.37     +0.48     +0.37       --
+      pascalctx    +0.11     +0.13     +0.16     +0.10     +0.16     +0.17
+                     11%       10%       9%        4%        5%        3%
+      diagswin_voc +0.42     +1.29     +1.76     +0.90     +0.75     +1.33
+                   [-0.03]   [+0.01]   [+0.38]   [+1.49]   [+1.05]   [+1.08]
+                     9%        21%       22%       8%        5%        5%
+  baselines(200e) voc 6.23/8.21/13.03/18.28/29.05/51.53 (pixAcc@100% 88.3);
+  pc 1.07/1.28/1.82/2.42/3.49/6.44 (56.4); swin 4.91/6.07/8.14/11.16/16.02/
+  26.26 (80.9); foodseg ... 17.88 (69.6); ade20k ... 27.49 (72.3);
+  cityscapes ... 49.43 (91.2).
+
+- *** D4 SURVIVES EXACTLY, WHICH IS THE POINT OF HAVING RE-RUN: voc@1% =
+  **+0.39 +-0.04** at 200 epochs against +0.38 at 50. The dense study's
+  headline negative -- a dense target on a dense task, the most favourable
+  venue this prior could be given, pays +0.39 at ~5 images per class where
+  classification shows a universal ~+1.5 floor -- now rests on properly
+  trained models with the schedule objection REMOVED rather than merely
+  unaddressed. Target-task alignment is not where the value comes from.
+- *** THE DENSE ENVELOPE GREW AN INTERIOR PEAK. At 50 epochs every population
+  was monotone rising with no right flank, which is what made me call VOC@100%
+  "a low-data cell in this study's terms". At 200 epochs voc PEAKS AT 25%
+  (+2.34) and falls to +0.46 at 100%; foodseg peaks at 25% (+0.56) and goes
+  **-0.12** at 100%; ade20k peaks at 10%. So the dense envelope is unimodal
+  like every classification population, AND neutral at sufficiency on two
+  populations. The 50-epoch monotonicity was a schedule artifact, not a
+  property of dense prediction. (E-A is not scorable until ade20k@100% lands.)
+- *** THE DENSE ATTENTION CONCLUSION IS WITHDRAWN -- IT WAS A CONVERGENCE
+  ARTIFACT, AND THIS RESTORES THE PAPER'S STRONGEST CLAIM.
+  At 50 epochs Swin was <= ResNet-18 at every fraction (-0.03/+0.01/+0.38 at
+  1/2/5%), and I reported that the attention deficit does NOT transplant to
+  dense prediction and that the ViT headline must be scoped to classification.
+  At 200 epochs Swin is **+0.42/+1.29/+1.76** at 1/2/5% against voc's
+  +0.39/+0.97/+1.15 -- ABOVE conv at 4 of 6 fractions, and in RELATIVE terms
+  (the fair comparison, since swin is the weaker segmentor: 26.26 vs 51.53
+  mIoU at 100%) **21-22% vs 12%/9% in the 2-5% band, i.e. ~2x**.
+  That 2x is the SAME ratio classification measures: G(swin) 7.6-10.5 vs
+  G(r18) 3.55-6.26 on C100. E-M's recorded falsifier -- "Delta(swin) <=
+  Delta(r18) at EVERY fraction => the attention deficit is a property of the
+  classification TASK" -- substantively held at 50 epochs and clearly does NOT
+  hold at 200. Swin under AdamW was simply much further from convergence than
+  the conv cells, so the 50-epoch recipe produced the OPPOSITE conclusion.
+  E-M's BAND (+2..+10 at 5-25%) still MISSES LOW (max +1.76), so the size was
+  over-predicted; the DIRECTION reverses.
+  ALSO MIRRORS CLASSIFICATION AT FULL DATA: swin@100% +1.33 (5% rel) vs
+  voc@100% +0.46 (1% rel) -- the attention backbone still gains where conv is
+  ~neutral, exactly as ViT-tiny gains +9.88 at full C100 where every conv is
+  neutral.
+- *** THE LABEL-SPACE EFFECT LARGELY DISSOLVES ONCE NORMALISED. voc vs
+  pascalcontext are BYTE-IDENTICAL pixels at 21 vs 254 classes. In absolute
+  mIoU voc's peak (+2.34) is 14x pascalcontext's (+0.17) -- but their
+  baselines differ 8x, which is the metric-scale artifact already corrected
+  once on 2026-08-11. In RELATIVE terms: 6% vs 11% @1%, 12% vs 10% @2%,
+  9% vs 9% @5%, 9% vs 4% @10%, 8% vs 5% @25%, 1% vs 3% @100% -- voc higher in
+  the mid-band, pascalcontext higher at BOTH ends, ~1.6x at most. The
+  same-pixels control therefore shows a MUCH weaker and less consistent
+  label-space effect than the 50-epoch reading claimed. State it as a mid-band
+  tendency, not as the 13x collapse first recorded nor the clean 1.6x.
+
+- *** THE DENSE STUDY IS COMPLETE AND HAS A COMMITTED EXPORTER (2026-08-13):
+  216/216 cells, 60/60 probes, and `analysis/aggregate_dense.py` regenerates
+  every dense table from runs_dense/. WORTH RECORDING WHY IT WAS MISSING: the
+  project's own non-negotiable is that tables regenerate from run records, and
+  until now EVERY dense number in this ledger came from an ad-hoc query in a
+  scratchpad. aggregate.py has no knowledge of runs_dense at all. That is the
+  exact fragility the rule exists to prevent, and the Data Availability
+  statement promises released tables.
+  THE EXPORTER EMITS RELATIVE DELTA ALONGSIDE ABSOLUTE, deliberately: absolute
+  mIoU is not comparable across populations whose baselines differ 8x, and
+  reading it as if it were produced the "13x label-space collapse" that was
+  really ~1.6x. It also evaluates readout against PIXEL ACCURACY rather than
+  mIoU, and declines to make a sign call for cells INSIDE the crossing bracket
+  (the mnet precedent).
+  *** THE LAW ON DENSE PREDICTION: 30 cells with both Delta and G (1-25%; 100%
+  excluded by the probe-ceiling rule):
+      inside the bracket (no prediction):  2
+      unresolvable (|readout| <= 2 SEM):  21
+      RESOLVABLE (these test the law):     9  -> 9 as predicted, 0 wrong
+  ALL NINE ARE ON THE POSITIVE BRANCH (pixAcc 52-78, above the bracket), which
+  is the honest limitation: dense confirms the law on a new TASK and a new
+  METRIC, but has ZERO resolvable cells below the crossing. That is exactly
+  what E-K was built to test.
+  *** E-K IS UNRESOLVED, NOT PASSED, AND THE REASON IS MINE. pascalcontext@1-2%
+  has trained pixel accuracy 21.1/25.9 -- clearly below the bracket, where the
+  law demands NEGATIVE readout. Measured: +0.02 and +0.00, i.e. ZERO. The
+  recorded falsifier needed readout clearly POSITIVE there, so it did not fire;
+  but the prediction was not confirmed either. When the long-schedule cells
+  were queued I wrote that L3 would make E-K answerable once baselines rose.
+  It did not: the re-pin more than doubled pascalcontext's baseline and left
+  Delta at +0.11..+0.16, so readout is still a difference of two tiny numbers.
+  The units test needs a population with abundant labels AND low pixel accuracy
+  AND a material Delta, and no dense population in this study has all three.
+  State it as a limitation rather than working around it a fourth time.
+  *** THE ATTENTION CLAIM, IN ITS FINAL AND NARROWEST FORM. I have now stated
+  this three ways and only the third is right. Relative G, swin vs r18 on VOC:
+      pct     1%     2%     5%    10%    25%
+      swin   4.6%  20.7%  17.4%   7.0%   2.0%
+      r18    6.3%  13.4%  10.8%   8.1%   5.8%
+  Swin's relative feature gain exceeds conv's ONLY at 2% and 5% (~1.6x), and
+  conv is HIGHER at 1%, 10% and 25%; at 25% swin's G collapses to +0.27 against
+  conv's +1.51. So the 50-epoch conclusion (swin <= conv at EVERY fraction) is
+  still withdrawn -- swin clearly wins the 2-5% band on both accuracy and
+  features -- but "~2x, the same ratio classification measures" was an overread
+  from the 4 fractions available at the time. It is a NARROW-BAND effect.
+  *** E-A SCORED: ade20k Delta(100%) = **-0.29** against a band of +1.5..+4.0,
+  MISSED LOW. The recorded falsifier (an interior peak exceeding both ends by
+  >= 0.5 mIoU) did NOT fire on the letter -- ade20k's peak is +0.38 against
+  +0.18 at 1%, only 0.20 above -- but the "monotone rising" premise it was
+  built on is false: the envelope falls to negative at 100%. Three populations
+  now go neutral-or-negative at full data (voc +0.46/0.9%, foodseg -0.12,
+  ade20k -0.29), which is the classification right flank reproduced on dense.
+
+- *** THE IMAGENET-100 WEDGE, FINALLY MEASURED (2026-08-13). A diagin100 cell
+  hanging mid-run was recorded earlier as an unexplained incident whose task
+  logs had been overwritten. It recurred -- diagin100_r50_none/seed0 stopped at
+  epoch 44 (previously another cell stopped at 99) -- and this time it was
+  characterised rather than guessed at:
+      state              R (running), NOT D/S -- so not a deadlock or IO stall
+      CPU time           advancing normally (~1.1 cores, same as its healthy
+                         sibling on the same node)
+      READ SYSCALLS      **frozen**: syscr 655970 -> 655970 over 25s, while the
+                         healthy aux cell did syscr +4658 in the same window
+      stime              +1 jiffy vs the sibling's +238 -- essentially no
+                         syscalls of any kind
+      metrics.csv        no write for 33 min on a cell whose epochs take 75s
+  So it burns CPU in a compute/spin loop and loads NO data. That rules out the
+  three cheap explanations (deadlock, GPFS stall, OOM) and points at the
+  dataloader/worker path rather than the model. syscr-vs-CPU-time over a short
+  window is the discriminator worth reusing: it separates "slow" from "stuck"
+  without py-spy, which is not installed on the compute nodes.
+  RECOVERY: killed and re-queued. num_workers deliberately NOT changed on the
+  retry even though a dataloader cause is plausible -- it is part of the
+  reproducibility contract and the AUX arm of this pair already ran with the
+  recorded value, so re-drawing the augmentation stream on one arm only would
+  put the recipe inside the Delta.
+  *** NEAR-MISS WORTH RECORDING: the first retry worklist listed BOTH cells of
+  the pair, including aux/seed1 which was alive and healthy at epoch 67 on
+  another node. Because the flock run lock is NODE-LOCAL on GPFS (established
+  hours earlier, when six trainings ran for three seeds across two nodes),
+  nothing would have stopped the new job from starting a duplicate and
+  overwriting its checkpoints mid-run. Caught before the job started; the
+  worklist now contains only the cell that actually needs running. Third time
+  in one day that the node-local flock assumption has mattered -- the guard
+  train.py advertises as "exclusive" is only exclusive within a node.
+
+- *** S2 CLOSED AT 2v3, AND diagin100_r50_none/seed0 IS ABANDONED (2026-08-13,
+  user decision: "let's do what you recommend and stop wasting more resources
+  on this training"):
+      baseline 85.94 +-0.36 (n=2: 85.58, 86.30)
+      aux      85.89 +-0.16 (n=3: 86.02, 86.08, 85.58)
+      **Delta = -0.05 +-0.39**   [S2 band 0.0 +-1.0 -> HIT; G2 (>=+1.5) DEAD]
+  The earlier 2v2 read was -0.14; with the third aux seed it is -0.05, i.e.
+  dead neutral. CONV NEUTRALITY AT 224px CONFIRMED, and the claim does not
+  depend on the missing seed: the same neutrality holds at every other scale
+  measured (+0.04 ImageNet64 at 1.28M images, -0.42 tin@100%, +0.15 C100@100%).
+  A third baseline seed would sharpen the error bar; it cannot move the sign.
+  WHY IT WAS ABANDONED, recorded so nobody re-queues it: 8 starts, 8 wedges, at
+  epochs 99, 44 and 28 -- while EVERY other cell in the family completed
+  (none/seed1-2, aux/seed0-2). Not the ~5% random SIGABRT: one specific
+  (config, seed) hangs reproducibly. The varying epoch is the clue -- shuffling
+  reorders data each epoch, so a single pathological sample would hang at a
+  RANDOM epoch, which is what is observed -- but seeds 1-2 see the same images
+  and finish, so a plain corrupt file does not fully explain it either. Cost so
+  far ~80 GPU-hours for zero data. runs/diagin100_r50_none/seed0/ABANDONED.txt
+  records this next to the cell; BIG_COMPLETE is set and worklist.big emptied
+  so a reconcile cannot resurrect it.
+  ALL COMPUTE FOR THE STUDY IS NOW DONE: dense 216/216 + 60/60 probes,
+  ImageNet 293/294 (the 294th abandoned above), classification grid complete.
+
+## DETECTION: THE THIRD TASK (2026-08-13, user: "let's start with a full
+## training with 200 epochs on PASCAL VOC")
+
+- WHY DETECTION, and why it is not just a third data point: classification
+  pools the auxiliary target to 8x8, segmentation compares it against features
+  of the output's own extent, and detection is neither. It is the ONLY task in
+  the study with a coordinate REGRESSION head, so it asks whether
+  oriented-energy structure helps a network that must LOCALIZE rather than
+  label -- the most plausible remaining mechanism, since Gabor energy is about
+  edges and extents.
+- THE SPLIT IS NOT VOC 07+12, deliberately. All 10,582 train_aug and 1,449 val
+  images the segmentation cells use also carry box annotations (verified, zero
+  missing), so detection reuses the SAME images, splits and committed subset
+  indices. Classification/segmentation/detection on byte-identical pixels is a
+  control nothing else here can give. COST STATED: absolute AP is not
+  comparable to published VOC numbers (different split, and from scratch).
+- INSTRUMENT: dense recipe VERBATIM (SGD 0.01, batch 16, 512 crops, scale
+  0.5-2.0 + flip, 200 epochs, cosine), same dilated r18 at stride 8, same tap
+  backbone.layer3. So detection differs from segmentation in the head and the
+  loss and in NOTHING else. Head is single-level anchor-free FCOS -- minimal
+  for the reason FCNHead was; single-level costs absolute AP and that is said
+  up front, not discovered.
+- *** THE LAW IS NOT TESTABLE HERE, REGISTERED BEFORE ANY RUN. Readout must be
+  read on the head's own classification scale (the dense units lesson), and
+  detection's per-location classification is ~99% background, so there is no
+  analogue of pixel accuracy. We report Delta and G and DECLINE to score
+  readout. Anyone scoring a sign law on AP50 would be repeating the exact
+  error the dense pass caught.
+- FLOOR RULE, PRE-DECLARED (the mirror of the probe-ceiling rule): a cell where
+  BOTH arms land below 1.0 AP50 is uninterpretable -- a difference between two
+  near-zero detectors is not a measurement. Such cells are reported and
+  EXCLUDED from any Delta claim.
+- PREDICTIONS RECORDED IN ADVANCE. Anchors: voc_seg Delta = +0.39/+0.97/+1.15/
+  +1.61/+2.34/+0.46 mIoU (6/12/9/9/8/1% relative); classification C100@1%
+  +1.42 on 8.93 = 15.9% relative; the universal ~+1.5 floor at 5 images/class.
+    (T1) POSITIVE BUT SMALL AT 1%: Delta(det@1%) = **+0.2..+1.5 AP50**, i.e.
+      4-15% relative -- the same relative band the other two tasks occupy at
+      matched supervision density (107 images, ~5 per class over 20 classes).
+    (T2) UNIMODAL WITH A RIGHT FLANK: an interior peak at 10-25%, and
+      **Delta(100%) = -0.5..+1.5 AP50**, i.e. neutral at sufficiency, which is
+      what the lambda->0 schedule makes structural rather than tuned. This has
+      now held on classification (10 populations) and segmentation (3 of 6).
+    (T3) FEATURE-SIDE: G (a fresh detection head on frozen features) tracks
+      Delta in sign at every interpretable fraction, as on both other tasks.
+    FALSIFIER A (the prior does not transfer to localization): Delta <= 0 at
+      EVERY interpretable fraction => the claim must be scoped to labeling
+      tasks, and the paper must say the prior buys nothing where the head
+      regresses coordinates.
+    FALSIFIER B (alignment reopens): relative Delta(det@1%) >= 25%, i.e.
+      materially above BOTH other tasks => detection is a qualitatively richer
+      regime and the D4 conclusion ("target-task alignment is not where the
+      value comes from") needs restating, since detection is LESS aligned with
+      a dense target than segmentation is.
+    NOTE the asymmetry, built in on purpose: A and B are opposite-signed, so
+    no uniform outcome passes both. A flat result fires A; a large one fires B.
+  RISK ACKNOWLEDGED IN ADVANCE: from-scratch single-level detection at 107
+  images may put both arms under the floor rule, in which case the 1% cell is
+  reported as uninterpretable rather than as a null -- that is a limitation of
+  the instrument at that scale, not evidence about the prior.
+
+- *** "THE LAW IS NOT TESTABLE ON DETECTION" IS WITHDRAWN, SAME DAY, BEFORE ANY
+  CELL RAN (2026-08-13; the user asked "why is it not testable? do we have a
+  solution?" and the answer is yes). My registration above was too quick, and
+  the argument behind it was weaker than I made it sound: I said detection's
+  per-location classification is ~99% background so it has no analogue of pixel
+  accuracy -- but SEGMENTATION's pixel accuracy also counts background (VOC is
+  ~70% background, pixAcc 72-88 against mIoU 6-51) and the law worked fine on
+  that inflated scale. The difference is degree, not kind.
+  THE SOLUTION, registered before any result: condition on foreground. Ground
+  truth says which locations hold which class; measure the head's 20-way
+  accuracy over exactly those locations (**fg_acc**). The conditioning comes
+  from GT boxes, not from predictions, so it is not circular, and it is
+  literally "the classification the head performs" -- which is what the dense
+  units lesson says readout tracks.
+  MEASURED, not argued (synthetic check before any GPU cell, 4096 locations,
+  0.37% foreground):
+      perfect head          loc_acc 100.00   fg_acc 100.00
+      all-background head   loc_acc  99.63   fg_acc   0.00
+  So raw location accuracy has 0.37 points of dynamic range between a useless
+  head and a perfect one -- it saturates and tests nothing -- while fg_acc
+  spans the full range. Both are logged every eval so the saturation claim
+  stays measured rather than assumed.
+  WHY THIS MATTERS BEYOND BOOKKEEPING: all nine resolvable cells in the
+  segmentation grid sat ABOVE the crossing, so dense confirmed the law's
+  POSITIVE branch and tested its negative branch not at all -- the gap E-K was
+  built for and failed to close. If fg_acc at 1-5% lands below the bracket,
+  detection supplies the negative-branch test segmentation could not.
+  PREDICTIONS RECORDED IN ADVANCE:
+    (T4) fg_acc RISES with data fraction and STRADDLES the crossing bracket
+      [31.8, 40.3] somewhere in 1-25%; cells below it must show NEGATIVE
+      readout, cells above it POSITIVE, exactly as on every other population.
+    FALSIFIER: readout POSITIVE at a detection cell whose fg_acc is clearly
+      below 31.8, or NEGATIVE below -1 at one clearly above 40.3 => the
+      readout term does not transplant to a coordinate-regression task and
+      the law's scope must be stated as labeling and dense-labeling tasks.
+  CAVEAT STATED WITH IT: this transplants an accuracy bracket measured on
+  whole-image classification to a differently-constructed accuracy scalar. The
+  same assumption held on segmentation's pixel accuracy, but it is an
+  assumption, and a miss here is ambiguous between "the law does not transfer"
+  and "fg_acc is the wrong scalar".
+
+## IMPRINT SPECIFICITY (2026-08-13, user: "run whatever you want to make the
+## paper stronger")
+
+- THE GAP THIS CLOSES. The paper's mechanistic evidence -- the spectral
+  imprint, alignment between tapped features and the moment target, +0.525 for
+  the prior arm against +0.215 for the baseline -- rests on ONE cell
+  (C100@5%). A single number cannot distinguish "the prior leaves an
+  oriented-energy imprint" from "good features on this dataset happen to look
+  like oriented energy". Any intervention that improves features might show
+  the same alignment, and that is the obvious referee objection.
+- THE DESIGN IS A SPECIFICITY TEST, NOT A CORRELATION, and the controls
+  already exist in the grid (C100/r18 cells with measured G and local
+  checkpoints): moment-prior cells (12), SimCLR-init cells (6), and the
+  random-fixed-target control. SimCLR-init is the decisive arm because it
+  buys LARGE G by a completely different route (G +6.15 at 1%, +10.63 at 5x
+  budget -- larger than the prior's).
+- PREDICTIONS RECORDED IN ADVANCE:
+    (I1) moment-prior cells show a LARGE alignment gap (aux minus its own
+      baseline), band **+0.15..+0.40**, and it should be present at every
+      fraction where G is positive.
+    (I2) SimCLR-init cells show LARGE G but a SMALL alignment gap: band
+      **-0.05..+0.10**, i.e. at most a third of the prior's at matched G.
+      This is the claim that makes the imprint specific rather than
+      incidental.
+    (I3) The random-fixed-target control, which already gives ~0 e2e gain,
+      shows ~0 alignment gap (**-0.05..+0.05**) -- so the imprint tracks the
+      TARGET'S CONTENT and not "any auxiliary loss".
+    FALSIFIER, and it costs the paper its mechanistic figure: SimCLR-init
+      cells show an alignment gap comparable to the moment-prior cells at
+      matched G (>= +0.15) => oriented-energy structure is simply what better
+      features look like on this data, the imprint is evidence only that
+      features improved, and Fig. heatmap must be demoted from mechanism to
+      illustration.
+    NOTE the falsifier is reachable and would be reported: the same measurement
+    produces it, and I2 and the falsifier are opposite readings of one number.
+  CAVEAT STATED IN ADVANCE: alignment is a Pearson r between channel-MEAN
+  energy maps, so it measures spatial layout agreement, not whether the
+  specific oriented channels are reproduced. A null on this measure would not
+  prove the absence of a finer imprint.
+
+- *** IMPRINT SPECIFICITY SCORED — THE FALSIFIER DID NOT FIRE, AND THE DESIGN
+  TURNED OUT TO CONTAIN A 2x2 I HAD NOT PLANNED (2026-08-13, CIFAR-100/r18,
+  one pinned target applied to every model, 256 test images/cell):
+      family                              n   mean G   align gap        band
+      moment prior, tap layer3 (I1)      10   +4.23   +0.396 [.31,.51]  +0.15..+0.40
+      SimCLR init, no moment target (I2)  5   +7.68   -0.156 [-.19,-.10] -0.05..+0.10
+      random fixed target (I3)            1   +1.31   -0.060            -0.05..+0.05
+    I1: mean lands exactly at the band top, all ten cells positive and tight.
+    I2: MISSED, in the STRONGER direction -- I predicted a small gap and the
+      measurement is consistently NEGATIVE. SimCLR-init cells carry MORE feature
+      gain than the prior (G +7.68 vs +4.23) and LESS oriented-energy structure
+      than their own baselines. The recorded falsifier needed >= +0.15 from this
+      family; it came back at the opposite sign.
+    I3: -0.060 against a band of -0.05..+0.05, i.e. 0.01 outside and
+      indistinguishable from zero at n=1.
+  *** THE TWO CONTROLS THAT FELL OUT, and they are worth more than the planned
+  comparison because each isolates one factor:
+      moment prior but tapped at L1/L2   n=2  G +4.67  gap **-0.181**
+      SimCLR init PLUS the moment aux    n=1  G +8.08  gap **+0.494**
+    The tap variants use the SAME target and the same family, imposed one or two
+    stages earlier; measured at layer3 the imprint is GONE. So it is localised
+    to where the target is applied, which a mechanism predicts and an incidental
+    correlation does not.
+    The combo cell has the SAME SimCLR initialization as the cells reading
+    -0.156, plus the moment target -- and shows the largest gap in the study.
+    Together these form a 2x2, {SimCLR init or not} x {moment target or not},
+    and the imprint follows the TARGET in both rows while G follows the
+    initialization. That separates "the prior leaves an oriented-energy
+    imprint" from "good features look like oriented energy" about as cleanly as
+    this study can.
+  CAVEAT REGISTERED IN ADVANCE AND STILL BINDING: alignment is a Pearson r
+  between channel-MEAN energy maps, so it measures spatial-layout agreement,
+  not whether the specific oriented channels are reproduced. And n=1 for both
+  the random-target and combo controls.
+
+## THE DETECTION FLOOR HAS A FIX, AND IT IS A DECOMPOSITION (2026-08-13, user:
+## "for the uninterpretablity issue, do you think we have a solution for it?")
+
+- THE FLOOR FIRED, exactly as the pre-declared rule anticipated (3 seeds/cell,
+  200 epochs, VOC detection on the segmentation splits):
+      pct | AP50 none      AP50 aux       dAP50 | fg_acc none  fg_acc aux  d_fg
+       1% | 0.30 +-0.03    0.27 +-0.01    -0.04 | 15.31 +-0.17 15.08 +-0.28 -0.23
+       2% | 0.61 +-0.03    0.59 +-0.04    -0.02 | 21.57 +-0.13 21.42 +-0.84 -0.15
+       5% | 1.77 +-0.89    2.61 +-0.04    +0.84 | 28.55 +-0.38 28.98 +-0.43 +0.43
+      10% | 6.40 +-0.07    6.97 +-0.14    +0.56 | 36.53 +-0.41 36.21 +-1.35 -0.32
+  1% and 2% are UNINTERPRETABLE by the rule (both arms < 1.0 AP50). 25/100%
+  still training.
+- THE DIAGNOSIS: the floor is a property of AP50, NOT of the runs. The same
+  cells return fg_acc 15.3 and 21.6 against a 5% chance rate with SEMs of
+  0.13-0.84, so the detectors are demonstrably doing something. AP50 is a
+  ranked-precision integral: when precision is poor everywhere the integral is
+  ~0 however much better one arm's boxes are. Same COMPRESSIVE failure as mIoU
+  on dense prediction (a +1.62-point pixel-accuracy gain reported as "+0.09
+  mIoU") and as the pathmnist probe (probe_none BELOW its own e2e).
+- THE FIX IS TO DECOMPOSE WHAT AP50 CONFOUNDS, both components conditioned on
+  GROUND-TRUTH foreground where neither can collapse:
+    fg_acc -- 20-way accuracy at GT-assigned locations. ALREADY LOGGED and
+      PRE-REGISTERED as the readout scale before any cell ran.
+    fg_iou -- mean IoU between the predicted and GT box at those SAME
+      locations (analysis/det_decompose.py). NEW. This is the quantity
+      detection was added for: the only task in the study with a coordinate
+      REGRESSION head, and nothing has measured that head.
+  Conditioning comes from GT through the same assign_targets() the training
+  loss uses, never from predictions, so it is not circular: a detector that
+  predicts nothing still has a well-defined fg_iou. No retraining -- it reads
+  existing checkpoints.
+- STATE THE PROVENANCE HONESTLY: fg_acc predates the results, fg_iou does not.
+  It was added AFTER seeing the floor, which is why (a) AP50 stays the headline
+  metric with the floor rule enforced, (b) the bands below are recorded before
+  fg_iou is computed on any aux cell, and (c) AP25 is computed only as a
+  ROBUSTNESS CHECK on whether the arms' ORDERING depends on the threshold, and
+  is never reported as a headline -- loosening a threshold after the strict one
+  proved inconvenient is exactly the move a referee should distrust.
+- WHY IT IS ALREADY POINTED: at 5% and 10% the prior gains +0.84 and +0.56 AP50
+  while its fg_acc delta is +0.43 and -0.32. The AP50 gain is therefore NOT
+  coming from classification, and localization is the only other component.
+- SMOKE MEASUREMENT (vocdet_none_1pct/seed0, the cell whose AP50 is 0.31):
+  fg_iou = 0.3414 over 25,467 foreground locations, with 28.3% of them at
+  IoU >= 0.5. The 1% detector localizes; AP50 simply cannot say so.
+- PREDICTIONS RECORDED IN ADVANCE (no aux fg_iou seen):
+    (T5) LOCALIZATION CARRIES THE MID-BAND GAIN: d_fg_iou = **+0.005..+0.040**
+      at BOTH 5% and 10%, since AP50 rises there while fg_acc does not.
+    (T6) THE FLOOR CELLS ANSWER T1 AFTER ALL, and small: d_fg_iou =
+      **+0.000..+0.015** at 1-2%, i.e. at or below the mid-band value --
+      the detection analogue of dense's +0.39 mIoU at ~5 images per class.
+    FALSIFIER: d_fg_iou <= 0 at BOTH 5% and 10% => the AP50 gain is neither
+      classification nor localization, so it must be score CALIBRATION or
+      ranking, and the paper must say that rather than attribute the gain to
+      the regression head.
+  REPORTING RULE: fg_iou is a per-location mean over ~25k locations per seed,
+  so quote the ACROSS-SEED SEM. The location count buys no precision about a
+  cell and quoting it would be pseudo-precision.
+- WHAT WAS CONSIDERED AND REJECTED: strengthening the detector (multi-level
+  FPN) to lift absolute AP. The dense re-pin is the precedent that makes this
+  tempting -- an under-powered instrument there produced the OPPOSITE answer,
+  twice -- but the diagnosis differs. Dense was under-TRAINED (same
+  architecture, baseline +155% from schedule alone); detection at 1% has 107
+  images and ~1,200 optimizer steps, and no head design puts that above 1.0
+  AP50. It would also cost a full 36-run re-grid and change the instrument
+  mid-study. CONDITIONAL ON RECORD: if the 100% cell lands very low (say
+  <= 15 AP50), the instrument is weak WITH data as well as without, and the
+  FPN question genuinely reopens.
+
+- *** DETECTION SCORED, 36/36 CELLS, AND IT IS A NULL (2026-08-13, 3 seeds/cell,
+  200 epochs, VOC on the segmentation splits; every quantity recomputed from
+  last.pt in one pass so AP50, fg_acc and fg_iou come from the same weights):
+      pct | dAP50   sigma | d_fg_iou   sigma | d_fg_acc | dAP25 | floor
+       1% | -0.04   -1.1  | -0.0003    -0.0  |  -0.23   | -0.19 | UNINTERPRETABLE
+       2% | -0.00   -0.1  | -0.0001    -0.0  |  -0.23   | -0.16 | UNINTERPRETABLE
+       5% | -0.08   -0.5  | -0.0048    -1.7  |  +0.11   | -0.16 |
+      10% | +0.56   +3.5  | +0.0032    +1.0  |  -0.32   | +0.35 |
+      25% | -0.41   -0.7  | +0.0017    +0.5  |  +0.01   | -0.03 |
+     100% | -0.14   -0.3  | +0.0031    +1.5  |  +0.64   | -0.04 |
+  *** THE +0.84 AT 5% WAS A COLLAPSED BASELINE SEED, NOT A GAIN, and the
+  decomposition is what exposed it. vocdet_none_5pct/seed2 returns fg_iou
+  EXACTLY 0.0000 and AP50 0.00 while its fg_acc is 27.86, in line with its
+  siblings' 29.19/28.59 -- classification trained, localization died. Its
+  metrics show the mechanism: reg loss pins at EXACTLY 1.0000 from epoch 40 to
+  199 (it was 0.678 at epoch 20, with AP50 0.34, so the head was working and
+  then failed), i.e. the predicted boxes went zero-area, GIoU saturated, the
+  gradient vanished and the branch could never recover. A NEW FAILURE MODE for
+  the study: a PARTIAL collapse, one branch of a two-headed model, where the
+  seed-level accuracy check used everywhere else would not flag it because the
+  cell still trains. With that seed excluded the 5% delta is -0.08 +-0.16.
+  I had already flagged its sigma (0.89) as "one bad seed" without knowing what
+  was wrong; fg_iou = 0.0000 is what made it unambiguous.
+  NOTED, NOT CLAIMED: the collapse is in the BASELINE arm, and 0 of 18 prior
+  runs collapsed against 1 of 18 baseline runs. That is the direction of the
+  instability-rescue signature (R50 no-hn, ConvNeXt, Swin) but n=1 is not
+  evidence; Fisher exact on 1-vs-0 is p ~ 1.
+  PREDICTIONS SCORED:
+    (T1) Delta(det@1%) = +0.2..+1.5 AP50 -- **MISSED**, measured -0.04, and the
+      cell is below the floor anyway. The decomposition answers it properly and
+      the answer is ZERO: d_fg_iou -0.0003 +-0.0067, d_fg_acc -0.23 +-0.33.
+    (T2) Delta(100%) = -0.5..+1.5 -- **HIT** (-0.14). The unimodal shape is
+      technically satisfied (10% is the only nonzero cell) but with five of six
+      fractions at zero there is no envelope to speak of.
+    (T4) fg_acc straddles the crossing bracket -- **HIT**: 15.3 / 21.6 / 28.9
+      below, 36.5 INSIDE (no sign call, the mnet precedent), 46.3 / 64.2 above.
+      The premise the negative-branch test needs therefore exists; the test
+      itself still needs detection G probes, which have not been run.
+    (T5) d_fg_iou = +0.005..+0.040 at 5% AND 10% -- **MISSED at both**
+      (-0.0048, +0.0032). Its falsifier required <= 0 at BOTH and did NOT fire,
+      since 10% is nominally positive.
+    (T6) d_fg_iou = +0.000..+0.015 at 1-2% -- measured -0.0003 and -0.0001,
+      i.e. statistically zero and a hair below the band floor. Scored as
+      substantively right (small) and nominally outside.
+    FALSIFIER A ("Delta <= 0 at EVERY interpretable fraction => scope the claim
+      to labeling tasks") did NOT fire on the letter: of the four interpretable
+      fractions (5/10/25/100) three are <= 0 and 10% is +0.56 at 3.5 sigma.
+    FALSIFIER B (relative Delta(det@1%) >= 25%) did not fire: it is -13%.
+  *** THE ONE POSITIVE CELL HAS NO MECHANISM BEHIND IT, which is why the honest
+  verdict is a null rather than "positive at 10%". At 10% AP50 moves +0.56
+  (3.5 sigma) while every component of it is flat: d_fg_iou +0.0032 (1.0),
+  d_fg_acc -0.32 (-0.2), and dAP25 +0.35 (0.6). A gain that is neither
+  classification nor localization and does not survive a threshold change is
+  ranking or calibration noise, not a finding.
+  *** THE INSTRUMENT CONDITIONAL IS CLOSED, AGAINST REOPENING FPN: I recorded
+  that if the 100% cell landed <= 15 AP50 the detector would be weak with data
+  as well as without, and the multi-level-FPN question would genuinely reopen.
+  It landed **48.87 AP50** (none) and 48.73 (aux) -- a from-scratch,
+  single-level, 200-epoch detector on VOC. The instrument is adequate, so the
+  null is about the prior and not about the head.
+  READING FOR THE PAPER: the prior transfers to SEGMENTATION (small, positive
+  at every population, unimodal, neutral at sufficiency) and does NOT transfer
+  to DETECTION (zero at every fraction on all four measures). Together with D4
+  -- a dense target on a dense task pays LESS than on classification -- the
+  task axis is now the sharpest limit in the study: whatever the prior supplies
+  is cashed by a whole-image classifier, partially by a per-pixel classifier,
+  and not at all by a coordinate regressor.
+
+- DETECTION G PROBES LAUNCHED (2026-08-13, 30 runs, job 44579019): the grid is
+  an e2e null on all four measures, and that admits two readings the trained
+  model cannot separate, because fg_acc and fg_iou are both measured THROUGH
+  the trained head:
+    H-NO-FEATURES  the prior buys a detection backbone nothing -> the null is
+                   feature-side and detection is outside what the prior helps.
+    H-READOUT      the features ARE better and the detection head cannot cash
+                   them -- the documented classification left flank, where at
+                   5 images per class the probe sees +4.70 and the trained
+                   classifier realizes +1.91.
+  Only a frozen trunk with a fresh head separates them, and the two give
+  DIFFERENT sentences: a limit of the prior, or a limit of the head.
+  PROTOCOL: analysis/det_probe.py, mirroring dense_probe -- freeze everything,
+  fit 1x1 convolutions (cls/ctr/reg) on the FULL 10,582-image train split, 10
+  epochs, SGD 0.01 cosine, score on val. 1/2/5/10/25%, both arms, 3 seeds.
+  100% REFUSED IN CODE by the probe-ceiling rule (probe labels == cell labels).
+  PREDICTIONS RECORDED IN ADVANCE (G = probe(aux) - probe(none)):
+    G(fg_acc) at 1-5% = **+0.0..+1.0 points**, i.e. H-NO-FEATURES with at most
+      a hint. Reasoning: this trunk was shaped by a DETECTION loss, and the
+      oriented-energy imprint being present is not the same as the features
+      being better for localization.
+    G(fg_iou) at 1-5% = **+0.000..+0.010**.
+    AP50 under the probe may itself floor at the low fractions (a 1-epoch
+      smoke gave 0.05), so fg_acc and fg_iou are the primary readouts and AP50
+      is reported with the floor rule applied, exactly as in the e2e table.
+    FALSIFIER, and it rewrites the detection conclusion: G(fg_acc) >= +1.5 at
+      any fraction <= 5% => the features ARE better and the detection null is a
+      READOUT failure, so the paper must say the head is the limit rather than
+      the prior. It would also make detection a resolvable NEGATIVE-BRANCH law
+      cell (baseline fg_acc 15.3/21.6/28.9 sits below the crossing bracket and
+      e2e Delta ~ 0 there, so readout = -G), which is the test all nine
+      resolvable segmentation cells failed to supply and Pascal-Context
+      returned 0.00 on.
+
+- *** DETECTION G PROBES SCORED — H-NO-FEATURES CONFIRMED; THE NULL IS THE
+  PRIOR, NOT THE HEAD (2026-08-14, 30/30, frozen trunk + 1x1 head on the full
+  10,582-image split, both arms identical):
+      pct | G(fg_acc)        | G(fg_iou)          | probe AP50 none/aux
+       1% | -0.16 +-0.06 -2.4| +0.0017 +-0.0020 +0.8 |  0.22 / 0.26
+       2% | -0.37 +-0.21 -1.7| -0.0006 +-0.0024 -0.3 |  0.37 / 0.36
+       5% | +0.34 +-0.53 +0.6| +0.0130 +-0.0090 +1.4 |  0.97 / 1.15
+      10% | +0.08 +-0.35 +0.2| +0.0073 +-0.0024 +3.1 |  2.59 / 2.70
+      25% | -0.47 +-0.21 -2.3| +0.0011 +-0.0016 +0.6 |  8.28 / 7.97
+  THE FALSIFIER (G(fg_acc) >= +1.5 below 5% => the null is a READOUT failure
+  and the head is the limit) IS DEAD: measured -0.16 and -0.37, the wrong sign
+  entirely. A fresh head with 100x the cell's labels extracts NOTHING more from
+  the prior's trunk than from the baseline's. So the detection null is
+  feature-side: the prior does not improve detection features, full stop.
+  THE PROTOCOL IS DEMONSTRABLY WORKING, which is what licenses that reading:
+  at 1% the probe lifts fg_acc from the trained cell's 15.31 to 23.81, so the
+  trained detection head IS heavily label-limited at 107 images -- exactly the
+  condition under which the classification left flank hides +4.70 of feature
+  gain behind +1.91 of realized gain. The condition is met and there is still
+  nothing to find.
+  MY BANDS: G(fg_acc) +0.0..+1.0 at 1-5% -- 1% and 2% land NEGATIVE, outside on
+  the low side; 5% lands +0.34, in band. G(fg_iou) +0.000..+0.010 -- 1/2/25%
+  in, 10% in (+0.0073), 5% ABOVE at +0.0130. Scored as: right branch, wrong
+  numbers, and I over-predicted the classification side while under-predicting
+  the localization side.
+  *** THE ONE RESOLVABLE MOVEMENT IS LOCALIZATION, NOT CLASSIFICATION, AND IT
+  IS TINY: G(fg_iou) = +0.0073 +-0.0024 (3.1 sigma) at 10%, against a
+  classification G of +0.08 +-0.35 (0.2 sigma) at the same cell. The e2e
+  d_fg_iou there was +0.0032, so the probe reads about twice what the trained
+  head realizes -- the left-flank shape, at a magnitude far too small to
+  matter. State it as "the prior leaves detection classification features
+  untouched and its box-regression features very slightly better", and do not
+  dress 0.007 of IoU as a finding.
+  *** DETECTION CANNOT SUPPLY THE NEGATIVE-BRANCH LAW CELL AFTER ALL, and the
+  obstruction is structural rather than a shortfall of effort. The law needs G
+  on the SAME metric as Delta, i.e. AP50 -- and the PROBE's AP50 floors exactly
+  where the baseline sits below the crossing:
+      pct | base fg_acc | D AP50        | G AP50        | readout | branch
+       1% |    15.31    | -0.04 +-0.03  | +0.04 +-0.04  |  -0.07  | FLOOR (probe AP50 0.2)
+       2% |    21.57    | -0.00 +-0.04  | -0.01 +-0.04  |  +0.01  | FLOOR (probe AP50 0.4)
+       5% |    28.89    | -0.08 +-0.17  | +0.18 +-0.12  |  -0.26  | below -> NEG required
+      10% |    36.53    | +0.56 +-0.16  | +0.11 +-0.26  |  +0.45  | inside bracket, no call
+      25% |    46.27    | -0.41 +-0.60  | -0.31 +-0.19  |  -0.10  | above -> POS required
+  The two cells below the crossing whose probe clears the floor are 5% (readout
+  -0.26, correct sign, but |readout| is ~1 SEM so NOT resolvable) and nothing
+  else; 1-2% are floored on both sides, 10% is inside the bracket where the law
+  makes no call, and 25% gives -0.10 where a small positive was expected, again
+  unresolvable. SO: 0 resolvable law cells from detection, same structural
+  outcome as Pascal-Context (E-K), and for the same reason -- readout is a
+  difference of two numbers that are both ~0. THE NEGATIVE-BRANCH TEST REMAINS
+  UNSUPPLIED BY EITHER NON-CLASSIFICATION TASK, and that should be stated as a
+  limitation of the study rather than worked around a fifth time.
+  NET: detection contributes a clean feature-side NULL and no law cell. The
+  task axis now reads -- whatever the prior supplies is cashed fully by a
+  whole-image classifier, partly by a per-pixel classifier, and not at all by a
+  coordinate regressor, and the last of those is now known to be because the
+  features are not there rather than because the head cannot reach them.

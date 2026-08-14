@@ -1,0 +1,8 @@
+2026-08-09T00:59:47+02:00 start: 6 cells
+2026-08-09T01:19:20+02:00 rc=0 19min :: METHOD=simclr PCT=1 bash scripts/sslbudget_par_any.sh
+2026-08-09T01:37:48+02:00 rc=0 18min :: METHOD=simclr PCT=2 bash scripts/sslbudget_par_any.sh
+2026-08-09T02:01:49+02:00 rc=0 24min :: METHOD=simclr PCT=3 bash scripts/sslbudget_par_any.sh
+2026-08-09T02:48:00+02:00 rc=0 46min :: METHOD=simclr PCT=7 bash scripts/sslbudget_par_any.sh
+2026-08-09T04:17:33+02:00 rc=0 89min :: METHOD=simclr PCT=15 bash scripts/sslbudget_par_any.sh
+2026-08-09T06:41:54+02:00 rc=0 144min :: METHOD=simclr PCT=25 bash scripts/sslbudget_par_any.sh
+2026-08-09T06:41:54+02:00 ENVELOPE_COMPLETE

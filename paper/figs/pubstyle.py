@@ -21,6 +21,7 @@ axis is shared reads side by side and belongs in a `figure*`; a single panel,
 or an image grid, belongs in one column.
 """
 import matplotlib.pyplot as plt
+from matplotlib.transforms import Bbox
 
 # CAS double-column geometry, in inches.
 COL = 3.33    # one column   -> \begin{figure}
@@ -88,3 +89,42 @@ def panel(ax, title=None):
     for s in ("top", "right"):
         ax.spines[s].set_visible(False)
     return ax
+
+
+def save(fig, path, wide=False, dpi=300):
+    """Save trimming ONLY the vertical whitespace, with the width held fixed.
+
+    Why not plain bbox_inches="tight": it trims all four sides, so the output
+    width depends on how long that figure's y-tick labels happen to be. Placed
+    at \\linewidth those files are then rescaled by different factors -- we
+    measured 227pt to 261pt across nine figures, i.e. a 15% spread in effective
+    font size between figures that were all authored at the same 7.5pt. That is
+    exactly what rule 1 at the top of this file forbids, and trimming
+    whitespace is not worth reintroducing it.
+
+    So: take the tight bbox, then put the horizontal edges back to the full
+    canvas. Vertical padding (the real offender, 5-8% of height) goes; the
+    width stays at COL or WIDE, so \\linewidth scales 1:1 and every figure's
+    type is the size it was set at.
+    """
+    fig.canvas.draw()
+    bb = fig.get_tightbbox(fig.canvas.get_renderer())
+    w_in = WIDE if wide else COL
+    pad = 0.02
+    # Holding the width fixed CROPS anything that overruns it, and it does so
+    # silently: a legend label ran past the canvas edge and shipped as
+    # "unresolved (450" with the bracket cut off, which a referee found and we
+    # did not. Complain loudly instead -- the caller must shorten the label or
+    # shrink the legend, not discover it in the typeset PDF.
+    over = max(bb.x1 - w_in, -bb.x0)
+    if over > 0.005:
+        raise ValueError(
+            f"{path}: content overruns the {w_in:.2f}in canvas by {over*72:.1f}pt "
+            f"(tight bbox x {bb.x0:.3f}..{bb.x1:.3f}in). Widening is not an "
+            f"option (rule 1); shorten the offending label or reduce its size.")
+    box = Bbox([[0.0, bb.y0 - pad], [w_in, bb.y1 + pad]])
+    for ext in ("pdf", "png"):
+        fig.savefig(path if path.endswith(ext) else
+                    path.rsplit(".", 1)[0] + "." + ext,
+                    facecolor="white", bbox_inches=box,
+                    **({"dpi": dpi} if ext == "png" else {}))

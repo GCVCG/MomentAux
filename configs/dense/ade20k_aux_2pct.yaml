@@ -1,0 +1,50 @@
+# ADE20K (SceneParse150) semantic segmentation, 2% of the training set.
+#
+# THE SECOND DENSE POPULATION, and it is chosen for a specific reason. VOC is
+# object-centric and background-dominated, so its per-pixel accuracy stays
+# ~72-83% even where mIoU is 4.6. The dense probes showed the readout term
+# reads on the head's OWN classification scale rather than on mIoU -- a claim
+# that currently rests on one dataset whose two scales never separate much.
+# ADE20K has 150 scene classes and no background class, so pixel accuracy and
+# mIoU decouple far more sharply; it is the population that can actually test
+# that reading rather than merely repeat it.#
+# The dense recipe (SGD 0.01, batch 16, 512 crops with scale 0.5-2.0 and flip,
+# 200 epochs, cosine) is FROZEN across every dense cell on every population --
+# no per-dataset tuning, exactly as the classification grid is frozen. Both
+# arms of this pair are identical except the moment_aux block.
+#
+# *** SCHEDULE RE-PINNED 50 -> 200 EPOCHS (2026-08-11, user decision).
+# The original dense recipe used 50 epochs. The pre-registered L1 control
+# measured what that cost: voc@10% baseline 7.23 -> 18.42 mIoU at 200 epochs,
+# a +155% rise, so the 50-epoch envelope was measured on segmentors that were
+# nowhere near trained and its absolute numbers reported a WEAK RECIPE as much
+# as a weak prior. 200 epochs is not a tuned value -- it is the SAME budget the
+# frozen classification recipe uses at every fraction, which is what makes a
+# cross-task comparison (e.g. dense-vs-classification at matched images per
+# class) legitimate rather than confounded by schedule. Choosing the dense
+# budget by inspecting convergence curves was explicitly rejected: that would
+# tune the recipe to the task, which this study does nowhere else.
+# eval_every 5 -> 20 keeps the number of validation passes per run at 10.
+# The 50-epoch runs are preserved as the 1x arm of a schedule axis.
+name: ade20k_aux_2pct
+task: segmentation
+dataset: ade20k
+backbone: resnet18
+output_stride: 8
+epochs: 200
+batch_size: 16
+lr: 0.01
+weight_decay: 0.0001
+crop: 512
+num_workers: 4
+eval_every: 20
+pretrained: false
+subset_pct: 2
+stem_calibrate: true
+moment_aux:
+  stem: energy-magnitude
+  tap: backbone.layer3
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine
+  head_norm: true

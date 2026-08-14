@@ -1,0 +1,92 @@
+# Guard the things that have silently broken before.
+#
+# Every check here exists because the failure it catches actually reached the
+# outside world at least once:
+#
+#   * the unit suite pins the filter banks numerically, so no result can drift
+#     with a library version;
+#   * check_submission.py was written to stop a submission going out without a
+#     compiled PDF, then sat unused and a fourth submission went out without
+#     one -- a checker nobody runs is not a checker;
+#   * sync_public_numbers.py compares the README and the project page against
+#     the paper's generated macros, after both spent months advertising
+#     sign-law figures the paper had retracted.
+#
+# Deliberately NOT here: anything that needs the run records or a GPU. These
+# checks run on a clean clone in under a minute, which is what makes them get
+# run at all.
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          # torch and torchvision MUST be installed together from the SAME
+          # index. The first version of this job took torch from the PyTorch
+          # CPU index and let timm pull torchvision from PyPI; the two builds
+          # are ABI-incompatible and the first casualty is the
+          # torchvision::nms custom op, which timm registers at import. All 14
+          # test files then failed at collection with "operator
+          # torchvision::nms does not exist" -- the same breakage this
+          # project's environment notes flag as the canary for an ABI split.
+          pip install torch==2.7.0 torchvision==0.22.0 \
+            --index-url https://download.pytorch.org/whl/cpu
+          # timm with --no-deps so it cannot replace that matched pair; its
+          # real runtime needs are listed explicitly instead.
+          pip install --no-deps timm==1.0.27
+          # The rest of what tests/ and momentstem/ import. fvcore is easy to
+          # miss because only test_overhead_match.py needs it (the FLOP parity
+          # check that proves the deployed network is identical to baseline),
+          # and pytest aborts the whole collection when one module fails to
+          # import -- so a single absent package reads as a total failure.
+          pip install numpy==1.26.4 scipy scikit-learn torchmetrics pyyaml \
+            pandas pytest pillow fvcore safetensors huggingface_hub
+      - name: torchvision ops resolve (ABI canary)
+        # Fail here, with a one-line reason, rather than as 14 collection
+        # errors whose stack traces bury the cause.
+        run: |
+          python - <<'PY'
+          import torch, torchvision, timm
+          torch.ops.torchvision.nms
+          print(f"torch {torch.__version__} | torchvision {torchvision.__version__} "
+                f"| timm {timm.__version__} | torchvision::nms resolves")
+          PY
+      - name: Unit suite (includes the pinned filter-bank fingerprints)
+        run: python -m pytest tests/ -q
+
+  numbers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Public numbers match the paper
+        # Compares every tagged figure in README.md and docs/index.md against
+        # paper/tables/numbers.tex. Exits non-zero on a mismatch, so a stale
+        # headline cannot be merged.
+        run: python scripts/sync_public_numbers.py --check
+
+  submission:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install poppler for the page/word counts
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
+      - name: Submission package is complete and within the journal's limits
+        run: python paper/check_submission.py

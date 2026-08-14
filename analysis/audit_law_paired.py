@@ -46,8 +46,26 @@ def _evals(runs, cell):
 
 
 def in_scope(r):
+    """aux-from-scratch: an aux target, no pretrained/SSL init, plain stem.
+
+    THE `pretrained` TEST WAS A BUG AND IT COST 6.6 POINTS OF THE HEADLINE.
+    It read `str(...).lower() not in ("true", "1")`, but export_results_csv.py
+    writes this column as the STRING "yes" (184 rows) or "". "yes" is in
+    neither reject set, so all 91 resolvable-scope ImageNet-TRANSFER TAX cells
+    passed the filter and entered the audit -- the exact cells the 2026-07-29
+    entry places OUTSIDE the law's derived scope, and which the paper's own
+    methods section declares excluded. They enter with large negative Delta
+    and G and only 9 of 50 land on the predicted side, so the leak DEPRESSED
+    the reported rate: 511 resolvable / 79.1% with the leak, 461 / 85.7%
+    without. Every downstream figure moved the same way (below-crossing
+    87.7 -> 94.2%, held-out 80.1 -> 88.0%, residual SD 2.15 -> 1.95).
+    Test the column truthily, exactly as the `init_from` test beside it
+    already did -- that one was correct only because it never compared
+    against a literal. Sibling script analysis/audit_sign_law.py always had
+    this right, which is why the two disagreed.
+    """
     return (r.get("aux_target") and not r.get("init_from")
-            and str(r.get("pretrained", "")).lower() not in ("true", "1")
+            and not r.get("pretrained")
             and (r.get("stem") or "none") == "none")
 
 

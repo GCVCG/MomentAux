@@ -1,0 +1,54 @@
+# Pascal-Context semantic segmentation, 1% of the training set.
+#
+# TWO JOBS AT ONCE, which is why this population is worth its cost:
+#
+# (1) THE SAME-PIXELS CONTROL. It re-annotates the IDENTICAL VOC images that
+#     voc_seg trains on -- the dense analog of cifar100super, which is what
+#     settled the granularity question on the classification side. Change only
+#     the label space (21 -> 254) and watch what moves. Nothing else in the
+#     dense study can separate a pixel effect from a label-space effect, and
+#     the images are read straight from VOCdevkit so "same pixels" is literal.
+#
+# (2) THE LOW-PIXEL-ACCURACY POPULATION. ADE20K was chosen to sit BELOW the
+#     readout crossing bracket [31.8, 40.3] and, once trained, did not (34.0
+#     at 1%, 38.5 at 2% -- inside it, where the pre-registered no-call rule
+#     applies). E-C therefore had nothing to fire on. 254 classes over these
+#     images should push trained pixel accuracy clearly below the bracket,
+#     which is what the units test actually needs.
+#
+# PROTOCOL, stated: the 254 most frequent classes ranked on the TRAIN split
+# alone, tail mapped to ignore -- an 8-bit mask holds 255 values and 255 is
+# the ignore index. The cost is nil (the top 254 cover 100.00% of labelled
+# pixels; only ~253 of the 459 ever occur). Same protocol shape as
+# Cityscapes' standard 19-of-34. The split is the official 4,998 / 5,105.
+#
+# The dense recipe is FROZEN across every dense cell on every population.
+# Both arms of this pair are identical except the moment_aux block.
+#
+# *** SCHEDULE RE-PINNED 50 -> 200 EPOCHS (2026-08-11, user decision).
+# The original dense recipe used 50 epochs. The pre-registered L1 control
+# measured what that cost: voc@10% baseline 7.23 -> 18.42 mIoU at 200 epochs,
+# a +155% rise, so the 50-epoch envelope was measured on segmentors that were
+# nowhere near trained and its absolute numbers reported a WEAK RECIPE as much
+# as a weak prior. 200 epochs is not a tuned value -- it is the SAME budget the
+# frozen classification recipe uses at every fraction, which is what makes a
+# cross-task comparison (e.g. dense-vs-classification at matched images per
+# class) legitimate rather than confounded by schedule. Choosing the dense
+# budget by inspecting convergence curves was explicitly rejected: that would
+# tune the recipe to the task, which this study does nowhere else.
+# eval_every 5 -> 20 keeps the number of validation passes per run at 10.
+# The 50-epoch runs are preserved as the 1x arm of a schedule axis.
+name: pascalcontext_none_1pct
+task: segmentation
+dataset: pascalcontext
+backbone: resnet18
+output_stride: 8
+epochs: 200
+batch_size: 16
+lr: 0.01
+weight_decay: 0.0001
+crop: 512
+num_workers: 4
+eval_every: 20
+pretrained: false
+subset_pct: 1

@@ -1,0 +1,13 @@
+2026-08-09T17:25:31+02:00 queue start: 10 tasks, SLOTS=3, need 4000MiB
+2026-08-09T17:25:31+02:00 gpu free, running
+2026-08-09T17:26:02+02:00 [2] rc=0 :: ~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagsslbudget_simclr800_c100
+2026-08-09T17:26:05+02:00 [3] rc=0 :: ~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagsslbudget_simclr800_c100
+2026-08-09T17:26:05+02:00 [1] rc=0 :: ~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagsslbudget_simclr800_c100
+2026-08-09T17:26:46+02:00 [4] rc=0 :: ~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagsslbudget_simclr800_c100
+2026-08-09T17:26:47+02:00 [5] rc=0 :: ~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagsslbudget_simclr800_c100
+2026-08-09T17:26:47+02:00 [6] rc=0 :: ~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagsslbudget_simclr800_c100
+2026-08-09T17:26:54+02:00 [8] rc=0 :: ~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/ablations_full/auxmag_3pct_sched0.yaml
+2026-08-09T17:26:54+02:00 [9] rc=0 :: ~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/ablations_full/auxmag_15pct_sched0.yam
+2026-08-09T17:26:54+02:00 [7] rc=0 :: ~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/ablations_full/auxmag_2pct_sched0.yaml
+2026-08-09T17:27:04+02:00 [10] rc=0 :: ~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/ablations_full/auxmag_25pct_sched0.yam
+2026-08-09T17:27:04+02:00 QUEUE_COMPLETE  ok=10 failed=0

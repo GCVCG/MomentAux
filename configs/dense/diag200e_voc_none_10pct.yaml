@@ -1,0 +1,33 @@
+# voc_seg segmentation at 10% of the training set, LONG SCHEDULE (200 epochs). DIAGNOSTIC.
+#
+# WHY THIS CELL EXISTS. The dense envelopes returned Delta of +0.09..+2.57
+# mIoU, which reads as "the prior does almost nothing on segmentation" until
+# the baselines are looked at: VOC@100% reaches 33.6 mIoU where an
+# ImageNet-pretrained R18-FCN reaches ~65-70, and pascalcontext@1% has a
+# baseline of 0.76. At 50 epochs from scratch these segmentors are barely
+# trained, and mIoU -- a per-class mean with equal weight -- is dominated by
+# classes the model never learns at all. So the small absolute Deltas may be
+# reporting a WEAK RECIPE rather than a weak prior.
+#
+# This quadruples the schedule (50 -> 200 epochs, matching the classification
+# recipe's budget) and changes NOTHING else. Both arms get it, so Delta stays
+# valid. DIAGNOSTIC, never a headline row: it deviates from the frozen dense
+# recipe, which is why the name carries a diag prefix.
+#
+# The pair with pascalcontext keeps the same-pixels control intact at the new
+# schedule -- identical VOC images, 21 vs 254 classes.
+name: diag200e_voc_none_10pct
+task: segmentation
+dataset: voc_seg
+split: train_aug
+backbone: resnet18
+output_stride: 8
+epochs: 200
+batch_size: 16
+lr: 0.01
+weight_decay: 0.0001
+crop: 512
+num_workers: 4
+eval_every: 20
+pretrained: false
+subset_pct: 10

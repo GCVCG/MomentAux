@@ -133,11 +133,19 @@ def main():
             if cur is None or base_rank(cur) < base_rank(cell):
                 baselines[k] = cell
 
+    # 100/num_classes for every dataset in the grid. Anything absent fell back
+    # to 1.0, which is a 10x-too-lenient collapse threshold on ImageNet64
+    # (1000 classes, chance 0.1) and 5.9x too strict on So2Sat (17 classes).
     CHANCE = {"cifar100": 1.0, "cifar100super": 5.0, "cifar10": 10.0,
               "stl10": 10.0, "tin": 0.5, "tin20": 5.0, "tin20b": 5.0,
               "tinsuper": 5.0, "tinsem": 5.0, "cub": 0.5,
               "eurosat": 10.0, "dtd": 100.0 / 47, "pathmnist": 100.0 / 9,
-              "food101": 100.0 / 101}
+              "food101": 100.0 / 101,
+              "eurosatms_rgb": 10.0, "eurosatms_nir": 10.0,
+              "eurosatms_all": 10.0,
+              "so2sat_sar": 100.0 / 17, "so2sat_opt": 100.0 / 17,
+              "so2sat_all": 100.0 / 17,
+              "imagenet64": 0.1, "imagenet100": 1.0}
 
     rows = []
     for cell, rec in sorted(cells.items()):
@@ -152,9 +160,19 @@ def main():
         # whole trains. A mean over a bimodal set misrepresents both modes
         # (ConvNeXt-SGD grid re-runs: seeds {0.84, 42.25, 19.54}); flag it so
         # no downstream reader mistakes the mean for a typical run.
+        # THE OLD TEST WAS `mean(accs) > ch*3`, and it failed on exactly the
+        # cells it existed for: when the collapse is the MAJORITY mode the mean
+        # is dragged below the threshold, so the more bistable a cell is the
+        # less likely it was to be flagged. Swin/EuroSAT@15% is {11.1, 33.5,
+        # 11.1} at chance 10 -- two seeds dead, one training at 3.4x chance --
+        # and mean 18.6 < 30 left it unflagged, while its Delta of +73.7 became
+        # the largest single exception in the sign-law audit. Test the two modes
+        # separately instead: at least one seed at chance AND at least one
+        # clearly training. A cell where EVERY seed is at chance is dead rather
+        # than bistable and is still (correctly) not flagged here.
         ch = CHANCE.get(ds, 1.0)
         collapsed = [v for v in accs if v <= ch * 1.5]
-        bistable = bool(collapsed) and st.mean(accs) > ch * 3
+        bistable = bool(collapsed) and max(accs) >= ch * 2.0
         # headline requires the FROZEN recipe *and* >=3 seeds -- the study's
         # own repeated lesson is that 1-2 seed numbers support nothing.
         headline = (not cell.startswith("diag")

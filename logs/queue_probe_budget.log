@@ -1,0 +1,8 @@
+2026-08-09T16:50:10+02:00 queue start: 5 tasks, SLOTS=2, need 4000MiB
+2026-08-09T16:50:10+02:00 gpu free, running
+2026-08-09T16:50:37+02:00 [1] rc=0 :: ~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagsslbudget_simclr800_c100
+2026-08-09T16:50:37+02:00 [2] rc=0 :: ~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagsslbudget_simclr800_c100
+2026-08-09T16:51:03+02:00 [3] rc=0 :: ~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagdeitsslbudget_simclr800_
+2026-08-09T16:51:03+02:00 [4] rc=0 :: ~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagdeitsslbudget_simclr800_
+2026-08-09T16:51:25+02:00 [5] rc=0 :: ~/venvs/momentstem/bin/python analysis/linear_probe.py --config configs/sslbudget/diagdeitsslbudget_simclr800_
+2026-08-09T16:51:25+02:00 QUEUE_COMPLETE  ok=5 failed=0
