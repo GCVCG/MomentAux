@@ -34,3 +34,6 @@ logs/so2sat_push.log
 # tree drifts from it the moment either side is edited. See
 # paper/SUBMISSION_FILES.md for what to upload.
 paper/submission/
+
+# release assets are built on demand, never committed
+dist/
