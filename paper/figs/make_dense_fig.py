@@ -56,7 +56,10 @@ def load(name):
 def main():
     PS.use()
     res, law = load("dense_results.csv"), load("dense_law.csv")
-    fig, (axA, axB) = plt.subplots(1, 2, figsize=(PS.WIDE, 2.5))
+    # Two rows in one column: the panels answer different questions and do
+    # not share an axis, but at COL width they still read top-to-bottom and
+    # the figure stops competing for full-width float slots.
+    fig, (axA, axB) = plt.subplots(2, 1, figsize=(PS.COL, 4.15))
 
     # ---- (a) relative envelope ------------------------------------------
     for pop, label, col, mk in POPS:
@@ -79,7 +82,7 @@ def main():
     axA.set_ylim(_lo, _hi + 0.42 * (_hi - _lo))
     axA.legend(fontsize=PS.LEGEND - 0.6, frameon=False, ncol=2,
                loc="upper left", handlelength=1.6, columnspacing=0.9)
-    PS.panel(axA, "(a) the envelope is unimodal, and neutral at sufficiency")
+    PS.panel(axA, "(a) unimodal, neutral at sufficiency")
 
     # ---- (b) readout vs the head's own classification scale --------------
     axB.axvspan(BRACKET[0], BRACKET[1], color=PS.OI["yellow"], alpha=0.30, lw=0,
@@ -100,12 +103,14 @@ def main():
     axB.annotate(r"filled = resolvable ($|$readout$|>2\,$SEM)",
                  xy=(0.03, 0.94), xycoords="axes fraction", ha="left", va="top",
                  fontsize=PS.SMALL - 0.5, color=PS.MUTED)
-    PS.panel(axB, "(b) every resolvable cell sits above the crossing")
+    PS.panel(axB, "(b) every resolvable cell is above the crossing")
 
-    fig.tight_layout(pad=0.4, w_pad=1.2)
+    fig.tight_layout(pad=0.3, h_pad=1.0)
     out = os.path.join(HERE, "dense_envelope.pdf")
-    fig.savefig(out, bbox_inches="tight")
-    fig.savefig(out.replace(".pdf", ".png"), dpi=300, bbox_inches="tight")
+    # pad_inches=0.02 rather than matplotlib's default 0.1in: the default
+    # leaves 7.2pt of blank on every side, which at these figure widths is
+    # 5-8% of the graphic's height and reads as a white band inside the float.
+    PS.save(fig, out)
     n_res = sum(1 for r in law if r["resolvable"] == "True" and r["predicted_sign"])
     print("dense_envelope written; %d law cells, %d resolvable, "
           "pixAcc range %.0f-%.0f"

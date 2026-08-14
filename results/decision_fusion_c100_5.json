@@ -1,0 +1,290 @@
+{
+ "cells": {
+  "abl5_none": {
+   "mean_single": 25.490000000000002,
+   "seed_ensemble": 27.6
+  },
+  "auxmag_5pct_sched0": {
+   "mean_single": 30.689,
+   "seed_ensemble": 33.45
+  },
+  "diagssl_simclr_5pct": {
+   "mean_single": 34.63,
+   "seed_ensemble": 37.419999999999995
+  },
+  "diagssl_simclraux_5pct": {
+   "mean_single": 33.03333333333333,
+   "seed_ensemble": 35.31
+  },
+  "diagssl_none400_5pct": {
+   "mean_single": 27.496666666666666,
+   "seed_ensemble": 29.38
+  },
+  "diagssl_simclr50_5pct": {
+   "mean_single": 30.99,
+   "seed_ensemble": 33.25
+  },
+  "auxmag3_c100_5pct": {
+   "mean_single": 30.73333333333333,
+   "seed_ensemble": 32.64
+  },
+  "enmag_5pct": {
+   "mean_single": 28.77,
+   "seed_ensemble": 30.8
+  }
+ },
+ "pairs": [
+  {
+   "a": "abl5_none",
+   "b": "auxmag_5pct_sched0",
+   "acc_a": 27.6,
+   "acc_b": 33.45,
+   "ensemble": 32.47,
+   "gain_over_best": -0.980000000000004,
+   "disagreement": 49.64
+  },
+  {
+   "a": "abl5_none",
+   "b": "diagssl_simclr_5pct",
+   "acc_a": 27.6,
+   "acc_b": 37.419999999999995,
+   "ensemble": 37.65,
+   "gain_over_best": 0.23000000000000398,
+   "disagreement": 69.11
+  },
+  {
+   "a": "abl5_none",
+   "b": "diagssl_simclraux_5pct",
+   "acc_a": 27.6,
+   "acc_b": 35.31,
+   "ensemble": 36.5,
+   "gain_over_best": 1.1899999999999977,
+   "disagreement": 68.77
+  },
+  {
+   "a": "abl5_none",
+   "b": "diagssl_none400_5pct",
+   "acc_a": 27.6,
+   "acc_b": 29.38,
+   "ensemble": 29.28,
+   "gain_over_best": -0.09999999999999787,
+   "disagreement": 33.050000000000004
+  },
+  {
+   "a": "abl5_none",
+   "b": "diagssl_simclr50_5pct",
+   "acc_a": 27.6,
+   "acc_b": 33.25,
+   "ensemble": 33.43,
+   "gain_over_best": 0.17999999999999972,
+   "disagreement": 59.809999999999995
+  },
+  {
+   "a": "abl5_none",
+   "b": "auxmag3_c100_5pct",
+   "acc_a": 27.6,
+   "acc_b": 32.64,
+   "ensemble": 32.16,
+   "gain_over_best": -0.480000000000004,
+   "disagreement": 51.559999999999995
+  },
+  {
+   "a": "abl5_none",
+   "b": "enmag_5pct",
+   "acc_a": 27.6,
+   "acc_b": 30.8,
+   "ensemble": 32.01,
+   "gain_over_best": 1.2099999999999973,
+   "disagreement": 60.49
+  },
+  {
+   "a": "auxmag_5pct_sched0",
+   "b": "diagssl_simclr_5pct",
+   "acc_a": 33.45,
+   "acc_b": 37.419999999999995,
+   "ensemble": 38.66,
+   "gain_over_best": 1.240000000000002,
+   "disagreement": 57.709999999999994
+  },
+  {
+   "a": "auxmag_5pct_sched0",
+   "b": "diagssl_simclraux_5pct",
+   "acc_a": 33.45,
+   "acc_b": 35.31,
+   "ensemble": 37.37,
+   "gain_over_best": 2.059999999999995,
+   "disagreement": 55.64
+  },
+  {
+   "a": "auxmag_5pct_sched0",
+   "b": "diagssl_none400_5pct",
+   "acc_a": 33.45,
+   "acc_b": 29.38,
+   "ensemble": 33.7,
+   "gain_over_best": 0.25,
+   "disagreement": 50.32
+  },
+  {
+   "a": "auxmag_5pct_sched0",
+   "b": "diagssl_simclr50_5pct",
+   "acc_a": 33.45,
+   "acc_b": 33.25,
+   "ensemble": 34.65,
+   "gain_over_best": 1.1999999999999957,
+   "disagreement": 47.25
+  },
+  {
+   "a": "auxmag_5pct_sched0",
+   "b": "auxmag3_c100_5pct",
+   "acc_a": 33.45,
+   "acc_b": 32.64,
+   "ensemble": 33.410000000000004,
+   "gain_over_best": -0.03999999999999915,
+   "disagreement": 28.1
+  },
+  {
+   "a": "auxmag_5pct_sched0",
+   "b": "enmag_5pct",
+   "acc_a": 33.45,
+   "acc_b": 30.8,
+   "ensemble": 33.410000000000004,
+   "gain_over_best": -0.03999999999999915,
+   "disagreement": 41.42
+  },
+  {
+   "a": "diagssl_simclr_5pct",
+   "b": "diagssl_simclraux_5pct",
+   "acc_a": 37.419999999999995,
+   "acc_b": 35.31,
+   "ensemble": 37.36,
+   "gain_over_best": -0.05999999999999517,
+   "disagreement": 34.25
+  },
+  {
+   "a": "diagssl_simclr_5pct",
+   "b": "diagssl_none400_5pct",
+   "acc_a": 37.419999999999995,
+   "acc_b": 29.38,
+   "ensemble": 38.67,
+   "gain_over_best": 1.250000000000007,
+   "disagreement": 67.42
+  },
+  {
+   "a": "diagssl_simclr_5pct",
+   "b": "diagssl_simclr50_5pct",
+   "acc_a": 37.419999999999995,
+   "acc_b": 33.25,
+   "ensemble": 37.830000000000005,
+   "gain_over_best": 0.4100000000000108,
+   "disagreement": 52.239999999999995
+  },
+  {
+   "a": "diagssl_simclr_5pct",
+   "b": "auxmag3_c100_5pct",
+   "acc_a": 37.419999999999995,
+   "acc_b": 32.64,
+   "ensemble": 37.89,
+   "gain_over_best": 0.47000000000000597,
+   "disagreement": 58.37
+  },
+  {
+   "a": "diagssl_simclr_5pct",
+   "b": "enmag_5pct",
+   "acc_a": 37.419999999999995,
+   "acc_b": 30.8,
+   "ensemble": 37.330000000000005,
+   "gain_over_best": -0.0899999999999892,
+   "disagreement": 62.29
+  },
+  {
+   "a": "diagssl_simclraux_5pct",
+   "b": "diagssl_none400_5pct",
+   "acc_a": 35.31,
+   "acc_b": 29.38,
+   "ensemble": 37.4,
+   "gain_over_best": 2.0899999999999963,
+   "disagreement": 66.95
+  },
+  {
+   "a": "diagssl_simclraux_5pct",
+   "b": "diagssl_simclr50_5pct",
+   "acc_a": 35.31,
+   "acc_b": 33.25,
+   "ensemble": 36.59,
+   "gain_over_best": 1.2800000000000011,
+   "disagreement": 51.580000000000005
+  },
+  {
+   "a": "diagssl_simclraux_5pct",
+   "b": "auxmag3_c100_5pct",
+   "acc_a": 35.31,
+   "acc_b": 32.64,
+   "ensemble": 36.7,
+   "gain_over_best": 1.3900000000000006,
+   "disagreement": 56.81
+  },
+  {
+   "a": "diagssl_simclraux_5pct",
+   "b": "enmag_5pct",
+   "acc_a": 35.31,
+   "acc_b": 30.8,
+   "ensemble": 36.04,
+   "gain_over_best": 0.7299999999999969,
+   "disagreement": 60.61
+  },
+  {
+   "a": "diagssl_none400_5pct",
+   "b": "diagssl_simclr50_5pct",
+   "acc_a": 29.38,
+   "acc_b": 33.25,
+   "ensemble": 34.22,
+   "gain_over_best": 0.9699999999999989,
+   "disagreement": 59.17
+  },
+  {
+   "a": "diagssl_none400_5pct",
+   "b": "auxmag3_c100_5pct",
+   "acc_a": 29.38,
+   "acc_b": 32.64,
+   "ensemble": 33.25,
+   "gain_over_best": 0.6099999999999994,
+   "disagreement": 51.57000000000001
+  },
+  {
+   "a": "diagssl_none400_5pct",
+   "b": "enmag_5pct",
+   "acc_a": 29.38,
+   "acc_b": 30.8,
+   "ensemble": 33.14,
+   "gain_over_best": 2.34,
+   "disagreement": 60.3
+  },
+  {
+   "a": "diagssl_simclr50_5pct",
+   "b": "auxmag3_c100_5pct",
+   "acc_a": 33.25,
+   "acc_b": 32.64,
+   "ensemble": 34.38,
+   "gain_over_best": 1.1300000000000026,
+   "disagreement": 47.24
+  },
+  {
+   "a": "diagssl_simclr50_5pct",
+   "b": "enmag_5pct",
+   "acc_a": 33.25,
+   "acc_b": 30.8,
+   "ensemble": 34.339999999999996,
+   "gain_over_best": 1.0899999999999963,
+   "disagreement": 55.769999999999996
+  },
+  {
+   "a": "auxmag3_c100_5pct",
+   "b": "enmag_5pct",
+   "acc_a": 32.64,
+   "acc_b": 30.8,
+   "ensemble": 33.42,
+   "gain_over_best": 0.7800000000000011,
+   "disagreement": 46.57
+  }
+ ]
+}

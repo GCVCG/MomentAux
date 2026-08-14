@@ -131,6 +131,47 @@ def main():
     macro("auditUnresolved", num(len(unres)))
     macro("auditBracket", num(len(bracket)))
     macro("auditRate", dec(100.0 * len(ok) / len(res)))
+    # THE RESCOPING DISCLOSURE (Section 4.2), generated rather than typed.
+    # An earlier version of in_scope() tested the exporter's `pretrained`
+    # column against the strings "true"/"1" while the exporter writes "yes",
+    # so the ImageNet-transfer cells -- which the law's scope has excluded
+    # since it was first stated -- were silently counted. Restoring the filter
+    # moved the headline rate, so the manuscript reports the previous figure,
+    # the excluded cells, and how those cells behave on their own. Recomputed
+    # here under the OLD predicate so the two numbers cannot drift apart.
+    old_pred = ALP.in_scope
+    ALP.in_scope = lambda r: (
+        r.get("aux_target") and not r.get("init_from")
+        and str(r.get("pretrained", "")).lower() not in ("true", "1")
+        and (r.get("stem") or "none") == "none")
+    prev = ALP.load(os.path.join(ROOT, "runs"),
+                    os.path.join(ROOT, "results", "all_results.csv"))
+    ALP.in_scope = old_pred
+
+    def _split(rr):
+        rest_ = [r for r in rr if not (LO <= r["base"] <= HI)]
+        res_ = [r for r in rest_ if r["sem"] > 0 and abs(r["ro"]) > 2 * r["sem"]]
+        ok_ = [r for r in res_ if (r["base"] < LO and r["ro"] < 0)
+               or (r["base"] > HI and r["ro"] > 0)]
+        below = [r for r in res_ if r["base"] < LO]
+        below_ok = [r for r in below if r["ro"] < 0]
+        return res_, ok_, below, below_ok
+    p_res, p_ok, p_below, p_below_ok = _split(prev)
+    _, _, n_below, n_below_ok = _split(rows)
+    key = lambda r: (r.get("cell"), r.get("dataset"), r.get("subset_pct"))
+    keep = set(map(key, rows))
+    excl = [r for r in prev if key(r) not in keep]
+    e_res, e_ok, _, _ = _split(excl)
+    macro("auditPrevScope", num(len(prev)), "scope before the filter was restored")
+    macro("auditPrevResolvable", num(len(p_res)))
+    macro("auditPrevRate", dec(100.0 * len(p_ok) / len(p_res)))
+    macro("auditPrevBelowRate", dec(100.0 * len(p_below_ok) / len(p_below)))
+    macro("auditBelowRate", dec(100.0 * len(n_below_ok) / len(n_below)))
+    macro("auditExclCells", num(len(excl)))
+    macro("auditExclResolvable", num(len(e_res)))
+    macro("auditExclCorrect", num(len(e_ok)))
+    macro("auditExclWrong", num(len(e_res) - len(e_ok)))
+    macro("auditExclRate", dec(100.0 * len(e_ok) / len(e_res)))
     # Take the residual spread from the audit's OWN output rather than
     # recomputing it here: two implementations of one statistic is exactly how
     # 2.1 and 2.2 came to coexist in the manuscript.

@@ -22,16 +22,72 @@
 %% Alternating row shading: \zebra{n} starts the banding at body row n of
 %% the tabular (rows are counted from the first row after \begin{tabular},
 %% header rows included), so each table declares where its body begins.
+%% ROW n IS ALWAYS THE FIRST SHADED ROW, whatever its parity. This needs the
+%% \ifodd below, and without it the banding phase is silently wrong: xcolor's
+%% \rowcolors{n}{odd}{even} keys off each row's ABSOLUTE number, not off an
+%% offset from n, so plain \rowcolors{n}{}{rowshade} shades row n only when n
+%% is even. With a one-line header (\zebra{2}) that happened to be right; with
+%% a two-line header (\zebra{3}) it silently inverted, so half the tables in
+%% the paper opened on a shaded body row and half on a white one, and a table
+%% whose \zebra{} did not match its own header depth opened with TWO white
+%% rows in a row -- which reads as a missing band rather than as a pattern.
+%% ROW SHADING: ON, by the authors' decision. Noting the tension once so it is
+%% a choice on the record rather than an oversight -- the Information Fusion
+%% guide says "Avoid vertical rules and shading within table cells" under
+%% Tables. Vertical rules we do avoid (booktabs throughout). Banding we keep,
+%% because these tables are wide and read badly without a row cue. Swap the two
+%% definitions below to comply literally if a referee or the production editor
+%% asks.
 \definecolor{rowshade}{gray}{0.94}
-\newcommand{\zebra}[1]{\rowcolors{#1}{}{rowshade}}
+\newcommand{\zebra}[1]{%                             % banded (author's choice)
+  \ifodd#1\relax\rowcolors{#1}{rowshade}{}\else\rowcolors{#1}{}{rowshade}\fi}
+%\newcommand{\zebra}[1]{}                       % guide-literal: no cell shading
 %% Better-direction markers used in column headers, the standard benchmark
 %% convention: \up marks "higher is better", \down "lower is better".
+%% Standard error printed beside a delta, small and grey enough that the
+%% column still reads as a column of deltas rather than of pairs.
+\newcommand{\sem}[1]{\,{\tiny$\pm$#1}}
 \newcommand{\up}{$\uparrow$}
 \newcommand{\down}{$\downarrow$}
 %% ragged-right fixed-width column, so wide text columns wrap inside the
 %% narrow CAS column instead of being scaled by \resizebox (which used to
 %% give every table a different effective font size)
 \newcolumntype{P}[1]{>{\raggedright\arraybackslash\hspace{0pt}}p{#1}}  % L/C/R are taken by makecell;
+%% Stretchy first column, so every table spans its full measure instead of
+%% sitting centred with a ragged band of dead space beside it. THE SLACK GOES
+%% INSIDE A COLUMN, NOT INTO THE GUTTERS, and that is the whole point: the
+%% obvious alternative, tabular* with @{\extracolsep{\fill}}, puts the slack in
+%% inter-column glue, which \rowcolors does NOT paint -- the banding then shows
+%% a white break at every column boundary (measured: a 35pt hole through the
+%% shaded rows of the two-column audit table). An X column is a p-column, so
+%% its background is painted like any other cell and the banding stays solid.
+%% Y for a left-aligned label column, Z for a right-aligned one. Because the
+%% target width exceeds the table's natural width, the X column is always
+%% WIDER than its content, so nothing that fitted before can wrap now.
+\usepackage{tabularx}
+%% Two-line right-aligned table cell, WITHOUT a nested alignment. Table 3 needs
+%% ~114 of these (a count over a per-class count) and used \makecell, which
+%% typesets its content in a nested tabular. That broke the row banding in two
+%% separate ways, both measured:
+%%   (1) colortbl's row counter is advanced by every \cr, INCLUDING the ones
+%%       inside a nested alignment. Each \makecell therefore advanced it once
+%%       more, so a row carrying eleven of them advanced it twelve times and
+%%       rows carrying a "x" or "--" instead advanced it fewer. The parity that
+%%       \rowcolors alternates on was then effectively arbitrary: the rendered
+%%       table ran six shaded rows, one white, four shaded, one white.
+%%   (2) colortbl does not paint continuously behind a nested tabular, so a
+%%       white seam appeared between every pair of numeric columns.
+%% \mcell sets the two lines in a \parbox instead. A \parbox contains no
+%% alignment, so no \cr is issued and no seam is introduced; the width is the
+%% wider of the two lines, which reproduces \makecell[r]'s geometry exactly.
+\newlength{\mcellw}\newlength{\mcellx}
+\newcommand{\mcell}[2]{%
+  \settowidth{\mcellw}{#1}%
+  \settowidth{\mcellx}{#2}%
+  \ifdim\mcellx>\mcellw \setlength{\mcellw}{\mcellx}\fi
+  \parbox[t]{\mcellw}{\raggedleft\strut#1\par\strut#2}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash\hspace{0pt}}X}
+\newcolumntype{Z}{>{\raggedleft\arraybackslash}X}
 %% the \hspace{0pt} re-enables hyphenation of the first word, which plain
 %% \raggedright suppresses (long tokens like "ImageNet-transferable" then
 %% overflow no matter how the column is sized)
@@ -51,30 +107,98 @@
 \@ifundefined{numbersStamp}{\@latex@error{tables/numbers.tex is OUT OF DATE
   (no \string\numbersStamp). Regenerate it with:
   python scripts/make_paper_numbers.py > paper/tables/numbers.tex}\@ehd}{}
+\@ifundefined{auditAllPaired}{\@latex@error{tables/numbers.tex is OUT OF DATE
+  (\string\auditAllPaired\space missing). Regenerate it with:
+  python scripts/make_paper_numbers.py > paper/tables/numbers.tex}\@ehd}{}
 \makeatother
 
-%% Float placement is DISTRIBUTION-DEPENDENT: the same source kept figures
-%% in the body under TeX Live 2023 locally and deferred them to the appendix
-%% on Overleaf.
-%% NO placeins. \usepackage[section]{placeins} was tried and REMOVED: its
-%% \FloatBarrier flushes every pending float at each \section, and a flush
-%% ignores \floatpagefraction, so a small figure with nowhere to go claims a
-%% whole page and leaves the other column blank (Overleaf: 40pp with 6 such
-%% pages, against 36pp and none without it). It was also \IfFileExists-guarded
-%% and placeins is absent from this machine's TeX Live, so it loaded ONLY in
-%% the environment it was never tested in -- the same mistake as dblfloatfix.
-%% What keeps floats out of the appendix instead is deterministic and needs no
-%% package: the \clearpage before \input{sections/appendix} flushes every
-%% pending float while the body is still open, and floats carry [tb] rather
-%% than [t] so a column bottom is a second chance to place them before they
-%% start deferring.
-%% NOT dblfloatfix either: cas-dc.cls already loads stfloats (see its \RequirePackage
-%% line), and the two both define \c@dblbotnumber, so loading it errors with
-%% "Command \c@dblbotnumber already defined" on any distribution that has it.
-%% stfloats supplies the double-column bottom-float placement dblfloatfix would
-%% have added, so nothing is lost.
+%% ---- FLOAT PLACEMENT: the real cause, found by reproducing it -----------
+%% SYMPTOM (reported from Overleaf): Figures 2-10 all abandon the body and
+%% pile onto float pages at the end, while every table places normally.
+%%
+%% HOW IT WAS FOUND. Three earlier diagnoses here were WRONG and are recorded
+%% as such: it is not the [tb] specifier, not float.sty arriving with
+%% \usepackage{algorithm}, and not the \@fp... float-page glue. All three were
+%% inferred from a local TeX Live 2023 build that never reproduced the bug.
+%% It was settled by compiling in a TeX Live 2026 container (Overleaf runs
+%% 2025; local is 2023), where the fault appears immediately -- including on
+%% the pristine pre-edit source, which is what proved it was never a
+%% regression. In that container [tb], [tbp], [!tbp], [tp] and [htbp] all
+%% produced BYTE-IDENTICAL placement. A specifier that changes nothing is not
+%% being read.
+%%
+%% THE CAUSE. cas-common.sty does not merely style floats, it REPLACES them:
+%%     \RenewDocumentEnvironment { figure } { O{} }
+%%       { \__reset_fig: ... \keys_set:nn { cas / fig } { #1 }
+%%         \csxdef{fps@figure}{\l_fig_pos_tl} \@float{figure} ... }
+%% so the optional argument is a KEY-VALUE list (cas/fig keys: pos, width,
+%% cols, align, ...), NOT a LaTeX placement specifier, and \@float is then
+%% called with no optional argument at all. \__reset_fig: hard-resets the
+%% position to `t' on every figure. A bare [tbp] falls to the `unknown' key
+%% handler, which does \tl_set:Nn \l_fig_pos_tl {\l_keys_key_tl} -- storing
+%% the macro NAME rather than its value -- so by the time \csxdef expands it
+%% the intended placement is gone. Every figure in this paper had been
+%% top-of-column-only, whatever the brackets said, and a top-only float with
+%% nowhere to go defers until a \clearpage. `table' is defined the same way
+%% and defaulted to `t' too; tables merely suffered less because they are
+%% smaller.
+%%
+%% THE FIX: use the class's own interface, [pos=tbp], on every float. Verified
+%% in the TeX Live 2026 container: figures move from a nine-figure pile-up on
+%% pp. 27-31 to pp. 6-25, beside the sections that cite them, with zero float
+%% warnings; the same source is equally correct on local TeX Live 2023. Write
+%% [pos=...] for any float added later -- a bare [htbp] will silently do
+%% nothing.
+%%
+%% NO placeins (its \FloatBarrier ignores \floatpagefraction and produced
+%% near-empty float pages) and NO dblfloatfix (cas-dc already loads stfloats;
+%% both define \c@dblbotnumber). The end-of-body \clearpage that used to guard
+%% against pending floats is gone too -- with [pos=...] honoured, nothing pends.
 \usepackage{flafter}                                            % never place a float before its definition
+%% Pseudocode for the fusion-decision procedure. `algorithmic' ONLY -- we do
+%% NOT load `algorithm'.
+%% WHY, and it cost a regression to learn: algorithm.sty pulls in float.sty,
+%% and float.sty does not confine itself to the float type it defines. It does
+%%     \let\@float@Hx\@xfloat   \def\@xfloat#1[{...}
+%% i.e. it globally reroutes \@xfloat, the core placement macro for EVERY float
+%% class, in order to add its `H' specifier. cas-dc already loads stfloats,
+%% which patches the double-column float lists, and we load flafter, which
+%% patches \@floatplacement. Three packages plus the class all rewriting one
+%% mechanism is stable only by luck, and the luck ran out on TeX Live 2025: with
+%% float.sty loaded, Overleaf deferred EVERY single-column figure to float pages
+%% at the end of the body (Figures 2-10 on pp. 29-33) while every table placed
+%% normally -- a blocked figure queue, which is the FIFO cascade from one stuck
+%% float. Local TeX Live 2023 did not reproduce it.
+%% So Algorithm 1 is set inside an ordinary `table' float instead: the table
+%% class is the one we can SEE placing correctly on that very Overleaf run, and
+%% it needs no new float machinery. \caption is deliberately NOT used, so the
+%% table counter does not advance and the float is not numbered as a Table;
+%% \thealgnum supplies its own number, and \refstepcounter makes \ref work.
+\usepackage{algorithmic}
+\newcounter{algnum}
+\renewcommand{\thealgnum}{\arabic{algnum}}
+%% NO \extrafloats. It was added as insurance against "Too many unprocessed
+%% floats", but it works by extending \@freelist, and \@freelist is exactly what
+%% the multiply-patched float mechanism above manipulates. With [tbp] the queue
+%% drains at each page break and never approached the 18-float limit in any
+%% build we have measured, so the insurance was buying nothing and adding one
+%% more interaction. Re-add it only if that fatal error actually appears.
 
+%% SUBMISSION MODE. The Information Fusion guide requires the graphical
+%% abstract and the highlights to be uploaded as SEPARATE files ("Submit your
+%% graphical abstract as a separate file", "Submit highlights as a separate
+%% editable file ... with the word highlights in the file name"), and both are
+%% already listed as separate deliverables in SUBMISSION_FILES.md
+%% (figs/graphical_abstract_submission.png, highlights.txt). cas-dc none the
+%% less typesets each as its own prelim page, which added two pages to the
+%% compiled manuscript and pushed it past the journal's 10-35 page limit for a
+%% research article. Currently OFF, by the authors' decision: both pages are
+%% typeset, so the compiled PDF is self-contained. Set \submissionmodetrue to
+%% drop them -- they then travel as their own files (highlights.txt,
+%% figs/graphical_abstract_submission.png), exactly as the guide asks, and the
+%% manuscript comes back to 35 pages.
+\newif\ifsubmissionmode
+\submissionmodefalse
 \begin{document}
 \let\WriteBookmarks\relax
 %% FLOAT PLACEMENT. The two lines here were previously \def\floatpagepagefraction
@@ -98,6 +222,142 @@
 \setcounter{bottomnumber}{2}
 \setcounter{totalnumber}{6}
 \setcounter{dbltopnumber}{3}
+
+%% ---- FLOAT/TEXT SEPARATION ----------------------------------------------
+%% The class inherits LaTeX's defaults, and \textfloatsep is 20pt -- almost
+%% exactly 2em at 10pt type -- inserted BOTH above and below every float that
+%% lands at a column top or bottom. With [pos=tbp] on 37 floats that is where
+%% nearly all of them land, so the document reads as though every table and
+%% figure is fenced off by a blank band. \dbltextfloatsep does the same for the
+%% full-width floats. Halved here, with \floatsep (float-to-float) and
+%% \intextsep (in-line floats) brought down in proportion. The shrink
+%% components are kept so the page breaker retains room to manoeuvre; only the
+%% natural size changes.
+\setlength{\textfloatsep}{10pt plus 2pt minus 3pt}
+\setlength{\dbltextfloatsep}{10pt plus 2pt minus 3pt}
+\setlength{\floatsep}{8pt plus 2pt minus 2pt}
+\setlength{\dblfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+
+%% ---- THE SKIPS INSIDE THE FLOAT BOX -------------------------------------
+%% \textfloatsep above is only half of what separates a float from the text,
+%% and halving it alone left a gap that still measured 16.4pt (against a 2.7pt
+%% body line gap). The other half is INSIDE the float: cas-common's
+%% \__reset_fig: / \__reset_tbl: re-apply their own 6pt skips at the start of
+%% EVERY float, so a preamble \setlength cannot reach them -- they have to be
+%% redefined, which is what this does. Only the skips that are pure TRAILING
+%% or LEADING space in the float box are zeroed:
+%%   figure  = graphic, [abovecap], caption, [belowcap]   -> belowcap is trailing
+%%   table   = [abovecap], caption, [abovetbl], tabular, [belowtbl]
+%%                                          -> abovecap leads, belowtbl trails
+%% The skips that do design work -- graphic-to-caption and caption-to-tabular
+%% -- are KEPT (at 4pt, from 6pt). abovefig/belowfig are left at the class
+%% default because nothing here establishes where the class applies them.
+%% pos/cols/align are reproduced verbatim from cas-common so that redefining
+%% these macros changes spacing and nothing else.
+\ExplSyntaxOn
+\cs_set:Npn \__reset_fig:
+{
+  \tl_set:Nx \l_fig_pos_tl { t }
+  \tl_set:Nx \l_fig_cols_tl { 1 }
+  \tl_set:Nn \l_fig_align_tl { \raggedleft }
+  \skip_set:Nn \l_fig_abovecap_skip { 4pt }
+  \skip_set:Nn \l_fig_belowcap_skip { 0pt }
+  \skip_set:Nn \l_fig_abovefig_skip { 6pt }
+  \skip_set:Nn \l_fig_belowfig_skip { 6pt }
+}
+\cs_set:Npn \__reset_tbl:
+{
+  \tl_set:Nx \l_tbl_pos_tl { t }
+  \tl_set:Nx \l_tbl_cols_tl { 1 }
+  \tl_set:Nn \l_tbl_align_tl { \centering }
+  \skip_set:Nn \l_tbl_abovecap_skip { 0pt }
+  \skip_set:Nn \l_tbl_belowcap_skip { 0pt }
+  \skip_set:Nn \l_tbl_abovetbl_skip { 4pt }
+  \skip_set:Nn \l_tbl_belowtbl_skip { 0pt }
+}
+\ExplSyntaxOff
+
+%% ---- HEADING SPACING ----------------------------------------------------
+%% A DELIBERATE DEVIATION FROM THE CAS TEMPLATE, and the only one in this
+%% file that changes the publisher's own typography rather than fixing a
+%% conflict. cas-common opens a section with 15pt and a subsection with 10pt,
+%% against a 2.7pt body line gap (measured). Both are reduced by about a
+%% quarter. The definitions are copied verbatim from cas-common lines
+%% 1924-1935 -- same \@startsection level, indent, run-in style and font --
+%% so ONLY the leading skip changes; the trailing skips (4pt and 0.1pt) are
+%% untouched, since shrinking those would let a heading drift away from the
+%% text it introduces. Elsevier production re-typesets to house style in any
+%% case; delete this block to return to the template exactly.
+\makeatletter
+\renewcommand\section{\@startsection{section}{1}{\z@}%
+    {11pt \@plus 3\p@ \@minus 3\p@}%
+    {4\p@}%
+    {\sectionfont\raggedright\hst[13pt]}}
+\renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
+    {8pt \@plus 2\p@ \@minus 2\p@}%
+    {.1\p@}%
+    {\ssectionfont\raggedright}}
+\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
+    {8pt \@plus 1\p@ \@minus .3\p@}%
+    {.1\p@}%
+    {\sssectionfont\raggedright}}
+\makeatother
+
+%% ---- WHITE SPACE BEFORE AND AFTER FIGURES -------------------------------
+%% Reported from Overleaf (TeX Live 2025, pdfLaTeX) and reproducible here.
+%% MEASURED, not guessed. Two independent mechanisms, both fixed below.
+%%
+%% (1) FLOAT PAGES CENTRE THEIR CONTENT. LaTeX's defaults are
+%%       \@fptop = 0pt plus 1fil   \@fpsep = 8pt plus 2fil   \@fpbot = 0pt plus 1fil
+%%     -- all infinitely stretchable -- so a page made entirely of floats
+%%     distributes them down the page instead of stacking them at the top. One
+%%     figure on such a page is left marooned with a large white band above AND
+%%     below it, which is exactly the reported symptom. This only became
+%%     reachable when the floats gained `p' placement (the fix for figures
+%%     spilling into the appendix), and whether a float page is built at all
+%%     depends on where the page breaks fall -- which is why TeX Live 2025
+%%     shows it and 2023 here did not. Removing `p' would bring the appendix
+%%     spill back, so instead: kill the stretch at the TOP and keep it at the
+%%     bottom, and float pages fill downward from the top margin like a normal
+%%     page.
+%%     \@fpsep MUST BE RIGID TOO, and the first version of this fix got that
+%%     wrong. It was left at `12pt plus 1fil' with the comment "a little
+%%     stretch so two floats sharing a page are not jammed together" -- but
+%%     1fil is not a little stretch, it is the same infinite order as
+%%     \@fpbot's, so the two split the leftover space equally. Two tables
+%%     sharing a float column then sat 72.0pt apart (measured on Tables 15/16
+%%     at p.19) with an equal band below, which reads as a hole between two
+%%     tables. Matching \@fpsep to \floatsep makes floats on a float page
+%%     stack exactly as they do on an ordinary page and sends all the slack
+%%     to \@fpbot, where a short column is the normal, unremarkable outcome.
+%%
+%% (2) \flushbottom STRETCHES FLOAT-HEAVY COLUMNS. cas-dc sets \flushbottom
+%%     (verified by probe), which forces every column to exactly \textheight by
+%%     inflating the glue inside it. That is invisible on a text page, where
+%%     there is plenty of inter-paragraph glue to absorb it. On a column that is
+%%     mostly figure -- and \textfraction is relaxed to 0.06 here, so a column
+%%     may be 94% float -- there is almost nothing to stretch except the space
+%%     around the float, so the slack lands there. \raggedbottom collects the
+%%     slack at the column FOOT instead, where it reads as a short column rather
+%%     than as a gap wrapped around a figure. Columns may now end at slightly
+%%     different heights; that is the accepted trade and is standard for
+%%     figure-dense two-column papers.
+\makeatletter
+\setlength{\@fptop}{0pt}
+\setlength{\@fpsep}{8pt plus 2pt minus 2pt}     % = \floatsep, deliberately rigid
+\setlength{\@fpbot}{0pt plus 1fil}
+\setlength{\@dblfptop}{0pt}
+\setlength{\@dblfpsep}{8pt plus 2pt minus 2pt}  % = \dblfloatsep
+\setlength{\@dblfpbot}{0pt plus 1fil}
+\makeatother
+%% NO \raggedbottom. It was added to stop \flushbottom inflating float-heavy
+%% columns, but it also changes how much material a column accepts, which
+%% feeds straight back into float placement -- and placement is the problem we
+%% cannot reproduce locally. Reverted so the machinery matches the
+%% configuration Overleaf placed correctly; the \@fp... glue above stays,
+%% because it only governs how an already-built float PAGE is filled and
+%% cannot influence whether a float is placed in a column.
 
 \shorttitle{When does fusing knowledge with learned representations pay?}
 \shortauthors{A. AlMughrabi et~al.}
@@ -123,8 +383,8 @@
 \ead{petia.ivanova@ub.edu}
 
 % Affiliations are numbered by order of FIRST APPEARANCE in the author list,
-% which is the Elsevier convention. Adding TUM in third position therefore
-% renumbers Universitat Pompeu Fabra from 2 to 3.
+% which is the Elsevier convention: UB (AlMughrabi) 1, TUM (Busam) 2,
+% UPF (Marques) 3. Reordering or removing an author renumbers these.
 \affiliation[1]{organization={Universitat de Barcelona},
                 city={Barcelona}, country={Spain}}
 \affiliation[2]{organization={Technical University of Munich},
@@ -139,14 +399,14 @@ tables: \url{https://github.com/GCVCG/MomentAux}}
 \begin{abstract}
 Fusing prior knowledge with data-driven learning is attractive where data
 is scarce, yet no controlled account says when such fusion helps, is
-redundant, or harms. We present a
-benchmark that measures one fixed, hand-crafted source of knowledge, a
+redundant, or harms. We benchmark one fixed, hand-crafted source of knowledge, a
 pinned bank of Gabor targets injected only during training at $\sim$2\%
 compute overhead, against the data-driven alternatives (SimCLR, SimSiam and
 DINO pre-training, ImageNet transfer, heavy augmentation, learned teachers)
 under one frozen recipe with fixed subsets: 13 datasets, 9 backbones,
 500 to 1.28M images, 32 to 224\,px, and 5.7M to 86M parameters
-($\computeCells$ configurations over $\computeRuns$ runs). Every pairwise
+($\computeCells$ classification configurations over $\computeRuns$ runs,
+plus segmentation and detection transplants). Every pairwise
 combination is measured, and all follow one rule at training time
 (decision-level fusion behaves differently): different-\emph{currency}
 sources stack (prior with augmentation), same-currency sources substitute
@@ -160,19 +420,27 @@ two satellites (Sentinel-1 radar with Sentinel-2 optical) never does; the
 two settings differ in both source asymmetry and modality, and our design
 cannot say which is operative. Underlying it is an empirical
 decomposition,
-$\Delta = G + \mathrm{readout}(\mathrm{base})$, whose sign holds on $79\%$
+$\Delta = G + \mathrm{readout}(\mathrm{base})$, whose sign holds on $\auditRate\%$
 of testable cells and which, registered in advance, called an unseen
 backbone family's feature gain from baseline heights alone. Code and data:
 \href{https://amughrabi.github.io/MomentAux}{\texttt{amughrabi.github.io/\allowbreak MomentAux}}.
 \end{abstract}
 
+\ifsubmissionmode\else
 \begin{graphicalabstract}
-%% NB: inside cas-dc's PrelimsAbstract box, \linewidth is wider than the
-%% box that actually receives the image, so \linewidth overflows by ~124pt.
-%% Use an explicit width that fits the abstract measure.
+%% The document's single Overfull \hbox (123.63pt, reported at \maketitle) is
+%% NOT this image and must not be "fixed" by shrinking it -- MEASURED: the
+%% overflow is byte-identical at 0.72\columnwidth and at 0.98\columnwidth, so it
+%% does not depend on the graphic at all. It is cas-dc's own prelims geometry:
+%% the class typesets the graphical-abstract block at \hsize = 494.51pt and then
+%% sets it into a 370.88pt slot. The image is scaled to \columnwidth here, which
+%% aligns it with the title block above and stays inside the printed measure;
+%% only the class's internal box is over-wide, and that is cosmetic in the log.
 \includegraphics[width=0.98\columnwidth]{figs/graphical_abstract.pdf}
 \end{graphicalabstract}
+\fi
 
+\ifsubmissionmode\else
 \begin{highlights}
 \item A \computeCells-configuration benchmark of data-efficiency interventions
 \item Splitting one instrument's bands pays; pairing two satellites does not
@@ -180,6 +448,7 @@ backbone family's feature gain from baseline heights alone. Code and data:
 \item Free prior beats 2$\times$-compute SSL on small ViTs; at 5$\times$ the ordering flips with data
 \item Attention's feature deficit persists at 1.28M images and grows with scale
 \end{highlights}
+\fi
 
 \begin{keywords}
 information fusion \sep data-efficient learning \sep hand-crafted priors \sep
@@ -199,6 +468,12 @@ self-supervised learning \sep auxiliary losses \sep benchmark
 \input{sections/s4_ablations_discussion}
 
 %% ------------------------------------------------------------------
+%% NO end-of-body \clearpage. It was a backstop for floats still pending at the
+%% end of the body, which was a real risk while every figure was silently
+%% top-only. With [pos=...] actually reaching the class, nothing pends: verified
+%% under TeX Live 2026 (the version that reproduced the original fault) that
+%% removing it leaves every figure where it was, produces no float warning, and
+%% saves the page the forced break was costing.
 \section*{Acknowledgments}
 This work was partially funded by the EU project FoodWISE,
 2021-SGR-01094 (AGAUR), Icrea Academia'2022 (Generalitat de Catalunya),
@@ -230,7 +505,7 @@ reported in this paper.
 \section*{Data availability}
 All artifacts needed to reproduce every number in this paper are released
 at \url{https://github.com/GCVCG/MomentAux}: the training and
-evaluation harness (configs for all \computeCells{} cells, the subset
+evaluation harness (configs for every cell, the subset
 indices, the fingerprinted filter banks, the single training command,
 the aggregation and audit scripts), and the complete result tables in open
 formats. The tagged release additionally carries the \emph{raw} evidence as
@@ -261,10 +536,13 @@ take full responsibility for the content of the published article.
 \bibliographystyle{unsrtnat}
 \bibliography{refs}
 
-%% Flush every pending float before the appendix starts. Without this a
-%% deferred body figure can be placed among the appendices, which is what was
-%% reported from Overleaf.
-\clearpage
+%% NO \clearpage here. It used to flush pending floats before the appendix, but
+%% that job now belongs to the end-of-body flush above (which discharges them
+%% among the body pages instead of after the reference list), and every float
+%% carries [tbp] so nothing should still be pending. Keeping a second break here
+%% only forced the appendix onto a fresh page and cost roughly a page of the
+%% journal's 35-page limit. Verified under the stricter float regime that
+%% reproduced the original spill: no float reaches the appendix without it.
 \input{sections/appendix}
 
 \end{document}

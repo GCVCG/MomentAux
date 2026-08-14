@@ -264,6 +264,12 @@ for dy, txt, fs0, col, bold in [
 
 _stem = "graphical_abstract_submission" if os.environ.get("GA_SUBMISSION") == "1" \
         else "graphical_abstract"
+# NO bbox_inches="tight" here, deliberately, and it is the one exception in
+# this directory. The graphical abstract is a separate submission deliverable
+# with a MANDATED canvas -- 2.5:1 at 1889x755, above Elsevier's 1328x531
+# minimum (see SUBMISSION_FILES.md). Cropping to the ink would change both
+# the aspect ratio and the pixel dimensions, i.e. break the requirement in
+# order to save a few points of margin that the journal expects to be there.
 for ext in ("pdf", "png"):
     fig.savefig(os.path.join(HERE, f"{_stem}.{ext}"), facecolor="white")
 print("graphical abstract written; law-scope points:",

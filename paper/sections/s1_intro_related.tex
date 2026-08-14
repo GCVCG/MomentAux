@@ -65,9 +65,9 @@ features under identical probing, we find across the grid that
 where the readout term depends, to a good approximation, only on the
 \emph{baseline accuracy} of the cell: it is negative below a crossing
 located at ${\sim}32$--$40\%$ accuracy, near zero at the crossing, and
-small and positive above it. The sign prediction holds in $79\%$ of the
-511 cells where measurement uncertainty allows it to be tested, and
-in $88\%$ of those below the crossing
+small and positive above it. The sign prediction holds in $\auditRate\%$ of the
+\auditResolvable{} cells where measurement uncertainty allows it to be tested, and
+in $94\%$ of those below the crossing
 (Section~\ref{sec:law}), and its quantitative form survived our hardest
 pre-registered tests: it predicted the feature gain of a backbone family it
 had never seen (Swin) from baseline heights alone, and at ImageNet scale it
@@ -102,10 +102,11 @@ mid-data band on photographic datasets, but under the modern DeiT recipe
 the comparison flips at every fraction we measure at matched
 ${\sim}2\times$ cost, because the recipe itself supplies the invariance
 SimCLR was being paid that compute to learn. Buying the comparator
-$5\times$ instead removes the flip on Tiny-ImageNet and leaves it only
-above ${\sim}10\%$ of CIFAR-100 (Section~\ref{sec:budget}), so the
-comparison is a statement about budget and population, not a ranking of
-methods.
+$5\times$ narrows the flip to the higher-data band, where the prior still
+wins on both populations, while the comparator takes the scarcest cells
+(Section~\ref{sec:budget}); the ordering therefore tracks the data
+fraction, and the comparison is a statement about budget and regime, not a
+ranking of methods.
 
 \paragraph{Contributions.}
 \begin{enumerate}
@@ -120,14 +121,24 @@ methods.
     500 to 1.28M images.
   \item \textbf{The law} (Section~\ref{sec:law}): $\Delta = G +
     \mathrm{readout}(\mathrm{base})$, validated from CIFAR scale to
-    ImageNet scale, with its boundary cases reported as findings.
+    ImageNet scale, with its boundary cases reported as findings rather
+    than excluded --- including the one patterned failure, where features
+    improve at sufficiency while accuracy does not follow
+    (Section~\ref{sec:exceptions}). The same account resolves an apparent
+    puzzle at ImageNet scale: three backbones on identical data give three
+    different envelope shapes, and the difference is only where each sits
+    on its own readout curve (Section~\ref{sec:scaleenvelope}).
   \item \textbf{A fusion taxonomy with mechanism}
     (Section~\ref{sec:fusion}): stack, substitute, or tax, decided by
     whether the fused sources carry the same information currency, and
     verified on the feature side, not just end-to-end.
-  \item \textbf{A decision guide} (Section~\ref{sec:guide}): a
-    regime-indexed recommendation table distilled from the grid, with
-    costs attached.
+  \item \textbf{A procedure, not only a taxonomy}
+    (Section~\ref{sec:procedure}): because each source's currency is
+    measurable from that source \emph{alone}, the outcome of combining two
+    is predictable before the combination is trained. We state this as an
+    algorithm, run it end to end on a pair whose answer we then verify by
+    training, and distil the grid into a regime-indexed guide with costs
+    attached (Section~\ref{sec:guide}).
 \end{enumerate}
 
 In one line, what the grid says: measure each source's currency alone and
@@ -361,7 +372,7 @@ question has been answered.
 
 \subsection{The gap this paper closes}\label{sec:gap}
 
-\begin{table}[tb]
+\begin{table}[pos=htbp]
 \caption{Where the literature stands on the five properties a fusion
 question needs, and what this work adds. \cmark{} = property present;
 \pmark{} = partial or incidental; \xmark{} = absent. ``Cost-normalized''
@@ -374,7 +385,7 @@ happens when two sources are applied together.}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \zebra{2}
-\begin{tabular}{@{}lccccc@{}}
+\begin{tabular}{lccccc}
 \toprule
 Line of work & \rotbox{one frozen recipe} & \rotbox{cost-normalized} &
   \rotbox{feature-side} & \rotbox{combinations} & \rotbox{predictive model} \\

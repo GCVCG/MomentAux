@@ -56,18 +56,18 @@ ax.axhline(0, color=PS.RULE, lw=0.7, zorder=1)
 # plotted in the order the audit reads them: the two classes that TEST the
 # law first, then the two that cannot.
 ax.scatter(*zip(*pts["unres"]), s=6, c="#c9c9c9", lw=0, alpha=0.75, zorder=2,
-           label=f"cannot test it: unresolved ({len(pts['unres'])})")
+           label=f"unresolved ({len(pts['unres'])})")
 ax.scatter(*zip(*pts["bracket"]), s=7, c=OI["grey"], marker="D", lw=0,
            alpha=0.8, zorder=2,
-           label=f"cannot test it: in bracket ({len(pts['bracket'])})")
+           label=f"in bracket ({len(pts['bracket'])})")
 ax.scatter(*zip(*pts["correct"]), s=9, c=OI["blue"], lw=0, alpha=0.85,
-           zorder=3, label=f"tests it: sign as predicted ({len(pts['correct'])})")
+           zorder=3, label=f"sign as predicted ({len(pts['correct'])})")
 # The wrong class is a fifth the size of the correct one, so it is drawn at
 # comparable ink weight rather than the heavier stroke it had when there were
 # only ten of them: a marker sized for 10 points reads as a crowd at 107.
 ax.scatter(*zip(*pts["wrong"]), s=12, c=OI["verm"], marker="x", lw=0.85,
            alpha=0.9, zorder=4,
-           label=f"tests it: sign wrong ({len(pts['wrong'])})")
+           label=f"sign wrong ({len(pts['wrong'])})")
 ax.set_xlabel("baseline accuracy (%)")
 ax.set_ylabel(r"readout $=\Delta-G$ (points)")
 ax.set_xlim(0, 100)
@@ -91,7 +91,10 @@ leg = ax.legend([handles[i] for i in order], [labels[i] for i in order],
                 frameon=False, handletextpad=0.35, columnspacing=1.0,
                 borderaxespad=0.0, markerscale=1.7, fontsize=PS.LEGEND)
 fig.tight_layout(pad=0.4)
-fig.savefig(os.path.join(HERE, "law_scatter.pdf"))
+# pad_inches=0.02 rather than matplotlib's default 0.1in: the default
+# leaves 7.2pt of blank on every side, which at these figure widths is
+# 5-8% of the graphic's height and reads as a white band inside the float.
+PS.save(fig, os.path.join(HERE, "law_scatter.pdf"))
 print("law_scatter:", {k: len(v) for k, v in pts.items()})
 
 # ---------------------------------------------------------------- fig 2
@@ -105,7 +108,10 @@ vit_d = [3.20, 6.01, 9.48, 16.34, 18.69, 21.00, 24.59, 25.05, 13.86]
 
 # One column, two rows: authored at the width it is placed at, so the
 # panel contents are drawn at the size the reader sees.
-fig, axes = plt.subplots(2, 1, figsize=(PS.COL, 4.25), sharex=True)
+# 3.6in rather than 4.25: at the taller size the two panels sat far apart and
+# the float ran to 306pt in a ~690pt column, which reads as air above and below
+# the data. The panels share an x axis, so the height buys nothing.
+fig, axes = plt.subplots(2, 1, figsize=(PS.COL, 3.6), sharex=True)
 for ax in axes:
     ax.axhline(0, color=PS.RULE, lw=0.7)
     ax.set_xscale("log")
@@ -128,6 +134,6 @@ b.set_ylabel(r"prior gain $\Delta$ (points)")
 b.set_title("(b) ViT-tiny, CIFAR-100", loc="left")
 b.legend(frameon=False, loc="upper left", handlelength=1.6)
 
-fig.tight_layout(pad=0.4, h_pad=1.0)
-fig.savefig(os.path.join(HERE, "envelopes.pdf"))
+fig.tight_layout(pad=0.3, h_pad=0.6)
+PS.save(fig, os.path.join(HERE, "envelopes.pdf"))
 print("envelopes written")

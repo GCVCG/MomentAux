@@ -1,13 +1,108 @@
 # Response to the referee
 
-This letter is cumulative and is organized newest first: round 3, then
-round 2, then round 1. The referee was right in round 3 that our previous
-letter answered only the first review and carried numbers the manuscript
-had superseded; every figure below is now the manuscript's current value,
-and where a round 1 table predates a change in the audit's scope, both
-values are shown rather than the old one quietly overwritten.
+This letter is cumulative and is organized newest first: round 4, then round
+3, round 2 and round 1.
 
-Across three rounds we have not disputed a point, because we have not yet
+---
+
+## Round 4
+
+Four items, two of them blocking. We accept all four. One correction to the
+record first, because it bears on how the referee should read the rest: the
+letter was not deleted. It was moved from `paper/` to `docs/` so that
+`paper/` would hold only files LaTeX compiles, and `SUBMISSION_FILES.md`
+lists only files under `paper/`. The assembled package therefore dropped it
+silently. That is a worse failure than deleting it deliberately would have
+been, because nobody involved knew it had happened, and it is the same shape
+as the `.gitignore`/`main.pdf` fault: a manifest that cannot see a file
+cannot report it missing. The manifest now names the letter with its real
+path, and `check_submission.py` fails without it.
+
+**B1. The headline moved from 79.1% to 85.7% and we did not say so.**
+Accepted without qualification, and the referee's reconstruction is exactly
+right. We have added a paragraph to Section 4.2 that states the previous
+figure, the scope rule, why it is the correct one, that it was applied when
+the law was first stated and lost when the audit was rewritten for
+seed-paired uncertainty, and the split of the cells it removes. The numbers
+are generated, not typed: `make_paper_numbers.py` now recomputes the audit a
+second time under the *old* predicate and emits `auditPrevRate`,
+`auditPrevResolvable`, `auditExclCells`, `auditExclResolvable`,
+`auditExclWrong`, `auditExclCorrect`, `auditExclRate` and the two
+below-crossing rates, so the disclosure cannot drift from the table it
+discloses.
+
+Every figure in the referee's report reproduces from our records: 1,100
+cells to 1,009, 511 resolvable to 461, 79.1% to 85.7%, and of the 50
+resolvable cells removed, 41 wrong against 9 correct. Below the crossing the
+count of correct cells is unchanged at 293 while 23 disappear, all of them
+wrong, moving that flank from 87.7% to 94.2%. Answering the referee's
+question directly: taken on their own the excluded cells agree with the sign
+law **18.0%** of the time. We report that in the manuscript rather than only
+here, because it is a result — it is the tax of Section 6.3 seen from the
+readout side — and because a rate that low is precisely why removing those
+cells moves the headline as much as it does.
+
+The specific defect was that the scope filter tested the exported
+`pretrained` field against the strings `true` and `1` while the exporter
+writes `yes`. We note it in the audit script's own docstring as well, since
+that is where the next person will look.
+
+**B2. Response letter.** This section is the answer. The letter now covers
+rounds 1 to 4 and ships with the package.
+
+**NB1. Figure 3's clipped legend.** Fixed, and the class of fault is fixed
+with it. `pubstyle.save` holds every figure's width at the column measure so
+that figures are not rescaled by different factors in LaTeX; when a label
+overran that width it was *cropped, silently*, which is how
+`cannot test it: unresolved (450` reached the referee. `save` now raises
+rather than crops. Running it over the whole figure set immediately caught a
+**second** clipped figure — Figure 8's panel title overran by 18.3 points —
+which the parenthesis check could not have found because nothing in it was
+unbalanced. Both are regenerated; all eleven figures now pass, and the text
+layer of every one has balanced parentheses.
+
+**NB2. The variance decomposition moved with the rescoping.** Section 4.1
+now says so, gives the previous four values, and explains the direction: the
+removed cells carry large negative Δ and large negative G and were the
+widest-scattered points in the fit.
+
+**NB3. Unused macros.** `vitBestDelta` is now used in Section 3.8, where it
+was doing its consistency-check job as a comment.
+
+**NB4. The 50-epoch ensemble checkpoint, raised for the third time.** Our
+apologies for needing three rounds. The reason is that the regression carries
+an asymmetry term, so a pair whose members differ greatly in accuracy reports
+that gap rather than diversity; 50 epochs is where SimCLR sits within a point
+of the prior (30.81 against 30.53) where 200 and 800 epochs put it 3.9 and
+9.2 points ahead. Section 7 now states this, states that the alternative
+would confound diversity with the budget effect Section 6 isolates, and
+states the cost — we have not measured how a longer-pre-trained arm
+ensembles.
+
+**NB5.** We agree and have not folded the dense law cells into the headline
+audit.
+
+**NB6. Pascal-Context.** Reordered so the limitation precedes the result, and
+sharpened: the obstruction is not only that the baseline sits below the
+bracket but that Δ runs +0.10 to +0.17 mIoU there, so readout is a difference
+between two small numbers whatever its sign.
+
+**Question 2: was `check_submission.py` run?** No. It was written during the
+round-3 revision and never added to the packaging step, so it existed and sat
+unused — which is the referee's "fixes what is named and does not always
+generalize the naming" with an unusually clean illustration. It is now run,
+and it now also checks the response letter and the highlights-to-manuscript
+consistency. It passes.
+
+---
+
+The referee was right in round 3 that our previous letter answered only the
+first review and carried numbers the manuscript had superseded; every figure
+below is now the manuscript's current value, and where a round 1 table
+predates a change in the audit's scope, both values are shown rather than the
+old one quietly overwritten.
+
+Across four rounds we have not disputed a point, because we have not yet
 found one that was wrong. Two of the referee's objections cost us the
 paper's headline number and one of its claims: the sign-law agreement fell
 from 96.4% to **79.1%** when we accepted that our uncertainty formula
@@ -15,7 +110,7 @@ assumed an independence that does not hold, and the correlation between
 source asymmetry and fusion gain was **withdrawn from the abstract** rather
 than defended. Both changes are in the paper.
 
-**What changed in round 3.** The two blocking issues, both clerical: the
+**What changed in rounds 1-3.** The two blocking issues, both clerical: the
 letter is rewritten (this document), and the ViT baseline in Section 3.5 is
 corrected from 62.7% to **61.4%**, which is what the records say and what
 makes Table 8's +13.9 consistent. Beyond those, we took the referee's

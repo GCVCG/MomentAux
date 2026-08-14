@@ -26,7 +26,7 @@ fixed subset indices are identical across the sources and the
 configuration is the champion verbatim with only the source changed, so
 nothing but the input varies.
 
-\begin{table}[pos=tbp]
+\begin{table}[pos=htbp]
 \caption{Does a second source pay? Fusion gain is the fused arm minus the
 better single source, at matched data. Sorted by data fraction. Three seeds
 per cell, ResNet-18; the champion configuration is used verbatim
@@ -35,8 +35,8 @@ pairing two satellites does not pay at any.}
 \label{tab:sensorfusion}
 \centering\scriptsize
 \setlength{\tabcolsep}{3.2pt}
-\zebra{3}
-\begin{tabular}{@{}rrrrrr@{}}
+\zebra{5}
+\begin{tabular}{rrrrrr}
 \toprule
 & \multicolumn{2}{c}{EuroSAT-MS (one instrument)}
 & \multicolumn{2}{c}{So2Sat (two satellites)} \\
@@ -154,12 +154,18 @@ asymmetry} $a_{ij} = \lvert \mathrm{acc}(p_i) -
 and $d_{ij}$ is a percentage of test images, so $\beta_d$ below converts
 one into the other. The self-supervised arm here is a
 50-epoch pre-training checkpoint rather than the 200- or 800-epoch ones of
-Section~\ref{sec:budget}, because this analysis needs two arms of
-\emph{matched accuracy} so that the asymmetry term does not dominate, and
-that is the budget at which SimCLR lands within a point of the prior. The
-budget lesson of Section~\ref{sec:budget} applies here too: a
-longer-pre-trained arm would ensemble differently, and we have not
-measured that.
+Section~\ref{sec:budget}, and since that section is entirely about budget
+mattering, the choice needs its reason stated plainly. The regression above
+carries an asymmetry term, so a pair whose two members differ greatly in
+accuracy tells us about that gap rather than about diversity; the analysis
+therefore needs arms of \emph{matched} accuracy, and $50$ epochs is the
+budget at which SimCLR lands within a point of the prior on this cell
+($30.81$ against $30.53$) where $200$ and $800$ epochs put it $3.9$ and
+$9.2$ points ahead. The alternative --- pairing the strongest available
+arms --- would confound diversity with the very budget effect
+Section~\ref{sec:budget} isolates. The cost of the choice is that we have
+\emph{not} measured how a longer-pre-trained arm ensembles, and the budget
+lesson gives every reason to expect it would differ.
 
 The first thing the data say is a caution rather than a confirmation.
 Least squares over the $n = 28$ pairs gives
@@ -178,7 +184,7 @@ of what either contributes. Restricting to pairs within one point of each
 other, where currency is actually the free variable, leaves the three
 pairs of Table~\ref{tab:ensemble}.
 
-\begin{table}[pos=tbp]
+\begin{table}[pos=htbp]
 \caption{Decision-level fusion on CIFAR-100 at 5\%, restricted to pairs whose
 two arms are within one accuracy point of each other so that the information
 source, rather than an accuracy gap, is what differs. Gain is over the better
@@ -188,7 +194,7 @@ predict different classes. Averaging posteriors requires no further training.}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \zebra{2}
-\begin{tabular}{@{}P{0.42\columnwidth}rr@{}}
+\begin{tabular}{P{0.42\columnwidth}rr}
 \toprule
 Pair & Gain~\up & Disagreement \\
 \midrule
@@ -224,7 +230,7 @@ as a finding, since it is what a practitioner would actually run.
 %% A `table' float, not an `algorithm' float: see the note in main.tex on why
 %% float.sty is not loaded. \caption is not used, so this does not consume a
 %% Table number; \refstepcounter{algnum} gives \ref{alg:procedure} its value.
-\begin{table}[pos=tbp]
+\begin{table}[pos=htbp]
 \refstepcounter{algnum}
 \label{alg:procedure}
 \centering

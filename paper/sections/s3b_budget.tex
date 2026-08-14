@@ -17,7 +17,7 @@ convolutional backbones, attaches a budget and a data regime to the claim
 that survives on attention, and replaces one account of the difference
 between our two populations with another.
 
-\begin{table}[tb]
+\begin{table}[pos=htbp]
 \caption{Buying the comparators more compute. CIFAR-100, ResNet-18, gain
 over the baseline; three seeds per pre-trained cell, ten for the baseline
 and the prior at 1, 5 and 10\%. Sorted by training cost. The last two rows
@@ -26,24 +26,24 @@ means the free prior still wins.}
 \label{tab:budget}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.4pt}
-\zebra{3}
-\begin{tabular}{@{}lrrrrr@{}}
+\zebra{2}
+\begin{tabular}{lrrrrr}
 \toprule
 Intervention & Cost~\down & 1\% & 2\% & 3\% & 5\% \\
 \midrule
-\textbf{Prior (this work)} & $\mathbf{1.02\times}$ & $+1.40$ & $+2.50$ & $+3.68$ & $+5.15$ \\
+\textbf{Prior (this work)} & $\mathbf{1.02\times}$ & $+1.42$ & $+2.50$ & $+3.68$ & $+5.15$ \\
 SimSiam, 200 ep & $2.00\times$ & $-0.04$ & $-0.11$ & $+0.11$ & $+0.13$ \\
 SimCLR, 200 ep  & $2.00\times$ & $+2.25$ & $+4.88$ & $+5.99$ & $+9.05$ \\
 SimSiam, 800 ep & $5.00\times$ & $-0.11$ & $+0.19$ & $+0.54$ & $+1.90$ \\
 SimCLR, 800 ep  & $5.00\times$ & $\mathbf{+4.52}$ & $\mathbf{+8.33}$ & $\mathbf{+10.82}$ & $\mathbf{+14.38}$ \\
 \midrule
-Prior $-$ SimSiam-800 & & $+1.51$ & $+2.31$ & $+3.14$ & $+3.25$ \\
-Prior $-$ SimCLR-800  & & $-3.12$ & $-5.83$ & $-7.14$ & $-9.24$ \\
+Prior $-$ SimSiam-800 & & $+1.53$ & $+2.31$ & $+3.14$ & $+3.25$ \\
+Prior $-$ SimCLR-800  & & $-3.10$ & $-5.83$ & $-7.14$ & $-9.23$ \\
 \bottomrule
 \end{tabular}
 
 \vspace{2pt}
-\begin{tabular}{@{}lrrrrr@{}}
+\begin{tabular}{lrrrrr}
 \toprule
 Intervention & Cost~\down & 7\% & 10\% & 15\% & 25\% \\
 \midrule
@@ -81,8 +81,10 @@ error we identify in our own earlier readings elsewhere in this paper.
 \subsection{On convolutions the prior's case becomes a cost
 case}\label{sec:budget:conv}
 Against the stronger comparator the prior loses at every fraction, including
-the scarcest. SimCLR at $5\times$ beats it by $3.12$ to $9.24$ points, at 8
-to 37 standard errors, from 500 images to 12{,}500. Our earlier positioning
+the scarcest. SimCLR at $5\times$ beats it by $3.10$ to $9.23$ points, at 8
+to 37 standard errors, from 500 images to 7{,}500 (1--15\%), and by a
+narrowing $2.61$ at 25\% as both interventions decay toward
+sufficiency. Our earlier positioning
 noted near-parity with self-supervision at 1\%; that was a statement at
 $2\times$ and it does not survive $5\times$. On convolutional backbones the
 prior's case is therefore a cost case and not an accuracy case, and we say
@@ -118,7 +120,7 @@ failed}\label{sec:budget:tin}
 Repeating the comparison on Tiny-ImageNet gives the same ordering at every
 matched fraction (Table~\ref{tab:budgetpop}).
 
-\begin{table}[tb]
+\begin{table}[pos=htbp]
 \caption{The prior minus a $5\times$-budget SimCLR initialization, on both
 populations, under DeiT augmentation on ViT-tiny. Positive means the free
 prior wins. The ordering tracks the data fraction, not the absolute image
@@ -128,7 +130,7 @@ the two disagree there while agreeing at every matched fraction.}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \zebra{2}
-\begin{tabular}{@{}lrrr@{}}
+\begin{tabular}{lrrr}
 \toprule
 Prior $-$ SimCLR-800 & 5\% & 10\% & 25\% \\
 \midrule

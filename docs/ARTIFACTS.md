@@ -15,24 +15,50 @@ question.
 | `results/all_results.csv` | **one row per experimental cell**: dataset, backbone, intervention, data fraction, seed count, accuracy mean and standard deviation, probe accuracy and probe seed count, the paired baseline, `delta` and its standard error, `G` and its standard error, readout, and the scope flags (`aux_target`, `init_from`, `pretrained`, `stem`, `bistable`, `is_headline`) |
 | `results/results_by_portion.csv` | the same measurements pivoted to configuration by data fraction |
 | `results/MomentStem_results.xlsx` | both views in one workbook, with a column dictionary and the law audit |
-| `results/law_audit.md` | the sign-law audit as printed in the paper |
+| `results/law_audit.md` | the canonical sign-law audit, verbatim output of `analysis/audit_law_paired.py` (seed-paired uncertainty, threshold sensitivity, robustness partitions and the full exception list) |
 | `results/summary.md`, `results/summary.tex` | the generated tables |
 
 The scope flags matter. The law is defined over auxiliary-prior cells trained
 from scratch, so reproducing the audit means filtering to `aux_target`
-present, `init_from` empty, `pretrained` false and `stem == none`. The
-released audit script does exactly this and prints both the in-scope and
-all-cells numbers so the choice stays visible.
+present, `init_from` empty, `pretrained` absent and `stem == none`.
+
+**Test emptiness, not truthiness.** `pretrained` is written as the string
+`yes` or left empty, so a boolean cast is wrong in both directions: an earlier
+version of this snippet used `~df.pretrained.astype(bool)`, and because pandas
+reads the empty cells as `NaN` and `NaN` casts to `True`, it selected **zero
+rows**. The same mistake in the audit script — comparing against the strings
+`true`/`1` when the exporter writes `yes` — is what let the ImageNet-transfer
+cells leak into the audit and cost 6.6 points of the reported rate. It is
+worth being pedantic about.
 
 ```python
 import pandas as pd
 df = pd.read_csv("results/all_results.csv")
 
 law = df[df.aux_target.notna() & df.init_from.isna()
-         & ~df.pretrained.astype(bool) & (df.stem.fillna("none") == "none")
-         & (df.n_seeds >= 3) & (df.n_probe_seeds >= 3)]
-law["readout"] = law.delta - law.G
+         & df.pretrained.isna() & (df.stem.fillna("none") == "none")
+         & df.baseline_cell.notna() & df.base_acc.notna()]
+law = law.assign(readout=law.delta - law.G)      # 1,237 cells
 ```
+
+**That is not yet the paper's 1,009.** The audit forms `readout` *per seed*,
+which needs four measurements from the same seed — both arms' accuracy and
+both arms' probe — and drops any cell without at least three seeds common to
+all four. That check needs the per-run records, not the summary table, so it
+cannot be done from the CSV alone: 228 of the 1,237 cells fall out. Unpack
+`run-records.tar.gz` alongside the tables and run
+
+```bash
+python analysis/audit_law_paired.py      # 1,009 in scope, 461 resolvable, 395 correct
+```
+
+which is the single command behind every law number in the paper. The
+`delta_sem` and `G_sem` columns in the CSV are *independent* standard errors;
+combining them in quadrature overstates the uncertainty on `readout` by a
+median factor of 1.8, because `Δ` and `G` are measured on the same
+checkpoints and are positively correlated. The paper reports the paired form
+and the repository keeps the older independent-SEM script
+(`analysis/audit_sign_law.py`) only because it answers a different question.
 
 ### `run-records.tar.gz`
 

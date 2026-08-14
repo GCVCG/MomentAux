@@ -93,12 +93,14 @@ def main():
               loc="center", bbox_to_anchor=(0.5, 0.42),
               handlelength=1.2, borderpad=0.1, labelspacing=0.25,
               columnspacing=0.8, handletextpad=0.35)
-    PS.panel(ax, "Alignment tracks where the target was imposed, not $G$")
+    PS.panel(ax, "Alignment tracks the target, not $G$")
 
     fig.tight_layout(pad=0.35)
     out = os.path.join(HERE, "imprint_dissociation.pdf")
-    fig.savefig(out, bbox_inches="tight")
-    fig.savefig(out.replace(".pdf", ".png"), dpi=300, bbox_inches="tight")
+    # pad_inches=0.02 rather than matplotlib's default 0.1in: the default
+    # leaves 7.2pt of blank on every side, which at these figure widths is
+    # 5-8% of the graphic's height and reads as a white band inside the float.
+    PS.save(fig, out)
     print("imprint_dissociation written; %d cells, %d families" % (len(d), len(seen)))
 
 

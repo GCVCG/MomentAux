@@ -52,7 +52,7 @@ pixel accuracy places them on the decayed positive branch, which is where
 they are. We registered this limitation in advance and then violated it in our
 own prediction, which is how it was found.
 
-\begin{table}[pos=tbp]
+\begin{table}[pos=htbp]
 \caption{The dense envelope. $\Delta$ in mIoU points, with $\Delta$ as a
 percentage of that cell's own baseline beneath it. Three seeds per cell,
 ResNet-18 with an FCN head at output stride 8 (Swin-Tiny in the last block),
@@ -61,8 +61,8 @@ uses. Pascal-Context is VOC's own pixels relabelled to 254 classes.}
 \label{tab:dense}
 \centering\scriptsize
 \setlength{\tabcolsep}{3.4pt}
-\zebra{3}
-\begin{tabular}{@{}lrrrrrr@{}}
+\zebra{2}
+\begin{tabular}{lrrrrrr}
 \toprule
 Population & 1\% & 2\% & 5\% & 10\% & 25\% & 100\% \\
 \midrule
@@ -80,23 +80,21 @@ Swin-Tiny, VOC    & $+0.42$ & $+1.29$ & $+1.76$ & $+0.90$ & $+0.75$ & $+1.31$ \\
 \end{tabular}
 \end{table}
 
-\begin{figure*}[pos=tbp]
+\begin{figure}[pos=htbp]
 \centering
-\includegraphics[width=\textwidth]{figs/dense_envelope.pdf}
+\includegraphics[width=\linewidth]{figs/dense_envelope.pdf}
 \caption{Semantic segmentation, six populations, 200 epochs, three seeds per
-cell. \textbf{(a)} $\Delta$ as a percentage of each cell's own baseline, not in
-absolute mIoU: the populations' baselines differ eightfold, so absolute deltas
-are not comparable across them. Read this way the envelopes are unimodal and
-occupy the same \denseRelLo--\denseRelHi\% band classification does, and three populations go
-neutral or negative at full data. \textbf{(b)} The readout term against the
-head's own classification scale (pixel accuracy), not against mIoU --- the
-crossing bracket is an accuracy bracket, and scoring the law on mIoU places
-every dense cell on the wrong flank. Filled markers are the cells whose readout
-is resolvable against its own uncertainty. Every one of them sits above the
-bracket, which is why segmentation confirms the law's positive branch and
-cannot test its negative branch.}
+cell. \textbf{(a)} $\Delta$ as a percentage of each cell's own baseline rather
+than in absolute mIoU, since the baselines differ eightfold. Read this way the
+envelopes are unimodal, occupy the same \denseRelLo--\denseRelHi\% band
+classification does, and go neutral or negative at full data on three
+populations. \textbf{(b)} Readout against the head's own classification scale
+(pixel accuracy), not mIoU: the crossing bracket is an accuracy bracket, and
+scoring the law on mIoU puts every dense cell on the wrong flank. Filled
+markers are the resolvable cells; all sit above the bracket, so segmentation
+confirms the law's positive branch and cannot test its negative one.}
 \label{fig:dense}
-\end{figure*}
+\end{figure}
 
 \subsection{Target--task alignment is not where the value comes
 from}\label{sec:densealign}
@@ -155,14 +153,20 @@ The qualification is that all \denseLawResolvable{} sit
 \emph{above} the crossing (pixel accuracy \denseLawPixLo--\denseLawPixHi),
 so segmentation confirms the law's positive branch on a new task and a new
 metric and does not test its negative branch. Pascal-Context was built to
-supply exactly that test --- its trained pixel accuracy is $21.1$ and $25.9$
-at $1$--$2\%$, clearly below the bracket, where a negative readout is
-required. It returns $+0.02$ and $+0.00$: zero, not negative. The
-pre-registered falsifier needed a clearly positive readout and so did not
-fire, but the prediction was not confirmed either, and we record the cell as
-\emph{unresolved}. The obstruction is structural: a population that could
-settle it needs abundant labels, low pixel accuracy, \emph{and} a $\Delta$
-large enough for readout to resolve, and none of our six has all three.
+supply exactly that test, and the reason it cannot is worth stating before
+its numbers rather than after them: resolving a readout requires not only a
+baseline below the bracket but a $\Delta$ large enough that
+$\Delta - G$ exceeds its own uncertainty, and Pascal-Context's $\Delta$ runs
+$+0.10$ to $+0.17$ mIoU. Readout there is a difference between two small
+numbers whatever its sign. What it delivers is therefore a null by
+construction: trained pixel accuracy $21.1$ and $25.9$ at $1$--$2\%$,
+clearly below the bracket where a negative readout is required, and a readout
+of $+0.02$ and $+0.00$ --- zero, not negative. The pre-registered falsifier
+needed a clearly positive readout and did not fire; the prediction was not
+confirmed either; we record the cells as \emph{unresolved} and claim nothing
+from them. A population that could settle it needs abundant labels, low pixel
+accuracy \emph{and} a material $\Delta$ at once, and none of our six has all
+three.
 
 \subsection{Attention, narrowed}\label{sec:denseattn}
 On classification the prior is worth roughly twice as much to a
@@ -210,7 +214,7 @@ Detection therefore differs from segmentation in the head and the loss and in
 nothing else. \detCells{} runs (\detCellCount{} cells in the sense of
 Section~\ref{sec:stats}): six fractions, both arms, three seeds.
 
-\begin{table}[pos=tbp]
+\begin{table}[pos=htbp]
 \caption{Detection is a null. $\Delta$ is aux minus baseline on PASCAL VOC.
 AP50 is the task metric; fg\_acc and fg\_iou are the head's 20-way accuracy and
 its mean box IoU \emph{at ground-truth foreground locations}, so neither can
@@ -221,8 +225,8 @@ Cells marked $\dagger$ fall under the pre-declared floor rule: both arms below
 \label{tab:det}
 \centering\scriptsize
 \setlength{\tabcolsep}{3.6pt}
-\zebra{3}
-\begin{tabular}{@{}lrrrrr@{}}
+\zebra{2}
+\begin{tabular}{lrrrrr}
 \toprule
 Data & $\Delta$AP50 & $\Delta$fg\_acc & $\Delta$fg\_iou & $G$(fg\_acc) & $G$(fg\_iou) \\
 \midrule

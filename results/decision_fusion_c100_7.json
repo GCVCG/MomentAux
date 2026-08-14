@@ -1,0 +1,223 @@
+{
+ "cells": {
+  "diagtransfer2_c100_none_7pct": {
+   "mean_single": 45.870000000000005,
+   "seed_ensemble": 51.5
+  },
+  "diagssl_simclr_7pct": {
+   "mean_single": 42.123333333333335,
+   "seed_ensemble": 44.92
+  },
+  "diaggrid_c100_r18_e800_5c8bbf_7pct": {
+   "mean_single": 37.97666666666667,
+   "seed_ensemble": 40.63
+  },
+  "grid_c100_r18_axmagnitudeL3_l10to00_hn_d94ac5_7pct": {
+   "mean_single": 35.98,
+   "seed_ensemble": 38.61
+  },
+  "auxmag_7pct_sched0": {
+   "mean_single": 37.086666666666666,
+   "seed_ensemble": 39.190000000000005
+  },
+  "grid_c100_r18_axmagnitudeL3_l20to00_461755_7pct": {
+   "mean_single": 36.92666666666667,
+   "seed_ensemble": 39.44
+  },
+  "abl7_gaboronly_calib": {
+   "mean_single": 32.78333333333333,
+   "seed_ensemble": 35.07
+  }
+ },
+ "pairs": [
+  {
+   "a": "diagtransfer2_c100_none_7pct",
+   "b": "diagssl_simclr_7pct",
+   "acc_a": 51.5,
+   "acc_b": 44.92,
+   "ensemble": 52.839999999999996,
+   "gain_over_best": 1.3399999999999963,
+   "disagreement": 50.88
+  },
+  {
+   "a": "diagtransfer2_c100_none_7pct",
+   "b": "diaggrid_c100_r18_e800_5c8bbf_7pct",
+   "acc_a": 51.5,
+   "acc_b": 40.63,
+   "ensemble": 51.39,
+   "gain_over_best": -0.10999999999999943,
+   "disagreement": 51.57000000000001
+  },
+  {
+   "a": "diagtransfer2_c100_none_7pct",
+   "b": "grid_c100_r18_axmagnitudeL3_l10to00_hn_d94ac5_7pct",
+   "acc_a": 51.5,
+   "acc_b": 38.61,
+   "ensemble": 48.46,
+   "gain_over_best": -3.039999999999999,
+   "disagreement": 51.910000000000004
+  },
+  {
+   "a": "diagtransfer2_c100_none_7pct",
+   "b": "auxmag_7pct_sched0",
+   "acc_a": 51.5,
+   "acc_b": 39.190000000000005,
+   "ensemble": 48.55,
+   "gain_over_best": -2.950000000000003,
+   "disagreement": 50.77
+  },
+  {
+   "a": "diagtransfer2_c100_none_7pct",
+   "b": "grid_c100_r18_axmagnitudeL3_l20to00_461755_7pct",
+   "acc_a": 51.5,
+   "acc_b": 39.44,
+   "ensemble": 48.339999999999996,
+   "gain_over_best": -3.1600000000000037,
+   "disagreement": 51.300000000000004
+  },
+  {
+   "a": "diagtransfer2_c100_none_7pct",
+   "b": "abl7_gaboronly_calib",
+   "acc_a": 51.5,
+   "acc_b": 35.07,
+   "ensemble": 47.63,
+   "gain_over_best": -3.8699999999999974,
+   "disagreement": 55.84
+  },
+  {
+   "a": "diagssl_simclr_7pct",
+   "b": "diaggrid_c100_r18_e800_5c8bbf_7pct",
+   "acc_a": 44.92,
+   "acc_b": 40.63,
+   "ensemble": 47.32,
+   "gain_over_best": 2.3999999999999986,
+   "disagreement": 55.71
+  },
+  {
+   "a": "diagssl_simclr_7pct",
+   "b": "grid_c100_r18_axmagnitudeL3_l10to00_hn_d94ac5_7pct",
+   "acc_a": 44.92,
+   "acc_b": 38.61,
+   "ensemble": 45.14,
+   "gain_over_best": 0.21999999999999886,
+   "disagreement": 53.99
+  },
+  {
+   "a": "diagssl_simclr_7pct",
+   "b": "auxmag_7pct_sched0",
+   "acc_a": 44.92,
+   "acc_b": 39.190000000000005,
+   "ensemble": 45.17,
+   "gain_over_best": 0.25,
+   "disagreement": 52.89
+  },
+  {
+   "a": "diagssl_simclr_7pct",
+   "b": "grid_c100_r18_axmagnitudeL3_l20to00_461755_7pct",
+   "acc_a": 44.92,
+   "acc_b": 39.44,
+   "ensemble": 44.97,
+   "gain_over_best": 0.04999999999999716,
+   "disagreement": 52.64
+  },
+  {
+   "a": "diagssl_simclr_7pct",
+   "b": "abl7_gaboronly_calib",
+   "acc_a": 44.92,
+   "acc_b": 35.07,
+   "ensemble": 44.26,
+   "gain_over_best": -0.6600000000000037,
+   "disagreement": 60.01
+  },
+  {
+   "a": "diaggrid_c100_r18_e800_5c8bbf_7pct",
+   "b": "grid_c100_r18_axmagnitudeL3_l10to00_hn_d94ac5_7pct",
+   "acc_a": 40.63,
+   "acc_b": 38.61,
+   "ensemble": 41.33,
+   "gain_over_best": 0.6999999999999957,
+   "disagreement": 47.29
+  },
+  {
+   "a": "diaggrid_c100_r18_e800_5c8bbf_7pct",
+   "b": "auxmag_7pct_sched0",
+   "acc_a": 40.63,
+   "acc_b": 39.190000000000005,
+   "ensemble": 41.61,
+   "gain_over_best": 0.9799999999999969,
+   "disagreement": 44.62
+  },
+  {
+   "a": "diaggrid_c100_r18_e800_5c8bbf_7pct",
+   "b": "grid_c100_r18_axmagnitudeL3_l20to00_461755_7pct",
+   "acc_a": 40.63,
+   "acc_b": 39.44,
+   "ensemble": 42.13,
+   "gain_over_best": 1.5,
+   "disagreement": 47.33
+  },
+  {
+   "a": "diaggrid_c100_r18_e800_5c8bbf_7pct",
+   "b": "abl7_gaboronly_calib",
+   "acc_a": 40.63,
+   "acc_b": 35.07,
+   "ensemble": 38.97,
+   "gain_over_best": -1.6600000000000037,
+   "disagreement": 47.11
+  },
+  {
+   "a": "grid_c100_r18_axmagnitudeL3_l10to00_hn_d94ac5_7pct",
+   "b": "auxmag_7pct_sched0",
+   "acc_a": 38.61,
+   "acc_b": 39.190000000000005,
+   "ensemble": 39.92,
+   "gain_over_best": 0.7299999999999969,
+   "disagreement": 31.96
+  },
+  {
+   "a": "grid_c100_r18_axmagnitudeL3_l10to00_hn_d94ac5_7pct",
+   "b": "grid_c100_r18_axmagnitudeL3_l20to00_461755_7pct",
+   "acc_a": 38.61,
+   "acc_b": 39.44,
+   "ensemble": 39.910000000000004,
+   "gain_over_best": 0.47000000000000597,
+   "disagreement": 34.2
+  },
+  {
+   "a": "grid_c100_r18_axmagnitudeL3_l10to00_hn_d94ac5_7pct",
+   "b": "abl7_gaboronly_calib",
+   "acc_a": 38.61,
+   "acc_b": 35.07,
+   "ensemble": 39.23,
+   "gain_over_best": 0.6199999999999974,
+   "disagreement": 47.15
+  },
+  {
+   "a": "auxmag_7pct_sched0",
+   "b": "grid_c100_r18_axmagnitudeL3_l20to00_461755_7pct",
+   "acc_a": 39.190000000000005,
+   "acc_b": 39.44,
+   "ensemble": 40.03,
+   "gain_over_best": 0.5900000000000034,
+   "disagreement": 31.569999999999997
+  },
+  {
+   "a": "auxmag_7pct_sched0",
+   "b": "abl7_gaboronly_calib",
+   "acc_a": 39.190000000000005,
+   "acc_b": 35.07,
+   "ensemble": 39.28,
+   "gain_over_best": 0.0899999999999963,
+   "disagreement": 44.81
+  },
+  {
+   "a": "grid_c100_r18_axmagnitudeL3_l20to00_461755_7pct",
+   "b": "abl7_gaboronly_calib",
+   "acc_a": 39.44,
+   "acc_b": 35.07,
+   "ensemble": 39.56,
+   "gain_over_best": 0.12000000000000455,
+   "disagreement": 46.92
+  }
+ ]
+}

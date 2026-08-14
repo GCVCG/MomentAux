@@ -44,17 +44,32 @@ features. Their difference behaves as a function of a single variable, the
 `readout` is strongly negative at low baselines (the features improve more
 than a data-starved classifier can express), crosses zero in a measured
 bracket of `[31.8, 40.3]` points, and decays back toward zero with
-sufficiency. Audited scope-wide by `analysis/audit_sign_law.py`:
+sufficiency. Audited scope-wide by `analysis/audit_law_paired.py`, which is
+the canonical script: `readout = Δ − G` is formed **per seed**, because `Δ`
+and `G` come from the same checkpoints and treating them as independent
+overstates the uncertainty by a median factor of 1.8.
 
 | | |
 |---|---|
-| cells with paired `Δ` and `G` | 1,660 |
-| in law scope (prior, from scratch, ≥3 seeds per arm) | 989 |
-| inside the crossing bracket (no prediction made) | 98 |
-| unresolved (`|readout| ≤ 2·SEM`) | 613 |
-| **resolvable, these test the law** | **278** |
-| sign as predicted | **268 (96%)** |
-| wrong side | 10 |
+| cells with paired `Δ` and `G` | 1,706<!--auditAllPaired--> |
+| in law scope (prior, from scratch, ≥3 seeds per arm) | 1,009<!--auditScope--> |
+| inside the crossing bracket (no prediction made) | 98<!--auditBracket--> |
+| unresolved (`|readout| ≤ 2·SEM`) | 450<!--auditUnresolved--> |
+| **resolvable, these test the law** | **461<!--auditResolvable-->** |
+| sign as predicted | **395<!--auditCorrect--> (85.7<!--auditRate-->%)** |
+| wrong side | 66<!--auditWrong--> |
+
+Two earlier figures for this table are superseded and we name them so nobody
+cites them from an old copy. **96%** came from an independent-SEM audit
+(`analysis/audit_sign_law.py`, still in the tree because it answers a
+different question) whose uncertainty formula the paper withdrew. **79.1%**
+came from before the scope filter was repaired: it tested the exported
+`pretrained` field against the strings `true`/`1` while the exporter writes
+`yes`, so the ImageNet-transfer cells leaked into an audit whose scope has
+always excluded them. Those cells agree with the law 18.0<!--auditExclRate-->%
+of the time on their own, which is why removing 50<!--auditExclResolvable-->
+resolvable cells moved the headline as much as it did. The manuscript
+discloses this in full.
 
 The law is **predictive, not descriptive**. Registered in advance, it called
 the feature gain of a backbone family it had never seen (Swin-T: predicted
@@ -156,7 +171,7 @@ python -m pytest tests/ -q              # contracts; must pass before training
 python train.py --config configs/<cell>.yaml --seed N   # one cell, one seed
 python analysis/linear_probe.py --run-dir runs/<cell>   # the feature gain G
 python analysis/aggregate.py                            # regenerate ALL tables
-python analysis/audit_sign_law.py                       # re-run the law audit
+python analysis/audit_law_paired.py                     # re-run the law audit
 ```
 
 Each run writes `metrics.csv` (per-epoch), `final.json` (config, accuracy,
@@ -217,7 +232,8 @@ train.py                  the single training entry point (with run guards)
 scripts/simclr_pretrain.py, simsiam_pretrain.py, dino_pretrain.py
 analysis/linear_probe.py  the feature gain G (full-train and fixed-shot)
 analysis/aggregate.py     runs/ -> markdown + LaTeX tables
-analysis/audit_sign_law.py  scope-wide audit of the law
+analysis/audit_law_paired.py  scope-wide audit of the law (canonical)
+analysis/audit_sign_law.py  the older independent-SEM audit, superseded
 analysis/export_results_csv.py  the released result tables
 configs/                  one YAML per cell (generated, committed)
 tests/                    contracts: pinned banks, tensor layout, overhead,

@@ -1,7 +1,15 @@
 # What to upload
 
-Everything lives in `paper/`. There is no separate submission copy, because a
-copy drifts from the source the moment either is edited.
+Everything lives in `paper/`, with one deliberate exception noted in the
+table below. There is no separate submission copy, because a copy drifts from
+the source the moment either is edited.
+
+THE RESPONSE LETTER IS PART OF THE UPLOAD. It lives in `docs/` rather than
+`paper/` so that `paper/` holds only what LaTeX compiles, and that tidying is
+exactly how it went missing from a submission once: the manifest listed only
+files under `paper/`, so the assembled package silently dropped it and the
+referee reported three rounds of revisions as invisible. `check_submission.py`
+now fails if it is absent.
 
 The guide requires editable source files; a PDF alone is not accepted.
 
@@ -14,6 +22,7 @@ The guide requires editable source files; a PDF alone is not accepted.
 | Highlights, separate editable file | `highlights.txt` |
 | Graphical abstract, separate file | `figs/graphical_abstract_submission.png` |
 | Cover letter | `cover_letter.md` |
+| Response to the referee | `../docs/RESPONSE_TO_REFEREE.md` |
 
 Build: `pdflatex main && bibtex main && pdflatex main && pdflatex main`
 

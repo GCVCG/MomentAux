@@ -43,16 +43,23 @@ def main():
     ref = uniform_distance()
 
     PS.use()
-    fig, axes = plt.subplots(2, 1, figsize=(PS.COL, 4.25), sharex=True,
+    # This figure carries two stacked panels, three arms each, plus a +-1SD
+    # band per arm -- six lines and six bands in one column. At the shared
+    # defaults (1.3pt strokes, 3.4pt markers) that reads far heavier than the
+    # rest of the paper's figures, which mostly carry three lines and no bands.
+    # Thin the strokes and markers HERE rather than in pubstyle, so the other
+    # figures keep the weights they were tuned at.
+    plt.rcParams.update({"lines.linewidth": 0.95, "lines.markersize": 2.5})
+    fig, axes = plt.subplots(2, 1, figsize=(PS.COL, 3.65), sharex=True,
                              sharey=True)
     for ax, key, title in (
         (axes[0], "block_mean", "(a) mean over all heads"),
         (axes[1], "block_min_head", "(b) the most local head in each block"),
     ):
-        ax.axhline(ref, color="#333333", lw=0.9, ls=":", zorder=0)
+        ax.axhline(ref, color="#333333", lw=0.7, ls=":", zorder=0)
         ax.text(0.15, ref + 0.03, "uniform attention", fontsize=PS.SMALL,
                 color="#333333")
-        ax.axvline(TAP, color=PS.ARM["prior"], lw=0.8, ls="--", alpha=0.45,
+        ax.axvline(TAP, color=PS.ARM["prior"], lw=0.6, ls="--", alpha=0.45,
                    zorder=0)
         if key == "block_min_head":   # the line is in both panels; the label
             ax.text(TAP - 0.16, 2.60, "tap", fontsize=PS.SMALL,   # would sit
@@ -76,9 +83,12 @@ def main():
     axes[0].set_ylim(2.55, 4.45)
     axes[0].legend(frameon=False, loc="lower right")
 
-    fig.tight_layout(h_pad=1.0)
+    fig.tight_layout(pad=0.3, h_pad=0.8)
     out = os.path.join(HERE, "attention_locality.pdf")
-    fig.savefig(out, bbox_inches="tight")
+    # pad_inches=0.02 rather than matplotlib's default 0.1in: the default
+    # leaves 7.2pt of blank on every side, which at these figure widths is
+    # 5-8% of the graphic's height and reads as a white band inside the float.
+    PS.save(fig, out)
     print("wrote", out, " uniform ref =", round(ref, 3))
 
 

@@ -77,7 +77,22 @@ def main():
     if os.path.exists(pdf):
         info = subprocess.run(["pdfinfo", pdf], capture_output=True, text=True).stdout
         n = int(re.search(r"Pages:\s+(\d+)", info).group(1))
-        check(PAGES[0] <= n <= PAGES[1], f"pages: {n} (limit {PAGES[0]}-{PAGES[1]})")
+        # The graphical abstract and the highlights are typeset into main.pdf for
+        # convenience but are SUBMITTED AS SEPARATE FILES, so they are not part of
+        # the manuscript the page limit applies to. Counting them reported a false
+        # failure at 36 pages while the manuscript itself was 34. Discount one page
+        # per preliminary block that is actually typeset (\submissionmodetrue drops
+        # both, and then nothing is discounted).
+        head = open(main_tex).read()
+        prelim = 0
+        if re.search(r"^\s*\\submissionmodefalse", head, re.M):
+            prelim = sum(bool(re.search(rf"\\begin{{{env}}}", head))
+                         for env in ("graphicalabstract", "highlights"))
+        m = n - prelim
+        note = f"pages: {m} (limit {PAGES[0]}-{PAGES[1]})"
+        if prelim:
+            note += f"; main.pdf is {n} incl. {prelim} separately-submitted page(s)"
+        check(PAGES[0] <= m <= PAGES[1], note)
 
     bbl = os.path.join(HERE, "main.bbl")
     if os.path.exists(bbl):
@@ -98,6 +113,44 @@ def main():
         longest = max(len(i) for i in items) if items else 0
         check(longest <= MAX_HIGHLIGHT,
               f"longest highlight: {longest} chars (limit {MAX_HIGHLIGHT})")
+
+        # highlights.txt is the file the JOURNAL actually receives (the guide
+        # wants highlights as a separate editable upload), and in submission
+        # mode the LaTeX block is not typeset at all -- so a drift between the
+        # two is invisible in the compiled PDF. It had already happened: the
+        # .txt still said "2,894-configuration" and carried a superseded fifth
+        # bullet while main.tex said 2,978. Compare them on rendered text.
+        hlf = os.path.join(HERE, "highlights.txt")
+        if os.path.exists(hlf):
+            # Resolve the generated macros first: highlights.txt must carry
+            # literal values (it goes into a plain-text form field), so an
+            # unexpanded \computeCells would look like a mismatch when it is
+            # actually the point. Then fold the two spellings of the same
+            # glyph, since the .txt is deliberately ASCII.
+            nums = os.path.join(HERE, "tables", "numbers.tex")
+            # The value pattern must allow ONE level of nesting: the counts are
+            # written 2{,}978 for LaTeX's thin-space grouping, and a plain
+            # [^}]* stops at the inner brace and yields "2,".
+            defs = dict(re.findall(
+                r"\\newcommand\{\\(\w+)\}\{((?:[^{}]|\{[^{}]*\})*)\}",
+                open(nums).read())) if os.path.exists(nums) else {}
+            raw = re.findall(r"\\item\s+(.*)", hl.group(1))
+            expanded = []
+            # Longest name first, so \computeCells is not eaten by \compute.
+            order = sorted(defs, key=len, reverse=True)
+            for it in raw:
+                for k in order:
+                    it = it.replace("\\" + k, defs[k].replace("{,}", ","))
+                expanded.append(rendered(it))
+            txt = [ln.strip().lstrip("-").strip()
+                   for ln in open(hlf).read().splitlines()
+                   if ln.strip().startswith("-")]
+
+            def norm(xs):
+                return [re.sub(r"\s+", " ", x.replace("\u00d7", "x")).strip()
+                        for x in xs]
+            check(norm(txt) == norm(expanded),
+                  "highlights.txt matches the highlights block in main.tex")
 
     print("Files named in SUBMISSION_FILES.md")
     listed = open(os.path.join(HERE, "SUBMISSION_FILES.md")).read()

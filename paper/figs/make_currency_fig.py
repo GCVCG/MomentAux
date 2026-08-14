@@ -95,7 +95,10 @@ def main():
 
     fig.tight_layout()
     out = os.path.join(HERE, "currency_evidence.pdf")
-    fig.savefig(out, bbox_inches="tight")
+    # pad_inches=0.02 rather than matplotlib's default 0.1in: the default
+    # leaves 7.2pt of blank on every side, which at these figure widths is
+    # 5-8% of the graphic's height and reads as a white band inside the float.
+    PS.save(fig, out)
     print("wrote", out)
 
 
