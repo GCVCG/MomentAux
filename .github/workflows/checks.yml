@@ -46,8 +46,13 @@ jobs:
           # timm with --no-deps so it cannot replace that matched pair; its
           # real runtime needs are listed explicitly instead.
           pip install --no-deps timm==1.0.27
+          # The rest of what tests/ and momentstem/ import. fvcore is easy to
+          # miss because only test_overhead_match.py needs it (the FLOP parity
+          # check that proves the deployed network is identical to baseline),
+          # and pytest aborts the whole collection when one module fails to
+          # import -- so a single absent package reads as a total failure.
           pip install numpy==1.26.4 scipy scikit-learn torchmetrics pyyaml \
-            pandas pytest safetensors huggingface_hub
+            pandas pytest pillow fvcore safetensors huggingface_hub
       - name: torchvision ops resolve (ABI canary)
         # Fail here, with a one-line reason, rather than as 14 collection
         # errors whose stack traces bury the cause.
