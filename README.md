@@ -13,8 +13,8 @@ recipe with committed data subsets**.
 
 | | |
 |---|---|
-| experimental cells | 2,800 |
-| training runs | ~8,900 (3,286 GPU-hours) |
+| experimental cells | 3,052<!--computeCells--> |
+| training runs | 9,390<!--computeRuns--> (3,798<!--computeGpuHours--> GPU-hours) |
 | datasets | 14, across 5 visual domains |
 | backbone families | 7 (ResNet-18/34/50, MobileNetV3, ConvNeXt-T, ViT-tiny/S/B, Swin-T) |
 | data scale | 500 to 1,281,167 images; 10 to 1000 classes |
@@ -51,18 +51,18 @@ overstates the uncertainty by a median factor of 1.8.
 
 | | |
 |---|---|
-| cells with paired `Δ` and `G` | 1,706<!--auditAllPaired--> |
-| in law scope (prior, from scratch, ≥3 seeds per arm) | 1,009<!--auditScope--> |
+| cells with paired `Δ` and `G` | 1,724<!--auditAllPaired--> |
+| in law scope (prior, from scratch, ≥3 seeds per arm) | 1,020<!--auditScope--> |
 | inside the crossing bracket (no prediction made) | 98<!--auditBracket--> |
-| unresolved (`|readout| ≤ 2·SEM`) | 450<!--auditUnresolved--> |
-| **resolvable, these test the law** | **461<!--auditResolvable-->** |
-| sign as predicted | **395<!--auditCorrect--> (85.7<!--auditRate-->%)** |
-| wrong side | 66<!--auditWrong--> |
+| unresolved (`|readout| ≤ 2·SEM`) | 451<!--auditUnresolved--> |
+| **resolvable, these test the law** | **471<!--auditResolvable-->** |
+| sign as predicted | **402<!--auditCorrect--> (85.4<!--auditRate-->%)** |
+| wrong side | 69<!--auditWrong--> |
 
 Two earlier figures for this table are superseded and we name them so nobody
 cites them from an old copy. **96%** came from an independent-SEM audit
 (`analysis/audit_sign_law.py`, still in the tree because it answers a
-different question) whose uncertainty formula the paper withdrew. **79.1%**
+different question) whose uncertainty formula the paper withdrew. **78.9<!--auditPrevRate-->%**
 came from before the scope filter was repaired: it tested the exported
 `pretrained` field against the strings `true`/`1` while the exporter writes
 `yes`, so the ImageNet-transfer cells leaked into an audit whose scope has
@@ -141,16 +141,17 @@ are compressed; `SHA256SUMS` accompanies them.
 
 | asset | contents |
 |---|---|
-| `run-records.tar.gz` | every run's `final.json` (config, accuracy, parameter and FLOP accounting, environment) plus every `linear_probe*.json` and `robustness.json`, under original `runs/<cell>/seed<N>/` paths |
-| `training-curves.tar.gz` | every run's per-epoch `metrics.csv` |
-| `result-tables.tar.gz` | the aggregated tables: `all_results.csv` (one row per cell), `results_by_portion.csv`, the combined workbook, `law_audit.md`, `summary.md`, `summary.tex` |
+| `run-records.tar.gz` | every run's `final.json` (config, accuracy, parameter and FLOP accounting, environment) and every probe record behind `G`: `linear_probe*.json` (full-train, fixed-shot, final-epoch and cross-label-space), `dense_probe.json`, `det_probe.json`, plus `robustness.json`, `cifair.json`, `head_forms_5shot.json` and `per_class_delta.json`. Records span `runs/`, `runs_turing/`, `runs_dense/` and `runs_det/`; per-seed records sit under `<tree>/<cell>/seed<N>/` and per-cell probes under `<tree>/<cell>/` |
+| `training-curves.tar.gz` | per-epoch `metrics.csv` for 9,662 of the 10,018 released runs (the 356 without one, and why, are listed in `docs/ARTIFACTS.md`) |
+| `result-tables.tar.gz` | the aggregated tables: `all_results.csv` (one row per cell), `results_by_portion.csv`, the combined workbook, `law_audit.md`, `summary.md`, `summary.tex`, the segmentation tables (`dense_results.csv`, `dense_law.csv`, `dense_summary.md`), the detection tables (`det_results.csv`, `det_summary.md`, `det_decompose.json`) and the per-analysis JSON records |
 | `logs.tar.gz` | campaign and wave logs, including the cluster work-queue logs |
 | `configs-and-subsets.tar.gz` | every cell configuration and the committed subset indices |
 
-Every table and figure in the paper regenerates from `result-tables` by one
-command. The per-run records are the raw evidence behind them, so any number
-in the paper can be traced from the printed table back to the individual
-training run that produced it.
+Every table and figure in the paper is generated from these assets by the
+scripts in `analysis/` — five of them, listed in `docs/ARTIFACTS.md`, not one.
+The per-run records are the raw evidence behind them, so any number in the
+paper can be traced from the printed table back to the individual training
+run that produced it.
 
 **What is not released:** model checkpoints (223 GB) and the source image
 datasets. All datasets are public and cited in the paper; the committed
@@ -170,9 +171,15 @@ python -m pytest tests/ -q              # contracts; must pass before training
 ```bash
 python train.py --config configs/<cell>.yaml --seed N   # one cell, one seed
 python analysis/linear_probe.py --run-dir runs/<cell>   # the feature gain G
-python analysis/aggregate.py                            # regenerate ALL tables
 python analysis/audit_law_paired.py                     # re-run the law audit
 ```
+
+Regenerating the released tables takes five commands, not one, and
+`aggregate.py` is **not** the one that writes the CSVs — it writes only
+`summary.{md,tex}` while printing a long table, which is an easy way to
+believe the CSVs are current when they are not. The full sequence, and the
+reason it is a sequence, is in
+[`docs/ARTIFACTS.md`](docs/ARTIFACTS.md#regenerating-the-papers-tables-from-the-release).
 
 Each run writes `metrics.csv` (per-epoch), `final.json` (config, accuracy,
 `fvcore` parameter and FLOP accounting, environment) and checkpoints under

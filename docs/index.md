@@ -25,8 +25,8 @@ intervention varies: a free hand-crafted spectral prior (**MomentAux**),
 self-supervised pre-training (SimCLR, SimSiam, DINO), ImageNet transfer,
 DeiT-strength augmentation, and learned FitNets teachers — each reported
 against a **declared multiple of baseline training compute**, and every
-pairwise combination measured. 2,978<!--computeCells--> classification
-configurations over 9,079<!--computeRuns--> runs, on 13 datasets and 9
+pairwise combination measured. 3,052<!--computeCells--> classification
+configurations over 9,390<!--computeRuns--> runs, on 13 datasets and 9
 backbones from 500 to 1.28M images and 32 to 224 px, plus segmentation and
 detection transplants.
 
@@ -79,9 +79,9 @@ limits before it is assembled.
 The law behind every cell: **Δ = G(features) + readout(baseline accuracy)**
 — `G` measured by linear probes on frozen features, readout negative below
 the measured crossing bracket `[31.8, 40.3]` and positive above it. Of the
-461<!--auditResolvable--> cells whose readout is resolvable against its own
-seed-paired uncertainty, **395<!--auditCorrect--> (85.7<!--auditRate-->%)
-fall on the predicted side** — 94.2<!--auditBelowRate-->% below the crossing,
+471<!--auditResolvable--> cells whose readout is resolvable against its own
+seed-paired uncertainty, **402<!--auditCorrect--> (85.4<!--auditRate-->%)
+fall on the predicted side** — 94.3<!--auditBelowRate-->% below the crossing,
 where the account makes a strong prediction. Machine-verified by
 `analysis/audit_law_paired.py`, which is the canonical audit; the older
 `audit_sign_law.py` uses an independent-SEM formula the paper withdrew, and

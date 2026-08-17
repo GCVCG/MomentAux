@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MomentAux: When does fusing hand-crafted knowledge with learned representations pay?</title>
+    <meta name="description" content="A controlled, cost-normalized benchmark of data-efficiency interventions: 3,052 classification configurations over 9,390 training runs, and a measurable rule for when fusing a hand-crafted prior with learned representations stacks, substitutes or interferes.">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { font-size: 16px; }
+        .abstract, .lead-text { text-align: justify; }
+        .author-list { display: flex; justify-content: center; flex-wrap: wrap; padding-left: 0; }
+        .author-item { margin: 10px; text-align: center; }
+        .icon-container { display: flex; justify-content: center; align-items: flex-start;
+                          gap: 28px; flex-wrap: wrap; margin: 18px 0 6px; }
+        .icon-container a { display: flex; flex-direction: column; align-items: center;
+                            text-decoration: none; color: #333; width: 110px; }
+        .icon-container img { width: 56px; height: 56px; }
+        .icon-container span { text-align: center; font-size: 14px; margin-top: 6px; }
+        figure { margin: 22px 0; }
+        figure img { width: 100%; border: 1px solid #e6e6e6; border-radius: 4px; }
+        figcaption { font-size: 14px; color: #555; margin-top: 8px; text-align: justify; }
+        h2 { margin-top: 34px; font-size: 28px; }
+        h3 { margin-top: 22px; font-size: 21px; }
+        table { font-size: 14px; }
+        table th { border-top: none; }
+        .tbl-note { font-size: 13px; color: #666; margin-top: -8px; }
+        .outcome { border-left: 4px solid #ccc; padding: 4px 0 4px 14px; margin-bottom: 16px; }
+        /* Three columns, not three stacked banners: the outcomes are a
+           taxonomy of alternatives, so they should be read side by side.
+           Bootstrap's grid collapses them back to one column under 768px. */
+        .outcome-row { margin-top: 6px; }
+        .outcome-row .outcome { height: 100%; margin-bottom: 0; }
+        .outcome-row h3 { margin-top: 0; font-size: 18px; }
+        .outcome-row p { font-size: 15px; }
+        .stack     { border-left-color: #1b9e77; }
+        .substitute{ border-left-color: #d9a300; }
+        .tax       { border-left-color: #d95f02; }
+        .citation { background: #f7f7f7; padding: 12px; border-radius: 4px;
+                    font-family: monospace; font-size: 13px; white-space: pre-wrap; }
+        .caveat { background: #fbfbf4; border-left: 4px solid #b9b98a;
+                  padding: 10px 14px; font-size: 15px; margin: 18px 0; }
+        footer { margin: 46px 0 30px; font-size: 14px; color: #666; text-align: center; }
+        /* Never let a long token (a URL in the BibTeX, a wide table cell)
+           stretch the page and force horizontal scrolling of the whole body. */
+        .citation { overflow-x: auto; word-break: break-word; }
+        .table-responsive { margin-bottom: 16px; }
+        img { max-width: 100%; height: auto; }
+
+        /* ---- narrow screens ------------------------------------------------
+           Bootstrap collapses the grid on its own; these rules size the things
+           it does not: display type set for a 980px column, the fixed-width
+           icon cells, and the gaps between flex items, which at 42px eat most
+           of a phone's width. */
+        /* TL;DR: the one thing a visitor should leave with if they read no
+           further, set above the abstract rather than inside it. */
+        .tldr-heading { margin-top: 8px; margin-bottom: 10px; }
+        .tldr { border-left: 5px solid #1b9e77; background: #f6fbf9;
+                padding: 16px 20px; margin: 0 0 26px; border-radius: 4px; }
+        .tldr-lead { font-size: 19px; line-height: 1.5; margin-bottom: 10px; }
+        .tldr-sub { font-size: 15.5px; color: #444; margin-bottom: 0;
+                    text-align: justify; }
+        /* Affiliation and funder marks. Height-matched rather than
+           width-matched, because these logos have very different aspect
+           ratios and a shared width makes the wide ones dwarf the square
+           ones. Greyed back so they read as credits, not as branding. */
+        .logo-strip { display: flex; align-items: center; justify-content: center;
+                      gap: 42px; flex-wrap: wrap; margin: 26px 0 8px; }
+        .logo-strip img { height: 58px; width: auto; filter: grayscale(100%);
+                          opacity: .75; transition: opacity .2s, filter .2s; }
+        .logo-strip a:hover img { filter: none; opacity: 1; }
+        /* Narrow-screen overrides LAST, so they win against the rules above:
+           .tldr-sub sets text-align: justify, and a media query placed
+           earlier in the sheet lost to it on specificity ties. */
+        @media (max-width: 767.98px) {
+            html, body { overflow-x: hidden; }
+            body { font-size: 15px; }
+            h1 { font-size: 26px; line-height: 1.25; }
+            h2 { font-size: 22px; margin-top: 26px; }
+            h3 { font-size: 18px; }
+            .container { padding-left: 14px; padding-right: 14px; }
+            .abstract, .lead-text, .tldr-sub, figcaption { text-align: left; }
+            .tldr { padding: 13px 15px; }
+            .tldr-lead { font-size: 17px; }
+            .icon-container { gap: 16px; }
+            .icon-container a { width: 84px; }
+            .icon-container img { width: 44px; height: 44px; }
+            .icon-container span { font-size: 13px; }
+            .logo-strip { gap: 22px; }
+            .logo-strip img { height: 42px; }
+            .outcome-row .outcome { margin-bottom: 14px; }
+            table { font-size: 13px; }
+            .citation { font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-4" style="max-width: 980px;">
+
+    <div class="row">
+        <div class="col-12 text-center mb-2">
+            <h1 class="mb-3">When does fusing hand-crafted knowledge with learned representations pay?</h1>
+            <p class="text-muted" style="font-size:18px; margin-top:-6px;">
+                A controlled, cost-normalized benchmark and a measurable rule for
+                stacking, substitution and interference
+            </p>
+
+            <ul class="list-inline author-list">
+                <li class="list-inline-item author-item">
+                    <a href="https://amughrabi.github.io/">Ahmad AlMughrabi</a>
+                    <br>Universitat de Barcelona
+                </li>
+                <li class="list-inline-item author-item">
+                    <a href="https://orcid.org/0000-0002-0187-6288">Albert Clop</a>
+                    <br>Universitat de Barcelona
+                </li>
+                <li class="list-inline-item author-item">
+                    <a href="https://orcid.org/0000-0002-0620-5774">Benjamin Busam</a>
+                    <br>Technical University of Munich
+                </li>
+                <li class="list-inline-item author-item">
+                    <a href="https://ricjm.github.io/">Ricardo Marques</a>
+                    <br>Universitat Pompeu Fabra
+                </li>
+                <li class="list-inline-item author-item">
+                    <a href="http://www.ub.edu/cvub/petiaradeva/">Petia Radeva</a>
+                    <br>Universitat de Barcelona
+                </li>
+            </ul>
+
+            <div class="icon-container">
+                <a href="https://github.com/GCVCG/MomentAux">
+                    <img src="imgs/paper.png" alt="Paper">
+                    <span>Paper</span>
+                </a>
+                <a href="https://github.com/GCVCG/MomentAux">
+                    <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub">
+                    <span>Code &amp; harness</span>
+                </a>
+                <a href="https://github.com/GCVCG/MomentAux/releases">
+                    <img src="imgs/dataset.png" alt="Results">
+                    <span>Result tables &amp; run records</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <h2 class="tldr-heading">TL;DR</h2>
+            <div class="tldr">
+                <p class="tldr-lead">A free, hand-crafted spectral prior is worth more to a
+                small transformer than two rounds of self-supervised pre-training. To a
+                convolutional network that already has enough data it is worth nothing at
+                all. Which of those two you are about to get is measurable
+                <em>before</em> you train the combined system.</p>
+                <p class="tldr-sub">We ran the comparison the field keeps making informally:
+                every intervention under one frozen recipe, on byte-identical images, with its
+                compute cost declared. The gain then decomposes as
+                &Delta;&nbsp;=&nbsp;<em>G</em>&nbsp;+&nbsp;readout(base): what a source does to the
+                features, plus what the classifier can cash in. The sign of that second
+                term is correct on 85.4<!--auditRate-->% of the cells that
+                can test it. Sources supplying the <em>same</em> currency substitute; sources
+                supplying different ones stack; fusing into an already-informed initialization
+                taxes you in proportion to what that initialization was worth.</p>
+            </div>
+            <h2>Abstract</h2>
+            <div class="abstract">
+                <p>Fusing prior knowledge with data-driven learning is attractive precisely
+                where data is scarce, yet no controlled account says when such fusion helps,
+                when it is redundant, and when it harms. We benchmark
+                one fixed, hand-crafted source of knowledge, a pinned bank of Gabor
+                targets injected only during training at ~2% compute overhead, against
+                the data-driven alternatives (SimCLR, SimSiam and DINO pre-training, ImageNet
+                transfer, heavy augmentation, learned teachers) under one frozen recipe with
+                fixed subsets: 13 datasets, 9 backbones, 500 to 1.28M images, 32 to 224&nbsp;px,
+                and 5.7M to 86M parameters (3,052<!--computeCells--> classification
+                configurations over 9,390<!--computeRuns--> runs, plus segmentation
+                and detection transplants).</p>
+
+                <p>Every pairwise combination is measured too, and all follow one rule:
+                different-<em>currency</em> sources stack, same-currency sources substitute,
+                and fusing into an already-informed initialization interferes in proportion to
+                what it carries. Because each source's currency is measurable on frozen
+                features beforehand, the outcome is predictable in advance, which we state as
+                a procedure. Underlying it is an empirical decomposition,
+                &Delta;&nbsp;=&nbsp;<em>G</em>&nbsp;+&nbsp;readout(base), whose sign holds on
+                85.4<!--auditRate-->% of testable cells and which, registered in advance, called an unseen
+                backbone family's feature gain from baseline heights alone.</p>
+            </div>
+
+            <figure>
+                <img src="imgs/overview.png" alt="Overview: the fusion, the law, and when it pays">
+                <figcaption><strong>Overview.</strong> The knowledge source is a fixed bank of
+                oriented-energy targets regressed from a mid-network tap, with the loss weight
+                decayed to exactly zero, so the deployed network is unchanged and inference
+                costs nothing extra. The centre panel is the decomposition that organizes the
+                grid; the right panel is the three-outcome taxonomy it predicts.</figcaption>
+            </figure>
+        </div>
+    </div>
+
+    <h2>The three outcomes</h2>
+    <p class="lead-text">Combining two sources of knowledge produces one of three outcomes,
+    and which one you get is not predictable from the sources' family names. The same
+    prior is redundant with effective self-supervision and complementary with augmentation.
+    It <em>is</em> predictable from a cheap measurement on frozen features, taken before the
+    combination is built.</p>
+
+    <div class="row outcome-row">
+        <div class="col-md-4 d-flex">
+        <div class="outcome stack">
+        <h3>Stack: different currencies</h3>
+        <p>The prior injects oriented-energy <em>structure</em>; heavy augmentation teaches
+        invariance to nuisance transforms. Different currencies, so they compound. On
+        ViT-tiny at 10% of CIFAR-100, the prior adds +13.3 under the plain recipe and
+        <strong>+21.0</strong> on top of DeiT augmentation.</p>
+        </div>
+        </div>
+        <div class="col-md-4 d-flex">
+        <div class="outcome substitute">
+        <h3>Substitute: same currency</h3>
+        <p>The prior and contrastive pre-training fill the same feature deficit, so combining
+        them adds nothing over the better single source. Measured on the feature side:
+        whichever source has the larger frozen-feature gain is the one that wins end-to-end,
+        at <strong>6 cells out of 6</strong> across two datasets.</p>
+        </div>
+        </div>
+        <div class="col-md-4 d-flex">
+        <div class="outcome tax">
+        <h3>Tax: fusing into an already-informed initialization</h3>
+        <p>Injecting the prior on top of ImageNet weights is destructive everywhere, and the
+        damage is proportional to what the initialization was contributing: up to
+        <strong>&minus;17</strong> points on photographic data, and statistically zero on
+        histopathology where those weights were worth little to begin with. Probing confirms
+        the loss is feature-side, not a classifier failure.</p>
+        </div>
+        </div>
+    </div>
+
+    <h2>The rule</h2>
+    <figure>
+        <img src="imgs/law.png" alt="Readout residual against baseline accuracy">
+        <figcaption><strong>&Delta; = G + readout(base).</strong> The accuracy gain of an
+        intervention decomposes into what it does to the <em>features</em> (<em>G</em>,
+        measured by an identical linear evaluation on frozen representations) and a
+        <em>readout</em> term set by how well the baseline already performs. The sign is
+        correct on 85.4<!--auditRate-->% of the cells where it is statistically resolvable
+        (402<!--auditCorrect--> of 471<!--auditResolvable-->, and 94.3<!--auditBelowRate-->%
+        on the scarce-data flank). It is informative on
+        the scarce-data flank, where the readout term is large and negative, and close to
+        uninformative once that term has decayed to nothing, and we say so rather than
+        reporting a single headline rate.</figcaption>
+    </figure>
+
+    <div class="caveat">
+        <strong>Registered in advance.</strong> Each experimental wave was launched with
+        numeric prediction bands and explicit falsifiers recorded before any result existed,
+        and outcomes are reported against those bands <em>including the misses</em>. In one
+        case the rule was used to predict an unseen backbone family's feature gain from its
+        baseline accuracies alone; all four cells landed inside the band. In others our
+        predictions were wrong, and the paper scores them that way.
+    </div>
+
+    <h2>Where the gain lives</h2>
+    <figure>
+        <img src="imgs/envelopes.png" alt="Gain envelopes across data fractions">
+        <figcaption><strong>Every effect moves with the data regime.</strong> The gain rises,
+        peaks and decays to zero as data becomes sufficient. That is why the benchmark
+        measures full envelopes rather than one or two fractions. Reading a two-point grid was
+        the single most common way we misled ourselves, and the paper documents each instance.
+        </figcaption>
+    </figure>
+
+    <h2>Selected results</h2>
+    <h3>Attention at small scale is where the prior matters most</h3>
+    <div class="table-responsive">
+    <table class="table table-sm table-striped">
+        <thead><tr><th>CIFAR-100, ViT-tiny</th><th class="text-right">Baseline</th>
+        <th class="text-right">+ Prior</th><th class="text-right">&Delta;</th></tr></thead>
+        <tbody>
+        <tr><td>Plain recipe, 10%</td><td class="text-right">16.47</td><td class="text-right">29.74</td><td class="text-right">+13.26</td></tr>
+        <tr><td>DeiT augmentation, 10%</td><td class="text-right">20.28</td><td class="text-right">41.29</td><td class="text-right"><strong>+21.00</strong></td></tr>
+        <tr><td>DeiT augmentation, 100%</td><td class="text-right">61.39</td><td class="text-right">75.25</td><td class="text-right">+13.86</td></tr>
+        <tr><td>ViT-S/16 @224&nbsp;px, ImageNet-100</td><td class="text-right">65.39</td><td class="text-right">78.39</td><td class="text-right">+13.00</td></tr>
+        <tr><td>ViT-B/16 @224&nbsp;px, ImageNet-100</td><td class="text-right">43.33</td><td class="text-right">69.34</td><td class="text-right"><strong>+26.01</strong></td></tr>
+        </tbody>
+    </table>
+    </div>
+    <p class="tbl-note">The deficit grows with model scale rather than shrinking, and persists
+    at 1.28M images where every ResNet is neutral (+0.04).</p>
+
+    <h3>Cost normalization, and what happens when the comparator gets more</h3>
+    <div class="table-responsive">
+    <table class="table table-sm table-striped">
+        <thead><tr><th>CIFAR-100, ResNet-18</th><th class="text-right">Cost</th>
+        <th class="text-right">5%</th><th class="text-right">10%</th><th class="text-right">25%</th></tr></thead>
+        <tbody>
+        <tr><td><strong>Prior (this work)</strong></td><td class="text-right"><strong>1.02&times;</strong></td>
+            <td class="text-right">+5.15</td><td class="text-right">+3.75</td><td class="text-right">+0.16</td></tr>
+        <tr><td>SimSiam, 200 pre-epochs</td><td class="text-right">2.00&times;</td>
+            <td class="text-right">+0.13</td><td class="text-right">+0.61</td><td class="text-right">&minus;0.03</td></tr>
+        <tr><td>SimCLR, 200 pre-epochs</td><td class="text-right">2.00&times;</td>
+            <td class="text-right">+9.05</td><td class="text-right">+8.76</td><td class="text-right">+2.81</td></tr>
+        <tr><td>SimCLR, 800 pre-epochs</td><td class="text-right">5.00&times;</td>
+            <td class="text-right">+14.38</td><td class="text-right">+10.92</td><td class="text-right">+2.77</td></tr>
+        </tbody>
+    </table>
+    </div>
+    <p class="tbl-note">Reported plainly: on convolutional backbones, once you can afford
+    5&times; compute, contrastive pre-training beats the free prior at every fraction we
+    measured. The prior's convolutional case is one of cost, not accuracy. On attention
+    backbones under a modern recipe the ordering differs, and the paper states it with both
+    its budget and its data regime attached.</p>
+
+    <h2>Does any of it hold off classification?</h2>
+    <p class="lead-text">Every number above is top-1 accuracy, so the prior was
+    transplanted to two other tasks. Both headline results are negative, which is
+    why they are worth reporting.</p>
+
+    <div class="outcome substitute">
+        <strong>Semantic segmentation.</strong> Six populations (PASCAL VOC,
+        Cityscapes, FoodSeg103, ADE20K, Pascal-Context, and a Swin-T arm),
+        216<!--denseCells--> runs at the same 200-epoch budget the classification
+        recipe uses. The envelope keeps its shape and its neutrality at full data,
+        but a dense target supervising a dense task, the venue most
+        favourable to this prior, pays <em>less</em> than classification does
+        at matched supervision density: +0.39<!--denseVocOneDelta-->&nbsp;mIoU at
+        about five images per class, against a universal
+        &asymp;&nbsp;+1.5 floor on classification. Target&ndash;task alignment is
+        not where the value comes from.
+    </div>
+
+    <div class="outcome tax">
+        <strong>Object detection.</strong> On the same VOC images this is a null end
+        to end <em>and</em> under the frozen-feature probe
+        (<em>G</em>(fg_acc) = &minus;0.16<!--detOneGFgAcc--> at 1%, against a
+        pre-registered falsifier of +1.5), so the null is the prior rather than a
+        weak head. A +0.84&nbsp;AP50 gain was withdrawn after it was traced to a
+        single seed whose box-regression branch had collapsed.
+    </div>
+
+    <p class="lead-text">Whatever the prior supplies is cashed fully by a
+    whole-image classifier, partly by a per-pixel one, and not at all by a
+    coordinate regressor.</p>
+
+    <h2>A procedure for deciding whether to fuse</h2>
+    <p class="lead-text">The practical content of the taxonomy is that the outcome can be
+    estimated <em>before</em> the combined system is built, from measurements of each source
+    alone. The only cost beyond training each source once is two linear evaluations on frozen
+    features, which run in minutes on cells that took hours to train.</p>
+    <ol>
+        <li>Train the baseline, source <em>A</em> alone and source <em>B</em> alone; record
+            each arm's gain and its declared compute multiple.</li>
+        <li>Evaluate all three frozen representations under an identical linear protocol.
+            This gives <em>G<sub>A</sub></em> and <em>G<sub>B</sub></em>.</li>
+        <li>If either source's gain is about zero, it supplies nothing to overlap, and the
+            combination is not the question.</li>
+        <li>If the two feature gains are close <em>and</em> both arms improve the same cells,
+            expect <strong>substitution</strong>: take the cheaper source.</li>
+        <li>If they differ in kind, expect <strong>stacking</strong>.</li>
+        <li>If one source is a mature initialization, do not inject a shaping prior on top:
+            expect a <strong>tax</strong> proportional to what that initialization supplies,
+            measurable in advance as its advantage over training from scratch.</li>
+    </ol>
+
+    <h2>The benchmark</h2>
+    <div class="table-responsive">
+    <table class="table table-sm">
+        <tbody>
+        <tr><th style="width:34%">Scale</th><td>3,052<!--computeCells--> classification configurations over 9,390<!--computeRuns--> training runs, plus 216<!--denseCells--> segmentation and 36<!--detCells--> detection runs</td></tr>
+        <tr><th>Datasets</th><td>13, spanning natural images, satellite, texture, fine-grained,
+            food and histopathology, plus multi-sensor Sentinel-1/2 pairs</td></tr>
+        <tr><th>Backbones</th><td>9 across 5 families: ResNet-18/34/50, ConvNeXt, MobileNetV3,
+            Swin, ViT-tiny/S/B</td></tr>
+        <tr><th>Data scale</th><td>500 to 1.28M images; 32 to 224&nbsp;px; 5.7M to 86M parameters</td></tr>
+        <tr><th>Comparators</th><td>SimCLR, SimSiam, DINO, ImageNet transfer, DeiT augmentation,
+            learned teachers, each at a declared multiple of baseline training cost</td></tr>
+        <tr><th>Protocol</th><td>One frozen recipe; fixed per-class subset indices shared by
+            every run; numerically pinned filter banks; every table regenerated by command</td></tr>
+        </tbody>
+    </table>
+    </div>
+
+    <div class="caveat">
+        <strong>What we disclose.</strong> Configuration selection used the test split on
+        CIFAR-100, which we mark as a selection set whose absolute values carry a bias of
+        unknown size; the chosen setting was then applied verbatim to twelve further datasets
+        that played no part in selection. Comparator tuning parity is asymmetric by
+        construction under cost normalization, so our self-supervised numbers are lower
+        bounds, and we measured how far below by re-running them at four times their
+        budget. Two accuracy claims of ours did not survive that test and were withdrawn.
+    </div>
+
+    <h2>Acknowledgments</h2>
+    <p class="lead-text">This work was partially funded by the EU project FoodWISE,
+    2021-SGR-01094 (AGAUR), Icrea Academia'2022 (Generalitat de Catalunya), and Grants
+    PID2025-173459NB-C21 (BRIDGE-AI) and AIA2025-163919-C51 (EXPLORA), funded by
+    MICIU/AEI, by FEDER (UE), and by European Union NextGenerationEU/PRTR.
+    A.&nbsp;AlMughrabi acknowledges the support of FPI Becas, MICINN, Spain. The authors
+    thankfully acknowledge the RES resources provided by the Barcelona Supercomputing
+    Center on MareNostrum5 for IM-2025-3-0008.</p>
+
+    <!-- Affiliation marks, taken from Wikimedia Commons where each is CC0 or
+         public domain, normalised to a common 160px height and stripped of the
+         654KB ICC profile the UPF source carried. The TUM and BSC marks were
+         supplied by the authors (paper/TU_Muenchen_Logo.svg.webp and
+         paper/BSC_Logo-1-1.jpg); the TUM one replaces a Commons file that was
+         the bare wordmark without the university name. Each image hides itself
+         if its file is missing rather than showing a broken icon. -->
+    <div class="logo-strip">
+        <a href="https://www.ub.edu/"><img src="imgs/logo-ub.png" alt="Universitat de Barcelona"
+           onerror="this.parentNode.style.display='none'"></a>
+        <a href="https://www.tum.de/"><img src="imgs/logo-tum.png" alt="Technical University of Munich"
+           onerror="this.parentNode.style.display='none'"></a>
+        <a href="https://www.upf.edu/"><img src="imgs/logo-upf.png" alt="Universitat Pompeu Fabra"
+           onerror="this.parentNode.style.display='none'"></a>
+        <a href="https://www.bsc.es/"><img src="imgs/logo-bsc.png" alt="Barcelona Supercomputing Center"
+           onerror="this.parentNode.style.display='none'"></a>
+    </div>
+
+    <h2>Citation</h2>
+    <div class="citation">@article{almughrabi2026momentaux,
+  title   = {When does fusing hand-crafted knowledge with learned representations pay?
+             A controlled, cost-normalized benchmark and a measurable rule for
+             stacking, substitution and interference},
+  author  = {AlMughrabi, Ahmad and Clop, Albert and Busam, Benjamin
+             and Marques, Ricardo and Radeva, Petia},
+  journal = {Under review},
+  year    = {2026}
+}</div>
+
+    <footer>
+        Universitat de Barcelona &middot; Technical University of Munich
+        &middot; Universitat Pompeu Fabra<br>
+        Code, configurations, subset indices, per-run records and all result tables:
+        <a href="https://github.com/GCVCG/MomentAux">github.com/GCVCG/MomentAux</a>
+    </footer>
+
+</div>
+</body>
+</html>

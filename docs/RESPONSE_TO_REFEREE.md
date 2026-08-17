@@ -1,11 +1,108 @@
 # Response to the referee
 
-This letter is cumulative and is organized newest first: round 4, then round
-3, round 2 and round 1.
+This letter is cumulative and is organized newest first: round 5, then round
+4, round 3, round 2 and round 1.
 
 ---
 
-## Round 4
+## Round 5
+
+Two blocking items, both packaging, and both of which we must answer
+precisely rather than simply accept.
+
+**B1 and B2, the missing letter and the missing PDF.** The referee asks
+directly whether `check_submission.py` was run before the package was
+assembled, and says that if it was run and overridden we should say what the
+override was for. The honest answer is that neither file is missing from the
+manuscript repository. `paper/main.pdf` is present, current and named in
+`SUBMISSION_FILES.md`; `docs/RESPONSE_TO_REFEREE.md` is present and is also
+named there, with the real path it acquired in round 4. Both are checked, and
+the checker reports both as present. They were removed from the bundle handed
+to the reviewer, which is why five rounds of review have proceeded without
+them. That is our fault for not noticing what the bundling step dropped, and
+the referee is right that the last step before sending was not being taken.
+It is a handoff defect rather than a repository defect, and we prefer to say
+so plainly instead of accepting a diagnosis that would have sent us looking
+in the wrong place.
+
+**The overfull box, diagnosed rather than confirmed.** The referee offered us
+the option of confirming that it renders acceptably, and we took the other
+one. It is not in the graphical abstract. Our own source comment said it was,
+and that comment was wrong for five rounds. It is the ARTICLE INFO column:
+`cas-common.sty` sets it as `\hbox_to_wd:nn {\z@} {\box \g_stm_key_box}`, a
+box of width `.25\textwidth` placed deliberately in a zero-width hbox so the
+abstract can flow beside it. On this class `.25\textwidth` is 123.62721pt,
+which is the reported excess to the digit. The attribution was settled by
+deleting the graphical abstract, the image alone, the highlights and the
+abstract in turn, none of which changed the number, and then the keywords
+block, which removed it. The box also cannot be silenced from `main.tex`,
+because `\maketitle` ships the title block through `\twocolumn`, whose
+optional argument is typeset inside `\@parboxrestore`, and that macro ends
+with `\sloppy`, which sets `\hfuzz` to 0.5pt after any value we assign.
+Probing `\hfuzz` at that point reports 0.5pt however large a value the
+document sets, and eight lines of plain LaTeX reproduce the identical
+message. We are not willing to patch the publisher's class for a cosmetic log
+line, so the box stays and is whitelisted by its exact size in
+`check_submission.py`, which now fails on any other overfull box. That is the
+stronger arrangement in any case: a blanket `\hfuzz` would have hidden the
+second box below.
+
+**A second overfull box, which this check found immediately.** Table 6 ran
+3.01pt over the measure. It is fixed by narrowing that table's column
+separation, which also pulls its row shading further inside the rules.
+
+**NB1, the unused macros, is now closed as a class rather than as a list.**
+`auditPrevScope` is printed in the disclosure paragraph, so it now reports the
+previous scope alongside the previous resolvable count and rate, as the
+referee suggested. `detOneDelta` and `detFullDelta` were replacing nothing:
+the detection table stated those two numbers as literals, which is precisely
+the drift the macro file exists to prevent, and the table now uses the macros.
+`detFloorPcts` names the floored fractions in that table's caption and
+`camDelta` is stated in Section 5.5. `computeHnvl` and `computeHtwo` are
+retired at the generator, because `computeNvl` reports their sum and is what
+the text prints. `check_submission.py` now fails when any generated macro is
+defined and never printed. This matters beyond tidiness, and it is the reason
+we treated it as more than a cleanup: a macro nothing prints cannot drift
+visibly, so it quietly stops being audited while still looking like a checked
+number.
+
+**A length violation the stale PDF had been hiding, which we found only by
+fixing the staleness.** The checker's one real failure was that `main.pdf` was
+older than its sources. Rebuilding it put the manuscript at 36 pages against
+the journal's hard limit of 35, and the "34 pages" the referee reconciled came
+from the stale build log we shipped. This was nobody's catch but the
+checker's, and it is the most serious thing in this round: the guide makes
+length a desk-rejection criterion. We verified the limit against the guide
+rather than our own encoding of it, including that appendices count toward it,
+and confirmed the other three encoded limits at the same time.
+
+Closing a page was not a formatting problem. Measured against the built
+document, shrinking every figure by 10%, dropping the t-SNE figure and
+dropping the class-activation panel each changed the page count by nothing:
+the document is float-saturated, so floats repack into whatever space is
+freed, and only text volume moves it. We therefore cut roughly 5,000
+characters of prose, the largest single piece being a genuine duplication in
+which the discussion re-established the fusion taxonomy that Section 2.4
+already sets out with the same four citations. The conclusion is a third
+shorter, the limitations section no longer states the 94%/68% split twice, and
+the data-availability statement no longer enumerates a table's columns. No
+result, table, figure or caveat was removed. The manuscript is now 35 pages
+and `check_submission.py` reports `submission ready`.
+
+We also stopped typesetting the highlights and the graphical abstract into the
+manuscript. The guide asks for both as separate uploads, so including them
+duplicated a deliverable and spent two of the 35 permitted pages doing it. The
+compiled PDF is now the article alone, at 35 pages with nothing discounted,
+and the two files travel in the formats the guide names: `highlights.txt`, and
+the graphical abstract as PDF rather than PNG, since the guide's preferred
+types are TIFF, EPS, PDF or MS Office. Both clear the mandated 1328x531
+minimum at a 2.5:1 aspect.
+
+**NB2, the released audit script.** The referee notes that the `true`/`1`
+versus `yes` claim is the one thing not checkable from the paper alone. The
+repaired predicate is in `analysis/audit_sign_law.py` as released, and the
+exporter emits the `pretrained` column the filter now reads, so the check is
+reproducible from the artifact rather than only from our description of it.
 
 Four items, two of them blocking. We accept all four. One correction to the
 record first, because it bears on how the referee should read the rest: the
@@ -296,10 +393,13 @@ rather than as like-for-like.
 
 ### R2-4. Compute accounting not regenerated
 
-**Rebuilt from the run records:** 3,341 GPU-hours over 8,827 records, with
-the device split re-derived, 2,639 kWh and 51 g CO₂eq per run. The
-8,827-against-8,887 discrepancy resolves by deletion: every retained record
-carries a wall-clock field, so there is no second population of timed runs.
+**Rebuilt from the run records:** 3,798 GPU-hours over 9,390 records, with
+the device split re-derived, 2,973 kWh and 54 g CO₂eq per run. Every
+retained record carries a wall-clock field, so there is no second population
+of timed runs; the earlier 8,827-against-8,887 discrepancy resolved by
+deletion. These figures are regenerated with the rest of the campaign, so
+they move as runs land: the numbers above are the current totals, not the
+ones quoted in the first round.
 
 ### R2-5. Three uncited claims
 
@@ -577,3 +677,44 @@ instruction to ourselves about the generative-AI declaration. They have
 been removed. We note that the referee chose to record this as an
 observation rather than an allegation, and we appreciate the fairness of
 that.
+
+## T7 / E5: the decision procedure is scored on the test split
+
+The referee is right, and nothing in the previous version said so. Every
+quantity Algorithm 1 consumes -- both deltas and both feature gains -- is
+measured on the same held-out split we report final accuracy on, and the
+direct currency test asks which *test* images each arm fixes. We have added
+that statement to the procedure section, in front of the end-to-end run
+rather than after it.
+
+We did not want to defend it with the true-but-insufficient observation that
+nothing is tuned on that split. That is worth saying, and we say it: the
+decision reads two numbers off already-trained single-source arms and selects
+no configuration. But it does not answer the objection. A procedure whose
+stated purpose is to decide *before* fusing should estimate its inputs on
+validation data and touch the test split once, after the chosen combination
+has been trained.
+
+What we can state plainly is the size of the defect. Every input the
+procedure needs is computable on a labelled split disjoint from training, at
+no additional training cost, so this is a defect of protocol and not of
+feasibility. Until it is re-run that way the demonstration should be read as
+one end-to-end illustration on test-scored inputs, and the manuscript now
+says exactly that rather than calling it a prospective validation.
+
+## N5: the Table 24 margin now reconciles
+
+The referee found one derived quantity that did not reconcile: the
+SimCLR-minus-prior margin at 1% reads +0.85 while the budget table's
+displayed values gave 2.25 - 1.42 = 0.83. The referee was right that
+something was wrong, and right about which of the two numbers to doubt --
+but the error was in the budget table, not in the margin. An audit of that
+table against the exporter found six wrong entries, all in the 1% column
+and each off by 0.02, including the 2.25, which should read 2.27. With that
+corrected, 2.27 - 1.42 = 0.85 and the two tables agree.
+
+The deltas in these tables are seed-paired, so subtracting two rounded
+column means is not in general the way to reproduce one; that this
+particular check happened to be reproducible that way is what made the
+inconsistency visible. A script now verifies every typed table delta
+against the exporter's paired value, and is part of the release.
