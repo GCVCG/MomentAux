@@ -1,6 +1,6 @@
-PY=/media/HDD_4TB/amughrabi/momentstem/venv/bin/python DATA_ROOT=data_sf METHOD=simsiam PCT=1 bash scripts/sslbudget_par_any.sh
-PY=/media/HDD_4TB/amughrabi/momentstem/venv/bin/python DATA_ROOT=data_sf METHOD=simsiam PCT=2 bash scripts/sslbudget_par_any.sh
-PY=/media/HDD_4TB/amughrabi/momentstem/venv/bin/python DATA_ROOT=data_sf METHOD=simsiam PCT=3 bash scripts/sslbudget_par_any.sh
-PY=/media/HDD_4TB/amughrabi/momentstem/venv/bin/python DATA_ROOT=data_sf METHOD=simsiam PCT=7 bash scripts/sslbudget_par_any.sh
-PY=/media/HDD_4TB/amughrabi/momentstem/venv/bin/python DATA_ROOT=data_sf METHOD=simsiam PCT=15 bash scripts/sslbudget_par_any.sh
-PY=/media/HDD_4TB/amughrabi/momentstem/venv/bin/python DATA_ROOT=data_sf METHOD=simsiam PCT=25 bash scripts/sslbudget_par_any.sh
+PY=${WORKSTATION_ROOT}/momentstem/venv/bin/python DATA_ROOT=data_sf METHOD=simsiam PCT=1 bash scripts/sslbudget_par_any.sh
+PY=${WORKSTATION_ROOT}/momentstem/venv/bin/python DATA_ROOT=data_sf METHOD=simsiam PCT=2 bash scripts/sslbudget_par_any.sh
+PY=${WORKSTATION_ROOT}/momentstem/venv/bin/python DATA_ROOT=data_sf METHOD=simsiam PCT=3 bash scripts/sslbudget_par_any.sh
+PY=${WORKSTATION_ROOT}/momentstem/venv/bin/python DATA_ROOT=data_sf METHOD=simsiam PCT=7 bash scripts/sslbudget_par_any.sh
+PY=${WORKSTATION_ROOT}/momentstem/venv/bin/python DATA_ROOT=data_sf METHOD=simsiam PCT=15 bash scripts/sslbudget_par_any.sh
+PY=${WORKSTATION_ROOT}/momentstem/venv/bin/python DATA_ROOT=data_sf METHOD=simsiam PCT=25 bash scripts/sslbudget_par_any.sh

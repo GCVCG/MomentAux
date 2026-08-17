@@ -17,8 +17,8 @@
 # Also re-runs diagdeitssl_tin_simclr_10pct (genssl's Track C reaches it
 # without Track B's pretrain and will fail it) and the A/B probes.
 set -uo pipefail
-PY=/mnt/beegfs/amughrabi/envs/momentstem/bin/python
-REPO=/mnt/beegfs/amughrabi/projects/MomentsCNNEncoder
+PY=${CLUSTER_SCRATCH}/envs/momentstem/bin/python
+REPO=${CLUSTER_SCRATCH}/projects/MomentsCNNEncoder
 cd "$REPO"
 echo "host=$(hostname)"; nvidia-smi --query-gpu=name --format=csv,noheader || true
 

@@ -17,8 +17,8 @@
 # staging. AdamW => diag-only, never headline.
 
 set -euo pipefail
-PY=/mnt/beegfs/amughrabi/envs/momentstem/bin/python
-cd /mnt/beegfs/amughrabi/projects/MomentsCNNEncoder
+PY=${CLUSTER_SCRATCH}/envs/momentstem/bin/python
+cd ${CLUSTER_SCRATCH}/projects/MomentsCNNEncoder
 echo "host=$(hostname)"; nvidia-smi --query-gpu=name --format=csv,noheader || true
 
 for PCT in 10 5; do

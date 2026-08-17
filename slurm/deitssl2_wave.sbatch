@@ -32,8 +32,8 @@
 # Also RE-RUNS the deitssl G probes that failed on a CLI mismatch (linear_probe
 # takes --run/--config, one cell at a time -- the wave passed --runs/--out).
 set -uo pipefail
-PY=/mnt/beegfs/amughrabi/envs/momentstem/bin/python
-REPO=/mnt/beegfs/amughrabi/projects/MomentsCNNEncoder
+PY=${CLUSTER_SCRATCH}/envs/momentstem/bin/python
+REPO=${CLUSTER_SCRATCH}/projects/MomentsCNNEncoder
 cd "$REPO"
 echo "host=$(hostname)"; nvidia-smi --query-gpu=name --format=csv,noheader || true
 

@@ -29,8 +29,8 @@
 #     fraction (the flip transplants across the envelope).
 # Ordering: cheap fractions first; the 100% pair LAST (longest, killable).
 set -uo pipefail
-PY=/mnt/beegfs/amughrabi/envs/momentstem/bin/python
-REPO=/mnt/beegfs/amughrabi/projects/MomentsCNNEncoder
+PY=${CLUSTER_SCRATCH}/envs/momentstem/bin/python
+REPO=${CLUSTER_SCRATCH}/projects/MomentsCNNEncoder
 cd "$REPO"
 echo "host=$(hostname)"; nvidia-smi --query-gpu=name --format=csv,noheader || true
 

@@ -16,8 +16,8 @@
 # C100 = in-memory, no staging. AdamW + augment => diag-only.
 
 set -euo pipefail
-PY=/mnt/beegfs/amughrabi/envs/momentstem/bin/python
-cd /mnt/beegfs/amughrabi/projects/MomentsCNNEncoder
+PY=${CLUSTER_SCRATCH}/envs/momentstem/bin/python
+cd ${CLUSTER_SCRATCH}/projects/MomentsCNNEncoder
 echo "host=$(hostname)"; nvidia-smi --query-gpu=name --format=csv,noheader || true
 
 for PCT in 1 5 10 25 100; do

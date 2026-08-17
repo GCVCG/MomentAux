@@ -16,8 +16,8 @@
 # should be unchanged by the head). Predictions in CLAUDE.md BEFORE launch.
 
 set -euo pipefail
-PY=/mnt/beegfs/amughrabi/envs/momentstem/bin/python
-cd /mnt/beegfs/amughrabi/projects/MomentsCNNEncoder
+PY=${CLUSTER_SCRATCH}/envs/momentstem/bin/python
+cd ${CLUSTER_SCRATCH}/projects/MomentsCNNEncoder
 echo "host=$(hostname)"; nvidia-smi --query-gpu=name --format=csv,noheader || true
 
 for CELL in diagcos_c100_none_1pct diagcos_c100_aux_1pct \

@@ -9,7 +9,7 @@ QOS has GrpTRES gres/gpu=0, i.e. zero GPUs -- discovered the hard way).
     python slurm/submit_grid.py                               # full grid
     python slurm/submit_grid.py --filter cifar100_resnet18    # cell substring
     python slurm/submit_grid.py --seeds 0 1 2 --gpu h100 \
-        --python /mnt/beegfs/amughrabi/envs/momentstem/bin/python
+        --python ${CLUSTER_SCRATCH}/envs/momentstem/bin/python
 """
 
 import argparse

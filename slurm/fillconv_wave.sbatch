@@ -13,8 +13,8 @@
 # live configurations share the study's full grid (1,2,3,5,7,10,15,25,100%)
 # instead of the sparse 4-5 points they were launched with.
 set -euo pipefail
-PY=/mnt/beegfs/amughrabi/envs/momentstem/bin/python
-REPO=/mnt/beegfs/amughrabi/projects/MomentsCNNEncoder
+PY=${CLUSTER_SCRATCH}/envs/momentstem/bin/python
+REPO=${CLUSTER_SCRATCH}/projects/MomentsCNNEncoder
 cd "$REPO"
 echo "host=$(hostname)"; nvidia-smi --query-gpu=name --format=csv,noheader || true
 declare -A BASE=( [3]=configs/diagnostics/abl3_none.yaml [7]=configs/diagnostics/abl7_none.yaml [15]=configs/diagnostics/abl15_none.yaml [25]=configs/diagnostics/abl25_none.yaml [100]=configs/ablations_full/ablf_none.yaml )

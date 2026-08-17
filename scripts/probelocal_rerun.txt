@@ -1,3 +1,3 @@
-/home/amughrabi/venvs/momentstem/bin/python analysis/linear_probe.py --run "$OUT/grid_c100_cnx_64bc90_3pct" --config configs/grid/grid_c100_cnx_64bc90_3pct.yaml --data-root "$DR"
-/home/amughrabi/venvs/momentstem/bin/python analysis/linear_probe.py --run "$OUT/grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_3pct" --config configs/grid/grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_3pct.yaml --data-root "$DR"
-/home/amughrabi/venvs/momentstem/bin/python analysis/linear_probe.py --run "$OUT/grid_c100_r18_poollearned_d9c446_2pct" --config configs/grid/grid_c100_r18_poollearned_d9c446_2pct.yaml --data-root "$DR"
+${HOME}/venvs/momentstem/bin/python analysis/linear_probe.py --run "$OUT/grid_c100_cnx_64bc90_3pct" --config configs/grid/grid_c100_cnx_64bc90_3pct.yaml --data-root "$DR"
+${HOME}/venvs/momentstem/bin/python analysis/linear_probe.py --run "$OUT/grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_3pct" --config configs/grid/grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_3pct.yaml --data-root "$DR"
+${HOME}/venvs/momentstem/bin/python analysis/linear_probe.py --run "$OUT/grid_c100_r18_poollearned_d9c446_2pct" --config configs/grid/grid_c100_r18_poollearned_d9c446_2pct.yaml --data-root "$DR"

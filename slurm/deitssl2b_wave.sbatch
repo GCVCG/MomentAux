@@ -20,8 +20,8 @@
 # overturn the flip -- deit-sslsv stays BELOW deit-aux at 10% and 25% (bands
 # 30..40 @10%, 46..55 @25%). FALSIFIER: deit-sslsv >= deit-aux at BOTH.
 set -uo pipefail
-PY=/mnt/beegfs/amughrabi/envs/momentstem/bin/python
-REPO=/mnt/beegfs/amughrabi/projects/MomentsCNNEncoder
+PY=${CLUSTER_SCRATCH}/envs/momentstem/bin/python
+REPO=${CLUSTER_SCRATCH}/projects/MomentsCNNEncoder
 cd "$REPO"
 echo "host=$(hostname)"; nvidia-smi --query-gpu=name --format=csv,noheader || true
 

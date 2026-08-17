@@ -1,2 +1,2 @@
-/home/amughrabi/venvs/momentstem/bin/python analysis/linear_probe.py --run "$OUT/diagin100_vitb_none" --config configs/diagnostics/diagin100_vitb_none.yaml --data-root "$DR" --shots 25,100,250
-/home/amughrabi/venvs/momentstem/bin/python analysis/linear_probe.py --run "$OUT/diagin100_vitb_aux" --config configs/diagnostics/diagin100_vitb_aux.yaml --data-root "$DR" --shots 25,100,250
+${HOME}/venvs/momentstem/bin/python analysis/linear_probe.py --run "$OUT/diagin100_vitb_none" --config configs/diagnostics/diagin100_vitb_none.yaml --data-root "$DR" --shots 25,100,250
+${HOME}/venvs/momentstem/bin/python analysis/linear_probe.py --run "$OUT/diagin100_vitb_aux" --config configs/diagnostics/diagin100_vitb_aux.yaml --data-root "$DR" --shots 25,100,250

@@ -17,8 +17,8 @@
 # (those 1,467 runs go to BSC's 32 GPUs instead).
 
 set -uo pipefail
-REPO=/mnt/beegfs/amughrabi/projects/MomentsCNNEncoder
-PY=/mnt/beegfs/amughrabi/envs/momentstem/bin/python
+REPO=${CLUSTER_SCRATCH}/projects/MomentsCNNEncoder
+PY=${CLUSTER_SCRATCH}/envs/momentstem/bin/python
 cd "$REPO"
 
 WORKLIST=$REPO/worklist.turing
