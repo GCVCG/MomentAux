@@ -1,23 +1,23 @@
 grid_c100_cnx_64bc90_3pct seed0: probe train 8.44  test 7.65
 Traceback (most recent call last):
-  File "/home/amughrabi/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 256, in <module>
+  File "${HOME}/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 256, in <module>
     main()
-  File "/home/amughrabi/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 219, in main
+  File "${HOME}/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 219, in main
     model.load_state_dict(torch.load(ckpt, map_location=device))
                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 1516, in load
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 1516, in load
     return _load(
            ^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 2114, in _load
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 2114, in _load
     result = unpickler.load()
              ^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/_weights_only_unpickler.py", line 532, in load
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/_weights_only_unpickler.py", line 532, in load
     self.append(self.persistent_load(pid))
                 ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 2078, in persistent_load
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 2078, in persistent_load
     typed_storage = load_tensor(
                     ^^^^^^^^^^^^
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 2031, in load_tensor
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 2031, in load_tensor
     zip_file.get_storage_from_record(name, numel, torch.UntypedStorage)
 RuntimeError: PytorchStreamReader failed reading file data/17: invalid header or archive is corrupted
 diagin100_vits_none seed0: probe train 80.90  test 66.68

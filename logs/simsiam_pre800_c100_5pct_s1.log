@@ -1,6 +1,6 @@
-/home/amughrabi/projects/MomentsCNNEncoder/scripts/simsiam_pretrain.py:116: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+${HOME}/projects/MomentsCNNEncoder/scripts/simsiam_pretrain.py:116: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
   scaler = torch.cuda.amp.GradScaler()
-/home/amughrabi/projects/MomentsCNNEncoder/scripts/simsiam_pretrain.py:124: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+${HOME}/projects/MomentsCNNEncoder/scripts/simsiam_pretrain.py:124: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
   with torch.cuda.amp.autocast():
 simsiam epoch 1/800 loss -0.0158
 simsiam epoch 10/800 loss -0.3792

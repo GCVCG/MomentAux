@@ -1,9 +1,9 @@
 Traceback (most recent call last):
-  File "/home/amughrabi/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 256, in <module>
+  File "${HOME}/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 256, in <module>
     main()
-  File "/home/amughrabi/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 219, in main
+  File "${HOME}/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 219, in main
     model.load_state_dict(torch.load(ckpt, map_location=device))
-  File "/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 2593, in load_state_dict
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 2593, in load_state_dict
     raise RuntimeError(
 RuntimeError: Error(s) in loading state_dict for StemmedModel:
 	Unexpected key(s) in state_dict: "net.global_pool.masks". 

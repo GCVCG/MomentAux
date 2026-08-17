@@ -1,4 +1,4 @@
-/home/amughrabi/venvs/momentstem/lib/python3.12/site-packages/torch/utils/data/dataloader.py:665: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/utils/data/dataloader.py:665: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
   warnings.warn(warn_msg)
 WARNING: training on CPU (fine for smoke tests only)
 moment-aux target calibrated on 1024 images

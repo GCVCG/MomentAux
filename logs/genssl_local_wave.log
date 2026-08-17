@@ -2083,40 +2083,40 @@ pretrain epoch 140/200 loss 1.7066
 pretrain epoch 150/200 loss 1.6700
 pretrain epoch 160/200 loss 1.6444
 Traceback (most recent call last):
-  File "/home/amughrabi/projects/MomentsCNNEncoder/scripts/simclr_pretrain.py", line 200, in <module>
+  File "${HOME}/projects/MomentsCNNEncoder/scripts/simclr_pretrain.py", line 200, in <module>
     sd = {k: v for k, v in model.state_dict().items()
     ^^^^^^
-  File "/home/amughrabi/projects/MomentsCNNEncoder/scripts/simclr_pretrain.py", line 177, in main
+  File "${HOME}/projects/MomentsCNNEncoder/scripts/simclr_pretrain.py", line 177, in main
     
     
-  File "/home/amughrabi/anaconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py", line 733, in __next__
+  File "${HOME}/anaconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py", line 733, in __next__
     data = self._next_data()
            ^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/anaconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py", line 1515, in _next_data
+  File "${HOME}/anaconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py", line 1515, in _next_data
     return self._process_data(data, worker_id)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/anaconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py", line 1550, in _process_data
+  File "${HOME}/anaconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py", line 1550, in _process_data
     data.reraise()
-  File "/home/amughrabi/anaconda3/lib/python3.12/site-packages/torch/_utils.py", line 750, in reraise
+  File "${HOME}/anaconda3/lib/python3.12/site-packages/torch/_utils.py", line 750, in reraise
     raise exception
 FileNotFoundError: Caught FileNotFoundError in DataLoader worker process 0.
 Original Traceback (most recent call last):
-  File "/home/amughrabi/anaconda3/lib/python3.12/site-packages/torch/utils/data/_utils/worker.py", line 349, in _worker_loop
+  File "${HOME}/anaconda3/lib/python3.12/site-packages/torch/utils/data/_utils/worker.py", line 349, in _worker_loop
     data = fetcher.fetch(index)  # type: ignore[possibly-undefined]
            ^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/anaconda3/lib/python3.12/site-packages/torch/utils/data/_utils/fetch.py", line 50, in fetch
+  File "${HOME}/anaconda3/lib/python3.12/site-packages/torch/utils/data/_utils/fetch.py", line 50, in fetch
     data = self.dataset.__getitems__(possibly_batched_index)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/anaconda3/lib/python3.12/site-packages/torch/utils/data/dataset.py", line 416, in __getitems__
+  File "${HOME}/anaconda3/lib/python3.12/site-packages/torch/utils/data/dataset.py", line 416, in __getitems__
     return [self.dataset[self.indices[idx]] for idx in indices]
             ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/anaconda3/lib/python3.12/site-packages/torchvision/datasets/folder.py", line 245, in __getitem__
+  File "${HOME}/anaconda3/lib/python3.12/site-packages/torchvision/datasets/folder.py", line 245, in __getitem__
     sample = self.loader(path)
              ^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/anaconda3/lib/python3.12/site-packages/torchvision/datasets/folder.py", line 284, in default_loader
+  File "${HOME}/anaconda3/lib/python3.12/site-packages/torchvision/datasets/folder.py", line 284, in default_loader
     return pil_loader(path)
            ^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/anaconda3/lib/python3.12/site-packages/torchvision/datasets/folder.py", line 262, in pil_loader
+  File "${HOME}/anaconda3/lib/python3.12/site-packages/torchvision/datasets/folder.py", line 262, in pil_loader
     with open(path, "rb") as f:
          ^^^^^^^^^^^^^^^^
 FileNotFoundError: [Errno 2] No such file or directory: '/dev/shm/genssl_local/tiny-imagenet-200/train/n02106662/images/n02106662_397.JPEG'

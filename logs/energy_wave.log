@@ -1868,7 +1868,7 @@ epoch 37/200 loss 1.1073 train 0.6850 test 0.2076
 epoch 38/200 loss 1.0437 train 0.6924 test 0.2081
 Terminated
 Traceback (most recent call last):
-  File "/home/amughrabi/anaconda3/lib/python3.12/multiprocessing/resource_sharer.py", line 138, in _serve
+  File "${HOME}/anaconda3/lib/python3.12/multiprocessing/resource_sharer.py", line 138, in _serve
 stem calibrated (True) on 1024 images
 [enmag_5pct seed1] {"params_trainable": 11224740, "params_stem_trainable": 0, "params_stem_fixed_filters": 1936, "flops_total": 563406848, "flops_stem": 1982464, "flops_image_size": 32}
 epoch 1/200 loss 4.6273 train 0.0210 test 0.0383

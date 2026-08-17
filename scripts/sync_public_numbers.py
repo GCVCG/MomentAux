@@ -25,6 +25,17 @@ Markdown, so the pages read normally on GitHub and GitHub Pages.
 
 The macro file is the single source of truth, so regenerating it and running
 --fix is the whole update path after new runs land.
+
+WHAT THIS MECHANISM CANNOT GUARD, and it is a real hole rather than an
+oversight. A tag only works where an HTML comment is a comment. Inside an
+attribute value it is literal text, so the project page's
+`<meta name="description" content="... 3,052 classification configurations
+over 9,390 training runs ...">` cannot be tagged: the comment would be served
+to search engines as part of the description. Those two figures were found
+stale on 2026-08-17 and corrected by hand, and they will go stale again the
+next time the macros move. Anyone regenerating numbers.tex should check that
+meta tag by eye, or teach this script a second tag form (an attribute-safe
+marker, or a line-anchored rule) so it can be guarded like everything else.
 """
 import argparse
 import os
@@ -33,7 +44,16 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MACROS = os.path.join(ROOT, "paper", "tables", "numbers.tex")
-TARGETS = [os.path.join(ROOT, "README.md"), os.path.join(ROOT, "docs", "index.md")]
+TARGETS = [os.path.join(ROOT, "README.md"),
+           os.path.join(ROOT, "docs", "index.md"),
+           # The public project page. It is SERVED from a different repository
+           # (amughrabi/amughrabi.github.io, branch momentaux-project-page,
+           # under MomentAux/) because the paper's URL points there, but the
+           # canonical copy lives here so it is guarded like everything else --
+           # it had drifted to "2,894 configurations over 8,827 runs" and a 79%
+           # sign-law rate. Publishing means copying this file to that repo;
+           # editing it there instead is how it drifted in the first place.
+           os.path.join(ROOT, "docs", "project_page", "index.html")]
 
 # The macro file writes LaTeX thousands separators; Markdown wants commas.
 TEX = {"{,}": ",", r"\%": "%", "~": " "}
@@ -50,19 +70,24 @@ def load_macros(path):
     return out
 
 
-TAG = re.compile(r"(?P<value>[-+−]?[\d][\d,\.]*%?)(?P<tag><!--\s*([A-Za-z]+)\s*-->)")
+TAG = re.compile(
+    r"(?P<value>(?:&minus;|&\#8722;|[-+\u2212])?\d[\d,.]*%?)"
+    r"(?P<tag><!--\s*([A-Za-z]+)\s*-->)")
 
 
 def same(a, b):
     """Compare VALUE, not typography.
 
-    Prose writes a gain as "+0.39" where the macro holds "0.39", and uses a
-    typographic minus (U+2212) where the macro has a hyphen. Both are the same
-    number, and a guard that reported them as drift would be trained away
-    within a week. Anything else -- a different digit, a lost comma group --
-    is a genuine mismatch and is reported.
+    Prose writes a gain as "+0.39" where the macro holds "0.39", and writes a
+    minus as U+2212 or as the HTML entity &minus; where the macro has a plain
+    hyphen. Those are the same number, and a guard that reported them as drift
+    would be trained away within a week. Anything else -- a different digit, a
+    lost comma group -- is a genuine mismatch and is reported.
     """
-    norm = lambda v: v.replace("−", "-").lstrip("+")
+    def norm(v):
+        for m in ("&minus;", "&#8722;", "\u2212"):
+            v = v.replace(m, "-")
+        return v.lstrip("+")
     return norm(a) == norm(b)
 
 
@@ -105,10 +130,12 @@ def main():
     macros = load_macros(MACROS)
     print(f"{len(macros)} macros loaded from paper/tables/numbers.tex")
     problems = 0
+    total_tagged = 0
     for path in TARGETS:
         rel = os.path.relpath(path, ROOT)
         bad, fixed, unknown = process(path, macros, args.fix)
         tagged = len(re.findall(TAG, open(path).read()))
+        total_tagged += tagged
         if unknown:
             print(f"  {rel}: UNKNOWN MACRO {sorted(set(unknown))}")
             problems += len(set(unknown))
@@ -119,6 +146,14 @@ def main():
                 print(f"  {rel}: {name} is {got}, numbers.tex says {want}")
             problems += len(bad)
             print(f"  {rel}: {tagged} tagged values, {len(bad)} stale")
+    # A guard that matches nothing PASSES, which is worse than one that fails:
+    # a broken regex here reported "0 tagged values, 0 stale / public numbers
+    # match the paper" while checking absolutely nothing. Refuse that outcome.
+    if total_tagged == 0:
+        print("\nNO TAGGED VALUES FOUND AT ALL. The pattern is broken, or the "
+              "tags were stripped -- either way this ran without checking "
+              "anything. Not reporting success.")
+        sys.exit(2)
     if problems:
         print(f"\n{problems} problem(s). Run --fix, or regenerate numbers.tex first:")
         print("  python scripts/make_paper_numbers.py > paper/tables/numbers.tex")

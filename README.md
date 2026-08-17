@@ -15,8 +15,8 @@ recipe with committed data subsets**.
 |---|---|
 | experimental cells | 3,052<!--computeCells--> |
 | training runs | 9,390<!--computeRuns--> (3,798<!--computeGpuHours--> GPU-hours) |
-| datasets | 14, across 5 visual domains |
-| backbone families | 7 (ResNet-18/34/50, MobileNetV3, ConvNeXt-T, ViT-tiny/S/B, Swin-T) |
+| datasets | 13, across six visual domains |
+| backbone families | 9 (ResNet-18/34/50, MobileNetV3, ConvNeXt-T, ViT-tiny/S/B, Swin-T) |
 | data scale | 500 to 1,281,167 images; 10 to 1000 classes |
 | resolution | 32, 64, 96, 224 px |
 | model scale | 5.7M to 86M parameters |

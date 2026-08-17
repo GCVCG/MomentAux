@@ -1,11 +1,11 @@
 TIN20_START tin20_none_seed0
 Traceback (most recent call last):
-  File "/home/amughrabi/projects/MomentsCNNEncoder/train.py", line 328, in <module>
+  File "${HOME}/projects/MomentsCNNEncoder/train.py", line 328, in <module>
     main()
-  File "/home/amughrabi/projects/MomentsCNNEncoder/train.py", line 166, in main
+  File "${HOME}/projects/MomentsCNNEncoder/train.py", line 166, in main
     calib = data_mod.calibration_batch(cfg["dataset"], args.data_root).to(device)
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/amughrabi/projects/MomentsCNNEncoder/data.py", line 307, in calibration_batch
+  File "${HOME}/projects/MomentsCNNEncoder/data.py", line 307, in calibration_batch
     raise ValueError(f"unknown dataset {dataset!r}")
 ValueError: unknown dataset 'tin20'
 TIN20_RETRY tin20_none_seed0 attempt 1
