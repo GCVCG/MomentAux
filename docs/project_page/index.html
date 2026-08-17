@@ -173,7 +173,7 @@
                 targets injected only during training at ~2% compute overhead, against
                 the data-driven alternatives (SimCLR, SimSiam and DINO pre-training, ImageNet
                 transfer, heavy augmentation, learned teachers) under one frozen recipe with
-                fixed subsets: 13 datasets, 9 backbones, 500 to 1.28M images, 32 to 224&nbsp;px,
+                fixed subsets: 13 datasets, 9 backbones, 150 to 1.28M images, 32 to 224&nbsp;px,
                 and 5.7M to 86M parameters (3,052<!--computeCells--> classification
                 configurations over 9,390<!--computeRuns--> runs, plus segmentation
                 and detection transplants).</p>
@@ -373,7 +373,7 @@
             food and histopathology, plus multi-sensor Sentinel-1/2 pairs</td></tr>
         <tr><th>Backbones</th><td>9 across 5 families: ResNet-18/34/50, ConvNeXt, MobileNetV3,
             Swin, ViT-tiny/S/B</td></tr>
-        <tr><th>Data scale</th><td>500 to 1.28M images; 32 to 224&nbsp;px; 5.7M to 86M parameters</td></tr>
+        <tr><th>Data scale</th><td>150 to 1.28M images; 32 to 224&nbsp;px; 5.7M to 86M parameters</td></tr>
         <tr><th>Comparators</th><td>SimCLR, SimSiam, DINO, ImageNet transfer, DeiT augmentation,
             learned teachers, each at a declared multiple of baseline training cost</td></tr>
         <tr><th>Protocol</th><td>One frozen recipe; fixed per-class subset indices shared by

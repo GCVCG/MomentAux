@@ -27,7 +27,7 @@ DeiT-strength augmentation, and learned FitNets teachers — each reported
 against a **declared multiple of baseline training compute**, and every
 pairwise combination measured. 3,052<!--computeCells--> classification
 configurations over 9,390<!--computeRuns--> runs, on 13 datasets and 9
-backbones from 500 to 1.28M images and 32 to 224 px, plus segmentation and
+backbones from 150 to 1.28M images and 32 to 224 px, plus segmentation and
 detection transplants.
 
 MomentAux itself regresses an intermediate layer onto fixed

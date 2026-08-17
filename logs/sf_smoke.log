@@ -5,4 +5,4 @@ moment-aux target calibrated on 1024 images
 [sf_eurosatms_nir_aux_5pct seed0] {"params_trainable": 11180050, "params_stem_trainable": 0, "params_stem_fixed_filters": 0, "flops_total": 2243138560, "flops_stem": 0, "flops_image_size": 64}
 epoch 1/2 loss 3.0301 train 0.4092 test 0.5150
 epoch 2/2 loss 1.0025 train 0.6504 test 0.5811
-done: final 0.5811 best 0.5811 -> /tmp/claude-1000/-home-amughrabi-projects-MomentsCNNEncoder/08d0108f-3b49-418e-af2b-a161c3dbad59/scratchpad/smoke_sf/sf_eurosatms_nir_aux_5pct/seed0
+done: final 0.5811 best 0.5811 -> /tmp/claude-1000/-home-user-projects-MomentsCNNEncoder/08d0108f-3b49-418e-af2b-a161c3dbad59/scratchpad/smoke_sf/sf_eurosatms_nir_aux_5pct/seed0
