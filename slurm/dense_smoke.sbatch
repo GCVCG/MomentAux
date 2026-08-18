@@ -1,12 +1,12 @@
 #!/bin/bash
 #SBATCH --job-name=ms_denssmoke
-#SBATCH --account=ub234
+#SBATCH --account=${CLUSTER_ACCOUNT:?set CLUSTER_ACCOUNT}
 #SBATCH --qos=acc_resc
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=20
 #SBATCH --time=00:30:00
-#SBATCH --output=/gpfs/scratch/ub234/momentstem/logs/%x_%j.out
+#SBATCH --output=${CLUSTER_SCRATCH}/momentstem/logs/%x_%j.out
 #
 # Pre-flight for the VOC segmentation envelope, on the machine that will run
 # it. Same discipline as the ImageNet pre-flight, for the same reason: every
@@ -26,7 +26,7 @@
 # make the completed-run guard skip the real cell.
 
 set -uo pipefail
-source /gpfs/scratch/ub234/momentstem/env.sh
+source ${CLUSTER_SCRATCH}/momentstem/env.sh
 cd "$MS_ROOT/repo"
 
 OUT=$MS_ROOT/runs_dense_smoke

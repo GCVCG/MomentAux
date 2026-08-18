@@ -12,7 +12,7 @@ import os
 import re
 import sys
 
-MS = os.environ.get("MS_ROOT", "/gpfs/scratch/ub234/momentstem")
+MS = os.environ.get("MS_ROOT", "${CLUSTER_SCRATCH}/momentstem")
 CFG = os.path.join(MS, "repo", "configs", "det")
 RUNS = os.path.join(MS, "runs_det")
 SEEDS = (0, 1, 2)

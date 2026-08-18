@@ -13,8 +13,8 @@ recipe with committed data subsets**.
 
 | | |
 |---|---|
-| experimental cells | 3,052<!--computeCells--> |
-| training runs | 9,390<!--computeRuns--> (3,798<!--computeGpuHours--> GPU-hours) |
+| experimental cells | 3,054<!--computeCells--> |
+| training runs | 9,402<!--computeRuns--> (3,854<!--computeGpuHours--> GPU-hours) |
 | datasets | 13, across six visual domains |
 | backbone families | 9 (ResNet-18/34/50, MobileNetV3, ConvNeXt-T, ViT-tiny/S/B, Swin-T) |
 | data scale | 150 to 1,281,167 images; 10 to 1000 classes |
@@ -142,7 +142,7 @@ are compressed; `SHA256SUMS` accompanies them.
 | asset | contents |
 |---|---|
 | `run-records.tar.gz` | every run's `final.json` (config, accuracy, parameter and FLOP accounting, environment) and every probe record behind `G`: `linear_probe*.json` (full-train, fixed-shot, final-epoch and cross-label-space), `dense_probe.json`, `det_probe.json`, plus `robustness.json`, `cifair.json`, `head_forms_5shot.json` and `per_class_delta.json`. Records span `runs/`, `runs_turing/`, `runs_dense/` and `runs_det/`; per-seed records sit under `<tree>/<cell>/seed<N>/` and per-cell probes under `<tree>/<cell>/` |
-| `training-curves.tar.gz` | per-epoch `metrics.csv` for 9,662 of the 10,018 released runs (the 356 without one, and why, are listed in `docs/ARTIFACTS.md`) |
+| `training-curves.tar.gz` | per-epoch `metrics.csv` for 9,674 of the 10,030 released runs (the 356 without one, and why, are listed in `docs/ARTIFACTS.md`) |
 | `result-tables.tar.gz` | the aggregated tables: `all_results.csv` (one row per cell), `results_by_portion.csv`, the combined workbook, `law_audit.md`, `summary.md`, `summary.tex`, the segmentation tables (`dense_results.csv`, `dense_law.csv`, `dense_summary.md`), the detection tables (`det_results.csv`, `det_summary.md`, `det_decompose.json`) and the per-analysis JSON records |
 | `logs.tar.gz` | campaign and wave logs, including the cluster work-queue logs |
 | `configs-and-subsets.tar.gz` | every cell configuration and the committed subset indices |

@@ -53,7 +53,7 @@ law = law.assign(readout=law.delta - law.G)      # 1,276 cells
 which needs four measurements from the same seed — both arms' accuracy and
 both arms' probe — and drops any cell without at least three seeds common to
 all four. That check needs the per-run records, not the summary table, so it
-cannot be done from the CSV alone: 256 of the 1,276 cells fall out. Unpack
+cannot be done from the CSV alone: 257 of the 1,277 cells fall out. Unpack
 `run-records.tar.gz` alongside the tables and run
 
 ```bash
@@ -120,7 +120,7 @@ Per-epoch `metrics.csv`: train and test accuracy, loss components, the `λ`
 schedule value, learning rate, and the `conv1` usage ratio. Use these for
 training dynamics; use `final.json` for the reported accuracy.
 
-This asset holds 9,663 curves: one for 9,662 of the 10,018 released runs, plus
+This asset holds 9,675 curves: one for 9,674 of the 10,030 released runs, plus
 one partial curve from `runs/diagtgt_c10_mag_10pct/seed0`, a run killed by a
 `SIGABRT` before it could write a `final.json` (which is why that cell reports
 two seeds rather than three). The 356 runs without a curve are 352 trained on

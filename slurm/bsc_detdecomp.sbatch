@@ -1,12 +1,12 @@
 #!/bin/bash
 #SBATCH --job-name=ms_detdecomp
-#SBATCH --account=ub234
+#SBATCH --account=${CLUSTER_ACCOUNT:?set CLUSTER_ACCOUNT}
 #SBATCH --qos=acc_resc
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=20
 #SBATCH --time=06:00:00
-#SBATCH --output=/gpfs/scratch/ub234/momentstem/logs/%x_%j.out
+#SBATCH --output=${CLUSTER_SCRATCH}/momentstem/logs/%x_%j.out
 #
 # The detection decomposition (2026-08-13). AP50 collapses at 1-2% data and the
 # pre-declared floor rule makes those cells uninterpretable; fg_acc and fg_iou,
@@ -28,7 +28,7 @@
 #          slurm/bsc_detdecomp.sbatch
 
 set -uo pipefail
-source /gpfs/scratch/ub234/momentstem/env.sh
+source ${CLUSTER_SCRATCH}/momentstem/env.sh
 cd "$MS_ROOT/repo"
 
 OUT=$MS_ROOT/results/det_decompose.json

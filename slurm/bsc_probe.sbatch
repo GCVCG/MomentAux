@@ -1,12 +1,12 @@
 #!/bin/bash
 #SBATCH --job-name=ms_probe
-#SBATCH --account=ub234
+#SBATCH --account=${CLUSTER_ACCOUNT:?set CLUSTER_ACCOUNT}
 #SBATCH --qos=acc_resc
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:4
 #SBATCH --cpus-per-task=80
 #SBATCH --time=08:00:00
-#SBATCH --output=/gpfs/scratch/ub234/momentstem/logs/%x_%j.out
+#SBATCH --output=${CLUSTER_SCRATCH}/momentstem/logs/%x_%j.out
 #
 # ImageNet-scale G-probe lane (2026-08-06): the P1/S1 pass -- does Delta ~= G
 # survive 1.28M images and 224px/86M params? Separate lane (own worklist/
@@ -22,7 +22,7 @@
 # would measure a training failure, not a feature deficit (swin scope rule).
 
 set -uo pipefail
-source /gpfs/scratch/ub234/momentstem/env.sh
+source ${CLUSTER_SCRATCH}/momentstem/env.sh
 cd "$MS_ROOT/repo"
 
 WORKLIST=$MS_ROOT/worklist.probe

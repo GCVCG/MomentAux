@@ -29,10 +29,10 @@ ported vs corrected and why.
   don't wait for the cluster). Long runs: detach with `setsid nohup`,
   write a `logs/*_wave.log` (PID to `logs/*.pid`), end with a `*_COMPLETE`
   marker line. All wave logs live in `logs/` — never the repo root.
-- turing cluster (`ssh amughrabi@turing.ub.edu`): repo mirror at
-  /mnt/beegfs/amughrabi/projects/MomentsCNNEncoder (rsync copy, NOT a git
+- turing cluster (`ssh <user>@turing.ub.edu`): repo mirror at
+  ${CLUSTER_SCRATCH}/projects/MomentsCNNEncoder (rsync copy, NOT a git
   repo — sync code with rsync, pull run results back the same way), venv at
-  /mnt/beegfs/amughrabi/envs/momentstem. GPU jobs need
+  ${CLUSTER_SCRATCH}/envs/momentstem. GPU jobs need
   `--partition=gpu --qos=gpu` (default QOS has zero GPUs). Max 2 running
   jobs (= one per GPU). **2026-07-19 user decision: the next-steps campaign
   runs on turing using BOTH GPUs (H100 + H200)** — this supersedes the old
@@ -40,7 +40,7 @@ ported vs corrected and why.
   python explicitly (submission-env-independent); markers/logs follow the
   local conventions but live in slurm/logs/.
 - CIFAR-100-C lives at data/CIFAR-100-C (local) and
-  /mnt/beegfs/amughrabi/data/CIFAR-100-C (turing).
+  ${CLUSTER_SCRATCH}/data/CIFAR-100-C (turing).
 - **`num_workers` IS PART OF THE REPRODUCIBILITY CONTRACT** (verified 2026-07-17,
   not assumed). Data ORDER is worker-count-independent (the sampler draws from
   `generator=gen` in the main process), but AUGMENTATION IS NOT: PyTorch seeds
@@ -2024,7 +2024,7 @@ ported vs corrected and why.
   the local machine to 0.01-0.05 on all four cells; G(vits) = +11.91 vs
   +11.95 local. The S1 headline number reproduces on independent hardware
   and a from-scratch environment. solarflare is now a commissioned second
-  worker (repo+venv+in100 data at /media/HDD_4TB/amughrabi/momentstem).
+  worker (repo+venv+in100 data at ${WORKSTATION_ROOT}/momentstem).
   THE CAMPAIGN'S LAST PRE-REGISTERED QUESTION IS ANSWERED: the law predicts
   feature gain from accuracy (and vice versa) at 500 images and at 1.28M, at
   32px and at 224px, at 5.7M params and at 86M. FALSIFIER LEDGER, FINAL:
@@ -4122,7 +4122,7 @@ ported vs corrected and why.
   it can fire against a claim I made four days ago.
 
 - FOURTH DENSE POPULATION ADDED THE SAME DAY (2026-08-11, user: "There is also
-  FoodSeg103 ... /media/amughrabi/HDD_4TB_1/amughrabi/data/FoodSeg103").
+  FoodSeg103 ... ${WORKSTATION_ROOT2}/data/FoodSeg103").
   **foodseg103**: 4,983 train / 2,135 test, 104 classes (103 foods +
   background), texture-dominated, images ~512x384. Already local, so it costs
   no acquisition at all.
@@ -4748,7 +4748,7 @@ ported vs corrected and why.
   POST-SURGERY INTEGRITY, verified rather than assumed: 384 lines = 168 pad +
   216 tasks, 0 duplicate (config, seed) pairs, 72/72 configs covered.
   WHAT COULD NOT BE FIXED: the allocation is 3 of 10 permitted nodes, and it is
-  NOT us hoarding -- account ub234 had exactly these 3 jobs running.
+  NOT us hoarding -- our own account had exactly these 3 jobs running.
   QOSGrpNodeLimit is a limit across EVERY user of the acc_resc QOS, so other
   projects hold it. Holding our nodes with work queued beats draining them and
   hoping to re-acquire.
@@ -5371,3 +5371,1521 @@ ported vs corrected and why.
   whole-image classifier, partly by a per-pixel classifier, and not at all by a
   coordinate regressor, and the last of those is now known to be because the
   features are not there rather than because the head cannot reach them.
+
+## REFEREE-REQUESTED EXPERIMENTS (2026-08-14, user: "we need to run all of
+## them on BSC. Please run the light ones locally, and the big ones on BSC")
+
+- WHY NOW: two referee reports converged on experiments the manuscript could
+  only answer with disclosure. Two of them are cheap enough to run locally and
+  BOTH CAN CHANGE A CLAIM, which is the test for whether an experiment is worth
+  running before submission instead of after a referee demands it.
+- NEW CODE: train.py `moment_aux.weight_delay` holds the auxiliary weight at
+  ZERO for the first N epochs, then runs the declared schedule over what
+  remains. VERIFIED: weight_delay=0 reproduces the previous lambda curve
+  bit-for-bit (the span expression collapses to the original), and with
+  delay=100 lambda is 0 through epoch 99, 1.0 at 100, and exactly 0 at 199.
+  Suite 108 passed on the study venv (~/venvs/momentstem/bin/python -- the
+  anaconda base python still carries timm 0.6.7 and fails the ViT test, the
+  hazard recorded 2026-07-28 and re-encountered today).
+
+- E3, THE TRANSFER TAX UNDER A WEAKER OR DELAYED PRIOR (local, 12 cells x 3
+  seeds, ~2.5 min/seed). Every transfer cell in the grid applies the prior at
+  full strength from step zero, so "a shaping prior taxes a mature
+  initialization" is established only for that timing. Arms: lambda0 in
+  {0.3, 0.1, 0.05} and a delayed onset (lambda 0 for the first 100 of 200
+  epochs) on the three cells that carry a measured G: c10@5% (tax -17.11),
+  c100@7% (-16.37), path@10% (-0.41).
+  PREDICTIONS RECORDED IN ADVANCE, from the currency account (damage
+  proportional to what the init supplied AND to how hard the prior shapes):
+    c10@5%   l03 -6..-13 | l01 -2..-6   | l005 -1..-3.5 | delay -4..-11
+    c100@7%  l03 -6..-12 | l01 -2..-6   | l005 -0.5..-3 | delay -4..-10
+    path@10% every arm ~0 (-1..+0.5): the init supplied little there, so
+      there is nothing to destroy at any lambda.
+    SHAPE: the tax is monotone in lambda0, and the delayed arm lands between
+      l03 and l01, because the study's own account puts the damage in the
+      early high-LR phase.
+  FALSIFIER, and it costs a taxonomy category: any arm reaching
+    Delta >= +0.5 on c10 or c100 => the prior CAN be added to a pretrained
+    initialization if applied gently, "tax" is a property of the schedule and
+    not of the fusion, and Section 6.3 plus the decision guide must be
+    rewritten to say so.
+
+- B4, THE ENVELOPE AT A FIXED OPTIMIZER-STEP BUDGET (local, 10 cells x 3
+  seeds). The recipe fixes epochs, so a 1% cell takes 600 steps and a 100%
+  cell 78,000; the unimodal envelope is therefore a joint statement about data
+  and optimization budget. Holding TOTAL STEPS fixed at ~600 (200/86/32/15/6
+  epochs at 1/2/5/10/25%, giving 600/602/608/585/582 steps) leaves data as the
+  only variable. Both arms get the identical budget, so Delta stays valid.
+  PREDICTIONS RECORDED IN ADVANCE:
+    Baselines rise with data but stay far below their 200-epoch values except
+      at 1%, which is unchanged by construction: ~8.9 / 11-14 / 15-19 / 17-22
+      / 20-26 at 1/2/5/10/25%.
+    Delta stays POSITIVE at every fraction and lands +1..+4 throughout, i.e.
+      FLATTER than the 200-epoch envelope's +0.16..+5.15, because every cell
+      now sits below the readout crossing where the term is negative.
+    Peak location NOT predicted. E1 on ImageNet64 was missed for exactly that
+      kind of call, and the honest position is that this experiment exists to
+      measure it.
+  FALSIFIER for "the envelope is a data effect": Delta essentially FLAT across
+    fractions (range < 1.5 points) => the 200-epoch envelope's shape is
+    substantially a step-budget effect, and the unimodal-envelope claim must
+    be restated as a joint data-and-compute statement wherever it appears.
+  NOTE this falsifier can fire against us and would touch a headline claim.
+
+- E1 / E2 / E4 go to BSC (prospective currency validation on a validation
+  split, a clean confirmatory grid off the CIFAR-100 selection set, and an
+  architecture-native ViT-B baseline). Scoped and predicted separately before
+  those are launched; nothing from them is claimed here.
+
+- E2, THE MISSING FUSION ARMS ON TWO NON-SELECTION POPULATIONS (BSC, 18 cells
+  x 3 seeds). A coverage check found the real hole behind the referees' "the
+  fusion evidence is thinner than the grid" complaint: on EuroSAT and Food-101,
+  which took no part in configuration selection, baseline / prior / SSL /
+  transfer / transfer+prior all exist at eleven fractions, while \emph{aug},
+  \emph{prior+aug} and \emph{prior+SSL} are absent entirely. The stack result
+  therefore rests on ViT/CIFAR alone. These 18 cells (3 arms x 2 datasets x
+  5/10/25%) are copied verbatim from each population's prior cell, so the only
+  variable is the added source. The 18 SimCLR pretrains they initialize from
+  were verified present on BSC at 3 seeds each BEFORE queueing (the axteach
+  asset-drift lesson).
+  PREDICTIONS RECORDED IN ADVANCE:
+    prior+aug STACKS on conv as it does on ViT, but weakly: conv baselines on
+      these sets are already high (EuroSAT 90.8 at 5%), so the amplification
+      seen on ViT (1.4-2.4x) should NOT transplant. Band: prior+aug beats the
+      better single by +0.3..+1.5 on food101, and by 0..+0.8 on eurosat where
+      the ceiling is near.
+    prior+SSL SUBSTITUTES on both, per the currency rule: combo within
+      +-0.7 of the better single, and NOT above it by more than 1 SEM.
+    aug alone: positive on food101 (+1..+4, a texture-rich set with room),
+      near-neutral to negative on eurosat (-1..+1).
+  FALSIFIERS: prior+SSL beating the better single by >= +1.5 on either set =>
+    the no-stack rule is CIFAR/ViT-specific and Section 6.2 must be rescoped.
+    prior+aug failing to beat the better single on BOTH sets => stacking is a
+    ViT phenomenon, not a currency one, and the taxonomy's first row narrows.
+
+- E4, IS THE ViT-B GAIN AN UNDER-TRAINED BASELINE? (BSC big lane, 2 cells x 3
+  seeds at 200 epochs against the measured 100). The +26.01 is the paper's
+  largest number and both referees asked whether a better-optimized baseline
+  erases it. Same recipe, twice the schedule, both arms.
+  PREDICTIONS RECORDED IN ADVANCE:
+    The baseline gains more than the prior arm does, because it is the one
+      that is under-trained: none 43.3 -> 52..62, aux 69.3 -> 71..76.
+    Delta therefore SHRINKS but stays large: +26.01 -> +12..+22.
+  FALSIFIER, and it would cost the paper its headline: Delta <= +6 at 200
+    epochs => most of the +26 was under-training, the model-scale claim
+    (Delta grows from ViT-S to ViT-B) must be re-measured at matched
+    optimization, and Section 7's S4 conclusion is withdrawn.
+  NOTE this is the experiment most likely to hurt us, which is why it is worth
+  running before a referee runs it.
+
+- *** E3 SCORED (PARTIAL, 2026-08-14, 10 of 12 cells, 3 seeds each, seed-paired
+  against the transfer baselines) -- **THE RECORDED FALSIFIER FIRED: THE
+  TRANSFER TAX IS A PROPERTY OF THE SCHEDULE, NOT OF THE FUSION.**
+      cell      arm    delta   sem  sigma | band          | lam0=1.0 tax
+      c10@5%    l03    -1.26  0.54  -2.3  | [-13,-6] ABOVE|  -17.11
+      c10@5%    l01    +0.18  0.13  +1.4  | [-6,-2]  ABOVE|
+      c10@5%    l005   +0.11  0.30  +0.4  | [-3.5,-1]ABOVE|
+      c10@5%    delay  -0.96  0.65  -1.5  | [-11,-4] ABOVE|
+      c100@7%   l03    +2.73  1.50  +1.8  | [-12,-6] ABOVE|  -16.37
+      c100@7%   l01    +2.30  0.74  +3.1  | [-6,-2]  ABOVE|
+      c100@7%   l005   +2.08  1.32  +1.6  | [-3,-0.5]ABOVE|
+      c100@7%   delay  +0.68  1.17  +0.6  | [-10,-4] ABOVE|
+      path@10%  l005   +0.35   n=1        | [-1,+0.5]  IN |   -0.41
+      path@10%  delay  -0.43  0.28  -1.5  | [-1,+0.5]  IN |
+  RECORDED FALSIFIER: "any arm reaching Delta >= +0.5 on c10 or c100 => the
+  prior CAN be added to a pretrained initialization if applied gently, 'tax' is
+  a property of the schedule and not of the fusion, and Section 6.3 plus the
+  decision guide must be rewritten to say so." FIRED on 4 of 4 c100 arms
+  (+0.68..+2.73). Configs verified pretrained: true, so these are genuine
+  transfer cells.
+  8/8 BANDS MISSED on the two heavy cells, every one in the SAME direction
+  (above), which is the signature of a wrong account rather than noise. At
+  lam0=1.0 the tax is -17.11 (c10) and -16.37 (c100); at lam0 <= 0.3 it is
+  -1.26 to +2.73. My bands assumed the tax scales smoothly with lam0 -- it does
+  not; it essentially VANISHES below lam0=1.0.
+  THE HONEST STRENGTH OF EACH CLAIM, stated separately because they differ:
+  the DISAPPEARANCE of the tax is overwhelming (a ~17-point move on both
+  datasets). The POSITIVE gain on c100 is suggestive, not established: the four
+  arms run +0.68..+2.73 at 0.6-3.1 sigma with n=3, and only l01 (+2.30, 3.1
+  sigma) is individually resolved. Do NOT write "the prior helps a pretrained
+  init" on this evidence; write that the tax is schedule-dependent and that at
+  lam0 <= 0.3 the fusion is neutral-to-positive.
+  pathmnist is UNCHANGED across arms (-0.43, +0.35), exactly as the currency
+  account requires: where ImageNet features are domain-mismatched there was
+  nothing to destroy at any lam0, so no schedule can matter.
+  MY SHAPE PREDICTION ALSO FAILED, in a way worth keeping: I predicted the
+  delayed arm would land BETWEEN l03 and l01, on the reasoning that the damage
+  is done in the early high-LR phase. The delayed arm is instead the WORST
+  non-1.0 arm on BOTH datasets (-0.96 on c10, +0.68 on c100). Withholding the
+  prior for 100 epochs and then applying it at full strength is worse than
+  applying a weak prior throughout, so "early shaping is what hurts" is not the
+  whole account -- STRENGTH matters independently of timing.
+  CONSEQUENCE FOR THE PAPER: referee N2 ("the tax is measured only with the
+  auxiliary weight at full strength from step zero, so 'never' is stronger than
+  the design supports") is CORRECT and the decision guide's "never add prior"
+  row must be rewritten with lam0 attached. PENDING before rewriting: the two
+  remaining path arms, and B4.
+
+- *** B4 SCORED (2026-08-15, fixed ~600-step budget, C100/r18, 3 seeds/cell) --
+  THE ENVELOPE'S RIGHT FLANK IS AN OPTIMIZATION EFFECT, NOT A DATA EFFECT.
+  Epochs set to 200/86/32/15/6 at 1/2/5/10/25% so every cell trains
+  600/602/608/585/582 steps (+-2%). Both arms identical, so Delta stays valid.
+      pct  base(600 steps)  Delta_600  |  Delta_200ep (frozen recipe)
+        1      9.02          +1.39     |     +1.42
+        2     12.91          +2.29     |     +2.50
+        5     17.48          +5.78     |     +5.15
+       10     18.35          +6.30     |     +3.75
+       25     20.09          +5.92     |     +0.25
+  BASELINE BANDS: 5/5 IN (predicted ~8.9 / 11-14 / 15-19 / 17-22 / 20-26).
+  DELTA BAND (+1..+4 throughout): MISSED HIGH at 5/10/25% (+5.78/+6.30/+5.92).
+  I predicted the fixed-step envelope would be FLATTER than the 200-epoch one;
+  its range is 4.91 points against the 200-epoch 4.90 -- essentially identical
+  spread, differently shaped.
+  RECORDED FALSIFIER: "Delta essentially FLAT across fractions (range < 1.5)
+  => the envelope's shape is substantially a step-budget effect". It did NOT
+  fire (range 4.91), so the envelope is NOT merely a step artifact and the
+  data axis is real.
+  *** BUT THE SHAPE CHANGES, AND THAT IS THE RESULT. At 200 epochs the
+  envelope is UNIMODAL: +1.42/+2.50/+5.15/+3.75/+0.25, peaking at 5% and
+  decaying to neutrality by 25%. At a matched 600 steps it RISES AND PLATEAUS:
+  +1.39/+2.29/+5.78/+6.30/+5.92, with NO right flank at all. The two agree at
+  1-5% (where the frozen recipe already gives few steps) and diverge sharply
+  at 10-25%.
+  READING, stated carefully: the LEFT flank is a DATA effect (it survives at
+  matched steps: +1.39 -> +5.78 from 1% to 5%). The RIGHT flank is an
+  OPTIMIZATION effect -- at 25% the frozen recipe trains 19,400 steps and the
+  prior is worth +0.25, while at 582 steps on the SAME 12,500 images it is
+  worth +5.92. More data does not make the prior redundant; the extra STEPS
+  that more data buys under an epoch-based recipe do.
+  This SHARPENS rather than weakens the redundancy claim -- "neutral at
+  sufficiency" is about sufficiency of OPTIMIZATION, not of data -- but the
+  paper currently says data, and every statement of the unimodal envelope must
+  be restated as joint in data and compute. Referee B4 was right to ask.
+  CAVEAT: all five fixed-step baselines (9.0-20.1) sit BELOW the readout
+  crossing bracket [31.8,40.3], where the sign law predicts negative readout
+  and Delta < G, so these cells are not a clean test of the law; G probes on
+  them would say how much larger the feature gain is. Not yet run.
+
+- *** E2 SCORED (2026-08-15, 54 runs across the two workstations; the three
+  fusion arms that were missing on the two populations that took NO part in
+  configuration selection). Comparators are the measured plain-recipe r18
+  cells; "best single" is the better of the two sources being fused:
+      EuroSAT   base  prior   SSL |  aug  p+aug p+SSL | aug-base  p+aug-best  p+SSL-best
+        5%     90.80  91.64 89.79 | 83.12 88.56 90.13 |   -7.67     -3.07       -1.51
+       10%     93.67  94.90 94.13 | 93.54 94.35 94.02 |   -0.14     -0.55       -0.87
+       25%     97.44  97.32 97.34 | 97.56 97.19 97.20 |   +0.11     -0.37       -0.14
+      Food-101 base  prior   SSL |  aug  p+aug p+SSL | aug-base  p+aug-best  p+SSL-best
+        5%     21.91  27.54 31.47 | 31.37 35.69 29.97 |   +9.45     +4.32       -1.50
+       10%     41.73  44.91 47.18 | 50.99 49.17 44.76 |   +9.26     -1.81       -2.41
+       25%     62.88  62.19 62.35 | 65.93 63.50 61.01 |   +3.05     -2.43       -1.34
+  (1) THE NO-STACK RULE HOLDS, AND ITS FALSIFIER DID NOT FIRE. Recorded:
+      "prior+SSL beating the better single by >= +1.5 on either set => the
+      no-stack rule is CIFAR/ViT-specific and Section 6.2 must be rescoped."
+      prior+SSL is NEGATIVE at all six cells (-0.14 to -2.41), never above.
+      So aux XOR effective-SSL transplants to two more populations, and on
+      conv it TAXES rather than merely failing to add -- the same sign as the
+      conv combo result (-1.51 on C100).
+  (2) THE STACKING CLAIM IS THE ONE THAT SUFFERS. Recorded band: prior+aug
+      beats the better single by +0.3..+1.5 on food101 and 0..+0.8 on eurosat.
+      MEASURED: only ONE of six cells stacks -- food@5% at +4.32 (11 sigma,
+      and far ABOVE the band). The other five are NEGATIVE (-0.37..-3.07).
+      The recorded falsifier required failing on BOTH sets; food@5% keeps it
+      from firing on the letter. Scored honestly: the tripwire did not fire,
+      and the claim it guards must still be narrowed. "Prior + augmentation
+      stack" is a ViT/CIFAR result plus one conv cell, NOT a general currency
+      statement, and the taxonomy's first row must say so.
+  (3) WHY, and it is the currency account rather than an excuse -- the same
+      pattern as the transfer tax: adding the prior at lambda0=1.0 costs
+      whenever the OTHER source is already strong. Where augmentation is weak
+      or harmful the prior still leads (eurosat@5%: aug alone -7.67, prior
+      +0.84); where augmentation is strong the prior subtracts (food@10%: aug
+      alone +9.26, adding the prior -1.81). food@5% is the one cell where both
+      sources are individually moderate and they compound. This is the
+      lambda0-strength lesson E3 established on pretrained inits, now visible
+      on a second kind of strong partner.
+  (4) DEIT AUGMENTATION IS NOT UNIVERSALLY GOOD, which the ViT-only evidence
+      hid: on EuroSAT it is neutral-to-harmful at every fraction (-7.67 at 5%,
+      where mixup/cutmix/RandAugment on 1,080 satellite images is destructive)
+      while on Food-101 it is worth +9.45/+9.26/+3.05. The aug-alone band
+      (food +1..+4, eurosat -1..+1) was MISSED on 4 of 6 cells, both
+      directions. Any claim about augmentation as a fusion source must name
+      its domain.
+  NOT YET MEASURED: G probes on these 18 arms. The currency account in (3) is
+  inferred from e2e magnitudes, exactly the inference the probes exist to
+  check, and it should not be stated as feature-side until they are run.
+
+- N1 LAUNCHED (2026-08-16, referee-requested): the target-family ablation
+  (Table 18, "the target is the ingredient") exists ONLY on CIFAR-100, which
+  Section 3.6 discloses as the selection set scored on the same test split.
+  It is the sole evidence for a claim Sections 2.2 and 10.1 both lean on.
+  diagtgt_tin_{mag,str,ste,rot,inv,gab,rand,hog}_{5,10}pct: eight targets x two
+  fractions x 3 seeds = 48 runs on TINY-IMAGENET (64px, 200-way), recipe copied
+  verbatim from tin_none_{5,10}pct so the ONLY variable is the aux target.
+  lambda=0.3 CONSTANT, matching the C100 ablation rather than the champion
+  schedule, so the rows stay comparable to each other and to Table 18.
+  Baselines already exist (tin_none 21.08 @5%, 33.60 @10%) so no baseline runs.
+  All eight arms 1-epoch smoke-tested locally before submission.
+  PREDICTIONS RECORDED IN ADVANCE (C100 reference: mag +3.18/+2.71, str
+  +1.08/+1.68, ste +1.55/+0.91, rot +1.44/+0.74, gab +0.56/-0.09, inv
+  -0.43/-3.07, hog +1.08/+1.27, rand -0.12/+0.04):
+    (1) MAGNITUDE IS FIRST at both fractions -- the core mechanism claim.
+    (2) RANDOM-FIXED is a null: within +-0.3 of zero at both fractions. This is
+        the control that kills "any aux signal", and it must transplant.
+    (3) HOG is positive but clearly below magnitude (a third to a half of it),
+        as on C100.
+    (4) INVARIANTS is last and harmful at 10%.
+    (5) THE MIDDLE ORDERING IS NOT PREDICTED. On C100 it is explicitly unstable
+        (structure is 4th at 5% and 2nd at 10%), and predicting it would be
+        ranking six targets off one column -- the thing the paper declines to
+        do. Only the two ends are predicted.
+  NOTE the magnitudes are expected SMALLER than C100's throughout: tin's whole
+  envelope is smaller (champion +2.13 at 5% vs C100's +5.15), so a like-for-like
+  magnitude comparison across datasets is not the test -- the ORDERING is.
+  FALSIFIERS, each costing a specific claim:
+    (A) random-fixed >= +0.5 at either fraction => the gain is partly "any aux
+        regression" on a second population and the mechanism claim is C100-
+        specific. This is the one that would hurt most.
+    (B) magnitude NOT the best family at BOTH fractions => "the target is the
+        ingredient" does not transplant, and Sections 2.2/10.1 must be rescoped
+        to CIFAR-like data.
+    (C) hog >= magnitude at either fraction => the moment target has no
+        advantage over a classical descriptor off the selection set.
+
+- B1 LAUNCHED (2026-08-16, the referee's TOP BLOCKING issue, probe-only):
+  "The readout term's negative branch may be an artifact of the probe's label
+  budget." The linear evaluation fits on the FULL train split while the cell
+  trained on 1-25% of it, so at 1% the probe holds 100x the labels. A probe
+  with far more labels shows more feature improvement than the few-label e2e
+  classifier realizes, so a NEGATIVE residual follows from the protocol before
+  any learning phenomenon is invoked -- and baseline accuracy is a monotone
+  proxy for that same label ratio, so "readout is negative below a baseline
+  crossing" partly restates the asymmetry. It blocks because that is where the
+  evidence is: 473 law cells sit below the crossing and 83% carry the negative
+  readout the account predicts.
+  DESIGN: re-probe BOTH arms of 34 champion cells at EACH CELL'S OWN per-class
+  label budget (shots = n_images / n_classes, from 5 to 2500), spanning
+  baseline 5.30 to 93.79 across 8 datasets, then recompute
+  readout_matched = Delta - G_matched and compare with the full-label readout.
+  --shots-only, so output goes to linear_probe_SHOTS.json and NO recorded G is
+  overwritten (the 2026-08-06 near-miss).
+  PREDICTION RECORDED IN ADVANCE, and it is NOT the comfortable one. Q7.3
+  already measured this on two cells: e2e +1.91 vs 5-shot gap +2.08, e2e +5.30
+  vs 25-shot gap +5.31 -- i.e. at MATCHED budget the probe gap ~= Delta. So we
+  expect **readout_matched ~ 0 on the left flank**, with
+  |readout_matched| < 0.5 x |readout_full| on most below-crossing cells.
+  WHAT THAT WOULD MEAN, stated before seeing it so it cannot be spun after:
+  it CONFIRMS the paper's own interpretation of the readout term (features
+  improve more than a label-starved classifier can cash in) and simultaneously
+  CONCEDES the referee's point that, below the crossing, the negative sign is
+  substantially a statement about label budget rather than an independent
+  empirical discovery. The law would remain true and useful as a decomposition,
+  but the sentence "its sign is predictable from baseline accuracy alone"
+  must be qualified: baseline accuracy is standing in for the label ratio.
+  FALSIFIER (the negative branch is NOT a budget artifact, and the referee's
+  objection is answered outright): readout_matched stays within 20% of
+  readout_full on the below-crossing cells. That is the outcome that would
+  leave the claim exactly as written, and I do not expect it.
+
+- *** N1 SCORED (2026-08-16, 48/48 runs, 0 FAILs) -- ALL THREE PRE-REGISTERED
+  FALSIFIERS FIRED. THE TARGET-FAMILY ORDERING IS LARGELY A CIFAR-100 FINDING.
+      target                 tin D@5%      tin D@10%   | C100 5%  C100 10%
+      Moment magnitude      +1.78 ±0.09   +1.19 ±0.21  |  +3.18    +2.71
+      Structure tensor      +1.09 ±0.24   +1.33 ±0.32  |  +1.08    +1.68
+      Steerable harmonics   +1.34 ±0.11   +0.72 ±0.33  |  +1.55    +0.91
+      Rotation-invariant    +0.94 ±0.17   +0.23 ±0.43  |  +1.44    +0.74
+      2nd-order invariants  +1.28 ±0.30   +0.67 ±0.18  |  -0.43    -3.07
+      Oriented edges        +0.96 ±0.32   +0.85 ±0.23  |  +0.56    -0.09
+      Random fixed maps     +0.67 ±0.13   +0.37 ±0.21  |  -0.12    +0.04
+      HOG target            +0.97 ±0.09   +1.28 ±0.27  |  +1.08    +1.27
+  (A) FIRED, AND IT IS THE ONE THAT HURTS MOST. Recorded: "random-fixed >=
+      +0.5 at either fraction => the gain is partly 'any aux regression' on a
+      second population and the mechanism claim is C100-specific." Measured
+      +0.67 ±0.13 at 5% -- 5 sigma from zero, and ~38% of magnitude's +1.78.
+      On C100 the same control is a clean null (-0.12/+0.04). So "a random
+      fixed target of identical shape does nothing", the paper's cleanest
+      evidence that the moment STRUCTURE carries the gain, DOES NOT TRANSPLANT.
+  (B) FIRED ON THE LETTER, but the substance is a tie. Magnitude is first at
+      5% (+1.78, clear) and THIRD at 10% (+1.19) behind structure (+1.33) and
+      HOG (+1.28). Both gaps are inside noise (-0.14 ±0.38 and -0.09 ±0.34),
+      so the honest statement is "magnitude is first at 5% and statistically
+      tied for first at 10%", not "magnitude loses".
+  (C) FIRED, same tie caveat: HOG >= magnitude at 10% (+1.28 vs +1.19), a
+      difference of +0.09 ±0.34, i.e. not resolvable. The claim "moments are
+      ~2.5x better than the classical descriptor" is a C100 number; on tin the
+      two are indistinguishable at 10% and magnitude leads by 1.8x at 5%.
+  (4) PREDICTION MISSED: I predicted invariants last and harmful at 10%, as on
+      C100 (-3.07). On tin it is +1.28/+0.67 -- POSITIVE at both fractions. The
+      "over-processed invariants are actively harmful" row is C100-specific too.
+  WHAT IS ACTUALLY TRUE, and it is narrower than the paper says: on tin EVERY
+  target helps (+0.23..+1.78) and the spread between best and worst at 10% is
+  1.1 points against SEMs of 0.2-0.4, so most pairwise differences are NOT
+  resolvable. The identity of the auxiliary target matters much less off the
+  selection set. Magnitude remains the best single choice (first at 5%, tied at
+  10%, never worse than third) but the ABLATION'S DISCRIMINATING POWER IS A
+  CIFAR-100 PROPERTY.
+  CAVEAT THAT IS REAL BUT DOES NOT RESCUE IT: tin's whole envelope is smaller
+  (champion +2.13 at 5% vs C100's +5.15), so all effects are compressed and
+  ranking eight targets is harder. That explains the tie structure in (B)/(C).
+  It does NOT explain (A): random-fixed at +0.67 ±0.13 is a resolved positive,
+  not a compressed null.
+  CONSEQUENCE FOR THE PAPER: Section 5.1's "the target is the ingredient" and
+  the Table 18 caption ("random fixed targets do nothing") must be scoped to
+  CIFAR-100 and reported alongside the tin transplant. Sections 2.2 and 10.1,
+  which lean on this claim, need the same qualification. The referee's N1
+  objection (selection contamination) is upheld.
+
+- N1b LAUNCHED (2026-08-16): the random-target control on a THIRD and FOURTH
+  population, caused directly by N1. State of evidence going in:
+      C100 (32px) random, lambda0=0.3: +0.28 +0.27 +0.14 -0.12 +0.04 +0.04
+        at 1/2/3/5/7/10% -- small positive at low data, ~0 by 5-10%
+      C100 (32px) random, lambda0=2.0->0: +0.55 +0.45 +0.39 +0.27 +0.04 -0.24
+      tin  (64px) random, lambda0=0.3:    +0.67 (5%)  +0.37 (10%)
+  Table 18 cites ONLY the two C100 lambda=0.3 cells at 5/10% and generalises
+  them to "random moves accuracy by at most 0.12 points". That is true of those
+  two cells and NOT of the family.
+  CELLS: diagtgt_{c10,food}_{mag,rand}_{5,10}pct, 3 seeds = 24 runs. CIFAR-10
+  is 32px like C100; Food-101 is 64px like tin. lambda=0.3 constant so the rows
+  are comparable to Table 18 and to diagtgt_tin_*. Recipes copied verbatim from
+  each population's own scratch baseline (c10_none_*, grid_food_r18_9ee7da_*),
+  so the ONLY variable is the target. All four arms smoke-tested.
+  THE FORK, and it is the point of running this:
+    H-RESOLUTION: the random positive tracks input size. Predicts
+      random(c10) ~ 0 (within +-0.25, like C100) and random(food) >= +0.4
+      (like tin). Mechanism: at 64px the aux head sees a larger spatial map, so
+      a fixed random regression target acts as a stronger generic regulariser.
+    H-DATASET: it is a per-dataset accident with no clean covariate. Predicts
+      no consistent split by resolution -- e.g. both c10 and food near zero, or
+      both positive.
+  PREDICTIONS RECORDED IN ADVANCE (I back H-RESOLUTION, weakly):
+      random(c10)@5%   -0.25..+0.25      random(food)@5%   +0.30..+0.80
+      random(c10)@10%  -0.25..+0.25      random(food)@10%  +0.15..+0.60
+      magnitude(c10)@5%  +3.5..+5.0 (champion schedule gives +4.41; lambda=0.3
+        is weaker), magnitude(food)@5% +3.0..+5.5 (champion +5.63)
+  WHAT EACH OUTCOME COSTS:
+    H-RESOLUTION confirmed => Table 18's "random does nothing" is a 32px
+      statement, and the mechanism claim must be scoped by input size, not just
+      by dataset. The margin magnitude-over-random stays the defensible claim.
+    H-DATASET confirmed (random positive at 32px too) => "random does nothing"
+      is wrong generally, Table 18's caption must be withdrawn rather than
+      scoped, and the full random envelope reported in its place.
+    FALSIFIER for the mechanism claim itself: random >= magnitude on ANY
+      population at either fraction => the moment structure is not what carries
+      the gain there, and Sections 2.2/5.1/10.1 need far more than scoping.
+
+- *** B1 SCORED (2026-08-16, 30 cells, 8 datasets, baselines 5.30-93.79) --
+  THE REFEREE IS RIGHT. THE READOUT TERM IS A LABEL-BUDGET EFFECT, AND AT
+  MATCHED BUDGET IT VANISHES.
+      region              mean readout          mean |readout|
+      below crossing (11)  -1.66 -> -0.19        1.66 -> 0.23
+      above crossing (16)  +0.10 -> -0.13        0.40 -> 0.15
+      |readout| shrank >50% at matched budget: 19/30 cells
+      matched readouts RESOLVABLE vs own SEM:   3/30
+      **|Delta - G_matched| mean 0.17, median 0.11, max 0.77**
+      (|Delta - G_full| mean 0.89 for comparison)
+  MY PRE-REGISTERED PREDICTION HELD (9/11 below-crossing cells shrank by >50%);
+  the falsifier I said I did not expect ("readout_matched within 20% of
+  readout_full") fired on 2/11 and is dead.
+  WHAT THIS MEANS, stated as plainly as the prediction was:
+  (1) THE REFEREE'S B1 OBJECTION IS UPHELD. With the full-train protocol the
+      probe holds up to 100x the cell's labels, and the negative readout below
+      the crossing is substantially that advantage rather than an independent
+      learning phenomenon. Baseline accuracy is a proxy for the label ratio,
+      exactly as the referee argued. Section 4.1's "its sign is predictable
+      from baseline accuracy alone" must be qualified with the mechanism.
+  (2) BUT THE SAME MEASUREMENT IS A STRONGER RESULT THAN THE ONE IT COSTS US.
+      At MATCHED budget, end-to-end training realizes what a linear head on
+      frozen features realizes to within **0.17 points on average** across 30
+      cells, 8 datasets and baselines from 5 to 94. That is Q7.3 (2 cells)
+      confirmed at scale, and it is directly actionable in a way the sign law
+      is not: measure G at your own label budget and you know Delta, without
+      training the cell.
+  (3) THE SIGN LAW IS NOT FALSE. It remains an accurate empirical description
+      of the full-label protocol, which is the protocol every recorded G in
+      this study uses, and the 96%-of-resolvable-cells audit stands as
+      measured. What changes is its INTERPRETATION: it is a statement about
+      how much more a label-rich probe sees than the cell's own classifier,
+      and that gap closes as the cell's label budget grows.
+  RECOMMENDED REFRAMING FOR THE PAPER: lead with (2) -- "the frozen-feature
+  gain at matched budget predicts the end-to-end gain" -- and present the sign
+  law as the full-label corollary with its mechanism named. This is a better
+  paper than the current one, and it is the referee's doing.
+  SCOPE: 4 of 34 selected cells dropped -- all cosinehead variants, 1 legacy
+  .tar checkpoint (PyTorch 2.6 weights_only default) and 3 corrupt archives
+  (the known local corruption class). Excluded loudly, not silently.
+
+- *** N1b SCORED (2026-08-16, 23/24 runs; one SIGABRT cost c10_mag_10pct seed0,
+  so that cell is n=2). THE MECHANISM CLAIM SURVIVES, RESTATED AS A MARGIN --
+  AND THE RANDOM CONTROL TRACKS RESOLUTION.
+      population   px    pct   magnitude        random      mag - rand
+      cifar10     32px    5%   +3.49 ±0.16   -0.70 ±0.13      +4.19
+      cifar10     32px   10%   +0.50 ±0.57   -1.46 ±0.57      +1.96   (mag n=2)
+      food101     64px    5%   +4.25 ±0.53   +0.06 ±0.50      +4.19
+      food101     64px   10%   +3.13 ±0.85   +0.38 ±0.85      +2.74
+      tin (N1)    64px  5/10%  +1.78/+1.19   +0.67/+0.37      +1.11/+0.82
+      C100 (old)  32px  5/10%  +3.18/+2.71   -0.12/+0.04      +3.30/+2.67
+  (1) THE MECHANISM FALSIFIER DID NOT FIRE. Recorded: "random >= magnitude on
+      ANY population at either fraction => the moment structure is not what
+      carries the gain there." Magnitude beats random on ALL FOUR populations
+      at BOTH fractions, by +0.82 to +4.19. So "the moment structure carries
+      the gain" HOLDS on four populations, 32px and 64px, and N1's alarming
+      tin random (+0.67) is a smaller effect than tin's magnitude (+1.78).
+  (2) H-RESOLUTION SUPPORTED IN DIRECTION, MISSED IN MAGNITUDE. Sorting the
+      random control by input size:
+        32px: -0.12, +0.04 (C100), -0.70, -1.46 (C10)   -> <= 0
+        64px: +0.67, +0.37 (tin),  +0.06, +0.38 (food)  -> >= 0
+      Every 32px cell is at or below zero and every 64px cell at or above it,
+      which is the split H-RESOLUTION predicted. But 3 of 4 recorded bands
+      MISSED, all BELOW: I predicted c10 within +-0.25 (measured -0.70/-1.46)
+      and food +0.30..+0.80 at 5% (measured +0.06). I over-predicted the size
+      of the random effect everywhere; only food@10% landed in band.
+  (3) SO THE RIGHT CLAIM IS THE MARGIN, NOT THE NULL. "A random fixed target
+      does nothing" is FALSE as an absolute -- it ranges -1.46 to +0.67 across
+      populations, helping slightly at 64px and HURTING at 32px. What is true
+      on every population measured is that magnitude beats it by a clear
+      margin. Table 18's caption must be rewritten from "random targets do
+      nothing" to the margin statement, with the full range reported.
+  (4) NOTE the 32px NEGATIVE random values are themselves informative: a fixed
+      random regression target is an active tax at 32px, which is consistent
+      with the forward-path result (any fixed pre-committed extra channel costs
+      accuracy) and with the transfer tax (shaping toward an uninformative
+      target damages features).
+  CAVEAT: c10_mag_10pct is n=2 after a SIGABRT and reads +0.50 ±0.57, well
+  below C10@10%'s champion +1.09; lambda=0.3 vs the champion schedule explains
+  part of it, but that cell should be re-run before it is quoted.
+  SIGABRT TALLY TONIGHT: 3 of ~80 BSC runs (E4 none seed2, E4 aux seed4,
+  c10_mag_10pct seed0) = ~4%, consistent with the recorded ~5% rate.
+
+- *** E4 SCORED AT FULL POWER — THE ViT-B HEADLINE IS SUBSTANTIALLY (NOT
+  ENTIRELY) UNDER-TRAINING, AND THE FALSIFIER IS NEITHER FIRED NOR EXCLUDED
+  (2026-08-16, diagin100e200_vitb_{none,aux}, ImageNet-100 @224px, ViT-B/16,
+  DeiT aug, 200 epochs against the measured 100; 6 seeds per arm):
+      none  n=6  73.68 75.68 74.66 77.22 75.52 75.12  -> 75.31 +-0.48 (sd 1.18)
+      aux   n=6  83.22 81.10 83.08 83.18 82.96 78.58  -> 82.02 +-0.76 (sd 1.87)
+      **Delta = +6.71 +-0.90   95% CI [4.94, 8.47]   7.4 sigma from zero**
+      vs the 100-epoch reference: 43.33 -> 69.34 = +26.01 +-2.01
+  RECORDED FALSIFIER: "Delta <= +6 at 200 epochs => most of the +26 was
+  under-training, the model-scale claim must be re-measured at matched
+  optimization, and Section 7's S4 conclusion is withdrawn." The CI CONTAINS
+  6.0 (the point estimate sits 0.78 sigma above it), so it is **NEITHER FIRED
+  NOR EXCLUDED** and must be reported that way rather than as a pass.
+  MY PREDICTIONS: baseline 52..62 -> landed 75.31, MISSED HIGH by 13 points
+  (I badly underestimated how much schedule the baseline was missing); aux
+  71..76 -> landed 82.02, also MISSED HIGH; Delta +12..+22 -> landed +6.71,
+  MISSED LOW. All three wrong in the same structural way: I assumed the
+  baseline would close most of the gap and it closed more than that.
+  TRAJECTORY, and it is the argument for deepening: 3v2 +7.79 +-1.21 -> 3v3
+  +7.79 +-0.90 -> **6v6 +6.71 +-0.90**. At 3v3 the CI excluded 6.0 by 0.04
+  points; at 6v6 it does not. Three seeds would have published a clearance
+  that is not there.
+  SEED DISCLOSED, NOT REMOVED: aux seed5 = 78.58 sits **4.6 sd** below the
+  other five (82.71 +-0.90). It is NOT a collapse (a perfectly trained
+  network) and there is no principled exclusion rule; dropping it would give
+  +7.39 +-0.63 and would exclude the threshold, which is precisely why it
+  stays. It is why the aux SEM (0.76) exceeds the baseline's (0.48) -- the
+  variance asymmetry this backbone already showed at 100 epochs (sd 3.29 vs
+  1.13), in the same direction, at a quarter the magnitude.
+  WHAT IS SOLID: +6.71 at 7.4 sigma. The prior is unambiguously worth ~6.7
+  points to ViT-B at a doubled schedule, and the baseline gained +31.98 from
+  schedule alone, so roughly a QUARTER of the headline survives. What CANNOT
+  be claimed is that this is distinguishable from the "mostly under-training"
+  account's threshold.
+  CONSEQUENCE FOR THE PAPER: +26.01 must be reported as a 100-epoch figure
+  with +6.71 beside it, and every ViT-S/ViT-B number in the intro and in
+  Section 7 needs its epoch budget attached. Referee E4 ("is the headline an
+  under-trained baseline?") is substantially upheld.
+
+- *** LEDGER CORRECTION — diagin100_r50_none/seed0 WAS NOT ABANDONED; IT
+  COMPLETED, AND S2 IS CLOSED AT 3v3 (2026-08-17, caught by the manuscript
+  audit, not by me). The 2026-08-13 entry above records "S2 CLOSED AT 2v3, AND
+  diagin100_r50_none/seed0 IS ABANDONED", says the cell wedged on 8 of 8
+  starts, and states that runs/diagin100_r50_none/seed0/ABANDONED.txt records
+  this next to the cell. BOTH HALVES ARE NOW FALSE:
+      there is NO ABANDONED.txt in that directory
+      seed0 carries a final.json and reads 85.68
+  Recomputed from the records, all three seeds present in both arms:
+      none  85.68 / 85.58 / 86.30  -> 85.85 +-0.23
+      aux   86.02 / 85.90 / 85.58  -> 85.83 +-0.13
+      **Delta = -0.02 +-0.26 at 3v3**  [S2 band 0.0 +-1.0 -> HIT; G2 DEAD]
+  The substantive conclusion is UNCHANGED (conv feature-neutrality at 224px;
+  the 2v3 read was -0.05, the 3v3 read is -0.02), so nothing downstream moves.
+  What was wrong was the PROVENANCE, and it matters because Section 3.9
+  releases this file as a version-controlled artifact: a reader would have
+  found the ledger claiming two seeds and an abandonment on the very cell that
+  carries the S2 falsifier, while the paper and the exporter both say three.
+  WHY IT HAPPENED: the abandonment decision was recorded when it was taken, and
+  the cell evidently completed on a later start that nobody went back to
+  reconcile against the entry. The ledger is append-only by habit, which is
+  right for predictions and wrong for facts about what exists on disk.
+  RULE: an entry that asserts the STATE OF THE FILESYSTEM (a run abandoned, a
+  marker file written, a checkpoint quarantined) must be re-verified against
+  disk before release, because unlike a measurement it can silently become
+  false afterwards. The pre-registration entries do not have this property and
+  must never be edited; state claims do and must be corrected in place or
+  superseded, as here.
+
+- *** E2 G-PROBES MEASURED — THE FUSION ORDERING IS FEATURE-SIDE ON BOTH
+  POPULATIONS, AND THE ONE STACKING CELL STACKS ON THE FEATURE SIDE TOO
+  (2026-08-17, all 18 diagfuse arms + all comparators probed under the
+  identical protocol, 3 seeds each). This SUPERSEDES the "NOT YET MEASURED:
+  G probes on these 18 arms" line in the E2 entry of 2026-08-15, which is now
+  stale: the currency reading there was flagged as an inference from e2e
+  magnitudes and is now measured.
+  Probe test accuracy (%), and the paired feature-side deltas:
+      eurosat   base  prior   ssl    aug   p+aug  p+ssl | p-over-aug p-over-ssl
+        5%     95.10  95.40  92.86  92.31  94.40  93.96 |   +2.09      +1.10
+       10%     96.04  96.59  95.78  96.03  96.51  96.04 |   +0.48      +0.25
+       25%     97.71  97.75  97.66  98.07  97.98  97.64 |   -0.09      -0.02
+      food101   base  prior   ssl    aug   p+aug  p+ssl |
+        5%     32.34  38.51  40.14  43.56  48.24  38.76 |   +4.68      -1.38
+       10%     47.84  50.64  51.31  57.31  56.09  49.02 |   -1.22      -2.29
+       25%     63.13  63.21  63.72  68.47  66.96  62.46 |   -1.51      -1.27
+  (1) THE e2e ORDERING IS FEATURE-SIDE, NOT A READOUT ARTIFACT. Adding the
+      prior to an SSL init LOWERS the frozen-feature quality on 5 of 6 cells
+      (-0.02 to -2.29), which is the same sign as its e2e cost (-0.14 to
+      -2.41). The substitution result therefore has the same feature-side
+      confirmation the conv and ViT combos already had.
+  (2) THE SINGLE STACKING CELL IS REAL AND FEATURE-SIDE: food@5% prior+aug
+      reads +4.68 over augmentation on the probe against +4.32 e2e. So the
+      one cell that stacks does so by supplying features augmentation did not,
+      exactly as the currency account requires. It is not an e2e fluke.
+  (3) THE STRENGTH MECHANISM IS VISIBLE IN THE FEATURES. Where the partner is
+      WEAK the prior adds feature gain (eurosat, where DeiT aug is harmful:
+      +2.09 and +0.48); where the partner is STRONG it subtracts (food@10/25%,
+      where aug alone is worth +9.26 e2e: -1.22 and -1.51). Same shape as the
+      transfer tax, whose damage was also proportional to what the init had
+      already supplied. This is the third population family on which
+      "the prior is redundant iff the partner already bought the features"
+      is confirmed at the FEATURE level rather than inferred from accuracy.
+  (4) The right flank behaves as everywhere else: at eurosat@25% every arm is
+      within 0.43 of every other and both deltas are ~0.
+  CAVEAT ON PROVENANCE: these 18 cells were absent from results/all_results.csv
+  when measured (see the artifact note below), so they were computed from the
+  run records directly. They must be present in the released exporter output
+  before submission or the paper cites numbers its own released table cannot
+  reproduce.
+
+- *** THE LOCAL DENSE TREE WAS THE WITHDRAWN GENERATION, NOT AN INCOMPLETE COPY
+  (2026-08-17, found during the pre-submission artifact pass). The local
+  runs_dense held 50 cells against BSC's 80, which looked like an ordinary
+  incomplete mirror. It was not. All 150 local finals were BYTE-IDENTICAL to
+  BSC's archived runs_dense_50e/ -- the WITHDRAWN 50-epoch runs the 2026-08-11
+  re-pin superseded. Example: local ade20k_aux_1pct/seed0 carries epochs 50 and
+  mIoU 1.85; the current record is epochs 200 and mIoU 3.49.
+  WHY THIS IS THE DANGEROUS VERSION OF THE PROBLEM: a local regeneration would
+  not have produced a visibly truncated table. It would have produced a
+  COMPLETE-LOOKING one blending withdrawn 50-epoch numbers with current
+  200-epoch ones, and **voc -- the reference population, all six fractions,
+  both arms -- was among the stale cells**. The two generations produced
+  OPPOSITE conclusions on the dense attention result (50e: swin <= conv at
+  every fraction, "the attention deficit does not transplant"; 200e: swin
+  ABOVE conv at 4 of 6, conclusion withdrawn). A blended table would have been
+  internally consistent, passed every row count and checksum, and been wrong.
+  CAUGHT BY comparing against the remote rather than trusting a count -- the
+  same instinct that produced the correct refusal to regenerate from an
+  incomplete tree earlier in the same pass.
+  REPAIR: the 50 stale cells MOVED (not deleted) to local runs_dense_50e/,
+  mirroring BSC's naming; all 80 cells re-pulled cell-by-cell; local
+  runs_dense now byte-identical to BSC across ALL 540 files (0 remote-only,
+  0 local-only, 0 checksum mismatches).
+  AND THE VERIFICATION IS WORTH AS MUCH AS THE REPAIR: a scratch regeneration
+  now reproduces the released dense_results.csv (36 rows), dense_law.csv (30
+  rows) and dense_summary.md EXACTLY. So the released dense tables are now
+  DEMONSTRATED to have been built from the 200-epoch tree, which until now was
+  believed rather than shown.
+  RULE, and it is the strongest form of a lesson this file already records
+  three times (verify by LOADING, then by IDENTITY, now by GENERATION): when a
+  recipe is re-pinned and the old runs are archived rather than deleted, every
+  MIRROR of that tree is a stale-generation hazard until proven otherwise. A
+  cell count cannot detect it, a checksum of a file against itself cannot
+  detect it, and the archive's existence makes the failure silent instead of
+  loud. Compare against the authoritative tree, or regenerate into scratch and
+  diff against the released artifact.
+- *** RELEASE-COLLECTOR GAP FOUND IN THE SAME PASS: scripts/make_release_assets.py
+  ships run records matching final.json, linear_probe.json,
+  linear_probe_SHOTS.json and robustness.json -- **dense_probe.json is NOT in
+  the list**. So every dense G in the paper, and all 30 rows of the released
+  dense_law.csv, rest on 60 records the release does not ship. Same class of
+  gap as the stale results table this pass was called in to fix. Predicate fix
+  authorized; runs_dense_50e stays OUT of the collector deliberately, because
+  shipping withdrawn runs beside current ones invites exactly the blend the
+  incident above nearly produced.
+
+## PRE-SUBMISSION BLOCKS A AND B (2026-08-17, user-approved: "let's go for A
+## and B and then we see if we need to go for C or submit")
+
+- FRAMING: the manuscript gate is clean and the artifact is consistent. These
+  blocks are not repairs; they convert two hedges into results and close the
+  paper's weakest claim. Block C (the open scientific threads) is deferred
+  pending these outcomes.
+
+- BLOCK A, no compute: sweep the released ledger against the regenerated
+  exporters and correct every STATE claim that no longer holds. Two were fixed
+  on 2026-08-17 (the r50 abandonment, the E2 probes) because they collided with
+  specific manuscript claims; the rest were never audited. Section 3.9 invites
+  referees to inspect this file, so a stale entry contradicting a table is a
+  discoverable inconsistency. RULE ALREADY ON RECORD and being applied here:
+  pre-registration entries are never edited; STATE claims (a run abandoned, a
+  marker written, a probe unmeasured) are corrected in place or superseded.
+
+- B1, PROSPECTIVE CURRENCY VALIDATION. The Section 9.3 procedure consumes
+  Delta and G measured on the HELD-OUT TEST split, which the paper discloses as
+  "a defect of protocol, not of feasibility". This re-scores both arms on a
+  VALIDATION carve-out and re-runs the algorithm.
+  *** FEASIBILITY CONSTRAINT DISCOVERED BEFORE PREDICTING, and it bounds the
+  experiment: final.json carries final_test_acc and best_test_acc ONLY, no
+  validation score. So validation must be carved from the UNUSED portion of
+  train, which exists only for sub-100% cells. The 100% cells cannot be
+  validated this way at all, and that is a limitation of the design rather than
+  of effort. No retraining: existing checkpoints are scored on the carve-out.
+  PREDICTIONS RECORDED IN ADVANCE:
+    (B1a) The procedure's CALLS are unchanged on at least 5 of 6 pairs. The
+      currency signal (G gaps of 4-14 points) is large relative to the
+      split-to-split noise of a linear probe (SEM 0.1-0.9 on these cells).
+    (B1b) The val-scored Delta and G shift by <= 1.0 point in absolute terms
+      versus their test-scored values, with no systematic sign.
+  FALSIFIER, and it costs the paper a contribution: ANY call flips => the
+    procedure's answer depends on which split scores it, it is not deployable
+    as stated, and Section 9.3 must say so rather than calling it a protocol
+    defect. A flip on the SUBSTITUTE/STACK boundary would be worse than one on
+    TAX, because the stack/substitute distinction is the taxonomy's core.
+  NOTE what this CANNOT establish: scoring on a validation carve-out taken from
+    train is not the same as a prospective decision made before any training,
+    because the checkpoints already exist. It removes the test-split
+    contamination, not the hindsight. State it that way.
+
+- B2, DEEPEN THE REDUCED-STRENGTH TRANSFER ARMS 3 -> 10 SEEDS. E3 established
+  that the transfer tax vanishes below lambda0 = 1.0 (a ~17-point move on both
+  datasets, overwhelming). It ALSO produced a positive gain on c100 (+0.68 to
+  +2.73 across four arms) which the 2026-08-14 entry explicitly refuses to
+  claim: 0.6-3.1 sigma at n=3, only l01 individually resolved.
+  CELLS: diagtaxlam_{c100_7pct, c10_5pct} x {l03, l01, l005, delay}, 3 -> 10
+  seeds, AND their diagtransfer2 baselines to 10 seeds, because at n=3 the
+  baseline dominates the paired SEM and deepening only the arms would not
+  improve it. path is NOT deepened: it is a measured null at every arm and
+  nothing hinges on it.
+  PREDICTIONS RECORDED IN ADVANCE:
+    (B2a) c100 SURVIVES at reduced magnitude: pooled Delta across the three
+      lambda0 arms lands **+1.5..+2.5**, down from the 3-seed +2.08..+2.73.
+      Reasoning: every deepening in this study regressed toward the mean
+      (C10 +7.14 -> +6.66; C100 1/5/10% all shrank; tin20 was the one that
+      strengthened). Betting on the pattern, not against it.
+    (B2b) c10 stays NEUTRAL: -0.5..+0.5 at l01 and l005, and the l03 arm
+      (3-seed -1.26) rises toward zero rather than staying negative.
+    (B2c) The DELAYED arm remains the worst non-full-strength arm on both
+      datasets, as at 3 seeds. If it instead lands with the lambda0 arms, the
+      "strength matters independently of timing" reading weakens.
+  FALSIFIER: c100 pooled Delta <= 0 at 10 seeds => the positive branch was
+    3-seed noise, the claim reverts to "the tax vanishes" with no positive
+    branch, and nothing in the manuscript changes because the paper already
+    declines to claim it. THIS IS THE CHEAP DIRECTION: the paper is currently
+    written for the falsifier's outcome, so only a confirmation costs an edit.
+  IF CONFIRMED: "the prior can be added to a pretrained initialization if
+    applied gently" becomes the most deployable finding in the study, and the
+    decision guide's transfer row changes from a prohibition to a condition.
+
+- B3, G PROBES ON THE FIXED-STEP CELLS. B4 (2026-08-15) showed the envelope's
+  right flank is an OPTIMIZATION effect, not a data effect: at a matched ~600
+  steps Delta is +5.92 at 25% where the 200-epoch recipe gives +0.25. That
+  claim was added to the manuscript THIS ROUND and has no feature-side
+  measurement. Probe-only, no training: diagstep_c100_{none,aux}_{1,2,5,10,25}
+  pct, both arms, identical protocol.
+  PREDICTIONS RECORDED IN ADVANCE, derived from the law rather than guessed.
+  All five fixed-step baselines (9.02/12.91/17.48/18.35/20.09) sit BELOW the
+  crossing bracket [31.8, 40.3], so readout must be NEGATIVE at every cell and
+  G must EXCEED Delta at every cell:
+      pct   base    Delta_600   readout_pred   G_pred    BAND
+       1%   9.02      +1.39        -2.7         +4.1   [+2.5, +5.5]
+       2%  12.91      +2.29        -2.1         +4.4   [+3.0, +6.0]
+       5%  17.48      +5.78        -1.5         +7.3   [+5.5, +9.0]
+      10%  18.35      +6.30        -1.4         +7.7   [+6.0, +9.5]
+      25%  20.09      +5.92        -1.3         +7.2   [+5.5, +9.0]
+    (B3a) THE DECISIVE COMPARISON: G at 25% under 600 steps versus G at 25%
+      under the frozen 200-epoch recipe. If the right flank is genuinely an
+      optimization effect, the feature gain must still be THERE at matched
+      steps and merely uncashed by the 200-epoch cell. Predict
+      **G(600 steps, 25%) - G(200ep, 25%) >= +4**.
+  FALSIFIER, and it would cost a claim added this round: G is the SAME under
+    both budgets at 10-25% (difference <= +1) => the fixed-step Delta gap is
+    READOUT-side, not feature-side, and "the right flank is an optimization
+    effect" must be restated as "the extra steps let the baseline cash feature
+    gain the prior had already supplied" -- a different mechanism with a
+    different lesson.
+  SECOND FALSIFIER: readout POSITIVE at any of these five cells, all of which
+    sit far below the crossing, would be a sign-law violation on
+    aux-from-scratch cells, which is the law's own derived scope.
+
+## BLOCK A EXECUTED: LEDGER-vs-EXPORTER STATE AUDIT (2026-08-17)
+
+- SCOPE AND METHOD. Every STATE claim in this file was checked against the
+  per-run records (runs/, runs_dense/, runs_det/, runs_turing/) and then
+  against the exporters regenerated today (results/all_results.csv,
+  law_audit.md, dense_results.csv, dense_law.csv, det_results.csv). No
+  compute, no training. The rule already on record was applied strictly:
+  PRE-REGISTRATION entries (predictions, bands, falsifiers, and the scoring
+  of them) are NEVER edited even where a number quoted inside them has since
+  moved, because their whole value is that they record what was believed
+  before the result. Only STATE claims are corrected, and they are corrected
+  HERE by supersession rather than by editing the original text, so the
+  historical record stays intact and the correction stays greppable.
+  Six stale state claims were found. Two more were found already resolved,
+  and one exporter-side pairing quirk is reported at the end because it runs
+  the other way: there the ledger is right and the released table is not.
+
+- *** A1. THE SIGN-LAW HEADLINE FIGURES ARE SUPERSEDED: 96% BECOMES 85.2%,
+  AND THE CHANGE IS METHODOLOGICAL, NOT A DATA CHANGE. Two entries dated
+  2026-08-05 report the audit as it then stood:
+      "497 law cells | 6 backbones | 14 datasets ... RESOLVABLE 134 ...
+       sign as predicted 129 (**96%**)"
+      "THE SIGN LAW AT 909 CELLS -- 250/260 RESOLVABLE CORRECT (**96%**)
+       ... 909 | 7 backbones | 14 datasets"
+  and 96% is then carried forward as the current figure by the 2026-08-06
+  framing decision ("sign law at 96% of resolvable cells") and by the B1
+  scoring entry of 2026-08-16 ("the 96%-of-resolvable-cells audit stands as
+  measured"). THE CURRENT CANONICAL AUDIT, results/law_audit.md, regenerated
+  today by analysis/audit_law_paired.py, reads:
+      law-scope cells with >=3 seed-matched arms : 1015
+      inside crossing bracket (no prediction)    :   98
+      unresolved (|readout| <= 2 SEM)            :  451
+      RESOLVABLE (these test the law)            :  466
+        sign as predicted                        :  397 (**85.2%**)
+        wrong side                               :   69
+        Wilson 95% CI                            : [81.7, 88.1]
+      scope now spans 21 datasets and 9 backbones, not 14 and 7.
+  WHY IT MOVED, and this is the part that must travel with the number: the
+  audit is now SEED-PAIRED. Paired SEM is roughly 0.59 of the independent SEM
+  it replaced (median ratio 0.588, independent overstates in 82% of cells), so
+  cells that used to fall under the |readout| > 2 SEM bar now clear it and the
+  resolvable count rises from 260 to 466. The newly admitted cells are
+  overwhelmingly ABOVE the crossing, where the law predicts readout ~ +0.4
+  decaying to ~0 and is right only 67.1% of the time (104/155). Below the
+  crossing, where the law's content actually lives, it is 293/311 = **94.2%**
+  [91.0, 96.3]. So the honest one-line summary changed from "96% of resolvable
+  cells" to "85.2% overall, 94.2% below the crossing and 67.1% above it", and
+  the drop is the price of a tighter error bar rather than a weakening of the
+  evidence.
+  NOT A DIVERGENCE BETWEEN THE TWO SCRIPTS: analysis/audit_sign_law.py, run
+  today, returns 1017/468/399 = 85.3% [81.8, 88.2], i.e. it agrees with the
+  canonical paired audit to within 2 cells. The 2026-08-05 entries are left
+  exactly as written; the 909-vs-497 reasoning inside them is about a scope
+  widening that genuinely happened and is still worth reading.
+  NOTE the docstring of analysis/audit_sign_law.py also still quotes 96% in
+  two places. That is a source file rather than the ledger and was left alone.
+
+- *** A2. THE RELEASE-COLLECTOR GAP IS CLOSED, AND IT WAS WIDER THAN THE ENTRY
+  SAID. The final bullet of the 2026-08-17 artifact pass records:
+      "scripts/make_release_assets.py ships run records matching final.json,
+       linear_probe.json, linear_probe_SHOTS.json and robustness.json --
+       **dense_probe.json is NOT in the list**. ... Predicate fix authorized"
+  The fix has since shipped and the predicate now reads final.json,
+  dense_probe.json, det_probe.json, robustness.json, cifair.json,
+  head_forms_5shot.json, per_class_delta.json, plus a GLOB over
+  linear_probe*.json. Three gaps were closed, not one:
+      dense_probe.json now ships (60 records, all 30 rows of dense_law.csv)
+      det_probe.json now ships, and runs_det is now a collector root at all
+        (the whole detection task, 36 finals and 30 probes, shipped nowhere
+        while results/det_results.csv was released and the paper has a
+        detection section -- a gap the original entry did not notice)
+      the exact-name list became a glob, because a case typo had silently
+        dropped 70 files (see A3)
+  runs_dense_50e remains excluded, as the entry required. So the "authorized"
+  state claim is discharged; the release now ships what the tables rest on.
+
+- *** A3. linear_probe_SHOTS.json IS THE WRONG PATH. IT DOES NOT EXIST AND
+  NEVER DID. Three entries name the fixed-shot probe output in upper case:
+  the P1/S1 probe-pass entry ("shots-only output goes to
+  linear_probe_SHOTS.json"), the B1 launch entry ("--shots-only, so output
+  goes to linear_probe_SHOTS.json"), and the release-collector bullet.
+  ON DISK: 0 files named linear_probe_SHOTS.json, and **70** named
+  linear_probe_shots.json. analysis/linear_probe.py writes the lower-case
+  name (line 272). docs/ARTIFACTS.md documents the lower-case name.
+  This is not cosmetic: the release predicate matched the upper-case string
+  literally, so all 70 fixed-shot probe records were omitted from the release
+  while README promised "every linear_probe*.json". That is what motivated the
+  glob in A2. The 70 files are 60 from the B1 matched-budget pass (30 cells x
+  2 arms) plus 10 from the ImageNet shots pass, which reconciles exactly.
+  The two entries carrying the wrong name sit INSIDE pre-registration blocks,
+  so they were not edited; the correct path is recorded here instead.
+
+- *** A4. E3 IS NO LONGER PARTIAL: 12 OF 12 CELLS, AND THE pathmnist NULL IS
+  NOW COMPLETE. The 2026-08-14 entry is headed "E3 SCORED (PARTIAL ... 10 of
+  12 cells)", lists path@10% l005 as "n=1", omits path l03 and path l01
+  entirely, and closes with "PENDING before rewriting: the two remaining path
+  arms, and B4." ALL THREE ARE NOW DISCHARGED. Every one of the 12 diagtaxlam
+  cells carries 3 seeds (36 finals), and B4 was scored on 2026-08-15.
+  The four pathmnist arms, complete, against base 93.79:
+      l03   93.57  Delta -0.22 +-0.44
+      l01   93.86  Delta +0.07 +-0.45
+      l005  93.27  Delta -0.52 +-0.78   (the n=1 read was +0.35)
+      delay 93.37  Delta -0.43 +-0.52
+  ALL FOUR sit inside the pre-registered pathmnist band (-1..+0.5), where the
+  partial entry could only score two of them. THE CONCLUSION IS UNCHANGED and
+  is now better supported: pathmnist is a measured null at every arm, exactly
+  as the currency account requires, because a domain-mismatched ImageNet init
+  supplied little and no schedule can destroy what was not there. Nothing
+  moves for c10 or c100, whose eight arms were already complete and whose
+  values reproduce from the exporter unchanged.
+
+- *** A5. THE STAGE-1/2 SCOREBOARD CONTRADICTS ITS OWN ENTRY AND IS STALE ON
+  EVERY ITEM. The scoreboard paragraph reads:
+      "Still open: P1/S1 (Delta ~= G at scale) -- needs the fixed-shots probe
+       pass; and the last 4 in-flight cells (r50_none seed0, r50_aux seed1,
+       depth food_aux seed0)."
+  and scores "S2 partial (2v2, in band)". It sits ~45 lines BELOW the entry
+  that scores P1/S1 ("P1/S1 SCORED -- DELTA ~= G SURVIVES IMAGENET SCALE; F1
+  AND G1 ARE DEAD"), and immediately below that same entry's own line "P1 P2
+  P3 S1 S3 S4 confirmed". It is a status fragment that was appended to rather
+  than updated. CURRENT STATE, all verified on disk:
+      P1/S1        SCORED; the fixed-shots pass ran
+      r50_none     3 seeds (seed0 completed; see the 2026-08-17 correction)
+      r50_aux      3 seeds
+      depth food_aux  3 seeds at every fraction (r34 and r50, 5/10/25%)
+      S2           CLOSED AT 3v3, Delta -0.02 +-0.26, not 2v2
+  Nothing is in flight. The falsifier verdicts the scoreboard reports are all
+  unaffected.
+
+- *** A6. THE DENSE "STILL PENDING" BULLET IS DISCHARGED. The 2026-08-11
+  re-pin section ends with:
+      "STILL PENDING under the new recipe: dense G-probes must be re-run on
+       the 200-epoch checkpoints (the recorded G values are all 50-epoch),
+       and D4, the label-space effect and the dense attention result must be
+       re-scored."
+  All of it was done and is recorded in the entries that follow. On disk:
+  runs_dense holds 80 cells and 240 finals, **every one at epochs=200**, and
+  **60 dense_probe.json**, being 6 populations x 2 arms x 5 fractions (1-25%,
+  with 100% excluded by the probe-ceiling rule). The three re-scorings landed
+  as separate entries: D4 survives at +0.39 (2026-08-12), the label-space
+  effect was restated as a mid-band tendency rather than a collapse, and the
+  dense attention conclusion was WITHDRAWN as a convergence artifact. No G
+  value now recorded for dense is a 50-epoch value; the 50-epoch tree lives
+  in runs_dense_50e (50 cells, 150 finals) and is deliberately not shipped.
+
+- *** A7. RESOLVED ALREADY, RECORDED SO THE SWEEP IS COMPLETE. The E2 G-probe
+  entry of 2026-08-17 closes with "these 18 cells were absent from
+  results/all_results.csv when measured ... They must be present in the
+  released exporter output before submission or the paper cites numbers its
+  own released table cannot reproduce." All 18 diagfuse cells are now in
+  results/all_results.csv, each with n=3 seeds and n=3 probe seeds, and the
+  entry's probe numbers reproduce from it (esat prioraug@5% G +2.09, food
+  prioraug@5% G +4.68). The past-tense half of that sentence is still true;
+  the condition it set is discharged.
+
+- LEFT UNTOUCHED ON PURPOSE, with the reasoning, because a wrongly-edited
+  pre-registration costs more than a stale state claim:
+  (a) "(D3) STILL OPEN -- needs the dense G probes; bands recorded below" and
+      "(T4) ... the test itself still needs detection G probes, which have not
+      been run". Both are SCORING-STATUS lines inside pre-registration scoring
+      blocks, both were TRUE when written, and in both cases the very next
+      bullet in the file launches the probes in question and a later entry
+      scores them. A reader moving in order is not misled. Editing them would
+      rewrite the record of which predictions were open at scoring time.
+  (b) The B1 launch entry's motivating figure "473 law cells sit below the
+      crossing and 83% carry the negative readout". That is the referee's
+      objection as it was framed before the experiment, i.e. pre-registration
+      context. For the record only, the current paired audit puts the
+      below-crossing resolvable rate at 94.2% (293/311).
+  (c) Every "G unmeasured" and "band" clause inside a prediction block. Those
+      are the point of the ledger.
+  (d) The 2026-08-12 dense table, which labels itself a snapshot at 212/216
+      cells with ade20k@100% still in flight. Its ade20k@10% entry (+0.48)
+      differs from the completed exporter value (+0.38) for exactly the reason
+      the entry states. The completed table is the 2026-08-13 entry and
+      results/dense_summary.md.
+
+- EXPORTER-SIDE, AND IT RUNS THE OTHER WAY: at the fixed-step 1% cell the
+  RELEASED TABLE is the one to distrust, not the ledger. all_results.csv pairs
+  diagstep_c100_aux_1pct against **abl1_none** (8.93) rather than against its
+  own matched-budget arm diagstep_c100_none_1pct (9.02), and so reports
+  Delta +1.47 where the B4 entry reports **+1.39**. The cause is benign and is
+  the documented tie-break: at 1% the fixed-step recipe IS 200 epochs, so the
+  two baselines are the same configuration run twice and the tie-break prefers
+  the original name. The 0.08 gap is seed noise between two runs of one
+  config, and the other four fractions pair correctly. STILL, the number to
+  quote for the fixed-step envelope is the self-paired +1.39, because the
+  whole point of that cell is that both arms trained on the same step budget.
+  Worth checking against the manuscript before submission.
+
+- STATE CLAIMS CHECKED AND FOUND ACCURATE (so coverage is judgeable, not just
+  the hits): the 21 quarantined *.wrongepoch checkpoints all still exist under
+  that name; runs_dense_50e holds exactly the 50 archived cells and 150 finals
+  described; runs_dense is 540 files as claimed; dense_results.csv is 36 rows
+  and dense_law.csv 30, as the regeneration entry states; the dense law split
+  (2 inside bracket, 21 unresolvable, 9 resolvable, 9 correct, 0 wrong)
+  reproduces exactly; detection contributes 0 resolvable law cells, as
+  det_summary.md independently states; analysis/aggregate.py still has no
+  knowledge of runs_dense, exactly as the 2026-08-13 entry says; every script
+  path named anywhere in this file exists (aggregate_dense.py, dense_probe.py,
+  det_probe.py, det_decompose.py, audit_sign_law.py, audit_law_paired.py,
+  linear_probe.py, verify_checkpoints.py, imprint_specificity.py, the four
+  pretrain scripts, make_subsets.py, make_tin_semantic_order.py,
+  prepare_seg_data.py, make_release_assets.py); data/subsets/cub_25pct.json
+  and data/subsets/tin_semantic_order.json are committed as claimed;
+  requirements-study.txt is committed; the imprint-specificity family means
+  and counts (10 tap-L3 at +0.396, 5 SimCLR at -0.156, 1 random at -0.060,
+  2 tap-L1/L2 at -0.181, 1 combo at +0.494) reproduce to the third decimal
+  from results/imprint_specificity.json, which stores them as 19 records under
+  three coarser family labels; the N1b caveat that diagtgt_c10_mag_10pct is
+  n=2 after a SIGABRT and reads +0.50 is STILL TRUE and that cell is still
+  n=2 on disk; E4's ViT-B pair is 6 seeds per arm reading 75.31 -> 82.02;
+  ImageNet64 r18 is +0.04 and ImageNet-100 R50 is -0.02, both 3v3. In total
+  38 state claims were verified true against disk or the regenerated tables.
+  NOT VERIFIABLE FROM THIS MACHINE, and so neither confirmed nor corrected:
+  everything asserting the state of the BSC filesystem (queue counters,
+  COMPLETE markers, worklist lengths, the .stray_backup directory, the
+  BSC-side quarantine), and the solarflare mirror.
+
+- *** B3 SCORED — THE RIGHT FLANK'S DISAPPEARANCE IS FEATURE-SIDE, 5/5 IN BAND,
+  BOTH FALSIFIERS DEAD (2026-08-17, probe-only on the fixed-step cells, 3 seeds,
+  standard full-train protocol identical on both arms):
+      pct  epochs  base   Delta_600     G_600        readout   band       verdict
+       1%   200    9.02    +1.39    +3.64 +-0.26      -2.25   [2.5,5.5]    IN
+       2%    86   12.91    +2.29    +4.41 +-0.29      -2.11   [3.0,6.0]    IN
+       5%    32   17.48    +5.78    +6.67 +-0.28      -0.89   [5.5,9.0]    IN
+      10%    15   18.35    +6.30    +7.80 +-0.25      -1.50   [6.0,9.5]    IN
+      25%     6   20.09    +5.92    +7.40 +-0.70      -1.48   [5.5,9.0]    IN
+  The POINT predictions (4.1/4.4/7.3/7.7/7.2), derived from baseline heights via
+  the law before any probe ran, land within ~0.4 on average. Readout is negative
+  at all five cells, all of which sit below the crossing bracket, so the
+  sign-law falsifier did NOT fire and G exceeds Delta everywhere as required.
+  *** B3a, THE DECISIVE COMPARISON (G at matched ~600 steps vs G under the
+  frozen 200-epoch recipe, same fraction):
+      pct   steps_600  steps_200ep   G_600   G_200ep   difference
+       1%      600         600       +3.64    +4.16   -0.52 +-0.31  <- CONTROL
+       2%      602       1,400       +4.41    +5.14   -0.73 +-0.46
+       5%      608       3,800       +6.67    +6.26   +0.41 +-0.32
+      10%      585       7,800       +7.80    +3.55   +4.25 +-0.34
+      25%      582      19,400       +7.40    +0.44   **+6.96 +-0.74**
+  Prediction was >= +4 at 25%. Measured +6.96 +-0.74, i.e. 9 sigma clear, so the
+  readout-side falsifier ("difference <= +1 => the fixed-step gap is readout,
+  not features") is DEAD.
+  WHAT IS NOW ESTABLISHED: at a matched step budget the prior's feature gain at
+  25% is still +7.40, while under the frozen recipe it is +0.44. So the right
+  flank's disappearance is FEATURE-SIDE, and the mechanism is that the extra
+  19,400 steps let the BASELINE'S FEATURES CATCH UP -- not that the prior's gain
+  is present but uncashed. The B4 e2e claim ("the right flank is an optimization
+  effect") is confirmed at the feature level and sharpened.
+  *** THE BUILT-IN CONTROL, and it is why the comparison is trustworthy: at 1%
+  the fixed-step recipe IS 200 epochs, so the two arms differ ONLY in
+  num_workers (2 vs 8), which re-draws the augmentation stream per the
+  reproducibility contract. That cell returns -0.52 +-0.31, bounding the
+  nuisance at ~0.5 -- an order of magnitude below the 10%/25% signal.
+  *** CORRECTION TO THIS ENTRY, MADE THE SAME DAY, AND THE ERROR IS MINE: I
+  first wrote here that "the divergence rises MONOTONICALLY with the step ratio
+  (1x -> 33x), which is what an optimization effect looks like and what a probe
+  artifact does not." THAT IS FALSE. The divergences are -0.52, -0.73, +0.41,
+  +4.25, +6.96 at 1/2/5/10/25%: the FIRST step is a DECREASE of 0.21, so the
+  rise is monotone only from 2% onward, over four of five points. The honest
+  statement is that the divergence rises with the step ratio from 2% up, and
+  that the 1%->2% dip is inside noise (SEMs 0.31 and 0.46) rather than a
+  counter-trend. I propagated "monotonically" from a subagent's summary without
+  checking it against the five numbers printed two lines above it in the same
+  entry, and it was caught only when the manuscript agent went to write the
+  clause and verified it first.
+  WHY IT IS WORTH RECORDING RATHER THAN QUIETLY FIXING: every INDIVIDUAL NUMBER
+  in that summary was correct; the CLAIM over them was not, so no numeric audit
+  could have caught it. That is the same shape as the highlights file shipping
+  a retracted claim while every number in it was right, and as the two
+  hardcoded table references pointing at the wrong tables. A summary sentence
+  is a claim and needs checking like one, especially when it is relayed from
+  someone else's report.
+  LEDGER CORRECTION IN PASSING: the recorded "+0.25" for the C100 25% e2e delta
+  is superseded by the exporter's **+0.16**, which is what the manuscript's
+  envelope table already prints.
+  METHOD NOTE worth keeping: the pretrained smoke test was run into a scratch
+  --out-root rather than runs/, because a 1-epoch final.json in the real run dir
+  would have been SKIPPED as complete by train.py's guard and silently poisoned
+  the wave. The completed-run guard makes re-runs safe and smoke tests dangerous.
+
+## BLOCK C, LAUNCHED IN PARALLEL WITH B (2026-08-17, user: "please do in
+## parallel", venue decision "for C, you can use BSC")
+
+- NOTE ON PROVENANCE, stated so the pre-registration is scored honestly: these
+  predictions are recorded BEFORE B2 lands. Sequencing C1 after B2 would have
+  let its band be set by B2's measured positive branch; the user chose
+  parallelism, so the bands below are set WITHOUT that information and must be
+  scored as such. That is a stronger pre-registration, not a weaker one.
+
+- C1, THE "BETTER FEATURES, WORSE ACCURACY AT HIGH DATA" THREAD. Five of the
+  ten sign-law exceptions share a signature the current law does not model:
+  G clearly positive and RESOLVED while Delta is NEGATIVE, all at >=20% data on
+  food101 and pathmnist:
+      cell                        base   Delta     G      readout
+      food101   r18  mag3  @50%   71.8   -1.30   +4.66    -5.96
+      food101   r18  mag6o @50%   71.8   -0.91   +4.97    -5.88
+      food101   mnet aux   @50%   55.1   -0.23   +3.70    -3.93
+      pathmnist mnet aux   @20%   89.0   -0.48   +1.88    -2.36
+      pathmnist r18  mag3  @50%   89.8   -1.36   +0.71    -2.07
+  THE HYPOTHESIS, and it is the reason this is worth cluster time: E3 showed
+  the TRANSFER TAX is schedule-dependent, vanishing below lambda0 = 1.0. These
+  cells may be the SAME phenomenon with a different partner -- early
+  lambda0=1.0 shaping taxing an already-strong partner, where the partner is
+  DATA rather than a pretrained init. If so, three separate findings (the
+  transfer tax, the fusion tax, and these high-data exceptions) collapse into
+  one rule: SHAPING STRENGTH MUST FALL AS THE PARTNER GETS STRONGER, WHATEVER
+  THE PARTNER IS.
+  CELLS: the five above re-run at lambda0 = 0.3, 3 seeds, everything else
+  verbatim, plus their existing baselines. Probes on all five.
+  PREDICTIONS RECORDED IN ADVANCE:
+    (C1a) Delta IMPROVES by >= +1.0 on the two food101 r18 cells, landing in
+      **-0.3 .. +1.5** (from -1.30 and -0.91).
+    (C1b) G STAYS SUBSTANTIALLY POSITIVE on those cells, **>= +2.0** (from
+      +4.66 and +4.97). Some loss is expected because weaker shaping does less
+      feature work; the claim is that it retains most of it.
+    (C1c) readout therefore moves from ~-6 toward **-1 .. -3**, i.e. the
+      anomaly shrinks rather than inverts.
+    (C1d) pathmnist cells move LESS than food101's, because their probe is
+      already recorded as a compressed measuring stick (probe_none below its
+      own e2e) and their G is small to begin with. No band; recorded as data.
+  FALSIFIERS, both reachable from the same measurement:
+    (F-C1a) Delta UNCHANGED at reduced lambda0 (within +-0.5 of its lambda0=1.0
+      value) => this is NOT overshoot, the three findings do NOT unify, and
+      "better features, worse accuracy at sufficiency" stands as a genuine
+      unexplained regime that the paper must report as open.
+    (F-C1b) G COLLAPSES to <= +1.0 while Delta improves => reduced lambda0
+      simply does less of everything, the "better features" half of the
+      signature disappears, and there is nothing to unify either. This is the
+      outcome I consider most likely after the first, and it is why C1b is
+      stated as a floor rather than a hope.
+
+- C2, THE MOBILENET FORK, AND IT COSTS NO TRAINING. G(mnet, tin@5%) = +0.01
+  +-0.23, the tightest measured null in the study, while the SAME backbone
+  gives +4.47 on C100@7% and +2.59 on pathmnist@10%. The 2026-07-29 entry
+  recorded two readings and deliberately declined to adjudicate: (a) mnet's
+  depthwise-separable stack with squeeze-excite already encodes oriented-energy
+  structure at 64px, so the prior is redundant there; (b) mnet is CAPACITY-
+  limited at tin's 200-way task, so extra feature structure cannot be
+  represented however good the target is.
+  THE DISCRIMINATOR, which needs only a shots-sweep on the EXISTING frozen
+  features: vary the probe's label budget on the existing checkpoints.
+    H-NO-DEFICIT (reading a): the aux features carry no extra information, so
+      G ~ 0 at EVERY budget. Band: |G| <= +0.3 at 25, 100 and 250 shots/class.
+    H-SATURATION (reading b): the deficit exists but the full-train probe
+      saturates because BOTH arms hit mnet's capacity ceiling, so a LOW budget
+      should reveal it -- aux features being more label-efficient is a measured
+      property elsewhere in this study. Predicts **G(25 shots) >= +1.0**,
+      decaying toward the measured +0.01 as the budget rises.
+  I BACK H-NO-DEFICIT, weakly. FALSIFIER for it: G >= +1.0 at any budget.
+  Note this is the cheapest open question in the study: no training, no new
+  cells, and it adjudicates a fork the ledger has carried unresolved since
+  2026-07-29.
+
+- *** B1 SCORED — THE PROCEDURE SURVIVES A CHANGE OF SCORING SPLIT ON ITS CORE
+  DISTINCTION, BUT ITS WEAKEST PREDICATE DOES NOT, AND MY PRE-REGISTRATION
+  CONTAINED A CONTRADICTION (2026-08-17, 14 pairs, 42 cells, 126 seed-records):
+  *** FIRST, MY ERROR, because it changes how everything below is read. I wrote
+  B1a as "calls unchanged on at least 5 of 6 pairs" AND the falsifier as "ANY
+  call flips". Those two criteria are MUTUALLY INCONSISTENT: B1a tolerates one
+  flip in six while the falsifier fires on one flip at all. The measurement
+  landed exactly in the gap (12/14 = 85.7% unchanged, above the 5/6 = 83.3%
+  bar, with two flips), so **B1a is MET and the falsifier FIRED simultaneously**
+  and neither reading can be selected over the other after the fact. The agent
+  reported both rather than choosing the convenient one, which is the correct
+  behaviour and is why the error is visible at all.
+  RULE: a pre-registration must state ONE criterion per question. A band plus a
+  falsifier that disagree is not two safeguards, it is a licence to pick.
+  *** THE SUBSTANTIVE RESULT, and it is not the clean win the headline suggests:
+      calls unchanged, test -> val:            12/14 (85.7%)
+      calls flipped:                            2, BOTH on the N/A gate
+      agreement with the TRAINED outcome:       5/6 test-scored -> **5/8 val**
+  Neither flip is on the SUBSTITUTE/STACK boundary (the taxonomy's core), which
+  is the good news. The bad news is sharper than a boundary flip: both flips
+  are on the |G| <= 1.0 "this source supplies nothing" GATE at eurosat@5%,
+  where the prior's feature gain sits directly on the threshold (G = +0.30
+  +-0.14 on test, +1.15 +-0.25 on val). The gate opens, the rule proceeds to
+  STACK, and **both newly-produced calls are WRONG** -- training measures
+  SUBSTITUTE(cost) at -2.75 and -1.12. Threshold sweep: at G_ZERO = 2.0 all 14
+  agree; at 1.0, 12/14; at 0.5, 10/14. THE LEAST ROBUST PART OF THE PROCEDURE
+  IS THE PREDICATE THE PAPER SAYS LEAST ABOUT.
+  *** B1b: magnitude half HELD, sign half FAILED. |val - test| <= 1.0 on 26/28
+  Deltas and 23/28 Gs. But the shift is SYSTEMATIC: val-scored gains run ~0.3
+  SMALLER than test-scored ones, 20/28 negative for Delta (p = 0.036) and 23/28
+  for G (p = 0.0009). Two built-in controls localise it: changing the probe's
+  FIT set moves Delta 0.00 and G -0.10, while changing the EVALUATION split
+  moves them -0.31 and -0.26. So it is the evaluation split, not the fit set.
+  Held-out TRAIN images read both interventions as slightly weaker than the
+  test split does. Small, consistent, and deliberately not explained here.
+  *** THE BOUND, which the agent volunteered rather than being asked for:
+  6 of 14 pairs never reach the branch under test (every source neutral, so the
+  rule correctly returns N/A on both splits and the pair tests only that the
+  gate agrees with itself). Only 8 pairs exercise SUBSTITUTE/STACK on val.
+  AND THE HONEST NOTE THAT COST US THE HEADLINE: the pre-registration names 6
+  pairs, the executed spec has 14, and no record exists of WHICH 6 were meant.
+  Scoring the 8 informative pairs alone gives 6/8 = 75%, BELOW the B1a bar. The
+  14-pair figure is reported because selecting a subset after seeing which
+  flipped is exactly the move the registration exists to prevent.
+  *** WHAT THE DESIGN GUARANTEES, verified independently of the script's own
+  asserts: FIT and VAL are a per-class partition of the unused train pool
+  (intersection measured zero); (FIT u VAL) n training-subset = 0 on all 7
+  subsets, which holds BECAUSE the committed subsets are NESTED (5% c 10% c
+  25%, checked not assumed) so one carve-out per dataset serves every fraction
+  and both arms of a pair are scored on identical images; and (FIT u VAL) n
+  TEST = 0 structurally. The leg NOT in the original design and checked because
+  it alone could have voided the SSL arms: SimCLR PRETRAINING is also confined
+  to the committed subset, so no carve-out image was seen even unlabelled by
+  one arm only. Every measurement uses last.pt, never best.pt, because best.pt
+  is SELECTED BY TEST ACCURACY and would carry the contamination back in
+  through the checkpoint choice. Validity check: the pipeline reproduces the
+  paper's worked example exactly (Delta 13.26/13.30, G 14.83/13.46).
+  *** THE CAVEAT, restated after the work and unchanged in force: this removes
+  the test-split contamination AND NOTHING ELSE. Every checkpoint was trained,
+  and its test accuracy already read, before the carve-out existed; the pairs
+  were assembled from a completed grid; and the rule's thresholds were pinned
+  by reading the paper's own worked example. What is shown is that the four
+  numbers the procedure consumes CAN be obtained without touching test, and
+  that the calls they produce are mostly but not entirely the same. A genuinely
+  prospective test would fix sources and thresholds first, measure on
+  validation, record the call, and only then train the combination. THAT
+  EXPERIMENT HAS NOT BEEN RUN AND THIS ONE IS NOT A SUBSTITUTE FOR IT.
+  *** PROCESS NOTE WORTH KEEPING: the previous agent's CONVERSATION died on an
+  API error but its three detached measurement lanes were STILL RUNNING. The
+  resuming agent noticed files appearing underneath it (the cache moved 93->96
+  between two commands), launched nothing, took no lock, and let them finish --
+  a duplicate process on the same tag would have had the last writer erase the
+  other's manifest. "The agent died" is not the same as "the work stopped".
+  MANUSCRIPT IMPACT: NONE FORCED. The paper already declines to call this run
+  prospective and marks it illustrative for a protocol reason. B1 mildly
+  STRENGTHENS the "defect of protocol, not of feasibility" framing, since the
+  inputs are obtainable without test. Recommend holding for the revision rather
+  than compressing a nuanced mixed result into a 35-of-35-page article.
+
+- *** C2 SCORED — THE 2026-07-29 MOBILENET FORK RESOLVES TO H-NO-DEFICIT;
+  H-SATURATION IS DEAD (2026-08-17, shots sweep on the EXISTING frozen features
+  of grid_mnet_tin_{none,aux}_5pct, 3 seeds/arm, --shots-only, ckpt=best.pt,
+  the same checkpoint the recorded full-train G was measured on):
+      shots/cls   none         aux          G (SEM of diff)    sigma
+        25      16.76 +-0.23  16.70 +-0.12  **-0.06 +-0.26**    -0.2
+       100      19.20 +-0.20  19.83 +-0.13  **+0.63 +-0.24**    +2.6
+       250      24.25 +-0.33  24.29 +-0.33  **+0.04 +-0.47**    +0.1
+      full-train (recorded 2026-07-29)      **+0.01 +-0.23**     0.04
+  H-SATURATION IS DEAD. It predicted G(25 shots) >= +1.0 decaying toward the
+  measured +0.01, on the account that BOTH arms hit mnet's capacity ceiling so
+  the full-train probe hides a real deficit. The 25-shot budget -- the one where
+  a hidden deficit should be MOST visible -- returns -0.06 +-0.26, a measured
+  zero with the WRONG SIGN, 4 sigma below the prediction. Reading (b), that mnet
+  is capacity-limited at tin's 200-way task, is not supported.
+  H-NO-DEFICIT IS BACKED, WITH ONE QUALIFICATION NOT ROUNDED AWAY. Its band was
+  |G| <= +0.3 at all three budgets: HIT at 25 and 250, **MISSED at 100**
+  (+0.63). That bump is not noise -- 2.6 sigma unpaired, 6.2 sigma seed-paired,
+  with all three per-seed differences positive and tightly clustered
+  (+0.58/+0.82/+0.48). But it is NON-MONOTONE, which is the opposite of the
+  monotone decay H-SATURATION requires, and it sits far below the +1.0 tripwire.
+  The recorded falsifier for H-NO-DEFICIT (G >= +1.0 at ANY budget) did NOT
+  fire; the largest value anywhere is +0.63.
+  VERDICT: at tin@5% mnet's prior-shaped features hold no meaningful extra
+  information at any label budget, so the flat tin envelope is a FEATURE
+  statement and not readout suppression. The 100-shot bump is a small
+  unexplained anomaly against an otherwise flat result and is recorded as such
+  rather than as a clean null.
+  PROTOCOL: the recorded linear_probe.json files were left untouched (their
+  2026-07-29 mtimes verified afterwards); new data went to the lowercase
+  linear_probe_shots.json, which is the filename the release predicate now
+  globs for after the case bug found 2026-08-17.
+
+- C1 LAUNCHED AND MAPPING VERIFIED (2026-08-17, BSC job on its own lane:
+  worklist.c1 / queue.counter.c1 / queue.lock.c1, 15 tasks, longest-job-first,
+  24h walltime with the claim deadline at 19h; food cells are ~4.2h/seed).
+  Each config is its parent VERBATIM except `name` and moment_aux.weight
+  1.0 -> 0.3, plus a provenance comment; verified by diff on all five, and the
+  baseline pairing verified INDEPENDENTLY against results/all_results.csv --
+  base accuracy, delta and the exporter's own baseline_cell all match the
+  pre-registered values exactly on all five rows:
+      grid_mag3_food_50pct_l03      <- grid_food_r18_9ee7da_50pct  71.75 / -1.30
+      grid_mag6o_food_50pct_l03     <- grid_food_r18_9ee7da_50pct  71.75 / -0.91
+      grid_mnet_food_aux_50pct_l03  <- grid_mnet_food_none_50pct   55.13 / -0.23
+      grid_mnet_path_aux_20pct_l03  <- grid_mnet_path_none_20pct   89.04 / -0.48
+      grid_mag3_path_50pct_l03      <- grid_path_r18_89e5af_50pct  89.83 / -1.36
+  TWO CORRECTIONS TO MY BRIEF, both mine: pathmnist WAS already staged on BSC
+  (data/pathmnist_64.npz, 1.07 GB, Jul 23) -- my probe looked for a directory,
+  not the npz; and runs land at $MS/runs, NOT $MS/repo/runs (repo/data is a
+  symlink and repo/runs holds the SSL pretrains and FitNets teachers).
+  PROBES STAGED BUT DELIBERATELY NOT SUBMITTED until 15/15 finals exist,
+  because linear_probe.py SKIPS a missing checkpoint rather than failing and
+  would silently under-seed a cell. G will be probe(new cell) - probe(existing
+  baseline) under the identical protocol; the baselines are NOT being re-probed,
+  since overwriting a recorded linear_probe.json is a hazard this ledger
+  already records.
+
+- *** B2 SCORED AT 10 SEEDS — THE POSITIVE BRANCH DOES NOT SURVIVE POWER; THE
+  TAX-VANISHING RESULT AND THE DELAYED-ARM RESULT BOTH DO (2026-08-17, 80 arm
+  runs + both baselines deepened to 10 seeds, seed-paired; 21 of the c10 arm
+  runs executed on the second workstation under an identical env and merged,
+  num_workers pinned):
+      arm            n   base    arm    Delta    SEM   sigma   was (3-seed)
+      c100 l03      10  47.48  48.98   +1.50   1.07   +1.4    +2.73
+      c100 l01      10  47.48  48.00   +0.53   1.26   +0.4    +2.30
+      c100 l005     10  47.48  47.68   +0.21   0.92   +0.2    +2.08
+      c100 delay    10  47.48  47.17   -0.31   0.39   -0.8    +0.68
+      c10  l03      10  80.92  80.74   -0.18   0.65   -0.3    -1.26
+      c10  l01      10  80.92  81.12   +0.20   0.31   +0.7    +0.18
+      c10  l005     10  80.92  80.97   +0.05   0.44   +0.1    +0.11
+      c10  delay    10  80.92  79.63   -1.29   0.20   -6.3    -0.96
+      c100 pooled (l03,l01,l005): **+0.70 +-0.61**   band was +1.5..+2.5
+      c10  pooled (l01,l005):      +0.15 +-0.25      band was -0.5..+0.5
+  (B2a) **MISSED LOW.** Pooled c100 landed +0.70 +-0.61 against a band of
+    +1.5..+2.5, and at 1.1 sigma it is NOT RESOLVED. The recorded falsifier
+    ("pooled Delta <= 0") did NOT fire on the letter. Scored honestly as: band
+    missed low, falsifier not fired, POSITIVE BRANCH NOT ESTABLISHED.
+    THE PRE-REGISTRATION CALLED THIS THE CHEAP DIRECTION AND IT WAS: the paper
+    already declines to claim the prior helps a pretrained init, so nothing in
+    it weakens. Only the six quoted three-seed numbers must update.
+  (B2b) **HIT, both parts.** c10 l01 +0.20 and l005 +0.05 are inside the
+    -0.5..+0.5 band, and the l03 arm rose toward zero (-1.26 -> -0.18) exactly
+    as predicted rather than staying negative.
+  (B2c) **HIT, and STRENGTHENED.** The delayed arm is the worst sub-full-strength
+    arm on BOTH datasets, as at three seeds; but where it was positive on c100
+    at three seeds (+0.68) it is now NEGATIVE on both (-0.31, -1.29), and the
+    c10 value is resolved at **6.3 sigma**. So "strength matters independently
+    of timing -- withholding the prior and then applying it at full strength is
+    worse than a weak prior throughout" moves from suggestive to measured.
+  *** THE REGRESSION-TO-MEAN IS THE CLEANEST INSTANCE IN THE STUDY: all EIGHT
+  arms moved toward zero or negative under power (+2.73->+1.50, +2.30->+0.53,
+  +2.08->+0.21, +0.68->-0.31, -1.26->-0.18, +0.18->+0.20, +0.11->+0.05,
+  -0.96->-1.29). The paper's own warning that three-seed deltas run optimistic
+  now has a direct eight-for-eight demonstration on a family it quotes.
+  WHAT IS UNTOUCHED, and it is the half that mattered: the tax still essentially
+  VANISHES below full strength (-16.4 -> +1.50/+0.53/+0.21 on c100;
+  -17.1 -> -0.18/+0.20/+0.05 on c10), now on ten seeds rather than three.
+  OPERATIONAL NOTE: the wave ran across two workstations with an explicit
+  disjoint partition (no cell straddled machines), the local counter frozen
+  under its flock rather than the worklist swapped, and identical torch/timm
+  pins on both. That is the established cross-machine merge precedent and it
+  held: solarflare's 21 runs merged into cells whose other seeds are local, and
+  the per-arm spreads are consistent across the two machines.
+
+- *** SECOND-ORDER RE-BASING: DEEPENING A BASELINE SILENTLY MOVED TWO HEADLINE
+  NUMBERS NOBODY DEEPENED (2026-08-17, found during the pre-submission
+  regeneration, not by the wave that caused it). B2 deepened
+  diagtransfer2_{c10,c100}_none to 10 seeds because the EIGHT reduced-strength
+  arms needed a better-powered baseline. That silently re-based the two
+  FULL-STRENGTH tax cells, which are paired against those same baselines:
+      diagtransfer2_c10_aux_5pct    -17.11 -> -16.38
+      diagtransfer2_c100_aux_7pct   -16.37 -> **-18.21**
+  NOTHING WAS RE-MEASURED. The arithmetic is correct; each paired difference is
+  now computed against a 10-seed baseline instead of a 3-seed one. But those two
+  values appear in the ABSTRACT, the intro hook, the tax table, the conclusion
+  and the decision guide, and the direction is awkward: c10 shrinks while c100
+  GROWS, so "up to -17" stopped being a ceiling in either direction.
+  THE GENERAL RULE, which would have caught it prospectively: AFTER DEEPENING
+  ANY CELL, RE-DERIVE EVERY PAIRED QUANTITY THAT NAMES IT AS A BASELINE, not
+  just the arms that motivated the deepening. A deepening changes numbers you
+  did not deepen, and it does so invisibly.
+  IT ALSO LEFT A SEED ASYMMETRY INSIDE THE PAPER'S CENTRAL TRANSFER COMPARISON:
+  the two full-strength cells became 3-seed-aux against 10-seed-baseline while
+  the eight reduced-strength arms beside them are 10v10, in a paragraph whose
+  whole point is full strength AGAINST reduced strength. RESOLVED AT SOURCE
+  rather than in prose: both aux arms deepened 3 -> 10 (14 runs, local), so the
+  comparison is seed-matched on both sides and the numbers are propagated once
+  rather than twice.
+  *** AND THE TWO FAILURES COMPOUND, which is why this nearly shipped: the
+  re-basing is invisible unless you REGENERATE, and the regeneration is
+  invisible unless you use the RIGHT EXPORTER. analysis/aggregate.py writes
+  only summary.md and summary.tex; **analysis/export_results_csv.py** is what
+  writes all_results.csv and results_by_portion.csv. Running the former and
+  expecting the latter to update exits 0, prints a plausible "wrote..." line,
+  and leaves the stale file in place. Either failure alone would have been
+  caught by the other in a later pass; together they produced a released table
+  a referee regenerating from the artifact would have hit before we did.
+  NOTE the irony worth keeping: this is a live instance of the exact claim the
+  manuscript corrected THE SAME DAY -- "one command regenerates every table"
+  was replaced with "a small set of exporters, one per task family" precisely
+  because believing the one-command version once cost stale tables. It then
+  cost them again, hours later, to the person who wrote the correction.
+
+- *** A CORRECTED CLAIM REGENERATES IN SUMMARIES: THE "ONE COMMAND" SENTENCE HAS
+  NOW BEEN FIXED FOUR TIMES (2026-08-17). It was corrected in the Data
+  Availability statement, then found surviving in supplement S5, then in the
+  contributions list, and finally in the ARTICLE'S OWN SUMMARY OF S5 -- a
+  sentence describing "the three commands that train a cell, regenerate every
+  table and re-run the audit", sitting a page from the corrected S5 that exists
+  to deny exactly that.
+  THE GENERAL FORM, and it is the transferable part: A CLAIM CORRECTED IN PLACE
+  REAPPEARS WHEREVER SOMEONE LATER COMPRESSES THAT PASSAGE, BECAUSE THE
+  COMPRESSED FORM IS THE WRONG ONE AND IT IS SHORTER. "Three commands" is a
+  tidier sentence than "the entry point, the exporters, and the released audit
+  script", so compression actively SELECTS for the falsehood. Fixing the
+  substantive text does not inoculate the summaries of it, and the summaries are
+  written later, by someone working from memory of the gist.
+  CONSEQUENCE FOR ANY FUTURE CORRECTION: after fixing a claim, grep the CLAIM
+  rather than the site, and grep again after any subsequent compression pass.
+  This is the same discipline the 2026-08-17 contributions-list miss produced
+  ("a claim-level correction has a claim-level scope, and whoever states it owes
+  the sweep"), now with a mechanism for WHY it recurs rather than only a rule.
+  RELATED, same day and same shape: the manuscript's numeric audits could never
+  have caught any of these, because every individual number in the false
+  sentences was correct. The three most dangerous defects of this campaign --
+  the stale highlights file shipping a retracted claim, the two hardcoded table
+  references pointing at the wrong tables, and the "monotonically" overclaim --
+  were all claims-over-correct-numbers.
+
+- *** C1 SCORED — THE "BETTER FEATURES, WORSE ACCURACY AT HIGH DATA" REGIME IS
+  **NOT** LAMBDA0 OVERSHOOT. THE UNIFICATION FAILS (2026-08-17, 15/15 runs +
+  5/5 probes on BSC, 3 seeds/cell, probes protocol-matched to the existing
+  baselines which were NOT re-probed):
+      cell                base   D(1.0)  D(0.3) |  G(1.0)  G(0.3)  | readout(0.3)
+      food r18 mag3 @50   71.75  -1.30   -0.57  |  +4.66  +5.31    |  -5.88
+      food r18 mag6o@50   71.75  -0.91   -0.38  |  +4.97  +5.34    |  -5.72
+      food mnet aux @50   55.13  -0.23   +0.47  |  +3.70  +4.03    |  -3.56
+      path mnet aux @20   89.04  -0.48   -2.75  |  +1.88  +0.77    |  -3.52
+      path r18 mag3 @50   89.83  -1.36   -2.57  |  +0.71  -0.48    |  -2.09
+  *** THE DECISIVE READING: ON FOOD101 THE READOUT PENALTY IS ESSENTIALLY
+  INVARIANT TO LAMBDA0. It was -5.96/-5.88/-3.93 at full strength and is
+  -5.88/-5.72/-3.56 at 0.3. If the anomaly were overshoot -- early lambda=1.0
+  shaping taxing an already-strong partner, as E3 showed for the TRANSFER tax
+  -- weakening the prior by 3.3x should have shrunk that penalty. It did not
+  move. So the three findings (transfer tax, fusion tax, high-data exceptions)
+  DO NOT COLLAPSE INTO ONE RULE, and "better features, worse accuracy at
+  sufficiency" survives as a genuine unexplained regime.
+  PREDICTIONS SCORED, and I got the mechanism wrong while the bands split:
+    (C1a) MISSED on magnitude. Predicted Delta improves by >= +1.0 into
+      -0.3..+1.5. Measured improvements +0.73/+0.53/+0.70 -- real, resolved,
+      but well under +1.0; the two r18 cells land at -0.57/-0.38, below the
+      band. Only the mnet cell reaches the band (+0.47).
+    (C1b) **HIT, 3/3 on food, and better than predicted.** Band was G >= +2.0,
+      stated as a floor because I expected weaker shaping to do less feature
+      work. Measured +5.31/+5.34/+4.03 -- G did not merely hold, it ROSE by
+      ~+0.4 at every food cell.
+    (C1c) MISSED, and this is the one that carries the verdict. Predicted
+      readout moves from ~-6 toward -1..-3. It moved ~0.1-0.4. The anomaly is
+      intact.
+    (C1d) MISSED. Predicted pathmnist moves LESS than food. It moved MORE and
+      in the OPPOSITE direction: Delta -0.48 -> -2.75 and -1.36 -> -2.57, with
+      G falling to +0.77 and -0.48. On pathmnist reduced lambda0 does less of
+      everything AND costs accuracy -- a different behaviour from food, on the
+      dataset whose probe is already recorded as a compressed measuring stick.
+  FALSIFIERS: NEITHER FIRED ON THE LETTER. F-C1a needed Delta unchanged within
+    +-0.5 (measured changes exceed that on all three food cells). F-C1b needed
+    G to COLLAPSE to <= +1.0 while Delta improves (on food G rose instead; on
+    pathmnist G did fall but Delta did NOT improve, so the conjunction is
+    unmet). BUT THE CONCLUSION F-C1a GUARDS IS WHAT THE DATA SUPPORT: this is
+    not overshoot, the findings do not unify, and the paper must keep reporting
+    the regime as open. Same shape as several earlier cells -- tripwire silent,
+    guarded claim still decided against me.
+  WHAT IS NOW KNOWN THAT WAS NOT: reducing lambda0 on these cells buys a small
+  REAL improvement in both accuracy AND features on food (Delta +0.5..+0.7,
+  G +0.3..+0.4), so the full-strength schedule is mildly suboptimal there --
+  but it does not touch the readout gap, which is the actual anomaly. A
+  mechanism that improves both terms while leaving their difference fixed is
+  not the mechanism behind the difference.
+  MANUSCRIPT IMPACT: NONE FORCED. The paper already reports these cells as
+  sign-law exceptions and names the regime as the most interesting open thread.
+  C1 adds "we tested the obvious hypothesis and it is not that", which
+  strengthens the honesty of that passage but is not required by it.
+  RECOMMEND holding for the revision alongside B1, rather than compressing a
+  five-cell negative into a 35-of-35-page article.
+
+- *** THE DEFECT CLASS THAT DOMINATED THIS REVISION: A CORRECT LOCAL UPDATE
+  LEAVES A STALE GLOBAL STATEMENT (2026-08-17, closing note). Three instances
+  in one revision, each with EVERY INDIVIDUAL NUMBER CORRECT and the SENTENCE
+  wrong:
+    - "Six cells entered scope late, five of them resolvable... from 461 to
+      471". A SECOND late admission arrived; the endpoint was updated by its
+      macro, the explanation of how the endpoint was reached was not. The span
+      then covered ten resolvable cells while the sentence claimed five.
+    - The delayed-arm pair, whose dataset assignment came only from the order
+      the two numbers appeared in. When the sign changed on one dataset,
+      position silently mislabelled it while both values stayed right.
+    - A sentence about individual-image maps pointing at an appendix that held
+      only the t-SNE panel and no maps.
+  WHY NO NUMERIC AUDIT CATCHES THESE: there is no wrong number in them. Only
+  reading the arithmetic ACROSS the sentence, or checking that a pointer points
+  where it claims, finds them. The trigger is always the same shape -- a local
+  edit is made correctly and the global statement that summarises it is not
+  revisited, because nothing about the local edit looks like it touches
+  anything else.
+  TOGETHER WITH the same-day finding that COMPRESSION SELECTS FOR THE FALSEHOOD
+  (a corrected claim regenerates in summaries because the wrong form is
+  shorter), this is the through-line of the whole revision: the four most
+  dangerous defects found were claims-over-correct-numbers, not wrong numbers.
+  The stale highlights file shipping a retracted claim, the two hardcoded table
+  references pointing at the wrong tables, the "monotonically" overclaim, and
+  the late-entry arithmetic. Every one passed every numeric check.
+
+## R1: THE MODEL-SCALE CLAIM AT A BUDGET WHERE BOTH MODELS ARE TRAINED
+## (2026-08-17, referee round 2 blocking issue; user: "use BSC, multiple jobs")
+
+- WHY. The claim "the attention deficit grows with model scale" rests on
+  ViT-S +13.00 against ViT-B +26.01, BOTH AT 100 EPOCHS. Our own E4 control
+  then showed the ViT-B baseline gains +31.98 from the schedule alone
+  (43.33 -> 75.31) and its Delta falls to +6.71 +-0.90 at 200 epochs. So the
+  comparison is made at a budget where ONE OF THE TWO MODELS IS DEMONSTRABLY
+  UNDERTRAINED, and the referee is right that the ordering may invert. Section
+  5 already discloses that ViT-S was not rerun; the highlights, the intro, the
+  discussion and the conclusion still assert the trend.
+- CELLS: diagin100e200_vits_{none,aux}, derived from diagin100_vits_{none,aux}
+  by changing ONLY the name, the header comment and epochs 100 -> 200 --
+  exactly the relationship diagin100e200_vitb bears to diagin100_vitb, which I
+  verified by diff. SIX seeds per arm, matched to the ViT-B control.
+- ANCHORS: ViT-S @100ep 65.39 -> 78.39 = +13.00 (n=3). ViT-B @100ep
+  43.33 -> 69.34 = +26.01 (n=3); @200ep 75.31 -> 82.02 = +6.71 +-0.90 (n=6).
+- PREDICTIONS RECORDED IN ADVANCE, and they bet AGAINST our own claim:
+    baseline(ViT-S, 200ep) = **71..79**. It cannot gain what ViT-B gained
+      (+31.98), because it starts at 65.39 rather than 43.33 and simply has
+      far less headroom to catch up.
+    aux(ViT-S, 200ep) = **80..85** (from 78.39; aux arms gained far less than
+      baselines on ViT-B, +12.68 against +31.98).
+    **Delta(ViT-S, 200ep) = +4..+10.**
+  *** THE PRIMARY FORK, and it is the whole point of the cell:
+    Delta(ViT-S) vs Delta(ViT-B) = +6.71 +-0.90 at the same budget.
+    I EXPECT INVERSION OR A TIE, i.e. Delta(ViT-S) >= 6.71. Reasoning: the
+    gain shrinks under a longer schedule because the BASELINE catches up, and
+    ViT-S's baseline has much less room to catch up than ViT-B's did. So
+    ViT-S's Delta should shrink LESS in absolute terms, from a smaller
+    starting value, and the two should converge or cross.
+- FALSIFIER FOR THE PAPER'S MODEL-SCALE CLAIM: Delta(ViT-S) >= Delta(ViT-B)
+  by more than 2 SEM of the difference => "the deficit GROWS with model scale"
+  is FALSE at a budget where both models are trained, and must be WITHDRAWN
+  from the highlights, the intro, the Section 5 subsection heading, the
+  discussion and the conclusion, keeping only the full-data ViT-B result with
+  both its budgets stated.
+- CONVERSE: Delta(ViT-S) <= Delta(ViT-B) by more than 2 SEM => the trend
+  SURVIVES at matched budget and the claim stands, restated with the budget
+  attached at every site.
+- IF THE TWO ARE INSIDE 2 SEM OF EACH OTHER: the honest outcome is that the
+  ordering is UNRESOLVED at 200 epochs, which still costs the paper the
+  unqualified "grows with model scale" and must be reported as such rather
+  than as survival.
+
+- *** R1 SCORED — THE MODEL-SCALE TREND SURVIVES AT A MATCHED BUDGET, AND MY
+  PREDICTION WAS WRONG IN THE PAPER'S FAVOUR (2026-08-18, 6 seeds per arm,
+  12/12 runs, 0 failures after two SIGABRT restarts):
+      cell              n   base            aux             Delta
+      ViT-S @200ep      6  79.47 +-0.16   83.99 +-0.08   **+4.52 +-0.18**
+      ViT-B @200ep      6  75.31 +-0.48   82.02 +-0.76     +6.71 +-0.90
+      (100-epoch anchors: ViT-S 65.39 -> 78.39 = +13.00; ViT-B 43.33 ->
+       69.34 = +26.01, both n=3)
+  *** THE FORK: Delta(ViT-S) - Delta(ViT-B) = **-2.19 +-0.92 = -2.4 SEM**.
+  The recorded CONVERSE fired ("Delta(ViT-S) <= Delta(ViT-B) by more than
+  2 SEM => the trend SURVIVES at matched budget"). The FALSIFIER
+  ("Delta(ViT-S) >= Delta(ViT-B) => withdraw the model-scale claim from the
+  highlights, intro, Section 5 heading, discussion and conclusion") did NOT
+  fire. So the claim STANDS, and it now rests on a comparison where BOTH
+  models are trained rather than one that was demonstrably undertrained.
+  PREDICTIONS SCORED HONESTLY, AND THE PRIMARY ONE IS A MISS:
+    Delta band +4..+10 -> **+4.52 IN BAND**, at the bottom edge.
+    aux band 80..85 -> 83.99 IN BAND.
+    baseline band 71..79 -> 79.47, MISSED HIGH by 0.47.
+    *** THE FORK ITSELF: I predicted INVERSION OR A TIE, i.e.
+    Delta(ViT-S) >= 6.71, on the reasoning that ViT-S's baseline had far less
+    headroom to catch up (65.4 vs 43.3) so its gain should shrink LESS in
+    absolute terms. WRONG. Both gains shrank by a similar PROPORTION -- ViT-S
+    13.00 -> 4.52 (-65%), ViT-B 26.01 -> 6.71 (-74%) -- so the smaller model,
+    starting from a smaller gain, ended lower in absolute terms too. I reasoned
+    about absolute headroom where the data behave proportionally.
+  I BET AGAINST OUR OWN CLAIM AND LOST, which is the outcome that makes the
+  claim worth keeping: the referee's objection was that the comparison sat at a
+  budget where ViT-B was undertrained, and at a budget where neither is, the
+  ordering is unchanged and now 2.4 SEM clear.
+  NOTE THE VARIANCE: ViT-S at 200 epochs is remarkably stable (base SEM 0.16,
+  aux 0.08) against ViT-B's 0.48 and 0.76, so the fork's uncertainty is carried
+  almost entirely by the ViT-B control. Deepening ViT-B further would tighten
+  it; nothing about the sign depends on that.
+  MANUSCRIPT CONSEQUENCE: the trend stays in the highlights, intro, Section 5,
+  discussion and conclusion, but every statement of it must now carry the
+  BUDGET and cite the matched-budget pair (+6.71 vs +4.52 at 200 epochs)
+  rather than resting on the 100-epoch pair (+26.01 vs +13.00), which must
+  itself be labelled as the 100-epoch reading wherever it appears.
+  OPERATIONAL: two aux seeds died of SIGABRT mid-run (epochs 132 and 168, both
+  on one node); their partial dirs were QUARANTINED rather than reused, because
+  an aborted best.pt survives a restart and is only overwritten when beaten --
+  which would have paired an aborted checkpoint with a fresh final.json, the
+  wrong-epoch defect this study already spent a day on. Restarts excluded that
+  node and ran clean.

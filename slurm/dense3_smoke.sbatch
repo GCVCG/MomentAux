@@ -1,12 +1,12 @@
 #!/bin/bash
 #SBATCH --job-name=ms_dense3smoke
-#SBATCH --account=ub234
+#SBATCH --account=${CLUSTER_ACCOUNT:?set CLUSTER_ACCOUNT}
 #SBATCH --qos=acc_resc
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=20
 #SBATCH --time=00:40:00
-#SBATCH --output=/gpfs/scratch/ub234/momentstem/logs/%x_%j.out
+#SBATCH --output=${CLUSTER_SCRATCH}/momentstem/logs/%x_%j.out
 #
 # Pre-flight for the three NEW dense populations (ade20k, cityscapes,
 # foodseg103), on the machine that will run them. Same discipline as the VOC
@@ -36,7 +36,7 @@
 # make the completed-run guard skip the real cell.
 
 set -uo pipefail
-source /gpfs/scratch/ub234/momentstem/env.sh
+source ${CLUSTER_SCRATCH}/momentstem/env.sh
 cd "$MS_ROOT/repo"
 
 OUT=$MS_ROOT/runs_dense3_smoke

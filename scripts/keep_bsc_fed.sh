@@ -14,14 +14,14 @@ set -uo pipefail
 # alogin1 went unreachable for hours while it was migrated and every keeper
 # tick failed with rc=255, so nothing was submitted. Try each host in turn and
 # use the first that answers. alogin2 migrated first, so it leads.
-BSC_HOSTS=${BSC_HOSTS:-"ub881905@alogin2.bsc.es ub881905@alogin1.bsc.es"}
+BSC_HOSTS=${BSC_HOSTS:-"${CLUSTER_USER}@alogin2.bsc.es ${CLUSTER_USER}@alogin1.bsc.es"}
 BSC=""
 for h in $BSC_HOSTS; do
     if timeout 25 ssh -o BatchMode=yes -o ConnectTimeout=15 "$h" true 2>/dev/null; then
         BSC="$h"; break
     fi
 done
-MS=/gpfs/scratch/ub234/momentstem
+MS=${CLUSTER_SCRATCH}/momentstem
 TARGET=8                                   # 8 jobs x 4 GPUs = 32 concurrent
 LOG=$HOME/projects/MomentsCNNEncoder/logs/bsc_keeper.log
 STAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
@@ -46,7 +46,7 @@ CTR=\$(cat "\$MS/queue.counter" 2>/dev/null || echo 0)
 # unclaimed tasks (cnx >=25%, pathmnist/food101 @100%, SSL-at-scale)
 NBIG=\$(wc -l < "\$MS/worklist.big" 2>/dev/null || echo 0)
 CBIG=\$(cat "\$MS/queue.counter.big" 2>/dev/null || echo 0)
-BIGJOBS=\$(squeue -u ub881905 -h -n ms_big -t R,PD -o "%i" | wc -l)
+BIGJOBS=\$(squeue -u ${CLUSTER_USER} -h -n ms_big -t R,PD -o "%i" | wc -l)
 if [ "\$CBIG" -ge "\$NBIG" ] && [ "\$BIGJOBS" -eq 0 ] && [ "\$NBIG" -gt 0 ] \
    && [ ! -f "\$MS/BIG_COMPLETE" ]; then
     # Big-lane RECONCILE (added 2026-07-27 after 53 walltime orphans): the
@@ -102,7 +102,7 @@ if [ "\$CBIG" -lt "\$NBIG" ] && [ "\$BIGJOBS" -lt 4 ]; then
         done
     fi
 fi
-CUR=\$(squeue -u ub881905 -h -n ms_grid -t R,PD -o "%i" | wc -l)
+CUR=\$(squeue -u ${CLUSTER_USER} -h -n ms_grid -t R,PD -o "%i" | wc -l)
 if [ "\$CTR" -ge "\$N" ]; then
     # Queue counter exhausted. RECONCILE: the counter advances on CLAIM with no
     # retry, so cells lost to walltime expiry are gaps. Regenerate the worklist

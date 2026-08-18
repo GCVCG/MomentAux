@@ -20,7 +20,7 @@
 # non-blocking flock run lock.
 set -uo pipefail
 
-MS=/gpfs/scratch/ub234/momentstem
+MS=${CLUSTER_SCRATCH}/momentstem
 LANE=${LANE:-det}
 WL=$MS/worklist.$LANE
 CTR=$MS/queue.counter.$LANE

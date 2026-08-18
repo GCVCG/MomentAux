@@ -23,6 +23,7 @@ import csv
 import glob
 import json
 import os
+import statistics
 import sys
 from decimal import Decimal, ROUND_HALF_UP
 
@@ -131,6 +132,43 @@ def main():
     macro("auditUnresolved", num(len(unres)))
     macro("auditBracket", num(len(bracket)))
     macro("auditRate", dec(100.0 * len(ok) / len(res)))
+    # COVERAGE and the MAJORITY-SIGN BASELINE. Two referees independently asked
+    # for these, and both are the right question: the resolvability rule is what
+    # makes the audit meaningful, but it also decides which cells get a vote, so
+    # the rate has to be read next to how many cells it speaks for. And an exact
+    # binomial against a coin is not a null anyone would propose -- readout is
+    # negative in most resolvable cells, so a constant "always negative" rule
+    # already scores well and is the baseline the account has to beat.
+    macro("auditCoverage", dec(100.0 * len(res) / n_scope),
+          "resolvable / scope; the audit's coverage")
+    _neg = sum(1 for r in res if r["ro"] < 0)
+    macro("auditMajority", dec(100.0 * max(_neg, len(res) - _neg) / len(res)),
+          "always-predict-the-majority-sign baseline")
+    # THE FULL TRANSFER-TAX POPULATION, rather than the three illustrative rows
+    # of Table~\ref{tab:tax}: three cells cannot support a claim about a
+    # regime. Every transfer cell carrying the prior at full auxiliary strength
+    # is counted here, at >=3 seeds.
+    # EXCLUSION, and it is load-bearing: the diagtaxlam_* family is the
+    # SCHEDULE CONTROL for this very claim (reduced lambda0, and a delayed
+    # onset at lambda0=1.0). Those cells are the arms that show the tax is
+    # schedule-dependent, so counting them inside the population the sentence
+    # describes would let the claim silently absorb its own control and turn
+    # "not one is positive" false. They are reported separately in the text.
+    _tax = []
+    with open(os.path.join(ROOT, "results", "all_results.csv")) as _f:
+        for _r in csv.DictReader(_f):
+            if (_r.get("pretrained") == "yes" and _r.get("aux_target")
+                    and _r.get("delta") and int(_r.get("n_seeds") or 0) >= 3
+                    and not _r["cell"].startswith("diagtaxlam")):
+                _tax.append(float(_r["delta"]))
+    _tax.sort()
+    macro("taxCells", num(len(_tax)), "transfer cells carrying the prior")
+    macro("taxNegative", num(sum(1 for v in _tax if v < 0)))
+    macro("taxWorst", dec(_tax[0], 1))
+    # MEDIAN, not the upper of the two middle values. The previous form,
+    # _tax[len(_tax) // 2], is wrong on an even-length list and reported -6.8
+    # where the median of these 92 values is -7.0.
+    macro("taxMedian", dec(statistics.median(_tax), 1))
     # THE RESCOPING DISCLOSURE (Section 4.2), generated rather than typed.
     # An earlier version of in_scope() tested the exporter's `pretrained`
     # column against the strings "true"/"1" while the exporter writes "yes",
@@ -195,10 +233,12 @@ def main():
         n_cells = sum(1 for _ in csv.DictReader(_f))
     macro("computeCells", num(n_cells), "rows in results/all_results.csv")
     macro("computeGpuHours", num(int(round(total))))
-    for dev, key in (("H100", "computeHhundred"), ("H100 NVL", "computeHnvl"),
-                     ("H200 NVL", "computeHtwo"), ("RTX 3090", "computeAmpere")):
+    for dev, key in (("H100", "computeHhundred"), ("RTX 3090", "computeAmpere")):
         macro(key, num(int(round(hours.get(dev, 0.0)))))
-    # The two NVL classes are reported as one term in the paper.
+    # The two NVL classes are reported as ONE term in the paper, so only the
+    # sum is emitted. The per-class components were emitted too and never
+    # printed, which is how a macro file grows figures nothing checks: an
+    # unused macro cannot drift visibly, so it silently stops being audited.
     macro("computeNvl", num(int(round(hours.get("H100 NVL", 0.0)
                                       + hours.get("H200 NVL", 0.0)))))
     macro("computeKwh", num(int(round(kwh))))

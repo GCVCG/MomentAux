@@ -85,7 +85,11 @@ def main():
           r" per-class stratified draw. Parentheses give images per class, which"
           r" sets a cell's regime: $1\%$ of CIFAR-10 is 50 per class, $1\%$ of"
           r" Tiny-ImageNet is 5. Relabeled controls and multi-source views reuse"
-          r" their parent's indices exactly and share its row. The two blanks"
+          r" their parent's indices exactly and share its row, which is why the"
+          r" twenty-one dataset identities counted in the sign-law audit are not"
+          r" twenty-one independent populations: five are relabeled controls of"
+          r" their parent's pixels and four are band subsets of two parent"
+          r" instruments, leaving twelve independent image sources. The two blanks"
           r" differ: $\times$ marks a fraction that \emph{cannot} be trained"
           r" under the frozen recipe, yielding fewer than one batch of 128"
           r" images; a dash marks one that is runnable but was not run.}")
