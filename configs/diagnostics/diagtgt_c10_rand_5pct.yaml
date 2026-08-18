@@ -1,0 +1,24 @@
+# diag: ablation lambda (0.3 constant), so comparable to the C100 Table-18
+# rows and to diagtgt_tin_*. THIRD POPULATION for the random-target control.
+# N1 found random-fixed = +0.67 on tin where C100's cited cells give ~0, and
+# C100's own full envelope gives +0.28..+0.55 at 1-3%. This asks whether the
+# random positive tracks RESOLUTION (32px C100/C10 vs 64px tin/food) or is a
+# per-dataset accident. Recipe copied verbatim from c10_none_5pct.
+name: diagtgt_c10_rand_5pct
+dataset: cifar10
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 8
+small_input: true
+pretrained: false
+subset_pct: 5
+stem: none
+stem_calibrate: true
+moment_aux:
+  stem: random-fixed
+  tap: layer3
+  weight: 0.3

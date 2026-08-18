@@ -1,0 +1,19 @@
+[cifar100] VAL 11200 / FIT 33800 (excluded pcts [10])
+  diagdeit_aux_10pct seed0: e2e val 41.78 test 41.00 (recorded 41.01)  probe val 49.74 test 49.10
+  diagdeit_aux_10pct seed1: e2e val 41.90 test 41.28 (recorded 41.30)  probe val 49.69 test 49.26
+  diagdeit_aux_10pct seed2: e2e val 42.59 test 41.55 (recorded 41.55)  probe val 49.97 test 49.64
+  diagdeit_none_10pct seed0: e2e val 19.36 test 18.96 (recorded 18.97)  probe val 25.26 test 25.68
+  diagdeit_none_10pct seed1: e2e val 22.62 test 21.94 (recorded 21.95)  probe val 29.14 test 29.49
+  diagdeit_none_10pct seed2: e2e val 20.03 test 19.93 (recorded 19.93)  probe val 26.67 test 27.43
+  diagsslvit_simclr_10pct seed0: e2e val 30.08 test 30.62 (recorded 30.63)  probe val 36.79 test 38.01
+  diagsslvit_simclr_10pct seed1: e2e val 30.20 test 30.03 (recorded 30.02)  probe val 37.66 test 37.78
+  diagsslvit_simclr_10pct seed2: e2e val 28.59 test 28.68 (recorded 28.67)  probe val 35.98 test 36.85
+  diagsslvitaux_10pct seed0: e2e val 31.00 test 30.70 (recorded 30.69)  probe val 39.11 test 38.85
+  diagsslvitaux_10pct seed1: e2e val 30.26 test 30.26 (recorded 30.26)  probe val 38.28 test 38.82
+  diagsslvitaux_10pct seed2: e2e val 29.23 test 28.86 (recorded 28.85)  probe val 36.96 test 36.56
+  diagvit_aux_10pct seed0: e2e val 29.64 test 29.63 (recorded 29.61)  probe val 38.35 test 38.85
+  diagvit_aux_10pct seed1: e2e val 29.88 test 29.54 (recorded 29.53)  probe val 38.54 test 39.15
+  diagvit_aux_10pct seed2: e2e val 29.73 test 30.04 (recorded 30.07)  probe val 38.23 test 38.36
+  diagvit_none_10pct seed0: e2e val 17.81 test 16.90 (recorded 16.89)  probe val 24.86 test 24.52
+  diagvit_none_10pct seed1: e2e val 16.58 test 15.90 (recorded 15.92)  probe val 23.50 test 23.83
+  diagvit_none_10pct seed2: e2e val 17.51 test 16.61 (recorded 16.61)  probe val 24.60 test 23.61

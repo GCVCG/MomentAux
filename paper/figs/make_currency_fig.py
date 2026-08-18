@@ -65,14 +65,21 @@ def main():
         ax.bar(x + (k - 1.5) * w, vals, w, label=name, color=colors[k],
                edgecolor="white", linewidth=0.4)
     ax.axhline(1.0, color=PS.ARM["prior"], lw=1.0, ls="--", zorder=0)
+    # The label sits just under the reference line at the right, in the clear
+    # band above the group-3 bars (max 0.98 there); the legend lives higher,
+    # with the extra headroom below, so the two can no longer collide -- the
+    # earlier upper-right legend descended to y~1.0 and covered this label.
     ax.text(len(pairs) - 0.45, 1.03, "same-seed level", color=PS.ARM["prior"],
             fontsize=PS.SMALL, va="bottom", ha="right")
     ax.set_xticks(x)
     ax.set_xticklabels([PAIR_LABEL[p] for p in pairs], fontsize=PS.SMALL)
     ax.set_ylabel("agreement / own seed-to-seed\nagreement", fontsize=PS.LABEL)
-    ax.set_ylim(0, 1.42)
+    ax.set_ylim(0, 1.68)
+    ax.set_yticks([0, 0.25, 0.5, 0.75, 1.0, 1.25])
     ax.tick_params(labelsize=PS.TICK)
-    ax.legend(fontsize=PS.SMALL, ncol=2, frameon=False, loc="upper right")
+    ax.legend(fontsize=PS.SMALL, ncol=4, frameon=False, loc="upper center",
+              bbox_to_anchor=(0.5, 1.02), handlelength=1.1, handletextpad=0.4,
+              columnspacing=0.9)
     PS.panel(ax, "(a) do they change the same things?")
 
     # ---- (b) how many images each fixes, and the shared part --------------

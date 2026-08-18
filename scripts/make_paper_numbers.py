@@ -123,8 +123,14 @@ def main():
             if (r.get("baseline_cell") and r.get("delta") and r.get("G")
                     and int(r.get("n_seeds") or 0) >= 3):
                 n_all += 1
+    # DELIBERATELY NOT FILTERED TO <100%, unlike auditScope below, and the two
+    # will therefore look inconsistent to anyone who does not know why. The
+    # probe-ceiling rule forbids SPLITTING a 100% cell into G and readout; it
+    # does not forbid REPORTING G, and both arms are probed identically so the
+    # gap stays valid. This row counts paired evaluations, so it legitimately
+    # keeps cells the sign-law count drops.
     macro("auditAllPaired", num(n_all),
-          "every intervention, >=3 seeds; Table 7 row 1")
+          "every intervention, >=3 seeds, 100% included; Table 7 row 1")
     macro("auditScope", num(n_scope))
     macro("auditResolvable", num(len(res)))
     macro("auditCorrect", num(len(ok)))
@@ -177,13 +183,33 @@ def main():
     # moved the headline rate, so the manuscript reports the previous figure,
     # the excluded cells, and how those cells behave on their own. Recomputed
     # here under the OLD predicate so the two numbers cannot drift apart.
+    #
+    # THERE ARE NOW TWO REPAIRS, NOT ONE, AND THEY MUST NOT BE POOLED.
+    # The 2026-08-18 pass restored the probe-ceiling rule (100% cells cannot
+    # be split into G and readout). Differencing the current scope against
+    # `prev` alone would attribute BOTH repairs to the `pretrained` bug and
+    # report 153 excluded cells in a paragraph that names only the transfer
+    # cells. So three scopes are computed and the two exclusions reported
+    # separately:
+    #   prev -> the true historical scope: pretrained bug present, 100% in
+    #   mid  -> pretrained repaired, 100% still in (the 2026-08-17 state)
+    #   rows -> both rules enforced (current)
+    # giving rates 79.1% -> 85.7% -> 86.4% as two attributable steps.
     old_pred = ALP.in_scope
-    ALP.in_scope = lambda r: (
+    _buggy_pretrained = lambda r: (
         r.get("aux_target") and not r.get("init_from")
         and str(r.get("pretrained", "")).lower() not in ("true", "1")
         and (r.get("stem") or "none") == "none")
+    _hundred_in = lambda r: (
+        r.get("aux_target") and not r.get("init_from")
+        and not r.get("pretrained")
+        and (r.get("stem") or "none") == "none")
+    ALP.in_scope = _buggy_pretrained
     prev = ALP.load(os.path.join(ROOT, "runs"),
                     os.path.join(ROOT, "results", "all_results.csv"))
+    ALP.in_scope = _hundred_in
+    mid = ALP.load(os.path.join(ROOT, "runs"),
+                   os.path.join(ROOT, "results", "all_results.csv"))
     ALP.in_scope = old_pred
 
     def _split(rr):
@@ -195,21 +221,41 @@ def main():
         below_ok = [r for r in below if r["ro"] < 0]
         return res_, ok_, below, below_ok
     p_res, p_ok, p_below, p_below_ok = _split(prev)
+    m_res, m_ok, m_below, m_below_ok = _split(mid)
     _, _, n_below, n_below_ok = _split(rows)
     key = lambda r: (r.get("cell"), r.get("dataset"), r.get("subset_pct"))
     keep = set(map(key, rows))
-    excl = [r for r in prev if key(r) not in keep]
+    keep_mid = set(map(key, mid))
+    # repair 1: the transfer-tax cells the `pretrained` string test let in
+    excl = [r for r in prev if key(r) not in keep_mid]
     e_res, e_ok, _, _ = _split(excl)
+    # repair 2: the 100% cells the probe-ceiling rule refuses to split
+    hexcl = [r for r in mid if key(r) not in keep]
+    h_res, h_ok, h_below, _ = _split(hexcl)
     macro("auditPrevScope", num(len(prev)), "scope before the filter was restored")
     macro("auditPrevResolvable", num(len(p_res)))
     macro("auditPrevRate", dec(100.0 * len(p_ok) / len(p_res)))
     macro("auditPrevBelowRate", dec(100.0 * len(p_below_ok) / len(p_below)))
     macro("auditBelowRate", dec(100.0 * len(n_below_ok) / len(n_below)))
-    macro("auditExclCells", num(len(excl)))
+    macro("auditExclCells", num(len(excl)), "repair 1: ImageNet-transfer only")
     macro("auditExclResolvable", num(len(e_res)))
     macro("auditExclCorrect", num(len(e_ok)))
     macro("auditExclWrong", num(len(e_res) - len(e_ok)))
     macro("auditExclRate", dec(100.0 * len(e_ok) / len(e_res)))
+    # The intermediate state, so the two repairs can be narrated as two steps
+    # rather than one unattributable jump.
+    macro("auditMidScope", num(len(mid)), "after repair 1, before repair 2")
+    macro("auditMidResolvable", num(len(m_res)))
+    macro("auditMidRate", dec(100.0 * len(m_ok) / len(m_res)))
+    macro("auditMidBelowRate", dec(100.0 * len(m_below_ok) / len(m_below)))
+    # repair 2 in the same shape as repair 1
+    macro("auditHundredCells", num(len(hexcl)), "repair 2: cells at 100%")
+    macro("auditHundredResolvable", num(len(h_res)))
+    macro("auditHundredCorrect", num(len(h_ok)))
+    macro("auditHundredWrong", num(len(h_res) - len(h_ok)))
+    macro("auditHundredRate", dec(100.0 * len(h_ok) / len(h_res)))
+    macro("auditHundredBelow", num(len(h_below)),
+          "below-crossing cells repair 2 removes")
     # Take the residual spread from the audit's OWN output rather than
     # recomputing it here: two implementations of one statistic is exactly how
     # 2.1 and 2.2 came to coexist in the manuscript.

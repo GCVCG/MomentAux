@@ -1,37 +1,36 @@
 %% ---------------------------------------------------------------------
 \section{Fusing genuinely different sources}\label{sec:multisource}
 
-Everything to this point fuses one knowledge source into one image stream.
-This section asks whether the same rule governs fusion in the sense the
-term usually carries: two \emph{sensors}, and two \emph{classifiers}.
-Section~\ref{sec:multisensor} takes visible and non-visible Sentinel-2
-bands as separate sources; Section~\ref{sec:decisionfusion} fuses trained
-models at the decision level. Both are tests of transfer rather than
-restatements: the rule was derived from training-time fusion of a prior
-into a network, and neither of these is that.
+Everything to this point fuses one knowledge source into one image stream. This
+section asks whether the same rule governs fusion in the sense the term usually
+carries: two \emph{sensors} (Sec.~\ref{sec:multisensor}) and two
+\emph{classifiers} (Sec.~\ref{sec:decisionfusion}). Both are tests of
+transfer, not restatements: the rule was derived from training-time fusion of a
+prior into a network, and neither of these is that.
 
 \subsection{Two sensors, and when a second one pays}\label{sec:multisensor}
-We build two multi-source populations that differ in how far apart the
-sources are, because that turns out to be the variable that matters.
+We build two multi-source populations differing in how far apart the sources
+are, which turns out to be the variable that matters.
 
-\textbf{EuroSAT-MS} splits \emph{one} instrument: Sentinel-2's 13 bands
-become \textbf{visible} (3), \textbf{non-visible} (the other 10, spanning
-red-edge, near-infrared, short-wave infrared and cirrus) and
-\textbf{sensor-fused} (all 13). \textbf{So2Sat LCZ42} pairs \emph{two
-satellites}: Sentinel-1 synthetic-aperture radar (8 channels) with
-Sentinel-2 optical (10 channels), over 17 local-climate-zone classes. The
-second is the harder and more informative test, since radar backscatter and
-optical reflectance share no detector and no physics. In both, tiles and
-fixed subset indices are identical across the sources and the
-configuration is the champion verbatim with only the source changed, so
-nothing but the input varies.
+\textbf{EuroSAT-MS} splits \emph{one} instrument: Sentinel-2's 13 bands become
+\textbf{visible} (3), \textbf{non-visible} (the other 10, spanning red-edge,
+near-infrared, short-wave infrared and cirrus) and \textbf{sensor-fused} (all
+13). \textbf{So2Sat LCZ42} pairs \emph{two satellites}: Sentinel-1
+synthetic-aperture radar (8 channels) with Sentinel-2 optical (10 channels),
+over 17 local-climate-zone classes. The second is the harder and more
+informative test, since radar backscatter and optical reflectance share no
+detector and no physics. In both, tiles and fixed subset indices are identical
+across the sources and the configuration is the reference configuration verbatim with only the
+source changed, so nothing but the input varies.
 
 \begin{table}[pos=htbp]
 \caption{Does a second source pay? Fusion gain is the fused arm minus the
 better single source, at matched data. Sorted by data fraction. Three seeds
-per cell, ResNet-18; the champion configuration is used verbatim
+per cell, ResNet-18; the reference configuration is used verbatim
 throughout. Splitting one instrument's bands pays at every fraction;
-pairing two satellites does not pay at any.}
+pairing two satellites does not pay at any. Best in bold, second best
+underlined, third best in italics, per fusion column; the asymmetry columns
+are unmarked inputs. That So2Sat's best gain is a zero is the finding.}
 \label{tab:sensorfusion}
 \centering\scriptsize
 \setlength{\tabcolsep}{3.2pt}
@@ -44,98 +43,106 @@ pairing two satellites does not pay at any.}
 Data & $|\Delta_{\mathrm{acc}}|$~\down & Fusion~\up
      & $|\Delta_{\mathrm{acc}}|$~\down & Fusion~\up \\
 \midrule
-1\%  &  6.68 & $+1.40$ & 26.31 & $-0.57$ \\
-2\%  &  1.07 & $+2.96$ & 33.77 & $-0.14$ \\
-5\%  &  0.58 & $+1.34$ & 30.61 & $-0.73$ \\
-10\% &  0.66 & $+1.15$ & 28.51 & $-0.11$ \\
-25\% &  0.11 & $+0.45$ & 25.98 & $\pm0.00$ \\
+1\%  &  6.68 & \snd{$+1.40$} & 26.31 & $-0.57$ \\
+2\%  &  1.07 & $\mathbf{+2.96}$ & 33.77 & \trd{$-$0.14} \\
+5\%  &  0.58 & \trd{+1.34} & 30.61 & $-0.73$ \\
+10\% &  0.66 & $+1.15$ & 28.51 & \snd{$-0.11$} \\
+25\% &  0.11 & $+0.45$ & 25.98 & $\mathbf{\pm0.00}$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\emph{One instrument's bands are complementary; two satellites are not.}
-Fusing EuroSAT's band sets beats the better single source at every
-fraction, by $+0.45$ to $+2.96$. Fusing So2Sat's two satellites never
-does: the 18-channel arm lands between $-0.73$ and $\pm0.00$, at or below
-optical alone throughout. Radar is not uninformative in isolation, reaching
-$35$--$53\%$ against a $5.9\%$ chance rate, but adding it to optical buys
-nothing here. Had we run only the multispectral population we would have
-concluded that a second sensor stacks, and reported a result that the first
-genuinely cross-modality test contradicts.
+\emph{One instrument's bands are complementary; two satellites are not.} Fusing
+EuroSAT's band sets beats the better single source at every fraction, by
+$+0.45$ to $+2.96$. Fusing So2Sat's two satellites never does: the 18-channel
+arm lands between $-0.73$ and $\pm0.00$, at or below optical alone throughout.
+Radar is not uninformative in isolation, reaching $35$--$53\%$ against a
+$5.9\%$ chance rate, but adding it to optical buys nothing here. Had we run
+only the multispectral population we would have concluded that a second sensor
+stacks, and reported a result that the first genuinely cross-modality test
+contradicts.
 
-\emph{What separates the two populations, and what we cannot yet
-separate.} The arms differ enormously in how well matched they are: the
-accuracy asymmetry between the two sources is $0.11$--$6.68$ points on
-EuroSAT-MS and $25.98$--$33.77$ on So2Sat, and the population with the
-matched arms is the one where fusion pays. That is consistent with
-Equation~\ref{eq:ensgain}, our decision-level fit on CIFAR-100 classifier
-ensembles, which is dominated not by diversity but by exactly this
-asymmetry term.
+\emph{What separates them, and what we cannot separate.} The accuracy
+asymmetry between the two sources is $0.11$--$6.68$ points on EuroSAT-MS and
+$25.98$--$33.77$ on So2Sat, and the population with the matched arms is the one
+where fusion pays, which is consistent with Eq.~\ref{eq:ensgain}, our
+decision-level fit on CIFAR-100 ensembles, dominated not by diversity but by
+exactly this asymmetry term.
 
-We had reported a correlation of $r = -0.80$ between asymmetry and fusion
-gain across the ten cells of Table~\ref{tab:sensorfusion}, and we withdraw
-it. The arithmetic is right but the statistic is not: within EuroSAT-MS the
-correlation is $+0.08$ and within So2Sat it is $-0.05$, so it is carried
-entirely by the gap between two clusters that do not overlap on either
-axis. Its effective sample size is two populations, not ten points. And
-those two populations differ in \emph{two} ways at once, since the
-low-asymmetry population splits one instrument's bands while the
-high-asymmetry population pairs two satellites with no shared detector or
-physics. Nothing in this design separates ``the sources are too unequal''
-from ``the sources are cross-modal'', and we should not have offered a
-correlation coefficient as though it did.
-
-What the experiment supports is therefore a contrast, not a predictor:
-fusion paid at every data scale within one instrument and never paid across
-two satellites, and the two settings differ in both source asymmetry and
-modality. Distinguishing the two would need a third population that breaks
-the confound, such as two well-matched cross-modal sources or two badly
+\looseness=-1 A correlation of $r = -0.80$ between asymmetry and fusion gain across the ten
+cells of Table~\ref{tab:sensorfusion} does not survive inspection and we do not
+report it as one. The arithmetic is right but the statistic is not: within
+EuroSAT-MS the correlation is $+0.08$ and within So2Sat it is $-0.05$, so it is
+carried entirely by the gap between two clusters that do not overlap on either
+axis, and its effective sample size is two populations, not ten points. Those
+two populations also differ in \emph{two} ways at once, since the
+low-asymmetry population splits one instrument's bands while the high-asymmetry
+one pairs two satellites with no shared detector or physics. Nothing in this
+design separates ``the sources are too unequal'' from ``the sources are
+cross-modal''. What the experiment supports is therefore a contrast, not a
+predictor. Distinguishing the two accounts would need a third population that
+breaks the confound, such as two well-matched cross-modal sources or two badly
 matched same-instrument ones, and we have not run it.
 
-\emph{The prior itself transplants to both sensors, including radar.} On
-optical it produces the study's usual envelope, $+1.13$, $+1.91$, $+1.19$,
-$+0.68$ and $-0.56$ at 1, 2, 5, 10 and 25\%: positive while data is scarce,
-decaying to neutral at sufficiency. On SAR it gives $+1.24$ at 1\% and
-$+2.59$ at 5\%, its largest So2Sat gain, then $-0.46$ and $-0.24$ at 10 and
-25\%. We had registered in advance that radar was where a fixed
-oriented-energy target might fail, being speckle-dominated and carrying no
-photographic edge statistics, with a falsifier at $\Delta \le -1.0$ on two
-fractions. It did not fire. Only the 2\% SAR cell falls below that, and
-both of its arms are unstable (seed spreads of $3.5$ and $5.5$ points
-against $0.1$--$1.1$ everywhere else in the column), so we read it as
-variance rather than as effect and flag it as such. On the multispectral
-population the picture is the same at 5\%, where the prior adds $+1.63$,
-$+2.60$ and $+3.30$ on the visible, non-visible and fused sources.
+\emph{The prior itself transplants to both sensors, and the radar column needs
+two caveats stated before its numbers.} \looseness=-1 On optical it produces
+the study's usual envelope, $+1.13$, $+1.91$, $+1.19$, $+0.68$ and $-0.56$ at
+1, 2, 5, 10 and 25\%: positive while data is scarce, decaying to neutral at
+sufficiency. On SAR it gives $+1.24$, $-3.09$, $+2.59$, $-0.46$ and $-0.24$ at
+the same five fractions.
 
-\emph{Whether the prior amplifies a second sensor is
-backbone-dependent, and we claim only what both backbones support.} On
-EuroSAT the ResNet gain rises with sensor count while on ViT-tiny it
-inverts, $+5.14$, $+2.69$, $+1.75$, tracking baseline weakness ($84.80$,
-$90.19$, $91.52$) as the rest of this study does. The defensible statement
-is that a second source does not absorb the prior on either backbone. On
-the arms that carry the prior, EuroSAT's fusion gain is $+1.92$, $+1.46$,
-$+2.04$, $+1.01$ and $+0.46$ against the baseline arms' $+1.40$, $+2.96$,
-$+1.34$, $+1.15$ and $+0.45$: the prior and the second sensor coexist
+The first caveat is that our channel reduction is not defined for radar. The
+target is built from a luminance weighting, generalized for inputs with other
+than three channels to a uniform mean over them: defensible for optical bands,
+but for synthetic-aperture radar it averages backscatter channels and carries
+no photometric meaning. Any weak or null result on SAR is therefore ambiguous
+between ``a fixed oriented-energy target does not suit radar statistics'' and
+``this channel reduction is wrong for radar'', and we cannot separate the two.
+A radar-specific reduction is a new design decision, not a defect
+repair, and we have not run it.
+
+\looseness=-1 The second concerns the status of the SAR expectation, and we state it against
+our own interest. Elsewhere the bands and falsifiers were fixed before the
+cells ran; here they were not. When the SAR expectation was written down, the
+10\% baseline cell and one seed of its prior arm were already on disk, so that
+band is a post-hoc reading of one seed, must not be scored as a registered
+prediction, and we do not claim the accompanying $\Delta \le -1.0$ tripwire as
+a survived test. As measurement, not adjudication: the 2\% cell sits
+well below that line at $-3.09$, and both of its arms are unstable there (seed
+spreads of $3.5$ and $5.5$ points against $0.1$--$1.1$ everywhere else in the
+column). On the multispectral population, whose three channel sets are all
+optical, the picture at 5\% is the usual one: the prior adds $+1.63$, $+2.60$
+and $+3.30$ on the visible, non-visible and fused sources.
+
+\emph{Whether the prior amplifies a second sensor is backbone-dependent, and we
+claim only what both backbones support.} On EuroSAT at $5\%$ the ResNet gain rises
+with sensor count, while on ViT-tiny at $10\%$ it inverts, $+5.14$, $+2.69$,
+$+1.75$, tracking
+baseline weakness ($84.80$, $90.19$, $91.52$) as the rest of this study does,
+so the defensible statement is only that a second source does not absorb the
+prior on either backbone. On the arms carrying the prior, EuroSAT's fusion gain
+is $+1.92$, $+1.46$, $+2.04$, $+1.01$ and $+0.46$ against the baseline arms'
+$+1.40$, $+2.96$, $+1.34$, $+1.15$ and $+0.45$: prior and second sensor coexist
 rather than substituting.
 
 \emph{The feature side carries part of it.} Under identical frozen-feature
-evaluation the prior's $G$ on So2Sat at 5\% is $+1.31$, $+1.54$ and $+0.88$
-on radar, optical and fused, against end-to-end gains of $+2.59$, $+1.19$
-and $+1.35$; on EuroSAT at 5\% $G$ is $+0.98$, $+1.29$ and $+1.16$ against
-$+1.63$, $+2.60$ and $+3.30$. So the gain is genuinely feature-level in
-part, and while data is scarce the readout term supplies the rest. Every
-baseline in these two populations sits between $43.5$ and $98.3$, far above
-the crossing, which is exactly the regime where Section~\ref{sec:lawaudit}
-reports the readout term decayed to nothing and its sign consequently
-uninformative; the residuals here run from $-0.96$ to $+1.28$ and we do not
+evaluation the prior's $G$ on So2Sat at 5\% is $+1.31$, $+1.54$ and $+0.88$ on
+radar, optical and fused, against end-to-end gains of $+2.59$, $+1.19$ and
+$+1.35$; on EuroSAT at 5\% $G$ is $+0.98$, $+1.29$ and $+1.16$ against $+1.63$,
+$+2.60$ and $+3.30$. The gain is therefore feature-level in part, the \readout{}
+term supplying the rest while data is scarce. Every baseline here sits between
+$43.5$ and $98.3$, far above the crossing, where
+Sec.~\ref{sec:lawaudit} reports the \readout{} term decayed to nothing; the
+residuals run from $-0.96$ to $+2.14$ and we do not
 read signs from them.
 
 \subsection{Two classifiers: decision-level fusion}\label{sec:decisionfusion}
 Multi-classifier fusion is a different level again, and the rule was not
-derived there. From the CIFAR-100 5\% checkpoints, with no further training,
-we fuse every pair of arms $(i,j)$ by averaging their class posteriors, $p_{ij}(y \mid x) = \tfrac{1}{2}\bigl(p_i(y \mid x) + p_j(y \mid
-x)\bigr)$, and characterize each pair by three scalars on the test set
-$\mathcal{T}$: the \emph{gain} over the better single arm,
+derived there. From the CIFAR-100 5\% checkpoints, with no further training, we
+fuse every pair of arms $(i,j)$ by averaging class posteriors, $p_{ij}(y \mid
+x) = \tfrac{1}{2}\bigl(p_i(y \mid x) + p_j(y \mid x)\bigr)$, and characterize
+each pair by three scalars on the test set $\mathcal{T}$. The \emph{gain} over
+the better single arm,
 \begin{equation}
   g_{ij} \;=\; \mathrm{acc}(p_{ij}) \;-\; \max\bigl(\mathrm{acc}(p_i),\,
   \mathrm{acc}(p_j)\bigr),
@@ -149,47 +156,49 @@ the \emph{disagreement} rate, the classical diversity measure
   \label{eq:disagree}
 \end{equation}
 where $\hat{y}_i(x) = \arg\max_y p_i(y \mid x)$, and the \emph{accuracy
-asymmetry} $a_{ij} = \lvert \mathrm{acc}(p_i) -
-\mathrm{acc}(p_j) \rvert$. Here $g_{ij}$ and $a_{ij}$ are accuracy points
-and $d_{ij}$ is a percentage of test images, so $\beta_d$ below converts
-one into the other. The self-supervised arm here is a
-50-epoch pre-training checkpoint rather than the 200- or 800-epoch ones of
-Section~\ref{sec:budget}, and since that section is entirely about budget
-mattering, the choice needs its reason stated plainly. The regression above
-carries an asymmetry term, so a pair whose two members differ greatly in
-accuracy tells us about that gap rather than about diversity; the analysis
-therefore needs arms of \emph{matched} accuracy, and $50$ epochs is the
-budget at which SimCLR lands within a point of the prior on this cell
-($30.81$ against $30.53$) where $200$ and $800$ epochs put it $3.9$ and
-$9.2$ points ahead. The alternative --- pairing the strongest available
-arms --- would confound diversity with the very budget effect
-Section~\ref{sec:budget} isolates. The cost of the choice is that we have
-\emph{not} measured how a longer-pre-trained arm ensembles, and the budget
-lesson gives every reason to expect it would differ.
+asymmetry} $a_{ij} = \lvert \mathrm{acc}(p_i) - \mathrm{acc}(p_j) \rvert$. Here
+$g_{ij}$ and $a_{ij}$ are accuracy points and $d_{ij}$ a percentage of test
+images, so $\beta_d$ converts one into the other. The self-supervised arm here
+is a 50-epoch pre-training checkpoint, not one of the 200- or 800-epoch ones of
+Sec.~\ref{sec:budget}, and the reason belongs in the open. The regression
+carries an asymmetry term, so a pair whose members differ greatly in accuracy
+reports that gap, not diversity; the analysis needs \emph{matched} arms,
+and $50$ epochs is the budget at which SimCLR lands within a point of the prior
+on this cell ($30.81$ against $30.51$) where $200$ and $800$ put it $3.9$ and
+$9.2$ ahead. Pairing the strongest arms instead would confound diversity with
+the budget effect Sec.~\ref{sec:budget} isolates. The cost is that we have
+\emph{not} measured how a longer-pre-trained arm ensembles.
 
-The first thing the data say is a caution rather than a confirmation.
+\looseness=-1 The first thing the data say is a caution, not a confirmation.
 Least squares over the $n = 28$ pairs gives
 \begin{equation}
   \hat{g}_{ij} \;=\; \beta_0 \;+\; \beta_d\, d_{ij} \;+\;
   \beta_a\, a_{ij},
   \label{eq:ensgain}
 \end{equation}
-with $\beta_0 = -2.74 \pm 0.48$, $\beta_d = +0.089 \pm 0.011$ and
-$\beta_a = -0.341 \pm 0.047$ ($R^2 = 0.74$, residual standard deviation
-$0.42$ points, every coefficient resolved at $\lvert t \rvert > 5$). Both terms matter, but the dominant one
-is not diversity: a one-point accuracy gap costs $\lvert \beta_a \rvert =
-0.34$ points of gain, which four points of extra disagreement are needed to
-recover. Pairing a strong arm with a weak one destroys the gain regardless
-of what either contributes. Restricting to pairs within one point of each
-other, where currency is actually the free variable, leaves the three
-pairs of Table~\ref{tab:ensemble}.
+with $\beta_0 = -2.74 \pm 0.48$, $\beta_d = +0.089 \pm 0.011$ and $\beta_a =
+-0.341 \pm 0.047$ ($R^2 = 0.74$, residual standard deviation $0.42$ points,
+every coefficient resolved at $\lvert t \rvert > 5$). Those are ordinary
+least-squares errors, and the $28$ pairs are not independent: all are pairs of
+the same eight arms, so each arm enters seven. A leave-one-arm-out jackknife,
+which clusters on the shared unit, leaves the coefficients unchanged and widens
+the errors to $0.48$, $0.012$ and $0.060$, the asymmetry term by about a
+quarter, with every coefficient still resolved at $\lvert t \rvert > 5$: the
+dependence costs precision without changing the reading. Both terms matter, but
+the dominant one is not diversity, since a one-point accuracy gap costs $\lvert
+\beta_a \rvert = 0.34$ points of gain, which four points of extra disagreement
+are needed to recover. Restricting to pairs within one point of each other,
+where currency is the free variable, leaves the three pairs of
+Table~\ref{tab:ensemble}.
 
 \begin{table}[pos=htbp]
 \caption{Decision-level fusion on CIFAR-100 at 5\%, restricted to pairs whose
 two arms are within one accuracy point of each other so that the information
 source, rather than an accuracy gap, is what differs. Gain is over the better
 single arm; disagreement is the fraction of test images on which the two arms
-predict different classes. Averaging posteriors requires no further training.}
+predict different classes. Averaging posteriors requires no further training.
+Best in bold, second best underlined, third best in italics, in the gain
+column.}
 \label{tab:ensemble}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
@@ -198,34 +207,33 @@ predict different classes. Averaging posteriors requires no further training.}
 \toprule
 Pair & Gain~\up & Disagreement \\
 \midrule
-Prior + SimCLR (50 ep)            & $+1.20$ & 47.2\% \\
-SimCLR (50 ep) + prior, wide bank & $+1.13$ & 47.2\% \\
-Prior + prior, wide bank          & $-0.04$ & 28.1\% \\
+Prior + SimCLR (50 ep)            & $\mathbf{+1.20}$ & 47.2\% \\
+SimCLR (50 ep) + prior, wide bank & \snd{$+1.13$} & 47.2\% \\
+Prior + prior, wide bank          & \trd{$-$0.04} & 28.1\% \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Two models built on the same knowledge source disagree on 28\% of test
-images and ensembling them buys nothing; pair either with a
-self-supervised model and disagreement rises to 47\% and ensembling buys
-${\sim}1.2$ points. That is the currency rule with its mechanism visible,
-and it is what the classical account would predict.
+Two models built on the same knowledge source disagree on 28\% of test images
+and ensembling them buys nothing; pair either with a self-supervised model and
+disagreement rises to 47\% and ensembling buys ${\sim}1.2$ points. That is the
+currency rule with its mechanism visible, and it is what the classical account
+would predict.
 
-We report the qualification with equal weight, because it bounds the
-taxonomy rather than extending it. The prior and SimCLR do \emph{not} stack
-at training time (Section~\ref{sec:substitute}), yet they ensemble usefully
-at decision time ($+1.20$). Redundancy in the sense of ``jointly training on
-both adds nothing'' therefore does not imply redundancy in the sense of
-``their errors are correlated''. The substitution result is a statement
-about training-time fusion, and we do not claim it transfers to decision
-fusion. With three matched pairs this is suggestive rather than
-established, and we say so.
+We report the qualification with equal weight, because it bounds the taxonomy
+rather than extending it. The prior and SimCLR do \emph{not} stack at training
+time (Sec.~\ref{sec:substitute}), yet they ensemble usefully at decision
+time ($+1.20$). Redundancy in the sense of ``jointly training on both adds
+nothing'' therefore does not imply redundancy in the sense of ``their errors
+are correlated''. The substitution result is a statement about training-time
+fusion, and we do not claim it transfers to decision fusion. With three matched
+pairs this is suggestive, not established, and we say so.
 
 \subsection{A procedure for deciding whether to fuse}\label{sec:procedure}
-The practical content of the taxonomy is that the outcome of a combination
-can be estimated \emph{before} the combined system is built, from
-measurements of each source alone. We state that as a procedure rather than
-as a finding, since it is what a practitioner would actually run.
+The practical content of the taxonomy is that the outcome of a combination can
+be estimated \emph{before} the combined system is built, from measurements of
+each source alone. We state that as a procedure, not a finding, since it is
+what a practitioner would actually run.
 
 %% A `table' float, not an `algorithm' float: see the note in main.tex on why
 %% float.sty is not loaded. \caption is not used, so this does not consume a
@@ -242,13 +250,13 @@ combination is trained. Every quantity is measured on the sources
 frozen-feature evaluations, which run in minutes. Line~\ref{alg:asym} is
 the weakest-supported step: it dominates our decision-level fit
 (Eq.~\ref{eq:ensgain}), but our two sensor populations differ in modality
-as well as in asymmetry (Section~\ref{sec:multisensor}), so it should rank
-candidates rather than reject one. ``Differ in kind'' at
+as well as in asymmetry (Sec.~\ref{sec:multisensor}), so it should rank
+candidates, not reject one. ``Differ in kind'' at
 line~\ref{alg:stack} means the two sources fix different test images and
 shape different directions in feature space, which
-Section~\ref{sec:samecurrency} measures directly.\par}
+Sec.~\ref{sec:samecurrency} measures directly.\par}
 \vspace{1pt}\rule{\linewidth}{0.4pt}\par
-\small
+\footnotesize
 %% RULE-TO-CODE SPACING. `algorithmic' sets \topsep 0.2em inside its own list
 %% setup, but 8pt of \topsep is still applied on both sides of the environment,
 %% which opened a two-line white band between the rule and \REQUIRE and another
@@ -263,15 +271,16 @@ Section~\ref{sec:samecurrency} measures directly.\par}
 \renewcommand{\algorithmicor}{\textnormal{or}}
 \begin{algorithmic}[1]
 \REQUIRE sources $A$, $B$; a shared baseline arm; a labeled split
-\ENSURE one of \textsc{stack}, \textsc{substitute}, \textsc{tax}, \textsc{n/a}
+\ENSURE one of \textsc{stack}, \textsc{substitute}, \textsc{interfere}, \textsc{n/a}
 \STATE train the baseline, $A$ alone and $B$ alone; record gains
   $\Delta_A, \Delta_B$ and declared compute multiples $c_A, c_B$
 \STATE $G_A, G_B \gets$ linear evaluation of the three frozen
   representations under one identical protocol
 \IF{$A$ or $B$ is a mature (pre-trained) initialization}
-  \STATE \textbf{return} \textsc{tax}: do not inject a shaping prior on top
-    of it; the cost is proportional to that initialization's advantage over
-    training from scratch, which is already measured
+  \STATE \textbf{return} \textsc{interfere}: at full auxiliary strength the cost is
+    proportional to that initialization's advantage over training from
+    scratch, which is already measured; at $\lambda_0 \le 0.3$ the cost is
+    neutral on the cells we tested
 \ENDIF
 \IF{$G_A \approx 0$ \OR $G_B \approx 0$}
   \STATE \textbf{return} \textsc{n/a}: a source supplying nothing cannot
@@ -285,8 +294,9 @@ Section~\ref{sec:samecurrency} measures directly.\par}
     exceed the better single arm; take the cheaper source,
     $\arg\min(c_A, c_B)$
 \ELSE
-  \STATE \textbf{return} \textsc{stack}: expect a combined gain larger than
-    either alone \label{alg:stack}
+  \STATE \textbf{return} \textsc{stack}: a combined gain larger than either
+    alone is possible; architecture and intervention strength moderate how
+    much of it is realized \label{alg:stack}
 \ENDIF
 \end{algorithmic}
 \vspace*{-\topsep}\vspace*{4pt}
@@ -294,53 +304,62 @@ Section~\ref{sec:samecurrency} measures directly.\par}
 \end{minipage}
 \end{table}
 
-Algorithm~\ref{alg:procedure} states it. Three properties are worth drawing
-out. It is \emph{inexpensive}: the only cost beyond training each source once is
-two linear evaluations on frozen features, which run in minutes on cells
-that took hours to train. It is \emph{predictive rather than
+Algorithm~\ref{alg:procedure} states it. Two properties matter beyond its
+cost, which the caption gives. It is \emph{predictive, not
 retrospective}, which places it alongside transferability estimation
-\citep{nguyen2020leep}, with the difference that those methods
-score a single pre-trained source for a target task while this scores a
-\emph{pair} for combination. And it is \emph{falsifiable}: the
-\textsc{substitute} branch asserts
-that equal feature gains imply no benefit from combining, which
-Sections~\ref{sec:substitute} and \ref{sec:decisionfusion} both test and
-which the training-time-versus-decision-time discrepancy above already
-qualifies.
+\citep{nguyen2020leep}, which scores a single
+pre-trained source where this scores a \emph{pair}. And it is \emph{falsifiable}: the \textsc{substitute} branch
+asserts that equal feature gains imply no benefit from combining, which
+Secs.~\ref{sec:substitute} and \ref{sec:decisionfusion} both test and which
+the training-time-versus-decision-time discrepancy above already qualifies.
 
-\emph{The procedure run once, end to end.} Take the pair the paper measures
-most closely: the moment prior and a SimCLR initialization, on ViT-tiny at
-CIFAR-100 $10\%$. Step~1 trains the three arms and records
+\emph{What the procedure is scored on.} Every quantity
+Algorithm~\ref{alg:procedure} consumes, both $\Delta$ values and both $G$
+values, is measured on the same held-out split we report final accuracy on, as
+is the direct currency test of Fig.~\ref{fig:currency}, which asks which
+\emph{test} images each arm fixes. Nothing is tuned on that split: the decision
+reads two numbers off already-trained single-source arms, and no configuration
+is selected by it. But a procedure whose stated purpose is to decide
+\emph{before} fusing should estimate its inputs on validation data and touch
+the test split once, after the chosen combination is trained, and the run below
+does not meet that standard. Every input it needs is computable on a labelled
+split disjoint from training at no extra training cost, so this is a defect of
+protocol rather than of feasibility; until it is re-run that way, read the
+demonstration as one end-to-end illustration on test-scored inputs, not as a
+clean prospective test.
+
+\emph{The procedure run once, end to end.} \looseness=-1 Take the moment prior
+and a SimCLR initialization on ViT-tiny at CIFAR-100 $10\%$. Step~1 records
 $\Delta_{\mathrm{prior}} = +13.26$ at $1.02\times$ compute and
-$\Delta_{\mathrm{SimCLR}} = +13.30$ at $2\times$. Step~2 evaluates the frozen
-representations under one protocol: $G_{\mathrm{prior}} = +14.83$ and
-$G_{\mathrm{SimCLR}} = +13.46$. Neither arm is a pre-trained initialization in
-the ImageNet sense, so the \textsc{tax} branch does not fire; neither $G$ is
-near zero, so the \textsc{n/a} branch does not fire; the arms are level
-($|\Delta_A - \Delta_B| = 0.04$), so nothing is deprioritized. That leaves the
-test at the \textsc{substitute} branch, and the two feature gains agree to
-$1.4$ points on a scale where the effects themselves are $13$--$15$. The
-procedure therefore predicts \textsc{substitute}: the combination should not
-exceed the better single arm.
-It does not. Trained, the combination reaches $\Delta = +13.46$, within noise
-of both singles ($+0.16$ over SimCLR alone, $+0.20$ over the prior alone), and
-its feature gain $+14.14$ sits \emph{between} the two rather than above
-either. The prediction cost two linear evaluations; the confirmation cost a
-full training run that the prediction would have saved. Contrast the same
-procedure on the prior and DeiT-strength augmentation, where the feature
-gains differ in kind and the branch taken is \textsc{stack}: there the
-combination does exceed both, and $G$ rises from $14.83$ to $22.20$
-(Section~\ref{sec:stack}).
+$\Delta_{\mathrm{SimCLR}} = +13.30$ at $2\times$; step~2 gives
+$G_{\mathrm{prior}} = +14.83$ and $G_{\mathrm{SimCLR}} = +13.46$ under one
+protocol. Neither arm is a pre-trained initialization, so \textsc{interfere} does not
+fire; neither $G$ is near zero, so \textsc{n/a} does not fire; the arms are
+level ($|\Delta_A - \Delta_B| = 0.04$), so nothing is deprioritized. That
+leaves \textsc{substitute}, the two feature gains agreeing to $1.4$ points
+where the effects are $13$--$15$: the combination should not exceed the better
+single arm, and it does not. Trained, it reaches $\Delta = +13.46$, within
+noise of both singles ($+0.16$ over SimCLR alone, $+0.20$ over the prior
+alone), and its feature gain $+14.14$ sits \emph{between} the two, not
+above either. The prediction cost two linear evaluations; the confirmation cost
+the training run it would have saved. Contrast the same
+procedure on the prior and DeiT-strength augmentation, where the feature gains
+differ in kind and the branch taken is \textsc{stack}: on this cell the
+combination does exceed both, and $G$ rises from $14.83$ to $22.20$. How far
+that branch reaches is bounded in Sec.~\ref{sec:stack}, where the same
+pairing on two convolutional populations off the selection set stacks at one
+cell of six.
 
-The limit is that branch's antecedent. We compare feature gains by
-magnitude and by which cells improve, not by a formal decomposition of the
-information each source carries. Partial information decomposition
-\citep{williams2010nonnegative,liang2023quantifying} is the principled
-version of that comparison, and an estimator that scaled to these
-representations would replace our proxy with a quantity that means
-something on its own.
+The limit is that branch's antecedent. We compare feature gains by magnitude
+and by which cells improve, not by a formal decomposition of the information
+each source carries. Partial information decomposition
+\citep{williams2010nonnegative,liang2023quantifying} is the principled version
+of that comparison, and an estimator that scaled to these representations would
+replace our proxy with a quantity that means something on its own.
 
-\emph{Takeaway.} The currency account extends past training-time fusion:
-across sensors and across classifiers, how asymmetric two sources are
-predicts whether combining them pays, and a second source that is merely
-weaker rather than different does not.
+\emph{Takeaway.} The currency account extends past training-time fusion, but
+the two experiments carry different weight and we attribute the claim only to
+the one that supports it: in the decision-level fit, how asymmetric two
+sources are predicts whether combining them pays, and the sensor experiments
+are consistent with that but cannot establish it, their two populations
+differing in asymmetry and modality at once.

@@ -1,0 +1,730 @@
+b1: 68 probe tasks (both arms of each cell, at the cell's own budget)
+--- [1/68] diagcos_tin_aux_1pct  shots=5
+diagcos_tin_aux_1pct seed0: shots-only (100000 imgs extracted)
+       5 shots/class (n= 1000): test 6.10
+diagcos_tin_aux_1pct seed1: shots-only (100000 imgs extracted)
+       5 shots/class (n= 1000): test 5.74
+diagcos_tin_aux_1pct seed2: shots-only (100000 imgs extracted)
+       5 shots/class (n= 1000): test 5.59
+PROBE_RESULT diagcos_tin_aux_1pct shots5 5.81+/-0.26 over 3 seeds -> runs/diagcos_tin_aux_1pct/linear_probe_shots.json
+--- [2/68] diagcos_tin_none_1pct  shots=5
+diagcos_tin_none_1pct seed0: shots-only (100000 imgs extracted)
+       5 shots/class (n= 1000): test 4.74
+diagcos_tin_none_1pct seed1: shots-only (100000 imgs extracted)
+       5 shots/class (n= 1000): test 4.58
+diagcos_tin_none_1pct seed2: shots-only (100000 imgs extracted)
+       5 shots/class (n= 1000): test 4.67
+PROBE_RESULT diagcos_tin_none_1pct shots5 4.66+/-0.08 over 3 seeds -> runs/diagcos_tin_none_1pct/linear_probe_shots.json
+--- [3/68] cub_aux_25pct  shots=7
+cub_aux_25pct seed0: shots-only (5994 imgs extracted)
+       7 shots/class (n= 1400): test 6.14
+cub_aux_25pct seed1: shots-only (5994 imgs extracted)
+       7 shots/class (n= 1400): test 6.42
+cub_aux_25pct seed2: shots-only (5994 imgs extracted)
+       7 shots/class (n= 1400): test 5.83
+PROBE_RESULT cub_aux_25pct shots7 6.13+/-0.29 over 3 seeds -> runs/cub_aux_25pct/linear_probe_shots.json
+--- [4/68] cub_none_25pct  shots=7
+cub_none_25pct seed0: shots-only (5994 imgs extracted)
+       7 shots/class (n= 1400): test 5.63
+cub_none_25pct seed1: shots-only (5994 imgs extracted)
+       7 shots/class (n= 1400): test 5.21
+cub_none_25pct seed2: shots-only (5994 imgs extracted)
+       7 shots/class (n= 1400): test 5.14
+PROBE_RESULT cub_none_25pct shots7 5.33+/-0.26 over 3 seeds -> runs/cub_none_25pct/linear_probe_shots.json
+--- [5/68] auxmag_1pct_sched0  shots=5
+auxmag_1pct_sched0 seed0: shots-only (50000 imgs extracted)
+       5 shots/class (n=  500): test 10.60
+auxmag_1pct_sched0 seed1: shots-only (50000 imgs extracted)
+       5 shots/class (n=  500): test 11.05
+auxmag_1pct_sched0 seed2: shots-only (50000 imgs extracted)
+       5 shots/class (n=  500): test 10.63
+auxmag_1pct_sched0 seed3: shots-only (50000 imgs extracted)
+       5 shots/class (n=  500): test 10.78
+auxmag_1pct_sched0 seed4: shots-only (50000 imgs extracted)
+       5 shots/class (n=  500): test 10.21
+auxmag_1pct_sched0 seed5: shots-only (50000 imgs extracted)
+       5 shots/class (n=  500): test 10.74
+auxmag_1pct_sched0 seed6: shots-only (50000 imgs extracted)
+       5 shots/class (n=  500): test 10.47
+auxmag_1pct_sched0 seed7: shots-only (50000 imgs extracted)
+       5 shots/class (n=  500): test 10.65
+auxmag_1pct_sched0 seed8: shots-only (50000 imgs extracted)
+       5 shots/class (n=  500): test 10.85
+auxmag_1pct_sched0 seed9: shots-only (50000 imgs extracted)
+       5 shots/class (n=  500): test 10.81
+PROBE_RESULT auxmag_1pct_sched0 shots5 10.68+/-0.23 over 10 seeds -> runs/auxmag_1pct_sched0/linear_probe_shots.json
+--- [6/68] abl1_none  shots=5
+abl1_none seed0: shots-only (50000 imgs extracted)
+       5 shots/class (n=  500): test 9.11
+abl1_none seed1: shots-only (50000 imgs extracted)
+       5 shots/class (n=  500): test 8.97
+abl1_none seed2: shots-only (50000 imgs extracted)
+       5 shots/class (n=  500): test 9.19
+abl1_none seed3: shots-only (50000 imgs extracted)
+       5 shots/class (n=  500): test 9.29
+abl1_none seed4: shots-only (50000 imgs extracted)
+       5 shots/class (n=  500): test 9.21
+abl1_none seed5: shots-only (50000 imgs extracted)
+       5 shots/class (n=  500): test 8.52
+abl1_none seed6: shots-only (50000 imgs extracted)
+       5 shots/class (n=  500): test 9.24
+abl1_none seed7: shots-only (50000 imgs extracted)
+       5 shots/class (n=  500): test 9.11
+abl1_none seed8: shots-only (50000 imgs extracted)
+       5 shots/class (n=  500): test 9.07
+abl1_none seed9: shots-only (50000 imgs extracted)
+       5 shots/class (n=  500): test 9.38
+PROBE_RESULT abl1_none shots5 9.11+/-0.24 over 10 seeds -> runs/abl1_none/linear_probe_shots.json
+--- [7/68] diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_2pct  shots=10
+diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_2pct seed0: shots-only (100000 imgs extracted)
+      10 shots/class (n= 2000): test 9.45
+diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_2pct seed1: shots-only (100000 imgs extracted)
+      10 shots/class (n= 2000): test 9.91
+diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_2pct seed2: shots-only (100000 imgs extracted)
+      10 shots/class (n= 2000): test 9.81
+PROBE_RESULT diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_2pct shots10 9.72+/-0.24 over 3 seeds -> runs/diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_2pct/linear_probe_shots.json
+--- [8/68] diaggrid_tin_r18_cosinehead_05b132_2pct  shots=10
+diaggrid_tin_r18_cosinehead_05b132_2pct seed0: shots-only (100000 imgs extracted)
+      10 shots/class (n= 2000): test 8.53
+diaggrid_tin_r18_cosinehead_05b132_2pct seed1: shots-only (100000 imgs extracted)
+      10 shots/class (n= 2000): test 8.71
+diaggrid_tin_r18_cosinehead_05b132_2pct seed2: shots-only (100000 imgs extracted)
+      10 shots/class (n= 2000): test 7.98
+PROBE_RESULT diaggrid_tin_r18_cosinehead_05b132_2pct shots10 8.41+/-0.38 over 3 seeds -> runs/diaggrid_tin_r18_cosinehead_05b132_2pct/linear_probe_shots.json
+--- [9/68] diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_3pct  shots=15
+diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_3pct seed0: shots-only (100000 imgs extracted)
+      15 shots/class (n= 3000): test 13.19
+diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_3pct seed1: shots-only (100000 imgs extracted)
+      15 shots/class (n= 3000): test 14.10
+diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_3pct seed2: shots-only (100000 imgs extracted)
+      15 shots/class (n= 3000): test 13.43
+PROBE_RESULT diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_3pct shots15 13.57+/-0.47 over 3 seeds -> runs/diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_3pct/linear_probe_shots.json
+--- [10/68] diaggrid_tin_r18_cosinehead_05b132_3pct  shots=15
+diaggrid_tin_r18_cosinehead_05b132_3pct seed0: shots-only (100000 imgs extracted)
+      15 shots/class (n= 3000): test 12.50
+diaggrid_tin_r18_cosinehead_05b132_3pct seed1: shots-only (100000 imgs extracted)
+      15 shots/class (n= 3000): test 12.03
+diaggrid_tin_r18_cosinehead_05b132_3pct seed2: shots-only (100000 imgs extracted)
+      15 shots/class (n= 3000): test 12.05
+PROBE_RESULT diaggrid_tin_r18_cosinehead_05b132_3pct shots15 12.19+/-0.27 over 3 seeds -> runs/diaggrid_tin_r18_cosinehead_05b132_3pct/linear_probe_shots.json
+--- [11/68] auxmag_2pct_sched0  shots=10
+auxmag_2pct_sched0 seed0: shots-only (50000 imgs extracted)
+      10 shots/class (n= 1000): test 16.77
+auxmag_2pct_sched0 seed1: shots-only (50000 imgs extracted)
+      10 shots/class (n= 1000): test 16.87
+auxmag_2pct_sched0 seed2: shots-only (50000 imgs extracted)
+      10 shots/class (n= 1000): test 16.71
+PROBE_RESULT auxmag_2pct_sched0 shots10 16.78+/-0.08 over 3 seeds -> runs/auxmag_2pct_sched0/linear_probe_shots.json
+--- [12/68] abl2_none  shots=10
+abl2_none seed0: shots-only (50000 imgs extracted)
+      10 shots/class (n= 1000): test 14.19
+abl2_none seed1: shots-only (50000 imgs extracted)
+      10 shots/class (n= 1000): test 14.13
+abl2_none seed2: shots-only (50000 imgs extracted)
+      10 shots/class (n= 1000): test 14.10
+PROBE_RESULT abl2_none shots10 14.14+/-0.05 over 3 seeds -> runs/abl2_none/linear_probe_shots.json
+--- [13/68] auxmag_3pct_sched0  shots=15
+auxmag_3pct_sched0 seed0: shots-only (50000 imgs extracted)
+      15 shots/class (n= 1500): test 22.12
+auxmag_3pct_sched0 seed1: shots-only (50000 imgs extracted)
+      15 shots/class (n= 1500): test 22.12
+auxmag_3pct_sched0 seed2: shots-only (50000 imgs extracted)
+      15 shots/class (n= 1500): test 22.47
+PROBE_RESULT auxmag_3pct_sched0 shots15 22.24+/-0.20 over 3 seeds -> runs/auxmag_3pct_sched0/linear_probe_shots.json
+--- [14/68] abl3_none  shots=15
+abl3_none seed0: shots-only (50000 imgs extracted)
+      15 shots/class (n= 1500): test 18.56
+abl3_none seed1: shots-only (50000 imgs extracted)
+      15 shots/class (n= 1500): test 18.56
+abl3_none seed2: shots-only (50000 imgs extracted)
+      15 shots/class (n= 1500): test 18.62
+PROBE_RESULT abl3_none shots15 18.58+/-0.03 over 3 seeds -> runs/abl3_none/linear_probe_shots.json
+--- [15/68] diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_5pct  shots=25
+diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_5pct seed0: shots-only (100000 imgs extracted)
+      25 shots/class (n= 5000): test 19.88
+diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_5pct seed1: shots-only (100000 imgs extracted)
+      25 shots/class (n= 5000): test 19.75
+diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_5pct seed2: shots-only (100000 imgs extracted)
+      25 shots/class (n= 5000): test 19.68
+PROBE_RESULT diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_5pct shots25 19.77+/-0.10 over 3 seeds -> runs/diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_5pct/linear_probe_shots.json
+--- [16/68] diaggrid_tin_r18_cosinehead_05b132_5pct  shots=25
+diaggrid_tin_r18_cosinehead_05b132_5pct seed0: shots-only (100000 imgs extracted)
+      25 shots/class (n= 5000): test 17.97
+diaggrid_tin_r18_cosinehead_05b132_5pct seed1: shots-only (100000 imgs extracted)
+      25 shots/class (n= 5000): test 18.60
+diaggrid_tin_r18_cosinehead_05b132_5pct seed2: shots-only (100000 imgs extracted)
+      25 shots/class (n= 5000): test 17.85
+PROBE_RESULT diaggrid_tin_r18_cosinehead_05b132_5pct shots25 18.14+/-0.40 over 3 seeds -> runs/diaggrid_tin_r18_cosinehead_05b132_5pct/linear_probe_shots.json
+--- [17/68] super1_aux  shots=25
+super1_aux seed0: shots-only (50000 imgs extracted)
+      25 shots/class (n=  500): test 24.72
+super1_aux seed1: shots-only (50000 imgs extracted)
+      25 shots/class (n=  500): test 24.95
+super1_aux seed2: shots-only (50000 imgs extracted)
+      25 shots/class (n=  500): test 24.33
+PROBE_RESULT super1_aux shots25 24.67+/-0.31 over 3 seeds -> runs/super1_aux/linear_probe_shots.json
+--- [18/68] super1_none  shots=25
+super1_none seed0: shots-only (50000 imgs extracted)
+      25 shots/class (n=  500): test 21.63
+super1_none seed1: shots-only (50000 imgs extracted)
+      25 shots/class (n=  500): test 22.08
+super1_none seed2: shots-only (50000 imgs extracted)
+      25 shots/class (n=  500): test 21.70
+PROBE_RESULT super1_none shots25 21.80+/-0.24 over 3 seeds -> runs/super1_none/linear_probe_shots.json
+--- [19/68] diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_7pct  shots=35
+Traceback (most recent call last):
+  File "${HOME}/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 295, in <module>
+    main()
+  File "${HOME}/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 236, in main
+    model.load_state_dict(torch.load(ckpt, map_location=device))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 1541, in load
+    return _legacy_load(
+           ^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 1787, in _legacy_load
+    return legacy_load(f)
+           ^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 1654, in legacy_load
+    raise RuntimeError(
+RuntimeError: Cannot use ``weights_only=True`` with files saved in the legacy .tar format. In PyTorch 2.6, we changed the default value of the `weights_only` argument in `torch.load` from `False` to `True`. Re-running `torch.load` with `weights_only` set to `False` will likely succeed, but it can result in arbitrary code execution. Do it only if you got the file from a trusted source.
+--- [20/68] diaggrid_tin_r18_cosinehead_05b132_7pct  shots=35
+diaggrid_tin_r18_cosinehead_05b132_7pct seed0: shots-only (100000 imgs extracted)
+      35 shots/class (n= 7000): test 22.93
+diaggrid_tin_r18_cosinehead_05b132_7pct seed1: shots-only (100000 imgs extracted)
+      35 shots/class (n= 7000): test 23.54
+diaggrid_tin_r18_cosinehead_05b132_7pct seed2: shots-only (100000 imgs extracted)
+      35 shots/class (n= 7000): test 23.19
+PROBE_RESULT diaggrid_tin_r18_cosinehead_05b132_7pct shots35 23.22+/-0.31 over 3 seeds -> runs/diaggrid_tin_r18_cosinehead_05b132_7pct/linear_probe_shots.json
+--- [21/68] auxmag_5pct_sched0  shots=25
+auxmag_5pct_sched0 seed0: shots-only (50000 imgs extracted)
+      25 shots/class (n= 2500): test 30.03
+auxmag_5pct_sched0 seed1: shots-only (50000 imgs extracted)
+      25 shots/class (n= 2500): test 30.67
+auxmag_5pct_sched0 seed2: shots-only (50000 imgs extracted)
+      25 shots/class (n= 2500): test 30.57
+auxmag_5pct_sched0 seed3: shots-only (50000 imgs extracted)
+      25 shots/class (n= 2500): test 30.94
+auxmag_5pct_sched0 seed4: shots-only (50000 imgs extracted)
+      25 shots/class (n= 2500): test 29.89
+auxmag_5pct_sched0 seed5: shots-only (50000 imgs extracted)
+      25 shots/class (n= 2500): test 29.94
+auxmag_5pct_sched0 seed6: shots-only (50000 imgs extracted)
+      25 shots/class (n= 2500): test 30.34
+auxmag_5pct_sched0 seed7: shots-only (50000 imgs extracted)
+      25 shots/class (n= 2500): test 30.62
+auxmag_5pct_sched0 seed8: shots-only (50000 imgs extracted)
+      25 shots/class (n= 2500): test 30.69
+auxmag_5pct_sched0 seed9: shots-only (50000 imgs extracted)
+      25 shots/class (n= 2500): test 30.45
+PROBE_RESULT auxmag_5pct_sched0 shots25 30.41+/-0.36 over 10 seeds -> runs/auxmag_5pct_sched0/linear_probe_shots.json
+--- [22/68] abl5_none  shots=25
+abl5_none seed0: shots-only (50000 imgs extracted)
+      25 shots/class (n= 2500): test 24.91
+abl5_none seed1: shots-only (50000 imgs extracted)
+      25 shots/class (n= 2500): test 24.60
+abl5_none seed2: shots-only (50000 imgs extracted)
+      25 shots/class (n= 2500): test 25.87
+abl5_none seed3: shots-only (50000 imgs extracted)
+      25 shots/class (n= 2500): test 25.28
+abl5_none seed4: shots-only (50000 imgs extracted)
+      25 shots/class (n= 2500): test 25.24
+abl5_none seed5: shots-only (50000 imgs extracted)
+      25 shots/class (n= 2500): test 25.84
+abl5_none seed6: shots-only (50000 imgs extracted)
+      25 shots/class (n= 2500): test 24.90
+abl5_none seed7: shots-only (50000 imgs extracted)
+      25 shots/class (n= 2500): test 25.14
+abl5_none seed8: shots-only (50000 imgs extracted)
+      25 shots/class (n= 2500): test 26.25
+abl5_none seed9: shots-only (50000 imgs extracted)
+      25 shots/class (n= 2500): test 25.44
+PROBE_RESULT abl5_none shots25 25.35+/-0.51 over 10 seeds -> runs/abl5_none/linear_probe_shots.json
+--- [23/68] super2_aux  shots=50
+super2_aux seed0: shots-only (50000 imgs extracted)
+      50 shots/class (n= 1000): test 32.53
+super2_aux seed1: shots-only (50000 imgs extracted)
+      50 shots/class (n= 1000): test 32.70
+super2_aux seed2: shots-only (50000 imgs extracted)
+      50 shots/class (n= 1000): test 32.95
+PROBE_RESULT super2_aux shots50 32.73+/-0.21 over 3 seeds -> runs/super2_aux/linear_probe_shots.json
+--- [24/68] super2_none  shots=50
+super2_none seed0: shots-only (50000 imgs extracted)
+      50 shots/class (n= 1000): test 27.37
+super2_none seed1: shots-only (50000 imgs extracted)
+      50 shots/class (n= 1000): test 27.07
+super2_none seed2: shots-only (50000 imgs extracted)
+      50 shots/class (n= 1000): test 27.36
+PROBE_RESULT super2_none shots50 27.27+/-0.17 over 3 seeds -> runs/super2_none/linear_probe_shots.json
+--- [25/68] diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_10pct  shots=50
+diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_10pct seed0: shots-only (100000 imgs extracted)
+      50 shots/class (n=10000): test 30.02
+diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_10pct seed1: shots-only (100000 imgs extracted)
+      50 shots/class (n=10000): test 29.97
+diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_10pct seed2: shots-only (100000 imgs extracted)
+      50 shots/class (n=10000): test 30.52
+PROBE_RESULT diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_10pct shots50 30.17+/-0.30 over 3 seeds -> runs/diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_10pct/linear_probe_shots.json
+--- [26/68] diaggrid_tin_r18_cosinehead_05b132_10pct  shots=50
+diaggrid_tin_r18_cosinehead_05b132_10pct seed0: shots-only (100000 imgs extracted)
+      50 shots/class (n=10000): test 28.83
+diaggrid_tin_r18_cosinehead_05b132_10pct seed1: shots-only (100000 imgs extracted)
+      50 shots/class (n=10000): test 29.30
+Traceback (most recent call last):
+  File "${HOME}/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 295, in <module>
+    main()
+  File "${HOME}/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 236, in main
+    model.load_state_dict(torch.load(ckpt, map_location=device))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 1486, in load
+    with _open_zipfile_reader(opened_file) as opened_zipfile:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 771, in __init__
+    super().__init__(torch._C.PyTorchFileReader(name_or_buffer))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: PytorchStreamReader failed reading zip archive: failed finding central directory
+--- [27/68] auxmag_7pct_sched0  shots=35
+auxmag_7pct_sched0 seed0: shots-only (50000 imgs extracted)
+      35 shots/class (n= 3500): test 36.66
+auxmag_7pct_sched0 seed1: shots-only (50000 imgs extracted)
+      35 shots/class (n= 3500): test 36.88
+auxmag_7pct_sched0 seed2: shots-only (50000 imgs extracted)
+      35 shots/class (n= 3500): test 37.42
+PROBE_RESULT auxmag_7pct_sched0 shots35 36.99+/-0.39 over 3 seeds -> runs/auxmag_7pct_sched0/linear_probe_shots.json
+--- [28/68] abl7_none  shots=35
+abl7_none seed0: shots-only (50000 imgs extracted)
+      35 shots/class (n= 3500): test 31.68
+abl7_none seed1: shots-only (50000 imgs extracted)
+      35 shots/class (n= 3500): test 31.92
+abl7_none seed2: shots-only (50000 imgs extracted)
+      35 shots/class (n= 3500): test 32.71
+PROBE_RESULT abl7_none shots35 32.10+/-0.54 over 3 seeds -> runs/abl7_none/linear_probe_shots.json
+--- [29/68] diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_15pct  shots=75
+diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_15pct seed0: shots-only (100000 imgs extracted)
+      75 shots/class (n=15000): test 36.71
+Traceback (most recent call last):
+  File "${HOME}/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 295, in <module>
+    main()
+  File "${HOME}/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 236, in main
+    model.load_state_dict(torch.load(ckpt, map_location=device))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 1516, in load
+    return _load(
+           ^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 2114, in _load
+    result = unpickler.load()
+             ^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/_weights_only_unpickler.py", line 532, in load
+    self.append(self.persistent_load(pid))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 2078, in persistent_load
+    typed_storage = load_tensor(
+                    ^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 2031, in load_tensor
+    zip_file.get_storage_from_record(name, numel, torch.UntypedStorage)
+RuntimeError: PytorchStreamReader failed reading file data/2: invalid header or archive is corrupted
+--- [30/68] diaggrid_tin_r18_cosinehead_05b132_15pct  shots=75
+diaggrid_tin_r18_cosinehead_05b132_15pct seed0: shots-only (100000 imgs extracted)
+      75 shots/class (n=15000): test 35.31
+diaggrid_tin_r18_cosinehead_05b132_15pct seed1: shots-only (100000 imgs extracted)
+      75 shots/class (n=15000): test 34.96
+diaggrid_tin_r18_cosinehead_05b132_15pct seed2: shots-only (100000 imgs extracted)
+      75 shots/class (n=15000): test 35.17
+PROBE_RESULT diaggrid_tin_r18_cosinehead_05b132_15pct shots75 35.15+/-0.18 over 3 seeds -> runs/diaggrid_tin_r18_cosinehead_05b132_15pct/linear_probe_shots.json
+--- [31/68] c10_aux_1pct  shots=50
+c10_aux_1pct seed0: shots-only (50000 imgs extracted)
+      50 shots/class (n=  500): test 45.93
+c10_aux_1pct seed1: shots-only (50000 imgs extracted)
+      50 shots/class (n=  500): test 45.52
+c10_aux_1pct seed2: shots-only (50000 imgs extracted)
+      50 shots/class (n=  500): test 46.42
+c10_aux_1pct seed3: shots-only (50000 imgs extracted)
+      50 shots/class (n=  500): test 45.32
+c10_aux_1pct seed4: shots-only (50000 imgs extracted)
+      50 shots/class (n=  500): test 45.56
+c10_aux_1pct seed5: shots-only (50000 imgs extracted)
+      50 shots/class (n=  500): test 45.05
+c10_aux_1pct seed6: shots-only (50000 imgs extracted)
+      50 shots/class (n=  500): test 45.38
+c10_aux_1pct seed7: shots-only (50000 imgs extracted)
+      50 shots/class (n=  500): test 45.45
+c10_aux_1pct seed8: shots-only (50000 imgs extracted)
+      50 shots/class (n=  500): test 45.01
+c10_aux_1pct seed9: shots-only (50000 imgs extracted)
+      50 shots/class (n=  500): test 45.38
+PROBE_RESULT c10_aux_1pct shots50 45.50+/-0.41 over 10 seeds -> runs/c10_aux_1pct/linear_probe_shots.json
+--- [32/68] c10_none_1pct  shots=50
+c10_none_1pct seed0: shots-only (50000 imgs extracted)
+      50 shots/class (n=  500): test 39.56
+c10_none_1pct seed1: shots-only (50000 imgs extracted)
+      50 shots/class (n=  500): test 39.13
+c10_none_1pct seed2: shots-only (50000 imgs extracted)
+      50 shots/class (n=  500): test 39.74
+c10_none_1pct seed3: shots-only (50000 imgs extracted)
+      50 shots/class (n=  500): test 39.01
+c10_none_1pct seed4: shots-only (50000 imgs extracted)
+      50 shots/class (n=  500): test 39.16
+c10_none_1pct seed5: shots-only (50000 imgs extracted)
+      50 shots/class (n=  500): test 39.50
+c10_none_1pct seed6: shots-only (50000 imgs extracted)
+      50 shots/class (n=  500): test 38.65
+c10_none_1pct seed7: shots-only (50000 imgs extracted)
+      50 shots/class (n=  500): test 39.21
+c10_none_1pct seed8: shots-only (50000 imgs extracted)
+      50 shots/class (n=  500): test 38.64
+c10_none_1pct seed9: shots-only (50000 imgs extracted)
+      50 shots/class (n=  500): test 38.66
+PROBE_RESULT c10_none_1pct shots50 39.13+/-0.40 over 10 seeds -> runs/c10_none_1pct/linear_probe_shots.json
+--- [33/68] auxmag_10pct_sched0  shots=50
+auxmag_10pct_sched0 seed0: shots-only (50000 imgs extracted)
+      50 shots/class (n= 5000): test 44.18
+auxmag_10pct_sched0 seed1: shots-only (50000 imgs extracted)
+      50 shots/class (n= 5000): test 44.68
+auxmag_10pct_sched0 seed2: shots-only (50000 imgs extracted)
+      50 shots/class (n= 5000): test 44.05
+auxmag_10pct_sched0 seed3: shots-only (50000 imgs extracted)
+      50 shots/class (n= 5000): test 43.55
+auxmag_10pct_sched0 seed4: shots-only (50000 imgs extracted)
+      50 shots/class (n= 5000): test 44.17
+auxmag_10pct_sched0 seed5: shots-only (50000 imgs extracted)
+      50 shots/class (n= 5000): test 43.84
+auxmag_10pct_sched0 seed6: shots-only (50000 imgs extracted)
+      50 shots/class (n= 5000): test 43.20
+auxmag_10pct_sched0 seed7: shots-only (50000 imgs extracted)
+      50 shots/class (n= 5000): test 44.28
+auxmag_10pct_sched0 seed8: shots-only (50000 imgs extracted)
+      50 shots/class (n= 5000): test 44.11
+auxmag_10pct_sched0 seed9: shots-only (50000 imgs extracted)
+      50 shots/class (n= 5000): test 42.90
+PROBE_RESULT auxmag_10pct_sched0 shots50 43.90+/-0.54 over 10 seeds -> runs/auxmag_10pct_sched0/linear_probe_shots.json
+--- [34/68] abl10_none  shots=50
+abl10_none seed0: shots-only (50000 imgs extracted)
+      50 shots/class (n= 5000): test 40.11
+abl10_none seed1: shots-only (50000 imgs extracted)
+      50 shots/class (n= 5000): test 39.56
+abl10_none seed2: shots-only (50000 imgs extracted)
+      50 shots/class (n= 5000): test 40.60
+abl10_none seed3: shots-only (50000 imgs extracted)
+      50 shots/class (n= 5000): test 40.10
+abl10_none seed4: shots-only (50000 imgs extracted)
+      50 shots/class (n= 5000): test 40.07
+abl10_none seed5: shots-only (50000 imgs extracted)
+      50 shots/class (n= 5000): test 40.91
+abl10_none seed6: shots-only (50000 imgs extracted)
+      50 shots/class (n= 5000): test 40.75
+abl10_none seed7: shots-only (50000 imgs extracted)
+      50 shots/class (n= 5000): test 39.48
+abl10_none seed8: shots-only (50000 imgs extracted)
+      50 shots/class (n= 5000): test 40.20
+abl10_none seed9: shots-only (50000 imgs extracted)
+      50 shots/class (n= 5000): test 39.89
+PROBE_RESULT abl10_none shots50 40.17+/-0.47 over 10 seeds -> runs/abl10_none/linear_probe_shots.json
+--- [35/68] diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_20pct  shots=100
+diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_20pct seed0: shots-only (100000 imgs extracted)
+     100 shots/class (n=20000): test 40.45
+diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_20pct seed1: shots-only (100000 imgs extracted)
+     100 shots/class (n=20000): test 41.37
+diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_20pct seed2: shots-only (100000 imgs extracted)
+     100 shots/class (n=20000): test 40.80
+PROBE_RESULT diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_20pct shots100 40.87+/-0.46 over 3 seeds -> runs/diaggrid_tin_r18_axmagnitudeL3_l10to00_cosinehead_fe90c5_20pct/linear_probe_shots.json
+--- [36/68] diaggrid_tin_r18_cosinehead_05b132_20pct  shots=100
+diaggrid_tin_r18_cosinehead_05b132_20pct seed0: shots-only (100000 imgs extracted)
+     100 shots/class (n=20000): test 39.82
+diaggrid_tin_r18_cosinehead_05b132_20pct seed1: shots-only (100000 imgs extracted)
+     100 shots/class (n=20000): test 39.73
+diaggrid_tin_r18_cosinehead_05b132_20pct seed2: shots-only (100000 imgs extracted)
+     100 shots/class (n=20000): test 39.85
+PROBE_RESULT diaggrid_tin_r18_cosinehead_05b132_20pct shots100 39.80+/-0.06 over 3 seeds -> runs/diaggrid_tin_r18_cosinehead_05b132_20pct/linear_probe_shots.json
+--- [37/68] stl_aux_10pct  shots=50
+stl_aux_10pct seed0: shots-only (5000 imgs extracted)
+      50 shots/class (n=  500): test 47.74
+stl_aux_10pct seed1: shots-only (5000 imgs extracted)
+      50 shots/class (n=  500): test 47.40
+stl_aux_10pct seed2: shots-only (5000 imgs extracted)
+      50 shots/class (n=  500): test 48.18
+PROBE_RESULT stl_aux_10pct shots50 47.77+/-0.39 over 3 seeds -> runs/stl_aux_10pct/linear_probe_shots.json
+--- [38/68] stl_none_10pct  shots=50
+stl_none_10pct seed0: shots-only (5000 imgs extracted)
+      50 shots/class (n=  500): test 43.23
+stl_none_10pct seed1: shots-only (5000 imgs extracted)
+      50 shots/class (n=  500): test 40.64
+stl_none_10pct seed2: shots-only (5000 imgs extracted)
+      50 shots/class (n=  500): test 41.08
+PROBE_RESULT stl_none_10pct shots50 41.65+/-1.38 over 3 seeds -> runs/stl_none_10pct/linear_probe_shots.json
+--- [39/68] super5_aux  shots=125
+super5_aux seed0: shots-only (50000 imgs extracted)
+     125 shots/class (n= 2500): test 43.36
+super5_aux seed1: shots-only (50000 imgs extracted)
+     125 shots/class (n= 2500): test 43.50
+super5_aux seed2: shots-only (50000 imgs extracted)
+     125 shots/class (n= 2500): test 44.39
+PROBE_RESULT super5_aux shots125 43.75+/-0.56 over 3 seeds -> runs/super5_aux/linear_probe_shots.json
+--- [40/68] super5_none  shots=125
+super5_none seed0: shots-only (50000 imgs extracted)
+     125 shots/class (n= 2500): test 37.08
+super5_none seed1: shots-only (50000 imgs extracted)
+     125 shots/class (n= 2500): test 38.06
+super5_none seed2: shots-only (50000 imgs extracted)
+     125 shots/class (n= 2500): test 37.19
+PROBE_RESULT super5_none shots125 37.44+/-0.54 over 3 seeds -> runs/super5_none/linear_probe_shots.json
+--- [41/68] cub_aux_100pct  shots=30
+cub_aux_100pct seed0: shots-only (5994 imgs extracted)
+      30 shots/class (n= 5994): test 46.81
+cub_aux_100pct seed1: shots-only (5994 imgs extracted)
+      30 shots/class (n= 5994): test 45.89
+cub_aux_100pct seed2: shots-only (5994 imgs extracted)
+      30 shots/class (n= 5994): test 45.29
+PROBE_RESULT cub_aux_100pct shots30 46.00+/-0.76 over 3 seeds -> runs/cub_aux_100pct/linear_probe_shots.json
+--- [42/68] cub_none_100pct  shots=30
+cub_none_100pct seed0: shots-only (5994 imgs extracted)
+      30 shots/class (n= 5994): test 42.96
+cub_none_100pct seed1: shots-only (5994 imgs extracted)
+      30 shots/class (n= 5994): test 42.13
+cub_none_100pct seed2: shots-only (5994 imgs extracted)
+      30 shots/class (n= 5994): test 43.77
+PROBE_RESULT cub_none_100pct shots30 42.95+/-0.82 over 3 seeds -> runs/cub_none_100pct/linear_probe_shots.json
+--- [43/68] tin_aux_25pct  shots=125
+tin_aux_25pct seed0: shots-only (100000 imgs extracted)
+     125 shots/class (n=25000): test 48.64
+tin_aux_25pct seed1: shots-only (100000 imgs extracted)
+     125 shots/class (n=25000): test 49.31
+tin_aux_25pct seed2: shots-only (100000 imgs extracted)
+     125 shots/class (n=25000): test 49.18
+PROBE_RESULT tin_aux_25pct shots125 49.04+/-0.36 over 3 seeds -> runs/tin_aux_25pct/linear_probe_shots.json
+--- [44/68] tin_none_25pct  shots=125
+tin_none_25pct seed0: shots-only (100000 imgs extracted)
+     125 shots/class (n=25000): test 49.31
+tin_none_25pct seed1: shots-only (100000 imgs extracted)
+     125 shots/class (n=25000): test 48.52
+tin_none_25pct seed2: shots-only (100000 imgs extracted)
+     125 shots/class (n=25000): test 48.69
+PROBE_RESULT tin_none_25pct shots125 48.84+/-0.42 over 3 seeds -> runs/tin_none_25pct/linear_probe_shots.json
+--- [45/68] auxmag_15pct_sched0  shots=75
+auxmag_15pct_sched0 seed0: shots-only (50000 imgs extracted)
+      75 shots/class (n= 7500): test 52.53
+auxmag_15pct_sched0 seed1: shots-only (50000 imgs extracted)
+      75 shots/class (n= 7500): test 52.11
+auxmag_15pct_sched0 seed2: shots-only (50000 imgs extracted)
+      75 shots/class (n= 7500): test 52.87
+PROBE_RESULT auxmag_15pct_sched0 shots75 52.50+/-0.38 over 3 seeds -> runs/auxmag_15pct_sched0/linear_probe_shots.json
+--- [46/68] abl15_none  shots=75
+abl15_none seed0: shots-only (50000 imgs extracted)
+      75 shots/class (n= 7500): test 50.02
+abl15_none seed1: shots-only (50000 imgs extracted)
+      75 shots/class (n= 7500): test 49.96
+abl15_none seed2: shots-only (50000 imgs extracted)
+      75 shots/class (n= 7500): test 49.48
+PROBE_RESULT abl15_none shots75 49.82+/-0.30 over 3 seeds -> runs/abl15_none/linear_probe_shots.json
+--- [47/68] c10_aux_2pct  shots=100
+c10_aux_2pct seed0: shots-only (50000 imgs extracted)
+     100 shots/class (n= 1000): test 58.05
+c10_aux_2pct seed1: shots-only (50000 imgs extracted)
+     100 shots/class (n= 1000): test 58.43
+c10_aux_2pct seed2: shots-only (50000 imgs extracted)
+     100 shots/class (n= 1000): test 58.29
+c10_aux_2pct seed3: shots-only (50000 imgs extracted)
+     100 shots/class (n= 1000): test 57.97
+c10_aux_2pct seed4: shots-only (50000 imgs extracted)
+     100 shots/class (n= 1000): test 58.02
+c10_aux_2pct seed5: shots-only (50000 imgs extracted)
+     100 shots/class (n= 1000): test 58.35
+c10_aux_2pct seed6: shots-only (50000 imgs extracted)
+     100 shots/class (n= 1000): test 57.34
+c10_aux_2pct seed7: shots-only (50000 imgs extracted)
+     100 shots/class (n= 1000): test 58.14
+c10_aux_2pct seed8: shots-only (50000 imgs extracted)
+     100 shots/class (n= 1000): test 58.69
+c10_aux_2pct seed9: shots-only (50000 imgs extracted)
+     100 shots/class (n= 1000): test 58.43
+PROBE_RESULT c10_aux_2pct shots100 58.17+/-0.37 over 10 seeds -> runs/c10_aux_2pct/linear_probe_shots.json
+--- [48/68] c10_none_2pct  shots=100
+c10_none_2pct seed0: shots-only (50000 imgs extracted)
+     100 shots/class (n= 1000): test 52.34
+c10_none_2pct seed1: shots-only (50000 imgs extracted)
+     100 shots/class (n= 1000): test 51.78
+c10_none_2pct seed2: shots-only (50000 imgs extracted)
+     100 shots/class (n= 1000): test 49.53
+c10_none_2pct seed3: shots-only (50000 imgs extracted)
+     100 shots/class (n= 1000): test 52.08
+c10_none_2pct seed4: shots-only (50000 imgs extracted)
+     100 shots/class (n= 1000): test 51.19
+c10_none_2pct seed5: shots-only (50000 imgs extracted)
+     100 shots/class (n= 1000): test 51.80
+c10_none_2pct seed6: shots-only (50000 imgs extracted)
+     100 shots/class (n= 1000): test 52.45
+c10_none_2pct seed7: shots-only (50000 imgs extracted)
+     100 shots/class (n= 1000): test 51.79
+c10_none_2pct seed8: shots-only (50000 imgs extracted)
+     100 shots/class (n= 1000): test 50.90
+c10_none_2pct seed9: shots-only (50000 imgs extracted)
+     100 shots/class (n= 1000): test 51.85
+PROBE_RESULT c10_none_2pct shots100 51.57+/-0.86 over 10 seeds -> runs/c10_none_2pct/linear_probe_shots.json
+--- [49/68] diaggrid_c100_r18_axmagnitudeL3_l10to00_cosinehead_d1f3e0_20pct  shots=100
+diaggrid_c100_r18_axmagnitudeL3_l10to00_cosinehead_d1f3e0_20pct seed0: shots-only (50000 imgs extracted)
+     100 shots/class (n=10000): test 54.14
+diaggrid_c100_r18_axmagnitudeL3_l10to00_cosinehead_d1f3e0_20pct seed1: shots-only (50000 imgs extracted)
+     100 shots/class (n=10000): test 54.08
+diaggrid_c100_r18_axmagnitudeL3_l10to00_cosinehead_d1f3e0_20pct seed2: shots-only (50000 imgs extracted)
+     100 shots/class (n=10000): test 51.33
+PROBE_RESULT diaggrid_c100_r18_axmagnitudeL3_l10to00_cosinehead_d1f3e0_20pct shots100 53.18+/-1.61 over 3 seeds -> runs/diaggrid_c100_r18_axmagnitudeL3_l10to00_cosinehead_d1f3e0_20pct/linear_probe_shots.json
+--- [50/68] diaggrid_c100_r18_cosinehead_2f17a9_20pct  shots=100
+diaggrid_c100_r18_cosinehead_2f17a9_20pct seed0: shots-only (50000 imgs extracted)
+     100 shots/class (n=10000): test 52.69
+diaggrid_c100_r18_cosinehead_2f17a9_20pct seed1: shots-only (50000 imgs extracted)
+     100 shots/class (n=10000): test 53.44
+Traceback (most recent call last):
+  File "${HOME}/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 295, in <module>
+    main()
+  File "${HOME}/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 236, in main
+    model.load_state_dict(torch.load(ckpt, map_location=device))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 1486, in load
+    with _open_zipfile_reader(opened_file) as opened_zipfile:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/serialization.py", line 771, in __init__
+    super().__init__(torch._C.PyTorchFileReader(name_or_buffer))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: PytorchStreamReader failed reading zip archive: failed finding central directory
+--- [51/68] stl_aux_20pct  shots=100
+stl_aux_20pct seed0: shots-only (5000 imgs extracted)
+     100 shots/class (n= 1000): test 57.93
+stl_aux_20pct seed1: shots-only (5000 imgs extracted)
+     100 shots/class (n= 1000): test 59.40
+stl_aux_20pct seed2: shots-only (5000 imgs extracted)
+     100 shots/class (n= 1000): test 59.31
+PROBE_RESULT stl_aux_20pct shots100 58.88+/-0.83 over 3 seeds -> runs/stl_aux_20pct/linear_probe_shots.json
+--- [52/68] stl_none_20pct  shots=100
+stl_none_20pct seed0: shots-only (5000 imgs extracted)
+     100 shots/class (n= 1000): test 54.78
+stl_none_20pct seed1: shots-only (5000 imgs extracted)
+     100 shots/class (n= 1000): test 53.83
+stl_none_20pct seed2: shots-only (5000 imgs extracted)
+     100 shots/class (n= 1000): test 54.44
+PROBE_RESULT stl_none_20pct shots100 54.35+/-0.48 over 3 seeds -> runs/stl_none_20pct/linear_probe_shots.json
+--- [53/68] super10_aux  shots=250
+super10_aux seed0: shots-only (50000 imgs extracted)
+     250 shots/class (n= 5000): test 54.86
+super10_aux seed1: shots-only (50000 imgs extracted)
+     250 shots/class (n= 5000): test 54.50
+super10_aux seed2: shots-only (50000 imgs extracted)
+     250 shots/class (n= 5000): test 55.03
+PROBE_RESULT super10_aux shots250 54.80+/-0.27 over 3 seeds -> runs/super10_aux/linear_probe_shots.json
+--- [54/68] super10_none  shots=250
+super10_none seed0: shots-only (50000 imgs extracted)
+     250 shots/class (n= 5000): test 51.06
+super10_none seed1: shots-only (50000 imgs extracted)
+     250 shots/class (n= 5000): test 51.68
+super10_none seed2: shots-only (50000 imgs extracted)
+     250 shots/class (n= 5000): test 51.69
+PROBE_RESULT super10_none shots250 51.48+/-0.36 over 3 seeds -> runs/super10_none/linear_probe_shots.json
+--- [55/68] auxmag_25pct_sched0  shots=125
+auxmag_25pct_sched0 seed0: shots-only (50000 imgs extracted)
+     125 shots/class (n=12500): test 61.23
+auxmag_25pct_sched0 seed1: shots-only (50000 imgs extracted)
+     125 shots/class (n=12500): test 61.28
+auxmag_25pct_sched0 seed2: shots-only (50000 imgs extracted)
+     125 shots/class (n=12500): test 61.91
+PROBE_RESULT auxmag_25pct_sched0 shots125 61.47+/-0.38 over 3 seeds -> runs/auxmag_25pct_sched0/linear_probe_shots.json
+--- [56/68] abl25_none  shots=125
+abl25_none seed0: shots-only (50000 imgs extracted)
+     125 shots/class (n=12500): test 61.79
+abl25_none seed1: shots-only (50000 imgs extracted)
+     125 shots/class (n=12500): test 60.80
+abl25_none seed2: shots-only (50000 imgs extracted)
+     125 shots/class (n=12500): test 61.30
+PROBE_RESULT abl25_none shots125 61.30+/-0.50 over 3 seeds -> runs/abl25_none/linear_probe_shots.json
+--- [57/68] c10_aux_5pct  shots=250
+c10_aux_5pct seed0: shots-only (50000 imgs extracted)
+     250 shots/class (n= 2500): test 73.50
+c10_aux_5pct seed1: shots-only (50000 imgs extracted)
+     250 shots/class (n= 2500): test 73.44
+c10_aux_5pct seed2: shots-only (50000 imgs extracted)
+     250 shots/class (n= 2500): test 73.17
+PROBE_RESULT c10_aux_5pct shots250 73.37+/-0.18 over 3 seeds -> runs/c10_aux_5pct/linear_probe_shots.json
+--- [58/68] c10_none_5pct  shots=250
+c10_none_5pct seed0: shots-only (50000 imgs extracted)
+     250 shots/class (n= 2500): test 68.84
+c10_none_5pct seed1: shots-only (50000 imgs extracted)
+     250 shots/class (n= 2500): test 69.06
+c10_none_5pct seed2: shots-only (50000 imgs extracted)
+     250 shots/class (n= 2500): test 68.98
+PROBE_RESULT c10_none_5pct shots250 68.96+/-0.11 over 3 seeds -> runs/c10_none_5pct/linear_probe_shots.json
+--- [59/68] super25_aux  shots=625
+super25_aux seed0: shots-only (50000 imgs extracted)
+     625 shots/class (n=12500): test 71.07
+super25_aux seed1: shots-only (50000 imgs extracted)
+     625 shots/class (n=12500): test 71.80
+super25_aux seed2: shots-only (50000 imgs extracted)
+     625 shots/class (n=12500): test 71.98
+PROBE_RESULT super25_aux shots625 71.62+/-0.48 over 3 seeds -> runs/super25_aux/linear_probe_shots.json
+--- [60/68] super25_none  shots=625
+super25_none seed0: shots-only (50000 imgs extracted)
+     625 shots/class (n=12500): test 72.03
+super25_none seed1: shots-only (50000 imgs extracted)
+     625 shots/class (n=12500): test 71.71
+super25_none seed2: shots-only (50000 imgs extracted)
+     625 shots/class (n=12500): test 71.40
+PROBE_RESULT super25_none shots625 71.71+/-0.32 over 3 seeds -> runs/super25_none/linear_probe_shots.json
+--- [61/68] stl_aux_50pct  shots=250
+stl_aux_50pct seed0: shots-only (5000 imgs extracted)
+     250 shots/class (n= 2500): test 76.58
+stl_aux_50pct seed1: shots-only (5000 imgs extracted)
+     250 shots/class (n= 2500): test 76.30
+stl_aux_50pct seed2: shots-only (5000 imgs extracted)
+     250 shots/class (n= 2500): test 76.25
+PROBE_RESULT stl_aux_50pct shots250 76.38+/-0.18 over 3 seeds -> runs/stl_aux_50pct/linear_probe_shots.json
+--- [62/68] stl_none_50pct  shots=250
+stl_none_50pct seed0: shots-only (5000 imgs extracted)
+     250 shots/class (n= 2500): test 72.68
+stl_none_50pct seed1: shots-only (5000 imgs extracted)
+     250 shots/class (n= 2500): test 73.40
+stl_none_50pct seed2: shots-only (5000 imgs extracted)
+     250 shots/class (n= 2500): test 73.33
+PROBE_RESULT stl_none_50pct shots250 73.13+/-0.40 over 3 seeds -> runs/stl_none_50pct/linear_probe_shots.json
+--- [63/68] c10_aux_10pct  shots=500
+c10_aux_10pct seed0: shots-only (50000 imgs extracted)
+     500 shots/class (n= 5000): test 81.78
+c10_aux_10pct seed1: shots-only (50000 imgs extracted)
+     500 shots/class (n= 5000): test 81.86
+c10_aux_10pct seed2: shots-only (50000 imgs extracted)
+     500 shots/class (n= 5000): test 81.45
+PROBE_RESULT c10_aux_10pct shots500 81.70+/-0.22 over 3 seeds -> runs/c10_aux_10pct/linear_probe_shots.json
+--- [64/68] c10_none_10pct  shots=500
+c10_none_10pct seed0: shots-only (50000 imgs extracted)
+     500 shots/class (n= 5000): test 80.59
+c10_none_10pct seed1: shots-only (50000 imgs extracted)
+     500 shots/class (n= 5000): test 79.94
+c10_none_10pct seed2: shots-only (50000 imgs extracted)
+     500 shots/class (n= 5000): test 81.38
+PROBE_RESULT c10_none_10pct shots500 80.64+/-0.72 over 3 seeds -> runs/c10_none_10pct/linear_probe_shots.json
+--- [65/68] super100_aux  shots=2500
+super100_aux seed0: shots-only (50000 imgs extracted)
+    2500 shots/class (n=50000): test 85.92
+super100_aux seed1: shots-only (50000 imgs extracted)
+    2500 shots/class (n=50000): test 85.84
+super100_aux seed2: shots-only (50000 imgs extracted)
+    2500 shots/class (n=50000): test 85.84
+PROBE_RESULT super100_aux shots2500 85.87+/-0.05 over 3 seeds -> runs/super100_aux/linear_probe_shots.json
+--- [66/68] super100_none  shots=2500
+super100_none seed0: shots-only (50000 imgs extracted)
+    2500 shots/class (n=50000): test 86.23
+super100_none seed1: shots-only (50000 imgs extracted)
+    2500 shots/class (n=50000): test 85.93
+super100_none seed2: shots-only (50000 imgs extracted)
+    2500 shots/class (n=50000): test 86.15
+PROBE_RESULT super100_none shots2500 86.10+/-0.16 over 3 seeds -> runs/super100_none/linear_probe_shots.json
+--- [67/68] diagtransfer2_path_aux_10pct  shots=1000
+diagtransfer2_path_aux_10pct seed0: shots-only (89996 imgs extracted)
+    1000 shots/class (n= 9000): test 94.82
+diagtransfer2_path_aux_10pct seed1: shots-only (89996 imgs extracted)
+    1000 shots/class (n= 9000): test 94.65
+diagtransfer2_path_aux_10pct seed2: shots-only (89996 imgs extracted)
+    1000 shots/class (n= 9000): test 94.92
+PROBE_RESULT diagtransfer2_path_aux_10pct shots1000 94.80+/-0.13 over 3 seeds -> runs/diagtransfer2_path_aux_10pct/linear_probe_shots.json
+--- [68/68] diagtransfer2_path_none_10pct  shots=1000
+diagtransfer2_path_none_10pct seed0: shots-only (89996 imgs extracted)
+    1000 shots/class (n= 9000): test 94.28
+diagtransfer2_path_none_10pct seed1: shots-only (89996 imgs extracted)
+    1000 shots/class (n= 9000): test 95.24
+diagtransfer2_path_none_10pct seed2: shots-only (89996 imgs extracted)
+    1000 shots/class (n= 9000): test 94.79
+PROBE_RESULT diagtransfer2_path_none_10pct shots1000 94.77+/-0.48 over 3 seeds -> runs/diagtransfer2_path_none_10pct/linear_probe_shots.json
+B1_COMPLETE missing_config=0 2026-08-16T12:42:49+02:00

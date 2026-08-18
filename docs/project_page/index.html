@@ -159,10 +159,11 @@
                 compute cost declared. The gain then decomposes as
                 &Delta;&nbsp;=&nbsp;<em>G</em>&nbsp;+&nbsp;readout(base): what a source does to the
                 features, plus what the classifier can cash in. The sign of that second
-                term is correct on 85.4<!--auditRate-->% of the cells that
+                term is correct on 86.4<!--auditRate-->% of the cells that
                 can test it. Sources supplying the <em>same</em> currency substitute; sources
-                supplying different ones stack; fusing into an already-informed initialization
-                taxes you in proportion to what that initialization was worth.</p>
+                supplying different ones stack; fusing a strong shaping
+                prior into an already-informed initialization interferes in proportion to what
+                that initialization was worth.</p>
             </div>
             <h2>Abstract</h2>
             <div class="abstract">
@@ -185,7 +186,7 @@
                 features beforehand, the outcome is predictable in advance, which we state as
                 a procedure. Underlying it is an empirical decomposition,
                 &Delta;&nbsp;=&nbsp;<em>G</em>&nbsp;+&nbsp;readout(base), whose sign holds on
-                85.4<!--auditRate-->% of testable cells and which, registered in advance, called an unseen
+                86.4<!--auditRate-->% of testable cells and which, registered in advance, called an unseen
                 backbone family's feature gain from baseline heights alone.</p>
             </div>
 
@@ -228,10 +229,11 @@
         </div>
         <div class="col-md-4 d-flex">
         <div class="outcome tax">
-        <h3>Tax: fusing into an already-informed initialization</h3>
+        <h3>Interference: fusing into an already-informed initialization</h3>
         <p>Injecting the prior on top of ImageNet weights is destructive everywhere, and the
-        damage is proportional to what the initialization was contributing: up to
-        <strong>&minus;17</strong> points on photographic data, and statistically zero on
+        damage is proportional to what the initialization was contributing and to how hard
+        the prior shapes: <strong>&minus;16 to &minus;18</strong> points on photographic data at full
+        auxiliary strength, vanishing below it, and statistically zero on
         histopathology where those weights were worth little to begin with. Probing confirms
         the loss is feature-side, not a classifier failure.</p>
         </div>
@@ -245,8 +247,8 @@
         intervention decomposes into what it does to the <em>features</em> (<em>G</em>,
         measured by an identical linear evaluation on frozen representations) and a
         <em>readout</em> term set by how well the baseline already performs. The sign is
-        correct on 85.4<!--auditRate-->% of the cells where it is statistically resolvable
-        (402<!--auditCorrect--> of 471<!--auditResolvable-->, and 94.3<!--auditBelowRate-->%
+        correct on 86.4<!--auditRate-->% of the cells where it is statistically resolvable
+        (393<!--auditCorrect--> of 455<!--auditResolvable-->, and 94.9<!--auditBelowRate-->%
         on the scarce-data flank). It is informative on
         the scarce-data flank, where the readout term is large and negative, and close to
         uninformative once that term has decayed to nothing, and we say so rather than
@@ -282,12 +284,15 @@
         <tr><td>Plain recipe, 10%</td><td class="text-right">16.47</td><td class="text-right">29.74</td><td class="text-right">+13.26</td></tr>
         <tr><td>DeiT augmentation, 10%</td><td class="text-right">20.28</td><td class="text-right">41.29</td><td class="text-right"><strong>+21.00</strong></td></tr>
         <tr><td>DeiT augmentation, 100%</td><td class="text-right">61.39</td><td class="text-right">75.25</td><td class="text-right">+13.86</td></tr>
-        <tr><td>ViT-S/16 @224&nbsp;px, ImageNet-100</td><td class="text-right">65.39</td><td class="text-right">78.39</td><td class="text-right">+13.00</td></tr>
-        <tr><td>ViT-B/16 @224&nbsp;px, ImageNet-100</td><td class="text-right">43.33</td><td class="text-right">69.34</td><td class="text-right"><strong>+26.01</strong></td></tr>
+        <tr><td>ViT-S/16 @224&nbsp;px, ImageNet-100, 100 ep</td><td class="text-right">65.39</td><td class="text-right">78.39</td><td class="text-right">+13.00</td></tr>
+        <tr><td>ViT-B/16 @224&nbsp;px, ImageNet-100, 100 ep</td><td class="text-right">43.33</td><td class="text-right">69.34</td><td class="text-right"><strong>+26.01</strong></td></tr>
+        <tr><td>ViT-S/16, ImageNet-100, 200 ep</td><td class="text-right">79.47</td><td class="text-right">83.99</td><td class="text-right">+4.52</td></tr>
+        <tr><td>ViT-B/16, ImageNet-100, 200 ep</td><td class="text-right">75.31</td><td class="text-right">82.02</td><td class="text-right"><strong>+6.71</strong></td></tr>
         </tbody>
     </table>
     </div>
-    <p class="tbl-note">The deficit grows with model scale rather than shrinking, and persists
+    <p class="tbl-note">The deficit grows with model scale rather than shrinking, at both budgets:
+    +6.71 against +4.52 at 200 epochs, where both models are trained. It persists
     at 1.28M images where every ResNet is neutral (+0.04).</p>
 
     <h3>Cost normalization, and what happens when the comparator gets more</h3>
@@ -360,8 +365,9 @@
             expect <strong>substitution</strong>: take the cheaper source.</li>
         <li>If they differ in kind, expect <strong>stacking</strong>.</li>
         <li>If one source is a mature initialization, do not inject a shaping prior on top:
-            expect a <strong>tax</strong> proportional to what that initialization supplies,
-            measurable in advance as its advantage over training from scratch.</li>
+            expect <strong>interference</strong> proportional to what that initialization supplies
+            and to the shaping strength, measurable in advance as its advantage over
+            training from scratch; a weak auxiliary weight removes the damage.</li>
     </ol>
 
     <h2>The benchmark</h2>

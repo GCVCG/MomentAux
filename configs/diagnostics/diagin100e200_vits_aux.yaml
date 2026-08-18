@@ -1,0 +1,26 @@
+# diag: ImageNet-100 stage, 200 epochs instead of 100.
+# R1, referee-requested: does the model-scale trend (ViT-S +13.0 vs
+# ViT-B +26.0) survive at a budget where BOTH models are trained?
+name: diagin100e200_vits_aux
+dataset: imagenet100
+backbone: vit_small
+optimizer: adamw
+epochs: 200
+batch_size: 128
+lr: 0.001
+weight_decay: 0.05
+momentum: 0.9
+num_workers: 5
+small_input: false
+pretrained: false
+subset_pct: 100
+stem: none
+stem_calibrate: true
+augment: deit
+moment_aux:
+  stem: energy-magnitude
+  tap: blocks.8
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine
+  head_norm: true

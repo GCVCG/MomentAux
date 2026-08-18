@@ -1,0 +1,24 @@
+# diag: epochs deviate from the frozen 200 by design.
+# B4, referee-requested: hold TOTAL OPTIMIZER STEPS fixed (~600)
+# across data fractions, so the envelope shape is a data effect
+# and not a step-budget effect. Both arms get the same budget.
+name: diagstep_c100_aux_5pct
+dataset: cifar100
+backbone: resnet18
+epochs: 32
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 5
+stem: none
+stem_calibrate: true
+moment_aux:
+  stem: energy-magnitude
+  tap: layer3
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine

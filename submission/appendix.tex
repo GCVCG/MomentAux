@@ -1,0 +1,156 @@
+%% ---------------------------------------------------------------------
+\appendix
+
+\section*{Appendix}
+\noindent The appendices hold material a reader may want to check but which
+would interrupt the argument: the self-supervised margin at every measured
+fraction (\ref{app:envelopes}), the component curves the law decomposes
+(\ref{app:law}), controls cited in passing (\ref{app:controls}), per-domain
+notes including the PathMNIST confound (\ref{app:domains}), the dataset table
+(\ref{app:datasets}), reproduction commands and released artifacts
+(\ref{app:repro}), and illustrative panels for the feature effect of
+Section~\ref{sec:imprint} (\ref{app:explain}).
+
+\section{The self-supervised margin}\label{app:envelopes}
+
+The prior's own envelopes are in the main text
+(Tables~\ref{tab:envelope}, \ref{tab:domainenv} and
+\ref{tab:vitenvelope}). Table~\ref{tab:appssl} gives the remaining
+envelope those tables summarize in prose: the margin of a
+$2\times$-compute SimCLR initialization over the prior at every measured
+fraction. Every entry is a paired difference against a shared baseline
+arm under the frozen recipe.
+
+\begin{table}[pos=htbp]
+\caption{SimCLR initialization ($2\times$ compute) minus the prior
+($1.02\times$) on CIFAR-100 with ResNet-18 under plain augmentation. The
+margin is unimodal: SSL's advantage is a mid-band phenomenon that
+vanishes at both extremes. A positive entry is a fraction where the
+$2\times$-compute initialization wins.}
+\label{tab:appssl}
+\centering\scriptsize
+\setlength{\tabcolsep}{2.6pt}
+\zebra{2}
+\begin{tabular}{lrlr}
+\toprule
+Frac. & SSL $-$ prior & Frac. & SSL $-$ prior \\
+\midrule
+\multicolumn{4}{@{}l}{\emph{SimCLR at $2\times$ compute; at $5\times$ the}}\\
+\multicolumn{4}{@{}l}{\emph{margin is $+3.1$ to $+9.2$ over 1--15\%,}}\\
+\multicolumn{4}{@{}l}{\emph{narrowing to $+2.6$ at 25\%}}\\
+1\% & $+0.85$ & 10\%  & $+5.01$ \\
+2\% & $+2.38$ & 15\%  & $+4.09$ \\
+3\% & $+2.31$ & 50\%  & $+0.73$ \\
+5\% & $+3.90$ & 100\% & $+0.22$ \\
+7\% & $+4.99$ &       & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{The law's components}\label{app:law}
+
+\paragraph{Feature-gain curves.} $G$ is non-monotone in data and
+dataset-specific in shape: CIFAR-10 $4.81$, $5.52$, $3.97$, $0.65$ at $0.5$,
+$1$, $2.5$, $5$k images; CIFAR-100 $4.16$, $5.14$, $6.26$, $3.55$;
+Tiny-ImageNet falls monotonically $4.19$, $2.66$, $1.70$ ($1$, $5$, $10$k);
+STL-10 $4.70$, $4.98$, $3.20$. Where the readout term is flat, the envelope
+peak coincides with the $G$ peak: the envelope's shape \emph{is} the
+feature-gain curve.
+
+\paragraph{The readout branch.} Mapped on ceiling-free CIFAR-10: $+1.80$ at
+baseline $39.4$, $+1.14$ at $51.7$ and $+0.44$ at both $69.1$ and $80.7$,
+positive throughout and decaying toward sufficiency. Below the crossing it
+reaches $-2.7$ at bases $8.9$ and $5.3$. The bracket $[31.8, 40.3]$ is pinned
+by a Swin cell still negative at $31.8$ and a conv cell already positive at
+$40.3$.
+
+\paragraph{Label-space crossings.} On byte-identical CIFAR-100 pixels, a full
+$2{\times}2$ of training against evaluation label space (100-way vs.\ 20-way)
+moves $G$ by at most $1\sigma$. On Tiny-ImageNet the same crossing finds two
+real opposing effects (evaluation-space $+1.9$, checkpoint-set $+1.6$, both
+${\sim}5\sigma$) that cancel on the diagonal, so $G$ comparisons in the paper
+always fix the evaluation space.
+
+\section{Selected controls}\label{app:controls}
+
+\paragraph{Contamination.} Re-evaluating the low-data CIFAR-100 cells on
+ciFAIR-100 \citep{barz2020cifair}, which replaces the test set's 927
+near-duplicates, moves the prior's gain by at most $0.20$ points at any
+fraction; both arms eat identical contamination, so it cancels in
+$\Delta$.
+
+\paragraph{Granularity, decisively.} Relabeling CIFAR-100's fixed
+subsets with their 20 coarse labels (byte-identical pixels, identical
+steps) reproduces the full gain at matched data ($+5.84$ vs.\ $+5.30$ at
+5\%): gain follows data and task performance, not class count. The
+mirrored Tiny-ImageNet control (positional, visually incoherent coarse
+groups) is the cell that falsified our own earlier account: class count
+dropped tenfold, baseline accuracy did not rise, and no readout boost
+appeared: exactly as Eq.~\ref{eq:law} requires and as ``label count
+drives gain'' does not.
+
+\paragraph{Robustness.} On CIFAR-100-C \citep{hendrycks2019benchmarking},
+corruption robustness tracks $55$--$60\%$ of the clean gain at low data
+and is neutral at 100\%; the prior neither buys nor costs robustness
+beyond its accuracy effect.
+
+\section{Domain notes}\label{app:domains}
+
+EuroSAT: the prior beats SimCLR at 7 of 11 fractions ($+0.8$--$+1.9$ in the
+1--10\% band), consistent with SimCLR's photographic view-invariances
+transferring poorly to satellite statistics while the spectral target is
+domain-agnostic. DTD is the reverse, SimCLR dominating from a few hundred
+images, and Food-101 is SSL territory on conv backbones. PathMNIST declines
+with added data for \emph{every} method above ${\sim}10$--$15\%$ ($92.0$ to
+$86.7$ from 10\% to 100\%), the signature of its center-shifted test split, so
+we interpret only its low-data cells. The domain axis does not split ``photo
+vs.\ non-photo''; each domain's statistics decide which currency is scarce.
+
+\section{Datasets}\label{app:datasets}
+
+Table~\ref{tab:partitions} lists every dataset with its training split size,
+class count and resolution as trained. Six visual domains are represented,
+with the two ImageNet stages supplying the data-scale and the
+resolution-and-model-scale axes. Sources of variable native resolution are
+squash-resized once, offline, and the resized copies are what every arm
+consumes. Five relabeled controls derived from CIFAR-100 and Tiny-ImageNet
+share their parents' pixels exactly and differ only in label space; they reuse
+their parent's indices and share its row rather than appearing separately, and
+they are why the dataset-identity count in Table~\ref{tab:audit} exceeds the
+number of image sources.
+
+\section{Reproducibility}\label{app:repro}
+
+One entry point trains any cell (\texttt{train.py --config <cell> --seed N});
+one command regenerates every table from run records; one
+(\texttt{analysis/audit\_law\_paired.py}) re-runs the sign-law audit with the
+seed-paired uncertainty Table~\ref{tab:audit} reports. Subset indices, filter-bank fingerprints and per-run
+environment records are released with the runs they describe. Training refuses
+to overwrite a completed cell, holds an exclusive per-run lock and writes
+checkpoints atomically (two of this study's incident classes made these guards
+necessary), and mirrors are verified by \emph{loading and evaluating}
+checkpoints against their recorded accuracies rather than by file listing. The
+full harness is released at the repository cited on the title page; an
+archival DOI will be minted on acceptance.
+
+\section{Illustrative panels}\label{app:explain}
+
+The measurements behind the prior's feature effect are the alignment statistic
+and the linear evaluation of Section~\ref{sec:imprint}. The panel here only
+illustrates them, and is included precisely because it shows the effect
+\emph{less} clearly than the numbers do.
+
+\begin{figure}[pos=htbp]
+\centering
+\includegraphics[width=\linewidth]{figs_explain/tsne_auxmag_5pct_sched0.png}
+\caption{t-SNE of frozen penultimate test features, first eight classes,
+baseline (top) and prior arm (bottom) at the CIFAR-100 5\% cell. The
+silhouette in each title is computed over \emph{all} classes in the
+\emph{full} feature space, not on the two projected dimensions shown.
+Reported
+with its own limitation: the silhouette score over all classes at full
+dimension moves only from $-0.072$ to $-0.064$, so this projection does
+\emph{not} show the $+6.3$-point feature gap that the linear evaluation
+measures at this cell. }
+\label{fig:tsne}
+\end{figure}

@@ -16,8 +16,6 @@
       "Bash(du -sh *)",
       "Bash(ls *)",
       "Bash(pgrep *)",
-      "Bash(ssh -o BatchMode=yes amughrabi@turing.ub.edu *)",
-      "Bash(ssh amughrabi@turing.ub.edu *)",
       "Bash(rsync *)"
     ]
   }

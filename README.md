@@ -52,12 +52,12 @@ overstates the uncertainty by a median factor of 1.8.
 | | |
 |---|---|
 | cells with paired `Δ` and `G` | 1,724<!--auditAllPaired--> |
-| in law scope (prior, from scratch, ≥3 seeds per arm) | 1,020<!--auditScope--> |
-| inside the crossing bracket (no prediction made) | 98<!--auditBracket--> |
-| unresolved (`|readout| ≤ 2·SEM`) | 451<!--auditUnresolved--> |
-| **resolvable, these test the law** | **471<!--auditResolvable-->** |
-| sign as predicted | **402<!--auditCorrect--> (85.4<!--auditRate-->%)** |
-| wrong side | 69<!--auditWrong--> |
+| in law scope (prior, from scratch, ≥3 seeds per arm) | 958<!--auditScope--> |
+| inside the crossing bracket (no prediction made) | 94<!--auditBracket--> |
+| unresolved (`|readout| ≤ 2·SEM`) | 409<!--auditUnresolved--> |
+| **resolvable, these test the law** | **455<!--auditResolvable-->** |
+| sign as predicted | **393<!--auditCorrect--> (86.4<!--auditRate-->%)** |
+| wrong side | 62<!--auditWrong--> |
 
 Two earlier figures for this table are superseded and we name them so nobody
 cites them from an old copy. **96%** came from an independent-SEM audit
@@ -84,7 +84,7 @@ sign), and the ImageNet-scale residual (`|Δ−G| ≤ 1.1` on five of six pairs)
 | prior + augmentation | structure + invariance | **stack** | `Δ` amplified 1.4–2.4×; `G` rises 14.9 → 22.2 |
 | prior + effective SSL | structure ≈ invariance | **substitute** | combo ≤ best single; equal `G` |
 | prior + ineffective SSL | structure + ~nothing | stack | full gain recovered on SimSiam |
-| prior + ImageNet init | structure vs. mature features | **tax** | −17 points, carried by `G`; null under domain shift |
+| prior + ImageNet init | structure vs. mature features | **interference** | −16..−18 points at full auxiliary strength, vanishing below it; carried by `G`; null under domain shift |
 | augmentation + SSL | invariance + invariance | substitute | the DeiT recipe collapses SimCLR's margin |
 
 The practical corollary: a cheap linear probe of what each candidate source
@@ -99,10 +99,15 @@ Every convolutional backbone is neutral at data sufficiency, including at
 | cell | baseline | with prior | Δ |
 |---|---|---|---|
 | ViT-tiny, ImageNet64, 1.28M imgs | 48.24 | 51.48 | **+3.23** |
-| ViT-S/16, ImageNet-100 @224px, DeiT recipe | 65.39 | 78.39 | **+13.00** |
-| ViT-B/16, ImageNet-100 @224px, DeiT recipe | 43.33 | 69.34 | **+26.01** |
+| ViT-S/16, ImageNet-100 @224px, DeiT recipe, 100 ep | 65.39 | 78.39 | **+13.00** |
+| ViT-B/16, ImageNet-100 @224px, DeiT recipe, 100 ep | 43.33 | 69.34 | **+26.01** |
+| ViT-S/16, ImageNet-100, 200 ep | 79.47 | 83.99 | **+4.52** |
+| ViT-B/16, ImageNet-100, 200 ep | 75.31 | 82.02 | **+6.71** |
 
-Every pre-registered scale falsifier (F1, F2, F3, G1, G2, G3, G4) is dead.
+The ordering holds at both budgets: doubling the schedule shrinks both gains
+(the baselines catch up), but the larger model keeps the larger deficit
+(+6.71 against +4.52 at 200 epochs, 2.4 SEM apart). Every pre-registered
+scale falsifier (F1, F2, F3, G1, G2, G3, G4) is dead.
 
 ---
 

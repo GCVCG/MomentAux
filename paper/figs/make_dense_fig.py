@@ -26,6 +26,8 @@ import sys
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib.lines import Line2D  # noqa: E402
+from matplotlib.patches import Patch  # noqa: E402
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import pubstyle as PS  # noqa: E402
@@ -98,11 +100,27 @@ def main():
                      zorder=3 if resolvable else 2)
     axB.set_xlabel("baseline pixel accuracy (%)", fontsize=PS.LABEL)
     axB.set_ylabel("readout $= \\Delta - G$ (mIoU)", fontsize=PS.LABEL)
-    axB.annotate("crossing\nbracket", xy=(36, axB.get_ylim()[1] * 0.62),
-                 ha="center", fontsize=PS.SMALL - 0.5, color=PS.MUTED)
-    axB.annotate(r"filled = resolvable ($|$readout$|>2\,$SEM)",
-                 xy=(0.03, 0.94), xycoords="axes fraction", ha="left", va="top",
-                 fontsize=PS.SMALL - 0.5, color=PS.MUTED)
+    # EVERY encoding in this panel appears in a legend: the fill/size pair
+    # (resolvable vs unresolved) gets its own proxy entries -- the earlier
+    # one-line annotation named only the filled half -- and the yellow band
+    # is entered too, alongside its in-place label. Marker shape and colour
+    # are the population, so those handles stay in panel (a)'s legend and a
+    # footnote here says where to read them.
+    proxies = [
+        Line2D([], [], marker="o", color=PS.INK, mfc=PS.INK, ls="none",
+               ms=4.2, mew=0.8,
+               label=r"filled, larger: resolvable ($|$readout$|>2\,$SEM)"),
+        Line2D([], [], marker="o", color=PS.INK, mfc="none", ls="none",
+               ms=3.0, mew=0.8, label="open, smaller: unresolved"),
+        Patch(fc=PS.OI["yellow"], alpha=0.30, ec="none",
+              label="crossing bracket [31.8, 40.3]"),
+    ]
+    proxies.append(
+        Line2D([], [], ls="none", marker="", color="none",
+               label="shape and colour: population, as in (a)"))
+    axB.legend(handles=proxies, fontsize=PS.SMALL - 0.5, frameon=False,
+               loc="upper left", handlelength=1.0, handletextpad=0.5,
+               labelspacing=0.25, borderaxespad=0.2)
     PS.panel(axB, "(b) every resolvable cell is above the crossing")
 
     fig.tight_layout(pad=0.3, h_pad=1.0)

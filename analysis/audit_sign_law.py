@@ -53,6 +53,27 @@ def fnum(row, key):
         return None
 
 
+def probe_interpretable(r):
+    """The probe-ceiling rule, the methods section's second scope rule.
+
+    A linear evaluation is interpretable only while it holds substantially
+    more labels than the cell trained on. At 100% the probe's labels ARE the
+    cell's labels, so the aux-vs-baseline gap cannot be split into G and
+    readout -- and the split is exactly what this script audits. The gap
+    itself remains valid (both arms are probed identically) and is reported
+    elsewhere; only the decomposition is refused here.
+
+    Applied OUTSIDE the law-scope toggle deliberately: this is a property of
+    the measurement, not of the intervention, so it holds under --scope all
+    as well. analysis/aggregate_dense.py has always honoured it; both
+    classification audits were missing it until 2026-08-18.
+    """
+    try:
+        return float(r.get("subset_pct") or 0) < 100.0
+    except ValueError:
+        return False
+
+
 def in_law_scope(r):
     """aux-from-scratch: an aux target, no pretrained/SSL init, plain stem."""
     if not r.get("aux_target"):
@@ -72,10 +93,40 @@ def main():
     ap.add_argument("--scope", choices=("law", "all"), default="law")
     ap.add_argument("--min-seeds", type=int, default=3)
     ap.add_argument("--csv", default=CSV)
+    ap.add_argument("--independent", action="store_true",
+                    help="force the CSV-only variant below instead of the "
+                         "paper's seed-paired audit")
     args = ap.parse_args()
+
+    # THIS SCRIPT IS NOT THE PAPER'S AUDIT, and the difference is not cosmetic.
+    # The paper's Table 7 uses SEED-PAIRED uncertainty: the readout is formed per
+    # seed and its SEM taken across seeds. What follows below propagates the two
+    # arms' SEMs in quadrature as if independent, which is all the released CSV
+    # supports (it carries per-cell means, not per-seed values). Independent
+    # propagation OVERSTATES the uncertainty by a median factor of 1.7, so it
+    # marks far more cells unresolvable: 286 resolvable at 97% here, against the
+    # paper's 461 at 85.7%. Both are correct arithmetic on their own premise, and
+    # a reader who ran this file expecting to reproduce Table 7 would reasonably
+    # conclude the paper does not reproduce. So this entry point now DELEGATES to
+    # the canonical audit whenever the per-run records are present, and the
+    # CSV-only variant is kept, behind --independent, as the conservative check
+    # available to anyone who has only the CSV.
+    paired = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                          "audit_law_paired.py")
+    runs = os.path.join(os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__))), "runs")
+    if not args.independent and os.path.exists(paired) and os.path.isdir(runs):
+        print("Delegating to analysis/audit_law_paired.py, which is the "
+              "protocol\nTable 7 reports (seed-paired uncertainty). Pass "
+              "--independent for the\nCSV-only variant, which overstates SEM "
+              "and is therefore conservative.\n")
+        os.execv(sys.executable, [sys.executable, paired])
 
     if not os.path.exists(args.csv):
         sys.exit(f"missing {args.csv} -- run analysis/export_results_csv.py first")
+    if args.independent:
+        print("CSV-ONLY VARIANT: SEM propagated as if the arms were independent.\n"
+              "This is NOT the paper's protocol; see the note in main().\n")
 
     cells = []
     with open(args.csv) as fh:
@@ -87,6 +138,10 @@ def main():
             if None in (d, g, base) or ns is None or nps is None:
                 continue
             if ns < args.min_seeds or nps < args.min_seeds:
+                continue
+            # probe-ceiling rule first: it gates the MEASUREMENT, so it holds
+            # under --scope all too, unlike the aux-from-scratch test below.
+            if not probe_interpretable(r):
                 continue
             if args.scope == "law" and not in_law_scope(r):
                 continue

@@ -324,10 +324,23 @@ def main():
     aux_wT = aux_cfg.get("weight_final", aux_w0)
     aux_sched = aux_cfg.get("weight_schedule", "const")
 
+    # weight_delay: hold the auxiliary weight at ZERO for the first N epochs,
+    # then run the declared schedule over what remains. Added for the referee
+    # question the tax evidence could not answer: every transfer cell in the
+    # grid applies the prior at full strength from step zero, so "a shaping
+    # prior taxes a mature initialization" is only established for that timing.
+    # A delayed onset lets the pretrained features settle first. Default 0
+    # reproduces the previous behaviour EXACTLY (span becomes epochs-1 and frac
+    # becomes epoch/(epochs-1), which is the original expression), so no
+    # existing cell moves.
+    aux_delay = int(aux_cfg.get("weight_delay", 0))
+
     def aux_lambda(epoch):
+        if epoch < aux_delay:
+            return 0.0
         if aux_sched == "const":
             return aux_w0
-        frac = epoch / max(cfg["epochs"] - 1, 1)
+        frac = (epoch - aux_delay) / max(cfg["epochs"] - 1 - aux_delay, 1)
         if aux_sched == "linear":
             return aux_w0 + (aux_wT - aux_w0) * frac
         if aux_sched == "cosine":

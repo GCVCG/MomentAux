@@ -1,0 +1,6 @@
+[slot6] task 4/70 : configs/grid/diagtransfer2_c100_none_7pct.yaml seed 6  11:00:53
+[slot6] task 7/70 : configs/grid/diagtransfer2_c100_none_7pct.yaml seed 9  11:24:16
+[slot6] task 18/70 : configs/diagnostics/diagtaxlam_c100_l03_7pct.yaml seed 6  11:50:46
+[slot6] task 24/70 : configs/diagnostics/diagtaxlam_c100_l01_7pct.yaml seed 5  12:18:40
+[slot6] task 30/70 : configs/diagnostics/diagtaxlam_c100_l005_7pct.yaml seed 4  12:44:48
+[slot6] SLOT_DONE

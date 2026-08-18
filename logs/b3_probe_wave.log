@@ -1,0 +1,51 @@
+=== PROBE diagstep_c100_none_1pct ===
+diagstep_c100_none_1pct seed0: probe train 37.20  test 26.64
+diagstep_c100_none_1pct seed1: probe train 36.92  test 26.73
+diagstep_c100_none_1pct seed2: probe train 37.56  test 27.60
+PROBE_RESULT diagstep_c100_none_1pct test 26.99+/-0.53 over 3 seeds -> runs/diagstep_c100_none_1pct/linear_probe.json
+=== PROBE diagstep_c100_aux_1pct ===
+diagstep_c100_aux_1pct seed0: probe train 41.95  test 30.80
+diagstep_c100_aux_1pct seed1: probe train 41.51  test 30.17
+diagstep_c100_aux_1pct seed2: probe train 42.00  test 30.91
+PROBE_RESULT diagstep_c100_aux_1pct test 30.63+/-0.40 over 3 seeds -> runs/diagstep_c100_aux_1pct/linear_probe.json
+=== PROBE diagstep_c100_none_2pct ===
+diagstep_c100_none_2pct seed0: probe train 40.82  test 28.97
+diagstep_c100_none_2pct seed1: probe train 40.45  test 28.66
+diagstep_c100_none_2pct seed2: probe train 40.49  test 28.67
+PROBE_RESULT diagstep_c100_none_2pct test 28.77+/-0.18 over 3 seeds -> runs/diagstep_c100_none_2pct/linear_probe.json
+=== PROBE diagstep_c100_aux_2pct ===
+diagstep_c100_aux_2pct seed0: probe train 45.40  test 32.80
+diagstep_c100_aux_2pct seed1: probe train 45.25  test 33.26
+diagstep_c100_aux_2pct seed2: probe train 45.61  test 33.46
+PROBE_RESULT diagstep_c100_aux_2pct test 33.17+/-0.34 over 3 seeds -> runs/diagstep_c100_aux_2pct/linear_probe.json
+=== PROBE diagstep_c100_none_5pct ===
+diagstep_c100_none_5pct seed0: probe train 41.14  test 30.87
+diagstep_c100_none_5pct seed1: probe train 40.96  test 30.31
+diagstep_c100_none_5pct seed2: probe train 40.93  test 30.05
+PROBE_RESULT diagstep_c100_none_5pct test 30.41+/-0.42 over 3 seeds -> runs/diagstep_c100_none_5pct/linear_probe.json
+=== PROBE diagstep_c100_aux_5pct ===
+diagstep_c100_aux_5pct seed0: probe train 49.42  test 37.28
+diagstep_c100_aux_5pct seed1: probe train 48.81  test 36.67
+diagstep_c100_aux_5pct seed2: probe train 49.65  test 37.28
+PROBE_RESULT diagstep_c100_aux_5pct test 37.08+/-0.35 over 3 seeds -> runs/diagstep_c100_aux_5pct/linear_probe.json
+=== PROBE diagstep_c100_none_10pct ===
+diagstep_c100_none_10pct seed0: probe train 39.68  test 29.31
+diagstep_c100_none_10pct seed1: probe train 39.60  test 29.42
+diagstep_c100_none_10pct seed2: probe train 40.47  test 29.86
+PROBE_RESULT diagstep_c100_none_10pct test 29.53+/-0.29 over 3 seeds -> runs/diagstep_c100_none_10pct/linear_probe.json
+=== PROBE diagstep_c100_aux_10pct ===
+diagstep_c100_aux_10pct seed0: probe train 49.88  test 37.52
+diagstep_c100_aux_10pct seed1: probe train 49.73  test 37.26
+diagstep_c100_aux_10pct seed2: probe train 49.14  test 37.22
+PROBE_RESULT diagstep_c100_aux_10pct test 37.33+/-0.16 over 3 seeds -> runs/diagstep_c100_aux_10pct/linear_probe.json
+=== PROBE diagstep_c100_none_25pct ===
+diagstep_c100_none_25pct seed0: probe train 40.85  test 31.05
+diagstep_c100_none_25pct seed1: probe train 42.25  test 32.02
+diagstep_c100_none_25pct seed2: probe train 41.90  test 31.82
+PROBE_RESULT diagstep_c100_none_25pct test 31.63+/-0.51 over 3 seeds -> runs/diagstep_c100_none_25pct/linear_probe.json
+=== PROBE diagstep_c100_aux_25pct ===
+diagstep_c100_aux_25pct seed0: probe train 50.73  test 39.70
+diagstep_c100_aux_25pct seed1: probe train 49.93  test 38.26
+diagstep_c100_aux_25pct seed2: probe train 50.53  test 39.14
+PROBE_RESULT diagstep_c100_aux_25pct test 39.03+/-0.73 over 3 seeds -> runs/diagstep_c100_aux_25pct/linear_probe.json
+B3_PROBE_COMPLETE

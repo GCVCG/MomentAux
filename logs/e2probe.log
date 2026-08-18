@@ -1,0 +1,105 @@
+--- diagfuse_esat_aug_5pct 2026-08-16T00:21:18+02:00
+diagfuse_esat_aug_5pct seed0: probe train 95.12  test 92.44
+diagfuse_esat_aug_5pct seed1: probe train 94.54  test 91.54
+diagfuse_esat_aug_5pct seed2: probe train 94.79  test 92.65
+PROBE_RESULT diagfuse_esat_aug_5pct test 92.21+/-0.59 over 3 seeds -> runs/diagfuse_esat_aug_5pct/linear_probe.json
+--- diagfuse_esat_aug_10pct 2026-08-16T00:21:35+02:00
+diagfuse_esat_aug_10pct seed0: probe train 98.31  test 96.19
+diagfuse_esat_aug_10pct seed1: probe train 98.23  test 95.85
+diagfuse_esat_aug_10pct seed2: probe train 98.26  test 96.02
+PROBE_RESULT diagfuse_esat_aug_10pct test 96.02+/-0.17 over 3 seeds -> runs/diagfuse_esat_aug_10pct/linear_probe.json
+--- diagfuse_esat_aug_25pct 2026-08-16T00:21:52+02:00
+diagfuse_esat_aug_25pct seed0: probe train 99.39  test 98.11
+diagfuse_esat_aug_25pct seed1: probe train 99.49  test 98.00
+diagfuse_esat_aug_25pct seed2: probe train 99.46  test 98.13
+PROBE_RESULT diagfuse_esat_aug_25pct test 98.08+/-0.07 over 3 seeds -> runs/diagfuse_esat_aug_25pct/linear_probe.json
+--- diagfuse_esat_prioraug_5pct 2026-08-16T00:22:08+02:00
+diagfuse_esat_prioraug_5pct seed0: probe train 96.45  test 93.94
+diagfuse_esat_prioraug_5pct seed1: probe train 96.97  test 94.54
+diagfuse_esat_prioraug_5pct seed2: probe train 96.84  test 94.61
+PROBE_RESULT diagfuse_esat_prioraug_5pct test 94.36+/-0.37 over 3 seeds -> runs/diagfuse_esat_prioraug_5pct/linear_probe.json
+--- diagfuse_esat_prioraug_10pct 2026-08-16T00:22:25+02:00
+diagfuse_esat_prioraug_10pct seed0: probe train 98.37  test 96.33
+diagfuse_esat_prioraug_10pct seed1: probe train 98.56  test 96.59
+diagfuse_esat_prioraug_10pct seed2: probe train 98.40  test 96.50
+PROBE_RESULT diagfuse_esat_prioraug_10pct test 96.48+/-0.13 over 3 seeds -> runs/diagfuse_esat_prioraug_10pct/linear_probe.json
+--- diagfuse_esat_prioraug_25pct 2026-08-16T00:22:42+02:00
+diagfuse_esat_prioraug_25pct seed0: probe train 99.39  test 97.85
+diagfuse_esat_prioraug_25pct seed1: probe train 99.35  test 98.06
+diagfuse_esat_prioraug_25pct seed2: probe train 99.31  test 98.13
+PROBE_RESULT diagfuse_esat_prioraug_25pct test 98.01+/-0.14 over 3 seeds -> runs/diagfuse_esat_prioraug_25pct/linear_probe.json
+--- diagfuse_esat_priorssl_5pct 2026-08-16T00:22:59+02:00
+diagfuse_esat_priorssl_5pct seed0: probe train 96.16  test 94.09
+diagfuse_esat_priorssl_5pct seed1: probe train 96.25  test 94.02
+diagfuse_esat_priorssl_5pct seed2: probe train 96.13  test 93.94
+PROBE_RESULT diagfuse_esat_priorssl_5pct test 94.02+/-0.07 over 3 seeds -> runs/diagfuse_esat_priorssl_5pct/linear_probe.json
+--- diagfuse_esat_priorssl_10pct 2026-08-16T00:23:16+02:00
+diagfuse_esat_priorssl_10pct seed0: probe train 97.82  test 96.17
+diagfuse_esat_priorssl_10pct seed1: probe train 97.80  test 96.13
+diagfuse_esat_priorssl_10pct seed2: probe train 97.48  test 95.83
+PROBE_RESULT diagfuse_esat_priorssl_10pct test 96.04+/-0.18 over 3 seeds -> runs/diagfuse_esat_priorssl_10pct/linear_probe.json
+--- diagfuse_esat_priorssl_25pct 2026-08-16T00:23:33+02:00
+diagfuse_esat_priorssl_25pct seed0: probe train 98.96  test 97.61
+diagfuse_esat_priorssl_25pct seed1: probe train 98.97  test 97.56
+diagfuse_esat_priorssl_25pct seed2: probe train 99.02  test 97.83
+PROBE_RESULT diagfuse_esat_priorssl_25pct test 97.67+/-0.15 over 3 seeds -> runs/diagfuse_esat_priorssl_25pct/linear_probe.json
+--- SKIP diagfuse_food_aug_5pct (already probed)
+--- diagfuse_food_aug_10pct 2026-08-16T00:23:50+02:00
+diagfuse_food_aug_10pct seed0: probe train 63.86  test 56.77
+diagfuse_food_aug_10pct seed1: probe train 63.89  test 57.64
+diagfuse_food_aug_10pct seed2: probe train 63.99  test 57.52
+PROBE_RESULT diagfuse_food_aug_10pct test 57.31+/-0.47 over 3 seeds -> runs/diagfuse_food_aug_10pct/linear_probe.json
+--- diagfuse_food_aug_25pct 2026-08-16T00:26:56+02:00
+diagfuse_food_aug_25pct seed0: probe train 78.62  test 68.16
+diagfuse_food_aug_25pct seed1: probe train 78.58  test 68.47
+diagfuse_food_aug_25pct seed2: probe train 78.44  test 68.21
+PROBE_RESULT diagfuse_food_aug_25pct test 68.28+/-0.17 over 3 seeds -> runs/diagfuse_food_aug_25pct/linear_probe.json
+--- diagfuse_food_prioraug_5pct 2026-08-16T00:30:04+02:00
+diagfuse_food_prioraug_5pct seed0: probe train 53.31  test 48.47
+diagfuse_food_prioraug_5pct seed1: probe train 52.89  test 47.89
+diagfuse_food_prioraug_5pct seed2: probe train 53.04  test 48.16
+PROBE_RESULT diagfuse_food_prioraug_5pct test 48.17+/-0.29 over 3 seeds -> runs/diagfuse_food_prioraug_5pct/linear_probe.json
+--- diagfuse_food_prioraug_10pct 2026-08-16T00:33:11+02:00
+diagfuse_food_prioraug_10pct seed0: probe train 63.83  test 56.07
+diagfuse_food_prioraug_10pct seed1: probe train 63.94  test 56.17
+diagfuse_food_prioraug_10pct seed2: probe train 64.09  test 56.06
+PROBE_RESULT diagfuse_food_prioraug_10pct test 56.10+/-0.06 over 3 seeds -> runs/diagfuse_food_prioraug_10pct/linear_probe.json
+--- diagfuse_food_prioraug_25pct 2026-08-16T00:36:18+02:00
+diagfuse_food_prioraug_25pct seed0: probe train 77.95  test 66.30
+diagfuse_food_prioraug_25pct seed1: probe train 77.97  test 66.93
+diagfuse_food_prioraug_25pct seed2: probe train 77.78  test 66.34
+PROBE_RESULT diagfuse_food_prioraug_25pct test 66.52+/-0.35 over 3 seeds -> runs/diagfuse_food_prioraug_25pct/linear_probe.json
+--- diagfuse_food_priorssl_5pct 2026-08-16T00:39:24+02:00
+diagfuse_food_priorssl_5pct seed0: probe train 46.83  test 39.56
+diagfuse_food_priorssl_5pct seed1: probe train 45.20  test 37.45
+diagfuse_food_priorssl_5pct seed2: probe train 46.28  test 39.32
+PROBE_RESULT diagfuse_food_priorssl_5pct test 38.78+/-1.16 over 3 seeds -> runs/diagfuse_food_priorssl_5pct/linear_probe.json
+--- diagfuse_food_priorssl_10pct 2026-08-16T00:42:30+02:00
+diagfuse_food_priorssl_10pct seed0: probe train 56.26  test 48.73
+diagfuse_food_priorssl_10pct seed1: probe train 56.56  test 49.61
+diagfuse_food_priorssl_10pct seed2: probe train 56.04  test 48.63
+PROBE_RESULT diagfuse_food_priorssl_10pct test 48.99+/-0.54 over 3 seeds -> runs/diagfuse_food_priorssl_10pct/linear_probe.json
+--- diagfuse_food_priorssl_25pct 2026-08-16T00:45:37+02:00
+diagfuse_food_priorssl_25pct seed0: probe train 71.94  test 62.55
+diagfuse_food_priorssl_25pct seed1: probe train 72.47  test 62.54
+diagfuse_food_priorssl_25pct seed2: probe train 72.38  test 62.28
+PROBE_RESULT diagfuse_food_priorssl_25pct test 62.46+/-0.15 over 3 seeds -> runs/diagfuse_food_priorssl_25pct/linear_probe.json
+--- SKIP grid_esat_r18_e99fb4_5pct (already probed)
+--- SKIP grid_esat_r18_e99fb4_10pct (already probed)
+--- SKIP grid_esat_r18_e99fb4_25pct (already probed)
+--- SKIP grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_5pct (already probed)
+--- SKIP grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_10pct (already probed)
+--- SKIP grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_25pct (already probed)
+--- SKIP diaggrid_simclr_esat_5pct (already probed)
+--- SKIP diaggrid_simclr_esat_10pct (already probed)
+--- SKIP diaggrid_simclr_esat_25pct (already probed)
+--- SKIP grid_food_r18_9ee7da_5pct (already probed)
+--- SKIP grid_food_r18_9ee7da_10pct (already probed)
+--- SKIP grid_food_r18_9ee7da_25pct (already probed)
+--- SKIP grid_food_r18_axmagnitudeL3_l10to00_hn_8bd74b_5pct (already probed)
+--- SKIP grid_food_r18_axmagnitudeL3_l10to00_hn_8bd74b_10pct (already probed)
+--- SKIP grid_food_r18_axmagnitudeL3_l10to00_hn_8bd74b_25pct (already probed)
+--- SKIP diaggrid_simclr_food_5pct (already probed)
+--- SKIP diaggrid_simclr_food_10pct (already probed)
+--- SKIP diaggrid_simclr_food_25pct (already probed)
+E2PROBE_COMPLETE 2026-08-16T00:48:44+02:00

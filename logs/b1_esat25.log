@@ -1,0 +1,17 @@
+[eurosat] VAL 4050 / FIT 12150 (excluded pcts [5, 10, 25])
+  diagfuse_esat_aug_25pct: cached
+  diagfuse_esat_prioraug_25pct seed0: e2e val 97.33 test 97.11 (recorded 97.11)  probe val 98.15 test 97.78
+  diagfuse_esat_prioraug_25pct seed1: e2e val 97.70 test 97.39 (recorded 97.39)  probe val 98.17 test 97.85
+  diagfuse_esat_prioraug_25pct seed2: e2e val 97.41 test 97.06 (recorded 97.06)  probe val 98.02 test 97.78
+  diagfuse_esat_priorssl_25pct seed0: e2e val 97.33 test 97.24 (recorded 97.24)  probe val 97.73 test 97.48
+  diagfuse_esat_priorssl_25pct seed1: e2e val 97.46 test 97.11 (recorded 97.11)  probe val 97.85 test 97.52
+  diagfuse_esat_priorssl_25pct seed2: e2e val 97.60 test 97.24 (recorded 97.24)  probe val 97.95 test 97.70
+  diaggrid_simclr_esat_25pct seed0: e2e val 97.43 test 97.24 (recorded 97.24)  probe val 97.78 test 97.52
+  diaggrid_simclr_esat_25pct seed1: e2e val 97.38 test 97.30 (recorded 97.30)  probe val 97.78 test 97.65
+  diaggrid_simclr_esat_25pct seed2: e2e val 97.70 test 97.48 (recorded 97.48)  probe val 97.93 test 97.72
+  grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_25pct seed0: e2e val 97.38 test 97.17 (recorded 97.17)  probe val 97.80 test 97.69
+  grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_25pct seed1: e2e val 97.36 test 97.43 (recorded 97.43)  probe val 97.73 test 97.69
+  grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_25pct seed2: e2e val 97.16 test 97.37 (recorded 97.37)  probe val 97.68 test 97.69
+  grid_esat_r18_e99fb4_25pct seed0: e2e val 97.80 test 97.56 (recorded 97.56)  probe val 97.93 test 97.87
+  grid_esat_r18_e99fb4_25pct seed1: e2e val 97.75 test 97.33 (recorded 97.33)  probe val 98.02 test 97.54
+  grid_esat_r18_e99fb4_25pct seed2: e2e val 97.93 test 97.43 (recorded 97.44)  probe val 98.12 test 97.81

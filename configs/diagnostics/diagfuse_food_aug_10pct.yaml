@@ -1,0 +1,18 @@
+# diag: recipe deviation (DeiT augmentation and/or an SSL init).
+# E2, referee-requested: the three fusion arms missing on the two
+# populations that took NO part in configuration selection. Copied
+# verbatim from the prior cell, so only the added source changes.
+name: diagfuse_food_aug_10pct
+dataset: food101
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 10
+stem: none
+augment: deit

@@ -1,0 +1,318 @@
+I’ll review the manuscript in the same context as our journal-selection discussion: scientific contribution, novelty, technical strength, weaknesses, and which Q1 journal is the best fit in its current form. I’ll also flag what would need strengthening before targeting journals such as Knowledge-Based Systems, Information Fusion, Information Sciences, or Pattern Recognition.
+
+I’ve confirmed the uploaded manuscript is not the food/VLM paper from your earlier description; it is the paper titled “When does fusing hand-crafted knowledge with learned representations pay?”, currently framed for Information Fusion. I’ll therefore review this specific manuscript independently, while keeping the same journal-fit/ranking approach we were using.
+
+The manuscript has an unusually strong reproducibility/controls ethos, but I’ve already found one issue that a tough Q1 reviewer will focus on: the champion MomentAux configuration was selected using the CIFAR-100 test split. The paper discloses this very clearly, which is good, but disclosure does not remove the methodological concern; the strongest general claims must therefore rest on the untouched datasets/backbones, not CIFAR-100.
+
+I reviewed the uploaded manuscript in the context of our discussion about the best Q1 journal and submission strategy. I also checked the current scope of Information Fusion and recent literature relevant to the central claim.
+
+Overall assessment
+
+Manuscript: When does fusing hand-crafted knowledge with learned representations pay? A cost-normalized benchmark of stacking, substitution and interference
+
+My recommendation: Major Revision before submission
+
+Best journal: Information Fusion
+
+Current readiness for Information Fusion: about 7.5/10
+
+Potential after revision: 9/10
+
+If I were reviewing the manuscript for Information Fusion today, I would probably return Major Revision if the journal allowed that at first review; under a binary-style evaluation I would be around borderline / weak reject, primarily because the strongest prospective claim is not yet demonstrated as cleanly as the abstract suggests.
+
+That is not because the experiments are weak. Quite the opposite: the experimental work is unusually extensive. The problem is that the claims currently outrun the cleanest evidence in a few important places.
+
+Information Fusion is genuinely an excellent thematic fit. Its current scope explicitly covers multi-source, multi-process and multi-sensor information fusion, and recent issues include prior-guided/deep-fusion research, so the journal framing is defensible rather than artificial. 
+
+⸻
+
+Reviewer-style scorecard
+
+Criterion
+
+Score
+
+Assessment
+
+Novelty
+
+8.5/10
+
+Strong, particularly the attempt to predict whether sources will combine constructively
+
+Experimental depth
+
+9.8/10
+
+Exceptional: 3,054 configurations, 9,402 runs, 13 datasets, 9 backbones, dense tasks and sensor experiments
+
+Methodological rigor
+
+8.3/10
+
+Very strong controls, but important validation/test issues remain
+
+Statistical analysis
+
+8.0/10
+
+Thoughtful and unusually transparent; some conclusions depend on selection/resolvability
+
+Generality
+
+7.3/10
+
+Broad empirical coverage, but only one handcrafted-prior family
+
+Reproducibility
+
+9.5/10
+
+One of the manuscript’s strongest aspects
+
+Writing
+
+7.4/10
+
+Scientifically sophisticated but extremely dense
+
+Information Fusion fit
+
+9.3/10
+
+Excellent if fusion prediction is kept as the central contribution
+
+Publication readiness
+
+7.5/10
+
+Strong paper, but I would revise before submitting
+
+The strongest part of the paper
+
+The paper is substantially better than I expected from the title alone.
+
+The main scientific question is excellent:
+
+Can we determine before training whether two information sources will complement, duplicate, or interfere with one another?
+
+That is more interesting than simply proposing MomentAux.
+
+The paper also does something many ML papers do not: it actively looks for evidence against itself. You report failed preregistered predictions, budget artifacts, the dense-prediction correction, test-selection contamination, the ImageNet-transfer strength control, and the matched-label-budget result that weakens the original interpretation of the readout term.
+
+That transparency substantially strengthens credibility.
+
+The 3,054 configurations / 9,402 runs are also impressive, particularly because they are not just random benchmark expansion. There are controlled axes involving:
+
+\text{dataset}
+\times
+\text{data regime}
+\times
+\text{architecture}
+\times
+\text{intervention}
+\times
+\text{compute}
+
+with frozen-feature measurements accompanying the end-to-end results.
+
+The ViT results are particularly compelling:
+
++13 \text{ points for ViT-S}
+
+and
+
++26 \text{ points for ViT-B}
+
+under the reported 100-epoch setting, followed by the much more responsible 200-epoch comparison showing approximately
+
++4.5,\quad +6.7
+
+rather than hiding the budget dependence.
+
+That is good science.
+
+⸻
+
+The major issues I would address
+
+1. The prospective claim is currently stronger than the prospective experiment. This is the single most important issue. The abstract says the fusion outcome “can be anticipated before training,” and the introduction makes prediction-before-combination one of the paper’s central contributions. But most of the stack/substitute/tax taxonomy is established retrospectively. The manuscript itself admits that only the procedure in Section “A procedure for deciding whether to fuse” was actually called before training. Worse, that demonstration uses quantities measured on the test split. I would add a genuine prospective experiment. Choose perhaps 10–20 previously untouched source pairs across several datasets/backbones, calculate all diagnostics using validation only, commit the predicted outcome, train the combinations, and reveal test performance afterward. This one experiment could increase the paper’s credibility dramatically.
+2. “Currency” needs one operational definition that does not require seeing the combination. There is currently a subtle logical inconsistency. The fusion section says two sources have the same currency when their G values agree and the combination’s G does not exceed the better individual source. But if I need the combination’s G, then I have already trained the combination, so this cannot be the quantity used to decide whether to fuse beforehand. Later, the algorithm instead uses G_A, G_B, performance similarity and whether both arms improve the same images. That is closer to what you need. I would define currency exclusively using single-source information. For example, construct a source similarity vector from G, corrected-image overlap, CKA/representation similarity and perhaps invariance statistics, and then prospectively predict the fusion outcome. The combination should only be used for evaluating the prediction, never defining the predictor.
+3. “Tax” is currently presented too much as a fusion category when your own experiment shows it is predominantly a schedule effect. This section contains a very important result: at \lambda_0=1, injecting MomentAux into ImageNet-pretrained features produces enormous degradation; at \lambda_0\le0.3, the degradation essentially disappears. Therefore the scientifically precise conclusion is not simply \text{prior}+\text{mature initialization}\Rightarrow\text{tax}. It is closer to \text{strong early representational shaping}+\text{mature initialization}\Rightarrow\text{interference}. The manuscript itself says: “The tax is a property of the schedule, not of the fusion.” That sentence conflicts somewhat with presenting “tax” alongside stack and substitute as a general fusion class. I would rename this category interference under incompatible/over-strong shaping and make auxiliary strength part of the condition.
+4. “Different currencies stack” is not general enough yet to be written as a universal rule. Your own off-selection convolutional test is the key problem: prior + augmentation stacks at only 1 of 6 convolutional cells, while it works convincingly on the attention backbones. That is actually an interesting finding, but it means architecture is a moderator. The manuscript already acknowledges this, but the abstract/algorithm/taxonomy remain stronger than the detailed evidence. I would formulate the conclusion as something closer to: non-overlapping representational contributions are necessary but not always sufficient for constructive training-time fusion; compatibility with architecture and intervention strength moderates whether the potential complementarity is realized. That is less catchy but much harder for a reviewer to attack.
+5. The CIFAR-100 test-set selection issue is serious. The paper handles it admirably transparently, but transparency does not remove the methodological problem. MomentAux’s target, tap depth, \lambda_0, head normalization and loss were selected on the CIFAR-100 test set. Therefore CIFAR-100 is effectively a development dataset. I would explicitly rename it as such throughout the manuscript instead of continuing to describe its results like ordinary test results. You do not necessarily need to retrain all 9,402 runs. A more feasible solution is to designate CIFAR-100 as development and introduce a small but rigorous confirmatory benchmark on completely untouched datasets/backbones. Those confirmatory experiments should carry the strongest claims.
+6. Ironically, the matched-label-budget finding may be stronger than the “law” currently given the most space. This is one of the most important observations I found while reviewing the manuscript. Your headline decomposition is \Delta=G+\mathrm{readout}(\mathrm{base}), but the equality itself is definitional, as you correctly acknowledge. Then you discover that when the frozen-feature evaluation uses the practitioner’s actual label budget, most of the negative readout branch disappears and \Delta and G agree to 0.17 points on average across 30 cells and seven datasets. That is remarkably clean. I would elevate this result. A much stronger practical message is: a cheap matched-budget linear probe can accurately estimate whether an intervention’s representational gain will translate into end-to-end gain. Conversely, the full-label sign law has only 47.5% resolvable coverage, is 94.9% correct below the crossing but only 67.4% above it, and its negative branch is substantially induced by the mismatch between training and evaluation label budgets. I would make the sign law a secondary explanatory result rather than the conceptual center.
+7. The comparator set should be modernized slightly for a 2026 submission. SimCLR, SimSiam and DINO are useful because they represent different SSL mechanisms, but reviewers may ask why a 2026 benchmark does not contain at least one masked/predictive modern SSL representative. You do not need to repeat the entire grid. One carefully chosen modern comparator would suffice—MAE or I-JEPA would make sense conceptually because their “currency” may differ from contrastive invariance. MAE is a standard masked-image pretraining method and I-JEPA explicitly learns through latent prediction rather than contrastive augmentation invariance.  This would actually help test the currency hypothesis rather than merely satisfy reviewers.
+8. There is a highly relevant related-work paper missing from the conceptual discussion. Ericsson, Gouk and Hospedales explicitly study which invariances SSL learns and show that downstream tasks benefit differently from those invariances; they also report that fusing complementary representations improves transfer across diverse tasks. That is very close to your “different currencies stack” motivation.  You should cite it and explain the distinction clearly: they demonstrate complementary invariances and representation fusion; you are attempting to build a prospective, cost-normalized decision rule for whether two sources will be complementary, redundant or interfering.
+
+⸻
+
+A major writing/structure concern
+
+I compiled the submitted main.tex: the manuscript is 35 pages.
+
+More importantly, it feels like several strong papers occupying one manuscript:
+
+\text{MomentAux}
+
++\quad \text{data-efficiency benchmark}
+
++\quad \text{feature/readout law}
+
++\quad \text{fusion taxonomy}
+
++\quad \text{ViT inductive-bias study}
+
++\quad \text{multisensor study}
+
++\quad \text{decision-level fusion}
+
++\quad \text{segmentation/detection transfer}.
+
+That demonstrates tremendous work, but it makes the central scientific message harder to identify.
+
+For Information Fusion, I would make the manuscript unmistakably about:
+
+\boxed{
+\text{Can source-alone measurements predict whether fusion will pay?}
+}
+
+MomentAux then becomes the controlled knowledge source used to study the question.
+
+The ViT findings become an important case study.
+
+The segmentation/detection sections become external-validity tests.
+
+The massive ablation material largely moves to supplementary material.
+
+That would make the paper much sharper.
+
+⸻
+
+Abstract
+
+The abstract is scientifically rich but overloaded.
+
+It currently introduces:
+
+* 13 datasets;
+* 9 backbones;
+* 150–1.28M images;
+* 32–224 px;
+* 2.5M–86M parameters;
+* 3,054 configurations;
+* 9,402 runs;
+* stack/substitute/tax;
+* currency;
+* ImageNet interference;
+* sensor experiments;
+* the \Delta=G+\mathrm{readout} decomposition;
+* sign-law accuracy;
+* an unseen backbone prediction;
+* 0.17-point prediction accuracy.
+
+That is too many independent ideas for an abstract.
+
+I would retain only four:
+
+problem → experimental scale → prospective fusion criterion → main validation.
+
+The +26 result can remain as a memorable example, but much of the rest can move to the paper.
+
+⸻
+
+The title
+
+I like the current title:
+
+“When does fusing hand-crafted knowledge with learned representations pay?”
+
+It is much better for Information Fusion than a title centered on MomentAux.
+
+However, I would consider changing:
+
+“A cost-normalized benchmark of stacking, substitution and interference”
+
+to something closer to:
+
+“A cost-normalized benchmark and predictive framework for complementarity, redundancy, and interference”
+
+because complementarity/redundancy/interference maps more naturally onto established information-fusion terminology. Your manuscript itself acknowledges that stack/substitute are informal labels for established categories.
+
+⸻
+
+Information Fusion specifically
+
+After seeing the manuscript, I would move Information Fusion decisively to #1 for this particular paper.
+
+Unlike the food ontology/VLM manuscript we discussed earlier, this paper is not a natural Knowledge-Based Systems paper. There is no knowledge graph, symbolic reasoning system or ontology at its center. The contribution is about interactions between information sources and learned representations.
+
+The journal explicitly positions itself around multi-source and multi-process information fusion.  Recent Information Fusion volumes also contain prior-guided deep-fusion and representation-learning work, so the broad methodological interpretation of fusion used by your manuscript is compatible with what the journal publishes. 
+
+My ranking for this manuscript would therefore be:
+
+Rank
+
+Journal
+
+Fit
+
+1
+
+Information Fusion
+
+9.3/10
+
+2
+
+Pattern Recognition
+
+8.7/10
+
+3
+
+Information Sciences
+
+8.5/10
+
+4
+
+IEEE TNNLS
+
+8.2/10
+
+5
+
+Neural Networks
+
+8.0/10
+
+6
+
+Knowledge-Based Systems
+
+7.2/10
+
+For Pattern Recognition, I would emphasize the representation-learning/ViT/data-efficiency contribution. For Information Fusion, the current framing is basically correct: when should heterogeneous knowledge sources be fused, and can that decision be made beforehand?
+
+⸻
+
+My likely reviewer decision
+
+Were I reviewing the exact manuscript you uploaded, my recommendation would be:
+
+Major Revision — potentially strong acceptance after revision.
+
+I would not reject it because the experimental evidence is inadequate. The opposite is true. I would ask for revision because the central conceptual claim has not yet been subjected to the same standard of clean validation that the authors apply to the rest of the manuscript.
+
+The single highest-value addition would be this:
+
+\boxed{
+\textbf{A clean prospective fusion-prediction benchmark}
+}
+
+Use untouched dataset/backbone/source pairs. Compute the source diagnostics on validation data. Freeze the prediction. Train the combination. Evaluate once on test.
+
+If that experiment demonstrates that the source-alone diagnostic predicts stack vs. substitute vs. interference with convincing accuracy across held-out combinations, I think the manuscript becomes a genuinely strong Information Fusion paper, because then the contribution is no longer merely a very large retrospective benchmark—it becomes an experimentally validated decision framework for fusion.
+
+And I would seriously consider reorganizing the paper around that claim. The material to support a very strong Q1 submission is already here; the issue is primarily claim hierarchy, clean prospective validation, and focus, rather than a lack of experiments.

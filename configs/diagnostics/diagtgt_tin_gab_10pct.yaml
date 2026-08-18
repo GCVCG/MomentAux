@@ -1,0 +1,25 @@
+# diag: ablation lambda (0.3 constant, not the champion schedule), so these
+# cells are comparable to EACH OTHER as an ablation requires, and not to the
+# envelope tables. N1, referee-requested: the target-family ablation exists
+# only on CIFAR-100, which is the selection set, yet it is the sole evidence
+# for 'the target is the ingredient'. This repeats it on Tiny-ImageNet, a
+# transplant population (64px, 200-way), with the recipe copied verbatim from
+# tin_none_10pct so the ONLY variable is the auxiliary target.
+name: diagtgt_tin_gab_10pct
+dataset: tin
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 10
+stem: none
+stem_calibrate: true
+moment_aux:
+  stem: moments-cat
+  tap: layer3
+  weight: 0.3

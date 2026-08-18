@@ -1,0 +1,19 @@
+[food101] VAL 14140 / FIT 42622 (excluded pcts [5, 10, 25])
+  diagfuse_food_aug_25pct seed0: e2e val 60.62 test 65.40 (recorded 65.40)  probe val 61.51 test 66.46
+  diagfuse_food_aug_25pct seed1: e2e val 60.63 test 66.18 (recorded 66.18)  probe val 61.20 test 66.94
+  diagfuse_food_aug_25pct seed2: e2e val 61.05 test 66.18 (recorded 66.21)  probe val 61.61 test 66.92
+  diagfuse_food_prioraug_25pct seed0: e2e val 58.00 test 63.29 (recorded 63.29)  probe val 59.58 test 64.54
+  diagfuse_food_prioraug_25pct seed1: e2e val 59.36 test 63.78 (recorded 63.77)  probe val 60.21 test 64.95
+  diagfuse_food_prioraug_25pct seed2: e2e val 59.05 test 63.43 (recorded 63.43)  probe val 59.94 test 64.61
+  diagfuse_food_priorssl_25pct seed0: e2e val 55.71 test 61.26 (recorded 61.28)  probe val 56.29 test 61.61
+  diagfuse_food_priorssl_25pct seed1: e2e val 55.74 test 60.86 (recorded 60.83)  probe val 56.18 test 61.64
+  diagfuse_food_priorssl_25pct seed2: e2e val 55.74 test 60.91 (recorded 60.91)  probe val 55.73 test 61.21
+  diaggrid_simclr_food_25pct seed0: e2e val 56.55 test 62.30 (recorded 62.28)  probe val 57.08 test 62.82
+  diaggrid_simclr_food_25pct seed1: e2e val 57.23 test 62.35 (recorded 62.36)  probe val 57.72 test 62.81
+  diaggrid_simclr_food_25pct seed2: e2e val 56.75 test 62.37 (recorded 62.40)  probe val 57.03 test 63.15
+  grid_food_r18_9ee7da_25pct seed0: e2e val 57.31 test 63.05 (recorded 63.03)  probe val 58.07 test 63.20
+  grid_food_r18_9ee7da_25pct seed1: e2e val 56.63 test 62.74 (recorded 62.76)  probe val 57.67 test 62.91
+  grid_food_r18_9ee7da_25pct seed2: e2e val 57.50 test 62.87 (recorded 62.85)  probe val 58.21 test 63.22
+  grid_food_r18_axmagnitudeL3_l10to00_hn_8bd74b_25pct seed0: e2e val 56.60 test 62.13 (recorded 62.15)  probe val 56.93 test 62.51
+  grid_food_r18_axmagnitudeL3_l10to00_hn_8bd74b_25pct seed1: e2e val 56.51 test 62.06 (recorded 62.07)  probe val 56.87 test 62.73
+  grid_food_r18_axmagnitudeL3_l10to00_hn_8bd74b_25pct seed2: e2e val 56.50 test 62.35 (recorded 62.36)  probe val 57.25 test 62.55

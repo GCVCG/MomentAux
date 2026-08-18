@@ -1,0 +1,29 @@
+=== C2 arm none Mon Aug 17 01:22:45 PM CEST 2026 ===
+grid_mnet_tin_none_5pct seed0: shots-only (100000 imgs extracted)
+      25 shots/class (n= 5000): test 17.21
+     100 shots/class (n=20000): test 19.49
+     250 shots/class (n=50000): test 24.75
+grid_mnet_tin_none_5pct seed1: shots-only (100000 imgs extracted)
+      25 shots/class (n= 5000): test 16.59
+     100 shots/class (n=20000): test 18.82
+     250 shots/class (n=50000): test 23.62
+grid_mnet_tin_none_5pct seed2: shots-only (100000 imgs extracted)
+      25 shots/class (n= 5000): test 16.48
+     100 shots/class (n=20000): test 19.29
+     250 shots/class (n=50000): test 24.38
+PROBE_RESULT grid_mnet_tin_none_5pct shots250 24.25+/-0.58 over 3 seeds -> runs/grid_mnet_tin_none_5pct/linear_probe_shots.json
+=== C2 arm aux Mon Aug 17 01:32:46 PM CEST 2026 ===
+grid_mnet_tin_aux_5pct seed0: shots-only (100000 imgs extracted)
+      25 shots/class (n= 5000): test 16.48
+     100 shots/class (n=20000): test 20.07
+     250 shots/class (n=50000): test 23.67
+grid_mnet_tin_aux_5pct seed1: shots-only (100000 imgs extracted)
+      25 shots/class (n= 5000): test 16.87
+     100 shots/class (n=20000): test 19.64
+     250 shots/class (n=50000): test 24.40
+grid_mnet_tin_aux_5pct seed2: shots-only (100000 imgs extracted)
+      25 shots/class (n= 5000): test 16.76
+     100 shots/class (n=20000): test 19.77
+     250 shots/class (n=50000): test 24.79
+PROBE_RESULT grid_mnet_tin_aux_5pct shots250 24.29+/-0.57 over 3 seeds -> runs/grid_mnet_tin_aux_5pct/linear_probe_shots.json
+C2_SHOTS_COMPLETE Mon Aug 17 01:41:48 PM CEST 2026

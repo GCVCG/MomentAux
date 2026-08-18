@@ -32,6 +32,8 @@ MAX_REFS = 50
 MAX_ABSTRACT = 250
 HIGHLIGHTS = (3, 5)
 MAX_HIGHLIGHT = 85
+# .25\textwidth under cas-dc; see the build-log check for why it is whitelisted.
+CLASS_BOX_PT = "123.62721"
 
 
 def rendered(tex):
@@ -151,6 +153,52 @@ def main():
                         for x in xs]
             check(norm(txt) == norm(expanded),
                   "highlights.txt matches the highlights block in main.tex")
+
+    # ---- build log -------------------------------------------------------
+    # A referee read the shipped log and found an overfull box we had not, then
+    # reported it for five consecutive rounds. Boxes are now checked here, with
+    # ONE whitelisted exception identified by its exact size.
+    #
+    # THE WHITELISTED BOX IS THE CLASS'S OWN. cas-common.sty sets the ARTICLE
+    # INFO column as \hbox_to_wd:nn {\z@} {\box \g_stm_key_box}: a box of width
+    # .25\textwidth deliberately placed in a zero-width hbox so the abstract can
+    # flow beside it. .25\textwidth is 123.62721pt on this class, which is the
+    # excess reported, and it cannot be silenced from main.tex because
+    # \twocolumn's optional argument is typeset inside \@parboxrestore, whose
+    # final act is \sloppy (\hfuzz=0.5pt). Whitelisting by exact size rather
+    # than raising \hfuzz is deliberate: a blanket \hfuzz would also have hidden
+    # the 3.01pt table overrun this check caught on its first run.
+    log = os.path.join(HERE, "main.log")
+    if os.path.exists(log):
+        print("Build log")
+        boxes = re.findall(r"(Overfull \\[hv]box \(([0-9.]+)pt too (?:wide|high)\))",
+                           open(log, errors="replace").read())
+        stray = [b for b, pt in boxes if pt != CLASS_BOX_PT]
+        known = sum(1 for _, pt in boxes if pt == CLASS_BOX_PT)
+        check(not stray, "no overfull boxes beyond the known class artifact"
+                         + (f"; found {len(stray)}: {stray[0]}" if stray else
+                            f" ({known} whitelisted)"))
+        text = open(log, errors="replace").read()
+        check("Citation" not in text or "undefined" not in text,
+              "no undefined citations or references")
+
+    # ---- generated macros ------------------------------------------------
+    # Every macro in numbers.tex must be PRINTED somewhere. Unused macros were
+    # raised in two review rounds, and they matter beyond tidiness: a macro
+    # nothing prints cannot drift visibly, so it quietly stops being audited
+    # while still looking like a checked number.
+    macros = os.path.join(HERE, "tables", "numbers.tex")
+    if os.path.exists(macros):
+        print("Generated numbers")
+        names = set(re.findall(r"\\newcommand\{\\([A-Za-z]+)\}", open(macros).read()))
+        body = ""
+        for f in [main_tex] + sorted(glob.glob(os.path.join(HERE, "sections", "*.tex"))):
+            body += open(f).read()
+        used = set(re.findall(r"\\([A-Za-z]+)", body))
+        unused = sorted(names - used)
+        check(not unused, "every generated macro is used"
+                          + (f"; unused: {', '.join(unused)}" if unused else
+                             f" ({len(names)} macros)"))
 
     print("Files named in SUBMISSION_FILES.md")
     listed = open(os.path.join(HERE, "SUBMISSION_FILES.md")).read()

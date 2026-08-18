@@ -20,14 +20,24 @@ The guide requires editable source files; a PDF alone is not accepted.
 | Figures, separate files | `figs/*.pdf` |
 | Compiled manuscript | `main.pdf` |
 | Highlights, separate editable file | `highlights.txt` |
-| Graphical abstract, separate file | `figs/graphical_abstract_submission.png` |
+| Graphical abstract, separate file | `figs/graphical_abstract_submission.pdf` |
 | Cover letter | `cover_letter.md` |
 | Response to the referee | `../docs/RESPONSE_TO_REFEREE.md` |
 
 Build: `pdflatex main && bibtex main && pdflatex main && pdflatex main`
 
-Regenerate the graphical abstract in submission format (2.5:1, 1889x755,
-above the 1328x531 minimum) with:
+The highlights and the graphical abstract are typeset into `main.pdf` only
+when `\submissionmodefalse` is set in `main.tex`. It is ON for submission, so
+the compiled manuscript is the article alone: the guide asks for both as
+separate uploads, and typesetting them into the manuscript would both
+duplicate a deliverable and spend two of the 35 permitted pages on it.
+
+We upload the PDF graphical abstract rather than the PNG because the guide
+names "TIFF, EPS, PDF or MS Office" as the preferred types; the PNG is
+regenerated alongside it and is a valid fallback if the submission system
+refuses vector input. Both are 2.5:1 and clear the 1328x531 minimum (the PDF
+renders to 1890x756 at 300 dpi, and being vector is readable at any size).
+Regenerate both with:
 
     GA_SUBMISSION=1 python figs/make_graphical_abstract.py
 

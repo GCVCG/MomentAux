@@ -6889,3 +6889,130 @@ ported vs corrected and why.
   which would have paired an aborted checkpoint with a fresh final.json, the
   wrong-epoch defect this study already spent a day on. Restarts excluded that
   node and ran clean.
+
+## THE THIRD AUDIT-SCOPE REPAIR: THE PAPER'S OWN 100% RULE WAS NOT IN THE
+## AUDIT SCRIPT (2026-08-18, found by the final pre-submission sweep)
+
+- THE DEFECT, and it is the same class as the two repairs already on record
+  (the pretrained-string leak and the late-admission scope): the manuscript
+  states "at 100% cells we report the aux-vs-baseline gap but do not split it
+  into G and readout" -- the probe-ceiling rule, pre-registered on 2026-07-18
+  -- while analysis/audit_law_paired.py applied NO such filter. 62 cells at
+  subset_pct=100 sat in law scope, 16 of them resolvable, scoring 56.2%. The
+  paper was enforcing a rule its released audit script did not.
+- THE FIX, in both scripts: audit_law_paired.py gained the filter in
+  in_scope; audit_sign_law.py gained probe_interpretable() applied OUTSIDE
+  the law-scope toggle, because the ceiling gates the MEASUREMENT, not the
+  intervention, so --scope all honours it too. law_audit.md regenerated; its
+  header is now script-emitted (it had been hand-typed, so its own
+  "regenerate with this command" line did not reproduce it -- the same
+  self-inconsistency the exporters exist to prevent).
+- THE HEADLINE MOVES, AND BOTH DIRECTIONS ARE REPORTED: 471 resolvable ->
+  **455**, correct 402 -> **393**, rate 85.4% -> **86.4%** [82.9, 89.2];
+  below-crossing 94.3% -> 94.9%. The rate RISES because the excluded cells
+  scored 56.2% -- ceiling-compressed readouts are noise and the rule was
+  right to exclude them. THE COST IS BREADTH: vit_base and vit_small leave
+  law scope entirely (their only law cells are ImageNet-100 at 100%), and
+  imagenet100 leaves as a dataset identity -- backbones 9 -> 7, datasets
+  21 -> 20. vit_tiny survives, so attention stays represented. The flattering
+  half (the rate) and the costly half (the breadth) travel together.
+- WHAT IS UNTOUCHED, stated so nobody misreads the ImageNet rows vanishing
+  from one table and not another: Section 7's Delta ~= G result at ImageNet
+  scale reports the GAP with no signed readout split, so it already complied
+  and stands unchanged; the dense audit already complied (dense_law.csv
+  byte-identical on regeneration). Only the sign-law count moves.
+- THE REPAIR HISTORY IS NOW THREE STEPS AND EACH IS ATTRIBUTABLE: the
+  macro layer splits auditExcl* (repair 1, the pretrained leak: 91 cells),
+  auditMid* (the intermediate 1,020/471/85.4 state), and auditHundred*
+  (repair 2: 62 cells, 16 resolvable, 56.3%). Pooling them would have made
+  the existing repair-1 paragraph false -- its "restoring it removes N
+  cells" arithmetic attributes N entirely to the string bug -- which is
+  exactly the second-order re-basing failure recorded on 2026-08-17, caught
+  prospectively this time.
+- THE GENERAL LESSON, fourth instance of the family: a rule stated in prose
+  and enforced by hand is not enforced. The probe-ceiling rule had been
+  applied correctly in every LEDGER scoring since 2026-07-18 (cub@100%,
+  in100, dense 100% cells) and was still absent from the SCRIPT a referee
+  would run. Every scope rule the paper states must be greppable in the
+  audit code that ships with it.
+- SAME RULE, THIRD ARTIFACT, found by applying the lesson the same hour it
+  was written: analysis/export_excel.py computed readout = Delta - G for
+  EVERY probed cell including the 103 at 100%, so the released spreadsheet
+  invited a reader to compute exactly the split the paper rules out. Fixed:
+  readout is blank at subset_pct=100 (G stays -- the aux-vs-baseline probe
+  gap under identical probing is the ruled-reportable quantity), the README
+  sheet says why, and the regenerated workbook verifies 103 full-data rows
+  blanked with zero sub-100% rows affected, on both the Law and All-cells
+  sheets.
+
+## THE 23-ITEM INTERNAL ROUND + CHATGPT R2 (2026-08-18/19, applied in one
+## figures pass + one writer pass; gate green at exactly 35 pages)
+
+- TERMINOLOGY DECISION, coordinated across both passes before either ran:
+  the third fusion outcome is renamed **interference**, with the strength
+  condition attached at every general statement (-16..-18 at lambda0=1.0,
+  vanishing at lambda0<=0.3); "tax" survives only as the name of the
+  measured degradation inside the transfer experiment, introduced once as
+  "an interference tax". This aligns the body with the title, which already
+  said interference, and answers ChatGPT-3 and the informal-register review
+  item at once. Public artifacts (README, docs, project page) renamed the
+  same day; the page's .tax CSS class name is an invisible identifier and
+  stays.
+- CURRENCY DEFINITION DE-CIRCULARIZED (ChatGPT-2, a real logical catch):
+  the old text defined same-currency partly via the COMBINATION's G, which
+  cannot be known before fusing. Currency is now defined from single-source
+  measurements only (each source's G, which test images its arm fixes,
+  representation similarity); the combination's G appears only as what the
+  definition predicts.
+- OTHER CLAIM-LEVEL CHANGES: "different currencies stack" softened to
+  necessary-not-sufficient with architecture and strength as moderators at
+  every headline site (the off-selection conv result stacks 1 of 6 cells);
+  the matched-budget Delta ~= G result elevated over the sign law in
+  abstract/contributions/law-section lead/conclusion; "anticipated before
+  training" aligned to "from quantities available before the combination is
+  trained"; CIFAR-100 naming unified on "selection set"; Ericsson-Gouk-
+  Hospedales (BMVC 2022) added with a one-sentence distinction -- cited
+  refs now 50 = the cap. Intro gained 13 citations, all reusing existing
+  keys.
+- MECHANICAL SWEEPS: "rather than" 93 -> 32 tree-wide; "champion" -> 
+  "reference configuration" (0 remain); readout is now a semantic macro
+  (\readout, italic) everywhere including Eq. 1; Section~ -> Sec.~ at 133
+  sites (sentence-start kept full); result tables carry bold/underline/
+  italic best/2nd/3rd with per-table judgment recorded (tab:det left
+  unstyled: bolding a "best" the text refuses to report as a gain would
+  assert a ranking the section denies).
+- FIGURES REDESIGNED: fig:method rebuilt (feature-map slabs, real loss +
+  lambda(t) inset, deployment strip, new stack/substitute/interfere
+  outcomes panel with measured examples); fig:bank now shows the pinned
+  bank's ACTUAL calibrated magnitude responses on an STL-10 image chosen by
+  a deterministic criterion (every orientation channel dominates somewhere
+  -- max-min over per-orientation argmax fractions; a plain max-min
+  selected gravel texture that read as noise). fig:currency legend overlap
+  fixed; fig:dense legend now covers every marker encoding. One cross-agent
+  seam caught on the rendered page: the figure said W_a where the body says
+  W -- fixed at the generator.
+- tab:budget TRANSPOSED TO SINGLE COLUMN (user instruction, resolved from
+  "Table 16" via main.aux to the label -- table numbers shift under edits,
+  labels do not); every cell re-verified against the original. This
+  conversion is what returned the manuscript to 35 pages after the round's
+  additions.
+- SUPPLEMENT MERGE (item 22) DOES NOT FIT, with the arithmetic recorded:
+  article exactly 35 with ~5 free lines; the smallest supplement section
+  typesets at ~0.35 page two-column, so merging ANY section exceeds the
+  limit. Supplement stays S1-S8.
+- CI FAILURE (item 21) DIAGNOSED: the public repo push of 2026-08-18 12:26
+  carried the regenerated numbers.tex but predated the public-numbers sync;
+  the repo's own drift check failed exactly as designed. Fixed by this
+  round's push.
+- SUPERSEDES the 2026-08-18 "FINAL GATE" line "49 references": the count is
+  now 50 (Ericsson added, cap reached). Same supersession rule as ever --
+  the original entry stays, this line corrects the state.
+- DECISIONS LEFT WITH THE USER, recorded before any is taken: (a) title
+  change to "complementarity, redundancy, interference" phrasing --
+  recommend AGAINST ("predictive framework" overclaims what ChatGPT-1
+  itself says is under-validated, and the body keeps stack/substitute);
+  (b) a genuinely prospective fusion-prediction experiment (untouched
+  pairs, validation-only diagnostics, predictions committed before
+  training) -- recommend FOR, infrastructure exists; (c) a masked-SSL
+  comparator (MAE on the decisive ViT fractions) -- optional, pairs
+  naturally with (b).

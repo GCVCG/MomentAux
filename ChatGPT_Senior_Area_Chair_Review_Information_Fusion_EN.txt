@@ -1,0 +1,1829 @@
+SENIOR AREA CHAIR REVIEW — INFORMATION FUSION
+
+I reviewed the complete manuscript contained in paper.zip, including the compiled PDF and LaTeX sources, following the requested evaluation criteria: novelty, information fusion relevance, technical soundness, experimental rigor, state-of-the-art comparison, ablations, reproducibility, impact, and specific suitability for Information Fusion.
+
+GENERAL CONCLUSION
+
+The paper has a clearly publishable scientific foundation and an exceptional experimental effort, but I would not submit it to Information Fusion yet.
+
+Current recommendation: MAJOR REVISION
+
+Overall score: 6.8–7.0/10
+
+Confidence: 4/5
+
+The main problem is not the number of experiments. It is that the manuscript's central claims are currently stronger than the evidence supporting them, especially the claims involving "currency", "law", "predictable beforehand", "never add prior", and some generalizations about multi-source fusion.
+
+
+1. WHAT THE PAPER IS ACTUALLY PROPOSING
+
+Main research problem
+
+The paper investigates an important question:
+
+When is it beneficial to fuse hand-crafted prior knowledge with learned representations, when are the two sources redundant, and when can their combination hurt performance?
+
+The work is not simply trying to show that MomentAux improves accuracy. It attempts to turn apparently contradictory behaviors into a general rule about interactions among information sources.
+
+Core hypothesis
+
+The central hypothesis is that different sources provide different "information currencies" and that:
+
+- sources providing different information stack;
+- sources providing redundant information substitute for each other;
+- adding a shaping prior to an already mature representation may create a tax/interference effect.
+
+The manuscript further argues that this interaction may be predicted before training the combined system, using changes measured with linear probing on frozen representations.
+
+Main methodological contribution
+
+MomentAux uses a fixed Gabor bank as an auxiliary training target:
+
+L = L_CE + lambda(t) ||W f_3(x) - m(x)||_2^2
+
+with an approximately 2% computational overhead and no additional inference cost.
+
+However, scientifically, I do not consider MomentAux itself to be the paper's most important contribution.
+
+The potentially strongest contribution for Information Fusion is:
+
+the attempt to formulate a measurable procedure for deciding when two information sources should be fused.
+
+Claimed novelty
+
+The manuscript presents five main contributions:
+
+1. a highly controlled experimental protocol;
+2. a grid of 2,978 configurations / 9,079 runs;
+3. a proposed empirical "law";
+4. the stack / substitute / tax taxonomy;
+5. a predictive procedure for deciding whether sources should be fused.
+
+Role of information fusion
+
+There is a genuine information-fusion component.
+
+Depending on the experiment, the paper combines:
+
+- labeled data + hand-crafted prior;
+- learned SSL representations + structural prior;
+- augmentation-derived invariances + structural prior;
+- ImageNet initialization + structural prior;
+- Sentinel-1 + Sentinel-2;
+- different Sentinel-2 bands;
+- decisions from different classifiers.
+
+This corresponds to several forms of fusion:
+
+- knowledge-level fusion;
+- representation-level fusion;
+- training-time fusion;
+- multi-source fusion;
+- sensor-level fusion;
+- decision-level fusion.
+
+Main findings
+
+The most convincing findings are:
+
+- MomentAux can produce very large improvements in ViTs trained from scratch.
+- The effect depends strongly on backbone and data regime.
+- The prior can combine favorably with augmentation.
+- It can become redundant with sufficiently strong SSL.
+- It can interfere with ImageNet-pretrained representations.
+- The visible usefulness of the prior does not directly follow from its representational effect.
+- The same general patterns appear across multiple datasets and architectures.
+- Negative results in segmentation/detection and failed predictions are reported rather than hidden.
+
+Strongest scientific contribution
+
+I would not identify the +26% ViT-B improvement as the main scientific contribution.
+
+The strongest contribution is:
+
+the controlled, cost-normalized experimental design for studying when information sources complement, substitute for, or interfere with one another, together with the attempt to move from a retrospective taxonomy to a predictive rule that can be applied before fusion.
+
+This is also the part that needs the most strengthening before submission to Information Fusion.
+
+
+2. JOURNAL FIT — INFORMATION FUSION
+
+Is information fusion central?
+
+Conceptually, yes. Experimentally, not yet as strongly as it should be.
+
+A large fraction of the thousands of experiments are essentially:
+
+visual representation learning baseline + auxiliary structural supervision.
+
+By itself, that could also fit naturally in a computer vision or machine learning journal.
+
+The paper becomes particularly relevant to Information Fusion when it asks:
+
+Given sources A and B, can we determine whether their information is complementary, redundant, or interfering before fusion?
+
+That question should become unequivocally the intellectual center of the manuscript.
+
+Problem
+
+The experiments closest to classical fusion — Section "Fusing genuinely different sources", Table 18, and Table 19 — are much smaller in scope than the main experimental grid.
+
+More importantly, Table 18 itself acknowledges that EuroSAT-MS vs. So2Sat simultaneously changes:
+
+- source asymmetry;
+- modality.
+
+Therefore, the experiment cannot identify which of these factors causes the observed behavior.
+
+Assessment
+
+The paper can fit Information Fusion well, but it should be positioned as:
+
+a controlled framework for measuring source complementarity, redundancy, and interference
+
+rather than primarily as:
+
+a very large benchmark showing that Gabor auxiliary targets improve vision networks.
+
+Journal Fit score: 7/10
+
+This could rise to 8–9/10 if "currency" becomes an operational, prospectively validated measure of interactions among sources.
+
+
+3. NOVELTY ASSESSMENT
+
+3.1 MomentAux
+
+Category:
+new combination of existing components + engineering/methodological refinement.
+
+Gabor filters, auxiliary supervision, and feature regularization are not individually novel.
+
+The particular combination of:
+
+- fixed Gabor targets;
+- auxiliary regression;
+- a decaying loss that reaches exactly zero;
+- discarding the auxiliary head at inference;
+
+is a defensible methodological variant.
+
+However, I do not believe MomentAux alone would provide sufficient novelty for Information Fusion.
+
+3.2 Controlled benchmark
+
+Category:
+genuine experimental/methodological contribution.
+
+The following design choices are distinctive and valuable:
+
+- identical subsets;
+- fixed training recipes;
+- explicit compute accounting;
+- thousands of cells;
+- feature probing;
+- pre-registered falsifiers;
+- reporting negative results.
+
+This is a major strength.
+
+3.3 Delta = G + readout
+
+This point requires extreme care.
+
+The manuscript defines:
+
+readout = Delta - G.
+
+Therefore:
+
+Delta = G + readout
+
+is necessarily true.
+
+This is not an empirical law. It is an algebraic identity resulting from the definition.
+
+The actually novel and falsifiable claim is:
+
+the sign or magnitude of readout can be anticipated from baseline accuracy.
+
+That relation reportedly has:
+
+R^2 = 0.26,
+
+with substantial residual dispersion.
+
+The result may still be interesting, but the equation itself should not be presented as "the law."
+
+3.4 Stack / substitute / tax
+
+Category:
+new operational taxonomy / combination of previously known phenomena.
+
+The paper itself correctly recognizes that the underlying ideas of:
+
+- redundancy;
+- synergy;
+- negative transfer/interference;
+
+are not new.
+
+There is also close prior work studying the value of prior knowledge as a function of data, including dependence, synergy, and substitution effects. This creates a potential novelty challenge that must be addressed explicitly in the Related Work section.
+
+A skeptical reviewer could reasonably ask:
+
+What is fundamentally new here beyond a much larger empirical realization of prior-knowledge synergy and substitution?
+
+The manuscript needs a direct answer.
+
+3.5 "Currency"
+
+This may be the manuscript's most novel potential contribution and, at the same time, its most vulnerable one.
+
+The paper correctly discusses Partial Information Decomposition as a framework that formalizes:
+
+- redundant information;
+- unique information;
+- synergistic information.
+
+However, the manuscript explicitly states that it does not compute PID.
+
+Instead, it relies mainly on:
+
+- the magnitude of G;
+- agreement on corrected images;
+- CKA;
+- some feature-side comparisons.
+
+The problem is that the most direct validation of "same currency" appears mainly in Figure 9, for a specific ViT-tiny / CIFAR-100 / 10% setting.
+
+A similar magnitude of G does not prove that two sources encode the same information.
+
+Two representations can improve linearly decodable accuracy by the same amount while containing very different information.
+
+Novelty score: 7/10
+
+This could rise to 8/10 if:
+
+1. the manuscript positions itself clearly against the closest prior work;
+2. "currency" is operationally defined;
+3. the resulting measure prospectively predicts stacking/substitution/interference.
+
+
+4. TECHNICAL SOUNDNESS
+
+T1. CIFAR-100 is simultaneously a development and evaluation dataset
+
+Severity: MAJOR
+
+Section "Configuration selection, and what it costs us" is commendably transparent.
+
+The manuscript explicitly acknowledges that:
+
+"the CIFAR-100 cells are a selection set, and their absolute values carry a selection bias of unknown size."
+
+This is a genuine methodological issue.
+
+The same CIFAR-100 test split was used to select elements such as:
+
+- target family;
+- tap depth;
+- lambda_0;
+- head normalization;
+- loss form;
+
+and CIFAR-100 results are subsequently reported as part of the paper's evidence.
+
+Transparency prevents this from looking like a hidden flaw, but it does not remove the selection bias.
+
+The argument that the remaining datasets provide transplant evidence is reasonable, so I do not believe this invalidates the paper as a whole.
+
+However, CIFAR-100 is also deeply involved in:
+
+- Table 11;
+- Figure 9;
+- Table 16;
+- Table 19;
+- several ablations;
+- the end-to-end demonstration of the decision procedure.
+
+Thus, some of the conceptually strongest claims still rely heavily on the development environment.
+
+
+T2. "Currency" is not independently measured
+
+Severity: MAJOR
+
+The Introduction claims that:
+
+"each source's currency is measurable [...] from each source alone, before any combination is trained."
+
+This is currently too strong.
+
+G_A approximately equal to G_B does not imply that sources A and B contain the same informational content.
+
+Two representations may provide the same gain in probe accuracy while encoding different predictive evidence.
+
+Figure 9 strengthens the argument through:
+
+- same-image fixes;
+- CKA;
+
+but remains a localized demonstration rather than a general validation.
+
+
+T3. The "law" combines an identity with an empirical hypothesis
+
+Severity: MAJOR
+
+The equality:
+
+Delta = G + (Delta - G)
+
+does not require empirical validation.
+
+The empirical claim is:
+
+readout approximately follows some function of baseline accuracy.
+
+This distinction must be explicit.
+
+In addition:
+
+- R^2 = 0.26 for baseline accuracy;
+- dataset identity explains non-trivial additional variance;
+- residual standard deviation is around 2 percentage points.
+
+Therefore, statements suggesting that readout "depends only on baseline accuracy" are too strong.
+
+A more defensible formulation would be:
+
+"Across the controlled grid, baseline accuracy is the strongest single predictor we identify for the sign of the residual readout term, although substantial dataset-dependent variation remains."
+
+
+T4. The 85.7% result must be reported together with coverage
+
+Severity: MODERATE–MAJOR
+
+Table 7 reports:
+
+- scope: 1,009 cells;
+- resolvable: 461;
+- unresolved: 450;
+- crossing bracket: 98;
+- correct among resolvable: 395/461 = 85.7%.
+
+Thus, the statement:
+
+"85.7% of testable cells"
+
+is mathematically correct.
+
+However, only:
+
+461 / 1009 = 45.7%
+
+of the scoped cells receive an actual sign test.
+
+This matters.
+
+A reviewer may argue that the resolvability condition removes precisely the difficult or near-zero cases.
+
+Table 8 partially addresses threshold sensitivity, but the paper should explicitly report:
+
+85.7% sign accuracy at 45.7% resolvable coverage.
+
+
+T5. "Tax" may reflect a hyperparameter mismatch
+
+Severity: MAJOR
+
+Table 12 shows a highly interesting result: applying MomentAux on top of ImageNet initialization can substantially reduce accuracy.
+
+However, the manuscript then moves toward conclusions such as:
+
+"never add prior"
+
+and essentially treats a mature initialization as a tax condition.
+
+The problem is that the MomentAux configuration was primarily selected for from-scratch training.
+
+The paper does not demonstrate that the negative effect remains under:
+
+- smaller lambda_0;
+- delayed auxiliary loss;
+- shorter shaping;
+- faster decay;
+- an alternative tap;
+- warm-up-only auxiliary supervision.
+
+Therefore, the current evidence supports:
+
+this specific shaping configuration interferes with these pretrained representations.
+
+It does not yet fully establish:
+
+structural priors intrinsically tax mature pretrained representations.
+
+
+T6. Statistical dependence in decision-level fusion
+
+Severity: MAJOR
+
+The decision-level fusion section studies 28 model pairs.
+
+However, different pairs reuse the same models/checkpoints.
+
+Therefore, observations are not statistically independent.
+
+OLS coefficient standard errors and t-statistics should not be interpreted as if the 28 observations were iid.
+
+The analysis should use, for example:
+
+- clustered bootstrap;
+- resampling over base models/seeds;
+- mixed-effects modeling;
+- or an independent design.
+
+
+T7. Test data should not be used in the decision procedure
+
+Severity: MAJOR
+
+For a tool whose purpose is to decide before fusion, criteria such as:
+
+- image-fix overlap;
+- per-example complementarity;
+- source asymmetry;
+
+should be measured on validation data, not on the final test set.
+
+The correct protocol is:
+
+1. estimate the decision criterion on validation data;
+2. decide whether/how to fuse;
+3. train the chosen combination;
+4. evaluate only once on untouched test data.
+
+Otherwise, the supposedly predictive procedure risks becoming test-dependent.
+
+
+T8. ViT gains may partially reflect optimization stabilization
+
+Severity: MODERATE–MAJOR
+
+The +13 and +26 point gains are impressive.
+
+Precisely because they are so large, they require stronger controls.
+
+For example, ViT-B/16 can have a substantially worse baseline than ViT-S/16 in some regimes, while the prior significantly stabilizes training.
+
+This may partially mean:
+
+MomentAux rescues an unstable or under-optimized training setup.
+
+It does not automatically establish:
+
+larger transformers inherently lack increasingly more oriented structural information.
+
+The latter is a stronger causal interpretation.
+
+Technical Soundness score: 7/10
+
+The implementation itself appears technically solid. The main concerns relate to causal identification, statistical interpretation, and the scope of the conclusions rather than basic architectural mistakes.
+
+
+5. EXPERIMENTAL EVALUATION
+
+Major strengths
+
+It is unusual to see a manuscript with:
+
+- 9,079 runs;
+- 2,978 configurations;
+- 13 datasets;
+- 9 backbones;
+- dataset scales from 500 to 1.28M images;
+- multiple resolutions;
+- compute normalization;
+- multiple seeds;
+- negative results;
+- registered predictions;
+- segmentation experiments;
+- detection experiments;
+- explicit failure analysis.
+
+This is clearly journal-level experimental effort.
+
+Key reviewer question
+
+Could the observed improvement reasonably be caused by something other than the contribution claimed by the authors?
+
+In some cases, yes.
+
+MomentAux improvements may partially arise from:
+
+1. regularization;
+2. optimization stabilization;
+3. architecture-specific training deficiencies;
+4. implicit additional supervision;
+5. CIFAR-100 selection;
+6. under-tuned comparator configurations.
+
+The manuscript already includes controls involving:
+
+- random targets;
+- HOG;
+- FitNets;
+- bank width;
+- placement;
+- schedule;
+
+which successfully eliminate several alternative explanations.
+
+However, the largest ViT gains still need a clearer separation between:
+
+structural-information benefit
+
+and
+
+optimization rescue.
+
+
+ESSENTIAL EXPERIMENTS BEFORE PUBLICATION
+
+E1. Prospectively validate "currency"
+
+This is the single most important missing experiment.
+
+Before training A+B:
+
+1. train baseline, A, and B;
+2. estimate a source-overlap/complementarity measure on validation data;
+3. classify the pair as Stack/Substitute/Tax;
+4. freeze the prediction;
+5. train A+B;
+6. evaluate whether the prediction was correct on untouched test data.
+
+Repeat across multiple:
+
+- datasets;
+- backbones;
+- source pairs.
+
+Report:
+
+- confusion matrix;
+- balanced accuracy;
+- coverage;
+- calibration;
+- prediction confidence.
+
+This would transform the paper's main conceptual claim into a much stronger Information Fusion contribution.
+
+
+E2. Add a fully clean confirmatory experiment
+
+It is not necessary to repeat all 9,079 runs.
+
+A smaller confirmatory grid is sufficient if:
+
+- validation is used for all selection;
+- test data remain completely untouched.
+
+A useful design would select 20–40 critical cells covering:
+
+- Prior;
+- SSL;
+- augmentation;
+- Prior+SSL;
+- Prior+augmentation;
+- transfer;
+- transfer+prior.
+
+Run them on one or two datasets that were not part of the central conceptual development process.
+
+
+E3. Test the mechanism behind the "tax"
+
+For ImageNet initialization, evaluate:
+
+lambda_0 in {0.05, 0.1, 0.3, 1.0}
+
+plus:
+
+- delayed start;
+- early-only shaping.
+
+If all configurations remain harmful, the tax hypothesis becomes much stronger.
+
+If weaker configurations work, the interpretation must be revised.
+
+
+E4. Add an architecture-native strong baseline for the transformer result
+
+This is particularly important for ViT-B/16.
+
+The paper should demonstrate that the +26 improvement does not disappear when the baseline is:
+
+- more carefully optimized;
+- trained longer;
+- trained with a strong architecture-appropriate standard recipe.
+
+
+E5. Correct decision-level statistics and avoid test-set decision making
+
+This is necessary if the decision procedure remains a central contribution.
+
+
+E6. Resolve or weaken the multisensor claim
+
+There are two defensible options:
+
+Option A:
+add a third population that separates modality from source asymmetry.
+
+Option B:
+retain the current experiments but frame them explicitly as boundary evidence, not as proof that source asymmetry predicts multisensor fusion.
+
+Strongly recommended experiments
+
+- Add one more modern comparator.
+- Replicate direct currency analysis beyond Figure 9.
+- Add confidence intervals for CKA / image-fix agreement.
+- Test probe sensitivity: ridge / nonlinear probe.
+- Vary compute for more comparators, not only SimCLR.
+- Replicate currency prediction on Tiny-ImageNet or another independent population.
+
+Optional experiments
+
+- color-opponent priors;
+- depth/symmetry priors;
+- additional dense tasks;
+- more filter-bank widths;
+- more auxiliary-head architectures.
+
+Experimental Rigor score: 7/10
+
+Quantity: 10/10.
+
+Confirmatory design for the central theoretical claims: approximately 6–7/10.
+
+
+6. STATE-OF-THE-ART COMPARISON
+
+This is one of the weaker parts of the current paper.
+
+Problem
+
+The Introduction refers to:
+
+"the strongest data-driven alternatives"
+
+but the main SSL comparators include:
+
+- SimCLR;
+- SimSiam;
+- DINO.
+
+For a 2026 submission, this wording is too strong.
+
+The paper does not need to become an SSL leaderboard. That would actually undermine its controlled-study design.
+
+Instead, it should use wording such as:
+
+representative controlled baselines
+
+rather than:
+
+the strongest data-driven alternatives.
+
+
+Recommended reorganization of the SOTA tables
+
+TABLE A — Controlled same-data / same-subset comparison
+
+Suggested columns:
+
+Method | Extra data | Compute | Prior type | Accuracy | Delta | G | Seeds
+
+Include:
+
+- baseline;
+- MomentAux;
+- HOG;
+- augmentation;
+- SimCLR;
+- SimSiam;
+- DINO;
+- one additional modern method.
+
+All should use exactly the same subsets.
+
+
+TABLE B — External-pretraining comparison
+
+Separate:
+
+- supervised ImageNet pretraining;
+- any foundation/SSL external-pretraining method included;
+- MomentAux from scratch.
+
+These methods use additional external information and should not be placed in the same cost-equivalent comparison without qualification.
+
+
+TABLE C — Fusion interaction table
+
+This should become central for Information Fusion:
+
+Source A | Source B | A | B | A+B | Fusion gain over best | G_A | G_B | Currency similarity | Prediction | Outcome
+
+Define:
+
+F(A,B) = Perf(A+B) - max[Perf(A), Perf(B)].
+
+This would make the fusion claim much clearer.
+
+
+TABLE D — Prospective prediction accuracy
+
+Dataset | Backbone | Pair | Predicted relation | Observed relation | Correct?
+
+This could become one of the most important tables in the paper.
+
+SOTA Comparison score: 6/10
+
+The evaluation is highly controlled, but the manuscript should not claim comparison against the strongest contemporary alternatives in its current form.
+
+
+7. ABLATION STUDIES
+
+The existing ablations are strong.
+
+Particularly valuable are:
+
+- Table 22 target/mechanism controls;
+- target type;
+- random maps;
+- HOG;
+- FitNet;
+- placement;
+- schedule endpoint;
+- head normalization;
+- bank width;
+- forward-path alternative.
+
+This is better than what many journal papers provide.
+
+However, the most important missing ablations for this manuscript are not additional Gabor variations.
+
+They are ablations of the fusion theory itself.
+
+Minimum convincing ablation set
+
+1. Baseline.
+2. Prior.
+3. Alternative structured target.
+4. Random target.
+5. Augmentation.
+6. Prior + augmentation.
+7. SSL.
+8. Prior + SSL.
+9. Pretrained initialization.
+10. Pretrained + prior.
+11. Pretrained + weak prior.
+12. Pretrained + delayed prior.
+13. Currency similarity metric for key combinations.
+14. Predicted vs. observed interaction.
+
+A large fraction already exists, but it should be reorganized as a causal ablation of the fusion hypothesis.
+
+Ablation Quality score: 8/10
+
+
+8. RESULTS INTERPRETATION
+
+Results that strongly support the hypothesis
+
+- MomentAux + augmentation.
+- Near-substitution of Prior + SimCLR in the studied cases.
+- Strong interference with ImageNet-pretrained representations.
+- Similar trends across multiple datasets/backbones.
+- Compute-budget experiments that correct previous conclusions.
+- Feature-side measurements accompanying end-to-end results.
+
+Results that only partially support the hypothesis
+
+"Currency predicts fusion"
+
+Interesting, but still only partially demonstrated.
+
+Figure 9 provides useful evidence, but a single direct analysis is insufficient to support a general law.
+
+"Baseline accuracy determines readout"
+
+Supported as a trend.
+
+Not supported as a unique predictor.
+
+R^2 = 0.26 is too low to claim that the residual depends essentially only on baseline accuracy.
+
+
+Results that complicate or contradict the narrative
+
+A. Multisensor contradiction
+
+Section 5 correctly recognizes that:
+
+- EuroSAT-MS;
+- So2Sat;
+
+differ simultaneously in modality and source asymmetry, and therefore the experiment cannot determine which factor explains the fusion benefit.
+
+Later, however, the manuscript states in stronger terms that:
+
+"across sensors and across classifiers, how asymmetric two sources are predicts whether combining them pays."
+
+That conclusion is stronger than the evidence allows.
+
+It should be corrected.
+
+
+B. Table 23: "Data sufficient (>=50%): nothing"
+
+The manuscript states:
+
+"every intervention within +/-0.8"
+
+This is not consistent with several results elsewhere in the paper, where measurable effects remain in high/full-data settings for some:
+
+- domain datasets;
+- ViTs;
+- ImageNet-scale experiments.
+
+The percentage of the dataset is not universally equivalent to "data sufficiency."
+
+This row should be removed or qualified as something like:
+
+high-baseline-accuracy convolutional regimes on photo-like datasets.
+
+
+C. "Never add prior"
+
+This is too categorical.
+
+A more defensible statement is:
+
+"Under the tested MomentAux schedule, adding the shaping prior to mature ImageNet-initialized representations consistently produced interference in the evaluated tasks."
+
+
+D. "More parameters and more data did not supply structure"
+
+This is too causal.
+
+The experiments show that MomentAux can continue to provide value as scale increases.
+
+They do not directly establish that transformers cannot learn the relevant structure under a properly optimized training recipe.
+
+Are the conclusions fully supported?
+
+Not completely.
+
+The evidence supports a more cautious version of the conclusions, which would actually be scientifically stronger and easier to defend.
+
+
+9. MANUSCRIPT STRUCTURE
+
+Title
+Status: Needs improvement
+
+What works:
+It communicates the central conceptual themes.
+
+Weakness:
+It is very long and simultaneously tries to sell the benchmark, rule, stacking, substitution, and interference.
+
+Recommended change:
+Shorten it and center it on predictive fusion behavior rather than every secondary contribution.
+
+
+Abstract
+Status: Needs improvement
+
+What works:
+Dense, informative, and experimentally specific.
+
+Weakness:
+Claims such as "Every pairwise combination", "all follow one rule", and "outcome is predictable" are too categorical.
+
+Recommended change:
+Replace universal wording with empirically bounded claims.
+
+
+Introduction
+Status: Adequate / Strong
+
+What works:
+The problem is clear, memorable, and relevant.
+
+Weakness:
+The manuscript expresses too much certainty before presenting evidence.
+
+Recommended change:
+Frame the proposed rule as a hypothesis validated over a controlled experimental domain.
+
+
+Related Work
+Status: Needs improvement
+
+What works:
+Good connections to PID, informed learning, and fusion theory.
+
+Weakness:
+The closest prior work on synergy/substitution of prior knowledge must be addressed much more directly.
+
+Recommended change:
+Explicitly distinguish the present contribution from prior analyses of prior-knowledge value and synergy/substitution.
+
+
+Methodology
+Status: Strong
+
+What works:
+MomentAux and the experimental protocol are explained precisely.
+
+Weakness:
+The operational definition of "currency" remains insufficiently formal.
+
+Recommended change:
+Provide a measurable definition or clearly label it as a proxy.
+
+
+Experimental Setup
+Status: Adequate
+
+What works:
+Excellent control and reproducibility.
+
+Weakness:
+CIFAR-100 test-selection contamination.
+
+Recommended change:
+Add a clean confirmatory protocol.
+
+
+Results
+Status: Needs improvement
+
+What works:
+Extensive and rich empirical evidence.
+
+Weakness:
+The "law" language exceeds what is statistically identified.
+
+Recommended change:
+Separate descriptive decomposition from predictive regularity.
+
+
+Ablation Studies
+Status: Strong
+
+What works:
+Wide coverage and honest controls.
+
+Weakness:
+Missing causal controls for tax and currency.
+
+Recommended change:
+Add the theory-critical ablations discussed above.
+
+
+Discussion
+Status: Needs improvement
+
+What works:
+Intelligent and conceptually ambitious.
+
+Weakness:
+Some sections become too metaphorical and categorical.
+
+Recommended change:
+Use "currency" as a motivating metaphor once, then define measurable quantities precisely.
+
+
+Limitations
+Status: Strong
+
+What works:
+One of the best sections in the manuscript. It is transparent and scientifically credible.
+
+Weakness:
+Some limitations acknowledged here are not reflected in the stronger wording used elsewhere.
+
+Recommended change:
+Make the Abstract, Discussion, and Conclusion consistent with the caution already present in the Limitations section.
+
+
+Conclusion
+Status: Needs improvement
+
+What works:
+Clear take-home message.
+
+Weakness:
+More categorical than the evidence and even more categorical than the paper's own Limitations section.
+
+Recommended change:
+Replace universal rules with domain-bounded empirical conclusions.
+
+
+10. FIGURES AND TABLES
+
+Figure 1 — Study overview
+
+Recommendation: Keep.
+
+It is important for understanding the experimental design.
+
+
+Figure 2 — Gabor bank
+
+Recommendation: Keep.
+
+It is useful for reproducibility.
+
+
+Tables 4–6 / Figure 3 — Envelopes
+
+These are useful but partially redundant.
+
+Some material could move to supplementary material.
+
+
+Figure 4 — "The law"
+
+This is a central figure but should be modified.
+
+Add prominently:
+
+- resolvable N;
+- unresolved N;
+- coverage = 45.7%;
+- confidence/calibration by baseline-accuracy bins.
+
+Do not show only the 85.7% figure.
+
+
+Tables 7–9
+
+Very valuable.
+
+Table 9, showing exceptions, increases credibility.
+
+
+Figure 9 — Currency
+
+Currently too important to rely on a single setting.
+
+A stronger version would include several panels, for example:
+
+- CIFAR-100 / ViT;
+- Tiny-ImageNet / ViT;
+- EuroSAT / ResNet;
+- one additional independent population.
+
+
+Table 12 — Tax
+
+Very important.
+
+It should include weak-lambda / delayed-prior controls.
+
+
+Table 13 — Fusion taxonomy
+
+Potentially one of the paper's central tables.
+
+It should distinguish:
+
+Observed outcome
+
+from
+
+Predicted outcome.
+
+
+Tables 18–19 — Multi-source fusion
+
+Extremely important for journal fit.
+
+However, Table 18 currently demonstrates a difference between two populations, not the causal mechanism responsible for that difference.
+
+
+Tables 20–21 / Figure 11 — Segmentation/detection
+
+Very useful as boundary analysis.
+
+The null result in detection strengthens the paper scientifically.
+
+
+Table 23 — Decision guide
+
+Needs substantial revision.
+
+Current statements are stronger than the evidence supports, including:
+
+- "never add prior";
+- "any scale";
+- "data sufficient >=50% -> nothing."
+
+I would not submit Table 23 in its current form.
+
+
+11. SCIENTIFIC WRITING
+
+The English is good.
+
+The primary writing problem is not grammar. It is the degree of certainty.
+
+Example 1
+
+Current:
+"the result of fusing them is known in advance"
+
+Recommended:
+"the fusion outcome can often be anticipated from source-specific measurements before the combined model is trained."
+
+
+Example 2
+
+Current:
+"all follow one rule"
+
+Recommended:
+"most resolvable training-time combinations are consistent with a common empirical sign regularity."
+
+
+Example 3
+
+Current:
+"never pour a shaping prior into a strong initialization"
+
+Recommended:
+"under the tested configuration, adding the shaping prior to mature pretrained representations consistently produced interference."
+
+
+Example 4
+
+Current:
+"more parameters and more data did not supply"
+
+Recommended:
+"the structural benefit remained measurable as model and data scale increased under the evaluated training recipes."
+
+
+Another stylistic issue
+
+The paper repeatedly uses metaphorical expressions such as:
+
+- "sources trade in currencies";
+- "what the data can pay for";
+- "being wrong in public";
+- "poured into initialization".
+
+The "currency" metaphor is memorable and worth keeping.
+
+However, it should be used sparingly and followed by a formal operational definition.
+
+
+12. REVIEWER SKEPTICISM TEST — FIVE STRONGEST ARGUMENTS AGAINST ACCEPTANCE
+
+1. "Currency is not actually measured"
+
+Seriousness: VERY HIGH
+
+Why a reviewer could raise it:
+Similar linear-probe gains do not prove that two sources contain the same information.
+
+Does the manuscript address it?
+Partially, through Figure 9 and the PID discussion.
+
+How to neutralize it:
+Add a prospective multi-cell currency experiment.
+
+
+2. "The central law is partly tautological"
+
+Seriousness: HIGH
+
+Why:
+readout is defined as Delta - G.
+
+Therefore, the decomposition itself cannot fail.
+
+How to neutralize it:
+Call the equation a decomposition and reserve "empirical regularity" for the relationship between baseline accuracy and readout.
+
+
+3. "The key development dataset was tuned on the test set"
+
+Seriousness: HIGH
+
+Why:
+The paper itself acknowledges the issue.
+
+Does transparency help?
+Yes, substantially.
+
+Does it remove the issue?
+No.
+
+How to neutralize it:
+Add a clean confirmatory grid with separate validation and untouched test data.
+
+
+4. "The comparator set is insufficiently contemporary/fair"
+
+Seriousness: HIGH
+
+Why:
+MomentAux receives extensive tuning and ablation while several comparators are closer to published/default settings.
+
+The paper's own compute-budget study shows that more compute for SimCLR changed conclusions, demonstrating that comparator configuration matters.
+
+How to neutralize it:
+Refresh the comparator set and describe them as "representative controlled alternatives."
+
+
+5. "The fusion theory overgeneralizes from limited direct fusion tests"
+
+Seriousness: VERY HIGH for Information Fusion
+
+Why:
+- Figure 9 is a single direct setting.
+- Table 18 is confounded.
+- Table 19 uses dependent model pairs.
+- Tax is tested with one principal prior schedule.
+
+How to neutralize it:
+Prospectively validate source interactions across several independent populations.
+
+
+13. FIVE STRONGEST ARGUMENTS FOR ACCEPTANCE
+
+1. Experimental scale
+
+9,079 runs is exceptional.
+
+More importantly, the experiments are structured rather than being an unprincipled hyperparameter search.
+
+
+2. Scientific transparency
+
+The paper reports:
+
+- pre-registered predictions that failed;
+- an audit correction;
+- compute-budget results that invalidated earlier conclusions;
+- a null detection result;
+- patterned exceptions;
+- CIFAR-100 selection contamination.
+
+This increases scientific trust.
+
+
+3. Reproducibility
+
+Fixed subsets, retained records, configurations, regeneration scripts, and artifacts provide a very strong reproducibility story.
+
+
+4. Practical finding
+
+MomentAux has:
+
+- approximately 2% compute overhead;
+- zero inference overhead;
+- potentially large performance gains.
+
+This is practically meaningful.
+
+
+5. Excellent research question
+
+"When should two information sources be fused?"
+
+is broad and important enough for Information Fusion, provided the predictive claim is validated more rigorously.
+
+
+14. MAJOR COMMENTS
+
+M1 — Operational definition of information currency is insufficient
+
+Problem:
+The central claim requires showing that "currency" can be identified independently of the fusion outcome.
+
+Why it matters:
+Without this, currency risks becoming a retrospective interpretation rather than a predictive construct.
+
+Where it occurs:
+Introduction, Sections 4–5, Figure 9, Table 13.
+
+Required evidence/revision:
+Prospectively evaluate a pre-defined currency/complementarity measure across multiple source pairs.
+
+Publication impact:
+High. This could determine Major Revision versus acceptance.
+
+
+M2 — The "law" should be reformulated
+
+Problem:
+The core equation is an identity under the definition of the residual.
+
+Why it matters:
+A reviewer may view the central "law" as tautological.
+
+Where it occurs:
+Core theoretical framing and associated figure/table discussion.
+
+Required revision:
+Separate the decomposition from the empirical sign regularity. Report R^2, coverage, and dataset dependence prominently.
+
+Publication impact:
+High.
+
+
+M3 — CIFAR-100 selection contamination requires confirmatory evidence
+
+Problem:
+The main development dataset was used for configuration selection.
+
+Why it matters:
+Reported absolute values from this dataset are selection-biased.
+
+Required revision:
+Add a confirmatory grid with frozen configuration and clean validation/test protocol.
+
+Publication impact:
+High.
+
+
+M4 — Fusion tax is currently overgeneralized
+
+Problem:
+Table 12 demonstrates interference for a specific shaping configuration.
+
+Why it matters:
+The current evidence does not yet prove an intrinsic "tax" from structural priors on mature representations.
+
+Required revision:
+Add pretrained-specific lambda/timing controls.
+
+Publication impact:
+High because "tax" is one of the three categories emphasized in the manuscript.
+
+
+M5 — Direct fusion evidence needs expansion
+
+Problem:
+Most of the grid studies individual interventions, while the journal-level contribution concerns interactions among sources.
+
+Why it matters:
+Information Fusion reviewers may view the paper as primarily a representation-learning study.
+
+Required revision:
+Expand the predicted-versus-observed source-combination matrix.
+
+Publication impact:
+Very high for journal fit.
+
+
+M6 — Multisensor conclusion conflicts with the manuscript's own confounding analysis
+
+Problem:
+The paper correctly notes that modality and asymmetry are confounded, then later gives a stronger conclusion about asymmetry predicting fusion success.
+
+Required revision:
+Add a third dataset/population or substantially weaken the claim.
+
+Publication impact:
+Moderate–high.
+
+
+M7 — Decision-level fusion statistics are not independent
+
+Problem:
+Model pairs share underlying arms/checkpoints.
+
+Why it matters:
+Conventional OLS inferential statistics may be invalid.
+
+Required revision:
+Use clustered/resampling statistics and validation-only model-selection criteria.
+
+Publication impact:
+Moderate–high.
+
+
+M8 — Comparator positioning and contemporary baselines
+
+Problem:
+The manuscript uses language implying comparison with the strongest current alternatives.
+
+Why it matters:
+The comparator set does not fully justify this wording.
+
+Required revision:
+Add at least one strong modern comparator and separate same-data from external-pretraining comparisons.
+
+Publication impact:
+High.
+
+
+15. MINOR COMMENTS
+
+m1. Shorten the title.
+
+m2. "Every pairwise combination is measured" in the Abstract should either be literally demonstrated or rephrased.
+
+m3. Always report the 85.7% prediction figure together with resolvability coverage.
+
+m4. Remove the word "never" from Table 23.
+
+m5. Replace claims such as "any ViT/Swin, any scale" with the actual evaluated scope.
+
+m6. Do not use dataset percentage as a universal synonym for "data sufficient."
+
+m7. Reduce narrative discussion of previous project versions; retain only scientifically relevant falsifiers.
+
+m8. Carbon accounting is transparent but could partially move to supplementary material to reduce density.
+
+m9. Several tables could move to an appendix; the manuscript is scientifically very dense.
+
+m10. Review table styling/shading for consistency with the target journal format.
+
+
+16. QUANTITATIVE REVIEWER SCORES
+
+Relevance to Information Fusion: 7/10
+Reason below 8:
+Direct source-interaction validation is smaller than the representation-learning grid.
+
+Novelty: 7/10
+Reason below 8:
+Currency is not yet independently established and the closest prior literature must be addressed.
+
+Technical Quality: 7/10
+Reason below 8:
+Law formulation, tax generalization, and decision-level statistical issues.
+
+Methodological Rigor: 7/10
+Reason below 8:
+CIFAR-100 test-selection contamination.
+
+Experimental Rigor: 7/10
+Reason below 8:
+Exceptional breadth, but several central confirmatory tests remain missing.
+
+SOTA Comparison: 6/10
+Reason below 8:
+Comparator set and positioning are insufficiently contemporary.
+
+Ablation Quality: 8/10
+
+Reproducibility: 9/10
+
+Clarity: 7/10
+Reason below 8:
+Strong scientific writing, but excessive certainty and metaphor in some places.
+
+Significance / Impact: 7/10
+Reason below 8:
+Potentially much higher if the fusion predictor is prospectively validated.
+
+Overall Quality: 7/10
+Reason:
+Strong manuscript, but several central claims currently exceed the direct evidence.
+
+
+17. PUBLICATION RECOMMENDATION
+
+Recommendation: MAJOR REVISION
+
+Confidence: 4/5
+
+I would not recommend rejection because:
+
+- there is a genuine scientific contribution;
+- the quantity and diversity of evidence are exceptional;
+- the paper acknowledges many of its own limitations;
+- I do not see a methodological flaw that invalidates the 9,079 runs.
+
+I would not recommend Minor Revision either because the required changes concern the central scientific claims rather than presentation alone.
+
+A stricter reviewer could reasonably recommend Reject and Resubmit because of the combination of:
+
+1. test-selection contamination;
+2. insufficient operationalization of the currency construct;
+3. limited/outdated comparator positioning;
+4. overstatement of the fusion law.
+
+
+18. ESTIMATED REVIEWER DISTRIBUTION
+
+Reviewer 1: Major Revision
+
+Reviewer 2: Major Revision
+
+Reviewer 3: Reject and Resubmit
+
+The main source of reviewer disagreement will likely be:
+
+Does the taxonomy/currency procedure constitute a genuinely new information-fusion contribution, or is it primarily a retrospective interpretation of a very large auxiliary representation-learning benchmark?
+
+A reviewer accepting the first interpretation is likely to be positive.
+
+A reviewer adopting the second interpretation will probably be much more critical.
+
+Current publication readiness: MODERATE
+
+Not "Low", because the experimental body is already enormous.
+
+Not "High", because the missing experiments are precisely those needed to validate the central thesis.
+
+
+19. REVISION PRIORITY
+
+PRIORITY 1 — MUST FIX BEFORE SUBMISSION
+
+1. Prospectively validate the fusion/currency decision rule.
+
+This is the single most important revision.
+
+2. Reformulate the "law."
+
+Change from:
+Delta = G + readout is a law.
+
+To:
+decomposition + empirically observed baseline-dependent readout regularity.
+
+3. Add clean confirmatory evidence independent of CIFAR-100 selection.
+
+Do not repeat the full benchmark; confirm the critical claims with a clean protocol.
+
+4. Test whether the ImageNet "tax" survives reasonable adaptations of prior strength/timing.
+
+This is necessary to defend tax as a phenomenon rather than a misconfigured fusion setup.
+
+5. Repair the decision-level fusion methodology.
+
+Use validation-only decision making and dependence-aware statistics.
+
+6. Resolve the multisensor overclaim.
+
+Either add a third population or make the conclusion substantially more cautious.
+
+7. Address the closest prior literature explicitly.
+
+The manuscript needs to clearly distinguish its contribution from prior work on the value of prior knowledge, synergy, and substitution.
+
+
+PRIORITY 2 — STRONGLY RECOMMENDED
+
+1. Add at least one contemporary learning comparator.
+2. Expand Figure 9 to multiple datasets/source pairs.
+3. Validate that ViT-B gains are not simply optimization rescue.
+4. Reorganize the SOTA/fusion tables.
+5. Make the decision procedure quantitatively executable by defining thresholds for "similar", "large", and "approximately zero."
+6. Report prediction coverage in addition to prediction accuracy.
+7. Reduce absolute statements in the decision guide.
+
+
+PRIORITY 3 — POLISH
+
+1. Shorten the title.
+2. Simplify the Abstract.
+3. Reduce repeated use of the "currency" metaphor.
+4. Move secondary results to supplementary material.
+5. Remove claims about earlier manuscript versions unless scientifically necessary.
+6. Correct table formatting/shading.
+7. Standardize range notation.
+
+
+20. ACCEPTANCE-IMPACT ANALYSIS
+
+Priority-1 issue: Currency validation
+
+Current risk:
+A reviewer may argue that the construct is circular or proxy-based and is only justified after observing fusion outcomes.
+
+Required action:
+Run a prospective multi-pair prediction experiment based only on source-specific validation measurements.
+
+Expected impact:
+Transforms the central narrative into genuine predictive fusion evidence.
+
+
+Priority-1 issue: Law formulation
+
+Current risk:
+A reviewer may call the central equation tautological.
+
+Required action:
+Separate the algebraic identity from the empirical predictor.
+
+Expected impact:
+Removes a potentially damaging conceptual criticism.
+
+
+Priority-1 issue: CIFAR-100 selection
+
+Current risk:
+A reviewer may question whether the evidence is unbiased.
+
+Required action:
+Add a clean confirmatory grid with untouched test data.
+
+Expected impact:
+Demonstrates genuine generalization.
+
+
+Priority-1 issue: Tax
+
+Current risk:
+A reviewer may attribute the negative result to a poorly matched lambda/schedule.
+
+Required action:
+Perform lambda/timing sensitivity experiments in the pretrained regime.
+
+Expected impact:
+Determines whether tax is a robust phenomenon or a configuration-specific effect.
+
+
+Priority-1 issue: Decision-level fusion statistics
+
+Current risk:
+A reviewer may reject significance claims because samples are not independent.
+
+Required action:
+Use clustered bootstrap, resampling, mixed effects, or another dependence-aware method.
+
+Expected impact:
+Makes the statistical evidence defensible.
+
+
+Priority-1 issue: Sensor confound
+
+Current risk:
+A reviewer may argue that the paper cannot attribute the result to source asymmetry.
+
+Required action:
+Add a third population or explicitly downgrade the conclusion.
+
+Expected impact:
+Strengthens the multi-source fusion story and journal fit.
+
+
+Priority-1 issue: Missing close prior work
+
+Current risk:
+A reviewer may challenge the novelty of synergy/substitution claims.
+
+Required action:
+Add direct comparison and positioning in Related Work.
+
+Expected impact:
+Makes the novelty claim substantially more defensible.
+
+
+21. CLOSEST-PRIOR-WORK ISSUE
+
+This deserves immediate attention.
+
+Prior work already studies how the value of prior knowledge varies with the data regime and discusses dependence, synergy, and substitution effects.
+
+This does not mean that the current manuscript lacks novelty.
+
+Important differences may include:
+
+- substantially larger experimental breadth;
+- cost normalization;
+- representational probing;
+- actual source-combination experiments;
+- stack/substitute/tax taxonomy;
+- a predictive procedure;
+- pre-registration;
+- multiple architectures/tasks;
+- sensor-level and decision-level fusion.
+
+However, these differences must be stated explicitly.
+
+A strong positioning would be:
+
+Prior work characterizes whether knowledge has positive, negative, synergistic, or substitutive value; this paper asks whether pairwise source interaction can be predicted from source-specific representation measurements before the fused system is trained.
+
+That is a much stronger novelty distinction.
+
+Similarly, Partial Information Decomposition should not be presented as something the proposed "currency" concept replaces.
+
+A safer and stronger framing is:
+
+currency is a cheap empirical proxy for source interaction intended for large-scale controlled benchmarking.
+
+The next step is then to demonstrate that this proxy works prospectively.
+
+
+22. SENIOR AREA CHAIR VERDICT
+
+1. What is the strongest contribution of the paper?
+
+The controlled, cost-normalized experimental framework for studying when different information sources complement, substitute for, or interfere with one another.
+
+MomentAux should be viewed as the experimental instrument rather than the principal intellectual contribution.
+
+
+2. What is the most dangerous weakness?
+
+"Currency" is not yet sufficiently operationalized or independently validated as a predictor of fusion outcome.
+
+A closely related weakness is presenting the central decomposition as a "law" even though its core equation is true by definition.
+
+
+3. Is the novelty sufficient for Information Fusion?
+
+Potentially yes, but it is not yet demonstrated with enough clarity.
+
+Current status:
+borderline sufficient.
+
+After prospective validation and stronger positioning against the closest prior work:
+yes.
+
+
+4. Are the experiments sufficient?
+
+In quantity:
+more than sufficient.
+
+For proving the exact central claims:
+not yet.
+
+The paper does not need another 2,000 experiments.
+
+It needs approximately 20–50 strategically selected confirmatory experiments.
+
+
+5. Is the information-fusion contribution sufficiently central?
+
+Conceptually, yes.
+
+Empirically, only partially.
+
+The paper should strengthen the direct interaction-between-sources analysis and reduce the relative emphasis on "MomentAux beats baseline."
+
+
+6. What is the single most important change?
+
+Convert "currency predicts fusion" into a prospective, pre-specified, held-out experiment.
+
+
+7. Would I submit this manuscript to Information Fusion in its current form?
+
+No.
+
+
+8. What needs to happen before submission?
+
+At minimum:
+
+- prospective currency/fusion validation;
+- reformulation of the law;
+- clean confirmation independent of CIFAR-100 selection;
+- tax-specific controls;
+- corrected multisensor and decision-fusion claims;
+- stronger novelty comparison with the closest prior literature.
+
+
+9. Final rating
+
+6.8/10, rounded to 7/10.
+
+If the Priority-1 issues are resolved convincingly, the manuscript has realistic potential to reach:
+
+8–8.5/10.
+
+
+10. Final recommendation
+
+MAJOR REVISION
+
+The manuscript does not need to become larger.
+
+It needs to become more falsifiable, more causal, and more precise about what has actually been demonstrated.
+
+The core scientific opportunity is already present.
+
+The experiment most likely to change reviewer perception is not another accuracy table. It is a demonstration that, without seeing the outcome of A+B, a quantity computed independently from A and B can correctly predict whether their fusion will stack, substitute, or tax in held-out settings.
+
+If that result is demonstrated convincingly, the paper moves from being an exceptionally large benchmark centered on a Gabor prior to a substantially stronger methodological contribution for Information Fusion.

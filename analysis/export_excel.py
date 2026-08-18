@@ -130,7 +130,10 @@ def sheet_readme(wb, stats):
               "features are once the classifier bottleneck is removed."],
         ["readout", "Delta - G. How much of the feature gain the cell's own "
                     "few-label classifier actually cashes in. Negative below ~30% "
-                    "baseline accuracy, positive above (the 'sign law')."],
+                    "baseline accuracy, positive above (the 'sign law'). Blank at "
+                    "100% cells: there the probe's labels are the cell's labels, "
+                    "so the split is not interpretable (probe-ceiling rule); G is "
+                    "still reported."],
         ["is_headline", "yes = frozen recipe. no = diagnostic; NEVER mix these into "
                         "a headline table."],
         ["aux_lambda0 / _final", "The aux loss weight lambda at the start / end of "
@@ -229,7 +232,13 @@ def main():
             if probe and bp:
                 g = st.mean(probe) - st.mean(bp)
                 d["G"] = round(g, 3)
-                d["readout"] = round(d["delta"] - g, 3)
+                # Probe-ceiling rule: at 100% the probe's labels are the
+                # cell's labels, so Delta - G is not an interpretable readout
+                # split. G itself (the aux-vs-baseline probe gap under
+                # identical probing) remains reportable. Same rule the
+                # audit scripts enforce; keep the artifacts consistent.
+                if d["subset_pct"] != 100:
+                    d["readout"] = round(d["delta"] - g, 3)
         recs.append(d)
 
     wb = Workbook()

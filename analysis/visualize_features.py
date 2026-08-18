@@ -387,52 +387,189 @@ def fig_cam(models, test_ds, device, out, cell, dataset, loader,
     plt.close(fig)
 
 
-def fig_bank(out):
-    """The prior itself: the quadrature pairs of the energy-magnitude bank.
+# The bank's committed layout, scale-major then orientation-major, exactly
+# the order quadrature_bank() emits: pair i = scale (i // 4), theta (i % 4).
+# sigma = pi / f for the two committed frequencies (pi/2, pi/(2*sqrt(2))).
+_BANK_SIGMA = [r"$\sigma{=}2$", r"$\sigma{=}2\sqrt{2}$"]
+_BANK_THETA = [r"$0^\circ$", r"$45^\circ$", r"$90^\circ$", r"$135^\circ$"]
 
-    Single-column, and the panels are packed nearly edge to edge: at 3.33in
-    every point of inter-axes padding is a point the 11x11 kernels do not get,
-    and the kernels are the content. tight_layout is deliberately NOT used
-    here -- it reserves space for labels that the shared row/column headings
-    have already made unnecessary.
+
+def _pick_bank_sample(stem, dataset, data_root, device, n_scan=2000):
+    """Deterministically choose the test image that best exercises ALL eight
+    pairs, in the sense a reader can SEE: every orientation channel must be
+    the locally dominant one somewhere in the image, in a sizeable region.
+    A plain max-min on channel means selects dense texture (every filter
+    fires, but the maps read as noise); requiring each orientation to WIN a
+    region selects images with distinct oriented structures instead. Score =
+    min over the four orientations of the pixel fraction where that
+    orientation's scale-pooled energy is the argmax, tie-broken toward
+    higher overall energy; candidates below median total energy are dropped
+    so a flat image cannot win on evenly-split noise. One image, no
+    cherry-pick: the criterion is the requirement itself."""
+    ds = data_mod.build_dataset(dataset, data_root, train=False)
+    n_scan = min(n_scan, len(ds))
+    frac_min, tot = [], []
+    with torch.no_grad():
+        for i0 in range(0, n_scan, 256):
+            xs = torch.stack([ds[i][0] for i in range(i0, min(i0 + 256, n_scan))])
+            e = stem._energy(stem._luma(xs.to(device)))
+            e = e * stem.calib_scale.view(1, -1, 1, 1)
+            B, _, Hh, Ww = e.shape
+            o = e.view(B, 2, 4, Hh, Ww).mean(1)        # scale-pooled per theta
+            win = o.argmax(1)                          # (B, H, W)
+            f = torch.stack([(win == t).float().mean(dim=(1, 2))
+                             for t in range(4)], 1)    # (B, 4)
+            frac_min.append(f.min(dim=1).values.cpu())
+            tot.append(e.mean(dim=(1, 2, 3)).cpu())
+    frac_min, tot = torch.cat(frac_min), torch.cat(tot)
+    ok = tot >= tot.median()
+    score = frac_min + 1e-3 * (tot / tot.max())
+    score[~ok] = -1.0
+    idx = int(score.argmax())
+    names = class_names(dataset, ds, data_root)
+    label = names[int(ds[idx][1])] if names else f"class {int(ds[idx][1])}"
+    return ds, idx, label
+
+
+def fig_bank(out, dataset="stl10", data_root="./data", device="cpu"):
+    """The prior itself, and what it does to a real image.
+
+    Top block: the eight complex Gabor quadrature pairs (even/odd), labelled
+    by their (sigma, theta). Bottom block: one test image from the study's own
+    data and its eight magnitude-response maps m(x), computed by the ACTUAL
+    pinned bank with the study's own calibration (unit per-channel std on the
+    committed calibration batch), so the maps share one colour scale honestly.
+    The sample is chosen by a deterministic max-min criterion so every pair
+    responds visibly (_pick_bank_sample); if the dataset is not present the
+    figure falls back to the kernel mosaic alone.
+
+    Single-column, packed nearly edge to edge: at 3.33in every point of
+    inter-axes padding is a point the kernels and maps do not get.
     """
     from momentstem import EnergyStem
 
     stem = EnergyStem(feature_type="magnitude")
-    even, odd = stem.even.squeeze(1), stem.odd.squeeze(1)   # (n_pairs, k, k)
+    sample = None
+    try:
+        calib = data_mod.calibration_batch(dataset, data_root)
+        stem = stem.to(device)
+        stem.calibrate(calib.to(device))
+        ds, idx, label = _pick_bank_sample(stem, dataset, data_root, device)
+        x = ds[idx][0].unsqueeze(0).to(device)
+        with torch.no_grad():
+            resp = (stem._energy(stem._luma(x))
+                    * stem.calib_scale.view(1, -1, 1, 1))[0].cpu()  # (8,H,W)
+        sample = (denorm(x[0], dataset), resp, label, idx)
+    except Exception as e:                                    # noqa: BLE001
+        print(f"bank sample unavailable ({e}); kernels-only fallback")
+
+    stem = stem.cpu()
+    even, odd = stem.even.squeeze(1), stem.odd.squeeze(1)     # (8, k, k)
     n = even.shape[0]
-    fig, axes = plt.subplots(2, n, figsize=(FIGW, FIGW * 0.30))
     lim = float(max(even.abs().max(), odd.abs().max()))
+
+    # All vertical layout in INCHES, top-down, so nothing lands off-canvas.
+    kx0_in, gap = 0.24, 0.035
+    kw_in = (FIGW - kx0_in - 0.02 - (n - 1) * gap) / n        # kernel panels
+    rx0_in = 1.33                                             # response block
+    rw_in = (FIGW - rx0_in - 0.02 - 3 * gap) / 4
+    top_hdr, theta_hdr = 0.145, 0.105
+    mid_txt = 0.17
+    H = (0.02 + top_hdr + theta_hdr + 2 * kw_in + gap
+         + (mid_txt + 2 * rw_in + gap + 0.24 if sample is not None else 0.04))
+    fig = plt.figure(figsize=(FIGW, H))
+
+    def ax_at(x_in, y_top_in, w_in, h_in):
+        return fig.add_axes([x_in / FIGW, (H - y_top_in - h_in) / H,
+                             w_in / FIGW, h_in / H])
+
+    # ---- kernel mosaic, (sigma, theta)-labelled ------------------------
+    k_y0 = 0.02 + top_hdr + theta_hdr
     for i in range(n):
         for r, bank in enumerate((even, odd)):
-            ax = axes[r, i]
+            ax = ax_at(kx0_in + i * (kw_in + gap), k_y0 + r * (kw_in + gap),
+                       kw_in, kw_in)
             ax.imshow(bank[i].numpy(), cmap="RdBu_r", vmin=-lim, vmax=lim)
             ax.set_xticks([]), ax.set_yticks([])
             for sp in ax.spines.values():
                 sp.set_linewidth(0.3)
-        axes[0, i].set_title(f"{i}", fontsize=6, pad=1.5)
-    axes[0, 0].set_ylabel("even", fontsize=6, labelpad=1.5)
-    axes[1, 0].set_ylabel("odd", fontsize=6, labelpad=1.5)
-    fig.text(0.5, 0.035, "quadrature pair", ha="center", fontsize=6)
-    fig.subplots_adjust(left=0.055, right=0.995, top=0.90, bottom=0.13,
-                        wspace=0.04, hspace=0.04)
+            if r == 0:
+                ax.set_title(_BANK_THETA[i % 4], fontsize=5.5, pad=1.5)
+            if i == 0:
+                ax.set_ylabel(("even", "odd")[r], fontsize=6, labelpad=1.5)
+    for s in range(2):                     # scale group headers with rules
+        gx0 = (kx0_in + s * 4 * (kw_in + gap)) / FIGW
+        gx1 = (kx0_in + (s * 4 + 3) * (kw_in + gap) + kw_in) / FIGW
+        fig.text((gx0 + gx1) / 2, 1 - (0.02 + 0.055) / H,
+                 _BANK_SIGMA[s] + " px", ha="center", fontsize=6)
+        fig.add_artist(plt.Line2D([gx0, gx1],
+                                  [1 - (0.02 + 0.115) / H] * 2,
+                                  color="#888888", lw=0.5))
+
+    if sample is None:
+        fig.savefig(os.path.join(out, "bank_gabor.png"), dpi=300,
+                    bbox_inches="tight", pad_inches=0.02)
+        plt.close(fig)
+        return
+
+    img, resp, label, idx = sample
+    txt_y = k_y0 + 2 * kw_in + gap + 0.10
+    # Keep this line NARROWER than the 3.33in canvas: bbox_inches="tight"
+    # widens to the longest artist, and a wide caption line here silently
+    # re-scales every panel once the file is placed at \linewidth.
+    fig.text(0.5, 1 - txt_y / H, "calibrated magnitude responses "
+             r"$m_{\sigma,\theta}(x)$ (shared colour scale)",
+             ha="center", va="center", fontsize=6)
+
+    # ---- sample image (left) + 2x4 response grid (right) ---------------
+    vmax = float(torch.quantile(resp, 0.99))
+    r_y0 = k_y0 + 2 * kw_in + gap + mid_txt
+    iw_in = 1.00
+    axi = ax_at(0.13, r_y0 + (2 * rw_in + gap - iw_in) / 2, iw_in, iw_in)
+    axi.imshow(img)
+    axi.set_xticks([]), axi.set_yticks([])
+    for sp in axi.spines.values():
+        sp.set_linewidth(0.4)
+    axi.set_xlabel(f"input $x$: {label} (96 px)", fontsize=5.5, labelpad=2.0)
+    for i in range(n):
+        r, c = divmod(i, 4)
+        ax = ax_at(rx0_in + c * (rw_in + gap), r_y0 + r * (rw_in + gap),
+                   rw_in, rw_in)
+        ax.imshow(resp[i].numpy(), cmap="magma", vmin=0, vmax=vmax)
+        ax.set_xticks([]), ax.set_yticks([])
+        for sp in ax.spines.values():
+            sp.set_linewidth(0.3)
+        ax.text(0.03, 0.03, _BANK_SIGMA[r] + ", " + _BANK_THETA[i % 4],
+                transform=ax.transAxes, fontsize=4.4, color="white",
+                ha="left", va="bottom")
     fig.savefig(os.path.join(out, "bank_gabor.png"), dpi=300,
                 bbox_inches="tight", pad_inches=0.02)
     plt.close(fig)
+    print(f"bank figure: sample = {dataset} test index {idx} ({label})")
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--pair", nargs=2, metavar=("NONE_CELL", "AUX_CELL"),
-                    required=True)
+    ap.add_argument("--pair", nargs=2, metavar=("NONE_CELL", "AUX_CELL"))
     ap.add_argument("--out", default="docs/viz")
     ap.add_argument("--seed-dir", default="seed0")
     ap.add_argument("--n-classes", type=int, default=8)
     ap.add_argument("--data-root", default="./data")
+    ap.add_argument("--bank-only", action="store_true",
+                    help="write bank_gabor.png only (no checkpoints needed)")
+    ap.add_argument("--bank-dataset", default="stl10",
+                    help="dataset supplying the bank figure's sample image")
     args = ap.parse_args()
 
     os.makedirs(args.out, exist_ok=True)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if args.bank_only:
+        fig_bank(args.out, dataset=args.bank_dataset,
+                 data_root=args.data_root, device=device)
+        print(f"BANK_DONE -> {args.out}", flush=True)
+        return
+    if args.pair is None:
+        ap.error("--pair is required unless --bank-only is given")
     none_cell, aux_cell = args.pair
     models = load_pair(none_cell, aux_cell, args.seed_dir, device)
     dataset = models[aux_cell][1]["dataset"]

@@ -73,15 +73,15 @@ limits before it is assembled.
 | STL-10 | +5.92 @10% | tracks CIFAR-10 at matched images |
 | Tiny-ImageNet | +2.12 @5% (10 seeds) | flat ≤ +2.2 (readout-suppressed) |
 | ViT-tiny, CIFAR-100 | +14.44 @15% | large at *every* scale; +9.88 at 100% |
-| ViT-S/16 @224px | +13.00 | ImageNet-100, standard DeiT recipe |
-| ViT-B/16 @224px | **+26.01** | the deficit grows with model scale |
+| ViT-S/16 @224px | +13.00 (100 ep), +4.52 (200 ep) | ImageNet-100, standard DeiT recipe |
+| ViT-B/16 @224px | **+26.01** (100 ep), **+6.71** (200 ep) | the deficit grows with model scale at both budgets |
 
 The law behind every cell: **Δ = G(features) + readout(baseline accuracy)**
 — `G` measured by linear probes on frozen features, readout negative below
 the measured crossing bracket `[31.8, 40.3]` and positive above it. Of the
-471<!--auditResolvable--> cells whose readout is resolvable against its own
-seed-paired uncertainty, **402<!--auditCorrect--> (85.4<!--auditRate-->%)
-fall on the predicted side** — 94.3<!--auditBelowRate-->% below the crossing,
+455<!--auditResolvable--> cells whose readout is resolvable against its own
+seed-paired uncertainty, **393<!--auditCorrect--> (86.4<!--auditRate-->%)
+fall on the predicted side** — 94.9<!--auditBelowRate-->% below the crossing,
 where the account makes a strong prediction. Machine-verified by
 `analysis/audit_law_paired.py`, which is the canonical audit; the older
 `audit_sign_law.py` uses an independent-SEM formula the paper withdrew, and
@@ -105,7 +105,7 @@ point of the comparison: the prior is ~1.02×, self-supervised pre-training
 | small ViT under the DeiT recipe, SSL at 5× | SSL at 5%, level at 10%, **prior at 25%** — the ordering flips with data, on both populations tested |
 | prior + augmentation | **stack** (different currencies: structure vs. nuisance-invariance) |
 | prior + effective SSL | **substitute** — the combination beats neither single arm |
-| prior + ImageNet init | **tax**, up to −17 points, and the frozen-feature probe shows the damage is to the features themselves |
+| prior + ImageNet init | **interference**, −16..−18 points at full auxiliary strength and gone below it; the frozen-feature probe shows the damage is to the features themselves |
 
 The practical rule that falls out: probe what each candidate source supplies
 *before* combining them. Sources with the same currency do not add.

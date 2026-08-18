@@ -6,7 +6,8 @@
 representations pay? A controlled, cost-normalized benchmark and a
 measurable rule for stacking, substitution and interference
 
-**Authors:** Ahmad AlMughrabi, Ricardo Marques, Petia Radeva
+**Authors:** Ahmad AlMughrabi, Albert Clop, Benjamin Busam, Ricardo Marques,
+Petia Radeva
 
 ---
 
@@ -50,18 +51,21 @@ results show, not predictable from their family names either — the same
 prior is redundant with effective self-supervision and complementary with
 augmentation. A cheap frozen-feature measurement decides it in advance.
 
-We also test the rule beyond the setting it was derived in. It holds where
-the two sources are two Sentinel-2 band sets, where they are Sentinel-1
-radar and Sentinel-2 optical, and where they are two trained classifiers
-fused at the decision level.
+We also test the rule beyond the setting it was derived in: where the two
+sources are two Sentinel-2 band sets, where they are Sentinel-1 radar and
+Sentinel-2 optical, and where they are two trained classifiers fused at the
+decision level. The three do not agree, and that is the finding: fusing one
+instrument's band sets pays at every data scale, whereas pairing the two
+satellites never pays at any.
 
 **What we found, including against ourselves.** Two results of the paper
 are negative and we consider them among its more useful contributions.
 First, a second sensor does not always pay: splitting one instrument's
 bands is complementary at every data scale, whereas pairing two satellites
-never is, and the accuracy asymmetry between the sources predicts which
-happens. Had we run only the first population we would have reported the
-opposite. Second, when we gave the self-supervised comparators four times
+never is. The two populations differ in both source asymmetry and modality,
+so our design cannot say which of the two is operative, and we report the
+contrast rather than a predictor. Had we run only the first population we
+would have reported the opposite. Second, when we gave the self-supervised comparators four times
 their pre-training budget across the whole data envelope, contrastive
 pre-training beat our prior at every convolutional cell. We withdrew the
 corresponding accuracy claim and restated the convolutional case as one of

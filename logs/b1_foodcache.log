@@ -1,0 +1,4 @@
+  cached food101/train: (75750, 64, 64, 3) in 227s
+ok train 75750
+  cached food101/test: (25250, 64, 64, 3) in 79s
+ok test 25250

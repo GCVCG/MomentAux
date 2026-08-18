@@ -1,0 +1,11 @@
+[eurosat] VAL 4050 / FIT 12150 (excluded pcts [5, 10, 25])
+  diagfuse_esat_aug_10pct seed0: e2e val 94.54 test 94.13 (recorded 94.13)  probe val 96.15 test 95.81
+  diagfuse_esat_aug_10pct seed1: e2e val 93.53 test 93.07 (recorded 93.07)  probe val 95.75 test 95.22
+  diagfuse_esat_aug_10pct seed2: e2e val 94.10 test 93.41 (recorded 93.41)  probe val 95.90 test 95.52
+  diagfuse_esat_aug_25pct seed0: e2e val 97.43 test 97.56 (recorded 97.56)  probe val 98.00 test 97.94
+  diagfuse_esat_aug_25pct seed1: e2e val 97.75 test 97.59 (recorded 97.59)  probe val 98.17 test 97.81
+  diagfuse_esat_aug_25pct seed2: e2e val 97.51 test 97.50 (recorded 97.52)  probe val 98.15 test 97.85
+  diagfuse_esat_aug_5pct seed0: e2e val 84.32 test 83.85 (recorded 83.85)  probe val 92.35 test 91.72
+  diagfuse_esat_aug_5pct seed1: e2e val 81.68 test 81.15 (recorded 81.17)  probe val 92.02 test 91.11
+  diagfuse_esat_aug_5pct seed2: e2e val 85.26 test 84.35 (recorded 84.35)  probe val 92.37 test 91.72
+  diagfuse_esat_prioraug_10pct seed0: e2e val 94.84 test 94.52 (recorded 94.52)  probe val 96.12 test 96.17

@@ -63,7 +63,35 @@ def in_scope(r):
     already did -- that one was correct only because it never compared
     against a literal. Sibling script analysis/audit_sign_law.py always had
     this right, which is why the two disagreed.
+
+    SECOND SCOPE RULE, ADDED 2026-08-18, AND IT WAS MISSING FROM BOTH SCRIPTS.
+    The methods section states two scope rules and says both are "enforced
+    throughout". Only the first was. The second is the probe-ceiling rule: a
+    linear evaluation is interpretable only while it holds substantially more
+    labels than the cell trained on, so at 100% cells the probe's labels ARE
+    the cell's labels and the aux-vs-baseline gap cannot be split into G and
+    readout. The gap itself stays valid -- both arms are probed identically --
+    which is why these cells are reported elsewhere and excluded only here,
+    where the quantity being audited IS the split.
+
+    analysis/aggregate_dense.py already honoured this (its 30 law cells are
+    6 populations x 5 fractions, 100% excluded), so the two audits disagreed
+    with each other as well as with the stated method.
+
+    Same class of defect as the `pretrained` bug above, and the same direction
+    of consequence but opposite in sign: the 62 100% cells score 56.2% (9 of
+    16 resolvable), far below the rest, so their presence DEPRESSED the
+    reported rate. Removing them takes the audit from 471 resolvable / 85.4%
+    to 455 / 86.4%. The correction costs us nothing and was costing us a
+    point, which is the only comfortable direction for a late change to a
+    headline -- but it is made because the script must match the stated
+    method, not because of which way it moves.
     """
+    try:
+        if float(r.get("subset_pct") or 0) >= 100.0:
+            return False
+    except ValueError:
+        return False
     return (r.get("aux_target") and not r.get("init_from")
             and not r.get("pretrained")
             and (r.get("stem") or "none") == "none")
@@ -129,15 +157,37 @@ def main():
 
     ratio = sorted(x["sem"] / x["ind_sem"] for x in rows
                    if x["sem"] > 0 and x["ind_sem"] > 0)
+    # The released results/law_audit.md carried this header by hand, so the
+    # file's own "regenerate with the command in the title line" instruction
+    # did not actually reproduce it. Printed here so it does.
+    print("# Sign-law audit "
+          "(machine-generated: python analysis/audit_law_paired.py)")
+    print()
+    print("This is the canonical audit and the source of every law number in "
+          "the paper.")
+    print("Uncertainty is seed-paired. Regenerate with the command in the "
+          "title line.")
+    print("Scope excludes 100% cells: the probe-ceiling rule refuses the "
+          "G/readout split")
+    print("where the evaluation's labels are the cell's own "
+          "(Section: statistical protocol).")
+    print()
     print("=" * 62)
     print(f"law-scope cells with >=3 seed-matched arms : {len(rows)}")
     print(f"SEM(paired)/SEM(independent) median        : "
           f"{ratio[len(ratio)//2]:.3f}  "
           f"(independent overstates in {sum(1 for x in ratio if x<1)/len(ratio):.0%})")
     inb = sum(1 for x in rows if LO <= x["base"] <= HI)
-    n, ok, _ = audit(rows, a.k)
+    n, ok, res = audit(rows, a.k)
     unres = len(rows) - inb - n
     lo_, hi_ = wilson(ok, n)
+    # THE BAR THE RATE IS JUDGED AGAINST. Readout is negative in most resolvable
+    # cells, so always predicting the majority sign already scores this; the
+    # honest effect size is the gap to it, not to 50%. It is emitted here so the
+    # released audit is self-sufficient for that comparison: the paper cites
+    # this figure, and a number a result is judged against should not be the one
+    # number a reader cannot reproduce from the artifact.
+    neg = sum(1 for x in res if x["ro"] < 0)
     print(f"inside crossing bracket (no prediction)    : {inb}")
     print(f"unresolved (|readout| <= {a.k} SEM)            : {unres}")
     print(f"RESOLVABLE (these test the law)            : {n}")
@@ -145,6 +195,8 @@ def main():
     print(f"  wrong side                               : {n-ok}")
     print(f"  Wilson 95% CI                            : "
           f"[{100*lo_:.1f}, {100*hi_:.1f}]")
+    print(f"  majority-sign baseline                   : "
+          f"{max(neg, n-neg)/n:.1%}  (always predict the commoner sign)")
     print("=" * 62)
 
     print("\nTHRESHOLD SENSITIVITY")

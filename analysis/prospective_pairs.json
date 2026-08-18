@@ -1,0 +1,398 @@
+{
+ "_what": "Pairs for the B1 prospective re-scoring of Algorithm 1 (Section 9.3).",
+ "cache_images": {
+  "food101": true
+ },
+ "pairs": [
+  {
+   "name": "vit_c100_10:prior|simclr",
+   "dataset": "cifar100",
+   "pct": 10,
+   "baseline": {
+    "cell": "diagvit_none_10pct",
+    "config": "configs/diagnostics/diagvit_none_10pct.yaml"
+   },
+   "A": {
+    "cell": "diagvit_aux_10pct",
+    "config": "configs/diagnostics/diagvit_aux_10pct.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diagsslvit_simclr_10pct",
+    "config": "configs/diagnostics/diagsslvit_simclr_10pct.yaml",
+    "label": "simclr",
+    "compute": 2.0,
+    "pretrained": false
+   },
+   "combo": {
+    "cell": "diagsslvitaux_10pct",
+    "config": "configs/diagnostics/diagsslvitaux_10pct.yaml"
+   }
+  },
+  {
+   "name": "vit_c100_10:prior|aug",
+   "dataset": "cifar100",
+   "pct": 10,
+   "baseline": {
+    "cell": "diagvit_none_10pct",
+    "config": "configs/diagnostics/diagvit_none_10pct.yaml"
+   },
+   "A": {
+    "cell": "diagvit_aux_10pct",
+    "config": "configs/diagnostics/diagvit_aux_10pct.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diagdeit_none_10pct",
+    "config": "configs/diagnostics/diagdeit_none_10pct.yaml",
+    "label": "augmentation",
+    "compute": 1.0,
+    "pretrained": false
+   },
+   "combo": {
+    "cell": "diagdeit_aux_10pct",
+    "config": "configs/diagnostics/diagdeit_aux_10pct.yaml"
+   }
+  },
+  {
+   "name": "esat_5:prior|aug",
+   "dataset": "eurosat",
+   "pct": 5,
+   "baseline": {
+    "cell": "grid_esat_r18_e99fb4_5pct",
+    "config": "configs/grid/grid_esat_r18_e99fb4_5pct.yaml"
+   },
+   "A": {
+    "cell": "grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_5pct",
+    "config": "configs/grid/grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_5pct.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diagfuse_esat_aug_5pct",
+    "config": "configs/diagnostics/diagfuse_esat_aug_5pct.yaml",
+    "label": "augmentation",
+    "compute": 1.0,
+    "pretrained": false
+   },
+   "combo": {
+    "cell": "diagfuse_esat_prioraug_5pct",
+    "config": "configs/diagnostics/diagfuse_esat_prioraug_5pct.yaml"
+   }
+  },
+  {
+   "name": "esat_5:prior|simclr",
+   "dataset": "eurosat",
+   "pct": 5,
+   "baseline": {
+    "cell": "grid_esat_r18_e99fb4_5pct",
+    "config": "configs/grid/grid_esat_r18_e99fb4_5pct.yaml"
+   },
+   "A": {
+    "cell": "grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_5pct",
+    "config": "configs/grid/grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_5pct.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diaggrid_simclr_esat_5pct",
+    "config": "configs/grid/diaggrid_simclr_esat_5pct.yaml",
+    "label": "simclr",
+    "compute": 2.0,
+    "pretrained": false,
+    "substituted_for": "diaggrid_ssl_eurosat_5pct",
+    "substitution_reason": "the diaggrid_ssl_* cell has no checkpoint on this machine (probed on the cluster, never pulled, and there is no network from here). diaggrid_simclr_* is the same intervention: all 18 seed accuracies match to 6 decimals across both datasets and all three fractions."
+   },
+   "combo": {
+    "cell": "diagfuse_esat_priorssl_5pct",
+    "config": "configs/diagnostics/diagfuse_esat_priorssl_5pct.yaml"
+   }
+  },
+  {
+   "name": "esat_10:prior|aug",
+   "dataset": "eurosat",
+   "pct": 10,
+   "baseline": {
+    "cell": "grid_esat_r18_e99fb4_10pct",
+    "config": "configs/grid/grid_esat_r18_e99fb4_10pct.yaml"
+   },
+   "A": {
+    "cell": "grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_10pct",
+    "config": "configs/grid/grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_10pct.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diagfuse_esat_aug_10pct",
+    "config": "configs/diagnostics/diagfuse_esat_aug_10pct.yaml",
+    "label": "augmentation",
+    "compute": 1.0,
+    "pretrained": false
+   },
+   "combo": {
+    "cell": "diagfuse_esat_prioraug_10pct",
+    "config": "configs/diagnostics/diagfuse_esat_prioraug_10pct.yaml"
+   }
+  },
+  {
+   "name": "esat_10:prior|simclr",
+   "dataset": "eurosat",
+   "pct": 10,
+   "baseline": {
+    "cell": "grid_esat_r18_e99fb4_10pct",
+    "config": "configs/grid/grid_esat_r18_e99fb4_10pct.yaml"
+   },
+   "A": {
+    "cell": "grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_10pct",
+    "config": "configs/grid/grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_10pct.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diaggrid_simclr_esat_10pct",
+    "config": "configs/grid/diaggrid_simclr_esat_10pct.yaml",
+    "label": "simclr",
+    "compute": 2.0,
+    "pretrained": false,
+    "substituted_for": "diaggrid_ssl_eurosat_10pct",
+    "substitution_reason": "the diaggrid_ssl_* cell has no checkpoint on this machine (probed on the cluster, never pulled, and there is no network from here). diaggrid_simclr_* is the same intervention: all 18 seed accuracies match to 6 decimals across both datasets and all three fractions."
+   },
+   "combo": {
+    "cell": "diagfuse_esat_priorssl_10pct",
+    "config": "configs/diagnostics/diagfuse_esat_priorssl_10pct.yaml"
+   }
+  },
+  {
+   "name": "esat_25:prior|aug",
+   "dataset": "eurosat",
+   "pct": 25,
+   "baseline": {
+    "cell": "grid_esat_r18_e99fb4_25pct",
+    "config": "configs/grid/grid_esat_r18_e99fb4_25pct.yaml"
+   },
+   "A": {
+    "cell": "grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_25pct",
+    "config": "configs/grid/grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_25pct.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diagfuse_esat_aug_25pct",
+    "config": "configs/diagnostics/diagfuse_esat_aug_25pct.yaml",
+    "label": "augmentation",
+    "compute": 1.0,
+    "pretrained": false
+   },
+   "combo": {
+    "cell": "diagfuse_esat_prioraug_25pct",
+    "config": "configs/diagnostics/diagfuse_esat_prioraug_25pct.yaml"
+   }
+  },
+  {
+   "name": "esat_25:prior|simclr",
+   "dataset": "eurosat",
+   "pct": 25,
+   "baseline": {
+    "cell": "grid_esat_r18_e99fb4_25pct",
+    "config": "configs/grid/grid_esat_r18_e99fb4_25pct.yaml"
+   },
+   "A": {
+    "cell": "grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_25pct",
+    "config": "configs/grid/grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_25pct.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diaggrid_simclr_esat_25pct",
+    "config": "configs/grid/diaggrid_simclr_esat_25pct.yaml",
+    "label": "simclr",
+    "compute": 2.0,
+    "pretrained": false,
+    "substituted_for": "diaggrid_ssl_eurosat_25pct",
+    "substitution_reason": "the diaggrid_ssl_* cell has no checkpoint on this machine (probed on the cluster, never pulled, and there is no network from here). diaggrid_simclr_* is the same intervention: all 18 seed accuracies match to 6 decimals across both datasets and all three fractions."
+   },
+   "combo": {
+    "cell": "diagfuse_esat_priorssl_25pct",
+    "config": "configs/diagnostics/diagfuse_esat_priorssl_25pct.yaml"
+   }
+  },
+  {
+   "name": "food_5:prior|aug",
+   "dataset": "food101",
+   "pct": 5,
+   "baseline": {
+    "cell": "grid_food_r18_9ee7da_5pct",
+    "config": "configs/grid/grid_food_r18_9ee7da_5pct.yaml"
+   },
+   "A": {
+    "cell": "grid_food_r18_axmagnitudeL3_l10to00_hn_8bd74b_5pct",
+    "config": "configs/grid/grid_food_r18_axmagnitudeL3_l10to00_hn_8bd74b_5pct.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diagfuse_food_aug_5pct",
+    "config": "configs/diagnostics/diagfuse_food_aug_5pct.yaml",
+    "label": "augmentation",
+    "compute": 1.0,
+    "pretrained": false
+   },
+   "combo": {
+    "cell": "diagfuse_food_prioraug_5pct",
+    "config": "configs/diagnostics/diagfuse_food_prioraug_5pct.yaml"
+   }
+  },
+  {
+   "name": "food_5:prior|simclr",
+   "dataset": "food101",
+   "pct": 5,
+   "baseline": {
+    "cell": "grid_food_r18_9ee7da_5pct",
+    "config": "configs/grid/grid_food_r18_9ee7da_5pct.yaml"
+   },
+   "A": {
+    "cell": "grid_food_r18_axmagnitudeL3_l10to00_hn_8bd74b_5pct",
+    "config": "configs/grid/grid_food_r18_axmagnitudeL3_l10to00_hn_8bd74b_5pct.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diaggrid_simclr_food_5pct",
+    "config": "configs/grid/diaggrid_simclr_food_5pct.yaml",
+    "label": "simclr",
+    "compute": 2.0,
+    "pretrained": false,
+    "substituted_for": "diaggrid_ssl_food101_5pct",
+    "substitution_reason": "the diaggrid_ssl_* cell has no checkpoint on this machine (probed on the cluster, never pulled, and there is no network from here). diaggrid_simclr_* is the same intervention: all 18 seed accuracies match to 6 decimals across both datasets and all three fractions."
+   },
+   "combo": {
+    "cell": "diagfuse_food_priorssl_5pct",
+    "config": "configs/diagnostics/diagfuse_food_priorssl_5pct.yaml"
+   }
+  },
+  {
+   "name": "food_10:prior|aug",
+   "dataset": "food101",
+   "pct": 10,
+   "baseline": {
+    "cell": "grid_food_r18_9ee7da_10pct",
+    "config": "configs/grid/grid_food_r18_9ee7da_10pct.yaml"
+   },
+   "A": {
+    "cell": "grid_food_r18_axmagnitudeL3_l10to00_hn_8bd74b_10pct",
+    "config": "configs/grid/grid_food_r18_axmagnitudeL3_l10to00_hn_8bd74b_10pct.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diagfuse_food_aug_10pct",
+    "config": "configs/diagnostics/diagfuse_food_aug_10pct.yaml",
+    "label": "augmentation",
+    "compute": 1.0,
+    "pretrained": false
+   },
+   "combo": {
+    "cell": "diagfuse_food_prioraug_10pct",
+    "config": "configs/diagnostics/diagfuse_food_prioraug_10pct.yaml"
+   }
+  },
+  {
+   "name": "food_10:prior|simclr",
+   "dataset": "food101",
+   "pct": 10,
+   "baseline": {
+    "cell": "grid_food_r18_9ee7da_10pct",
+    "config": "configs/grid/grid_food_r18_9ee7da_10pct.yaml"
+   },
+   "A": {
+    "cell": "grid_food_r18_axmagnitudeL3_l10to00_hn_8bd74b_10pct",
+    "config": "configs/grid/grid_food_r18_axmagnitudeL3_l10to00_hn_8bd74b_10pct.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diaggrid_simclr_food_10pct",
+    "config": "configs/grid/diaggrid_simclr_food_10pct.yaml",
+    "label": "simclr",
+    "compute": 2.0,
+    "pretrained": false,
+    "substituted_for": "diaggrid_ssl_food101_10pct",
+    "substitution_reason": "the diaggrid_ssl_* cell has no checkpoint on this machine (probed on the cluster, never pulled, and there is no network from here). diaggrid_simclr_* is the same intervention: all 18 seed accuracies match to 6 decimals across both datasets and all three fractions."
+   },
+   "combo": {
+    "cell": "diagfuse_food_priorssl_10pct",
+    "config": "configs/diagnostics/diagfuse_food_priorssl_10pct.yaml"
+   }
+  },
+  {
+   "name": "food_25:prior|aug",
+   "dataset": "food101",
+   "pct": 25,
+   "baseline": {
+    "cell": "grid_food_r18_9ee7da_25pct",
+    "config": "configs/grid/grid_food_r18_9ee7da_25pct.yaml"
+   },
+   "A": {
+    "cell": "grid_food_r18_axmagnitudeL3_l10to00_hn_8bd74b_25pct",
+    "config": "configs/grid/grid_food_r18_axmagnitudeL3_l10to00_hn_8bd74b_25pct.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diagfuse_food_aug_25pct",
+    "config": "configs/diagnostics/diagfuse_food_aug_25pct.yaml",
+    "label": "augmentation",
+    "compute": 1.0,
+    "pretrained": false
+   },
+   "combo": {
+    "cell": "diagfuse_food_prioraug_25pct",
+    "config": "configs/diagnostics/diagfuse_food_prioraug_25pct.yaml"
+   }
+  },
+  {
+   "name": "food_25:prior|simclr",
+   "dataset": "food101",
+   "pct": 25,
+   "baseline": {
+    "cell": "grid_food_r18_9ee7da_25pct",
+    "config": "configs/grid/grid_food_r18_9ee7da_25pct.yaml"
+   },
+   "A": {
+    "cell": "grid_food_r18_axmagnitudeL3_l10to00_hn_8bd74b_25pct",
+    "config": "configs/grid/grid_food_r18_axmagnitudeL3_l10to00_hn_8bd74b_25pct.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diaggrid_simclr_food_25pct",
+    "config": "configs/grid/diaggrid_simclr_food_25pct.yaml",
+    "label": "simclr",
+    "compute": 2.0,
+    "pretrained": false,
+    "substituted_for": "diaggrid_ssl_food101_25pct",
+    "substitution_reason": "the diaggrid_ssl_* cell has no checkpoint on this machine (probed on the cluster, never pulled, and there is no network from here). diaggrid_simclr_* is the same intervention: all 18 seed accuracies match to 6 decimals across both datasets and all three fractions."
+   },
+   "combo": {
+    "cell": "diagfuse_food_priorssl_25pct",
+    "config": "configs/diagnostics/diagfuse_food_priorssl_25pct.yaml"
+   }
+  }
+ ]
+}

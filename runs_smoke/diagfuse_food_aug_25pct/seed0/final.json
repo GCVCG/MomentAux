@@ -1,0 +1,36 @@
+{
+  "name": "diagfuse_food_aug_25pct",
+  "seed": 0,
+  "config": {
+    "name": "diagfuse_food_aug_25pct",
+    "dataset": "food101",
+    "backbone": "resnet18",
+    "epochs": 1,
+    "batch_size": 128,
+    "lr": 0.1,
+    "weight_decay": 0.0005,
+    "momentum": 0.9,
+    "num_workers": 2,
+    "small_input": true,
+    "pretrained": false,
+    "subset_pct": 25,
+    "stem": "none",
+    "augment": "deit",
+    "epochs_overridden": true
+  },
+  "final_test_acc": 0.037069305777549744,
+  "best_test_acc": 0.037069305777549744,
+  "accounting": {
+    "params_trainable": 11220645,
+    "params_stem_trainable": 0,
+    "params_stem_fixed_filters": 0,
+    "flops_total": 2226670080,
+    "flops_stem": 0,
+    "flops_image_size": 64
+  },
+  "wall_seconds": 48.83309030532837,
+  "torch_version": "2.7.0+cu126",
+  "device": "cuda",
+  "gpu_name": "NVIDIA GeForce RTX 3090",
+  "amp": true
+}

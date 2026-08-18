@@ -1,0 +1,2 @@
+epoch,train_loss,train_acc,test_acc,lr,epoch_seconds,conv1_identity,conv1_gabor,conv1_zernike,ce_loss,aux_loss,lambda,tap_std
+0,4.662053,0.014358,0.037069,0.100000,48.8,,,,,,,

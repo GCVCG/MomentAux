@@ -1,0 +1,4 @@
+[slot1] task 5/17 : configs/diagnostics/diagtaxlam_c100_delay_7pct.yaml seed 4  13:16:20
+[slot1] task 11/17 : configs/diagnostics/diagtaxlam_c10_delay_5pct.yaml seed 3  13:38:11
+[slot1] task 13/17 : configs/diagnostics/diagtaxlam_c10_delay_5pct.yaml seed 5  13:56:59
+[slot1] SLOT_DONE

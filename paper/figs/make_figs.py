@@ -98,26 +98,48 @@ PS.save(fig, os.path.join(HERE, "law_scatter.pdf"))
 print("law_scatter:", {k: len(v) for k, v in pts.items()})
 
 # ---------------------------------------------------------------- fig 2
+# These are transcribed from the article's own envelope tables (tab:envelope
+# and tab:vitenvelope), which are themselves generated from
+# results/all_results.csv -- the supplement's caption promises this figure
+# "draws the same values and adds none of its own", so every entry below must
+# equal the exporter's delta for that cell. Verified against all_results.csv
+# on 2026-08-18; three values had gone stale against it since the figure was
+# last built and are corrected here:
+#   CIFAR-100 @25%   +0.25 -> +0.16   (auxmag_25pct_sched0)
+#   CIFAR-100 @100%  +0.08 -> -0.01   (auxmag_100pct_sched0)
+#   ViT DeiT  @5%   +16.34 -> +16.32  (diagdeit_aux_5pct, deepened to 6 seeds)
+# Tiny-ImageNet previously plotted 6 of the table's 9 fractions; 3/7/15% are
+# added so the curve shows the same points its table does (its true peak is
+# 3%, which the 6-point version could not show).
 fr = [1, 2, 3, 5, 7, 10, 15, 25, 100]
-c100 = [1.42, 2.50, 3.68, 5.15, 4.87, 3.75, 2.55, 0.25, 0.08]
+c100 = [1.42, 2.50, 3.68, 5.15, 4.87, 3.75, 2.55, 0.16, -0.01]
 c10 = [6.37, 6.66, 5.38, 4.41, 2.21, 1.09, -0.66, -0.83, -0.26]
-tin_f = [1, 2, 5, 10, 25, 100]
-tin = [1.49, 1.81, 2.12, 1.65, 0.10, -0.42]
+tin_f = [1, 2, 3, 5, 7, 10, 15, 25, 100]
+tin = [1.49, 1.81, 2.34, 2.12, 2.01, 1.65, 1.44, 0.10, -0.42]
 vit_p = [1.35, 3.25, 6.21, 9.35, 10.99, 13.26, 14.44, 13.67, 9.88]
-vit_d = [3.20, 6.01, 9.48, 16.34, 18.69, 21.00, 24.59, 25.05, 13.86]
+vit_d = [3.20, 6.01, 9.48, 16.32, 18.69, 21.00, 24.59, 25.05, 13.86]
 
 # One column, two rows: authored at the width it is placed at, so the
 # panel contents are drawn at the size the reader sees.
 # 3.6in rather than 4.25: at the taller size the two panels sat far apart and
 # the float ran to 306pt in a ~690pt column, which reads as air above and below
 # the data. The panels share an x axis, so the height buys nothing.
-fig, axes = plt.subplots(2, 1, figsize=(PS.COL, 3.6), sharex=True)
+# WIDE=1 emits the side-by-side variant used by the project page instead.
+# Same data and same styling, one code path: the page previously carried a
+# hand-edited copy of this file, which is how its figures went stale.
+_wide = os.environ.get("WIDE") == "1"
+if _wide:
+    fig, axes = plt.subplots(1, 2, figsize=(PS.WIDE, 2.6))
+else:
+    fig, axes = plt.subplots(2, 1, figsize=(PS.COL, 3.6), sharex=True)
 for ax in axes:
     ax.axhline(0, color=PS.RULE, lw=0.7)
     ax.set_xscale("log")
     ax.set_xticks([1, 2, 5, 10, 25, 100])
     ax.set_xticklabels(["1", "2", "5", "10", "25", "100"])
-axes[1].set_xlabel("data fraction (%)")
+# side by side, both panels need the label; stacked, only the lower one does
+for _a in (axes if _wide else axes[1:]):
+    _a.set_xlabel("data fraction (%)")
 
 a = axes[0]
 a.plot(fr, c100, "-o", ms=2.8, c=OI["blue"], label="CIFAR-100")
@@ -135,5 +157,6 @@ b.set_title("(b) ViT-tiny, CIFAR-100", loc="left")
 b.legend(frameon=False, loc="upper left", handlelength=1.6)
 
 fig.tight_layout(pad=0.3, h_pad=0.6)
-PS.save(fig, os.path.join(HERE, "envelopes.pdf"))
+PS.save(fig, os.path.join(HERE, "envelopes_wide.pdf" if _wide else "envelopes.pdf"),
+        wide=_wide)
 print("envelopes written")

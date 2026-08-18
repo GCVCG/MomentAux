@@ -1,0 +1,33 @@
+[eurosat] VAL 4050 / FIT 12150 (excluded pcts [5, 10, 25])
+  diagfuse_esat_aug_10pct: cached
+  diagfuse_esat_aug_5pct: cached
+  diagfuse_esat_prioraug_10pct seed0: e2e val 94.84 test 94.52 (recorded 94.52)  probe val 96.12 test 96.17
+  diagfuse_esat_prioraug_10pct seed1: e2e val 95.26 test 94.33 (recorded 94.33)  probe val 96.30 test 96.22
+  diagfuse_esat_prioraug_10pct seed2: e2e val 94.91 test 94.19 (recorded 94.19)  probe val 96.30 test 96.09
+  diagfuse_esat_prioraug_5pct seed0: e2e val 88.69 test 88.13 (recorded 88.13)  probe val 93.73 test 93.50
+  diagfuse_esat_prioraug_5pct seed1: e2e val 90.12 test 89.15 (recorded 89.13)  probe val 94.42 test 94.28
+  diagfuse_esat_prioraug_5pct seed2: e2e val 89.65 test 88.39 (recorded 88.43)  probe val 94.62 test 93.98
+  diagfuse_esat_priorssl_10pct seed0: e2e val 94.81 test 93.80 (recorded 93.80)  probe val 95.98 test 95.63
+  diagfuse_esat_priorssl_10pct seed1: e2e val 94.47 test 94.09 (recorded 94.09)  probe val 95.80 test 95.57
+  diagfuse_esat_priorssl_10pct seed2: e2e val 94.91 test 94.19 (recorded 94.19)  probe val 95.88 test 95.78
+  diagfuse_esat_priorssl_5pct seed0: e2e val 90.91 test 90.35 (recorded 90.33)  probe val 94.30 test 94.02
+  diagfuse_esat_priorssl_5pct seed1: e2e val 91.53 test 90.22 (recorded 90.22)  probe val 94.40 test 93.63
+  diagfuse_esat_priorssl_5pct seed2: e2e val 90.91 test 89.85 (recorded 89.83)  probe val 93.98 test 93.72
+  diaggrid_simclr_esat_10pct seed0: e2e val 94.89 test 93.94 (recorded 93.94)  probe val 95.80 test 95.20
+  diaggrid_simclr_esat_10pct seed1: e2e val 94.44 test 94.07 (recorded 94.06)  probe val 95.48 test 95.48
+  diaggrid_simclr_esat_10pct seed2: e2e val 94.79 test 94.41 (recorded 94.39)  probe val 95.51 test 95.76
+  diaggrid_simclr_esat_5pct seed0: e2e val 90.00 test 89.50 (recorded 89.50)  probe val 92.79 test 92.26
+  diaggrid_simclr_esat_5pct seed1: e2e val 90.79 test 89.80 (recorded 89.80)  probe val 93.70 test 92.57
+  diaggrid_simclr_esat_5pct seed2: e2e val 90.35 test 90.07 (recorded 90.07)  probe val 93.73 test 92.85
+  grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_10pct seed0: e2e val 95.58 test 94.89 (recorded 94.89)  probe val 96.74 test 96.69
+  grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_10pct seed1: e2e val 95.73 test 94.87 (recorded 94.87)  probe val 96.91 test 96.30
+  grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_10pct seed2: e2e val 95.43 test 94.91 (recorded 94.93)  probe val 96.54 test 96.44
+  grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_5pct seed0: e2e val 92.32 test 91.56 (recorded 91.54)  probe val 95.80 test 95.31
+  grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_5pct seed1: e2e val 92.42 test 91.87 (recorded 91.87)  probe val 95.90 test 95.37
+  grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_5pct seed2: e2e val 91.98 test 91.50 (recorded 91.50)  probe val 95.46 test 95.19
+  grid_esat_r18_e99fb4_10pct seed0: e2e val 95.04 test 94.11 (recorded 94.11)  probe val 96.49 test 95.94
+  grid_esat_r18_e99fb4_10pct seed1: e2e val 94.67 test 93.67 (recorded 93.69)  probe val 96.57 test 95.94
+  grid_esat_r18_e99fb4_10pct seed2: e2e val 93.75 test 93.22 (recorded 93.22)  probe val 95.80 test 95.50
+  grid_esat_r18_e99fb4_5pct seed0: e2e val 91.04 test 90.57 (recorded 90.59)  probe val 94.96 test 94.98
+  grid_esat_r18_e99fb4_5pct seed1: e2e val 91.31 test 90.96 (recorded 90.96)  probe val 94.47 test 94.67
+  grid_esat_r18_e99fb4_5pct seed2: e2e val 91.28 test 90.83 (recorded 90.83)  probe val 94.27 test 94.50

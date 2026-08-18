@@ -1,0 +1,25 @@
+# C1 (2026-08-17): the 'better features, worse accuracy at high data' thread.
+# grid_mnet_path_aux_20pct VERBATIM except moment_aux.weight (lambda0) 1.0 -> 0.3.
+# Tests whether those sign-law exceptions are lambda0-overshoot, as E3 showed
+# the transfer tax to be. Pre-registered in CLAUDE.md, Block C item C1.
+name: grid_mnet_path_aux_20pct_l03
+dataset: pathmnist
+backbone: mobilenetv3_small_100
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 20
+stem: none
+stem_calibrate: true
+moment_aux:
+  stem: energy-magnitude
+  tap: blocks.3
+  weight: 0.3
+  weight_final: 0.0
+  weight_schedule: cosine
+  head_norm: true
