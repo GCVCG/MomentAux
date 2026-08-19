@@ -290,19 +290,27 @@ def fig_heatmaps(models, test_ds, device, out, cell, dataset, loader,
     def nm(c):
         return names[c] if names else f"class {c}"
 
-    cols = ["input (true label)", "moment target", "baseline tap", "prior tap"]
-    fig, axes = plt.subplots(len(adv), 4,
-                             figsize=(FIGW, FIGW / 4 * 1.30 * len(adv)))
-    axes = np.atleast_2d(axes)
-    for r, idx in enumerate(adv):
-        t = tgt[r].mean(0).cpu()
-        maps = {2: feats["base"][r].abs().mean(0).cpu(),
-                3: feats["aux"][r].abs().mean(0).cpu()}
+    # Four advantage cases as a 2x2 grid of sample BLOCKS, two per row,
+    # each block the same four panels the single-column layout used. Short
+    # per-panel titles; the caption carries the long forms.
+    cols = ["input", "target", "base tap", "prior tap"]
+    import matplotlib.gridspec as gridspec
+    fig = plt.figure(figsize=(FIGW, FIGW / 8 * 1.52 * 2 + 0.26))
+    outer = gridspec.GridSpec(2, 2, figure=fig, wspace=0.10, hspace=0.46,
+                              left=0.005, right=0.995, top=0.860,
+                              bottom=0.095)
+    for k, idx in enumerate(adv):
+        inner = gridspec.GridSpecFromSubplotSpec(
+            1, 4, subplot_spec=outer[k // 2, k % 2], wspace=0.04)
+        t = tgt[k].mean(0).cpu()
+        maps = {2: feats["base"][k].abs().mean(0).cpu(),
+                3: feats["aux"][k].abs().mean(0).cpu()}
         for c in range(4):
-            ax = axes[r, c]
+            ax = fig.add_subplot(inner[0, c])
             if c == 0:
-                ax.imshow(denorm(xs[r], dataset))
-                ax.set_xlabel(nm(int(ys[idx])), fontsize=6)
+                ax.imshow(denorm(xs[k], dataset))
+                ax.text(0.5, -0.06, nm(int(ys[idx])), transform=ax.transAxes,
+                        ha="center", va="top", fontsize=4.6)
             elif c == 1:
                 m = t.numpy()
                 ax.imshow((m - m.min()) / (np.ptp(m) + 1e-9), cmap="magma")
@@ -312,16 +320,16 @@ def fig_heatmaps(models, test_ds, device, out, cell, dataset, loader,
                 r_t = _corr(maps[c], t)
                 pred = pb[idx] if c == 2 else pa[idx]
                 ok = "\u2713" if pred == ys[idx] else "\u2717"
-                ax.set_xlabel(f"{nm(int(pred))} {ok}\n$r$={r_t:+.2f}",
-                              fontsize=5.5, linespacing=1.15)
+                ax.text(0.5, -0.06, f"{nm(int(pred))} {ok}\n$r$={r_t:+.2f}",
+                        transform=ax.transAxes, ha="center", va="top",
+                        fontsize=4.0, linespacing=1.2)
             ax.set_xticks([]), ax.set_yticks([])
-            if r == 0:
-                ax.set_title(cols[c], fontsize=6.5)
+            if k < 2:
+                ax.set_title(cols[c], fontsize=5.2, pad=2.0)
     fig.suptitle(
         f"test-set mean alignment $r$:  baseline {align['base']:+.3f}"
         f"    prior {align['aux']:+.3f}", fontsize=6.5)
-    fig.tight_layout()
-    fig.savefig(os.path.join(out, f"heatmaps_{cell}.png"), dpi=150,
+    fig.savefig(os.path.join(out, f"heatmaps_{cell}.png"), dpi=300,
                 bbox_inches="tight", pad_inches=0.02)
     plt.close(fig)
     return align
@@ -344,10 +352,18 @@ def fig_cam(models, test_ds, device, out, cell, dataset, loader,
     def nm(c):
         return names[c] if names else f"class {c}"
 
-    fig, axes = plt.subplots(len(adv), 3,
-                             figsize=(FIGW, FIGW / 3 * 1.22 * len(adv)))
-    axes = np.atleast_2d(axes)
-    cols = ["input (true label)", "baseline CAM", "prior CAM"]
+    import matplotlib.gridspec as gridspec
+    fig = plt.figure(figsize=(FIGW, FIGW / 6 * 1.30 * 2 + 0.10))
+    outer = gridspec.GridSpec(2, 2, figure=fig, wspace=0.09, hspace=0.30,
+                              left=0.005, right=0.995, top=0.90,
+                              bottom=0.065)
+    axes = np.empty((len(adv), 3), dtype=object)
+    for k in range(len(adv)):
+        inner = gridspec.GridSpecFromSubplotSpec(
+            1, 3, subplot_spec=outer[k // 2, k % 2], wspace=0.04)
+        for c in range(3):
+            axes[k, c] = fig.add_subplot(inner[0, c])
+    cols = ["input", "baseline CAM", "prior CAM"]
     for col, (name, (model, cfg)) in enumerate(items, start=1):
         fmap = model.net.forward_features(model.stem(xs))
         pred = model.net.get_classifier()(model.net.global_pool(fmap)).argmax(1)
@@ -363,25 +379,19 @@ def fig_cam(models, test_ds, device, out, cell, dataset, loader,
             ax.imshow(denorm(xs[r], dataset))
             ax.imshow(m, cmap="magma", alpha=0.5)
             p = int(pred[r]); ok = "\u2713" if p == ys[idx] else "\u2717"
-            ax.text(0.5, -0.02, f"{nm(p)} {ok}", transform=ax.transAxes,
-                    ha="center", va="top", fontsize=5.5)
+            ax.text(0.5, -0.03, f"{nm(p)} {ok}", transform=ax.transAxes,
+                    ha="center", va="top", fontsize=4.4)
             ax.set_xticks([]), ax.set_yticks([])
-            if r == 0:
-                ax.set_title(cols[col], fontsize=6.5)
+            if r < 2:
+                ax.set_title(cols[col], fontsize=5.2, pad=2.0)
     for r, idx in enumerate(adv):
         ax = axes[r, 0]
         ax.imshow(denorm(xs[r], dataset))
-        ax.text(0.5, -0.02, nm(int(ys[idx])), transform=ax.transAxes,
-                ha="center", va="top", fontsize=5.5)
+        ax.text(0.5, -0.03, nm(int(ys[idx])), transform=ax.transAxes,
+                ha="center", va="top", fontsize=4.4)
         ax.set_xticks([]), ax.set_yticks([])
-        if r == 0:
-            ax.set_title(cols[0], fontsize=6.5)
-    # Packed, as for the bank: the images ARE the content, and at column width
-    # every point of padding is a point they do not get. The per-panel labels
-    # are drawn as annotations rather than xlabels precisely so that no axes
-    # space is reserved for them.
-    fig.subplots_adjust(left=0.005, right=0.995, top=0.955, bottom=0.028,
-                        wspace=0.03, hspace=0.20)
+        if r < 2:
+            ax.set_title(cols[0], fontsize=5.2, pad=2.0)
     fig.savefig(os.path.join(out, f"cam_{cell}.png"), dpi=300,
                 bbox_inches="tight", pad_inches=0.02)
     plt.close(fig)

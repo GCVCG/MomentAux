@@ -360,14 +360,14 @@ can add'' is not a dataset property but a (dataset, architecture) property.
 \begin{figure}[pos=htbp]
 \centering
 \includegraphics[width=\linewidth]{figs_explain/heatmaps_auxmag_5pct_sched0.png}
-\caption{The spectral imprint at the tap, CIFAR-100 at 5\%. Columns:
-input, the fixed moment target, and the tapped-stage energy of the
-baseline and prior arms. Over the \emph{whole} test set the alignment
-between tapped features and the target is $+0.215$ for the baseline and
-$+0.525$ for the prior arm. The three rows are \emph{selected} cases
-(prior arm correct, baseline wrong), so they illustrate the alignment
-difference, not sample it, and only the test-set-wide figure
-should be read as evidence.}
+\caption{The spectral imprint at the tap, CIFAR-100 at 5\%. Each of the
+four sample blocks shows the input, the fixed moment target, and the
+tapped-stage energy of the baseline and prior arms. Over the \emph{whole}
+test set the alignment between tapped features and the target is $+0.215$
+for the baseline and $+0.525$ for the prior arm. The four samples are
+\emph{selected} cases (prior arm correct, baseline wrong), so they
+illustrate the alignment difference, not sample it, and only the
+test-set-wide figure should be read as evidence.}
 \label{fig:heatmap}
 \end{figure}
 $G$ is a number, and it is worth seeing what in the representation it
@@ -383,16 +383,16 @@ representation settles, not what the loss pulls on at the finish.
 \begin{figure}[pos=htbp]
 \centering
 \includegraphics[width=\linewidth]{figs_explain/cam_auxmag_5pct_sched0.png}
-\caption{Where the class evidence sits, CIFAR-100 at $5\%$. The three rows are
-\emph{selected} cases (prior arm correct, baseline wrong), so they show what the
-difference looks like where it is present, not how often. The evidential
-quantity is measured over the whole test set instead: the Gini coefficient of
-each class-activation map normalized to sum one, where higher means evidence
-concentrated at fewer locations, gives $\camBase$ for the baseline against
-$\camAux$ for the prior arm over $\camN$ images ($\camSigma\,\sigma$). The
-prior's evidence is measurably more
-concentrated, by a modest amount, not the categorical difference the three
-rows suggest.}
+\caption{Where the class evidence sits, CIFAR-100 at $5\%$. The four
+samples are \emph{selected} cases (prior arm correct, baseline wrong), so
+they show what the difference looks like where it is present, not how
+often. The evidential quantity is measured over the whole test set instead:
+the Gini coefficient of each class-activation map normalized to sum one,
+where higher means evidence concentrated at fewer locations, gives
+$\camBase$ for the baseline against $\camAux$ for the prior arm over
+$\camN$ images ($\camSigma\,\sigma$). The prior's evidence is measurably
+more concentrated, by a modest amount, not the categorical difference the
+selected samples suggest.}
 \label{fig:cam}
 \end{figure}
 
