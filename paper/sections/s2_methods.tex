@@ -4,30 +4,17 @@
 \begin{figure*}[pos=htbp]
 \centering
 \includegraphics[width=\linewidth]{figs/method.pdf}
-\caption{MomentAux in three phases, and the fusion outcomes it measures.
-\textbf{(a)} Phase 1: the knowledge source, the pinned Gabor bank, turns
-the input into the fixed oriented-energy target $m(x)$ of
-Eq.~\ref{eq:energy} (four of the eight magnitude maps shown), calibrated
-and fingerprinted before any training and identical for every dataset,
-backbone and task. Phase 2: the same input feeds the unchanged backbone,
-drawn generically as early, mid, deep and final stages; a $1{\times}1$
-convolution $W$ regresses the tapped deep stage (the third of four in our
-backbones, $f_3$ in Eq.~\ref{eq:loss}) onto the target, so training
-minimizes
-$\mathcal{L}=\mathcal{L}_{\mathrm{CE}}+\lambda(t)\,\lVert W
-f_{\mathrm{deep}}(x)-m(x)\rVert_2^2$, with the cosine schedule (inset)
-taking $\lambda$ from $\lambda_0$ to exactly zero, so late training is
-pure cross-entropy. Phase 3: $W$ and the bank are dropped, leaving the
-plain backbone and a task head at FLOPs identical to the baseline; the
-same bank, tap and schedule serve classification, segmentation and
-detection, only the head changes. \textbf{(b)} The three outcomes the
-benchmark measures when two knowledge sources are fused, schematic bars
-with one measured example each: different currencies can stack, the same
-currency substitutes, and a strong partner turns the prior into
-interference (an ImageNet initialization at $\lambda_0{=}1.0$), which
-vanishes at $\lambda_0{\leq}0.3$. Each cell's gain decomposes as
-$\Delta=G+\readout$ (Eq.~\ref{eq:law}), $G$ measured on frozen features
-under linear evaluation.}
+\caption{The study in one picture. \textbf{(a)} One frozen recipe and fixed
+subset indices, so every intervention sees byte-identical images; cells that
+must deviate are marked diagnostic and never enter headline tables.
+\textbf{(b)} MomentAux, the fused knowledge source: a pinned bank of
+oriented-energy targets regressed from a tap at the third of four feature
+stages, during training only, with $\lambda$ decaying to exactly zero, so
+the deployed network is byte-identical to the baseline. \textbf{(c)} Each cell
+yields two measurements, the end-to-end gain $\Delta$ and the frozen-feature
+gain $G$, whose difference is the \readout{} term of Eq.~\ref{eq:law}.
+\textbf{(d)} The comparator ladder, ordered by declared training cost; all are
+fused into the same recipe, and their pairwise combinations are measured too.}
 \label{fig:method}
 \end{figure*}
 
@@ -598,7 +585,7 @@ CUB-200   & --      & --      & --       & $+2.74$\rlap{$^{\ast}$} \\
 
 \looseness=-1 Tables~\ref{tab:envelope} and~\ref{tab:domainenv} give the
 prior's gain across the data axis, Table~\ref{tab:vitenvelope} gives it on
-ViT-tiny, and S8 of the supplement draws both. Three regularities recur. The
+ViT-tiny, and Fig.~\ref{fig:envelopes} in the appendix draws both. Three regularities recur. The
 envelope is \emph{unimodal}: gains rise from the extreme-scarcity floor, peak
 in a dataset-specific band, and decay toward zero as data becomes sufficient.
 The peak's location tracks the dataset's difficulty, not its fraction, easy
@@ -648,7 +635,7 @@ The same envelope measured for every comparator produces the head-to-head
 tables Secs.~\ref{sec:fusion} and \ref{sec:guide} analyze. As a preview: on CIFAR-100 under plain augmentation, SimCLR initialization at
 $2\times$ compute beats the $1.02\times$ prior by $+0.85$ to $+5.0$ points
 between 1\% and 10\% and converges back to parity by 50\% (the full margin
-envelope is Table~S1 of the supplementary material); SimSiam gains ${\leq}+0.9$ anywhere on this envelope at
+envelope is Table~\ref{tab:appssl} in the appendix); SimSiam gains ${\leq}+0.9$ anywhere on this envelope at
 that budget, a property of the
 budget, not of the method (Sec.~\ref{sec:parity}). DINO, a ViT-only
 comparator in this grid, trails the

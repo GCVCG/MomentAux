@@ -7186,3 +7186,31 @@ ported vs corrected and why.
   three-character abbreviated horizontal keys (Rec./Cst./Fea./Cmb./Prd.)
   explained in a table FOOTER, first column narrowed -- no rotated element
   anywhere. Gate green at 35 pages throughout.
+
+- *** WAVE M SCORED, SAME DAY -- EVERY BAND MISSED HIGH, AND THE MISS IS THE
+  FINDING (2026-08-19, 3 seeds/cell + probes; the wave completed in 29
+  minutes on four H100s):
+      pct   base    MAE-init         band       aux-ViT  SimCLR  DINO
+       5%  12.25  20.46 +-1.23    12..16 MISS   21.60    20.34   15.22
+      10%  16.47  29.51 +-0.19    16..25 MISS   29.74    29.77   24.60
+      25%  28.50  42.65 +-0.99    28..40 MISS   42.17    43.58   ~42
+  (M1) FALSIFIED: MAE was predicted at-or-below DINO everywhere; it BEATS
+    DINO by +5.2 at 5% and +4.9 at 10%. "MAE is known-weak at tiny data"
+    -- this ledger's own recorded prior -- does not survive a 32px/patch-4
+    instantiation with a proper decoder: masked reconstruction has plenty
+    to learn at 2,500 images.
+  (F-M1) NOT FIRED ON THE LETTER, and the honest reading is a TIE: MAE vs
+    SimCLR-init is +0.12 / -0.26 / -0.93 at 5/10/25% -- statistical peers
+    at <=10%, SimCLR ahead at 25%. The SSL comparisons keep SimCLR as the
+    representative but must note MAE matches it at low data.
+  (F-M2) NOT FIRED, narrowly: aux-ViT stays above MAE at 5% (+1.14) and
+    ties at 10% (+0.23). The prior's low-data attention lead over masked
+    SSL is a 5-percent statement, not a <=10% one.
+  (M3) HELD: G(mae) = +10.90/+13.33/+13.83 vs G(aux) 13.17/14.85/14.03 --
+    below the prior's feature gain at 5% and 10%, converging by 25%; and
+    ABOVE G(simclr) at 5% (10.90 vs 10.02). Masked reconstruction's
+    currency looks like MORE of the same feature deficit fill, not a new
+    currency -- the same account as every SSL family measured, which is
+    what the coming mae|prior prospective tranche will test properly.
+  MAE seed note: diagmae_vit_5pct seed1 = 17.99 vs siblings ~21.7 -- the
+  ViT variance asymmetry again, baseline-side of the init.

@@ -350,7 +350,7 @@ identical pixels: fine-grained weak supervision is where the prior has the most
 feature work to do. The \readout{} term follows task performance, not label
 budget: engineered cells that lower class count without raising baseline
 accuracy get no \readout{} boost (a prediction our own account initially got
-wrong, and the cell that corrected it is S7 of the supplement). And
+wrong, and the cell that corrected it is in \ref{app:controls}). And
 $G$ depends on the backbone as sharply as on the data: at the same
 Tiny-ImageNet cell, ResNet-18 carries $G = +2.66$ while MobileNetV3 carries $G
 = +0.01 \pm 0.23$, a measured zero on the weaker network, so ``how much a prior
@@ -513,7 +513,7 @@ We are deliberate about how far the qualitative evidence goes. The
 individual-image maps of Figs.~\ref{fig:heatmap} and \ref{fig:cam} are
 selected on cases the prior gets right
 and the baseline wrong, so they illustrate rather than demonstrate; a t-SNE
-of the frozen features (supplementary Fig.~S3) moves the all-class silhouette
+of the frozen features (Fig.~\ref{fig:tsne}) moves the all-class silhouette
 only from $-0.072$ to $-0.064$, since a $+6.3$-point feature gap need not be
 legible in two projected dimensions. The alignment statistic and the linear
 evaluation are the measurements; the pictures illustrate them.
