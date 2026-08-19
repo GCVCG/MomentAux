@@ -1298,6 +1298,8 @@
 | diagin100_vits_none_5pct | imagenet100 | 5 | vit_small | none | 3 | 7.29+/-3.79 | 7.40+/-3.71 | 21.70 | 0 | 4250.3 |
 | diagin100e200_vitb_aux | imagenet100 | 100 | vit_base | none | 6 | 82.02+/-1.87 | 82.13+/-1.89 | 85.88 | 0 | 16866.7 |
 | diagin100e200_vitb_none | imagenet100 | 100 | vit_base | none | 6 | 75.31+/-1.18 | 75.41+/-1.18 | 85.88 | 0 | 16866.7 |
+| diagin100e200_vits_aux | imagenet100 | 100 | vit_small | none | 6 | 83.99+/-0.20 | 84.13+/-0.25 | 21.71 | 0 | 4250.3 |
+| diagin100e200_vits_none | imagenet100 | 100 | vit_small | none | 6 | 79.47+/-0.40 | 79.66+/-0.39 | 21.70 | 0 | 4250.3 |
 | diagin64_mnet_aux | imagenet64 | 100 | mobilenetv3_small_100 | none | 3 | 34.88+/-0.12 | 34.88+/-0.12 | 2.54 | 0 | 20.8 |
 | diagin64_mnet_aux_10pct | imagenet64 | 10 | mobilenetv3_small_100 | none | 3 | 21.22+/-0.32 | 21.23+/-0.33 | 2.54 | 0 | 20.8 |
 | diagin64_mnet_aux_15pct | imagenet64 | 15 | mobilenetv3_small_100 | none | 3 | 25.24+/-0.05 | 25.24+/-0.05 | 2.54 | 0 | 20.8 |
@@ -1360,6 +1362,9 @@
 | diagin64_vit_none_3pct | imagenet64 | 3 | vit_tiny | none | 3 | 3.43+/-0.18 | 4.32+/-0.07 | 5.58 | 0 | 349.2 |
 | diagin64_vit_none_5pct | imagenet64 | 5 | vit_tiny | none | 3 | 5.89+/-0.23 | 7.52+/-0.49 | 5.58 | 0 | 349.2 |
 | diagin64_vit_none_7pct | imagenet64 | 7 | vit_tiny | none | 3 | 7.59+/-0.13 | 9.56+/-0.14 | 5.58 | 0 | 349.2 |
+| diagmae_vit_10pct | cifar100 | 10 | vit_tiny | none | 3 | 29.51+/-0.34 | 29.62+/-0.26 | 5.38 | 0 | 347.2 |
+| diagmae_vit_25pct | cifar100 | 25 | vit_tiny | none | 3 | 42.65+/-1.73 | 42.87+/-1.76 | 5.38 | 0 | 347.2 |
+| diagmae_vit_5pct | cifar100 | 5 | vit_tiny | none | 3 | 20.46+/-2.14 | 20.59+/-2.16 | 5.38 | 0 | 347.2 |
 | diagsfvit_eurosatms_all_aux_10pct | eurosatms_all | 10 | vit_tiny | none | 3 | 93.27+/-0.10 | 93.45+/-0.12 | 5.51 | 0 | 356.8 |
 | diagsfvit_eurosatms_all_aux_5pct | eurosatms_all | 5 | vit_tiny | none | 3 | 90.16+/-0.18 | 90.30+/-0.15 | 5.51 | 0 | 356.8 |
 | diagsfvit_eurosatms_all_none_10pct | eurosatms_all | 10 | vit_tiny | none | 3 | 91.52+/-0.44 | 91.75+/-0.34 | 5.51 | 0 | 356.8 |
@@ -1474,7 +1479,7 @@
 | diagtransfer2_c100_aux_2pct | cifar100 | 2 | resnet18 | none | 3 | 11.21+/-0.37 | 11.35+/-0.42 | 11.22 | 0 | 556.7 |
 | diagtransfer2_c100_aux_3pct | cifar100 | 3 | resnet18 | none | 3 | 15.40+/-0.75 | 15.62+/-0.69 | 11.22 | 0 | 556.7 |
 | diagtransfer2_c100_aux_50pct | cifar100 | 50 | resnet18 | none | 3 | 72.76+/-0.58 | 72.91+/-0.56 | 11.22 | 0 | 556.7 |
-| diagtransfer2_c100_aux_7pct | cifar100 | 7 | resnet18 | none | 3 | 29.27+/-5.02 | 29.57+/-5.08 | 11.22 | 0 | 556.7 |
+| diagtransfer2_c100_aux_7pct | cifar100 | 7 | resnet18 | none | 10 | 30.63+/-3.91 | 30.87+/-3.90 | 11.22 | 0 | 556.7 |
 | diagtransfer2_c100_none_100pct | cifar100 | 100 | resnet18 | none | 3 | 79.80+/-0.14 | 79.89+/-0.06 | 11.22 | 0 | 556.7 |
 | diagtransfer2_c100_none_10pct | cifar100 | 10 | resnet18 | none | 3 | 58.28+/-2.19 | 58.62+/-2.20 | 11.22 | 0 | 556.7 |
 | diagtransfer2_c100_none_15pct | cifar100 | 15 | resnet18 | none | 3 | 65.45+/-1.23 | 66.09+/-0.79 | 11.22 | 0 | 556.7 |
@@ -1494,7 +1499,7 @@
 | diagtransfer2_c10_aux_2pct | cifar10 | 2 | resnet18 | none | 3 | 44.77+/-2.58 | 45.13+/-2.74 | 11.18 | 0 | 556.7 |
 | diagtransfer2_c10_aux_3pct | cifar10 | 3 | resnet18 | none | 3 | 55.11+/-1.79 | 55.39+/-1.79 | 11.18 | 0 | 556.7 |
 | diagtransfer2_c10_aux_50pct | cifar10 | 50 | resnet18 | none | 3 | 92.85+/-0.33 | 92.96+/-0.36 | 11.18 | 0 | 556.7 |
-| diagtransfer2_c10_aux_5pct | cifar10 | 5 | resnet18 | none | 3 | 64.54+/-2.88 | 64.76+/-2.84 | 11.18 | 0 | 556.7 |
+| diagtransfer2_c10_aux_5pct | cifar10 | 5 | resnet18 | none | 10 | 65.68+/-2.16 | 65.86+/-2.14 | 11.18 | 0 | 556.7 |
 | diagtransfer2_c10_aux_7pct | cifar10 | 7 | resnet18 | none | 3 | 67.63+/-3.64 | 67.71+/-3.64 | 11.18 | 0 | 556.7 |
 | diagtransfer2_c10_none_100pct | cifar10 | 100 | resnet18 | none | 3 | 95.44+/-0.08 | 95.54+/-0.09 | 11.17 | 0 | 556.7 |
 | diagtransfer2_c10_none_10pct | cifar10 | 10 | resnet18 | none | 3 | 90.03+/-0.73 | 90.13+/-0.69 | 11.17 | 0 | 556.7 |

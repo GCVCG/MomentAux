@@ -1,0 +1,28 @@
+# MAE-init ViT UNDER DeiT AUGMENTATION (C100@5%) -- the masked-SSL column
+# of the modern-recipe comparison. Every MAE cell so far ran under plain
+# crop+flip, while the paper's attention claim ("the prior beats SSL once a
+# small ViT is trained the modern way") is stated under DeiT augmentation.
+# The mechanism predicts masked SSL should behave UNLIKE SimCLR here: heavy
+# supervised augmentation collapsed SimCLR's value because both supply
+# nuisance-INVARIANCE (same currency, so it substitutes), whereas masked
+# reconstruction supplies spatial/structural prediction, which augmentation
+# does not supply. Identical to diagmae_vit_5pct except for 'augment: deit';
+# the pretrain is augmentation-agnostic and is reused unchanged.
+# AdamW + augment => diag-only, never a headline row.
+name: diagdeitmae_vit_5pct
+dataset: cifar100
+backbone: vit_tiny
+optimizer: adamw
+epochs: 200
+batch_size: 128
+lr: 0.001
+weight_decay: 0.05
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 5
+stem: none
+stem_calibrate: true
+augment: deit
+init_from: runs/mae_pre_vit_5pct/seed{seed}/pretrain.pt

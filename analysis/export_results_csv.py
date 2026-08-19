@@ -110,7 +110,11 @@ def main():
                     help="repeatable; later roots win on seed collisions")
     ap.add_argument("--out", default="results/all_results.csv")
     args = ap.parse_args()
-    roots = args.runs_root or ["runs", "runs_turing"]
+    # runs_bscpull is a default root, not an opt-in: cells pulled from the
+    # cluster and never mirrored into runs/ were silently absent from the
+    # released table (the 13 wave-1 fusion combos, found 2026-08-20), which is
+    # the same gap the 2026-08-17 pass found for the diagfuse arms.
+    roots = args.runs_root or ["runs", "runs_turing", "runs_bscpull"]
     roots = [r for r in roots if os.path.isdir(r)]
 
     cells = load_cells(roots)

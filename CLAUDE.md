@@ -7296,3 +7296,267 @@ ported vs corrected and why.
   checkpoints are now pulled and independently re-probed on a second machine
   under the identical protocol, which is a cross-machine reproduction the
   comparator did not have before.
+
+## WAVE M2: THE MASKED-SSL COLUMN UNDER A MODERN RECIPE (2026-08-20, user:
+## "the masked SSL needs more experiments? if so, please run them too on BSC")
+
+- WHY, and it is a gap in a HEADLINE claim rather than a completeness item.
+  Wave M measured MAE-init on ViT-tiny at C100 5/10/25% under PLAIN crop+flip
+  only. The paper's attention claim is stated under DeiT augmentation ("the
+  prior beats SimCLR once a small ViT is trained the modern way"), so masked
+  SSL has never been tested in the regime the claim is about. A referee asking
+  "and masked SSL?" would find the comparison missing exactly where it counts.
+  Wave M also stopped at 5%, leaving the 1-2% band -- the prior's own claimed
+  niche -- unmeasured for the only non-invariance SSL family in the study.
+- THE MECHANISM AT STAKE, and it makes this a test rather than a fill-in:
+  heavy supervised augmentation COLLAPSED SimCLR's marginal value (deit-ssl
+  below deit-aux at every fraction; G rose only +3.84 from plain to deit at
+  10%, against aux's +7.35) because both supply nuisance-INVARIANCE -- same
+  currency, so augmentation substitutes. Masked reconstruction supplies
+  spatial/structural prediction, which augmentation does NOT supply, so the
+  stack/substitute account predicts MAE should behave like the PRIOR here
+  (compounding) and not like SimCLR (substituting).
+- COST IS NEGLIGIBLE AND THE REASON IS STRUCTURAL: the MAE pretrain is
+  AUGMENTATION-AGNOSTIC (only the supervised stage changes), so the five
+  DeiT arms reuse the nine existing pretrains unchanged -- the same reuse the
+  deitssl wave made of fillvit's. Only 1% and 2% need new pretraining, and
+  those are 500 and 1000 images. 21 finetunes + 6 pretrains + probes.
+- CONFIGS ARE THE PARENTS VERBATIM, verified by diff rather than asserted:
+  diagdeitmae_vit_Npct differs from diagmae_vit_Npct in `name` and
+  `augment: deit` and nothing else; diagmae_vit_{1,2}pct differ from
+  diagvit_none_{1,2}pct in `name` and `init_from` and nothing else. The
+  generated template reproduced the EXISTING diagmae_vit_5pct body
+  byte-for-byte, which is what licenses the other six.
+- PREDICTIONS RECORDED IN ADVANCE (no cell run). Anchors, all measured:
+      plain  base 12.25/16.47/28.50 | aux 21.60/29.74/42.17
+             simclr 20.34/29.77/43.58 | mae 20.46/29.51/42.65   (5/10/25%)
+      deit   base 12.55/20.28/32.27 | aux 28.87/41.29/57.32
+             ssl 21.64/36.06/52.31
+      plain@1%  base 6.44 aux 7.80 simclr 7.05
+      plain@2%  base 8.91 aux 12.15 simclr 10.88
+    (M4) THE DECISIVE FORK, and the two branches are ~5 points apart at 10%.
+      Augmentation lifts the ViT baseline by +3.81 at 10%; on top of that the
+      prior compounds a further +7.74 and SimCLR only +2.48. So:
+        compounds like the prior => deit-mae ~ 41 (ties deit-aux 41.29)
+        substitutes like SimCLR  => deit-mae ~ 36 (ties deit-ssl 36.06)
+      I back the COMPOUNDING branch on the currency account, but not all the
+      way, because MAE is data-starved at these scales and mixup/cutmix may
+      damage a reconstruction-learned representation during finetuning:
+        @5%  **22..28**  (deit-ssl 21.64, deit-aux 28.87)
+        @10% **37..42**  (deit-ssl 36.06, deit-aux 41.29)
+        @25% **52..58**  (deit-ssl 52.31, deit-aux 57.32)
+      PROBE: if MAE compounds, its G must rise from 13.33 by more than
+      SimCLR's +3.84 => **G(deit-mae)@10% = 18..22** (deit-ssl 17.30,
+      deit-aux 22.20).
+    (M5) THE LOW-DATA END, and it rests on an asymmetry worth stating:
+      contrastive learning needs many IMAGES (it is negatives that are
+      scarce at 500), while masked reconstruction draws its supervision from
+      PATCHES -- 500 images is already ~32k patch targets. So MAE should
+      starve LESS than SimCLR at 1%, where SimCLR buys only +0.61 over
+      baseline. Bands: **@1% 7.0..9.5**, **@2% 10.0..13.0**.
+- FALSIFIERS, each costing a specific claim:
+  (F-M4) deit-mae >= deit-aux at BOTH 10% and 25% => masked SSL matches the
+    prior under a modern recipe, and the attention headline must be restated
+    to name its scope: it holds against INVARIANCE-BASED self-supervision,
+    not against self-supervision in general. This is the one that would cost
+    the paper a claim, and it is reachable -- the compounding branch I am
+    backing lands within ~0.3 of it at 10%.
+  (F-M5) deit-mae <= deit-ssl + 0.5 at both 10% and 25% => augmentation
+    substitutes for masked reconstruction too, the structural-vs-invariance
+    account is wrong about what MAE supplies, and the currency taxonomy needs
+    a category it does not have.
+  (F-M6) mae <= base + 0.5 at 1% (i.e. <= 6.94) => masked reconstruction
+    starves at 500 images exactly as contrastive does, and the patch-count
+    asymmetry behind M5 is wrong.
+  (F-M7) mae >= aux at BOTH 1% and 2% => the prior's low-data attention niche
+    does not survive masked SSL under plain augmentation either, which would
+    narrow the niche claim on its own home ground.
+  NOTE F-M4 and F-M5 are opposite-signed and F-M6/F-M7 likewise, so no
+  uniform outcome passes the block: a large result fires F-M4, a flat one
+  fires F-M5.
+- SMOKE-TESTED BEFORE SUBMISSION, all three paths, into a scratch --out-root
+  so a 1-epoch final.json could not trip train.py's completed-run guard on a
+  real cell: the 1% pretrain runs (150 tensors), the plain finetune loads it
+  (150 transferred, 2 left fresh = the classifier), and the DeiT arm loads the
+  same init with the augmentation stack live. The temporary smoke pretrain was
+  deleted afterwards so it cannot be mistaken for a real one.
+
+## THE WAVE-1 POST-MORTEM: THE RULE IS NOT NOISY, IT IS INVERTED (2026-08-20,
+## user: "is the failure something we need to fix?")
+
+- FIRST, THE PART THAT NEEDS NO FIXING: nothing failed technically. Both the
+  mae and prosp lanes wrote BSC_WORKER_COMPLETE with ZERO FAILs, all 13
+  combos carry 3 seeds and all 3 MAE cells carry 3 seeds and a probe. The
+  "failure" is the scientific one -- Algorithm 1 called 1 of 9 held-out pairs
+  -- and it was correctly reported and the claim correctly withdrawn.
+- WHAT THE POST-MORTEM ADDS, and it is much sharper than the diagnosis
+  recorded last night ("the predicate conflates same-currency-in-different-
+  amounts with different-in-kind"). Scoring the published statistic as a
+  RANKING rather than as a set of calls:
+      |G_A - G_B| / max(|G_A|,|G_B|)      AUC = 0.125  [0.00, 0.38]
+      restricted to RESOLVED outcomes     AUC = 0.050  [0.00, 0.30]
+  An AUC of 0.5 is no signal. 0.125 is not no-signal, it is the predicate
+  ordering the pairs BACKWARDS. The published rule reads "similar G => same
+  currency => SUBSTITUTE"; in the data, similar G goes with STACK (mean
+  relative gap 0.266 for STACK against 0.637 for SUBSTITUTE). That is why it
+  scored 1 of 9 rather than the ~4.5 of 9 a coin would have.
+- THE SECOND PREDICATE FAILS TOO, AND THAT MATTERS BECAUSE IT IS THE ONE THE
+  PAPER'S OWN DEFINITION NAMES. The de-circularized currency definition
+  (2026-08-18) lists three single-source measurements: each source's G, WHICH
+  TEST IMAGES ITS ARM FIXES, and representation similarity. Algorithm 1 only
+  ever operationalized the first. The second is already implemented --
+  fixed_similarity() in analysis/prospective_currency.py, the normalized
+  fix-set overlap S(A,B) = across / sqrt(within_A * within_B), with the
+  across-seed term as the control for "some images are simply easier" -- and
+  it was computed for all 13 wave-1 pairs. It separates nothing:
+      S(A,B)   STACK mean 1.009 [0.696, 1.312] | SUB mean 0.982 [0.715, 1.416]
+               **AUC = 0.500**, and the best threshold FIT ON THIS DATA gets
+               9/13 against a majority-class floor of 8/13.
+  Note what S ~ 1 means, because it is the interesting part: two DIFFERENT
+  sources fix the same baseline errors to almost exactly the degree that two
+  SEEDS OF ONE SOURCE do. Which images get fixed is largely seed noise, not a
+  property of the source, so no predicate built on it can work at 3 seeds.
+- SO THE FIX IS NOT A BETTER CURRENCY PROXY. IT IS THAT THE OPERATIVE
+  VARIABLE IS STRENGTH ASYMMETRY, WHICH THIS STUDY ALREADY ESTABLISHED ON
+  THREE INDEPENDENT AXES AND ALGORITHM 1 CONTRADICTED:
+      the transfer tax scales with what the init already supplied (E3)
+      the fusion tax appears wherever the PARTNER is already strong (E2)
+      "the prior is redundant iff the partner already bought the features"
+        -- the restatement forced by SimSiam (2026-07-24)
+  All three say: two comparably-strong sources compound; a strong source
+  plus a weak one does not, and at lambda0 = 1.0 the weak one TAXES. Sorting
+  the 9 resolved wave-1 cells by |G_A - G_B|/max gives exactly that ordering
+  with ONE inversion (r18_tin_10 prior|simsiam, 0.55, stacked):
+      0.09 STACK  0.15 STACK  0.24 STACK  0.30 STACK  | 0.51 SUB
+      0.55 STACK(the inversion)  0.60 SUB  0.89 SUB  0.92 SUB
+  AUC of the FLIPPED direction: **0.950 [0.70, 1.00]** on resolved cells,
+  0.875 [0.62, 1.00] on all 13.
+  So Algorithm 1 encoded a CURRENCY story in a place where the study's own
+  evidence supported a STRENGTH story, and it encoded it with the sign
+  reversed.
+- *** THIS IS A HYPOTHESIS, NOT A RESULT, AND THE DISTINCTION IS THE WHOLE
+  POINT. The flipped rule and its threshold are derived from the same 13
+  pairs that falsified the original. Reporting "we fixed it" on that basis
+  would be fitting on the test set -- precisely the contamination the
+  pre-registration discipline exists to prevent, and the reason wave 1 was
+  run at all. Wave 1 is hereby the DERIVATION set, disclosed as such; the
+  revised rule gets ONE held-out test on pairs whose combination has never
+  been trained.
+
+## WAVE 2: THE STRENGTH-ASYMMETRY RULE, PRE-REGISTERED (2026-08-20)
+
+- THE RULE, fixed here before any wave-2 pair is scored, with its threshold
+  fit on wave 1 and that fact stated:
+      REL = |G_A - G_B| / max(|G_A|, |G_B|),  both G on the validation
+            carve-out, last.pt only, never test.
+      REL <  0.40  ->  STACK       (comparable strength; deficits compound)
+      REL >= 0.40  ->  SUBSTITUTE  (asymmetric; the weaker source adds
+                                    nothing and at lambda0=1.0 may tax)
+  0.40 is the midpoint of the resolved gap between 0.30 (the largest STACK)
+  and 0.51 (the smallest SUBSTITUTE). The N/A gate is REMOVED, not kept: a
+  source with |G| <= 1.0 beside a strong one is the MAXIMAL asymmetry case,
+  so the strength rule already covers it, and the gate was independently the
+  worst-performing part of wave 1 (1/4 on validation, 0/4 on test).
+  Applied retrospectively to wave 1 this gives 11/13 overall and 8/9
+  resolved, against the published rule's 1/9. Both numbers are in-sample.
+- PRIMARY CRITERION, one per question this time (the wave-1 registration
+  contained a band and a falsifier that contradicted each other, and the
+  measurement landed in the gap): over the wave-2 pairs whose outcome is
+  RESOLVED at 2 SEM, the revised rule is supported if it calls **at least
+  75%** correctly, and is REJECTED at 50% or below -- a coin. Between the
+  two it is reported as UNRESOLVED, and with the pair count expected here
+  that band is wide, which is honest rather than convenient.
+- WHAT THIS CANNOT ESTABLISH, recorded in advance as for wave 1: the pairs
+  are assembled by us and not adversarially; the threshold is fit on wave 1;
+  and the single arms already exist, so this is a prospective test of the
+  RULE, not of the whole pipeline from scratch. What it does establish, if
+  it holds, is that a rule derived from one set of untrained combinations
+  predicts another -- which no retrospective scoring can.
+
+- *** WAVE 2 GETS ITS FIRST THREE PAIRS FOR FREE, AND THEY PIT THE STRENGTH
+  RULE AGAINST MY OWN M2 BANDS (2026-08-20, committed with job 44832750
+  RUNNING at 4m26s, counter 12/21, ZERO finals on disk -- so these calls
+  precede every result they are about).
+  diagdeitmae_vit_Npct IS a fusion combination: masked SSL (the init) plus
+  DeiT augmentation (the recipe), over the shared diagvit_none_Npct baseline,
+  and both single arms are already measured. So the strength rule can be
+  applied to it at no extra compute.
+      pair                  G(mae)  G(aug)    REL      CALL
+      aug|mae vit_c100_5    10.91    0.00   1.000   SUBSTITUTE
+      aug|mae vit_c100_10   13.33    3.17   0.762   SUBSTITUTE
+      aug|mae vit_c100_25   13.83    4.46   0.678   SUBSTITUTE
+  All three are deep in the asymmetric branch: masked reconstruction buys
+  11-14 points of frozen-feature gain where DeiT augmentation buys 0-4.5.
+  SUBSTITUTE predicts the combination LANDS AT the better single arm within
+  2 SEM, i.e. **20.5 / 29.5 / 42.7** -- essentially the plain MAE numbers,
+  with augmentation adding nothing on top.
+  *** AND THAT CONTRADICTS THE M2 BANDS I RECORDED HOURS EARLIER TODAY
+  (22..28 / 37..42 / 52..58), which were reasoned from the currency account:
+  "masked reconstruction supplies structure, augmentation supplies
+  invariance, different currencies compound". The strength rule says the
+  currencies are beside the point and the asymmetry decides. The two cannot
+  both be right, so this wave adjudicates between them:
+      lands 37..42 @10%  => the currency/compounding account wins, the
+        strength rule is wrong on its first held-out pairs, and the wave-1
+        post-mortem's diagnosis is itself falsified.
+      lands ~29.5 @10%   => the strength rule wins and my mechanism
+        reasoning was wrong twice in one day, in the same direction.
+      lands ~36 (deit-ssl-like) => BOTH are wrong.
+  Recorded because a prediction that can only be checked after the fact is
+  worth nothing, and because I would otherwise be free to claim whichever
+  of my two mutually exclusive predictions the data happened to match.
+  PROTOCOL NOTE, stated rather than buried: these three REL values are
+  computed from the RECORDED (test-split) probes, not from the validation
+  carve-out the wave-2 registration specifies, because the carve-out
+  measurement would not have finished before the cells did. Wave 1 shows
+  REL is stable across splits (mean |val - test| = 0.054 over 13 pairs, and
+  12 of 13 calls unchanged), so the substitution is defensible; it is
+  recorded as a deviation and these three are scored separately from the
+  properly-measured wave-2 pairs.
+
+- *** WAVE 2 IS CANCELLED BEFORE SUBMISSION: THE STRENGTH RULE IS ALREADY
+  FALSIFIED ON DATA WE DID NOT HAVE TO GENERATE (2026-08-20). Before spending
+  a node on a prospective test, the rule was scored against six ViT
+  combinations that ALREADY EXIST and were NOT in its derivation set -- three
+  aug|simclr (diagdeitssl) and three prior|aug (diagdeit_aux) cells on
+  C100/ViT-tiny at 5/10/25%:
+      pair                     REL    call        combo-best   sig   actual
+      aug|simclr vit_c100_5   1.000  SUBSTITUTE      +1.30     0.9  SUBSTITUTE
+      prior|aug  vit_c100_5   1.000  SUBSTITUTE      +7.27    18.5  STACK
+      aug|simclr vit_c100_10  0.764  SUBSTITUTE      +6.29     7.0  STACK
+      prior|aug  vit_c100_10  0.786  SUBSTITUTE     +11.55    50.5  STACK
+      aug|simclr vit_c100_25  0.690  SUBSTITUTE      +8.73    27.0  STACK
+      prior|aug  vit_c100_25  0.682  SUBSTITUTE     +15.15    44.1  STACK
+  **1 of 6**, and the single hit is an unresolved 0.9-sigma cell. The rule
+  that scored 8/9 on wave 1 (AUC 0.95) scores at chance-or-worse one family
+  over. It does not generalize, so a prospective wave-2 test of it would not
+  be thoroughness -- it would be spending a node to re-learn what six
+  existing cells already say. Cancelled; nothing submitted.
+- *** AND THE FAILURE NAMES A THIRD KIND OF SOURCE THE TAXONOMY DOES NOT
+  HAVE. Every rule tried so far -- currency-magnitude, fix-set overlap,
+  strength-asymmetry -- compares the two sources' OWN feature gains. DeiT
+  augmentation defeats all three for the same reason: **its own G is
+  ~zero while it multiplies what the other source is worth.**
+      G(aug) alone, C100/ViT:  +0.00 @5%   +3.17 @10%   +4.46 @25%
+      what it adds to the prior: +7.27     +11.55       +15.15
+  A source contributing nothing measurable by itself and 15 points on top of
+  another is not describable by any comparison of G_A with G_B. It is an
+  AMPLIFIER, not an addend, and that is the same mechanism recorded on
+  2026-07-22 from the envelope shape ("augmentation removes the overfitting
+  that otherwise caps how much structure the net can use") -- now visible
+  directly in the feature measurements rather than inferred from a peak
+  shifting right.
+  CONSEQUENCE FOR THE PAPER, and it is a strengthening of the withdrawal
+  rather than a repair: the wave-1 result should NOT be reported as "our
+  particular predicate was miscalibrated". Three independent
+  operationalizations of the taxonomy fail out-of-sample, and the reason is
+  structural -- at least one real source type has no single-arm signature at
+  all. That is a sharper and more useful negative than a tuning failure, and
+  it is what the section should say.
+- STANDING SCORE FOR THE THREE COMMITTED aug|mae CALLS, unchanged by the
+  cancellation and now with a third contender: the strength rule says
+  SUBSTITUTE (~20.5/29.5/42.7), my M2 currency bands say compounding
+  (22..28/37..42/52..58), and the AMPLIFIER account -- read off the six
+  cells above, where augmentation adds +7 to +15 to whatever it is paired
+  with -- also says STACK, agreeing with the M2 bands. The running wave
+  therefore separates the strength rule from the other two.
