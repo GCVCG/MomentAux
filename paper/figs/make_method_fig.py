@@ -42,9 +42,32 @@ plt.rcParams.update({
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
-FIG_W_IN, FIG_H_IN = 7.0, 2.60
+# Two rows. The top row is the instrument and what it measures; the bottom row
+# is the ANSWER -- the three fusion outcomes the paper's question asks for --
+# and the scope those outcomes were measured over. R1_* keeps the top row's
+# internal geometry identical to the four-panel version it grew from: the
+# panels are given the same 2.06 in of height, only moved up.
+FIG_W_IN, FIG_H_IN = 7.0, 2.78
+ROW_H_IN, ROW_TOP_IN, TITLE_IN, SCOPE_IN = 2.16, 0.24, 0.22, 0.16
+R1_Y = SCOPE_IN / FIG_H_IN
+R1_H = ROW_H_IN / FIG_H_IN
+# Five columns in one row. The inter-panel gutters were the slack: trimming
+# them from ~0.03 to 0.018 of the width is what makes room for (e) without
+# taking any width from the four panels that were already tight.
+PX = {}
+_x, _gap = 0.010, 0.018
+for _k, _w in (("a", 0.166), ("b", 0.222), ("c", 0.172), ("d", 0.152),
+               ("e", 0.198)):
+    PX[_k] = (_x, _w)
+    _x += _w + _gap
 fig = plt.figure(figsize=(FIG_W_IN, FIG_H_IN), dpi=300)
 fig.patch.set_facecolor("white")
+
+fig.text(0.012, 1 - 0.055, "When Does Fusing Hand-Crafted Knowledge With "
+         "Learned Representations Pay?", fontsize=7.4, fontweight="bold",
+         color=INK, va="center", ha="left")
+fig.add_artist(plt.Line2D([0.012, 0.992], [1 - 0.093, 1 - 0.093],
+                          color=LINE, lw=0.6))
 
 
 def text_width_pt(s, fontsize, bold=False):
@@ -97,7 +120,7 @@ def panel(rect, title):
 
 
 # ---------------------------------------------------------------- (a)
-axa, UA = panel([0.012, 0.06, 0.215, 0.79], "(a)  Controlled Instrument")
+axa, UA = panel([PX["a"][0], R1_Y, PX["a"][1], R1_H], "(a)  Controlled Instrument")
 box(axa, 0.2, 7.9, 9.4, 1.7,
     "Frozen Recipe: SGD 0.1, Cosine,\n200 Epochs, Batch 128, Crop and Flip",
     "#eef2f6", UA, tc=INK, fs=4.6, ec=BLUE, lw=0.5)
@@ -138,8 +161,10 @@ def _load_assets():
         with torch.no_grad():
             resp = (stem._energy(stem._luma(x))
                     * stem.calib_scale.view(1, -1, 1, 1))[0]
-        kerns = [stem.even.squeeze(1)[i].numpy() for i in (0, 1)]
-        maps = [resp[i].numpy() for i in (0, 2)]
+        # one scale, all four orientations: the smallest set that still reads
+        # as a bank, with each map produced by the kernel directly above it.
+        kerns = [stem.even.squeeze(1)[i].numpy() for i in range(4)]
+        maps = [resp[i].numpy() for i in range(4)]
         return img, kerns, maps
     except Exception as e:                                    # noqa: BLE001
         print(f"method-fig assets unavailable ({e}); plain boxes kept")
@@ -148,21 +173,25 @@ def _load_assets():
 
 B_IMG, B_KERNS, B_MAPS = _load_assets()
 
-axb, UB = panel([0.263, 0.06, 0.235, 0.79], "(b)  MomentAux: The Fused Prior")
+axb, UB = panel([PX["b"][0], R1_Y, PX["b"][1], R1_H], "(b)  MomentAux: The Fused Prior")
 
 PY, PH = 7.82, 1.35
 if B_IMG is not None:
-    ub_x = 0.235 * FIG_W_IN / 10.0
-    ub_y = 0.79 * FIG_H_IN / 10.0
-    iw = 1.25
+    ub_x = PX["b"][1] * FIG_W_IN / 10.0
+    ub_y = R1_H * FIG_H_IN / 10.0
+    iw = 1.20
     ih = iw * ub_x / ub_y
     iy0 = PY + PH / 2 - ih / 2
-    axb.imshow(B_IMG, extent=(0.05, 0.05 + iw, iy0, iy0 + ih), zorder=3,
+    IMX = 0.0
+    axb.imshow(B_IMG, extent=(IMX, IMX + iw, iy0, iy0 + ih), zorder=3,
                aspect="auto")
-    axb.add_patch(Rectangle((0.05, iy0), iw, ih, fc="none", ec=INK, lw=0.45,
+    axb.add_patch(Rectangle((IMX, iy0), iw, ih, fc="none", ec=INK, lw=0.45,
                             zorder=4))
-    axb.text(0.05 + iw / 2, iy0 - 0.14, "Image", ha="center", va="top",
+    axb.text(IMX + iw / 2, iy0 + ih + 0.10, "Image", ha="center", va="bottom",
              fontsize=3.9, color=MUTED)
+    # the bank reads the SAME image: an explicit arrow down to it, which the
+    # figure previously left the reader to infer
+    arrow(axb, IMX + iw / 2, iy0 - 0.10, IMX + iw / 2, 6.42, GREEN)
 else:
     box(axb, 0.05, PY, 1.25, PH, "Image", "#e6e6e6", UB, tc=INK, fs=4.4)
 axb.add_patch(FancyBboxPatch((1.62, PY - 0.18), 5.50, PH + 0.36,
@@ -176,40 +205,57 @@ for xx, name in zip(STAGE_X, ["Early", "Mid", "Deep", "Final"]):
 axb.text(1.66, PY + PH + 0.52, "Backbone Feature Stages, Unchanged",
          ha="left", va="top", fontsize=4.0, color=MUTED)
 box(axb, 7.46, PY, 2.45, PH, "Classifier", "#e6e6e6", UB, tc=INK, fs=4.3)
-for x1, x2 in [(1.31, 1.60), (7.14, 7.44)]:
+for x1, x2 in [(1.26, 1.58), (7.14, 7.44)]:
     arrow(axb, x1, PY + PH / 2, x2, PY + PH / 2)
 axb.text(8.68, PY - 0.34, "Cross-Entropy", ha="center", va="top",
          fontsize=4.0, color=MUTED)
 
 TAP_X = STAGE_X[2] + 0.58
-arrow(axb, TAP_X, PY - 0.24, TAP_X, 6.30, VERM, ls=(0, (2, 1.2)))
+arrow(axb, TAP_X, PY - 0.24, TAP_X, 6.18, VERM, ls=(0, (2, 1.2)))
 axb.text(TAP_X + 0.22, 7.10, "Tap: Deep Stage (3 of 4)", fontsize=4.1,
          color=VERM, ha="left", va="center")
-box(axb, 3.95, 4.90, 3.15, 1.35, "Aux Head\nTraining Only", VERM, UB, fs=4.4)
-arrow(axb, 3.85, 5.57, 3.20, 5.57, VERM, ls=(0, (2, 1.2)))
-box(axb, 0.05, 4.90, 3.05, 1.35, "", GREEN, UB, fs=4.4)
-axb.text(1.58, 5.86, "Fixed Gabor\nEnergy Bank", ha="center", va="center",
-         fontsize=4.0, color="white", zorder=4, linespacing=1.15)
+# The bank box shows the bank AS a bank: one row of kernels over the row of
+# magnitude maps each one produces on the image above, so the correspondence
+# is visible rather than asserted. Four orientations at one scale, which is
+# the smallest set that still reads as oriented.
+BKX, BKY, BKW, BKH = 0.0, 4.62, 4.30, 1.80
+box(axb, BKX, BKY, BKW, BKH, "", GREEN, UB, fs=4.4)
+axb.text(BKX + BKW / 2, BKY + BKH - 0.30, "Fixed Gabor Energy Bank",
+         ha="center", va="center", zorder=4, color="white",
+         fontsize=fit_fontsize("Fixed Gabor Energy Bank",
+                               (BKW - 0.30) * UB, 4.2))
 if B_KERNS is not None:
-    ub_x = 0.235 * FIG_W_IN / 10.0
-    ub_y = 0.79 * FIG_H_IN / 10.0
-    tw = 0.52
+    ub_x = PX["b"][1] * FIG_W_IN / 10.0
+    ub_y = R1_H * FIG_H_IN / 10.0
+    n = len(B_KERNS)
+    gap, pad, hdr, vgap = 0.09, 0.16, 0.46, 0.07
+    # tiles must fit the box in BOTH directions: width sets the natural size,
+    # and the two rows plus the header cap it in height. Taking the smaller of
+    # the two is what stops them overflowing the box when the panel narrows.
+    tw = (BKW - 2 * pad - (n - 1) * gap) / n
     th = tw * ub_x / ub_y
-    ty0 = 4.98
-    for j, arrk in enumerate(B_KERNS):
-        x0 = 0.22 + j * 0.62
-        axb.imshow(arrk, extent=(x0, x0 + tw, ty0, ty0 + th), cmap="RdBu_r",
-                   zorder=4, aspect="auto")
-    for j, arrm in enumerate(B_MAPS):
-        x0 = 1.72 + j * 0.62
-        axb.imshow(arrm, extent=(x0, x0 + tw, ty0, ty0 + th), cmap="magma",
-                   zorder=4, aspect="auto")
-axb.text(7.30, 5.57, "MSE × λ(t)", fontsize=4.3, color=VERM, va="center")
-axb.text(5.0, 4.20, "+2% Training Compute, +0 at Inference", fontsize=4.3,
+    th_max = (BKH - hdr - vgap - 0.12) / 2
+    if th > th_max:
+        th = th_max
+        tw = th * ub_y / ub_x
+    x00 = BKX + (BKW - (n * tw + (n - 1) * gap)) / 2
+    for row, (arrs, cm) in enumerate(((B_KERNS, "RdBu_r"), (B_MAPS, "magma"))):
+        ty0 = BKY + BKH - hdr - (row + 1) * th - row * vgap
+        for j_, arr in enumerate(arrs):
+            x0 = x00 + j_ * (tw + gap)
+            axb.imshow(arr, extent=(x0, x0 + tw, ty0, ty0 + th), cmap=cm,
+                       zorder=4, aspect="auto")
+box(axb, 4.62, 4.74, 2.62, 1.35, "Aux Head\nTraining Only", VERM, UB, fs=4.3)
+arrow(axb, 4.52, 5.42, 4.20, 5.42, VERM, ls=(0, (2, 1.2)))
+axb.text(7.38, 5.42, "MSE × λ(t)", fontsize=4.3, color=VERM, va="center")
+axb.text(5.0, 4.06, "+2% Training Compute, +0 at Inference", fontsize=4.3,
          color=MUTED, ha="center")
 
 # --- lambda schedule: say what it plots and what follows from it
-ins = fig.add_axes([0.300, 0.115, 0.105, 0.215])
+# Placed in figure coordinates, so it has to follow the row when the row moves:
+# 0.143 in above the row's floor, 0.559 in tall, as in the four-panel version.
+ins = fig.add_axes([0.300, (R1_Y * FIG_H_IN + 0.143) / FIG_H_IN,
+                    0.105, 0.559 / FIG_H_IN])
 t = np.linspace(0, 1, 300)
 lam = 0.5 * (1 + np.cos(np.pi * t))
 ins.plot(t, lam, lw=1.0, color=VERM)
@@ -231,7 +277,7 @@ for s in ins.spines.values():
     s.set_linewidth(0.4)
 
 # ---------------------------------------------------------------- (c)
-axc, UC = panel([0.535, 0.06, 0.215, 0.79], "(c)  Two Measurements Per Cell")
+axc, UC = panel([PX["c"][0], R1_Y, PX["c"][1], R1_H], "(c)  Two Measurements")
 
 box(axc, 0.2, 8.45, 4.4, 1.35, "Baseline Arm", "#9e9e9e", UC, fs=4.6)
 box(axc, 5.4, 8.45, 4.4, 1.35, "Prior Arm", GREEN, UC, fs=4.6)
@@ -273,7 +319,7 @@ axc.text(5.0, 0.40, "Δ = G + readout(base)", ha="center", va="center",
          color=VERM, fontweight="bold")
 
 # ---------------------------------------------------------------- (d)
-axd, UD = panel([0.787, 0.06, 0.205, 0.79], "(d)  Comparators, By Cost")
+axd, UD = panel([PX["d"][0], R1_Y, PX["d"][1], R1_H], "(d)  Comparators, By Cost")
 ladder = [("ImageNet Transfer", "External Data", PURPLE),
           ("SimCLR, SimSiam, DINO", "2× Compute", ORANGE),
           ("FitNets Learned Teacher", "2× Compute", ORANGE),
@@ -290,6 +336,71 @@ for name, cost, col in ladder:
 axd.text(0.15, 0.62, "All Fused Into the Same Frozen Recipe;\n"
          "Combinations Measured Too", fontsize=4.3, color=MUTED, va="top",
          linespacing=1.3)
+
+# ---------------------------------------------------------------- (e)
+# The answer, as a fifth column: three stacked blocks, one per outcome, each a
+# small grouped bar of the two sources ALONE and then together, all as gain
+# over the same from-scratch baseline and on ONE shared scale so the blocks
+# are comparable. The outcome is then the shape of the group -- the combined
+# bar clears both singles, sits level with the taller, or drops below zero.
+axe, UEp = panel([PX["e"][0], R1_Y, PX["e"][1], R1_H], "(e)  When Fusion Pays")
+GREY1, GREY2 = "#bdbdbd", "#7d7d7d"
+blocks = [
+    ("STACK", GREEN, "Prior + Augmentation", "Food-101 5%",
+     +5.63, +9.46, +13.78),
+    ("SUBSTITUTE", ORANGE, "Prior + SimCLR Init", "ViT-Tiny CIFAR-100 10%",
+     +13.26, +13.30, +13.46),
+    ("INTERFERE", VERM, "Prior + ImageNet Init", "CIFAR-100 7%",
+     +4.87, +15.39, -1.46),
+]
+VMIN, VMAX = -2.6, 16.6                      # one shared scale for all three
+BLK_H, BLK_TOP = 3.14, 9.90                  # block pitch and first block top
+BAR_W, BAR_GAP = 1.62, 0.42
+for b, (verdict, col, pair, cell, va_, vb_, vc_) in enumerate(blocks):
+    top = BLK_TOP - b * BLK_H
+    axe.add_patch(FancyBboxPatch((0.05, top - 0.72), 4.35, 0.72,
+                                 boxstyle="round,pad=0.02,rounding_size=0.22",
+                                 fc=col, ec=col, lw=0.5, zorder=3))
+    axe.text(2.22, top - 0.36, verdict, ha="center", va="center", zorder=4,
+             fontsize=fit_fontsize(verdict, 4.0 * UEp, 4.4, bold=True),
+             color="white", fontweight="bold")
+    axe.text(4.62, top - 0.20, pair, ha="left", va="center", fontsize=3.9,
+             color=INK)
+    axe.text(4.62, top - 0.58, cell, ha="left", va="center", fontsize=3.5,
+             color=MUTED)
+    # plot area for this block
+    ay1, ay0 = top - 0.98, top - 2.62
+    def _y(v):
+        return ay0 + (v - VMIN) / (VMAX - VMIN) * (ay1 - ay0)
+    zero = _y(0.0)
+    axe.plot([0.05, 9.95], [zero, zero], lw=0.5, color=LINE, zorder=1)
+    x = 0.55
+    for v, c in ((va_, GREY1), (vb_, GREY2), (vc_, col)):
+        h = _y(v) - zero
+        axe.add_patch(Rectangle((x, zero if h >= 0 else zero + h), BAR_W,
+                                abs(h), fc=c, ec="none", zorder=3))
+        if h >= 0:
+            axe.text(x + BAR_W / 2, _y(v) + 0.09,
+                     f"{v:+.1f}", ha="center", va="bottom", fontsize=3.5,
+                     color=c, fontweight="bold" if c is col else "normal")
+        else:
+            axe.text(x + BAR_W + 0.12, zero + h / 2,
+                     f"{v:+.1f}".replace("-", "\u2212"), ha="left",
+                     va="center", fontsize=3.5, color=c, fontweight="bold")
+        x += BAR_W + BAR_GAP
+    if b == 0:
+        for k, lbl in enumerate(("source 1", "source 2", "both")):
+            axe.text(0.55 + k * (BAR_W + BAR_GAP) + BAR_W / 2, ay0 - 0.04,
+                     lbl, ha="center", va="top", fontsize=3.4, color=MUTED)
+
+# ------------------------------------------------------- scope strip
+fig.add_artist(plt.Line2D([0.010, 0.992], [SCOPE_IN / FIG_H_IN - 0.028,
+                                           SCOPE_IN / FIG_H_IN - 0.028],
+                          color=LINE, lw=0.6))
+fig.text(0.010, 0.020, "Measured Over  21 Datasets  ·  9 Backbones  ·  "
+         "500 to 1.28M Images  ·  32 to 224 px  ·  Classification, "
+         "Segmentation and Detection", fontsize=4.6, color=MUTED,
+         va="center", ha="left")
 
 # bbox_inches="tight" matters here: without it matplotlib writes the whole
 # canvas, and this figure's hand-placed boxes leave ~23pt empty at the top and

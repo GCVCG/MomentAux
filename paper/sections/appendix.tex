@@ -123,13 +123,13 @@ robustness beyond its accuracy effect.
 
 \section{Operational reproducibility}\label{app:repro}
 
-\looseness=-1 The operational detail behind the Data Availability
-statement: one entry point trains any cell from its configuration name and
-seed; the result tables regenerate from the run records through one
-exporter per task family; a released script re-runs the sign-law audit with
-the seed-paired uncertainty of Table~\ref{tab:audit}. Subset indices,
-filter-bank fingerprints and per-run environment records ship with the
-runs. Training refuses to overwrite a completed cell, holds an exclusive
-per-run lock and writes checkpoints atomically, and mirrors are verified by
-loading and evaluating checkpoints against their recorded accuracies, not
-by file listing. An archival DOI will be minted on acceptance.
+\looseness=-1 Behind the Data Availability statement: one entry point trains
+any cell from its configuration name and seed; the result tables regenerate
+from the run records through one exporter per task family; a released script
+re-runs the sign-law audit with the seed-paired uncertainty of
+Table~\ref{tab:audit}. Subset indices, filter-bank fingerprints and per-run
+environment records ship with the runs. Training refuses to overwrite a
+completed cell, holds an exclusive per-run lock and writes checkpoints
+atomically, and mirrors are verified by evaluating checkpoints against their
+recorded accuracies, not by file listing. An archival DOI will be minted on
+acceptance.

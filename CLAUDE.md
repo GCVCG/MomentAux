@@ -7214,3 +7214,85 @@ ported vs corrected and why.
     what the coming mae|prior prospective tranche will test properly.
   MAE seed note: diagmae_vit_5pct seed1 = 17.99 vs siblings ~21.7 -- the
   ViT variance asymmetry again, baseline-side of the init.
+
+- *** WAVE 1 SCORED — THE PROSPECTIVE TEST FAILED, AND THE PRE-REGISTERED
+  CONSEQUENCE IS A WITHDRAWAL (2026-08-20, 13 pairs, 39 combination runs, 0
+  failures). The calls recorded on 2026-08-19 reproduce EXACTLY from the
+  pinned decide() on the val-scored inputs (13/13 identical), so what is
+  scored below is the committed call, not a re-derived one:
+      pair                        committed  combo−best(val)  sig  outcome  hit
+      r18_c100_10  prior|simclr   STACK          −1.69       −7.4  SUB(cost)  no
+      r18_c10_2    prior|simclr   SUBSTITUTE     +1.20       +2.6  STACK      no
+      r18_stl_10   prior|simclr   STACK          +2.96       +1.3  SUBSTITUTE no
+      vit_c100_25  prior|dino     SUBSTITUTE     +1.36       +3.3  STACK      no
+      vit_c10_10   prior|dino     STACK          −0.41       −1.5  SUBSTITUTE no
+      vit_food_50  prior|dino     SUBSTITUTE     +0.92       +4.6  STACK      no
+      r18_food_5   aug|simclr     STACK          +3.58       +3.3  STACK     YES
+      r18_food_10  aug|simclr     STACK          −3.25       −4.1  SUB(cost)  no
+      r18_esat_5   aug|simclr     STACK          −0.48       −0.7  SUBSTITUTE no
+      (N/A gate, implied outcome combo ~ strong single: 1/4 val, 0/4 test)
+  **1 of 9 on val, and 1 of 9 on test** — the two splits agree cell for cell,
+  so this is not an artifact of which split scores the outcome. THE RECORDED
+  CRITERION: ">= 7 validated; 5-6 PARTIAL; <= 4 and the paper's 'the outcome
+  follows from quantities available before the combination is trained' claim
+  is WITHDRAWN in favor of the retrospective statement." It is withdrawn.
+  Even crediting every unresolved cell (3 of the 8 misses sit within 2 SEM of
+  the better single arm) to whichever call it was given gives at most 4 of 9,
+  still at the withdrawal threshold.
+  *** THE DIAGNOSIS, and it is specific rather than "it was noisy": the rule
+  operationalizes "same currency" as AGREEMENT IN THE MAGNITUDE of the two
+  feature gains (|G_A − G_B| <= 0.25 max). That proxy conflates two different
+  things and fails in both directions:
+    (a) SAME currency, DIFFERENT amounts reads as "differs in kind".
+        r18_c100_10: G_prior +4.05 vs G_simclr +8.25, a 51% relative gap, so
+        the rule branches STACK — on the exact pair whose substitution this
+        study documented at length. The combination lands 1.69 BELOW the
+        better arm (7.4 sigma). Four of the five clear misses are this shape.
+    (b) SIMILAR G, but the combination still adds a little. vit_c100_25:
+        G 12.01 vs 10.88 (9% apart) branches SUBSTITUTE; the combination
+        beats the better arm by +1.36 (3.3 sigma).
+  So the algorithm's predicate is close to uninformative on held-out pairs,
+  while the TAXONOMY it was built to operationalize is not in question: every
+  outcome here is one of the three named outcomes, and the feature-side
+  readings that distinguish them retrospectively are unaffected.
+  *** AND A SECOND, SEPARATE CORRECTION THE SAME DATA FORCE: the manuscript
+  states that against effective self-supervised pre-training "the combination
+  never beats the better single source." Wave 1 has THREE resolved
+  counterexamples on pairs the claim had never been tested against —
+  r18_c10_2 +1.20 (2.6 sigma), vit_c100_25 +1.36 (3.3), vit_food_50 +0.92
+  (4.6) — all with the SSL arm effective by the rule's own test. The
+  magnitudes are small against single-arm gains of 6 to 15 points, so the
+  substance survives as "the combination lands near the better single arm and
+  occasionally about a point above it, never near additivity", but "never
+  beats" is false as written and must go.
+  WHAT THIS DOES NOT TOUCH, stated so the withdrawal is not read wider than
+  it is: Delta = G + readout, the sign law, the matched-budget Delta ~= G
+  result (0.17 points over 30 cells), and every measured stack/substitute/
+  interfere cell in the grid. None of those is a prediction about an untrained
+  combination.
+  PROTOCOL: every input val-scored on the carve-outs, last.pt only, and the
+  measurement's own identity check reproduced each cell's recorded test
+  accuracy to <= 0.02 on all 39 runs.
+
+- *** RETRACTED WITHIN THE HOUR, AND THE RETRACTION IS THE ENTRY WORTH
+  KEEPING (2026-08-20). I wrote here that the wave-M G values "were never
+  measured", on the evidence that worklist.mae carried no probe line and no
+  linear_probe.json exists under any diagmae cell ON BSC. Both of those facts
+  are true and the conclusion drawn from them is FALSE: the probes were run
+  LOCALLY the same day, and runs/diagmae_vit_{5,10,25}pct/linear_probe.json
+  have been on this disk since 2026-08-19 10:59, holding exactly the recorded
+  values. Re-probing the freshly pulled BSC checkpoints today reproduces them
+  to 0.01 (31.21/38.20/47.72 against 31.20/38.20/47.72, same best.pt
+  protocol), so the ledger's +10.90/+13.33/+13.83 was right all along and
+  M3's scoring stands as written.
+  THE ERROR CLASS IS THE ONE THIS FILE KEEPS CATALOGUING, committed while
+  writing an entry about it: I checked ONE location, found the artifact
+  absent, and asserted a global negative. The campaign has run on at least
+  four trees (runs, runs_bscpull, runs_turing, and BSC's own), and "not on
+  BSC" has never meant "not measured". A NEGATIVE state claim needs every
+  tree checked, not the first one that looks authoritative -- the positive
+  version of the same rule that caught the stale dense mirror.
+  WHAT THE FALSE ALARM DID BUY, so it is not pure waste: the wave-M
+  checkpoints are now pulled and independently re-probed on a second machine
+  under the identical protocol, which is a cross-machine reproduction the
+  comparator did not have before.

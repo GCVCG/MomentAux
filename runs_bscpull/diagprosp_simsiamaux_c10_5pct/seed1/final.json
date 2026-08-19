@@ -1,0 +1,44 @@
+{
+  "name": "diagprosp_simsiamaux_c10_5pct",
+  "seed": 1,
+  "config": {
+    "name": "diagprosp_simsiamaux_c10_5pct",
+    "dataset": "cifar10",
+    "backbone": "resnet18",
+    "epochs": 200,
+    "batch_size": 128,
+    "lr": 0.1,
+    "weight_decay": 0.0005,
+    "momentum": 0.9,
+    "num_workers": 2,
+    "small_input": true,
+    "pretrained": false,
+    "subset_pct": 5,
+    "stem": "none",
+    "stem_calibrate": true,
+    "init_from": "runs/simsiam_pre_c10_5pct/seed{seed}/pretrain.pt",
+    "moment_aux": {
+      "stem": "energy-magnitude",
+      "tap": "layer3",
+      "weight": 1.0,
+      "weight_final": 0.0,
+      "weight_schedule": "cosine",
+      "head_norm": true
+    }
+  },
+  "final_test_acc": 0.7396000027656555,
+  "best_test_acc": 0.7421000003814697,
+  "accounting": {
+    "params_trainable": 11176018,
+    "params_stem_trainable": 0,
+    "params_stem_fixed_filters": 0,
+    "flops_total": 556659712,
+    "flops_stem": 0,
+    "flops_image_size": 32
+  },
+  "wall_seconds": 228.83780121803284,
+  "torch_version": "2.4.0a0+gite3b9b71",
+  "device": "cuda",
+  "gpu_name": "NVIDIA H100",
+  "amp": true
+}

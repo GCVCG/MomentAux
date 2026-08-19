@@ -290,8 +290,8 @@ Sec.~\ref{sec:samecurrency} measures directly.\par}
   \STATE deprioritize: matched arms are where fusion paid
 \ENDIF
 \IF{$G_A \approx G_B$ \AND both arms improve the same cells}
-  \STATE \textbf{return} \textsc{substitute}: the combination will not
-    exceed the better single arm; take the cheaper source,
+  \STATE \textbf{return} \textsc{substitute}: the combination will land
+    at the better single arm; take the cheaper source,
     $\arg\min(c_A, c_B)$
 \ELSE
   \STATE \textbf{return} \textsc{stack}: a combined gain larger than either
@@ -313,46 +313,55 @@ asserts that equal feature gains imply no benefit from combining, which
 Secs.~\ref{sec:substitute} and \ref{sec:decisionfusion} both test and which
 the training-time-versus-decision-time discrepancy above already qualifies.
 
-\emph{What the procedure is scored on.} Every quantity
-Algorithm~\ref{alg:procedure} consumes, both $\Delta$ values and both $G$
-values, is measured on the same held-out split we report final accuracy on, as
-is the direct currency test of Fig.~\ref{fig:currency}, which asks which
-\emph{test} images each arm fixes. Nothing is tuned on that split: the decision
-reads two numbers off already-trained single-source arms, and no configuration
-is selected by it. But a procedure whose stated purpose is to decide
-\emph{before} fusing should estimate its inputs on validation data and touch
-the test split once, after the chosen combination is trained, and the run below
-does not meet that standard. Every input it needs is computable on a labelled
-split disjoint from training at no extra training cost, so this is a defect of
-protocol rather than of feasibility; until it is re-run that way, read the
-demonstration as one end-to-end illustration on test-scored inputs, not as a
-clean prospective test.
+\emph{Tested prospectively, it fails.} \looseness=-1 The illustration below is
+retrospective: the combination it predicts was already measured. So we ran the
+procedure as it is meant to be run. Thirteen pairs whose combination had never
+been trained were assembled; every input was estimated on a validation split
+carved per class from the unused portion of each cell's training pool, so no
+quantity touched test; the calls were recorded; and only then were the
+thirty-nine combination runs submitted. Four pairs were declined at the
+$|G|\le1$ gate, three of which then moved from the strong single arm by more
+than two standard errors. Of the nine reaching a \textsc{stack} or
+\textsc{substitute} call, \textbf{one matched} what training showed, scoring
+the outcome on the validation split the calls were made on, and one again on
+test; crediting every statistically indistinguishable pair to whichever call
+it received still gives at most four of nine.
 
-\emph{The procedure run once, end to end.} \looseness=-1 Take the moment prior
-and a SimCLR initialization on ViT-tiny at CIFAR-100 $10\%$. Step~1 records
-$\Delta_{\mathrm{prior}} = +13.26$ at $1.02\times$ compute and
-$\Delta_{\mathrm{SimCLR}} = +13.30$ at $2\times$; step~2 gives
-$G_{\mathrm{prior}} = +14.83$ and $G_{\mathrm{SimCLR}} = +13.46$ under one
-protocol. Neither arm is a pre-trained initialization, so \textsc{interfere} does not
-fire; neither $G$ is near zero, so \textsc{n/a} does not fire; the arms are
-level ($|\Delta_A - \Delta_B| = 0.04$), so nothing is deprioritized. That
-leaves \textsc{substitute}, the two feature gains agreeing to $1.4$ points
-where the effects are $13$--$15$: the combination should not exceed the better
-single arm, and it does not. Trained, it reaches $\Delta = +13.46$, within
-noise of both singles ($+0.16$ over SimCLR alone, $+0.20$ over the prior
-alone), and its feature gain $+14.14$ sits \emph{between} the two, not
-above either. The prediction cost two linear evaluations; the confirmation cost
-the training run it would have saved. Contrast the same
-procedure on the prior and DeiT-strength augmentation, where the feature gains
-differ in kind and the branch taken is \textsc{stack}: on this cell the
-combination does exceed both, and $G$ rises from $14.83$ to $22.20$. How far
-that branch reaches is bounded in Sec.~\ref{sec:stack}, where the same
-pairing on two convolutional populations off the selection set stacks at one
-cell of six.
+\looseness=-1 The antecedent breaks, not the taxonomy. The procedure reads
+same-currency off \emph{agreement in the magnitude} of two feature gains, and
+that proxy confuses same-currency-in-different-amounts with different-in-kind:
+on CIFAR-100 at $10\%$ the prior's $G$ is $+4.1$ and SimCLR's $+8.3$, a $51\%$
+gap the rule sends to \textsc{stack}, on the very pair whose substitution
+Sec.~\ref{sec:substitute} documents, and the combination lands $1.7$ points
+\emph{below} the better arm at $7.4$ standard errors. Four of the five
+resolved misses have that shape. We therefore withdraw the claim that these
+outcomes can be anticipated before the combination is trained and read
+Algorithm~\ref{alg:procedure} as a statement of the taxonomy, not a validated
+predictor. Nothing measured is affected: every outcome here is still one of
+the three and still separated on frozen features, and the matched-budget
+result of Sec.~\ref{sec:law} concerns a single intervention, not an untrained
+pair. The predicate that would replace a magnitude comparison is the open
+problem the next paragraph names.
 
-The limit is that branch's antecedent. We compare feature gains by magnitude
+\emph{How the rule reads a cell.} \looseness=-1 On the moment prior and a
+SimCLR initialization on ViT-tiny at CIFAR-100 $10\%$, step~1 records
+$\Delta = +13.26$ at $1.02\times$ compute against $+13.30$ at $2\times$ and
+step~2 gives $G = +14.83$ against $+13.46$. Neither arm is a pre-trained
+initialization and neither $G$ is near zero, so \textsc{interfere} and
+\textsc{n/a} do not fire; the arms are level, so nothing is deprioritized;
+the feature gains agree to $1.4$ points where the effects are $13$--$15$,
+leaving \textsc{substitute}. That is what training shows, $\Delta = +13.46$
+with a feature gain of $+14.14$ sitting \emph{between} the two singles. On the
+prior and DeiT-strength augmentation the gains differ in kind, the branch is
+\textsc{stack}, the combination exceeds both and $G$ rises from $14.83$ to
+$22.20$; Sec.~\ref{sec:stack} bounds how far that reaches. Both readings are
+retrospective, and the prospective test above is what they could not
+substitute for.
+
+The antecedent is the limit. We compare feature gains by magnitude
 and by which cells improve, not by a formal decomposition of the information
-each source carries. Partial information decomposition
+each source carries, and the magnitude half is exactly what the prospective
+test broke. Partial information decomposition
 \citep{williams2010nonnegative,liang2023quantifying} is the principled version
 of that comparison, and an estimator that scaled to these representations would
 replace our proxy with a quantity that means something on its own.

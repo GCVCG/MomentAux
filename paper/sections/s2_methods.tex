@@ -14,7 +14,14 @@ the deployed network is byte-identical to the baseline. \textbf{(c)} Each cell
 yields two measurements, the end-to-end gain $\Delta$ and the frozen-feature
 gain $G$, whose difference is the \readout{} term of Eq.~\ref{eq:law}.
 \textbf{(d)} The comparator ladder, ordered by declared training cost; all are
-fused into the same recipe, and their pairwise combinations are measured too.}
+fused into the same recipe, and their pairwise combinations are measured too.
+\textbf{(e)} What those combinations produce, one measured cell per outcome.
+Each block shows the two sources alone and then together, as gain over the
+same from-scratch baseline and on one shared scale, so the outcome is the
+shape of the group: the combination clears both singles, sits level with the
+taller, or drops below the baseline. Interference is shown at full auxiliary
+strength, the condition it depends on (Sec.~\ref{sec:taxsub}); the frozen
+features move the same way in all three cases (Sec.~\ref{sec:fusion}).}
 \label{fig:method}
 \end{figure*}
 
@@ -647,6 +654,16 @@ $+9.2$ from 1\% to 15\%, so on convolutional backbones the
 prior's case is one of cost, not accuracy; on attention backbones, and on any
 backbone under a modern augmentation recipe, the ordering inverts
 (Sec.~\ref{sec:fusion}).
+
+\looseness=-1 Masked reconstruction, the one major self-supervised family the
+three above omit, was added at the same $2\times$ budget and protocol on
+ViT-tiny at CIFAR-100: $20.5$, $29.5$ and $42.7$ at 5, 10 and $25\%$, clearly
+ahead of DINO and level with both SimCLR and the prior, which it trails by
+$1.1$, matches, then leads by $0.5$ --- the same crossing with data the other
+comparisons show. Its feature gains ($+10.9$, $+13.3$, $+13.8$) sit below the
+prior's at the two smaller fractions, so masked prediction reads here as more
+of the same currency, not a new one. It enters as a comparator only: its
+combinations were not measured.
 
 \subsection{Attention: where the prior is dramatic}\label{sec:attention}
 \begin{table}[pos=htbp]

@@ -33,11 +33,12 @@ method is matters far less. Two sources add only when their currencies differ,
 a necessary condition: whether the possible gain is realized also depends on
 the architecture and on the strength at which the second source is applied.
 This is not a metaphor we impose after the fact: each source's currency is
-measurable, on frozen features, from each source \emph{alone}. That is what
-lets the three outcomes above be anticipated from quantities measurable before
-the combination is trained, and it is why the same free prior can be the most
+measurable, on frozen features, from each source \emph{alone}, which is what
+separates the three outcomes above and why the same free prior can be the most
 valuable intervention we measure in one setting and the most damaging in
-another.
+another. Turning that separation into a rule that \emph{predicts} an untrained
+combination is a further step, and one we take and report as unsuccessful
+(Sec.~\ref{sec:procedure}).
 
 This paper treats the question as a measurement problem. We build a single
 instrument (one frozen training recipe, fixed data subsets shared by every run,
@@ -91,8 +92,8 @@ being a metaphor and becomes the term $G$: heavy augmentation supplies
 nuisance-invariance, contrastive pre-training much the same invariance at
 greater expense, ImageNet weights mature photographic features, and the moment
 prior oriented-energy structure. Same-currency fusions substitute: the prior
-and SimCLR each render the other nearly worthless, and their combination never
-beats the better single. Different-currency fusions can stack, the prior's gain
+and SimCLR each render the other nearly worthless, and their combination sits
+at the better single, above it by at most a point where at all. Different-currency fusions can stack, the prior's gain
 growing $1.4$--$2.4\times$ under DeiT-strength augmentation on the attention
 backbones, though on two convolutional populations off the selection set the
 same pairing stacks
@@ -151,15 +152,15 @@ statement about budget and regime, not a ranking of methods.
     whether the fused sources carry the same information currency, with the
     interference conditioned on shaping strength, and
     verified on the feature side, not just end-to-end.
-  \item \textbf{A procedure, not only a taxonomy}
+  \item \textbf{A procedure, stated and then falsified}
     (Sec.~\ref{sec:procedure}): because each source's currency is
-    measurable from that source \emph{alone}, the outcome of combining two
-    follows from quantities measurable before the combination is trained. We
-    state this as an
-    algorithm, run it end to end on a pair whose answer we then verify by
-    training, marking that run illustrative, not prospective, for a
-    protocol reason we give there, and distil the grid into a regime-indexed
-    guide with costs attached (Sec.~\ref{sec:guide}).
+    measurable from that source \emph{alone}, we state the taxonomy as an
+    algorithm over quantities available before the combination is trained,
+    and test it on thirteen pairs whose combination did not yet exist, with
+    every input estimated on validation data and the calls recorded first.
+    It calls one of nine correctly, so we withdraw the predictive claim,
+    report which predicate fails and why, and distil the measured grid into a
+    regime-indexed guide with costs attached (Sec.~\ref{sec:guide}).
 \end{enumerate}
 
 %% ---------------------------------------------------------------------
@@ -381,7 +382,7 @@ partial or incidental; \xmark{} = absent.}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \zebra{2}
-\begin{tabular}{P{0.52\columnwidth}ccccc}
+\begin{tabular}{P{0.58\columnwidth}ccccc}
 \toprule
 Line of work & Rec. & Cst. & Fea. & Cmb. & Prd. \\
 \midrule

@@ -486,15 +486,14 @@ plus segmentation and detection transplants). Every pairwise
 combination we measure at training time follows one rule (decision-level
 fusion differs). Different-\emph{currency} sources can stack: the prior
 composes with DeiT augmentation on attention backbones and is worth $+26$
-points to ViT-B/16 at $224$\,px on a $100$-epoch budget, $+6.7$ when that
-budget is doubled. Same-currency sources substitute: against effective
-self-supervised pre-training the combination never beats the better single
-source. Fusing at full strength into an already-informed initialization
-interferes in proportion to what it carries: ImageNet
-transfer, $-15$ to $-17$ points, removed by a weaker auxiliary weight.
-Each source's currency is measurable on frozen features from that
-source alone, so the outcome follows from quantities available before the
-combination is trained; we state it as a procedure. At a
+points to ViT-B/16 at $224$\,px, $+6.7$ at twice that budget. Same-currency sources substitute: against effective
+self-supervised pre-training the combination stays within a point of the
+better single source. Fusing at full strength into an
+already-informed initialization interferes in proportion to what it carries:
+ImageNet transfer, $-15$ to $-17$ points, removed by a weaker auxiliary
+weight. Each source's currency is measurable on frozen features from that
+source alone, which separates the three outcomes but does not predict them:
+as a procedure on thirteen untrained pairs it calls one. At a
 practitioner's own label budget the frozen-feature gain predicts the
 end-to-end gain to within $0.17$ points across 30 cells and seven datasets;
 the underlying decomposition, $\Delta = G + \readout(\mathrm{base})$, holds
@@ -517,7 +516,7 @@ family's feature gain in advance.
 \begin{highlights}
 \item A \computeCells-configuration benchmark of data-efficiency interventions
 \item Splitting one instrument's bands pays; pairing two satellites does not
-\item A measurable rule predicts stacking, substitution or interference
+\item A frozen-feature reading separates stacking, substitution and interference
 \item Free prior beats or ties 2$\times$-compute SSL on small ViTs; at 5$\times$ ordering flips with data
 \item Attention deficit persists at 1.28M images; grows with model scale at matched budget
 \end{highlights}

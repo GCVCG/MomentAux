@@ -1,0 +1,12 @@
+diagmae_vit_5pct seed0: probe train 39.48  test 32.81
+diagmae_vit_5pct seed1: probe train 34.69  test 27.74
+diagmae_vit_5pct seed2: probe train 40.03  test 33.07
+PROBE_RESULT diagmae_vit_5pct test 31.21+/-3.01 over 3 seeds -> runs_bscpull/diagmae_vit_5pct/linear_probe.json
+diagmae_vit_10pct seed0: probe train 48.63  test 38.40
+diagmae_vit_10pct seed1: probe train 48.49  test 38.10
+diagmae_vit_10pct seed2: probe train 48.90  test 38.09
+PROBE_RESULT diagmae_vit_10pct test 38.20+/-0.18 over 3 seeds -> runs_bscpull/diagmae_vit_10pct/linear_probe.json
+diagmae_vit_25pct seed0: probe train 63.98  test 46.03
+diagmae_vit_25pct seed1: probe train 66.32  test 49.25
+diagmae_vit_25pct seed2: probe train 65.51  test 47.89
+PROBE_RESULT diagmae_vit_25pct test 47.72+/-1.62 over 3 seeds -> runs_bscpull/diagmae_vit_25pct/linear_probe.json

@@ -26,7 +26,11 @@
     "compute": 2.0,
     "pretrained": false
    },
-   "combo": null
+   "combo": {
+    "cell": "diagprosp_simclraux_c100_10pct",
+    "config": "configs/diagnostics/diagprosp_simclraux_c100_10pct.yaml",
+    "label": "prior+simclr"
+   }
   },
   {
    "name": "r18_c100_25:prior|simclr",
@@ -50,7 +54,11 @@
     "compute": 2.0,
     "pretrained": false
    },
-   "combo": null
+   "combo": {
+    "cell": "diagprosp_simclraux_c100_25pct",
+    "config": "configs/diagnostics/diagprosp_simclraux_c100_25pct.yaml",
+    "label": "prior+simclr"
+   }
   },
   {
    "name": "r18_c10_2:prior|simclr",
@@ -74,7 +82,11 @@
     "compute": 2.0,
     "pretrained": false
    },
-   "combo": null
+   "combo": {
+    "cell": "diagprosp_simclraux_c10_2pct",
+    "config": "configs/diagnostics/diagprosp_simclraux_c10_2pct.yaml",
+    "label": "prior+simclr"
+   }
   },
   {
    "name": "r18_stl_10:prior|simclr",
@@ -98,7 +110,11 @@
     "compute": 2.0,
     "pretrained": false
    },
-   "combo": null
+   "combo": {
+    "cell": "diagprosp_simclraux_stl_10pct",
+    "config": "configs/diagnostics/diagprosp_simclraux_stl_10pct.yaml",
+    "label": "prior+simclr"
+   }
   },
   {
    "name": "r18_tin_10:prior|simsiam",
@@ -122,7 +138,11 @@
     "compute": 2.0,
     "pretrained": false
    },
-   "combo": null
+   "combo": {
+    "cell": "diagprosp_simsiamaux_tin_10pct",
+    "config": "configs/diagnostics/diagprosp_simsiamaux_tin_10pct.yaml",
+    "label": "prior+simsiam"
+   }
   },
   {
    "name": "r18_c10_5:prior|simsiam",
@@ -146,7 +166,11 @@
     "compute": 2.0,
     "pretrained": false
    },
-   "combo": null
+   "combo": {
+    "cell": "diagprosp_simsiamaux_c10_5pct",
+    "config": "configs/diagnostics/diagprosp_simsiamaux_c10_5pct.yaml",
+    "label": "prior+simsiam"
+   }
   },
   {
    "name": "vit_c100_25:prior|dino",
@@ -170,7 +194,11 @@
     "compute": 2.0,
     "pretrained": false
    },
-   "combo": null
+   "combo": {
+    "cell": "diagprosp_dinoaux_c100_25pct",
+    "config": "configs/diagnostics/diagprosp_dinoaux_c100_25pct.yaml",
+    "label": "prior+dino"
+   }
   },
   {
    "name": "vit_c10_10:prior|dino",
@@ -194,7 +222,11 @@
     "compute": 2.0,
     "pretrained": false
    },
-   "combo": null
+   "combo": {
+    "cell": "diagprosp_dinoaux_c10_10pct",
+    "config": "configs/diagnostics/diagprosp_dinoaux_c10_10pct.yaml",
+    "label": "prior+dino"
+   }
   },
   {
    "name": "vit_food_50:prior|dino",
@@ -218,7 +250,11 @@
     "compute": 2.0,
     "pretrained": false
    },
-   "combo": null
+   "combo": {
+    "cell": "diagprosp_dinoaux_food_50pct",
+    "config": "configs/diagnostics/diagprosp_dinoaux_food_50pct.yaml",
+    "label": "prior+dino"
+   }
   },
   {
    "name": "vit_dtd_50:prior|dino",
@@ -242,7 +278,11 @@
     "compute": 2.0,
     "pretrained": false
    },
-   "combo": null
+   "combo": {
+    "cell": "diagprosp_dinoaux_dtd_50pct",
+    "config": "configs/diagnostics/diagprosp_dinoaux_dtd_50pct.yaml",
+    "label": "prior+dino"
+   }
   },
   {
    "name": "r18_food_5:aug|simclr",
@@ -266,7 +306,11 @@
     "compute": 2.0,
     "pretrained": false
    },
-   "combo": null
+   "combo": {
+    "cell": "diagprosp_augssl_food_5pct",
+    "config": "configs/diagnostics/diagprosp_augssl_food_5pct.yaml",
+    "label": "aug+simclr"
+   }
   },
   {
    "name": "r18_food_10:aug|simclr",
@@ -290,7 +334,11 @@
     "compute": 2.0,
     "pretrained": false
    },
-   "combo": null
+   "combo": {
+    "cell": "diagprosp_augssl_food_10pct",
+    "config": "configs/diagnostics/diagprosp_augssl_food_10pct.yaml",
+    "label": "aug+simclr"
+   }
   },
   {
    "name": "r18_esat_5:aug|simclr",
@@ -314,7 +362,11 @@
     "compute": 2.0,
     "pretrained": false
    },
-   "combo": null
+   "combo": {
+    "cell": "diagprosp_augssl_esat_5pct",
+    "config": "configs/diagnostics/diagprosp_augssl_esat_5pct.yaml",
+    "label": "aug+simclr"
+   }
   }
  ]
 }

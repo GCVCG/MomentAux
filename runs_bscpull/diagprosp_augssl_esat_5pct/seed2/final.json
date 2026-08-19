@@ -1,0 +1,36 @@
+{
+  "name": "diagprosp_augssl_esat_5pct",
+  "seed": 2,
+  "config": {
+    "name": "diagprosp_augssl_esat_5pct",
+    "dataset": "eurosat",
+    "backbone": "resnet18",
+    "epochs": 200,
+    "batch_size": 128,
+    "lr": 0.1,
+    "weight_decay": 0.0005,
+    "momentum": 0.9,
+    "num_workers": 2,
+    "small_input": true,
+    "pretrained": false,
+    "subset_pct": 5,
+    "stem": "none",
+    "augment": "deit",
+    "init_from": "runs/simclr_pre_esat_5pct/seed{seed}/pretrain.pt"
+  },
+  "final_test_acc": 0.8998148441314697,
+  "best_test_acc": 0.9009259343147278,
+  "accounting": {
+    "params_trainable": 11173962,
+    "params_stem_trainable": 0,
+    "params_stem_fixed_filters": 0,
+    "flops_total": 2226623488,
+    "flops_stem": 0,
+    "flops_image_size": 64
+  },
+  "wall_seconds": 382.11227536201477,
+  "torch_version": "2.4.0a0+gite3b9b71",
+  "device": "cuda",
+  "gpu_name": "NVIDIA H100",
+  "amp": true
+}

@@ -680,6 +680,16 @@ feature space even as the combination edges ahead end to end. We therefore state
 single when the partner's $G$ matches the prior's, and partial when it does
 not}, and we count these cells as the case that forced the qualification.
 
+That qualification is not sufficient either. Three further pairs, trained for
+the prospective test of Sec.~\ref{sec:procedure} and so never used to shape any
+statement here, exceed their better single arm by $+1.04$ to $+1.43$ points at
+$2.3$ to $3.8$ standard errors, two of them with partner feature gains that
+\emph{do} match the prior's. What survives is the magnitude, not the
+inequality: across these combinations the result sits within about a point of
+the better single arm either way, against single-arm gains of $6$ to $15$, so
+same-currency fusion buys a rounding error where different-currency fusion buys
+multiples. We retire any exact-inequality phrasing of the row.
+
 \subsection{Fusing into mature features interferes}\label{sec:taxsub}
 \begin{table}[pos=htbp]
 \caption{The interference tax of the ImageNet-transfer fusion, and its
@@ -790,7 +800,7 @@ one cell of six and mildly interferes at the rest
 Fusion & Currencies & Call & Measured & Key evidence \\
 \midrule
 Prior + augmentation & structure + invariance & stack & \textbf{stack} & $\Delta$ amplified $1.4$--$2.4\times$ (1--25\%); $G\uparrow$ (ViTs; 1 of 6 conv cells off-selection) \\
-Prior + effective SSL & structure $\approx$ invariance$^{*}$ & substitute & \textbf{substitute} & combo $\leq$ best single when $G$ matches; partial when it does not \\
+Prior + effective SSL & structure $\approx$ invariance$^{*}$ & substitute & \textbf{substitute} & combo within ${\sim}1$ point of best single, either side \\
 Prior + ineffective SSL & structure + ${\sim}$nothing & stack & \textbf{stack} & full gain recovered on SimSiam \\
 Prior + ImageNet init & structure vs.\ mature features & interfere & \textbf{interfere} & $-15$ to $-17$ e2e at $\lambda_0{=}1.0$, carried by $G$; null on shift; gone at $\lambda_0{\leq}0.3$ \\
 Augmentation + SSL & invariance + invariance & substitute & \textbf{substitute} & DeiT recipe collapses SimCLR's margin \\

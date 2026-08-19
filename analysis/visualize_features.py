@@ -295,10 +295,19 @@ def fig_heatmaps(models, test_ds, device, out, cell, dataset, loader,
     # per-panel titles; the caption carries the long forms.
     cols = ["input", "target", "base tap", "prior tap"]
     import matplotlib.gridspec as gridspec
-    fig = plt.figure(figsize=(FIGW, FIGW / 8 * 1.52 * 2 + 0.26))
-    outer = gridspec.GridSpec(2, 2, figure=fig, wspace=0.14, hspace=0.24,
-                              left=0.005, right=0.995, top=0.870,
-                              bottom=0.080)
+    # Laid out in INCHES so the panels come out square. imshow holds a square
+    # aspect, so an axes box taller than it is wide pads the image with white
+    # above and below -- which is where the row gap came from, not hspace.
+    # The only vertical slack left between rows is the two label lines.
+    lft, rgt, ows, iws = 0.005, 0.995, 0.14, 0.16
+    w_blk = (rgt - lft) * FIGW / (2 + ows)
+    w_pan = w_blk / (4 + 3 * iws)
+    lab_h, top_h = 0.175, 0.30            # label lines below a row; titles above
+    H = 2 * w_pan + 2 * lab_h + top_h
+    fig = plt.figure(figsize=(FIGW, H))
+    outer = gridspec.GridSpec(2, 2, figure=fig, wspace=ows, hspace=lab_h / w_pan,
+                              left=lft, right=rgt,
+                              top=1 - top_h / H, bottom=lab_h / H)
     for k, idx in enumerate(adv):
         inner = gridspec.GridSpecFromSubplotSpec(
             1, 4, subplot_spec=outer[k // 2, k % 2], wspace=0.16)
@@ -353,10 +362,17 @@ def fig_cam(models, test_ds, device, out, cell, dataset, loader,
         return names[c] if names else f"class {c}"
 
     import matplotlib.gridspec as gridspec
-    fig = plt.figure(figsize=(FIGW, FIGW / 6 * 1.30 * 2 + 0.10))
-    outer = gridspec.GridSpec(2, 2, figure=fig, wspace=0.13, hspace=0.16,
-                              left=0.005, right=0.995, top=0.905,
-                              bottom=0.055)
+    # Square panels by construction, as in the heatmap figure: the row gap is
+    # then exactly the one label line, with no imshow padding added to it.
+    lft, rgt, ows, iws = 0.005, 0.995, 0.13, 0.14
+    w_blk = (rgt - lft) * FIGW / (2 + ows)
+    w_pan = w_blk / (3 + 2 * iws)
+    lab_h, top_h = 0.095, 0.11            # one label line below; titles above
+    H = 2 * w_pan + 2 * lab_h + top_h
+    fig = plt.figure(figsize=(FIGW, H))
+    outer = gridspec.GridSpec(2, 2, figure=fig, wspace=ows, hspace=lab_h / w_pan,
+                              left=lft, right=rgt,
+                              top=1 - top_h / H, bottom=lab_h / H)
     axes = np.empty((len(adv), 3), dtype=object)
     for k in range(len(adv)):
         inner = gridspec.GridSpecFromSubplotSpec(

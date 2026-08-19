@@ -1,0 +1,37 @@
+{
+  "name": "diagmae_vit_10pct",
+  "seed": 2,
+  "config": {
+    "name": "diagmae_vit_10pct",
+    "dataset": "cifar100",
+    "backbone": "vit_tiny",
+    "optimizer": "adamw",
+    "epochs": 200,
+    "batch_size": 128,
+    "lr": 0.001,
+    "weight_decay": 0.05,
+    "momentum": 0.9,
+    "num_workers": 2,
+    "small_input": true,
+    "pretrained": false,
+    "subset_pct": 10,
+    "stem": "none",
+    "stem_calibrate": true,
+    "init_from": "runs/mae_pre_vit_10pct/seed{seed}/pretrain.pt"
+  },
+  "final_test_acc": 0.2973000109195709,
+  "best_test_acc": 0.29820001125335693,
+  "accounting": {
+    "params_trainable": 5380132,
+    "params_stem_trainable": 0,
+    "params_stem_fixed_filters": 0,
+    "flops_total": 347216064,
+    "flops_stem": 0,
+    "flops_image_size": 32
+  },
+  "wall_seconds": 299.7763903141022,
+  "torch_version": "2.4.0a0+gite3b9b71",
+  "device": "cuda",
+  "gpu_name": "NVIDIA H100",
+  "amp": true
+}
