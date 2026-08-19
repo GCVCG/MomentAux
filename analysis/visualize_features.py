@@ -296,12 +296,12 @@ def fig_heatmaps(models, test_ds, device, out, cell, dataset, loader,
     cols = ["input", "target", "base tap", "prior tap"]
     import matplotlib.gridspec as gridspec
     fig = plt.figure(figsize=(FIGW, FIGW / 8 * 1.52 * 2 + 0.26))
-    outer = gridspec.GridSpec(2, 2, figure=fig, wspace=0.10, hspace=0.46,
-                              left=0.005, right=0.995, top=0.860,
-                              bottom=0.095)
+    outer = gridspec.GridSpec(2, 2, figure=fig, wspace=0.14, hspace=0.24,
+                              left=0.005, right=0.995, top=0.870,
+                              bottom=0.080)
     for k, idx in enumerate(adv):
         inner = gridspec.GridSpecFromSubplotSpec(
-            1, 4, subplot_spec=outer[k // 2, k % 2], wspace=0.04)
+            1, 4, subplot_spec=outer[k // 2, k % 2], wspace=0.16)
         t = tgt[k].mean(0).cpu()
         maps = {2: feats["base"][k].abs().mean(0).cpu(),
                 3: feats["aux"][k].abs().mean(0).cpu()}
@@ -354,13 +354,13 @@ def fig_cam(models, test_ds, device, out, cell, dataset, loader,
 
     import matplotlib.gridspec as gridspec
     fig = plt.figure(figsize=(FIGW, FIGW / 6 * 1.30 * 2 + 0.10))
-    outer = gridspec.GridSpec(2, 2, figure=fig, wspace=0.09, hspace=0.30,
-                              left=0.005, right=0.995, top=0.90,
-                              bottom=0.065)
+    outer = gridspec.GridSpec(2, 2, figure=fig, wspace=0.13, hspace=0.16,
+                              left=0.005, right=0.995, top=0.905,
+                              bottom=0.055)
     axes = np.empty((len(adv), 3), dtype=object)
     for k in range(len(adv)):
         inner = gridspec.GridSpecFromSubplotSpec(
-            1, 3, subplot_spec=outer[k // 2, k % 2], wspace=0.04)
+            1, 3, subplot_spec=outer[k // 2, k % 2], wspace=0.14)
         for c in range(3):
             axes[k, c] = fig.add_subplot(inner[0, c])
     cols = ["input", "baseline CAM", "prior CAM"]
