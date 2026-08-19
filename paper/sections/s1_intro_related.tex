@@ -375,20 +375,15 @@ answered.
 
 \begin{table}[pos=htbp]
 \caption{Where the literature stands on the five properties a fusion
-question needs, and what this work adds. P1: one frozen recipe. P2:
-cost-normalized, comparators reported against a declared training-compute
-multiple, not each method's own chosen budget. P3: feature-side, the effect
-measured on frozen representations, not only end-to-end. P4: combinations,
-the study measures what happens when two sources are applied together. P5:
-a predictive model of the outcome. \cmark{} = present; \pmark{} = partial
-or incidental; \xmark{} = absent.}
+question needs, and what this work adds. \cmark{} = present; \pmark{} =
+partial or incidental; \xmark{} = absent.}
 \label{tab:gap}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \zebra{2}
-\begin{tabular}{lccccc}
+\begin{tabular}{P{0.40\columnwidth}ccccc}
 \toprule
-Line of work & P1 & P2 & P3 & P4 & P5 \\
+Line of work & Rec. & Cst. & Fea. & Cmb. & Prd. \\
 \midrule
 Fixed spectral filters in the forward path
   \citep{bruna2013scattering,luan2018gaborcnn,shi2026fvit}
@@ -414,6 +409,7 @@ Classical fusion taxonomy
 \midrule
 \textbf{This work} & \cmark & \cmark & \cmark & \cmark & \cmark \\
 \bottomrule
+\rowcolor{white}\multicolumn{6}{@{}p{0.97\columnwidth}@{}}{\footnotesize Rec.: one frozen recipe. Cst.: cost-normalized, comparators reported against a declared training-compute multiple, not each method's own chosen budget. Fea.: feature-side, the effect measured on frozen representations, not only end-to-end. Cmb.: combinations, what happens when two sources are applied together. Prd.: a predictive model of the outcome.} \\
 \end{tabular}
 \end{table}
 

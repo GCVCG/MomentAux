@@ -7178,3 +7178,11 @@ ported vs corrected and why.
   results/prospective_currency.json and OVERWROTE it; restored from git
   and the output is now tag-suffixed at source. The same pattern as every
   shared-filename incident in this ledger: two producers, one path.
+- SUPERSEDED SAME DAY, at the user's call: the two-source-lane redesign of
+  fig:method is ROLLED BACK to the 2026-08-18 two-panel design (restored
+  byte-exact from git with its matching caption), which the user judged
+  better than both of today's rewrites. The v3 design survives in commit
+  e0bbc6a if ever wanted. tab:gap headers moved again per instruction:
+  three-character abbreviated horizontal keys (Rec./Cst./Fea./Cmb./Prd.)
+  explained in a table FOOTER, first column narrowed -- no rotated element
+  anywhere. Gate green at 35 pages throughout.
