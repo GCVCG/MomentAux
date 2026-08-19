@@ -1,0 +1,26 @@
+# PROSPECTIVE combination (wave 1): the committed call for this pair
+# was recorded in CLAUDE.md BEFORE this cell existed. Parent single-
+# arm config + the reference-configuration aux block, nothing else.
+name: diagprosp_dinoaux_food_50pct
+dataset: food101
+backbone: vit_tiny
+optimizer: adamw
+epochs: 200
+batch_size: 128
+lr: 0.001
+weight_decay: 0.05
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 50
+stem: none
+stem_calibrate: true
+init_from: runs/dino_pre_food_50pct/seed{seed}/pretrain.pt
+moment_aux:
+  stem: energy-magnitude
+  tap: blocks.8
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine
+  head_norm: true

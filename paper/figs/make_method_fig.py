@@ -53,7 +53,7 @@ plt.rcParams.update({
     "text.color": INK, "axes.labelcolor": INK,
     "mathtext.fontset": "dejavusans"})
 
-FIG_W_IN, FIG_H_IN = 7.0, 3.05
+FIG_W_IN, FIG_H_IN = 7.0, 3.95
 fig = plt.figure(figsize=(FIG_W_IN, FIG_H_IN), dpi=300)
 fig.patch.set_facecolor("white")
 
@@ -80,10 +80,12 @@ def _load_assets():
                + torch.tensor(mean).view(3, 1, 1)).clamp(0, 1)
         img = img.permute(1, 2, 0).numpy()
         with torch.no_grad():
-            m = (stem._energy(stem._luma(x))
-                 * stem.calib_scale.view(1, -1, 1, 1))[0].mean(0).numpy()
-        kerns = [stem.even.squeeze(1)[i].numpy() for i in (1, 6)]
-        return img, m, kerns
+            resp = (stem._energy(stem._luma(x))
+                    * stem.calib_scale.view(1, -1, 1, 1))[0]
+        m = resp.mean(0).numpy()
+        maps = [resp[i].numpy() for i in (0, 1, 2, 3)]   # sigma=2, 4 thetas
+        kerns = [stem.even.squeeze(1)[i].numpy() for i in (0, 1, 2, 3)]
+        return img, m, kerns, maps
     except Exception as e:                                    # noqa: BLE001
         print(f"method-fig assets fallback ({e})")
         yy, xx = np.mgrid[0:96, 0:96] / 96.0
@@ -91,10 +93,10 @@ def _load_assets():
         m = np.abs(np.sin(14 * xx) * np.cos(9 * yy))
         k = np.outer(np.hanning(11), np.hanning(11)) * np.cos(
             np.linspace(-6, 6, 11))[None, :]
-        return img, m, [k, k.T]
+        return img, m, [k, k.T, k, k.T], [m, m.T, m, m.T]
 
 
-IMG, MMAP, KERNS = _load_assets()
+IMG, MMAP, KERNS, MAPS = _load_assets()
 
 
 # ----------------------------------------------------------------- helpers
@@ -159,6 +161,13 @@ def slab(ax, x0, yc, a_in, t_in, ux, uy, label=None, tap=False):
     w, h = a_in / ux, a_in / uy
     dx, dy = 0.55 * t_in / ux, 0.55 * t_in / uy
     y0 = yc - h / 2
+    # channel stack: two offset back sheets, then the cuboid faces, so the
+    # stage reads as a STACK of feature maps rather than a flat box
+    for k in (2, 1):
+        off_x, off_y = k * dx / 2.6, k * dy / 2.6
+        ax.add_patch(Rectangle((x0 + off_x, y0 + off_y), w, h,
+                               fc=shade(BLUE, 0.42 + 0.13 * k),
+                               ec=shade(BLUE, -0.05), lw=0.3, zorder=3 - 0.1 * k))
     ax.add_patch(Polygon([(x0 + w, y0), (x0 + w + dx, y0 + dy),
                           (x0 + w + dx, y0 + h + dy), (x0 + w, y0 + h)],
                          fc=shade(BLUE, -0.25), ec="none", zorder=3))
@@ -179,132 +188,204 @@ def slab(ax, x0, yc, a_in, t_in, ux, uy, label=None, tap=False):
 
 
 # ================================================================ panel (a)
+# Clean-slate design for the venue: TWO INFORMATION SOURCES in parallel
+# lanes, ONE fusion point, deployment carrying neither source's machinery.
+# Arrow discipline: every connector is a single FancyArrowPatch, strictly
+# horizontal, vertical, or one rounded elbow; no chained heads, no diagonals.
 axa, UA = panel([0.008, 0.045, 0.610, 0.875],
-                "(a)  MomentAux Training: One Input, Two Losses")
-ux, uy = 0.610 * FIG_W_IN / 10.0, 0.875 * FIG_H_IN / 10.0
+                "(a)  Two Information Sources, Fused at Training Time Only")
 
-Y = 7.55                                    # training-path centerline
-# --- input image (the real sample)
-IMG_W = 1.32
-IMG_H = IMG_W * ux / uy                      # square on the page
-axa.imshow(IMG, extent=(0.10, 0.10 + IMG_W, Y - IMG_H / 2, Y + IMG_H / 2),
+ux = 0.610 * FIG_W_IN / 10.0
+uy = 0.875 * FIG_H_IN / 10.0
+
+
+def lane(y0, y1, label, color):
+    axa.add_patch(FancyBboxPatch((1.42, y0), 8.54, y1 - y0,
+                                 boxstyle="round,pad=0.02,rounding_size=0.10",
+                                 fc=shade(color, 0.945), ec=shade(color, 0.55),
+                                 lw=0.5, zorder=0))
+    axa.text(1.55, y1 - 0.12, label, fontsize=4.6, fontweight="bold",
+             color=shade(color, -0.25), ha="left", va="top", zorder=4)
+
+
+def onearrow(x1, y1, x2, y2, color, ls="-", lw=0.7, style=None):
+    axa.add_patch(FancyArrowPatch((x1, y1), (x2, y2), arrowstyle="-|>",
+                                  mutation_scale=4.2, lw=lw, color=color,
+                                  linestyle=ls, zorder=2,
+                                  connectionstyle=style))
+
+
+# ---- the shared input, once, feeding both source lanes -------------------
+IMG_W = 1.02
+IMG_H = IMG_W * ux / uy
+IY = 6.85
+axa.imshow(IMG, extent=(0.06, 0.06 + IMG_W, IY - IMG_H / 2, IY + IMG_H / 2),
            zorder=3, aspect="auto")
-axa.add_patch(Rectangle((0.10, Y - IMG_H / 2), IMG_W, IMG_H, fc="none",
-                        ec=INK, lw=0.4, zorder=4))
-axa.text(0.76, Y + IMG_H / 2 + 0.24, "Input $x$", ha="center", va="bottom",
+axa.add_patch(Rectangle((0.06, IY - IMG_H / 2), IMG_W, IMG_H, fc="none",
+                        ec=INK, lw=0.5, zorder=4))
+axa.text(0.57, IY - IMG_H / 2 - 0.16, "Input $x$", ha="center", va="top",
          fontsize=4.8, color=INK)
+JX = 1.24
+axa.plot([0.06 + IMG_W, JX], [IY, IY], color=INK, lw=0.7, zorder=2)
+axa.plot([JX], [IY], marker="o", ms=2.0, color=INK, zorder=5)
+onearrow(JX, IY, 1.98, 8.62, GREEN,
+         style="angle,angleA=90,angleB=180,rad=3")
+onearrow(JX, IY, 1.98, 5.55, BLUE,
+         style="angle,angleA=-90,angleB=180,rad=3")
 
-# --- backbone: four slabs, spatial size falling, channels growing
-sizes = [(0.470, 0.080), (0.375, 0.115), (0.290, 0.160), (0.220, 0.210)]
-xs, gap = 1.80, 0.34
-tap_xy = None
-axa.text(2.00, 9.72, "Backbone: Four Feature Stages, Unchanged",
-         ha="left", va="center", fontsize=4.4, color=MUTED)
-right_edges = []
-for i, (a_in, t_in) in enumerate(sizes):
-    lab = f"$f_{i+1}(x)$"
-    r, _ = slab(axa, xs, Y, a_in, t_in, ux, uy, label=lab, tap=(i == 2))
-    if i == 2:
-        tap_xy = (xs + a_in / ux / 2, Y - a_in / uy / 2)
-    right_edges.append(r)
-    if i < 3:
-        arrow(axa, r + 0.06, Y, r + gap - 0.06, Y)
-    xs = r + gap
-arrow(axa, 1.48, Y, 1.75, Y)
-arrow(axa, right_edges[-1] + 0.06, Y, 7.06, Y)
-
-# --- task head + CE
-box(axa, 7.12, Y - 0.62, 1.62, 1.24, "Task Head\n(Classifier)", "#e6e6e6",
-    UA, tc=INK, fs=4.4, ec=LINE)
-arrow(axa, 8.80, Y, 9.20, Y)
-axa.text(9.62, Y, r"$\mathcal{L}_{\mathrm{CE}}$", ha="center", va="center",
-         fontsize=6.0, color=INK)
-
-# --- tap branch: 1x1 conv aux head (training only)
-arrow(axa, tap_xy[0], tap_xy[1] - 0.55, tap_xy[0], 5.62, VERM,
-      ls=(0, (2, 1.2)), lw=0.8, z=2)
-axa.plot([tap_xy[0]], [tap_xy[1]], marker="o", ms=3.2, color=VERM, zorder=5)
-axa.text(tap_xy[0] + 0.16, 6.10, "Tap", fontsize=4.4, color=VERM,
-         ha="left", va="center")
-box(axa, tap_xy[0] - 1.18, 4.42, 2.36, 1.18,
-    "Aux Head: $1{\\times}1$ Conv $W$\n(Training Only)", VERM, UA, fs=4.2)
-
-# --- bank path: same input -> pinned bank -> m(x)
-arrow(axa, 0.76, Y - IMG_H / 2 - 0.10, 0.76, 5.75, GREEN,
-      ls=(0, (2, 1.2)), lw=0.8)
-box(axa, 0.10, 4.42, 2.10, 1.18, "", "#ffffff", UA, ec=GREEN, lw=0.6)
-KW = 0.60
+# ---- Source 1: hand-crafted knowledge ------------------------------------
+lane(7.72, 10.02, "Source 1  \u00b7  Hand-Crafted Knowledge: the Pinned "
+     "Gabor Bank, Fixed Before Training", GREEN)
+SY = 8.62
+KW = 0.40
 KH = KW * ux / uy
 for j, k in enumerate(KERNS):
-    x0 = 0.28 + j * 0.74
-    axa.imshow(k, extent=(x0, x0 + KW, 5.01 - KH / 2, 5.01 + KH / 2),
+    x0 = 2.14 + j * 0.50
+    axa.imshow(k, extent=(x0, x0 + KW, SY - KH / 2, SY + KH / 2),
                cmap="RdBu_r", zorder=3, aspect="auto")
-axa.text(1.90, 5.01, "$g_{\\sigma,\\theta}$", ha="center", va="center",
-         fontsize=5.0, color=GREEN)
-axa.text(1.15, 4.20, "Pinned Gabor Bank\n(Fixed, Fingerprinted)",
-         ha="center", va="top", fontsize=4.2, color=GREEN, linespacing=1.25)
-arrow(axa, 2.28, 5.01, 2.72, 5.01, GREEN)
-MW = 0.86
+axa.text(3.06, SY - KH / 2 - 0.12, "$g_{\\sigma,\\theta}$: 2 Scales "
+         "$\\times$ 4 Orientations", ha="center", va="top", fontsize=3.8,
+         color=MUTED)
+onearrow(4.18, SY, 4.60, SY, GREEN)
+MW = 0.50
 MH = MW * ux / uy
-axa.imshow(MMAP, extent=(2.80, 2.80 + MW, 5.01 - MH / 2, 5.01 + MH / 2),
-           cmap="magma", zorder=3, aspect="auto")
-axa.add_patch(Rectangle((2.80, 5.01 - MH / 2), MW, MH, fc="none",
-                        ec=shade(GREEN, -0.2), lw=0.4, zorder=4))
-axa.text(3.23, 4.20, "Target\n$m(x)=|x*g_{\\sigma,\\theta}|$",
-         ha="center", va="top", fontsize=4.2, color=GREEN, linespacing=1.25)
+for j, mm in enumerate(MAPS):
+    x0 = 4.72 + j * 0.58
+    axa.imshow(mm, extent=(x0, x0 + MW, SY - MH / 2, SY + MH / 2),
+               cmap="magma", zorder=3, aspect="auto")
+    axa.add_patch(Rectangle((x0, SY - MH / 2), MW, MH, fc="none",
+                            ec=shade(GREEN, -0.2), lw=0.35, zorder=4))
+axa.text(5.86, SY - MH / 2 - 0.12,
+         "$0^{\\circ}$\u2002 $45^{\\circ}$\u2002 $90^{\\circ}$"
+         "\u2002 $135^{\\circ}$", ha="center", va="top", fontsize=3.7,
+         color=shade(GREEN, -0.2))
+axa.text(7.25, SY, "Target\n$m(x)=|x*g_{\\sigma,\\theta}|$",
+         ha="left", va="center", fontsize=4.5,
+         color=shade(GREEN, -0.25), linespacing=1.3)
 
-# --- the loss, with its real symbols, fed by all three branches
-LOSS = ("$\\mathcal{L} \\,=\\, \\mathcal{L}_{\\mathrm{CE}} \\;+\\; "
-        "\\lambda(t)\\,\\Vert\\, W f_3(x) - m(x) \\,\\Vert_2^2$")
-axa.add_patch(FancyBboxPatch((0.30, 1.92), 6.30, 1.05,
-                             boxstyle="round,pad=0.05,rounding_size=0.18",
-                             fc="#fdf1e9", ec=VERM, lw=0.6, zorder=2))
-axa.text(3.45, 2.44, LOSS, ha="center", va="center", fontsize=5.6,
+# ---- Source 2: the learned representation --------------------------------
+lane(4.55, 7.44, "Source 2  \u00b7  Learned Representation: the Backbone, "
+     "Trained on the Cell's Own Data", BLUE)
+BY = 5.50
+stage_names = ("Early", "Mid", "Deep", "Final")
+xs = 2.14
+right = None
+tap_x = None
+for i, (a_in, t_in) in enumerate(
+        ((0.30, 0.055), (0.25, 0.085), (0.205, 0.13), (0.165, 0.185))):
+    if i == 2:
+        axa.text(xs - 0.02, BY, "$\\cdots$", ha="center", va="center",
+                 fontsize=8, color=INK)
+        xs += 0.32
+    elif i:
+        onearrow(right + 0.04, BY, xs - 0.04, BY, GREY, lw=0.6)
+    right, _ = slab(axa, xs, BY, a_in, t_in, ux, uy)
+    h = a_in / uy
+    axa.text(xs + a_in / ux / 2, BY + h / 2 + 0.40, stage_names[i],
+             ha="center", va="bottom", fontsize=4.2,
+             color=VERM if i == 2 else MUTED,
+             fontweight="bold" if i == 2 else "normal")
+    if i == 2:
+        tap_x = xs + a_in / ux / 2
+        axa.plot([tap_x], [BY - h / 2], marker="o", ms=3.0, color=VERM,
+                 zorder=5)
+    xs += 0.98
+onearrow(right + 0.04, BY, 6.42, BY, GREY, lw=0.6)
+box(axa, 6.48, BY - 0.46, 1.44, 0.92, "Task Head", "#e6e6e6", UA, tc=INK,
+    fs=4.3, ec=LINE)
+onearrow(7.98, BY, 8.34, BY, GREY, lw=0.6)
+axa.text(8.74, BY, "$\\mathcal{L}_{\\mathrm{CE}}$", ha="center",
+         va="center", fontsize=5.4, color=INK)
+
+# ---- the fusion point ----------------------------------------------------
+FB_Y0, FB_Y1 = 2.02, 3.96
+axa.add_patch(FancyBboxPatch((1.42, FB_Y0), 8.54, FB_Y1 - FB_Y0,
+                             boxstyle="round,pad=0.02,rounding_size=0.10",
+                             fc="#fdf1e9", ec=VERM, lw=0.6, zorder=0))
+axa.text(1.55, FB_Y1 - 0.12, "Fusion  \u00b7  A Decaying Auxiliary "
+         "Regression at the Tapped Stage", fontsize=4.6, fontweight="bold",
+         color=shade(VERM, -0.15), ha="left", va="top", zorder=4)
+LOSS = ("$\\mathcal{L} \\,=\\, \\mathcal{L}_{\\mathrm{CE}} "
+        "\\,+\\, \\lambda(t)\\,\\Vert\\, W f_{\\mathrm{deep}}(x)"
+        " - m(x) \\,\\Vert_2^2$")
+axa.text(4.30, 2.86, LOSS, ha="center", va="center", fontsize=5.3,
          color=INK, zorder=4)
-arrow(axa, 3.23, 3.62, 3.23, 3.10, GREEN)            # m(x) -> loss
-arrow(axa, tap_xy[0], 4.36, tap_xy[0], 3.10, VERM)   # aux head -> loss
-axa.plot([9.72, 9.72], [Y - 0.50, 2.44], color=GREY, lw=0.65, zorder=1)
-arrow(axa, 9.72, 2.44, 6.78, 2.44, GREY)             # CE -> loss, around inset
+axa.text(4.30, 2.30, "$W$: a $1{\\times}1$ Convolution, Trained With the "
+         "Network and Used Only Here", ha="center", va="center",
+         fontsize=3.9, color=MUTED, zorder=4)
+onearrow(tap_x, BY - 0.34, tap_x, 4.02, VERM, ls=(0, (2, 1.2)), lw=0.8)
+axa.text(tap_x + 0.13, 4.26, "Tap: $f_{\\mathrm{deep}}(x)$", fontsize=4.0,
+         color=VERM, ha="left", va="center")
+onearrow(5.86, SY - MH / 2 - 0.36, 5.86, 4.02, GREEN, ls=(0, (2, 1.2)),
+         lw=0.8)
+axa.text(5.99, 4.26, "$m(x)$", fontsize=4.2, color=shade(GREEN, -0.2),
+         ha="left", va="center")
+onearrow(8.74, BY - 0.32, 8.74, 4.02, GREY, lw=0.6)
 
-# --- lambda(t) inset: cosine 1 -> exactly 0
-ins = fig.add_axes([0.480, 0.335, 0.100, 0.205])
+# lambda(t) inset, inside the fusion band on the right
+ins = fig.add_axes([0.438, 0.222, 0.088, 0.115])
 t = np.linspace(0, 1, 300)
 lam = 0.5 * (1 + np.cos(np.pi * t))
 ins.plot(t, lam, lw=1.0, color=VERM)
 ins.fill_between(t, 0, lam, color=VERM, alpha=0.13, lw=0)
 ins.set_xlim(0, 1); ins.set_ylim(0, 1.13)
-ins.set_xticks([0, 1]); ins.set_xticklabels(["0", "$T$"], fontsize=4.1)
+ins.set_xticks([0, 1]); ins.set_xticklabels(["0", "$T$"], fontsize=3.9)
 ins.set_yticks([0, 1]); ins.set_yticklabels(["0", "$\\lambda_0$"],
-                                            fontsize=4.1)
-ins.tick_params(length=1.5, pad=1)
-ins.set_xlabel("Epoch $t$", fontsize=4.2, labelpad=0.6)
-ins.set_title("Cosine Schedule $\\lambda(t)$", fontsize=4.4, color=INK,
-              pad=2.0)
-ins.annotate("$\\lambda$ Reaches Exactly 0:\nLate Training Is Pure CE",
-             xy=(0.955, 0.075), xytext=(0.70, 0.47), fontsize=3.9,
-             color=VERM, ha="center", va="center", linespacing=1.25,
-             arrowprops=dict(arrowstyle="-|>", lw=0.5, color=VERM,
-                             shrinkA=1, shrinkB=1, mutation_scale=3.6))
-for s in ins.spines.values():
-    s.set_linewidth(0.4)
+                                            fontsize=3.9)
+ins.tick_params(length=1.4, pad=1)
+ins.set_title("$\\lambda(t)$: Cosine to Exactly 0,\nLate Training "
+              "Is Pure CE", fontsize=3.8, color=VERM, pad=1.6,
+              linespacing=1.15)
+for sp in ins.spines.values():
+    sp.set_linewidth(0.4)
+ins.set_zorder(6)
+ins.patch.set_alpha(0.0)
 
-# --- deployment strip: aux head dropped, identical FLOPs
-axa.add_patch(Rectangle((0.10, 0.02), 9.80, 1.42, fc="#f5f5f5", ec=LINE,
-                        lw=0.4, zorder=1))
-axa.text(0.30, 1.16, "Deployment", fontsize=4.6, color=INK,
-         fontweight="bold", va="center")
-dxs = 1.90
-for a_in in (0.16, 0.13, 0.105, 0.085):
-    h = a_in / uy * 1.6
-    axa.add_patch(Rectangle((dxs, 0.72 - h / 2), 0.22, h,
-                            fc=shade(BLUE, 0.15), ec="none", zorder=2))
-    dxs += 0.36
-arrow(axa, dxs, 0.72, dxs + 0.30, 0.72, lw=0.5)
-box(axa, dxs + 0.36, 0.42, 1.30, 0.60, "Task Head", "#e6e6e6", UA, tc=INK,
-    fs=3.9, ec=LINE)
-axa.text(5.30, 0.72, "$W$ and the Bank Are Dropped:  Backbone + Task Head"
-         " Only,\nFLOPs and Parameters Identical to the Baseline",
-         fontsize=4.2, color=MUTED, ha="left", va="center", linespacing=1.3)
+# ---- deployment ----------------------------------------------------------
+axa.add_patch(FancyBboxPatch((1.42, 0.04), 8.54, 1.62,
+                             boxstyle="round,pad=0.02,rounding_size=0.10",
+                             fc=shade(BLUE, 0.955), ec=shade(BLUE, 0.55),
+                             lw=0.5, zorder=0))
+axa.text(1.55, 1.54, "Deployment  \u00b7  $W$ and the Bank Are Dropped: "
+         "FLOPs and Parameters Identical to the Baseline", fontsize=4.6,
+         fontweight="bold", color=shade(BLUE, -0.25), ha="left", va="top",
+         zorder=4)
+dxs = 1.95
+for a_in in (0.135, 0.11, 0.09, 0.072):
+    r, _ = slab(axa, dxs, 0.58, a_in, a_in * 0.5, ux, uy)
+    dxs = r + 0.14
+onearrow(dxs, 0.58, dxs + 0.22, 0.58, GREY, lw=0.5)
+chip_x = dxs + 0.28
+chips = [("Classification", 0.98, "cls"), ("Segmentation", 0.58, "seg"),
+         ("Detection", 0.18, "det")]
+for lab, hy, icon in chips:
+    axa.add_patch(FancyBboxPatch((chip_x, hy - 0.14), 1.98, 0.28,
+                                 boxstyle="round,pad=0.03,rounding_size=0.12",
+                                 fc="white", ec=shade(BLUE, -0.15), lw=0.5,
+                                 zorder=3))
+    ix = chip_x + 0.13
+    if icon == "cls":
+        for bi, bl in enumerate((0.25, 0.15, 0.085)):
+            axa.add_patch(Rectangle((ix, hy + 0.062 - bi * 0.072), bl, 0.048,
+                                    fc=shade(BLUE, -0.1), ec="none", zorder=4))
+    elif icon == "seg":
+        for gi in range(4):
+            gx, gy = ix + (gi % 2) * 0.125, hy - 0.088 + (gi // 2) * 0.105
+            axa.add_patch(Rectangle((gx, gy), 0.11, 0.09,
+                                    fc=[shade(BLUE, 0.1), shade(GREEN, 0.2),
+                                        shade(ORANGE, 0.3),
+                                        shade(VERM, 0.35)][gi],
+                                    ec="none", zorder=4))
+    else:
+        axa.add_patch(Rectangle((ix, hy - 0.09), 0.26, 0.18, fc="none",
+                                ec=shade(VERM, -0.05), lw=0.7, zorder=4))
+        axa.plot([ix + 0.13], [hy], marker=".", ms=1.5,
+                 color=shade(BLUE, -0.2), zorder=4)
+    axa.text(chip_x + 0.50, hy, lab, ha="left", va="center", fontsize=3.9,
+             color=INK, zorder=4)
+axa.text(6.35, 0.58, "One Task Head, Trained for the Task at Hand;\nthe "
+         "Same Bank, Tap and Schedule Serve All Three", fontsize=4.0,
+         color=MUTED, ha="left", va="center", linespacing=1.35)
 
 # ================================================================ panel (b)
 axb, UB = panel([0.665, 0.045, 0.330, 0.875],

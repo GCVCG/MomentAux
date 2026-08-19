@@ -1,0 +1,36 @@
+{
+  "name": "diaggrid_simclr_stl_10pct",
+  "seed": 0,
+  "config": {
+    "name": "diaggrid_simclr_stl_10pct",
+    "dataset": "stl10",
+    "backbone": "resnet18",
+    "epochs": 200,
+    "batch_size": 128,
+    "lr": 0.1,
+    "weight_decay": 0.0005,
+    "momentum": 0.9,
+    "num_workers": 2,
+    "small_input": true,
+    "pretrained": false,
+    "subset_pct": 10,
+    "stem": "none",
+    "stem_calibrate": true,
+    "init_from": "runs/simclr_pre_stl_10pct/seed{seed}/pretrain.pt"
+  },
+  "final_test_acc": 0.5006250143051147,
+  "best_test_acc": 0.5023750066757202,
+  "accounting": {
+    "params_trainable": 11173962,
+    "params_stem_trainable": 0,
+    "params_stem_fixed_filters": 0,
+    "flops_total": 5009896448,
+    "flops_stem": 0,
+    "flops_image_size": 96
+  },
+  "wall_seconds": 370.33857011795044,
+  "torch_version": "2.4.0a0+gite3b9b71",
+  "device": "cuda",
+  "gpu_name": "NVIDIA H100",
+  "amp": true
+}

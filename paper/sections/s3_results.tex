@@ -185,49 +185,40 @@ so excluding them is not a neutral choice. Table~\ref{tab:exceptions} lists the 
 individually, because where an account fails is part of what it claims.
 
 \paragraph{Two scope repairs that moved this number, and by how much.}
-\looseness=-1 An
-earlier version of this audit reported $\auditPrevRate\%$ over
-$\auditPrevResolvable$ resolvable cells, drawn from a scope of
-$\auditPrevScope$. The figure is higher
-because two scope filters were repaired, not because any run, any seed or any
-measurement changed. The law is defined on aux-from-scratch cells, and cells
-carrying an ImageNet initialization are the interference case of
-Sec.~\ref{sec:taxsub}, reported separately precisely
-because it lies outside the regime the \readout{} branch was estimated in; the
-filter nevertheless admitted them, testing the exported \texttt{pretrained}
-field against the strings \texttt{true} and \texttt{1} while the exporter
-writes \texttt{yes}. Restoring it removes \auditExclCells{} cells,
-\auditExclResolvable{} of them resolvable, \auditExclWrong{} on the wrong
-side and \auditExclCorrect{} correct ($\auditExclRate\%$ on their own),
-taking the scope to
-$\auditMidScope$ and the rate to $\auditMidRate\%$ over \auditMidResolvable{}
-resolvable cells. Below the crossing the count of correct cells
-is unchanged at $298$ while $23$ cells disappear, every one of them wrong,
-moving that flank from $\auditPrevBelowRate\%$ to
-$\auditMidBelowRate\%$: Sec.~\ref{sec:taxsub} seen from the other side,
-early shaping destroying features
-in proportion to what the initialization supplied. Both the pre-repair
-headline and the excluded cells' own rate belong in the record,
-so we state both, not the repaired number alone.
-
-\looseness=-1 The second repair applies the paper's own scope rule: at $100\%$ cells
+\looseness=-1 An earlier version of this audit reported $\auditPrevRate\%$
+over $\auditPrevResolvable$ resolvable cells from a scope of
+$\auditPrevScope$; the figure is higher because two scope filters were
+repaired, not because any run, seed or measurement changed. First, cells
+carrying an ImageNet initialization, the interference case of
+Sec.~\ref{sec:taxsub} and outside the regime the \readout{} branch was
+estimated in, leaked in through a string mismatch: the filter tested the
+exported \texttt{pretrained} field against \texttt{true} and \texttt{1}
+while the exporter writes \texttt{yes}. Restoring it removes
+\auditExclCells{} cells, \auditExclResolvable{} of them resolvable
+(\auditExclCorrect{} correct, \auditExclWrong{} wrong,
+$\auditExclRate\%$ on their own), taking the scope to $\auditMidScope$
+and the rate to $\auditMidRate\%$ over \auditMidResolvable{} resolvable
+cells; below the
+crossing the $298$ correct cells are untouched while $23$ wrong ones leave
+($\auditPrevBelowRate\%$ to $\auditMidBelowRate\%$),
+Sec.~\ref{sec:taxsub} seen from the other side. Second, at $100\%$ cells
 Sec.~\ref{sec:probe} reports the aux-vs-baseline gap and refuses the
-$G$/\readout{} split, yet the released script carried no such filter, so
-\auditHundredCells{} full-data cells were voting. Removing them drops
-\auditHundredResolvable{} resolvable cells, \auditHundredCorrect{} correct and
-\auditHundredWrong{} wrong ($\auditHundredRate\%$ on their own, the
+$G$/\readout{} split, yet the released script carried no such filter.
+Removing the \auditHundredCells{} full-data cells drops
+\auditHundredResolvable{} resolvable cells (\auditHundredCorrect{} correct,
+\auditHundredWrong{} wrong, $\auditHundredRate\%$ on their own, the
 worst-scoring subset in the audit and exactly the cells the rule calls
-uninterpretable), moves the headline from $\auditMidRate\%$ to $\auditRate\%$,
-and removes \auditHundredBelow{} below-crossing cells, both wrong
-($\auditMidBelowRate\%$ to $\auditBelowRate\%$). The trade is breadth as well
-as rate, and we state both halves: ViT-S, ViT-B and ImageNet-100 hold
-law-scope cells only at $100\%$, so the span narrows from nine backbones to
-seven and from twenty-one dataset identities to twenty even as the rate rises,
-though the five architecture families survive, ViT-tiny keeping attention in
-scope. Section~\ref{sec:scale} is untouched: Table~\ref{tab:scale} reports
-$\Delta$, $G$ and their gap, which the rule permits, and no signed \readout{}, so
-the ImageNet $\Delta \approx G$ result stands while the same cells leave the
-sign-law count.
+uninterpretable), moving the headline from $\auditMidRate\%$ to
+$\auditRate\%$ and the below-crossing flank to $\auditBelowRate\%$
+(\auditHundredBelow{} more cells, both wrong). The price is breadth: ViT-S,
+ViT-B and ImageNet-100 hold law-scope cells only at $100\%$, so the span
+narrows from nine backbones to seven and from twenty-one dataset identities
+to twenty, though the five architecture families survive. Both pre-repair
+headlines and both excluded subsets' own rates are stated above so the
+repair stays visible. Sec.~\ref{sec:scale} is untouched:
+Table~\ref{tab:scale} reports $\Delta$, $G$ and their gap with no signed
+\readout{}, which the rule permits, so the ImageNet $\Delta \approx G$
+result stands while the same cells leave the sign-law count.
 
 \begin{table}[pos=htbp]
 \caption{The ten largest-magnitude resolvable exceptions, of
@@ -533,31 +524,27 @@ evaluation are the measurements; the pictures illustrate them.
 The grid's central comparative finding is that fusion outcomes are predictable
 from the \emph{currency} each information source supplies.
 
-\textbf{What we mean by currency, operationally.} The word is a metaphor and we
-use it once as one; what it stands for is a measurement, and the definition
-uses single-source quantities only, so that nothing in it requires training the
-combination. A source's currency is
-characterised from that source \emph{alone}: the frozen-feature gain $G$ it
-produces under the declared evaluation protocol, together with \emph{what} it
-improves, that is, which test images its arm fixes and how similar its learned
-representation is to the other source's, both measured on the single-source
-arms (Sec.~\ref{sec:samecurrency}). Two sources trade in the same currency
-when, at a matched cell, their $G$ values agree \emph{and} their single-source
-arms agree, on images fixed and in representation, about as closely as two
-seeds of one source do. Both halves are necessary, since two representations can raise linear
-accuracy equally while encoding different things, which is why
-Sec.~\ref{sec:samecurrency}
-tests the pair directly on the same images instead of inferring
-sameness from magnitudes. The combination's $G$ appears nowhere in the
-definition; it is what the definition \emph{predicts}, same currency implying
-that the combination's $G$ will not exceed the better single source, and
-Secs.~\ref{sec:substitute} and~\ref{sec:samecurrency} test that prediction.
-We are deliberate about its status: $G$ is a cheap
-ordinal proxy for source overlap, not an estimate of the unique and redundant
-atoms that partial information decomposition formalizes
-(Sec.~\ref{sec:fusiontheory}). What it buys is measurability on each source
-\emph{alone}, at the cost of one linear fit, which is what makes a prospective
-rule possible at this grid's scale.
+\textbf{What we mean by currency, operationally.} The word is a metaphor
+used once as one; what it stands for is a measurement from single-source
+quantities only, so nothing in it requires training the combination. A
+source's currency is characterised from that source \emph{alone}: the
+frozen-feature gain $G$ it produces under the declared protocol, together
+with \emph{what} it improves, that is, which test images its arm fixes and
+how similar its learned representation is to the other source's, both
+measured on the single-source arms (Sec.~\ref{sec:samecurrency}). Two
+sources trade in the same currency when, at a matched cell, their $G$ values
+agree \emph{and} their single-source arms agree, on images fixed and in
+representation, about as closely as two seeds of one source do; both halves
+are necessary because two representations can raise linear accuracy equally
+while encoding different things. The combination's $G$ appears nowhere in
+the definition; it is what the definition \emph{predicts}, same currency
+implying that the combination's $G$ will not exceed the better single
+source, and Secs.~\ref{sec:substitute} and~\ref{sec:samecurrency} test
+that prediction. $G$ is a cheap ordinal proxy for source overlap, not an
+estimate of the unique and redundant atoms that partial information
+decomposition formalizes (Sec.~\ref{sec:fusiontheory}); what it buys is
+measurability on each source alone, at the cost of one linear fit, which is
+what makes a prospective rule possible at this grid's scale.
 
 This section presents the three outcomes in order of how favorable they are:
 different currencies can compound, differing currency being necessary while

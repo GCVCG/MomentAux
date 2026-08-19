@@ -1,0 +1,36 @@
+{
+  "name": "diaggrid_vit_food_none_50pct",
+  "seed": 2,
+  "config": {
+    "name": "diaggrid_vit_food_none_50pct",
+    "dataset": "food101",
+    "backbone": "vit_tiny",
+    "optimizer": "adamw",
+    "epochs": 200,
+    "batch_size": 128,
+    "lr": 0.001,
+    "weight_decay": 0.05,
+    "momentum": 0.9,
+    "num_workers": 2,
+    "small_input": true,
+    "pretrained": false,
+    "subset_pct": 50,
+    "stem": "none",
+    "stem_calibrate": true
+  },
+  "final_test_acc": 0.2508118748664856,
+  "best_test_acc": 0.2693861424922943,
+  "accounting": {
+    "params_trainable": 5407973,
+    "params_stem_trainable": 0,
+    "params_stem_fixed_filters": 0,
+    "flops_total": 348985728,
+    "flops_stem": 0,
+    "flops_image_size": 64
+  },
+  "wall_seconds": 16181.001526355743,
+  "torch_version": "2.4.0a0+gite3b9b71",
+  "device": "cuda",
+  "gpu_name": "NVIDIA H100",
+  "amp": true
+}

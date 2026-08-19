@@ -169,7 +169,13 @@ def measure_cell(cell, cfg_path, carve, loaders, device, ckpt="last.pt"):
     fit_ld, val_ld, test_ld = loaders
     n_classes = data_mod.NUM_CLASSES[ds]
     out = []
+    import glob as _glob
     run_dir = os.path.join("runs", cell)
+    if not _glob.glob(os.path.join(run_dir, "seed*", ckpt)):
+        # the local mirror of a cluster-trained cell often holds records but
+        # not checkpoints; arms pulled for this pass live in a separate tree
+        # so the exporters never scan them
+        run_dir = os.path.join("runs_bscpull", cell)
     for seed_dir in sorted(d for d in os.listdir(run_dir) if d.startswith("seed")):
         path = os.path.join(run_dir, seed_dir, ckpt)
         if not os.path.exists(path):
@@ -229,7 +235,7 @@ def measure_cell(cell, cfg_path, carve, loaders, device, ckpt="last.pt"):
         # partial result gets reported as a complete one. Six diaggrid_ssl_*
         # cells are in this state locally (probed on the cluster, checkpoints
         # never pulled, and there is no network from here to pull them).
-        raise SystemExit(f"{cell}: no {ckpt} under runs/{cell}/seed*/ -- refusing "
+        raise SystemExit(f"{cell}: no {ckpt} under {run_dir}/seed*/ -- refusing "
                          "to record an empty cell")
     return out
 
@@ -302,10 +308,13 @@ def recorded(cell):
     separate from anything measured here so the comparison can distinguish
     'the eval split moved the call' from 'the probe's fit set moved it'."""
     import glob
+    tree = ("runs" if glob.glob(f"runs/{cell}/seed*/final.json")
+            else "runs_bscpull")
     e = [json.load(open(f))["final_test_acc"] * 100
-         for f in sorted(glob.glob(f"runs/{cell}/seed*/final.json"))]
-    p = [r["probe_test"] * 100
-         for r in json.load(open(f"runs/{cell}/linear_probe.json"))["results"]]
+         for f in sorted(glob.glob(f"{tree}/{cell}/seed*/final.json"))]
+    pj = f"{tree}/{cell}/linear_probe.json"
+    p = ([r["probe_test"] * 100 for r in json.load(open(pj))["results"]]
+         if os.path.exists(pj) else None)
     return e, p
 
 
@@ -382,6 +391,11 @@ def main():
             if args.only_pct and p["pct"] not in [int(x) for x in args.only_pct.split(",")]:
                 continue
             for role in ("baseline", "A", "B", "combo"):
+                # Wave-1 prospective pairs have NO combo yet: the combination
+                # is what the committed call predicts, and it is trained only
+                # after the call is on record. B1 specs always carry one.
+                if p.get(role) is None:
+                    continue
                 by_ds.setdefault(p["dataset"], {})[p[role]["cell"]] = p[role]["config"]
         for ds, cellmap in by_ds.items():
             carve = json.load(open(f"data/valcarve/{ds}.json"))
@@ -404,7 +418,8 @@ def main():
                  "A": p["A"]["label"], "B": p["B"]["label"]}
             arms = {}
             ok = True
-            for role in ("baseline", "A", "B", "combo"):
+            has_combo = p.get("combo") is not None
+            for role in ("baseline", "A", "B") + (("combo",) if has_combo else ()):
                 c = p[role]["cell"]
                 if c not in cells:
                     ok = False
@@ -418,9 +433,12 @@ def main():
                 else:
                     base_e = [x[f"e2e_{split}"] for x in arms["baseline"]]
                     base_p = [x[f"probe_{split}"] for x in arms["baseline"]]
-                for role, tag in (("A", "A"), ("B", "B"), ("combo", "C")):
+                roles = [("A", "A"), ("B", "B")] + ([("combo", "C")] if has_combo else [])
+                for role, tag in roles:
                     if split == "rec":
                         e, pr = recorded(p[role]["cell"])
+                        if pr is None:
+                            pr = [float("nan")]
                     else:
                         e = [x[f"e2e_{split}"] for x in arms[role]]
                         pr = [x[f"probe_{split}"] for x in arms[role]]
@@ -433,21 +451,25 @@ def main():
                     r[f"g{tag}_{split}"] = gm_ - bpm
                     r[f"g{tag}_{split}_sem"] = float(np.hypot(gs_, bps))
                     r[f"acc{tag}_{split}"], r[f"acc{tag}_{split}_sem"] = dm_, ds_
-                call, why = decide(r[f"dA_{split}"], r[f"dB_{split}"],
-                                   r[f"gA_{split}"], r[f"gB_{split}"],
-                                   p["A"].get("pretrained", False),
-                                   p["B"].get("pretrained", False))
+                if any(np.isnan(r[f"{k}_{split}"]) for k in ("dA", "dB", "gA", "gB")):
+                    call, why = "n/m", ["a recorded input is missing on this split"]
+                else:
+                    call, why = decide(r[f"dA_{split}"], r[f"dB_{split}"],
+                                       r[f"gA_{split}"], r[f"gB_{split}"],
+                                       p["A"].get("pretrained", False),
+                                       p["B"].get("pretrained", False))
                 r[f"call_{split}"] = call
                 r[f"why_{split}"] = why
                 # Combo vs the better single arm, compared on the ARM
                 # accuracies: the shared baseline cancels in the difference, so
                 # folding its seed noise into the SEM would only inflate it.
-                best = "A" if r[f"dA_{split}"] >= r[f"dB_{split}"] else "B"
-                sem = float(np.hypot(r[f"accC_{split}_sem"], r[f"acc{best}_{split}_sem"]))
-                r[f"combo_minus_best_{split}"] = r[f"accC_{split}"] - r[f"acc{best}_{split}"]
-                r[f"combo_minus_best_{split}_sem"] = sem
-                r[f"outcome_{split}"] = outcome(r[f"dC_{split}"], r[f"dA_{split}"],
-                                                r[f"dB_{split}"], sem)
+                if has_combo:
+                    best = "A" if r[f"dA_{split}"] >= r[f"dB_{split}"] else "B"
+                    sem = float(np.hypot(r[f"accC_{split}_sem"], r[f"acc{best}_{split}_sem"]))
+                    r[f"combo_minus_best_{split}"] = r[f"accC_{split}"] - r[f"acc{best}_{split}"]
+                    r[f"combo_minus_best_{split}_sem"] = sem
+                    r[f"outcome_{split}"] = outcome(r[f"dC_{split}"], r[f"dA_{split}"],
+                                                    r[f"dB_{split}"], sem)
             # same-cells diagnostic, on both splits
             for split in ("test", "val"):
                 try:
@@ -460,7 +482,9 @@ def main():
                 except Exception as e:  # masks are a diagnostic, not the rule
                     r[f"S_{split}"] = float("nan")
             rows.append(r)
-        with open("results/prospective_currency.json", "w") as f:
+        out_json = ("results/prospective_currency.json" if not args.tag
+                    else f"results/prospective_currency_{args.tag}.json")
+        with open(out_json, "w") as f:
             json.dump({"thresholds": {"G_ZERO": G_ZERO, "G_EQ_REL": G_EQ_REL,
                                       "ASYM_REL": ASYM_REL},
                        "pairs": rows}, f, indent=1)
@@ -477,7 +501,8 @@ def main():
             for s in ("rec", "test", "val"):
                 line += (f"{r['dA_'+s]:6.2f} {r['dB_'+s]:6.2f} {r['gA_'+s]:6.2f} "
                          f"{r['gB_'+s]:6.2f} {r['call_'+s]:>11} | ")
-            line += (f"{r['outcome_val']:<14s} {r['S_test']:5.2f} {r['S_val']:5.2f}"
+            line += (f"{r.get('outcome_val', 'PENDING'):<14s} "
+                     f"{r['S_test']:5.2f} {r['S_val']:5.2f}"
                      f"  {'FLIP' if r['call_rec'] != r['call_val'] else ''}")
             print(line)
         n = len(rows)
@@ -496,7 +521,8 @@ def main():
                 return None
             return (call == "STACK") == (out == "STACK")
         for s in ("rec", "test", "val"):
-            h = [hit(r[f"call_{s}"], r[f"outcome_{s}"]) for r in rows]
+            h = [hit(r[f"call_{s}"], r[f"outcome_{s}"]) for r in rows
+                 if f"outcome_{s}" in r]
             h = [x for x in h if x is not None]
             print(f"call agrees with the trained outcome ({s}): {sum(h)}/{len(h)}")
 

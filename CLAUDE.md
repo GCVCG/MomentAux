@@ -7016,3 +7016,165 @@ ported vs corrected and why.
   training) -- recommend FOR, infrastructure exists; (c) a masked-SSL
   comparator (MAE on the decisive ViT fractions) -- optional, pairs
   naturally with (b).
+
+## WAVE M: THE MASKED-SSL COMPARATOR (2026-08-19, user-approved; requested
+## at review -- "why does a 2026 benchmark contain no masked/predictive SSL
+## representative?"; the ledger's own note said run MAE only if a reviewer
+## demands it, and one now has)
+
+- SCOPE: MAE-style masked reconstruction on ViT-tiny, C100 @5/10/25%, the
+  SimCLR-ViT protocol VERBATIM (200 pre-epochs on the committed subset
+  images only = 2x compute, per-seed pretrains, then diagvit_none_*
+  verbatim from that init). 9 pretrains + 9 finetunes + probes, 3 seeds.
+  scripts/mae_pretrain.py: 75% masking, 2-block dim-128 decoder,
+  norm-pix loss; deviations from the MAE paper stated in the docstring
+  (this is "masked reconstruction under the study's budget", never
+  "MAE verbatim"). Smoke-tested: trains, 150 tensors transfer, only the
+  classifier stays fresh -- the SimCLR transfer check reproduced.
+- THE QUESTION IS CURRENCY, not leaderboard: contrastive (SimCLR),
+  negative-free (SimSiam) and self-distilled (DINO) all supply
+  nuisance-invariance; masked reconstruction supplies spatial/structural
+  prediction, plausibly a DIFFERENT currency. G(mae ckpts) vs G(aux) and
+  G(simclr) under identical probing is the measurement; the e2e envelope
+  is the positioning.
+- PREDICTIONS RECORDED IN ADVANCE (nothing from any MAE cell seen).
+  Anchors: base 12.25/16.47/28.50, aux-ViT 21.60/29.74/42.17, SimCLR-ViT
+  20.34/29.77/43.58, DINO-ViT 15.22/24.60/~42 at 5/10/25%.
+  MAE is known-weak at small data (its own paper's regime is 1.28M
+  images; at 2.5-12.5k masked prediction has very little signal to
+  learn), and DINO -- also non-contrastive -- already lands below SimCLR
+  everywhere <=10% here. So:
+    (M1) MAE-init <= DINO-init at every fraction; bands
+         diagmae_vit_5pct  = 12..16 (Delta over base 0..+4)
+         diagmae_vit_10pct = 16..25
+         diagmae_vit_25pct = 28..40
+    (M2) MAE-init < aux-ViT at 5% and 10% (the prior keeps its low-data
+         attention lead against a fourth SSL family).
+    (M3) G(mae) < G(simclr) at 5/10% under identical probing.
+  FALSIFIERS, one per claim: (F-M1) MAE >= SimCLR-init at >=2 fractions
+  => the contrastive representative was NOT the strongest SSL here and
+  every SSL-vs-prior comparison needs an asterisk naming MAE. (F-M2)
+  MAE >= aux-ViT at any fraction <=10% => the low-data attention
+  positioning must be restated against masked SSL. (F-M3) G(mae) >=
+  G(aux) at 5% with MAE's e2e ALSO >= aux's => masked reconstruction
+  supplies what the prior supplies, and the prior's uniqueness claim on
+  attention narrows to cost.
+- MAE+prior COMBOS ARE DELIBERATELY NOT IN THIS WAVE: once the MAE
+  singles are measured, mae|prior becomes a SECOND prospective tranche
+  with its call committed from val-side diagnostics before the combo
+  trains -- the same discipline as wave 1.
+
+## WAVE 1: THE GENUINELY PROSPECTIVE FUSION-PREDICTION EXPERIMENT
+## (2026-08-19, user-approved; the review's "single highest-value addition")
+
+- WHY: every stack/substitute/interference outcome in the paper was measured
+  before or alongside its diagnosis, and B1's validation re-scoring says in
+  its own caveat that it "is not a substitute" for a prospective test. This
+  wave is that test: THIRTEEN source pairs whose COMBINATION HAS NEVER BEEN
+  TRAINED, diagnostics computed on validation carve-outs only (never test,
+  last.pt only), the calls committed HERE, and only then the combinations
+  submitted. Algorithm 1's published thresholds are applied VERBATIM
+  (G_ZERO=1.0, G_EQ_REL=0.25, the pinned decide() of
+  analysis/prospective_currency.py) -- any surprise is the inputs' doing,
+  never a retuned rule.
+- INFRASTRUCTURE: analysis/prospective_pairs_wave1.json (13 pairs, combo:
+  null); prospective_currency.py extended to tolerate absent combos, search
+  runs_bscpull/ for cluster-pulled checkpoints, and write tag-suffixed
+  output (the first --decide OVERWROTE B1's results/prospective_currency.json
+  -- restored from git, and the filename collision fixed at source). New
+  carve-outs committed for cifar10/tin/stl10/dtd (make_val_carveout.py
+  gained STL10's .labels attr). 16 arm cells' last.pt pulled from BSC; the
+  measure phase's built-in identity check passed on every seed (test-split
+  e2e reproduces the recorded final to <=0.06). Turing is unreachable, so
+  the two tin-SimCLR pairs were dropped and a c10 ViT prior|dino pair
+  substituted; tin stays represented through the simsiam pair.
+- THE COMMITTED CALLS, from validation-scored Delta and G (3 seeds/arm;
+  values are val-split, the test-split call agreed on 12/13):
+    pair                        dA_val dB_val gA_val gB_val  CALL
+    r18_c100_10  prior|simclr    4.37   9.02   4.05   8.25   STACK
+    r18_c100_25  prior|simclr    0.43   1.90   0.14   1.26   N/A (prior G<=1)
+    r18_c10_2    prior|simclr    7.30   8.36   5.88   6.88   SUBSTITUTE
+    r18_stl_10   prior|simclr    6.08  10.22   4.03   8.01   STACK
+    r18_tin_10   prior|simsiam   1.97   0.81   1.97   0.89   N/A (simsiam G<=1)
+    r18_c10_5    prior|simsiam   5.00   0.42   4.77   0.48   N/A (simsiam G<=1)
+    vit_c100_25  prior|dino     11.54  10.52  12.01  10.88   SUBSTITUTE
+    vit_c10_10   prior|dino     13.73  10.44  12.23   8.82   STACK
+    vit_food_50  prior|dino      5.97   8.56   5.97   7.86   SUBSTITUTE *
+    vit_dtd_50   prior|dino     13.26   2.98   9.15   0.71   N/A (dino G<=1)
+    r18_food_5   aug|simclr      8.44   8.97  10.71   7.48   STACK
+    r18_food_10  aug|simclr      8.13   4.57   8.62   3.47   STACK
+    r18_esat_5   aug|simclr     -7.46  -0.83  -2.32  -1.16   STACK *
+  LOW-CONFIDENCE FLAGS (*), declared AT PREDICTION TIME per the B1 lesson
+  that the G-equality and G-zero gates are the least robust predicates:
+  vit_food_50 sits 0.08 from the G_EQ_REL boundary AND its test-split call
+  is STACK (the one test/val flip); r18_esat_5 is the negative-G corner --
+  both sources DAMAGE features on eurosat at 5%, gB is 0.16 from the
+  G-zero gate, and "stack" here means "the combination beats the better
+  single arm", i.e. least-bad. These two are the calls most likely to miss,
+  said now rather than after.
+- THE PRIMARY CRITERION, one per question: over the NINE non-N/A calls, the
+  procedure is VALIDATED if >= 7 match the trained outcome (outcome() as
+  pinned: combo vs better single arm at 2 SEM); 5-6 is PARTIAL and must be
+  reported as such; <= 4 and the paper's "the outcome follows from
+  quantities available before the combination is trained" claim is
+  WITHDRAWN in favor of the retrospective statement. The four N/A pairs are
+  scored SEPARATELY as a gate test: the gate implies the weak source adds
+  nothing, so its implied outcome is combo ~= strong single (within 2 SEM);
+  B1 showed this gate is where the procedure fails, and these four measure
+  that prospectively.
+- WHAT THIS CANNOT CLAIM, stated in advance: the THRESHOLDS were pinned on
+  the paper's own worked example (disclosed in Sec. 9.3), so this validates
+  the procedure as published, not a procedure derived blind; and the pair
+  list was assembled by us, not adversarially. What it does establish, if
+  the criterion holds, is calls committed before training on combinations
+  that did not exist, which is the thing no retrospective scoring can.
+- CELLS: 13 combos x 3 seeds = 39 runs, configs diagprosp_* derived
+  verbatim from the corresponding single-arm configs plus either the
+  reference-configuration aux block (conv tap layer3 / vit tap blocks.8) or
+  the SimCLR arm's own per-seed pretrain init (augssl family). All 39
+  init checkpoints verified present on BSC before queueing; three families
+  smoke-tested locally (120/150 tensors transfer, aux loss live).
+
+## THE FIGURE-AND-SPACE ROUND, EXECUTED WITHOUT SUBAGENTS (2026-08-19; the
+## agent quota reset killed three delegated passes mid-flight, so the whole
+## round ran in the main session)
+
+- fig:method REDESIGNED TWICE, and the second design is the keeper. The
+  first rebuild answered the itemized notes (three phase bands, general
+  early/mid/deep/final stages, input linked into the source lane, four real
+  magnitude maps, connected m(x), modern deployment chips) but accumulated
+  patched-in arrows the user called out as misaligned. The clean-slate
+  version reframes panel (a) in the venue's own vocabulary: TWO INFORMATION
+  SOURCES in parallel lanes (hand-crafted knowledge producing m(x); the
+  learned representation as a generic early/mid/../deep/final backbone),
+  ONE fusion band holding the loss and the lambda(t) inset, and a
+  deployment strip whose three task chips carry micro-icons. Arrow
+  discipline enforced structurally: every connector is a single
+  FancyArrowPatch, horizontal, vertical, or one rounded elbow -- no chained
+  heads. The loss is written with f_deep and the caption bridges it to
+  Eq. 4's f_3. LESSON: when a diagram accretes fixes, the arrows are the
+  first thing to rot; a redesign that constrains the connector vocabulary
+  beats another patch.
+- fig:bank: response maps computed by the ACTUAL pinned bank on two
+  deterministic samples (STL-10 deer, EuroSAT highway -- the criterion
+  picks the image where every orientation channel dominates somewhere; a
+  plain max-min chose gravel that read as noise). Final layout per the
+  user: the two examples SIDE BY SIDE, which cut the figure from 5.3 to
+  2.3 inches and made the page fit possible.
+- tab:gap: rotated headings replaced by horizontal P1-P5 keys defined in
+  the caption (user: figure rotation is a bad idea -- applies to headings
+  too; no rotated element remains).
+- CONDENSATION: the paper's prose is largely post-fat after four rounds;
+  what remained was the NEWEST text. Cuts: the two-repair audit narration
+  (45 -> 35 lines with every macro and both honesty clauses kept), the
+  budget section's duplicated image-count-vs-fraction derivation (stated
+  once), the currency definition (26 -> 22 lines, no clause lost), the
+  decision-guide caption restatement. With the layout gains the article is
+  EXACTLY 35 PAGES, gate green, with the two richer figures in.
+- SUPPLEMENT MERGE (standing item): still does not fit -- the merge needs
+  ~5 pages and the article has ~0 free. The 50-epoch arithmetic recorded
+  on 2026-08-19 stands; revisit only if a future revision frees pages.
+- OPERATIONAL: prospective_currency.py's --decide originally wrote to B1's
+  results/prospective_currency.json and OVERWROTE it; restored from git
+  and the output is now tag-suffixed at source. The same pattern as every
+  shared-filename incident in this ledger: two producers, one path.

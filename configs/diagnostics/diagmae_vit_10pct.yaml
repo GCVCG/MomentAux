@@ -1,0 +1,22 @@
+# MAE-init on ViT-tiny (C100@10%) -- the masked/predictive SSL comparator.
+# The study's SSL set (SimCLR, SimSiam, DINO) is invariance-based; masked
+# reconstruction may supply a different currency. Same protocol as the
+# SimCLR-ViT cells: 200ep pretrain on the SAME committed subset images (2x
+# compute), then this cell verbatim from diagvit_none_10pct. AdamW because
+# ViTs do not train under the frozen SGD recipe; diag-only, never headline.
+name: diagmae_vit_10pct
+dataset: cifar100
+backbone: vit_tiny
+optimizer: adamw
+epochs: 200
+batch_size: 128
+lr: 0.001
+weight_decay: 0.05
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 10
+stem: none
+stem_calibrate: true
+init_from: runs/mae_pre_vit_10pct/seed{seed}/pretrain.pt

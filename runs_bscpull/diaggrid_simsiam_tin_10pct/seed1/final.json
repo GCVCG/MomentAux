@@ -1,0 +1,36 @@
+{
+  "name": "diaggrid_simsiam_tin_10pct",
+  "seed": 1,
+  "config": {
+    "name": "diaggrid_simsiam_tin_10pct",
+    "dataset": "tin",
+    "backbone": "resnet18",
+    "epochs": 200,
+    "batch_size": 128,
+    "lr": 0.1,
+    "weight_decay": 0.0005,
+    "momentum": 0.9,
+    "num_workers": 2,
+    "small_input": true,
+    "pretrained": false,
+    "subset_pct": 10,
+    "stem": "none",
+    "stem_calibrate": true,
+    "init_from": "runs/simsiam_pre_tin_10pct/seed{seed}/pretrain.pt"
+  },
+  "final_test_acc": 0.3467000126838684,
+  "best_test_acc": 0.34950000047683716,
+  "accounting": {
+    "params_trainable": 11271432,
+    "params_stem_trainable": 0,
+    "params_stem_fixed_filters": 0,
+    "flops_total": 2226720768,
+    "flops_stem": 0,
+    "flops_image_size": 64
+  },
+  "wall_seconds": 619.962162733078,
+  "torch_version": "2.4.0a0+gite3b9b71",
+  "device": "cuda",
+  "gpu_name": "NVIDIA H100",
+  "amp": true
+}

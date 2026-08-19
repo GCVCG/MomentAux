@@ -1,0 +1,44 @@
+{
+  "name": "diaggrid_vit_dtd_aux_50pct",
+  "seed": 0,
+  "config": {
+    "name": "diaggrid_vit_dtd_aux_50pct",
+    "dataset": "dtd",
+    "backbone": "vit_tiny",
+    "optimizer": "adamw",
+    "epochs": 200,
+    "batch_size": 128,
+    "lr": 0.001,
+    "weight_decay": 0.05,
+    "momentum": 0.9,
+    "num_workers": 2,
+    "small_input": true,
+    "pretrained": false,
+    "subset_pct": 50,
+    "stem": "none",
+    "stem_calibrate": true,
+    "moment_aux": {
+      "stem": "energy-magnitude",
+      "tap": "blocks.8",
+      "weight": 1.0,
+      "weight_final": 0.0,
+      "weight_schedule": "cosine",
+      "head_norm": true
+    }
+  },
+  "final_test_acc": 0.23723404109477997,
+  "best_test_acc": 0.2430851012468338,
+  "accounting": {
+    "params_trainable": 5399095,
+    "params_stem_trainable": 0,
+    "params_stem_fixed_filters": 0,
+    "flops_total": 348975360,
+    "flops_stem": 0,
+    "flops_image_size": 64
+  },
+  "wall_seconds": 976.0876863002777,
+  "torch_version": "2.4.0a0+gite3b9b71",
+  "device": "cuda",
+  "gpu_name": "NVIDIA H100",
+  "amp": true
+}

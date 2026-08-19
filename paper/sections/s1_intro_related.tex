@@ -375,21 +375,20 @@ answered.
 
 \begin{table}[pos=htbp]
 \caption{Where the literature stands on the five properties a fusion
-question needs, and what this work adds. \cmark{} = property present;
-\pmark{} = partial or incidental; \xmark{} = absent. ``Cost-normalized''
-means comparators are reported against a declared training-compute
-multiple, not each method's own chosen budget;
-``feature-side'' means the effect is measured on frozen representations,
-not only end-to-end; ``combination'' means the study measures what
-happens when two sources are applied together.}
+question needs, and what this work adds. P1: one frozen recipe. P2:
+cost-normalized, comparators reported against a declared training-compute
+multiple, not each method's own chosen budget. P3: feature-side, the effect
+measured on frozen representations, not only end-to-end. P4: combinations,
+the study measures what happens when two sources are applied together. P5:
+a predictive model of the outcome. \cmark{} = present; \pmark{} = partial
+or incidental; \xmark{} = absent.}
 \label{tab:gap}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \zebra{2}
 \begin{tabular}{lccccc}
 \toprule
-Line of work & \rotbox{one frozen recipe} & \rotbox{cost-normalized} &
-  \rotbox{feature-side} & \rotbox{combinations} & \rotbox{predictive model} \\
+Line of work & P1 & P2 & P3 & P4 & P5 \\
 \midrule
 Fixed spectral filters in the forward path
   \citep{bruna2013scattering,luan2018gaborcnn,shi2026fvit}

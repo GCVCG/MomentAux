@@ -107,24 +107,17 @@ ordering tracks the data fraction, not the absolute image count: $5{,}000$
 images is 10\% of CIFAR-100 but 5\% of Tiny-ImageNet, and the two disagree
 there while agreeing at every matched fraction.
 
-Getting there cost us a prediction and an account. Having measured only 5 and
-10\% on Tiny-ImageNet, where the comparator was ahead and level, we wrote that
-the prior led nowhere on that population and that the two datasets told
-different stories. We then predicted the 25\% cell at $40$--$44$, explicitly
-against our own method. It landed at $36.53$, $3.5$ points \emph{below} that
-band: the prior wins by $1.71$, and the falsifier recorded for that cell fired.
-The tin envelope has a crossover after all, and the ``different stories''
-reading was an artifact of a two-point grid, the same error this section has
-already documented once.
-
-The account we had proposed also fails, and its replacement is what the
-matched-fraction table shows. We had expected the two populations to line up by
-\emph{image count}. They do not: at a matched 5{,}000 images CIFAR-100 is level
-while Tiny-ImageNet has the comparator ahead. They line up by \emph{fraction}
-instead. Five thousand images is 10\% of CIFAR-100 but 5\% of Tiny-ImageNet, so
-matching on image count compares different points on two different learning
-curves. What determines which source wins is where a cell sits on its own
-dataset's curve, not how many images it holds.
+Getting there cost us a prediction and an account. With only the 5 and 10\%
+cells measured, where the comparator was ahead and level, we wrote that the
+prior led nowhere on this population, predicted the 25\% cell at $40$--$44$
+explicitly against our own method, and expected the two populations to line
+up by image count. The cell landed at $36.53$, below the band; the recorded
+falsifier fired; and the matched-fraction table shows why the account was
+wrong: matching on image count compares different points on two different
+learning curves, and what determines which source wins is where a cell sits
+on its own dataset's curve. The ``different stories'' reading was an
+artifact of a two-point grid, the same error this section has already
+documented once.
 
 One measurement in this pass we report without explaining. At Tiny-ImageNet
 25\%, four times the pre-training made the comparator \emph{worse}: $38.48$ at

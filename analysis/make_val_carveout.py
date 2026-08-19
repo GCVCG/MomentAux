@@ -63,7 +63,10 @@ def train_targets(dataset, data_root):
     ds = data_mod.build_dataset(dataset, data_root, train=True, download=False)
     node = ds
     for _ in range(4):
+        # torchvision STL10 calls the same array .labels
         t = getattr(node, "targets", None)
+        if t is None:
+            t = getattr(node, "labels", None)
         if t is not None:
             return np.asarray(list(t))
         node = getattr(node, "dataset", None) or getattr(node, "base", None)

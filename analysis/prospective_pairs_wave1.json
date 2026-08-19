@@ -1,0 +1,320 @@
+{
+ "_what": "Wave-1 GENUINELY PROSPECTIVE pairs: no combination exists; the combination is trained only after the committed call is on record. Diagnostics are computed on the validation carve-out only.",
+ "cache_images": {
+  "food101": true
+ },
+ "pairs": [
+  {
+   "name": "r18_c100_10:prior|simclr",
+   "dataset": "cifar100",
+   "pct": 10,
+   "baseline": {
+    "cell": "abl10_none",
+    "config": "configs/ablations_full/abl10_none.yaml"
+   },
+   "A": {
+    "cell": "auxmag_10pct_sched0",
+    "config": "configs/diagnostics/auxmag_10pct_sched0.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diaggrid_simclr_c100_10pct",
+    "config": "configs/grid/diaggrid_simclr_c100_10pct.yaml",
+    "label": "simclr",
+    "compute": 2.0,
+    "pretrained": false
+   },
+   "combo": null
+  },
+  {
+   "name": "r18_c100_25:prior|simclr",
+   "dataset": "cifar100",
+   "pct": 25,
+   "baseline": {
+    "cell": "abl25_none",
+    "config": "configs/diagnostics/abl25_none.yaml"
+   },
+   "A": {
+    "cell": "auxmag_25pct_sched0",
+    "config": "configs/diagnostics/auxmag_25pct_sched0.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diaggrid_simclr_c100_25pct",
+    "config": "configs/grid/diaggrid_simclr_c100_25pct.yaml",
+    "label": "simclr",
+    "compute": 2.0,
+    "pretrained": false
+   },
+   "combo": null
+  },
+  {
+   "name": "r18_c10_2:prior|simclr",
+   "dataset": "cifar10",
+   "pct": 2,
+   "baseline": {
+    "cell": "c10_none_2pct",
+    "config": "configs/diagnostics/c10_none_2pct.yaml"
+   },
+   "A": {
+    "cell": "c10_aux_2pct",
+    "config": "configs/diagnostics/c10_aux_2pct.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diaggrid_simclr_c10_2pct",
+    "config": "configs/grid/diaggrid_simclr_c10_2pct.yaml",
+    "label": "simclr",
+    "compute": 2.0,
+    "pretrained": false
+   },
+   "combo": null
+  },
+  {
+   "name": "r18_stl_10:prior|simclr",
+   "dataset": "stl10",
+   "pct": 10,
+   "baseline": {
+    "cell": "stl_none_10pct",
+    "config": "configs/diagnostics/stl_none_10pct.yaml"
+   },
+   "A": {
+    "cell": "stl_aux_10pct",
+    "config": "configs/diagnostics/stl_aux_10pct.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diaggrid_simclr_stl_10pct",
+    "config": "configs/grid/diaggrid_simclr_stl_10pct.yaml",
+    "label": "simclr",
+    "compute": 2.0,
+    "pretrained": false
+   },
+   "combo": null
+  },
+  {
+   "name": "r18_tin_10:prior|simsiam",
+   "dataset": "tin",
+   "pct": 10,
+   "baseline": {
+    "cell": "tin_none_10pct",
+    "config": "configs/diagnostics/tin_none_10pct.yaml"
+   },
+   "A": {
+    "cell": "tin_aux_10pct",
+    "config": "configs/diagnostics/tin_aux_10pct.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diaggrid_simsiam_tin_10pct",
+    "config": "configs/grid/diaggrid_simsiam_tin_10pct.yaml",
+    "label": "simsiam",
+    "compute": 2.0,
+    "pretrained": false
+   },
+   "combo": null
+  },
+  {
+   "name": "r18_c10_5:prior|simsiam",
+   "dataset": "cifar10",
+   "pct": 5,
+   "baseline": {
+    "cell": "c10_none_5pct",
+    "config": "configs/diagnostics/c10_none_5pct.yaml"
+   },
+   "A": {
+    "cell": "c10_aux_5pct",
+    "config": "configs/diagnostics/c10_aux_5pct.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diaggrid_simsiam_c10_5pct",
+    "config": "configs/grid/diaggrid_simsiam_c10_5pct.yaml",
+    "label": "simsiam",
+    "compute": 2.0,
+    "pretrained": false
+   },
+   "combo": null
+  },
+  {
+   "name": "vit_c100_25:prior|dino",
+   "dataset": "cifar100",
+   "pct": 25,
+   "baseline": {
+    "cell": "diagvit_none_25pct",
+    "config": "configs/diagnostics/diagvit_none_25pct.yaml"
+   },
+   "A": {
+    "cell": "diagvit_aux_25pct",
+    "config": "configs/diagnostics/diagvit_aux_25pct.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diaggrid_dino_c100_25pct",
+    "config": "configs/grid/diaggrid_dino_c100_25pct.yaml",
+    "label": "dino",
+    "compute": 2.0,
+    "pretrained": false
+   },
+   "combo": null
+  },
+  {
+   "name": "vit_c10_10:prior|dino",
+   "dataset": "cifar10",
+   "pct": 10,
+   "baseline": {
+    "cell": "diaggrid_vit_c10_none_10pct",
+    "config": "configs/grid/diaggrid_vit_c10_none_10pct.yaml"
+   },
+   "A": {
+    "cell": "diaggrid_vit_c10_aux_10pct",
+    "config": "configs/grid/diaggrid_vit_c10_aux_10pct.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diaggrid_dino_c10_10pct",
+    "config": "configs/grid/diaggrid_dino_c10_10pct.yaml",
+    "label": "dino",
+    "compute": 2.0,
+    "pretrained": false
+   },
+   "combo": null
+  },
+  {
+   "name": "vit_food_50:prior|dino",
+   "dataset": "food101",
+   "pct": 50,
+   "baseline": {
+    "cell": "diaggrid_vit_food_none_50pct",
+    "config": "configs/grid/diaggrid_vit_food_none_50pct.yaml"
+   },
+   "A": {
+    "cell": "diaggrid_vit_food_aux_50pct",
+    "config": "configs/grid/diaggrid_vit_food_aux_50pct.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diaggrid_dino_food_50pct",
+    "config": "configs/grid/diaggrid_dino_food_50pct.yaml",
+    "label": "dino",
+    "compute": 2.0,
+    "pretrained": false
+   },
+   "combo": null
+  },
+  {
+   "name": "vit_dtd_50:prior|dino",
+   "dataset": "dtd",
+   "pct": 50,
+   "baseline": {
+    "cell": "diaggrid_vit_dtd_none_50pct",
+    "config": "configs/grid/diaggrid_vit_dtd_none_50pct.yaml"
+   },
+   "A": {
+    "cell": "diaggrid_vit_dtd_aux_50pct",
+    "config": "configs/grid/diaggrid_vit_dtd_aux_50pct.yaml",
+    "label": "prior",
+    "compute": 1.02,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diaggrid_dino_dtd_50pct",
+    "config": "configs/grid/diaggrid_dino_dtd_50pct.yaml",
+    "label": "dino",
+    "compute": 2.0,
+    "pretrained": false
+   },
+   "combo": null
+  },
+  {
+   "name": "r18_food_5:aug|simclr",
+   "dataset": "food101",
+   "pct": 5,
+   "baseline": {
+    "cell": "grid_food_r18_9ee7da_5pct",
+    "config": "configs/grid/grid_food_r18_9ee7da_5pct.yaml"
+   },
+   "A": {
+    "cell": "diagfuse_food_aug_5pct",
+    "config": "configs/diagnostics/diagfuse_food_aug_5pct.yaml",
+    "label": "aug",
+    "compute": 1.0,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diaggrid_simclr_food_5pct",
+    "config": "configs/grid/diaggrid_simclr_food_5pct.yaml",
+    "label": "simclr",
+    "compute": 2.0,
+    "pretrained": false
+   },
+   "combo": null
+  },
+  {
+   "name": "r18_food_10:aug|simclr",
+   "dataset": "food101",
+   "pct": 10,
+   "baseline": {
+    "cell": "grid_food_r18_9ee7da_10pct",
+    "config": "configs/grid/grid_food_r18_9ee7da_10pct.yaml"
+   },
+   "A": {
+    "cell": "diagfuse_food_aug_10pct",
+    "config": "configs/diagnostics/diagfuse_food_aug_10pct.yaml",
+    "label": "aug",
+    "compute": 1.0,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diaggrid_simclr_food_10pct",
+    "config": "configs/grid/diaggrid_simclr_food_10pct.yaml",
+    "label": "simclr",
+    "compute": 2.0,
+    "pretrained": false
+   },
+   "combo": null
+  },
+  {
+   "name": "r18_esat_5:aug|simclr",
+   "dataset": "eurosat",
+   "pct": 5,
+   "baseline": {
+    "cell": "grid_esat_r18_e99fb4_5pct",
+    "config": "configs/grid/grid_esat_r18_e99fb4_5pct.yaml"
+   },
+   "A": {
+    "cell": "diagfuse_esat_aug_5pct",
+    "config": "configs/diagnostics/diagfuse_esat_aug_5pct.yaml",
+    "label": "aug",
+    "compute": 1.0,
+    "pretrained": false
+   },
+   "B": {
+    "cell": "diaggrid_simclr_esat_5pct",
+    "config": "configs/grid/diaggrid_simclr_esat_5pct.yaml",
+    "label": "simclr",
+    "compute": 2.0,
+    "pretrained": false
+   },
+   "combo": null
+  }
+ ]
+}

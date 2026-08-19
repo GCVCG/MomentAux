@@ -1,0 +1,18 @@
+# PROSPECTIVE combination (wave 1): the committed call for this pair
+# was recorded in CLAUDE.md BEFORE this cell existed. Parent aug-arm
+# config + the SimCLR arm's own per-seed pretrain init, nothing else.
+name: diagprosp_augssl_food_10pct
+dataset: food101
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 10
+stem: none
+augment: deit
+init_from: runs/simclr_pre_food_10pct/seed{seed}/pretrain.pt

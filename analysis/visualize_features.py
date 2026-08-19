@@ -431,39 +431,45 @@ def _pick_bank_sample(stem, dataset, data_root, device, n_scan=2000):
     return ds, idx, label
 
 
-def fig_bank(out, dataset="stl10", data_root="./data", device="cpu"):
-    """The prior itself, and what it does to a real image.
+def fig_bank(out, dataset="stl10", data_root="./data", device="cpu",
+             second_dataset="eurosat"):
+    """The prior itself, and what it does to real images.
 
     Top block: the eight complex Gabor quadrature pairs (even/odd), labelled
-    by their (sigma, theta). Bottom block: one test image from the study's own
-    data and its eight magnitude-response maps m(x), computed by the ACTUAL
-    pinned bank with the study's own calibration (unit per-channel std on the
-    committed calibration batch), so the maps share one colour scale honestly.
-    The sample is chosen by a deterministic max-min criterion so every pair
-    responds visibly (_pick_bank_sample); if the dataset is not present the
-    figure falls back to the kernel mosaic alone.
+    by their (sigma, theta). Below: TWO test images from the study's own
+    data -- one photographic (STL-10) and one non-photographic (EuroSAT
+    satellite) -- each with its eight magnitude-response maps m(x), computed
+    by the ACTUAL pinned bank with the study's own calibration (unit
+    per-channel std on the committed calibration batch), on one honest
+    colour scale per example. Two domains because the bank is identical for
+    every dataset in the study: the same fixed kernels respond to trunks and
+    to field boundaries alike. Samples are chosen by a deterministic max-min
+    criterion so every pair responds visibly (_pick_bank_sample); a dataset
+    that is not present is skipped with a note.
 
-    Single-column, packed nearly edge to edge: at 3.33in every point of
-    inter-axes padding is a point the kernels and maps do not get.
+    Single-column. The response tiles are the point of the figure, so they
+    take the full column width; the input thumbnail sits in each example's
+    header row.
     """
     from momentstem import EnergyStem
 
-    stem = EnergyStem(feature_type="magnitude")
-    sample = None
-    try:
-        calib = data_mod.calibration_batch(dataset, data_root)
-        stem = stem.to(device)
-        stem.calibrate(calib.to(device))
-        ds, idx, label = _pick_bank_sample(stem, dataset, data_root, device)
-        x = ds[idx][0].unsqueeze(0).to(device)
-        with torch.no_grad():
-            resp = (stem._energy(stem._luma(x))
-                    * stem.calib_scale.view(1, -1, 1, 1))[0].cpu()  # (8,H,W)
-        sample = (denorm(x[0], dataset), resp, label, idx)
-    except Exception as e:                                    # noqa: BLE001
-        print(f"bank sample unavailable ({e}); kernels-only fallback")
+    samples = []
+    for ds_name in (dataset, second_dataset):
+        try:
+            stem = EnergyStem(feature_type="magnitude").to(device)
+            calib = data_mod.calibration_batch(ds_name, data_root)
+            stem.calibrate(calib.to(device))
+            ds, idx, label = _pick_bank_sample(stem, ds_name, data_root, device)
+            x = ds[idx][0].unsqueeze(0).to(device)
+            with torch.no_grad():
+                resp = (stem._energy(stem._luma(x))
+                        * stem.calib_scale.view(1, -1, 1, 1))[0].cpu()
+            px = data_mod.IMAGE_SIZE[ds_name]
+            samples.append((ds_name, denorm(x[0], ds_name), resp, label, idx, px))
+        except Exception as e:                                # noqa: BLE001
+            print(f"bank sample unavailable for {ds_name} ({e}); skipped")
 
-    stem = stem.cpu()
+    stem = EnergyStem(feature_type="magnitude")
     even, odd = stem.even.squeeze(1), stem.odd.squeeze(1)     # (8, k, k)
     n = even.shape[0]
     lim = float(max(even.abs().max(), odd.abs().max()))
@@ -471,12 +477,14 @@ def fig_bank(out, dataset="stl10", data_root="./data", device="cpu"):
     # All vertical layout in INCHES, top-down, so nothing lands off-canvas.
     kx0_in, gap = 0.24, 0.035
     kw_in = (FIGW - kx0_in - 0.02 - (n - 1) * gap) / n        # kernel panels
-    rx0_in = 1.33                                             # response block
-    rw_in = (FIGW - rx0_in - 0.02 - 3 * gap) / 4
+    rw_in = (FIGW - 0.06 - 3 * gap) / 4                       # response tiles,
+    rx0_in = 0.04                                             # full width
     top_hdr, theta_hdr = 0.145, 0.105
-    mid_txt = 0.17
+    hdr_in = 0.46                                             # per-example header
+    rw2_h = ((FIGW - 0.06 - 0.10) / 2 - 3 * 0.025) / 4        # side-by-side tile
+    blk_in = hdr_in + 2 * rw2_h + 0.025 + 0.04                # ONE block row
     H = (0.02 + top_hdr + theta_hdr + 2 * kw_in + gap
-         + (mid_txt + 2 * rw_in + gap + 0.24 if sample is not None else 0.04))
+         + (blk_in + 0.02 if samples else 0.04))
     fig = plt.figure(figsize=(FIGW, H))
 
     def ax_at(x_in, y_top_in, w_in, h_in):
@@ -497,55 +505,64 @@ def fig_bank(out, dataset="stl10", data_root="./data", device="cpu"):
                 ax.set_title(_BANK_THETA[i % 4], fontsize=5.5, pad=1.5)
             if i == 0:
                 ax.set_ylabel(("even", "odd")[r], fontsize=6, labelpad=1.5)
-    for s in range(2):                     # scale group headers with rules
-        gx0 = (kx0_in + s * 4 * (kw_in + gap)) / FIGW
-        gx1 = (kx0_in + (s * 4 + 3) * (kw_in + gap) + kw_in) / FIGW
+    for sgrp in range(2):                  # scale group headers with rules
+        gx0 = (kx0_in + sgrp * 4 * (kw_in + gap)) / FIGW
+        gx1 = (kx0_in + (sgrp * 4 + 3) * (kw_in + gap) + kw_in) / FIGW
         fig.text((gx0 + gx1) / 2, 1 - (0.02 + 0.055) / H,
-                 _BANK_SIGMA[s] + " px", ha="center", fontsize=6)
+                 _BANK_SIGMA[sgrp] + " px", ha="center", fontsize=6)
         fig.add_artist(plt.Line2D([gx0, gx1],
                                   [1 - (0.02 + 0.115) / H] * 2,
                                   color="#888888", lw=0.5))
 
-    if sample is None:
+    if not samples:
         fig.savefig(os.path.join(out, "bank_gabor.png"), dpi=300,
                     bbox_inches="tight", pad_inches=0.02)
         plt.close(fig)
         return
 
-    img, resp, label, idx = sample
-    txt_y = k_y0 + 2 * kw_in + gap + 0.10
-    # Keep this line NARROWER than the 3.33in canvas: bbox_inches="tight"
-    # widens to the longest artist, and a wide caption line here silently
-    # re-scales every panel once the file is placed at \linewidth.
-    fig.text(0.5, 1 - txt_y / H, "calibrated magnitude responses "
-             r"$m_{\sigma,\theta}(x)$ (shared colour scale)",
-             ha="center", va="center", fontsize=6)
+    # ---- example blocks, SIDE BY SIDE: two columns, each = header row
+    # (input thumb + label) over a 2x4 map grid at column width ------------
+    col_w = (FIGW - 0.06 - 0.10) / 2          # two columns, small mid-gap
+    rw2 = (col_w - 3 * 0.025) / 4             # per-column map tile
+    y0 = k_y0 + 2 * kw_in + gap + 0.03
+    for ci, (ds_name, img, resp, label, idx, px) in enumerate(samples):
+        cx = 0.03 + ci * (col_w + 0.10)
+        vmax = float(torch.quantile(resp, 0.99))
+        iw_in = hdr_in - 0.06
+        axi = ax_at(cx, y0 + 0.02, iw_in, iw_in)
+        axi.imshow(img)
+        axi.set_xticks([]), axi.set_yticks([])
+        for sp in axi.spines.values():
+            sp.set_linewidth(0.4)
+        nice = {"stl10": "STL-10", "eurosat": "EuroSAT"}.get(ds_name, ds_name)
+        if ds_name == "eurosat" and str(label).startswith("class "):
+            _E = ["annual crop", "forest", "herbaceous veg.", "highway",
+                  "industrial", "pasture", "permanent crop", "residential",
+                  "river", "sea/lake"]
+            label = _E[int(str(label).split()[-1])]
+        fig.text((cx + iw_in + 0.07) / FIGW, 1 - (y0 + hdr_in / 2 - 0.10) / H,
+                 f"$x$: {nice} {label} ({px} px)", fontsize=5.0,
+                 ha="left", va="center")
+        fig.text((cx + iw_in + 0.07) / FIGW, 1 - (y0 + hdr_in / 2 + 0.07) / H,
+                 r"$m_{\sigma,\theta}(x)$, shared scale", fontsize=4.6,
+                 ha="left", va="center")
+        r_y0 = y0 + hdr_in
+        for i in range(n):
+            r, c = divmod(i, 4)
+            ax = ax_at(cx + c * (rw2 + 0.025), r_y0 + r * (rw2 + 0.025),
+                       rw2, rw2)
+            ax.imshow(resp[i].numpy(), cmap="magma", vmin=0, vmax=vmax)
+            ax.set_xticks([]), ax.set_yticks([])
+            for sp in ax.spines.values():
+                sp.set_linewidth(0.3)
+            ax.text(0.04, 0.04, _BANK_SIGMA[r] + ", " + _BANK_THETA[i % 4],
+                    transform=ax.transAxes, fontsize=3.6, color="white",
+                    ha="left", va="bottom")
+        print(f"bank figure: sample = {ds_name} test index {idx} ({label})")
 
-    # ---- sample image (left) + 2x4 response grid (right) ---------------
-    vmax = float(torch.quantile(resp, 0.99))
-    r_y0 = k_y0 + 2 * kw_in + gap + mid_txt
-    iw_in = 1.00
-    axi = ax_at(0.13, r_y0 + (2 * rw_in + gap - iw_in) / 2, iw_in, iw_in)
-    axi.imshow(img)
-    axi.set_xticks([]), axi.set_yticks([])
-    for sp in axi.spines.values():
-        sp.set_linewidth(0.4)
-    axi.set_xlabel(f"input $x$: {label} (96 px)", fontsize=5.5, labelpad=2.0)
-    for i in range(n):
-        r, c = divmod(i, 4)
-        ax = ax_at(rx0_in + c * (rw_in + gap), r_y0 + r * (rw_in + gap),
-                   rw_in, rw_in)
-        ax.imshow(resp[i].numpy(), cmap="magma", vmin=0, vmax=vmax)
-        ax.set_xticks([]), ax.set_yticks([])
-        for sp in ax.spines.values():
-            sp.set_linewidth(0.3)
-        ax.text(0.03, 0.03, _BANK_SIGMA[r] + ", " + _BANK_THETA[i % 4],
-                transform=ax.transAxes, fontsize=4.4, color="white",
-                ha="left", va="bottom")
     fig.savefig(os.path.join(out, "bank_gabor.png"), dpi=300,
                 bbox_inches="tight", pad_inches=0.02)
     plt.close(fig)
-    print(f"bank figure: sample = {dataset} test index {idx} ({label})")
 
 
 def main():
