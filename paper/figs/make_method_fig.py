@@ -132,7 +132,12 @@ box(axa, 0.2, 5.9, 9.4, 1.5,
     "#eef2f6", UA, tc=INK, fs=4.6, ec=BLUE, lw=0.5)
 box(axa, 0.2, 4.2, 9.4, 1.2, "Pinned Filter Bank (Fingerprinted)",
     "#eef2f6", UA, tc=INK, fs=4.6, ec=BLUE, lw=0.5)
-arrow(axa, 5.0, 4.1, 5.0, 3.2, BLUE)
+# NOT arrows between the three: they are simultaneous controls, and an arrow
+# would assert a pipeline that does not exist. "+" says all three at once,
+# and the single arrow below carries what they jointly buy.
+for gy in (7.65, 5.65):
+    axa.text(4.9, gy, "+", ha="center", va="center", fontsize=6.0, color=BLUE)
+arrow(axa, 4.9, 4.1, 4.9, 3.2, BLUE)
 axa.add_patch(Rectangle((0.2, 0.22), 9.4, 2.88, fc="#f5f5f5", ec="none"))
 axa.text(4.9, 2.62, "Every Intervention Sees", ha="center", fontsize=4.7,
          color=MUTED)
@@ -217,7 +222,7 @@ axb.text(8.68, PY - 0.34, "Cross-Entropy", ha="center", va="top",
 TAP_X = STAGE_X[2] + 0.58
 # a gentle diagonal, so the tap lands near the aux head's middle instead of on
 # its top-left corner
-arrow(axb, TAP_X, PY - 0.24, TAP_X + 0.90, 6.26, VERM, ls=(0, (2, 1.2)))
+arrow(axb, TAP_X, PY - 0.24, TAP_X, 6.26, VERM, ls=(0, (2, 1.2)))
 # left of the arrow's origin: set to its right the label ran under the arrow
 # itself and out past the panel edge. "(3 of 4)" went with it -- the stage
 # boxes are already named, so the count restated what the drawing shows.
@@ -227,43 +232,46 @@ axb.text(TAP_X - 0.16, 7.18, "Tap: Deep Stage", fontsize=4.1,
 # magnitude maps each one produces on the image above, so the correspondence
 # is visible rather than asserted. Four orientations at one scale, which is
 # the smallest set that still reads as oriented.
-BKX, BKY, BKW, BKH = 0.0, 4.72, 3.55, 1.44
+BKX, BKY, BKW, BKH = 0.0, 4.72, 3.02, 1.44
 box(axb, BKX, BKY, BKW, BKH, "", GREEN, UB, fs=4.4)
 # The bank's name sits ABOVE the box, where it has the panel's full width. Set
 # inside it, the label forced the tiles into a narrower box and still ran past
-# its own edges at any legible size.
-axb.text(1.00, BKY + BKH + 0.30, "Fixed Gabor Energy Bank", ha="left",
-         va="center", color=GREEN, fontsize=4.0)
+# its own edges at any legible size. Two lines, and clear of the arrow coming
+# down from the image at x = 0.60.
+axb.text(1.00, BKY + BKH + 0.12, "Fixed Gabor\nEnergy Bank", ha="left",
+         va="bottom", color=GREEN, fontsize=4.0, linespacing=1.15)
 if B_KERNS is not None:
     ub_x = PX["b"][1] * FIG_W_IN / 10.0
     ub_y = R1_H * FIG_H_IN / 10.0
     n = len(B_KERNS)
-    gap, pad, hdr, vgap = 0.09, 0.16, 0.13, 0.07
+    gap, pad, vgap = 0.06, 0.12, 0.07
     # tiles must fit the box in BOTH directions: width sets the natural size,
-    # and the two rows plus the header cap it in height. Taking the smaller of
-    # the two is what stops them overflowing the box when the panel narrows.
+    # and the two rows cap it in height. Taking the smaller of the two is what
+    # stops them overflowing the box when the panel narrows.
     tw = (BKW - 2 * pad - (n - 1) * gap) / n
     th = tw * ub_x / ub_y
-    th_max = (BKH - hdr - vgap - 0.12) / 2
+    th_max = (BKH - 2 * pad - vgap) / 2
     if th > th_max:
         th = th_max
         tw = th * ub_y / ub_x
     x00 = BKX + (BKW - (n * tw + (n - 1) * gap)) / 2
+    y00 = BKY + (BKH + 2 * th + vgap) / 2      # centred, not hung from the top
     for row, (arrs, cm) in enumerate(((B_KERNS, "RdBu_r"), (B_MAPS, "magma"))):
-        ty0 = BKY + BKH - hdr - (row + 1) * th - row * vgap
+        ty0 = y00 - (row + 1) * th - row * vgap
         for j_, arr in enumerate(arrs):
             x0 = x00 + j_ * (tw + gap)
             axb.imshow(arr, extent=(x0, x0 + tw, ty0, ty0 + th), cmap=cm,
                        zorder=4, aspect="auto")
-AHX, AHY, AHW, AHH = 4.72, 4.72, 2.44, 1.44
+# centred on the tap, so the arrow from the deep stage drops straight into it
+AHW, AHH = 2.44, 1.44
+AHX, AHY = TAP_X - AHW / 2, 4.72
 box(axb, AHX, AHY, AHW, AHH, "Aux Head\nTraining Only", VERM, UB, fs=4.3)
 # the bank supplies the regression TARGET, so the arrow runs bank -> head. It
-# previously spanned 0.32 units between two touching boxes and never showed;
-# it now has a full unit of clear space to be seen in.
+# previously spanned 0.32 units between two touching boxes and never showed.
 arrow(axb, BKX + BKW + 0.08, BKY + BKH / 2, AHX - 0.10, AHY + AHH / 2,
       GREEN, lw=0.8)
-axb.text(7.38, AHY + AHH / 2, "MSE × λ(t)", fontsize=4.3, color=VERM,
-         va="center")
+axb.text(AHX + AHW + 0.22, AHY + AHH / 2, "MSE × λ(t)", fontsize=4.3,
+         color=VERM, va="center")
 axb.text(5.0, 4.06, "+2% Training Compute, +0 at Inference", fontsize=4.3,
          color=MUTED, ha="center")
 
@@ -280,12 +288,15 @@ t = np.linspace(0, 1, 300)
 lam = 0.5 * (1 + np.cos(np.pi * t))
 ins.plot(t, lam, lw=1.0, color=VERM)
 ins.fill_between(t, 0, lam, color=VERM, alpha=0.13, lw=0)
-ins.set_xlim(0, 1); ins.set_ylim(0, 1.13)
+ins.set_xlim(0, 1); ins.set_ylim(0, 1.26)     # headroom for a level y label
 ins.set_xticks([0, 1]); ins.set_xticklabels(["Start", "End"], fontsize=4.1)
 ins.set_yticks([0, 1]); ins.set_yticklabels(["0", "λ₀"], fontsize=4.1)
 ins.tick_params(length=1.5, pad=1)
 ins.set_xlabel("Training Progress", fontsize=4.2, labelpad=1.0)
-ins.set_ylabel("Aux Weight λ(t)", fontsize=4.2, labelpad=1.0)
+# set as a y-label matplotlib turns this on its side, and it was then the only
+# rotated element anywhere in the manuscript. Laid flat in the axes headroom.
+ins.text(0.03, 0.985, "Aux Weight λ(t)", transform=ins.transAxes, ha="left",
+         va="top", fontsize=4.2, color=INK)
 ins.set_title("Prior Dominates Early, Then Vanishes", fontsize=4.4,
               color=INK, pad=2.0)
 ins.annotate("λ = 0 Exactly:\nPure Cross-Entropy", xy=(0.975, 0.035),
@@ -359,79 +370,65 @@ axd.text(0.15, 0.62, "All Fused Into the Same Frozen Recipe;\n"
          linespacing=1.3)
 
 # ---------------------------------------------------------------- (e)
-# The answer, as a fifth column: three bullet charts, one per outcome, on ONE
-# shared scale of gain over the same from-scratch baseline. The bar is the two
-# sources FUSED; the ticks are each source ALONE. The verdict is then a single
-# comparison -- the bar ends past the rightmost tick, on it, or is dragged back
-# across zero. A grouped bar chart asked the reader to compare three heights to
-# read the same thing, and left the panel mostly white.
+# The answer, as a fifth column: for each outcome, the two sources ALONE and
+# then BOTH, as three labelled horizontal bars on one shared scale of gain over
+# the same from-scratch baseline. Named rows and a printed value per bar mean
+# the chart needs no key and no decoding: the "Both" bar is longer than either
+# single, level with them, or dragged back across zero. Earlier drafts asked
+# the reader to learn an encoding first (which height is which source; bar
+# against tick), which is exactly what a one-glance panel cannot afford.
 axe, UEp = panel([PX["e"][0], R1_Y, PX["e"][1], R1_H], "(e)  When Fusion Pays")
+SOLO = "#d0d0d0"
 blocks = [
-    ("STACK", GREEN, "Prior + Augmentation", "Food-101 5%",
-     +5.63, +9.46, +13.78),
-    ("SUBSTITUTE", ORANGE, "Prior + SimCLR Init", "ViT-Tiny CIFAR-100 10%",
-     +13.26, +13.30, +13.46),
-    ("INTERFERE", VERM, "Prior + ImageNet Init", "CIFAR-100 7%",
-     +4.87, +15.39, -1.46),
+    ("STACK", GREEN, "Food-101 5%",
+     (("Prior", +5.63), ("Augmentation", +9.46), ("Both", +13.78))),
+    ("SUBSTITUTE", ORANGE, "ViT-Tiny CIFAR-100 10%",
+     (("Prior", +13.26), ("SimCLR Init", +13.30), ("Both", +13.46))),
+    ("INTERFERE", VERM, "CIFAR-100 7%",
+     (("Prior", +4.87), ("ImageNet Init", +15.39), ("Both", -1.46))),
 ]
-VMIN, VMAX = -3.0, 16.5                      # one shared scale for all three
-X0, X1 = 0.30, 9.20
-BLK_H, BLK_TOP = 3.10, 9.95
-BH = 0.50                                    # bullet bar height
+VMIN, VMAX = -3.0, 16.5                    # one shared scale for all three
+BX0, BX1 = 2.72, 8.50                      # the bars' own span
+BLK_TOP, BLK_H = 9.55, 3.05                # clear of the panel title
+ROW_P, BARH = 0.60, 0.42
 
 
 def _ex(v):
-    return X0 + (v - VMIN) / (VMAX - VMIN) * (X1 - X0)
+    return BX0 + (v - VMIN) / (VMAX - VMIN) * (BX1 - BX0)
 
 
 ZX = _ex(0.0)
-for b, (verdict, col, pair, cell, va_, vb_, vc_) in enumerate(blocks):
+for b, (verdict, col, cell, rows) in enumerate(blocks):
     top = BLK_TOP - b * BLK_H
-    axe.add_patch(FancyBboxPatch((0.05, top - 0.72), 3.20, 0.62,
+    axe.add_patch(FancyBboxPatch((0.05, top - 0.58), 2.86, 0.56,
                                  boxstyle="round,pad=0.02,rounding_size=0.20",
                                  fc=col, ec=col, lw=0.5, zorder=3))
-    axe.text(1.65, top - 0.41, verdict, ha="center", va="center", zorder=4,
-             fontsize=fit_fontsize(verdict, 2.90 * UEp, 4.4, bold=True),
+    axe.text(1.48, top - 0.30, verdict, ha="center", va="center", zorder=4,
+             fontsize=fit_fontsize(verdict, 2.60 * UEp, 4.4, bold=True),
              color="white", fontweight="bold")
-    axe.text(3.48, top - 0.22, pair, ha="left", va="center", fontsize=3.8,
-             color=INK)
-    axe.text(3.48, top - 0.60, cell, ha="left", va="center", fontsize=3.4,
+    axe.text(3.10, top - 0.30, cell, ha="left", va="center", fontsize=3.5,
              color=MUTED)
-    ay = top - 1.45
-    axe.add_patch(Rectangle((X0, ay - BH / 2), X1 - X0, BH, fc="#efefef",
-                            ec="none", zorder=1))
-    x_c = _ex(vc_)
-    axe.add_patch(Rectangle((min(ZX, x_c), ay - BH / 2), abs(x_c - ZX), BH,
-                            fc=col, ec="none", zorder=3))
-    axe.plot([ZX, ZX], [ay - BH / 2, ay + BH / 2], lw=0.5, color="#c8c8c8",
-             zorder=4)
-    for v in (va_, vb_):                      # each source on its own
-        axe.plot([_ex(v), _ex(v)], [ay - BH * 0.78, ay + BH * 0.78], lw=0.85,
-                 color=INK, zorder=5, solid_capstyle="butt")
-    lbl = f"{vc_:+.1f}".replace("-", "\u2212")
-    if abs(x_c - ZX) > 1.55:                  # room to sit inside the bar
-        axe.text(x_c - 0.14, ay, lbl, ha="right", va="center", fontsize=3.5,
-                 color="white", fontweight="bold", zorder=6)
-    else:                                     # above it: beside, it would run
-        axe.text(x_c, ay + BH / 2 + 0.10, lbl, ha="center", va="bottom",
-                 fontsize=3.4, color=col, fontweight="bold", zorder=6)
-    if b == 0:                                # tick key, stated once
-        xa, xb = sorted((_ex(va_), _ex(vb_)))
-        ky = ay - BH * 0.78 - 0.14
-        axe.plot([xa, xa, xb, xb], [ky + 0.12, ky, ky, ky + 0.12], lw=0.45,
-                 color=MUTED, zorder=2)
-        axe.text((xa + xb) / 2, ky - 0.06, "Each Source Alone", ha="center",
-                 va="top", fontsize=3.4, color=MUTED)
-    if b == len(blocks) - 1:                  # scale, labelled once
-        for tv in (0, 5, 10, 15):
-            axe.plot([_ex(tv), _ex(tv)], [ay - BH / 2 - 0.10,
-                                          ay - BH / 2 - 0.26],
-                     lw=0.5, color=LINE, zorder=1)
-            axe.text(_ex(tv), ay - BH / 2 - 0.34, f"{tv:+d}" if tv else "0",
-                     ha="center", va="top", fontsize=3.4, color=MUTED)
-        axe.text(4.75, ay - BH / 2 - 0.94,
-                 "Gain Over From-Scratch Baseline (pts)", ha="center",
-                 va="top", fontsize=3.4, color=MUTED)
+    ry0 = top - 1.06
+    axe.plot([ZX, ZX], [ry0 + BARH * 0.85,
+                        ry0 - 2 * ROW_P - BARH * 0.85],
+             lw=0.5, color="#cfcfcf", zorder=1)
+    for i, (name, v) in enumerate(rows):
+        ry = ry0 - i * ROW_P
+        both = name == "Both"
+        axe.text(BX0 - 0.16, ry, name, ha="right", va="center", fontsize=3.5,
+                 color=INK if both else MUTED,
+                 fontweight="bold" if both else "normal")
+        xv = _ex(v)
+        axe.add_patch(Rectangle((min(ZX, xv), ry - BARH / 2), abs(xv - ZX),
+                                BARH, fc=col if both else SOLO, ec="none",
+                                zorder=3))
+        axe.text(9.92, ry, f"{v:+.1f}".replace("-", "\u2212"), ha="right",
+                 va="center", fontsize=3.5, color=col if both else MUTED,
+                 fontweight="bold" if both else "normal")
+axe.text(ZX, BLK_TOP - 2 * BLK_H - 1.06 - 2 * ROW_P - BARH / 2 - 0.14, "0",
+         ha="center", va="top", fontsize=3.3, color=MUTED)
+axe.text(5.0, 0.44, "Accuracy Gain Over From-Scratch Baseline (pts)",
+         ha="center", va="top", fontsize=3.4, color=MUTED)
 
 # ------------------------------------------------------- scope strip
 fig.add_artist(plt.Line2D([0.010, 0.992], [SCOPE_IN / FIG_H_IN - 0.030,
