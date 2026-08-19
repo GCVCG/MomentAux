@@ -4,31 +4,30 @@
 \begin{figure*}[pos=htbp]
 \centering
 \includegraphics[width=\linewidth]{figs/method.pdf}
-\caption{Two information sources, fused at training time only, and the
-outcomes the benchmark measures. \textbf{(a)} Source 1, hand-crafted
-knowledge: the pinned Gabor bank turns the input into the fixed
-oriented-energy target $m(x)$ of Eq.~\ref{eq:energy} (four of the eight
-magnitude maps shown), calibrated and fingerprinted before any training and
-identical for every dataset, backbone and task. Source 2, the learned
-representation: the same input feeds the unchanged backbone, drawn
-generically as early, mid, deep and final stages. Fusion: a $1{\times}1$
+\caption{MomentAux in three phases, and the fusion outcomes it measures.
+\textbf{(a)} Phase 1: the knowledge source, the pinned Gabor bank, turns
+the input into the fixed oriented-energy target $m(x)$ of
+Eq.~\ref{eq:energy} (four of the eight magnitude maps shown), calibrated
+and fingerprinted before any training and identical for every dataset,
+backbone and task. Phase 2: the same input feeds the unchanged backbone,
+drawn generically as early, mid, deep and final stages; a $1{\times}1$
 convolution $W$ regresses the tapped deep stage (the third of four in our
 backbones, $f_3$ in Eq.~\ref{eq:loss}) onto the target, so training
 minimizes
 $\mathcal{L}=\mathcal{L}_{\mathrm{CE}}+\lambda(t)\,\lVert W
 f_{\mathrm{deep}}(x)-m(x)\rVert_2^2$, with the cosine schedule (inset)
 taking $\lambda$ from $\lambda_0$ to exactly zero, so late training is
-pure cross-entropy. At deployment $W$ and the bank are dropped, leaving the
-plain backbone and a task head at FLOPs identical to the baseline; the same
-bank, tap and schedule serve classification, segmentation and detection,
-only the head changes. \textbf{(b)} The three outcomes the benchmark
-measures when two knowledge sources are fused, schematic bars with one
-measured example each: different currencies can stack, the same currency
-substitutes, and a strong partner turns the prior into interference (an
-ImageNet initialization at $\lambda_0{=}1.0$), which vanishes at
-$\lambda_0{\leq}0.3$. Each cell's gain decomposes as $\Delta=G+\readout$
-(Eq.~\ref{eq:law}), $G$ measured on frozen features under linear
-evaluation.}
+pure cross-entropy. Phase 3: $W$ and the bank are dropped, leaving the
+plain backbone and a task head at FLOPs identical to the baseline; the
+same bank, tap and schedule serve classification, segmentation and
+detection, only the head changes. \textbf{(b)} The three outcomes the
+benchmark measures when two knowledge sources are fused, schematic bars
+with one measured example each: different currencies can stack, the same
+currency substitutes, and a strong partner turns the prior into
+interference (an ImageNet initialization at $\lambda_0{=}1.0$), which
+vanishes at $\lambda_0{\leq}0.3$. Each cell's gain decomposes as
+$\Delta=G+\readout$ (Eq.~\ref{eq:law}), $G$ measured on frozen features
+under linear evaluation.}
 \label{fig:method}
 \end{figure*}
 
