@@ -252,7 +252,6 @@ configs/                  one YAML per cell (generated, committed)
 tests/                    contracts: pinned banks, tensor layout, overhead,
                           subset determinism, metric reference
 slurm/                    cluster work-queue: worker, big lane, probe lane
-paper/                    the manuscript sources and figure generators
 ```
 
 ## Citation

@@ -1,7 +1,0 @@
-Highlights
-
-- A 3,054-configuration benchmark of data-efficiency interventions
-- Splitting one instrument's bands pays; pairing two satellites does not
-- A frozen-feature reading separates stacking, substitution and interference
-- Free prior beats or ties 2x-compute SSL on small ViTs; at 5x ordering flips with data
-- Attention deficit persists at 1.28M images; grows with model scale at matched budget

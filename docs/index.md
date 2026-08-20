@@ -39,10 +39,9 @@ tuned.
 
 ## Paper
 
-Submitted to *Information Fusion*. The manuscript, its generated number file,
-the response letter and the submission checker live in `paper/` and `docs/`;
-`python paper/check_submission.py` verifies the package against the journal's
-limits before it is assembled.
+Submitted to *Information Fusion*. The manuscript sources are kept out of
+this repository; every number in the paper regenerates from the run records
+and exporters released here.
 
 ## Documentation
 

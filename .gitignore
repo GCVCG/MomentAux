@@ -37,3 +37,28 @@ paper/submission/
 
 # release assets are built on demand, never committed
 dist/
+
+# Manuscript, reviews and journal material live locally only (repo cleanup 2026-08-20):
+# the public repo carries the implementation, configs, run records, logs and results.
+paper/
+submission/
+review_*.md
+*review*.txt
+Claude_review_*.md
+ChatGPT_*Review*.txt
+Guide for authors*.pdf
+els-cas-templates.zip
+mode___title__*.pdf
+texput.log
+.claude/
+docs/RESPONSE_TO_REFEREE.md
+docs/PRE_SUBMISSION_CHECKLIST.md
+docs/deep_research_prompt.md
+docs/thesis_proposal_prompt.md
+docs/compass_artifact_*.md
+scripts/make_submission.py
+scripts/make_paper_numbers.py
+scripts/check_table_numbers.py
+scripts/make_partition_table.py
+scripts/sync_public_numbers.py
+scripts/run_checks.sh

@@ -1,0 +1,36 @@
+=== diagdeitmae_vit_10pct 11:20:08 ===
+diagdeitmae_vit_10pct seed0: probe train 49.89  test 43.27
+diagdeitmae_vit_10pct seed1: probe train 48.75  test 41.93
+diagdeitmae_vit_10pct seed2: probe train 53.10  test 44.04
+PROBE_RESULT diagdeitmae_vit_10pct test 43.08+/-1.07 over 3 seeds -> runs_bscpull/diagdeitmae_vit_10pct/linear_probe.json
+=== diagdeitmae_vit_5pct 11:20:24 ===
+diagdeitmae_vit_5pct seed0: probe train 37.60  test 33.58
+diagdeitmae_vit_5pct seed1: probe train 28.36  test 25.33
+diagdeitmae_vit_5pct seed2: probe train 42.52  test 36.93
+PROBE_RESULT diagdeitmae_vit_5pct test 31.95+/-5.97 over 3 seeds -> runs_bscpull/diagdeitmae_vit_5pct/linear_probe.json
+=== diagdeitmae_vit_25pct 11:20:40 ===
+diagdeitmae_vit_25pct seed0: probe train 66.97  test 53.38
+diagdeitmae_vit_25pct seed1: probe train 71.25  test 55.63
+diagdeitmae_vit_25pct seed2: probe train 69.18  test 55.68
+PROBE_RESULT diagdeitmae_vit_25pct test 54.90+/-1.31 over 3 seeds -> runs_bscpull/diagdeitmae_vit_25pct/linear_probe.json
+=== diagdeitmae_vit_1pct 11:20:55 ===
+diagdeitmae_vit_1pct seed0: probe train 17.97  test 16.74
+diagdeitmae_vit_1pct seed1: probe train 18.19  test 16.03
+diagdeitmae_vit_1pct seed2: probe train 18.18  test 16.74
+PROBE_RESULT diagdeitmae_vit_1pct test 16.50+/-0.41 over 3 seeds -> runs_bscpull/diagdeitmae_vit_1pct/linear_probe.json
+=== diagdeitmae_vit_2pct 11:21:11 ===
+diagdeitmae_vit_2pct seed0: probe train 22.00  test 20.00
+diagdeitmae_vit_2pct seed1: probe train 23.96  test 21.73
+diagdeitmae_vit_2pct seed2: probe train 25.26  test 22.59
+PROBE_RESULT diagdeitmae_vit_2pct test 21.44+/-1.32 over 3 seeds -> runs_bscpull/diagdeitmae_vit_2pct/linear_probe.json
+=== diagmae_vit_1pct 11:21:27 ===
+diagmae_vit_1pct seed0: probe train 21.02  test 16.99
+diagmae_vit_1pct seed1: probe train 19.03  test 16.65
+diagmae_vit_1pct seed2: probe train 18.32  test 16.61
+PROBE_RESULT diagmae_vit_1pct test 16.75+/-0.21 over 3 seeds -> runs_bscpull/diagmae_vit_1pct/linear_probe.json
+=== diagmae_vit_2pct 11:21:42 ===
+diagmae_vit_2pct seed0: probe train 24.56  test 20.59
+diagmae_vit_2pct seed1: probe train 24.16  test 20.45
+diagmae_vit_2pct seed2: probe train 25.97  test 21.66
+PROBE_RESULT diagmae_vit_2pct test 20.90+/-0.66 over 3 seeds -> runs_bscpull/diagmae_vit_2pct/linear_probe.json
+MAE2_PROBE_COMPLETE Thu Aug 20 11:21:57 AM CEST 2026
