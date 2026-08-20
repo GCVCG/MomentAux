@@ -183,6 +183,11 @@ diagdeit_none_tin_1pct,tin,vit_tiny,adamw,200,linear,none,,,,,,,1,1000,3,3.99,0.
 diagdeit_none_tin_25pct,tin,vit_tiny,adamw,200,linear,none,,,,,,,25,25000,3,23.14,2.52,28.07,2.61,3,no,,,,,,,,
 diagdeit_none_tin_2pct,tin,vit_tiny,adamw,200,linear,none,,,,,,,2,2000,3,4.28,1.63,8.97,3.72,3,no,,,,,,,,
 diagdeit_none_tin_5pct,tin,vit_tiny,adamw,200,linear,none,,,,,,,5,5000,3,8.29,0.82,13.62,1.10,3,no,,,,,,,,
+diagdeitmae_vit_10pct,cifar100,vit_tiny,adamw,200,linear,none,yes,,,,,,10,5000,3,34.53,0.94,43.08,1.07,3,no,,diagdeit_none_10pct,20.28,14.24,1.03,15.04,1.22,-0.80
+diagdeitmae_vit_1pct,cifar100,vit_tiny,adamw,200,linear,none,yes,,,,,,1,500,3,7.42,0.26,16.50,0.41,3,no,,diagdeit_none_1pct,6.48,0.93,0.41,1.92,0.95,-0.99
+diagdeitmae_vit_25pct,cifar100,vit_tiny,adamw,200,linear,none,yes,,,,,,25,12500,3,50.47,1.57,54.90,1.31,3,no,,diagdeit_none_25pct,32.27,18.20,1.04,16.54,1.01,1.66
+diagdeitmae_vit_2pct,cifar100,vit_tiny,adamw,200,linear,none,yes,,,,,,2,1000,3,11.09,0.82,21.44,1.32,3,no,,diagdeit_none_2pct,9.98,1.11,0.49,2.24,0.93,-1.13
+diagdeitmae_vit_5pct,cifar100,vit_tiny,adamw,200,linear,none,yes,,,,,,5,2500,3,21.27,4.39,31.95,5.97,3,no,,diagdeit_none_5pct,12.55,8.72,2.62,11.65,3.62,-2.93
 diagdeitssl_simclr_100pct,cifar100,vit_tiny,adamw,200,linear,none,yes,,,,,,100,50000,3,73.25,0.51,,,,no,,diagdeit_none_100pct,61.39,11.86,0.39,,,
 diagdeitssl_simclr_10pct,cifar100,vit_tiny,adamw,200,linear,none,yes,,,,,,10,5000,3,36.06,1.18,45.34,1.20,3,no,,diagdeit_none_10pct,20.28,15.78,1.11,17.31,1.26,-1.53
 diagdeitssl_simclr_15pct,cifar100,vit_tiny,adamw,200,linear,none,yes,,,,,,15,7500,3,43.46,0.43,,,,no,,diagdeit_none_15pct,24.07,19.38,2.47,,,
@@ -1360,7 +1365,9 @@ diagin64_vit_none_3pct,imagenet64,vit_tiny,adamw,40,linear,none,,,,,,,3,,3,3.43,
 diagin64_vit_none_5pct,imagenet64,vit_tiny,adamw,40,linear,none,,,,,,,5,,3,5.89,0.23,,,,no,,,,,,,,
 diagin64_vit_none_7pct,imagenet64,vit_tiny,adamw,40,linear,none,,,,,,,7,,3,7.59,0.13,,,,no,,,,,,,,
 diagmae_vit_10pct,cifar100,vit_tiny,adamw,200,linear,none,yes,,,,,,10,5000,3,29.51,0.34,38.20,0.18,3,no,,diagvit_none_10pct,16.47,13.03,0.35,13.33,0.52,-0.29
+diagmae_vit_1pct,cifar100,vit_tiny,adamw,200,linear,none,yes,,,,,,1,500,3,6.46,0.42,16.75,0.21,3,no,,diagvit_none_1pct,6.44,0.02,0.27,1.00,0.53,-0.98
 diagmae_vit_25pct,cifar100,vit_tiny,adamw,200,linear,none,yes,,,,,,25,12500,3,42.65,1.73,47.72,1.62,3,no,,diagvit_none_25pct,28.50,14.16,1.06,13.83,0.96,0.33
+diagmae_vit_2pct,cifar100,vit_tiny,adamw,200,linear,none,yes,,,,,,2,1000,3,10.37,0.62,20.90,0.66,3,no,,diagvit_none_2pct,8.91,1.46,0.44,2.78,0.56,-1.32
 diagmae_vit_5pct,cifar100,vit_tiny,adamw,200,linear,none,yes,,,,,,5,2500,3,20.46,2.14,31.21,3.01,3,no,,diagvit_none_5pct,12.25,8.21,1.32,10.91,1.81,-2.70
 diagprosp_augssl_esat_5pct,eurosat,resnet18,sgd,200,linear,none,yes,,,,,,5,1080,3,89.14,0.73,,,,no,,diagfuse_esat_aug_5pct,83.12,6.02,1.08,,,
 diagprosp_augssl_food_10pct,food101,resnet18,sgd,200,linear,none,yes,,,,,,10,7575,3,47.57,1.27,,,,no,,diagfuse_food_aug_10pct,50.99,-3.42,0.78,,,

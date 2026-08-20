@@ -7560,3 +7560,93 @@ ported vs corrected and why.
   cells above, where augmentation adds +7 to +15 to whatever it is paired
   with -- also says STACK, agreeing with the M2 bands. The running wave
   therefore separates the strength rule from the other two.
+
+- *** WAVE M2 SCORED — TWO FALSIFIERS FIRED, BOTH AGAINST MY OWN MECHANISM
+  REASONING, AND THE PAPER'S TWO CLAIMS SURVIVE UNTOUCHED (2026-08-20, 21/21
+  runs 0 FAILs, 3 seeds every cell, probes run locally against the existing
+  comparators):
+      pct  deit-base deit-mae deit-ssl deit-aux | band(M4)   verdict
+        5    12.55    21.27    21.64    28.89   | 22..28     MISSED LOW
+       10    20.28    34.53    36.06    41.29   | 37..42     MISSED LOW
+       25    32.27    50.47    52.31    57.32   | 52..58     MISSED LOW
+      pct  base    mae     simclr  prior        | band(M5)   verdict
+        1   6.44    6.46    7.05    7.80        | 7.0..9.5   MISSED LOW
+        2   8.91   10.37   10.88   12.15        | 10.0..13.0 HIT
+  (F-M4) NOT FIRED. deit-mae is 6.8-7.6 BELOW deit-aux at every fraction, so
+    masked SSL does not match the prior under a modern recipe and the attention
+    headline keeps its scope. It now stands against FOUR SSL families
+    (contrastive, negative-free, self-distilled, masked).
+  (F-M7) NOT FIRED. The prior stays above MAE at 1% (+1.34) and 2% (+1.78),
+    so the low-data attention niche survives masked SSL on its home ground.
+  *** (F-M5) FIRED: deit-mae <= deit-ssl + 0.5 at BOTH 10% and 25% (34.53 vs
+    36.56; 50.47 vs 52.81). Its recorded consequence, stated in advance:
+    "augmentation substitutes for masked reconstruction too, the
+    structural-vs-invariance account is wrong about what MAE supplies, and the
+    currency taxonomy needs a category it does not have." I predicted MAE would
+    compound with augmentation LIKE THE PRIOR because reconstruction supplies
+    structure and augmentation supplies invariance. It compounds like SimCLR
+    instead, and lands slightly BELOW it.
+  *** (F-M6) FIRED: mae@1% = 6.46 against base 6.44, i.e. Delta +0.02 -- masked
+    reconstruction buys NOTHING at 500 images, and less than SimCLR's +0.61.
+    The M5 reasoning ("MAE draws supervision from PATCHES, ~32k targets at 500
+    images, so it should starve LESS than contrastive") is wrong: it starves
+    MORE. Whatever the patch count, the signal is bounded by the image count.
+  *** THE FEATURE SIDE CONFIRMS BOTH FIRES RATHER THAN LEAVING THEM e2e-ONLY:
+      cell         probe(mae)  probe(base)   G(mae)      | G(prior) G(SSL)
+      deit @5%     31.95+-3.45 20.28+-1.11  +11.66+-3.62 |  21.37   12.77
+      deit @10%    43.08+-0.62 28.04+-1.06  +15.04+-1.22 |  22.20   17.30
+      deit @25%    54.90+-0.76 38.35+-0.67  +16.54+-1.01 |  23.05   17.98
+      plain@1%     16.75+-0.12 15.75+-0.52   +1.00+-0.53 |   5.89    1.78
+      plain@2%     20.90+-0.38 18.12+-0.40   +2.78+-0.56 |     --      --
+    The pre-registered probe band was G(deit-mae)@10% = 18..22, on the
+    compounding account. MEASURED +15.04 -- MISSED LOW, and BELOW deit-ssl's
+    17.30 rather than above it. At 1% G(mae) = +1.00 sits with SimCLR's
+    collapsed +1.78, nowhere near the prior's +5.89: F-M6 is feature-side too.
+  *** THE ORDERING THAT MAKES THIS MORE THAN TWO WRONG PREDICTIONS. How much
+    feature gain DeiT augmentation ADDS to each source at C100@10%, i.e.
+    G(source under deit) - G(source under plain):
+        prior  14.85 -> 22.20  **+7.35**
+        SimCLR 13.46 -> 17.30  **+3.84**
+        MAE    13.33 -> 15.04  **+1.71**
+    All three sources have nearly IDENTICAL plain-recipe G (13.3-14.9), and
+    augmentation amplifies them by 4.3x different amounts, in an order that
+    reproduces the e2e ordering exactly (aux > ssl > mae). So the amplifier
+    account established from the wave-1 post-mortem is refined rather than
+    contradicted: augmentation is not a constant multiplier, it compounds
+    MOST with the source whose currency is furthest from nuisance-invariance.
+    READ CAREFULLY, because it is a reading and not a measurement: this places
+    masked reconstruction as MORE invariance-like than the prior, and slightly
+    more so than contrastive learning -- the opposite of the structural
+    prediction I registered. It is inferred from an amplification ordering,
+    not from any direct measurement of what MAE's features encode.
+  MAE SEED NOTE: diagmae_vit_5pct seed1 (17.99) and diagdeitmae_vit_5pct seed1
+    (16.47) are both low outliers against tight siblings, and the 5% probe
+    carries sigma 3.45 for the same reason. The 5% column is the noisiest in
+    this wave; the 10/25% conclusions do not depend on it.
+
+- *** THE THREE COMMITTED aug|mae CALLS SCORED — THE STRENGTH RULE IS
+  FALSIFIED A SECOND TIME, ON PAIRS WHOSE COMBINATION DID NOT EXIST WHEN THE
+  CALL WAS MADE (2026-08-20). Recorded with job 44832750 running and ZERO
+  finals on disk: REL 1.000/0.762/0.678 -> SUBSTITUTE at all three, i.e. the
+  combination lands AT the better single arm (~20.5 / 29.5 / 42.7).
+      pct  G(mae)  G(aug)   better  combo   combo-better  sigma  outcome
+        5    8.21    0.30    20.46  21.27      +0.81       +0.3  unresolved
+       10   13.04    3.81    29.51  34.53      +5.02       +8.8  **STACK**
+       25   14.15    3.77    42.65  50.47      +7.82       +5.8  **STACK**
+    STRENGTH RULE: **0 of 2 resolved**. AMPLIFIER ACCOUNT (predicting STACK
+    because augmentation has ~zero own-G yet adds to whatever it is paired
+    with): **2 of 2**. This is an independent confirmation that cancelling
+    wave 2 was right -- the rule had already scored 1/6 on six existing ViT
+    combos, and it now scores 0/2 on genuinely held-out ones.
+  *** THE THREE-WAY ADJUDICATION I RECORDED, scored strictly and none of the
+    three branches wins outright. I wrote: "lands 37..42 @10% => the
+    currency/compounding account wins; lands ~29.5 => the strength rule wins;
+    lands ~36 (deit-ssl-like) => BOTH are wrong." It landed **34.53**, nearest
+    the third branch. So:
+      the strength rule is dead (it predicted NO gain; there is +5.02 at 8.8
+        sigma and +7.82 at 5.8 sigma),
+      the compounding DIRECTION is right and its MAGNITUDE is not (my M4 band
+        overshot by 2.5-5 points at every fraction),
+      and the honest verdict is the branch I labelled "both are wrong".
+    Two mutually exclusive predictions were on record before the wave, which
+    is the only reason I cannot now claim the one that fits.
