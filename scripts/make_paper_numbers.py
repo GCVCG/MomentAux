@@ -56,10 +56,24 @@ def compute():
     """GPU-hours per device class, and the energy that follows, from records."""
     hours, runs = {}, 0
     # runs/ and runs_ckptfix/ are real measurements; runs_smoke/ holds
-    # 1-epoch pre-flight runs and is deliberately excluded.
+    # 1-epoch pre-flight runs and is deliberately excluded. runs_bscpull/ holds
+    # cells pulled from the cluster and never mirrored into runs/; it was
+    # missing here exactly as it was missing from the results exporter (found
+    # 2026-08-20), so 60 runs of wall-clock went uncounted. It is scanned LAST
+    # and deduplicated on (cell, seed) because 57 of its 117 records are
+    # byte-identical mirrors of runs/ copies and would otherwise double-count.
+    # runs_turing/ is fully mirrored into runs/ and adds nothing (checked, not
+    # assumed).
     paths = (glob.glob(os.path.join(ROOT, "runs", "*", "seed*", "final.json")) +
-             glob.glob(os.path.join(ROOT, "runs_ckptfix", "*", "seed*", "final.json")))
+             glob.glob(os.path.join(ROOT, "runs_ckptfix", "*", "seed*", "final.json")) +
+             glob.glob(os.path.join(ROOT, "runs_bscpull", "*", "seed*", "final.json")))
+    seen = set()
     for path in paths:
+        parts = path.split(os.sep)
+        cell_seed = (parts[-3], parts[-2])
+        if cell_seed in seen:
+            continue
+        seen.add(cell_seed)
         try:
             with open(path) as f:
                 r = json.load(f)

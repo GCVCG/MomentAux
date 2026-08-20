@@ -413,7 +413,7 @@ runs on ViT-tiny only, so its cells cross datasets but not architectures.}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \zebra{2}
-\begin{tabular}{lp{0.60\columnwidth}}
+\begin{tabularx}{\columnwidth}{@{}lX@{}}
 \toprule
 \textbf{Axis} & \textbf{Coverage} \\
 \midrule
@@ -427,7 +427,7 @@ Interventions & MomentAux ($1.02\times$); SimCLR, SimSiam and DINO
 Measured & $\computeCells$ cells over $\computeRuns$ retained run records
   including exploration and repeats \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 \looseness=-1 Table~\ref{tab:glance} lists the backbones and interventions;
@@ -529,7 +529,11 @@ and the expense sits in the comparators, every self-supervised arm doubling the
 cost of its cell.
 
 \subsection{The prior's own envelope}\label{sec:ownenvelope}
-\begin{table}[pos=htbp]
+\begin{table*}[width=0.485\textwidth,pos=htbp]
+%% width= sets the class's caption parbox, which otherwise typesets at
+%% \FullWidth and makes the two captions overlap. Side by side in one full-width float: both are narrow, and stacking
+%% them in one column cost a page of whitespace.
+\begin{minipage}[t]{0.485\textwidth}
 \caption{Complete envelopes: gain $\Delta$ of the reference-configuration
 prior over the
 shared baseline (points), with the seed-paired standard error of each
@@ -557,9 +561,8 @@ Fraction & CIFAR-100~\up & CIFAR-10~\up & Tiny-IN~\up \\
 100\% & $-0.01$\sem{0.13} & $-0.26$\sem{0.18} & $-0.42$\sem{0.36} \\
 \bottomrule
 \end{tabular}
-\end{table}
-
-\begin{table}[pos=htbp]
+\end{minipage}\hfill
+\begin{minipage}[t]{0.485\textwidth}
 \caption{Domain datasets at representative fractions (points, three
 seeds). Best in bold, second best underlined, third best in italics, per
 row; rows with only two measured entries mark the best alone.
@@ -587,7 +590,9 @@ CUB-200   & --      & --      & --       & $+2.74$\rlap{$^{\ast}$} \\
 \bottomrule
 \rowcolor{white}\multicolumn{5}{@{}l}{\footnotesize $^{\ast}$value at 100\%.} \\
 \end{tabular}
-\end{table}
+\end{minipage}
+\end{table*}
+
 
 \looseness=-1 Tables~\ref{tab:envelope} and~\ref{tab:domainenv} give the
 prior's gain across the data axis, Table~\ref{tab:vitenvelope} gives it on
@@ -661,8 +666,23 @@ ahead of DINO and level with both SimCLR and the prior, which it trails by
 $1.1$, matches, then leads by $0.5$ --- the same crossing with data the other
 comparisons show. Its feature gains ($+10.9$, $+13.3$, $+13.8$) sit below the
 prior's at the two smaller fractions, so masked prediction reads here as more
-of the same currency, not a new one. It enters as a comparator only: its
-combinations were not measured.
+of the same currency, not a new one. Extended to the smallest fractions it
+gains $+0.02$ over the baseline at $1\%$ and $+1.5$ at $2\%$, below SimCLR at
+both, so it starves on a few hundred images as the other families do.
+
+\looseness=-1 Its combination with augmentation was measured on the same three
+fractions, and reproduces the inversion reported above. Under DeiT-strength
+augmentation the initialization reaches $21.3$, $34.5$ and $50.5$, at or below
+SimCLR's $21.6$, $36.1$ and $52.3$ and $6.8$ to $7.6$ below the prior's; its
+feature gain at $10\%$ ($+15.0$) likewise sits below SimCLR's $+17.3$ and the
+prior's $+22.2$. The three sources enter the augmented recipe from nearly
+indistinguishable plain-recipe feature gains ($13.3$ to $14.9$) and leave it
+$+1.7$, $+3.8$ and $+7.4$ higher, an ordering that reproduces the accuracy
+ordering and sharpens the same-currency reading: augmentation compounds least
+with the source whose currency most resembles the invariance it already
+supplies. The $5\%$ column is this comparison's noisiest, with two low seeds
+and a probe standard error of $3.5$, so the $10$ and $25\%$ cells carry the
+claim.
 
 \subsection{Attention: where the prior is dramatic}\label{sec:attention}
 \begin{table}[pos=htbp]

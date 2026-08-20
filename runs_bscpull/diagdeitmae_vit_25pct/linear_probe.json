@@ -1,0 +1,21 @@
+{
+  "config": "configs/diagnostics/diagdeitmae_vit_25pct.yaml",
+  "ckpt": "best.pt",
+  "results": [
+    {
+      "seed": "seed0",
+      "probe_train": 0.6696799993515015,
+      "probe_test": 0.5338000059127808
+    },
+    {
+      "seed": "seed1",
+      "probe_train": 0.7125200033187866,
+      "probe_test": 0.5562999844551086
+    },
+    {
+      "seed": "seed2",
+      "probe_train": 0.6917600035667419,
+      "probe_test": 0.5568000078201294
+    }
+  ]
+}

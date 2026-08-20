@@ -7,14 +7,15 @@ This repository is the complete instrument, data and analysis behind the
 paper of that name. It measures one fixed, hand-crafted source of knowledge,
 a pinned bank of Gabor moment-energy targets injected only during training at
 about 2% compute overhead, against the leading data-driven alternatives
-(SimCLR, SimSiam and DINO self-supervised pre-training, ImageNet transfer,
+(SimCLR, SimSiam, DINO and masked-reconstruction self-supervised
+pre-training, ImageNet transfer,
 DeiT-strength augmentation, and learned FitNets teachers) under **one frozen
 recipe with committed data subsets**.
 
 | | |
 |---|---|
-| experimental cells | 3,054<!--computeCells--> |
-| training runs | 9,402<!--computeRuns--> (3,854<!--computeGpuHours--> GPU-hours) |
+| experimental cells | 3,077<!--computeCells--> |
+| training runs | 9,471<!--computeRuns--> (3,885<!--computeGpuHours--> run-hours; workers share a GPU, so this is not device occupancy) |
 | datasets | 13, across six visual domains |
 | backbone families | 9 (ResNet-18/34/50, MobileNetV3, ConvNeXt-T, ViT-tiny/S/B, Swin-T) |
 | data scale | 150 to 1,281,167 images; 10 to 1000 classes |
@@ -51,7 +52,7 @@ overstates the uncertainty by a median factor of 1.8.
 
 | | |
 |---|---|
-| cells with paired `Δ` and `G` | 1,724<!--auditAllPaired--> |
+| cells with paired `Δ` and `G` | 1,734<!--auditAllPaired--> |
 | in law scope (prior, from scratch, ≥3 seeds per arm) | 958<!--auditScope--> |
 | inside the crossing bracket (no prediction made) | 94<!--auditBracket--> |
 | unresolved (`|readout| ≤ 2·SEM`) | 409<!--auditUnresolved--> |

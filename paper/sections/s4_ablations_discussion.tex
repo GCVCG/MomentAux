@@ -206,7 +206,7 @@ verbatim.}
 \centering\scriptsize
 \setlength{\tabcolsep}{2.6pt}
 \zebra{2}
-\begin{tabular}{P{0.285\columnwidth}P{0.205\columnwidth}lP{0.265\columnwidth}}
+\begin{tabularx}{\columnwidth}{@{}P{0.255\columnwidth}P{0.205\columnwidth}lX@{}}
 \toprule
 Regime & Recommendation & Cost & Measured basis \\
 \midrule
@@ -220,7 +220,7 @@ ImageNet-transferable task & transfer; the prior only at reduced $\lambda_0$ &--
 Domain-shifted from ImageNet (e.g.\ stains) & prior from scratch competitive & $1.02\times$ & transfer advantage shrinks to $+2..{+}3$ \\
 Conv, photo-like, ${\geq}50\%$ & nothing (all converge) &--& conv arms within $\pm 0.8$; \emph{not} ViTs, which still gain at full data \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 Table~\ref{tab:guide} is the benchmark's practical distillate; its
@@ -254,8 +254,9 @@ adds value only when the sources' contributions are non-overlapping
 \emph{in feature space}, with architecture and intervention strength
 moderating how much of that value is realized; the overlap is measurable in
 advance by an
-inexpensive linear evaluation of each source alone, and the measurement
-predicts the combination. On the destructive outcome the grid also locates the
+inexpensive linear evaluation of each source alone, even though, as
+Sec.~\ref{sec:procedure} reports, comparing those measurements does not yet
+predict which of the three outcomes follows. On the destructive outcome the grid also locates the
 damage, in the feature term, not the \readout{}, which makes it a fusion
 outcome on the same currency logic as the other two and not a separate
 pathology.

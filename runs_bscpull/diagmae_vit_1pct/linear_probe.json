@@ -1,0 +1,21 @@
+{
+  "config": "configs/diagnostics/diagmae_vit_1pct.yaml",
+  "ckpt": "best.pt",
+  "results": [
+    {
+      "seed": "seed0",
+      "probe_train": 0.21023999154567719,
+      "probe_test": 0.16990000009536743
+    },
+    {
+      "seed": "seed1",
+      "probe_train": 0.19033999741077423,
+      "probe_test": 0.1665000021457672
+    },
+    {
+      "seed": "seed2",
+      "probe_train": 0.1831599920988083,
+      "probe_test": 0.16609999537467957
+    }
+  ]
+}

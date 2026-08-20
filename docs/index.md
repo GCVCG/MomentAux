@@ -22,11 +22,12 @@ and the measurable rule that organizes its results.
 
 One frozen recipe and fixed image subsets are held constant while the
 intervention varies: a free hand-crafted spectral prior (**MomentAux**),
-self-supervised pre-training (SimCLR, SimSiam, DINO), ImageNet transfer,
+self-supervised pre-training (SimCLR, SimSiam, DINO, masked
+reconstruction), ImageNet transfer,
 DeiT-strength augmentation, and learned FitNets teachers — each reported
 against a **declared multiple of baseline training compute**, and every
-pairwise combination measured. 3,054<!--computeCells--> classification
-configurations over 9,402<!--computeRuns--> runs, on 13 datasets and 9
+pairwise combination measured. 3,077<!--computeCells--> classification
+configurations over 9,471<!--computeRuns--> runs, on 13 datasets and 9
 backbones from 150 to 1.28M images and 32 to 224 px, plus segmentation and
 detection transplants.
 
