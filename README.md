@@ -20,7 +20,7 @@ recipe with committed data subsets**.
 | backbone families | 9 (ResNet-18/34/50, MobileNetV3, ConvNeXt-T, ViT-tiny/S/B, Swin-T) |
 | data scale | 150 to 1,281,167 images; 10 to 1000 classes |
 | resolution | 32, 64, 96, 224 px |
-| model scale | 5.7M to 86M parameters |
+| model scale | 2.5M to 86M parameters |
 
 Everything is released: the harness, every configuration, the committed
 subset indices, the pinned filter-bank fingerprints, **every per-run JSON
@@ -72,6 +72,17 @@ of the time on their own, which is why removing 50<!--auditExclResolvable-->
 resolvable cells moved the headline as much as it did. The manuscript
 discloses this in full.
 
+Above the crossing the term is small and its sign is close to a coin flip
+(67.4% of resolvable cells); below it, where the term is large and negative,
+the sign is right 94.9<!--auditBelowRate-->% of the time. "Law" is used in the
+paper's bounded sense, a measured-regime regularity, never a theorem. Its
+mechanism is a label-budget effect: re-probed at each cell's *own* label
+budget, the readout term shrinks by more than half on 19 of 30 cells and the
+frozen-feature gain tracks the end-to-end gain to **0.17 points** on average
+across 30 cells, 8 datasets and baselines from 5 to 94%. That matched-budget
+result is the paper's practical headline; the full-label sign law is its
+corollary.
+
 The law is **predictive, not descriptive**. Registered in advance, it called
 the feature gain of a backbone family it had never seen (Swin-T: predicted
 band `+7..+11`, measured `10.5 / 9.3 / 10.1 / 7.6`, four of four in band),
@@ -82,17 +93,25 @@ sign), and the ImageNet-scale residual (`|Δ−G| ≤ 1.1` on five of six pairs)
 
 | fusion | currencies | outcome | evidence |
 |---|---|---|---|
-| prior + augmentation | structure + invariance | **stack** | `Δ` amplified 1.4–2.4×; `G` rises 14.9 → 22.2 |
-| prior + effective SSL | structure ≈ invariance | **substitute** | combo ≤ best single; equal `G` |
+| prior + augmentation | structure + invariance | **stack** (on ViT/CIFAR; 1 of 6 cells on two off-selection conv populations) | `Δ` amplified 1.4–2.4×; `G` rises 14.9 → 22.2 |
+| prior + effective SSL (SimCLR, DINO, masked) | structure ≈ invariance | **substitute** | combo never usefully exceeds the better single arm (at most ~1 point above, never near additivity); equal `G` |
 | prior + ineffective SSL | structure + ~nothing | stack | full gain recovered on SimSiam |
-| prior + ImageNet init | structure vs. mature features | **interference** | −16..−18 points at full auxiliary strength, vanishing below it; carried by `G`; null under domain shift |
+| prior + ImageNet init | structure vs. mature features | **interference** | −15..−17 points at full auxiliary strength (10 seeds per arm), vanishing at `λ0 ≤ 0.3`; carried by `G`; null under domain shift |
 | augmentation + SSL | invariance + invariance | substitute | the DeiT recipe collapses SimCLR's margin |
 
-The practical corollary: a cheap linear probe of what each candidate source
-contributes predicts whether combining them is worth anything, **before** any
-joint training is run.
+This taxonomy is **retrospective**. Each source's currency is measurable on
+its own frozen features, and that measurement separates the outcomes after the
+fact, but it does not predict them: a rule built on it, run prospectively on
+thirteen pairs whose combination had never been trained (calls committed from
+validation-split diagnostics before any combination ran), matched the trained
+outcome on **1 of 9** resolved pairs. Two further rules of the same shape
+(strength asymmetry, fix-set overlap) fail out of sample too, and the reason
+is structural: DeiT augmentation contributes almost no feature gain on its own
+yet multiplies what it is paired with, an amplifier no comparison of two
+single-arm gains can describe. The paper reports the failure as a result and
+claims no predictive fusion selection.
 
-### 3. Attention carries a feature deficit that grows with model scale
+### 3. Attention carries a feature deficit that grows with model scale, at matched budget
 
 Every convolutional backbone is neutral at data sufficiency, including at
 1.28M images (`Δ = +0.04 ± 0.07`). Vision transformers are not:
@@ -136,7 +155,13 @@ on) transplants across every dataset and backbone without retuning.
 
 A learned teacher costing an entire extra model does approximately nothing,
 across a full eight-point envelope. The gain is the moment structure
-specifically.
+specifically. Two qualifications, both measured after the table above was
+first written: that ordering comes from CIFAR-100, the selection set, and on
+Tiny-ImageNet it compresses (every target helps, most pairwise gaps are inside
+noise, magnitude is first at 5% and tied for first at 10%); and the random
+fixed target is not a universal null (−1.46 to +0.67 across four populations).
+The defensible statement is the margin: magnitude beats random fixed maps on
+every population measured, by +0.8 to +4.2 points.
 
 ---
 
@@ -159,7 +184,7 @@ The per-run records are the raw evidence behind them, so any number in the
 paper can be traced from the printed table back to the individual training
 run that produced it.
 
-**What is not released:** model checkpoints (223 GB) and the source image
+**What is not released:** model checkpoints (about 275 GB) and the source image
 datasets. All datasets are public and cited in the paper; the committed
 subset indices reproduce the exact image selection without redistributing
 images.
@@ -207,8 +232,9 @@ Each run writes `metrics.csv` (per-epoch), `final.json` (config, accuracy,
   redraws the augmentation stream. It is pinned per cell and recorded per run.
 - **Predictions were registered before results.** Every experimental wave was
   launched with numeric bands and explicit falsifiers recorded in `CLAUDE.md`
-  before any result existed. Four major predictions missed; all four are
-  reported in the paper.
+  before any result existed. Misses are reported in the paper and scored
+  in the ledger, including the prospective fusion rule that called one pair
+  of nine.
 - **Run-directory guards.** A completed run is a no-op, concurrent trainers
   on the same cell abort on an exclusive lock, and checkpoint writes are
   atomic.
@@ -240,11 +266,15 @@ momentstem/aux.py         MomentAux: the training-only prior under test
 momentstem/stem.py        forward-path MomentStem (superseded; kept as a control)
 momentstem/controls.py    learned / random-fixed / gabor-learn control stems
 momentstem/backbones.py   timm backbones, small-image surgery, FLOP accounting
-data.py                   14 dataset loaders, committed subsets, CIFAR-C
-train.py                  the single training entry point (with run guards)
-scripts/simclr_pretrain.py, simsiam_pretrain.py, dino_pretrain.py
+data.py                   the classification loaders, committed subsets, CIFAR-C
+data_dense.py, data_det.py   segmentation and detection loaders (same VOC images)
+train.py                  the single classification entry point (with run guards)
+train_dense.py, train_det.py  the dense and detection transplants, same recipe
+scripts/simclr_pretrain.py, simsiam_pretrain.py, dino_pretrain.py, mae_pretrain.py
 analysis/linear_probe.py  the feature gain G (full-train and fixed-shot)
+analysis/dense_probe.py, det_probe.py  the dense and detection analogues of G
 analysis/aggregate.py     runs/ -> markdown + LaTeX tables
+analysis/aggregate_dense.py, aggregate_det.py  the dense and detection tables
 analysis/audit_law_paired.py  scope-wide audit of the law (canonical)
 analysis/audit_sign_law.py  the older independent-SEM audit, superseded
 analysis/export_results_csv.py  the released result tables
@@ -257,12 +287,13 @@ slurm/                    cluster work-queue: worker, big lane, probe lane
 ## Citation
 
 ```bibtex
-@article{almughrabi2026fusing,
-  author  = {AlMughrabi, Ahmad and Marques, Ricardo and Radeva, Petia},
-  title   = {When does fusing hand-crafted spectral knowledge with learned
-             representations pay? A controlled, cost-normalized benchmark
-             and its organizing law},
-  journal = {Information Fusion},
+@article{almughrabi2026momentaux,
+  author  = {AlMughrabi, Ahmad and Clop, Albert and Busam, Benjamin
+             and Marques, Ricardo and Radeva, Petia},
+  title   = {When does fusing hand-crafted knowledge with learned
+             representations pay? A cost-normalized benchmark of stacking,
+             substitution and interference},
+  journal = {Under review},
   year    = {2026}
 }
 ```

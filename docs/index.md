@@ -61,7 +61,7 @@ and exporters released here.
 - **[Released artifacts](ARTIFACTS.md)** — what is in each released asset
   (per-run records, training curves, result tables, campaign logs) and how
   to load it.
-- **[Porting notes](PORTING.md)** — what was ported vs corrected from the
+- **[Porting notes](../PORTING.md)** — what was ported vs corrected from the
   original MomentsNeRF code and why.
 
 ## Headline results (3–10 seeds, frozen recipe)
@@ -87,6 +87,11 @@ where the account makes a strong prediction. Machine-verified by
 `audit_sign_law.py` uses an independent-SEM formula the paper withdrew, and
 its higher figure should not be quoted.
 
+At each cell's *own* label budget the frozen-feature gain tracks the
+end-to-end gain to 0.17 points on average (30 cells, 8 datasets), which is the
+paper's practical headline; the sign law above is its full-label corollary,
+and "law" is used in the bounded, measured-regime sense.
+
 The law is predictive: registered in advance it called an unseen backbone
 family's feature gain from baseline heights alone (Swin-T, four of four in
 band) and the ImageNet-scale residual (`|Δ−G| ≤ 1.1` on five of six pairs).
@@ -103,12 +108,17 @@ point of the comparison: the prior is ~1.02×, self-supervised pre-training
 | convolutional, SSL at 5× | **SSL wins at every fraction 1–25%.** The prior's convolutional case is a *cost* case, not an accuracy case, and we say so without qualification |
 | small ViT under the DeiT recipe, SSL at 2× | prior wins at every CIFAR-100 fraction |
 | small ViT under the DeiT recipe, SSL at 5× | SSL at 5%, level at 10%, **prior at 25%** — the ordering flips with data, on both populations tested |
-| prior + augmentation | **stack** (different currencies: structure vs. nuisance-invariance) |
-| prior + effective SSL | **substitute** — the combination beats neither single arm |
-| prior + ImageNet init | **interference**, −16..−18 points at full auxiliary strength and gone below it; the frozen-feature probe shows the damage is to the features themselves |
+| prior + augmentation | **stack** on ViT/CIFAR (different currencies: structure vs. nuisance-invariance); necessary, not sufficient: on two off-selection convolutional populations the pairing stacks at one cell of six |
+| prior + effective SSL (SimCLR, DINO, masked reconstruction) | **substitute** — the combination never usefully exceeds the better single arm (at most about a point above it, never near additivity) |
+| prior + ImageNet init | **interference**, −15..−17 points at full auxiliary strength (ten seeds per arm) and gone at λ0 ≤ 0.3; the frozen-feature probe shows the damage is to the features themselves |
 
-The practical rule that falls out: probe what each candidate source supplies
-*before* combining them. Sources with the same currency do not add.
+Those outcomes are organized, not predicted, by a frozen-feature reading of
+each source alone: a rule built on that reading and run prospectively on
+thirteen untrained pairs called **one of nine** resolved outcomes, so the
+paper claims no predictive fusion selection and reports the failure as a
+result. Masked reconstruction (MAE-style, 2×) was added on ViT-tiny: level
+with SimCLR and the prior under the plain recipe, 6.8 to 7.6 points below the
+prior under DeiT augmentation.
 
 ## Off classification
 

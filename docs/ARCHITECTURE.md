@@ -4,7 +4,7 @@ Diagrams for the MomentStem study. GitHub renders the mermaid blocks natively.
 Generated figures referenced here live in [viz/](viz/) (see
 `analysis/visualize_features.py`).
 
-## 1. MomentAux — the champion method
+## 1. MomentAux — the method under test (the paper's reference configuration)
 
 The deployed network is a **vanilla ResNet** (RGB → logits, +0 inference
 params). The moment prior exists only as a training-time auxiliary loss.
@@ -37,7 +37,9 @@ flowchart LR
 
 Key settled design points: tap **layer3** (layer1≈layer2≈layer3 plateau,
 layer4 cliff — tap depth is NOT a regime knob), target **magnitude** (beats
-structure/steerable/rotinv/gabor/HOG/random/learned-teacher), loss **MSE**
+structure/steerable/rotinv/gabor/HOG/random/learned-teacher on CIFAR-100;
+the ordering compresses on Tiny-ImageNet, where the surviving claim is the
+margin over random fixed maps), loss **MSE**
 (cosine discards the scale that matters), **λ0 is the data-regime knob**
 (2.0 at 1–2%, 1.0 at 3–10%, 0.3 at 15–25%, 0.1 at 100%).
 
@@ -76,16 +78,18 @@ flowchart TD
     E2E --> RO["readout = Δe2e − G
     (what the cell's classifier can cash in)"]
     GG --> RO
-    RO --> LAW["SIGN LAW (20 clean cells):
-    readout < 0 below baseline ≈ 30
-    readout > 0 above baseline ≈ 34
-    crossing pinned in [29.8, 33.6]"]
+    RO --> LAW["SIGN LAW (seed-paired audit):
+    readout < 0 below the crossing
+    readout ≳ 0 above it
+    crossing bracketed in [31.8, 40.3]
+    455 resolvable cells, 393 (86.4%) as predicted"]
 ```
 
 Guard rails: the decomposition is valid only while the probe holds far more
 labels than the cell (probe-ceiling rule — stl@20/50% excluded); G is
 comparable only within a fixed probe space (the tin 2×2 result); every claim
-is machine-checked by `analysis/audit_law.py`.
+is machine-checked by `analysis/audit_law_paired.py` (the canonical audit);
+`analysis/audit_law.py` is the older closure check and is kept for the record.
 
 ## 4. The label-space controls (what moved, what stayed fixed)
 
@@ -133,9 +137,9 @@ flowchart LR
     (groups by config NAME)"]
     RUNS --> PROBES["analysis/linear_probe.py
     (--probe-dataset, --shots)"]
-    RUNS --> AUDIT["analysis/audit_law.py
-    (recomputes Δ, G, readout;
-    checks the law; exit 1 on fail)"]
+    RUNS --> AUDIT["analysis/audit_law_paired.py
+    (recomputes Δ, G, readout per seed;
+    audits the sign law; writes law_audit.md)"]
     RUNS --> VIZ["analysis/visualize_features.py
     (t-SNE + silhouette, layer3 vs
     target heatmaps, CAM, the bank)"]

@@ -46,18 +46,20 @@ df = pd.read_csv("results/all_results.csv")
 law = df[df.aux_target.notna() & df.init_from.isna()
          & df.pretrained.isna() & (df.stem.fillna("none") == "none")
          & df.baseline_cell.notna() & df.base_acc.notna()]
-law = law.assign(readout=law.delta - law.G)      # 1,276 cells
+law = law.assign(readout=law.delta - law.G)      # 1,277 cells
 ```
 
-**That is not yet the paper's 1,020.** The audit forms `readout` *per seed*,
-which needs four measurements from the same seed — both arms' accuracy and
-both arms' probe — and drops any cell without at least three seeds common to
-all four. That check needs the per-run records, not the summary table, so it
-cannot be done from the CSV alone: 257 of the 1,277 cells fall out. Unpack
-`run-records.tar.gz` alongside the tables and run
+**That is not yet the paper's 958.** Two further rules apply. The audit
+excludes the 100% cells (115 of the 1,277), because there the evaluation's
+labels are the cell's own and the probe-ceiling rule refuses the G/readout
+split; and it forms `readout` *per seed*, which needs four measurements from
+the same seed — both arms' accuracy and both arms' probe — and drops any cell
+without at least three seeds common to all four. That second check needs the
+per-run records, not the summary table, so it cannot be done from the CSV
+alone. Unpack `run-records.tar.gz` alongside the tables and run
 
 ```bash
-python analysis/audit_law_paired.py      # 1,020 in scope, 471 resolvable, 402 correct
+python analysis/audit_law_paired.py      # 958 in scope, 455 resolvable, 393 correct (86.4%)
 ```
 
 which is the single command behind every law number in the paper. The
@@ -155,9 +157,9 @@ intervention at a given (dataset, fraction) consumes byte-identical images.
 
 ## What is not released, and why
 
-- **Model checkpoints (223 GB).** Too large to distribute. Every cell
+- **Model checkpoints (about 275 GB).** Too large to distribute. Every cell
   retrains from its committed configuration and subset.
-- **Source images.** All 14 datasets are public and cited in the paper. The
+- **Source images.** All datasets are public and cited in the paper. The
   subset indices reproduce the exact selection without redistributing images.
 
 ## Verifying an asset

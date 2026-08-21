@@ -1,5 +1,10 @@
 """Mechanical audit of the study's central claims, from raw run files.
 
+SUPERSEDED for the law numbers by analysis/audit_law_paired.py (seed-paired
+uncertainty, current crossing bracket [31.8, 40.3]); this script keeps the
+original 2026-07 closure checks and writes results/law_audit_legacy.md so it
+can never overwrite the canonical results/law_audit.md.
+
 The ledger (CLAUDE.md / FINDINGS.md) is hand-written; this script recomputes
 every number in the law's chain directly from runs/*/final.json and
 runs/*/linear_probe*.json and CHECKS the claims, so the write-up rests on
@@ -14,7 +19,7 @@ machine-verified facts:
 
 Exit code 1 if any check fails -- CI-able.
 
-    python analysis/audit_law.py [--out results/law_audit.md]
+    python analysis/audit_law.py [--out results/law_audit_legacy.md]
 """
 
 import argparse
@@ -86,7 +91,7 @@ def probe(cell, fname):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="results/law_audit.md")
+    ap.add_argument("--out", default="results/law_audit_legacy.md")
     args = ap.parse_args()
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
 

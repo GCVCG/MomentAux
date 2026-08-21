@@ -9,6 +9,12 @@ defined here.
 
 ## The method
 
+**Reference configuration / "champion".** The paper's term for the
+configuration every headline cell uses (λ0 = 1.0 cosine-decayed to 0,
+magnitude target, third-stage tap, head_norm on) is *reference
+configuration*; this file, [FINDINGS.md](FINDINGS.md) and the ledger call the
+same thing the **champion**. One object, two names.
+
 **Moment filters / the bank.** A fixed set of image filters inspired by
 classical image *moments* (Gabor and Zernike families). The study's champion
 bank is 8 **complex-Gabor quadrature pairs**: for each orientation/scale, an
@@ -33,7 +39,12 @@ dark-to-bright edge give the same response). One map per pair → an
 "energy-magnitude" and "the (aux) target" all refer to this. The target
 sweep (FINDINGS §4) showed phase-invariant magnitude beats raw oriented
 edges, rotation invariants, structure tensors, HOG, learned teachers, and
-random fixed maps as an aux target.
+random fixed maps as an aux target on CIFAR-100, the selection set. Off it
+the ordering compresses: on Tiny-ImageNet every target helps and most
+pairwise gaps are inside noise (magnitude first at 5%, tied for first at
+10%), and the random fixed target is not a universal null (−1.46 to +0.67
+across four populations). The claim that survives is the margin: magnitude
+beats random fixed maps on every population measured, by +0.8 to +4.2.
 
 **Calibration.** Once per run, the bank is fed a deterministic batch of
 1024 training images (index order, eval transform, no labels) and each
@@ -104,8 +115,8 @@ naive cross-fraction comparisons confound data with compute.
 
 **diag\* prefix.** A config whose name starts with `diag` deviates from the
 frozen recipe (different optimizer, head, init, epochs...) and may never
-enter a headline table. Enforced in `train.py` for AdamW, `head:`, and
-`init_from`.
+enter a headline table. Enforced in `train.py` for AdamW, `head:`,
+`init_from`, `pretrained: true` and `augment:`.
 
 **Subsets.** The low-data fractions use *committed* index files
 (`data/subsets/*.json`), drawn once, stratified per class, identical for
@@ -129,10 +140,18 @@ readout(baseline task performance)`. G is a property of what the network
 saw; readout depends only on how good the baseline is.
 
 **The sign law / the crossing.** readout is *negative* when the baseline's
-test accuracy is below ≈30–35% (few labels → the classifier can't exploit
-better features, so realized gain < G) and *positive* above it (aux
-features are easier to read — realized gain > G). 25 clean cells, zero
-violations, including ViT.
+test accuracy is below a crossing bracketed at **[31.8, 40.3]** points (few
+labels → the classifier can't exploit better features, so realized gain < G)
+and small and *positive* above it (aux features are easier to read —
+realized gain > G). Audited scope-wide by `analysis/audit_law_paired.py`
+(the canonical, seed-paired audit): 958 cells in scope, 455 resolvable
+against their own uncertainty, **393 (86.4%)** on the predicted side, 94.9%
+below the crossing and 67.4% above it, where the term is near zero and its
+sign barely tests anything. Its mechanism is a label-budget effect:
+re-probed at the cell's own label budget the term mostly vanishes and the
+frozen-feature gain tracks the end-to-end gain to 0.17 points (30 cells),
+so baseline accuracy is largely standing in for the label ratio. "Law" in
+this study means that bounded regularity, never a theorem.
 
 **Shots / k-shot probe.** A probe trained on only k labels per class
 (`--shots`), measuring how much of G is visible at a given label budget.
@@ -148,8 +167,11 @@ Falsified at 50 labels/class (R measured >100%) and replaced by the
 additive law above. Appears only in dated FINDINGS entries.
 
 **SSL (self-supervised learning).** Training on images with NO labels, by
-inventing a task the data grades itself. In this study SSL means one method:
-**SimCLR** (`scripts/simclr_pretrain.py`). Two randomly augmented views of
+inventing a task the data grades itself. Four families are measured:
+**SimCLR** (`scripts/simclr_pretrain.py`, the main comparator), SimSiam
+(`simsiam_pretrain.py`, negative-free; learns ~nothing at this scale), DINO
+(`dino_pretrain.py`, self-distillation) and masked reconstruction
+(`mae_pretrain.py`, MAE-style). For SimCLR: two randomly augmented views of
 the same image (crop / flip / color-jitter / grayscale) are pushed to have
 similar representations while views of different images are pushed apart
 (the contrastive **NT-Xent** loss). The pretrained weights then **initialize**
@@ -163,15 +185,19 @@ control (plain supervised training at the same doubled budget) separates
 "SSL helped" from "trained twice as long". Cost: SSL is a whole extra
 training phase (**~2x compute**); MomentAux is **~1.02x**.
 
-Result (C100 top-1): SimCLR-init beats the champion aux at every measured
-fraction -- 11.21 vs 10.35 @1%, 34.41 vs 30.51 @5%, 49.04 vs 44.03 @10% --
-with the margin GROWING as data grows. So MomentAux is not the accuracy
-frontier once 2x compute is affordable; its surviving claims are near-zero
-marginal cost, near-parity at 1%, and the attention regime. The two priors
-also do NOT stack: SimCLR-init + aux is *worse* than SimCLR-init alone
-(-1.51), and G(simclr) = +9.0 shows SSL fills the SAME feature deficit the
-moment prior fills, only more of it. Recommendation on record: **aux XOR
-SSL, never both**.
+Result (C100 top-1, convolutional): SimCLR-init beats the champion aux at
+every measured fraction -- 11.21 vs 10.35 @1%, 34.41 vs 30.51 @5%, 49.04 vs
+44.03 @10% -- with a margin that is UNIMODAL in data (peaking near 7-10%,
+gone by 50%), and at 5x pre-training budget it wins at every fraction 1-25%.
+So on convolutional backbones MomentAux's case is one of cost (~1.02x),
+not accuracy. On small ViTs under DeiT augmentation the ordering inverts:
+the prior beats 2x SSL at every CIFAR-100 fraction, and at 5x SSL wins at
+5%, ties at 10% and loses at 25% (same ordering on Tiny-ImageNet). The prior
+and effective SSL do NOT stack: SimCLR-init + aux is *worse* than SimCLR-init
+alone (-1.51 on conv, neutral on ViT), and G(simclr) = +9.0 shows SSL fills
+the SAME feature deficit the moment prior fills, only more of it; SimSiam,
+which learns ~nothing here, does stack. Recommendation on record: **aux XOR
+effective SSL**.
 
 **Granularity controls.** Datasets built to move *one* variable:
 `cifar100super` (CIFAR-100's images, official 20 coarse labels),
@@ -220,8 +246,9 @@ per-epoch log. Since 2026-07-20 metrics.csv also logs `ce_loss`,
 | `analysis/visualize_features.py` | what does the prior *do*: bank rendering, layer3-vs-target heatmaps + alignment r, t-SNE + silhouette, CAMs |
 | `analysis/per_class_delta.py` | *which classes* gain or lose, by name, across seeds |
 | `analysis/training_dynamics.py` | *when* in training the gap opens; λ/lr schedules; loss components; tap-std collapse check |
-| `analysis/aggregate.py` | regenerates every results table from runs/ |
-| `analysis/audit_law.py` | machine-checks every number in the law table (exit 1 on failure) |
+| `analysis/aggregate.py` | regenerates summary.{md,tex} from runs/ (the CSVs come from `export_results_csv.py`; dense and detection tables from `aggregate_dense.py` / `aggregate_det.py`) |
+| `analysis/audit_law_paired.py` | the canonical sign-law audit (seed-paired uncertainty, writes `results/law_audit.md`) |
+| `analysis/audit_law.py` | the older mechanical closure check from the 2026-07 ledger (writes `results/law_audit_legacy.md`); superseded for the law numbers |
 | `analysis/eval_cifair.py`, `eval_robustness.py` | duplicate-contamination control; corruption robustness (CIFAR-100-C) |
 
 **Aggregation rule.** Tables group by config *name* (the cell), never by

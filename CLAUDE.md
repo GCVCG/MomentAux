@@ -7650,3 +7650,122 @@ ported vs corrected and why.
       and the honest verdict is the branch I labelled "both are wrong".
     Two mutually exclusive predictions were on record before the wave, which
     is the only reason I cannot now claim the one that fits.
+
+## THE ROUND-3 REVIEW APPLICATION AND THE PAGE-GATE REGRESSION (2026-08-20,
+## user items: method-figure title, failed CI run, three review files, table
+## footnotes/float placement, Tiny-IN ratio column, tab:controls width)
+
+- THE CI FAILURE WAS NEVER CODE: run 32357212339's three jobs were refused by
+  GitHub before starting -- "recent account payments have failed or your
+  spending limit needs to be increased" on the GCVCG org. Nothing in the repo
+  was broken; all three jobs verified green locally (suite 108/108,
+  sync_public_numbers 0 stale, check_submission clean). BUT the outage hid a
+  real regression, and the guard had a second hole: the submission CI job ran
+  check_submission.py WITHOUT --strict, which prints failures and exits 0 --
+  the job would have stayed green at any page count. Ninth silent-guard
+  incident; the workflow now passes --strict.
+- THE REGRESSION IT HID: the wave-1 withdrawal text (+1 page) and the wave-M2
+  fold-in (+1 page) took the article from its gated 35 to 37 against the
+  journal's hard 35 (verified from committed PDFs: ef6c609 = 36, 9f5ca66 =
+  37). Recovered to EXACTLY 35 in three stages, per the user's instruction to
+  exhaust formatting first: (1) formatting -- \floatpagefraction 0.70->0.88
+  (a float column only had to be 70% full, which is precisely the blank the
+  user saw below tab:budget), heading/display-skip tightening, two-line
+  headings shortened, captions trimmed, footers to \tiny (~0.8 page);
+  (2) prose condensation, ~60 source lines, no number, caveat, citation or
+  registered-prediction disclosure dropped (~0.6 page); (3) two appendix
+  artifacts the paper itself declared redundant became prose -- tab:appssl
+  (derivable from tab:budget's columns), fig:envelopes ("adding no value of
+  its own"), fig:tsne (its silhouette numbers already in the main text).
+- REVIEWS APPLIED: the full Claude round-3 + second-pass fix list (stale
+  tab:exceptions regenerated from the live audit -- the referee's arithmetic
+  was exact: DTD@100% out, PathMNIST MNet@3% in; cover letter re-titled and
+  de-withdrawn-claimed, now machine-checked; residual "anticipatable"
+  sentence; taxonomy caption and row P1; P2 detection cross-ref re-anchored
+  to the Table-4 pair 4.16/1.42; P4 numeric gate into Algorithm 1;
+  highlights.txt 3,077; abstract "calls one of nine" at 248 words; uncited
+  hendrycks entry dropped) and the ChatGPT SAC editorial layer (claims audit:
+  "predictable from currency" -> "organized by" with 1/9 beside it
+  everywhere, procedure reframed hypothesized-then-falsified, selection-set
+  markings in captions, c10-2% worker flag in tab:envelope, m1 "law"
+  bounded-sense clause at first use). ChatGPT items NOT actionable as edits,
+  left as open decisions: title softening (recommended against -- the body
+  no longer overclaims), a formal train->val->lock->test confirmatory panel
+  (E2), 300-epoch/convergence ViT arms (E3 beyond the 200-epoch control),
+  and a third multi-source population to break the EuroSAT-MS/So2Sat
+  confound (E5) -- each is an experiment, not an edit.
+- A STALE SIBLING CAUGHT IN PASSING: the method figure's scope strip still
+  said "500 to 1.28M Images" after the manuscript's data-scale claim was
+  corrected to 150 (STL-10@3%) -- the generator carried the literal, the
+  fifth instance of that class. And the Tiny-IN ratio column was populated
+  from the EXPORTER, not the ledger: at 1% the exporter's plain delta is
+  +1.28 (ratio 2.4), not the ledger's +1.39 (2.2) -- tables regenerate from
+  the released records, so the exporter wins and this entry records the
+  discrepancy rather than hiding it.
+- *** CI REMOVED BY USER DECISION, GUARDS KEPT (2026-08-20, same day): the
+  org's Actions billing was not going to be restored, so
+  .github/workflows/checks.yml is deleted rather than left permanently red.
+  The three checks move verbatim into scripts/run_checks.sh (unit suite,
+  public-numbers drift, check_submission --strict) -- run it BEFORE EVERY
+  PUSH, because the "checker nobody runs is not a checker" lesson now has no
+  automated backstop. Verified green end-to-end at creation (108/108, 0
+  stale, submission ready, 35 pages).
+- *** PUBLIC-REPO CLEANUP (2026-08-20, user: "We need only the implementation
+  and their logs and results"): commit 5070b09 untracks from GCVCG/MomentAux
+  -- keeping every file ON DISK -- the manuscript sources (paper/), the old
+  submission/ package, all referee reviews and response letters, the journal
+  author guide and CAS templates, the title mockups, the five paper-support
+  scripts (make_paper_numbers, make_partition_table, check_table_numbers,
+  make_submission, sync_public_numbers), .claude/settings.json, and the
+  billing-dead CI workflow; texput.log deleted outright; the missing
+  logs/mae2_probe.log added. README's layout section and docs/index.md no
+  longer point at paper/. All of it is .gitignore'd so it cannot silently
+  return. VERIFIED before pushing: nothing the Data Availability statement
+  promises was removed (harness, configs, subsets, pinned banks, run
+  records, result tables, aggregation + audit scripts, and this ledger all
+  stay tracked), no public doc references a removed file, and the
+  public-numbers drift check still passes. CAVEAT ON RECORD: untracking
+  removes files from the TIP only -- the manuscript and reviews remain
+  retrievable from git history; expunging them needs git filter-repo plus a
+  force push, which is a separate decision nobody has taken. The local
+  pre-push gate (scripts/run_checks.sh) is now ignored, not tracked, because
+  it invokes paper/ tooling a public clone does not have.
+
+## PUBLIC DOCS REVIEW (2026-08-21, user: "give a final review for the docs on
+## the github repo, make them up to date"; the co-author-trailer removal was
+## withdrawn by the user in the same turn: "You can keep Claude")
+
+- STATE CLAIMS CORRECTED across README.md, docs/index.md, GLOSSARY.md,
+  ARCHITECTURE.md, VISUALS.md, ARTIFACTS.md (checked against the paper's
+  current macros, results/law_audit.md and the exporter; sync_public_numbers
+  --check 0 stale, link check 0 broken): the withdrawn "a probe predicts
+  whether combining is worth anything BEFORE joint training" corollary is
+  replaced by the retrospective taxonomy + the 1-of-9 prospective result and
+  the amplifier diagnosis; "prior + effective SSL: combo <= best single" ->
+  "never usefully exceeds (at most ~1 point above)"; "prior + augmentation
+  stack" scoped (1 of 6 cells on two off-selection conv populations);
+  interference -16..-18 -> -15..-17 (10 seeds); 5.7M -> 2.5M parameters;
+  checkpoints 223 GB -> ~275 GB (paper's figure; local runs/ alone is 258G);
+  the sign-law crossing in GLOSSARY/ARCHITECTURE still read [29.8, 33.6] /
+  "25 clean cells, zero violations" -> [31.8, 40.3], 958/455/393, 94.9% below
+  / 67.4% above, plus the matched-budget 0.17-point mechanism; GLOSSARY's SSL
+  entry ("one method: SimCLR", "margin GROWING", "aux XOR SSL") -> four
+  families, unimodal margin, 5x result, attention inversion, "aux XOR
+  effective SSL"; the target-sweep sentences gained the N1/N1b scope
+  (CIFAR-100 ordering; random not a universal null; the margin is the
+  claim); ARTIFACTS' audit walkthrough 1,020/471/402 -> 958/455/393 with the
+  100%-exclusion rule; VISUALS' C100@5% cell to the 10-seed values; README
+  citation gained Clop and Busam and the current title; layout lists the
+  dense/detection entry points and mae_pretrain; docs/index.md's PORTING
+  link fixed (was relative to docs/).
+- HAZARD CLOSED: analysis/audit_law.py (the 2026-07 closure check) wrote to
+  results/law_audit.md BY DEFAULT, the same path the canonical paired audit
+  writes, and VISUALS.md told readers to run it -- one obedient reader would
+  have overwritten the released audit with the [29.8, 33.6] version. Default
+  is now results/law_audit_legacy.md, docstring marks it superseded, every
+  doc points at audit_law_paired.py.
+- docs/FINDINGS.md: its record ends 2026-07-19; a header note says so and a
+  new §13 gives a one-page pointer summary of everything after (law at scale,
+  comparator budget, taxonomy + prospective test, attention/model scale,
+  dense + detection, two sensors, referee rounds). The dated Q-entries were
+  left verbatim, as the ledger's own rule requires.

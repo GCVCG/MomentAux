@@ -5,7 +5,12 @@ its status. Negatives are recorded as prominently as positives: several cost a
 full ablation to establish and are easy to re-litigate by accident.
 
 `CLAUDE.md` remains the authoritative working ledger (denser, chronological).
-This file is the navigable index into it. Last updated 2026-07-16.
+This file is the navigable index into it. The question-by-question record
+below covers the study through 2026-07-19 and is kept as written; §13 at
+the end summarizes everything that landed after that date (the comparator
+budget study, ImageNet scale, the dense and detection transplants, the
+multi-source populations and the prospective fusion test) with pointers into
+the ledger. Last updated 2026-08-21.
 
 **Status legend**
 | tag | meaning |
@@ -970,3 +975,75 @@ draws agree on e2e, G, AND readout), Q6.9j (tin 2×2: granularity = readout
 effect; diagonal G invariant; probe-space effect survives the budget
 control at 7.6σ), tin envelope 1.49/1.81/2.13/1.65/0.10 at 1/2/5/10/25%
 with G(tin,2000)=3.47 completing the falling curve.
+
+---
+
+## 13. After 2026-07-19: what landed later, in one page
+
+Each line is a pointer; the full pre-registration, scoring and post-mortem
+is in `CLAUDE.md` under the date given, and the numbers are in
+`results/all_results.csv`, `results/law_audit.md`, `results/dense_*.csv`
+and `results/det_*.csv`.
+
+**The law at scale (2026-08-05 → 08-18).** The sign law was audited over
+the whole grid with seed-paired uncertainty (`analysis/audit_law_paired.py`):
+958 cells in scope, 455 resolvable, **393 (86.4%)** on the predicted side,
+94.9% below the crossing bracket [31.8, 40.3] and 67.4% above it, where the
+term is near zero. An earlier 96% (independent-SEM audit) and 78.9%
+(pretrained-cell leak) are superseded and named as such. Predicted in
+advance from baselines alone: Swin-T's feature gain (4 of 4 in band), eight
+cells on four new domains (8 of 8 in sign), and the ImageNet-scale residual
+(|Δ−G| ≤ 1.1 on five of six pairs). Re-probed at each cell's *own* label
+budget (referee item B1, 2026-08-16), the readout term mostly vanishes and
+G tracks Δ to 0.17 points over 30 cells: the negative branch is a
+label-budget effect, and the matched-budget result is the practical
+headline. — **SETTLED**
+
+**Comparator budget (2026-08-09).** SimCLR at 5× compute beats the prior at
+every convolutional fraction 1–25%, so the convolutional claim is a cost
+claim, not an accuracy claim. On ViT-tiny under DeiT augmentation the prior
+beats 2× SSL at every fraction; at 5× SSL wins at 5%, ties at 10%, loses at
+25%, with the same ordering on Tiny-ImageNet. SimSiam learns ~nothing at
+study scale; DINO and masked reconstruction (MAE-style, 2026-08-19/20) sit
+at or below SimCLR and below the prior under DeiT augmentation. —
+**SETTLED, two accuracy claims withdrawn**
+
+**Fusion taxonomy and its prospective test (2026-08-14 → 08-20).** Stack /
+substitute / interfere are separable after the fact on frozen features
+(imprint specificity: the oriented-energy imprint follows the target, not
+the gain). Interference with an ImageNet init is −15..−17 at full auxiliary
+strength (10 seeds) and gone at λ0 ≤ 0.3 (E3/B2). The off-selection fusion
+arms on EuroSAT/Food-101 (E2) stack at 1 cell of 6. A hypothesized rule for
+predicting the outcome of an untrained pair, calls committed from
+validation-split diagnostics, matched the trained outcome on **1 of 9**
+(wave 1); the strength-asymmetry and fix-set-overlap alternatives fail out
+of sample too, because DeiT augmentation is an amplifier with ~zero own G.
+— **FALSIFIED as a predictor; the taxonomy stands as retrospective**
+
+**Attention and model scale (2026-08-06 → 08-18).** ViT-tiny gains +3.2 at
+1.28M images where every conv is neutral (+0.04); ViT-S/16 +13.0 and
+ViT-B/16 +26.0 at 224 px / 100 epochs, +4.5 and +6.7 at 200 epochs (six
+seeds), so the deficit grows with model scale at matched budget. Every
+pre-registered scale falsifier (F1–F3, G1–G4) is dead. — **SETTLED**
+
+**Dense prediction and detection (2026-08-10 → 08-14).** Six segmentation
+populations at the 200-epoch recipe (216 runs): the envelope keeps its
+shape and its neutrality at full data, but a dense target on a dense task
+pays +0.39 mIoU at ~5 images/class against classification's ~+1.5 floor
+(alignment is not the source of the gain); the 50-epoch generation was
+withdrawn after it produced the opposite dense-attention conclusion.
+Detection on the same VOC images is a null end to end and under the probe
+(G(fg_acc) −0.16 at 1%). — **SETTLED (both negative)**
+
+**Two sensors (2026-08-08).** Splitting one instrument's bands (EuroSAT-MS)
+stacks at every fraction, +0.45..+2.96; pairing two satellites (So2Sat
+radar + optical) never does, −0.73..0.00. The design cannot separate source
+asymmetry from modality, so this is a contrast, not a predictor. — **SETTLED**
+
+**Referee rounds (2026-08-14 → 08-21).** N1/N1b (target ordering is a
+CIFAR-100 property; magnitude beats random by +0.8..+4.2 everywhere), B3/B4
+(the envelope's right flank is an optimization effect, feature-side), C1
+(the high-data "better features, worse accuracy" exceptions are not λ0
+overshoot), C2 (MobileNet on tin has no feature deficit at any budget), R1
+(ViT-S at 200 epochs: the scale ordering survives).
+
