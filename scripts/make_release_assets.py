@@ -166,7 +166,99 @@ def build(name, pred, outdir, verify):
             info.uname = info.gname = "momentaux"
             with open(os.path.join(ROOT, p), "rb") as fh:
                 tar.addfile(info, fh)
-    return path
+    return path, len(members), total
+
+
+REPO_URL = "https://github.com/GCVCG/MomentAux"
+RELEASE_TAG = "v1.0-benchmark"
+RELEASE_URL = f"{REPO_URL}/releases/tag/{RELEASE_TAG}"
+
+
+def _git_head():
+    try:
+        import subprocess
+        h = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT,
+                           capture_output=True, text=True, check=True).stdout.strip()
+        d = subprocess.run(["git", "log", "-1", "--format=%cs"], cwd=ROOT,
+                           capture_output=True, text=True, check=True).stdout.strip()
+        return h, d
+    except Exception:
+        return "unknown", "unknown"
+
+
+def write_readme(outdir, rows, sums):
+    """dist/README.md: what each asset is, its checksum, and where else it lives.
+
+    Written by the builder rather than by hand so the counts, sizes and
+    checksums it quotes are the ones of the files beside it. It exists because
+    the assets double as the journal's supplementary material, and a reviewer
+    opening a tarball without the repository needs the manifest in the bundle.
+    """
+    head, date = _git_head()
+    lines = [
+        "# MomentAux benchmark: released data assets",
+        "",
+        "Supplementary material for *When does fusing hand-crafted knowledge with "
+        "learned representations pay? A cost-normalized benchmark of stacking, "
+        "substitution and interference* (AlMughrabi, Clop, Busam, Marques, "
+        "Radeva).",
+        "",
+        "**These files are also published on GitHub.** They are the assets of "
+        f"the tagged release [`{RELEASE_TAG}`]({RELEASE_URL}) of the study "
+        f"repository [{REPO_URL}]({REPO_URL}), which also holds the code that "
+        "produced them (training harness, configs, subsets, pinned filter "
+        "banks, exporters and audit scripts). `docs/ARTIFACTS.md` in that "
+        "repository documents every asset in detail and how to regenerate the "
+        "paper's tables from them; this file is the short form that travels "
+        "with the bundle.",
+        "",
+        f"Built from repository commit `{head}` ({date}) by "
+        "`python scripts/make_release_assets.py --out dist/`. Tarballs are "
+        "byte-reproducible (sorted members, fixed mtimes), so the checksums "
+        "below identify this exact build.",
+        "",
+        "| asset | packed | files | contents |",
+        "|---|---:|---:|---|",
+    ]
+    for name, n, raw, packed, desc in rows:
+        lines.append(f"| `{name}` | {packed/1048576:.1f} MB | {n:,} | {desc} |")
+    lines += [
+        "",
+        "## Which to open first",
+        "",
+        "- `result-tables.tar.gz`: one row per experimental cell in "
+        "`results/all_results.csv`; the same pivoted by data fraction; the "
+        "Excel workbook with a column dictionary; `results/law_audit.md`, the "
+        "sign-law audit verbatim; the segmentation and detection grids; and the "
+        "per-figure JSON records. This answers almost every question.",
+        "- `configs-and-subsets.tar.gz`: the YAML of every cell and the committed "
+        "subset indices, so any cell can be re-run on byte-identical images "
+        "with `python train.py --config <cell>.yaml --seed N` from the "
+        "repository.",
+        "- `run-records.tar.gz`: every run's `final.json` and probe record, "
+        "needed to re-run the seed-paired audit "
+        "(`python analysis/audit_law_paired.py`).",
+        "- `training-curves.tar.gz`: per-epoch `metrics.csv` for every run.",
+        "- `logs.tar.gz`: campaign logs, what was submitted when and what failed.",
+        "",
+        "Model checkpoints (about 275 GB) are not released; every cell is "
+        "re-trainable from the configs and subsets above.",
+        "",
+        "## Verifying",
+        "",
+        "```",
+        "sha256sum -c SHA256SUMS",
+        "```",
+        "",
+        "SHA256SUMS:",
+        "",
+        "```",
+        *sums,
+        "```",
+        "",
+    ]
+    with open(os.path.join(outdir, "README.md"), "w") as fh:
+        fh.write("\n".join(lines))
 
 
 def main():
@@ -178,25 +270,29 @@ def main():
     os.makedirs(args.out, exist_ok=True)
 
     print(f"{'asset':30} {'files':>13}  {'size':>11}")
-    built = []
-    for name, (pred, _desc) in ASSETS.items():
-        p = build(name, pred, args.out, args.verify)
-        if p:
-            built.append(p)
+    built = {}
+    for name, (pred, desc) in ASSETS.items():
+        r = build(name, pred, args.out, args.verify)
+        if r:
+            path, n, raw = r
+            built[name] = (path, n, raw, desc)
     if args.verify:
         return
 
-    sums = []
-    for p in sorted(built):
+    sums, rows = [], []
+    for name in sorted(built):
+        p, n, raw, desc = built[name]
         h = hashlib.sha256()
         with open(p, "rb") as fh:
             for chunk in iter(lambda: fh.read(1 << 20), b""):
                 h.update(chunk)
-        sums.append(f"{h.hexdigest()}  {os.path.basename(p)}")
-        print(f"  {os.path.basename(p):30} -> {os.path.getsize(p)/1048576:8.1f} MB packed")
+        sums.append(f"{h.hexdigest()}  {name}")
+        rows.append((name, n, raw, os.path.getsize(p), desc))
+        print(f"  {name:30} -> {os.path.getsize(p)/1048576:8.1f} MB packed")
     with open(os.path.join(args.out, "SHA256SUMS"), "w") as fh:
         fh.write("\n".join(sums) + "\n")
-    print(f"\nwrote {len(built)} assets + SHA256SUMS to {args.out}")
+    write_readme(args.out, rows, sums)
+    print(f"\nwrote {len(built)} assets + SHA256SUMS + README.md to {args.out}")
 
 
 if __name__ == "__main__":
