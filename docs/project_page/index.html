@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MomentAux: When does fusing hand-crafted knowledge with learned representations pay?</title>
-    <meta name="description" content="A controlled, cost-normalized benchmark of data-efficiency interventions: 3,077 classification configurations over 9,471 training runs, and a measurable rule for when fusing a hand-crafted prior with learned representations stacks, substitutes or interferes.">
+    <meta name="description" content="A controlled, cost-normalized benchmark of data-efficiency interventions: 3,077 classification configurations over 9,471 training runs, and the frozen-feature decomposition that organizes when fusing a hand-crafted prior with learned representations stacks, substitutes or interferes.">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { font-size: 16px; }
@@ -101,8 +101,7 @@
         <div class="col-12 text-center mb-2">
             <h1 class="mb-3">When does fusing hand-crafted knowledge with learned representations pay?</h1>
             <p class="text-muted" style="font-size:18px; margin-top:-6px;">
-                A controlled, cost-normalized benchmark and a measurable rule for
-                stacking, substitution and interference
+                A cost-normalized benchmark of stacking, substitution and interference
             </p>
 
             <ul class="list-inline author-list">
@@ -152,8 +151,8 @@
                 <p class="tldr-lead">A free, hand-crafted spectral prior is worth more to a
                 small transformer than two rounds of self-supervised pre-training. To a
                 convolutional network that already has enough data it is worth nothing at
-                all. Which of those two you are about to get is measurable
-                <em>before</em> you train the combined system.</p>
+                all. And at your own label budget, a linear evaluation of frozen features
+                predicts the end-to-end gain to within 0.17 points.</p>
                 <p class="tldr-sub">We ran the comparison the field keeps making informally:
                 every intervention under one frozen recipe, on byte-identical images, with its
                 compute cost declared. The gain then decomposes as
@@ -161,43 +160,56 @@
                 features, plus what the classifier can cash in. The sign of that second
                 term is correct on 86.4<!--auditRate-->% of the cells that
                 can test it. Sources supplying the <em>same</em> currency substitute; sources
-                supplying different ones stack; fusing a strong shaping
+                supplying different ones can stack; fusing a strong shaping
                 prior into an already-informed initialization interferes in proportion to what
-                that initialization was worth.</p>
+                that initialization was worth, at full auxiliary strength and not below it. A
+                rule built on that reading separates the three outcomes in hindsight but, run
+                prospectively on nine untrained pairs, called one, and we report that as a
+                result.</p>
             </div>
             <h2>Abstract</h2>
             <div class="abstract">
-                <p>Fusing prior knowledge with data-driven learning is attractive precisely
-                where data is scarce, yet no controlled account says when such fusion helps,
-                when it is redundant, and when it harms. We benchmark
-                one fixed, hand-crafted source of knowledge, a pinned bank of Gabor
-                targets injected only during training at ~2% compute overhead, against
-                the data-driven alternatives (SimCLR, SimSiam, DINO and masked-reconstruction
-                pre-training, ImageNet
-                transfer, heavy augmentation, learned teachers) under one frozen recipe with
-                fixed subsets: 13 datasets, 9 backbones, 150 to 1.28M images, 32 to 224&nbsp;px,
-                and 5.7M to 86M parameters (3,077<!--computeCells--> classification
-                configurations over 9,471<!--computeRuns--> runs, plus segmentation
-                and detection transplants).</p>
+                <p>Fusing prior knowledge with data-driven learning is attractive where data is
+                scarce, yet no controlled account says when it helps, is redundant, or harms.
+                We benchmark one fixed hand-crafted knowledge source, a pinned bank of Gabor
+                targets injected only during training at ~2% overhead, against data-driven
+                alternatives (SimCLR, SimSiam, DINO and masked-reconstruction pre-training,
+                ImageNet transfer, augmentation, learned teachers) under one frozen recipe
+                with fixed subsets: 13 datasets, 9 backbones, 150 to 1.28M images,
+                32&ndash;224&nbsp;px, 2.5M&ndash;86M parameters
+                (3,077<!--computeCells--> classification configurations over
+                9,471<!--computeRuns--> runs, plus segmentation and detection
+                transplants).</p>
 
-                <p>Every pairwise combination is measured too, and all follow one rule:
-                different-<em>currency</em> sources stack, same-currency sources substitute,
-                and fusing into an already-informed initialization interferes in proportion to
-                what it carries. Because each source's currency is measurable on frozen
-                features beforehand, the outcome is predictable in advance, which we state as
-                a procedure. Underlying it is an empirical decomposition,
-                &Delta;&nbsp;=&nbsp;<em>G</em>&nbsp;+&nbsp;readout(base), whose sign holds on
-                86.4<!--auditRate-->% of testable cells and which, registered in advance, called an unseen
-                backbone family's feature gain from baseline heights alone.</p>
+                <p>Every pairwise combination we measure at training time follows one rule
+                (decision-level fusion differs). Different-<em>currency</em> sources can
+                stack: the prior composes with DeiT augmentation on attention backbones and is
+                worth +26 points to ViT-B/16 at 224&nbsp;px, +6.7 at twice that budget.
+                Same-currency sources substitute: against effective self-supervised
+                pre-training the combination never usefully exceeds the better single source.
+                Fusing at full strength into an already-informed initialization interferes in
+                proportion to what it carries: ImageNet transfer, &minus;15 to &minus;17
+                points, removed by a weaker auxiliary weight. Each source's currency is
+                measurable on frozen features from that source alone, which separates the
+                three outcomes but does not predict them: as a procedure on untrained pairs it
+                calls one of nine. At a practitioner's own label budget the frozen-feature
+                gain predicts the end-to-end gain to within 0.17 points across 30 cells and
+                seven datasets; the underlying decomposition,
+                &Delta;&nbsp;=&nbsp;<em>G</em>&nbsp;+&nbsp;readout(base), holds in sign on
+                86.4<!--auditRate-->% of testable cells and called an unseen backbone family's
+                feature gain in advance.</p>
             </div>
 
             <figure>
                 <img src="imgs/overview.png" alt="Overview: the fusion, the law, and when it pays">
-                <figcaption><strong>Overview.</strong> The knowledge source is a fixed bank of
-                oriented-energy targets regressed from a mid-network tap, with the loss weight
-                decayed to exactly zero, so the deployed network is unchanged and inference
-                costs nothing extra. The centre panel is the decomposition that organizes the
-                grid; the right panel is the three-outcome taxonomy it predicts.</figcaption>
+                <figcaption><strong>The benchmark at a glance.</strong> Left: what is fused. A
+                real image feeds the backbone stages (deployed unchanged) and a fixed bank of
+                Gabor energy targets; the deep stage is tapped into an auxiliary head trained
+                only, with a weight &lambda; that decays to exactly zero, so inference costs
+                nothing extra. Then the three fusion outcomes on one measured cell each, the
+                decomposition &Delta;&nbsp;=&nbsp;<em>G</em>&nbsp;+&nbsp;readout(base) with its
+                audit, and where the prior pays at what comparator cost. Every number is read
+                from the released tables.</figcaption>
             </figure>
         </div>
     </div>
@@ -206,24 +218,28 @@
     <p class="lead-text">Combining two sources of knowledge produces one of three outcomes,
     and which one you get is not predictable from the sources' family names. The same
     prior is redundant with effective self-supervision and complementary with augmentation.
-    It <em>is</em> predictable from a cheap measurement on frozen features, taken before the
-    combination is built.</p>
+    A cheap measurement on frozen features, taken on each source alone, separates the three
+    after the fact; a rule built on it and run prospectively on nine untrained pairs called
+    one, so the taxonomy is something the measurement organizes, not something it predicts.</p>
 
     <div class="row outcome-row">
         <div class="col-md-4 d-flex">
         <div class="outcome stack">
         <h3>Stack: different currencies</h3>
         <p>The prior injects oriented-energy <em>structure</em>; heavy augmentation teaches
-        invariance to nuisance transforms. Different currencies, so they compound. On
+        invariance to nuisance transforms. Different currencies, so they can compound. On
         ViT-tiny at 10% of CIFAR-100, the prior adds +13.3 under the plain recipe and
-        <strong>+21.0</strong> on top of DeiT augmentation.</p>
+        <strong>+21.0</strong> on top of DeiT augmentation. Necessary, not sufficient: on two
+        convolutional populations outside the selection set the same pairing stacks at one
+        cell of six.</p>
         </div>
         </div>
         <div class="col-md-4 d-flex">
         <div class="outcome substitute">
         <h3>Substitute: same currency</h3>
-        <p>The prior and contrastive pre-training fill the same feature deficit, so combining
-        them adds nothing over the better single source. Measured on the feature side:
+        <p>The prior and contrastive pre-training fill the same feature deficit, so the
+        combination never usefully exceeds the better single source (at most about a point
+        above it, never near additivity). Measured on the feature side:
         whichever source has the larger frozen-feature gain is the one that wins end-to-end,
         at <strong>6 cells out of 6</strong> across two datasets.</p>
         </div>
@@ -233,8 +249,8 @@
         <h3>Interference: fusing into an already-informed initialization</h3>
         <p>Injecting the prior on top of ImageNet weights is destructive everywhere, and the
         damage is proportional to what the initialization was contributing and to how hard
-        the prior shapes: <strong>&minus;16 to &minus;18</strong> points on photographic data at full
-        auxiliary strength, vanishing below it, and statistically zero on
+        the prior shapes: <strong>&minus;15 to &minus;17</strong> points on photographic data at full
+        auxiliary strength (ten seeds per arm), vanishing below it, and statistically zero on
         histopathology where those weights were worth little to begin with. Probing confirms
         the loss is feature-side, not a classifier failure.</p>
         </div>
@@ -294,7 +310,11 @@
     </div>
     <p class="tbl-note">The deficit grows with model scale rather than shrinking, at both budgets:
     +6.71 against +4.52 at 200 epochs, where both models are trained. It persists
-    at 1.28M images where every ResNet is neutral (+0.04).</p>
+    at 1.28M images where every ResNet is neutral (+0.04). Masked reconstruction
+    (MAE-style, 2&times; compute), added on ViT-tiny, lands level with SimCLR and the prior
+    under the plain recipe (20.5 / 29.5 / 42.7 at 5 / 10 / 25%) and 6.8 to 7.6 points below
+    the prior under DeiT augmentation; its feature gains sit below the prior's, so it reads as
+    more of the same currency, not a new one.</p>
 
     <h3>Cost normalization, and what happens when the comparator gets more</h3>
     <div class="table-responsive">
@@ -350,26 +370,45 @@
     whole-image classifier, partly by a per-pixel one, and not at all by a
     coordinate regressor.</p>
 
-    <h2>A procedure for deciding whether to fuse</h2>
-    <p class="lead-text">The practical content of the taxonomy is that the outcome can be
-    estimated <em>before</em> the combined system is built, from measurements of each source
-    alone. The only cost beyond training each source once is two linear evaluations on frozen
-    features, which run in minutes on cells that took hours to train.</p>
-    <ol>
-        <li>Train the baseline, source <em>A</em> alone and source <em>B</em> alone; record
-            each arm's gain and its declared compute multiple.</li>
-        <li>Evaluate all three frozen representations under an identical linear protocol.
-            This gives <em>G<sub>A</sub></em> and <em>G<sub>B</sub></em>.</li>
-        <li>If either source's gain is about zero, it supplies nothing to overlap, and the
-            combination is not the question.</li>
-        <li>If the two feature gains are close <em>and</em> both arms improve the same cells,
-            expect <strong>substitution</strong>: take the cheaper source.</li>
-        <li>If they differ in kind, expect <strong>stacking</strong>.</li>
-        <li>If one source is a mature initialization, do not inject a shaping prior on top:
-            expect <strong>interference</strong> proportional to what that initialization supplies
-            and to the shaping strength, measurable in advance as its advantage over
-            training from scratch; a weak auxiliary weight removes the damage.</li>
-    </ol>
+    <h2>A procedure for deciding whether to fuse, and its prospective test</h2>
+    <p class="lead-text">If the taxonomy had practical content beyond description, it would be
+    that the outcome can be estimated <em>before</em> the combined system is built, from
+    measurements of each source alone. We stated that as a hypothesized procedure, registered
+    its calls on thirteen pairs whose combinations had never been trained, and only then
+    trained them. The procedure reads each source's frozen-feature gain, returns
+    <em>interfere</em> for a mature initialization, <em>n/a</em> when a source supplies nothing,
+    <em>substitute</em> when the two gains are close and both arms fix the same cells, and
+    <em>stack</em> otherwise.</p>
+    <div class="caveat">
+        <strong>It called one of nine.</strong> On the nine pairs whose outcome resolved, the
+        rule was right once, on validation and on test alike, so the predictive claim is
+        withdrawn and the paper reports the failure as a result. The diagnosis is specific:
+        the rule reads agreement in the <em>magnitude</em> of two feature gains as "same
+        currency", which conflates same-currency-in-different-amounts with different-in-kind,
+        and on held-out pairs that proxy orders the outcomes backwards. A strength-asymmetry
+        rule fitted on those pairs fails on the next family over (one of six), because DeiT
+        augmentation contributes almost no feature gain on its own and multiplies what it is
+        paired with: an amplifier, which no comparison of two single-arm gains can describe.
+        Three rules of the same shape fail out of sample, and that is the finding.
+    </div>
+    <p class="lead-text">What does predict: at a practitioner's <em>own</em> label budget, a
+    linear evaluation of frozen features predicts the end-to-end gain to within 0.17 points on
+    average across 30 cells, 8 datasets and baselines from 5 to 94%. Measure <em>G</em> at your
+    budget and you know &Delta; without training the cell. The full-label sign law is the
+    corollary of that measurement, and the paper names its mechanism: a label-rich probe sees
+    more than a label-starved classifier can cash in.</p>
+
+    <h2>Two sensors, and when a second one pays</h2>
+    <p class="lead-text">Two multi-source populations that differ in how far apart the sources
+    are. Splitting <em>one</em> instrument's bands (EuroSAT-MS: Sentinel-2 visible against
+    non-visible) is complementary at every fraction, +0.45 to +2.96 over the better single
+    source. Pairing <em>two satellites</em> (So2Sat LCZ42: Sentinel-1 radar with Sentinel-2
+    optical) never pays, landing between &minus;0.73 and &plusmn;0.00 against optical alone,
+    though radar reaches 35&ndash;53% on its own against a 5.9% chance rate. Had we run only
+    the multispectral population we would have reported that a second sensor stacks; the first
+    genuinely cross-modality test contradicts it. The two populations also differ in source
+    asymmetry, and the design cannot separate "too unequal" from "cross-modal"; the paper
+    reports a contrast, not a predictor.</p>
 
     <h2>The benchmark</h2>
     <div class="table-responsive">
@@ -380,7 +419,7 @@
             food and histopathology, plus multi-sensor Sentinel-1/2 pairs</td></tr>
         <tr><th>Backbones</th><td>9 across 5 families: ResNet-18/34/50, ConvNeXt, MobileNetV3,
             Swin, ViT-tiny/S/B</td></tr>
-        <tr><th>Data scale</th><td>150 to 1.28M images; 32 to 224&nbsp;px; 5.7M to 86M parameters</td></tr>
+        <tr><th>Data scale</th><td>150 to 1.28M images; 32 to 224&nbsp;px; 2.5M to 86M parameters</td></tr>
         <tr><th>Comparators</th><td>SimCLR, SimSiam, DINO, masked reconstruction, ImageNet transfer, DeiT augmentation,
             learned teachers, each at a declared multiple of baseline training cost</td></tr>
         <tr><th>Protocol</th><td>One frozen recipe; fixed per-class subset indices shared by
@@ -396,7 +435,9 @@
         that played no part in selection. Comparator tuning parity is asymmetric by
         construction under cost normalization, so our self-supervised numbers are lower
         bounds, and we measured how far below by re-running them at four times their
-        budget. Two accuracy claims of ours did not survive that test and were withdrawn.
+        budget. Two accuracy claims of ours did not survive that test and were withdrawn, and so
+        was the claim that the fusion outcome is predictable in advance, after its prospective
+        test called one pair of nine.
     </div>
 
     <h2>Acknowledgments</h2>
@@ -429,8 +470,7 @@
     <h2>Citation</h2>
     <div class="citation">@article{almughrabi2026momentaux,
   title   = {When does fusing hand-crafted knowledge with learned representations pay?
-             A controlled, cost-normalized benchmark and a measurable rule for
-             stacking, substitution and interference},
+             A cost-normalized benchmark of stacking, substitution and interference},
   author  = {AlMughrabi, Ahmad and Clop, Albert and Busam, Benjamin
              and Marques, Ricardo and Radeva, Petia},
   journal = {Under review},
