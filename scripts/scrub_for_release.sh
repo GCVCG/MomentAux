@@ -77,11 +77,30 @@ CHECK=${1:-}
 files=$(git ls-files | grep -E '^(slurm|scripts|logs)/' \
         | grep -v '^scripts/scrub_for_release.sh$' || true)
 
-pat_ip='161\.116\.84\.52'
-pat_user='amughrabi'
-pat_bsc_login='ub881905'   # personal login: removed everywhere, no exceptions
-pat_bsc_group='ub234'      # group allocation: parameterized, directive kept
-ALL="$pat_ip|$pat_user|$pat_bsc_login|$pat_bsc_group"
+# The identifiers themselves are NOT in this file. Holding them here as
+# literals put the personal cluster login into the public tree at HEAD, which
+# is the one place the scrub was supposed to keep it out of (found 2026-08-21).
+# They live in an untracked, 0600, gitignored file beside the repo root:
+#
+#   .scrub_identifiers   (one KEY=value per line, shell syntax)
+#     SCRUB_WS_IP=...         workstation IP (regex-escaped dots)
+#     SCRUB_USER=...          local/turing login
+#     SCRUB_BSC_LOGIN=...     personal BSC login: removed everywhere
+#     SCRUB_BSC_GROUP=...     BSC group allocation: parameterized
+#     SCRUB_BSC_LOGIN_IP=...  BSC login-node IP as it appears in ssh errors
+#
+# Missing file or missing key => refuse, loudly. A scrub that silently
+# matches nothing is the failure mode this whole script exists to prevent.
+IDF=".scrub_identifiers"
+[ -r "$IDF" ] || { echo "refusing: $IDF not found (see header)"; exit 2; }
+# shellcheck disable=SC1090
+. "./$IDF"
+pat_ip=${SCRUB_WS_IP:?set SCRUB_WS_IP in $IDF}
+pat_user=${SCRUB_USER:?set SCRUB_USER in $IDF}
+pat_bsc_login=${SCRUB_BSC_LOGIN:?set SCRUB_BSC_LOGIN in $IDF}
+pat_bsc_group=${SCRUB_BSC_GROUP:?set SCRUB_BSC_GROUP in $IDF}
+pat_bsc_ip=${SCRUB_BSC_LOGIN_IP:?set SCRUB_BSC_LOGIN_IP in $IDF}
+ALL="$pat_ip|$pat_user|$pat_bsc_login|$pat_bsc_group|$pat_bsc_ip"
 
 if [ "$CHECK" = "--check" ]; then
   echo "files that would be rewritten:"
@@ -104,6 +123,7 @@ for f in $files; do
     -e "s#(--account=)$pat_bsc_group#\1\${CLUSTER_ACCOUNT:?set CLUSTER_ACCOUNT}#g" \
     -e "s#\b$pat_bsc_group\b#\${CLUSTER_ACCOUNT}#g" \
     -e "s#\b$pat_bsc_login\b#\${CLUSTER_USER}#g" \
+    -e "s#$pat_bsc_ip#\${CLUSTER_LOGIN_HOST}#g" \
     "$f"
 done
 echo "scrubbed. Now re-read the diff by hand: a sed pass is not a review,"

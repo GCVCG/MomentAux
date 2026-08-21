@@ -880,7 +880,7 @@ load bsc/1.0 (PATH, MANPATH)
 load bsc/1.0 (PATH, MANPATH)
 2026-08-17T00:00:02Z STATE dense grid COMPLETE (0 missing)
 Connection timed out during banner exchange
-Connection to 212.128.224.22 port 22 timed out
+Connection to ${CLUSTER_LOGIN_HOST} port 22 timed out
 load bsc/1.0 (PATH, MANPATH)
 2026-08-17T00:15:32Z STATE dense grid COMPLETE (0 missing)
 load bsc/1.0 (PATH, MANPATH)

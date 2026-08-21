@@ -3,7 +3,7 @@
 # Predictions and falsifiers were recorded in CLAUDE.md BEFORE this launched.
 # Study venv only: anaconda base carries timm 0.6.7 and cannot build the ViTs.
 set -u
-cd /home/amughrabi/projects/MomentsCNNEncoder
+cd ${HOME}/projects/MomentsCNNEncoder
 PY=~/venvs/momentstem/bin/python
 LOG=logs/refwave_local.log
 mkdir -p logs

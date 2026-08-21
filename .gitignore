@@ -63,3 +63,4 @@ scripts/check_table_numbers.py
 scripts/make_partition_table.py
 scripts/sync_public_numbers.py
 scripts/run_checks.sh
+.scrub_identifiers

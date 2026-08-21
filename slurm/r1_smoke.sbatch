@@ -1,14 +1,14 @@
 #!/bin/bash
 #SBATCH --job-name=ms_r1smoke
-#SBATCH --account=ub234
+#SBATCH --account=${CLUSTER_ACCOUNT:?set CLUSTER_ACCOUNT}
 #SBATCH --qos=acc_resc
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=20
 #SBATCH --time=00:30:00
-#SBATCH --output=/gpfs/scratch/ub234/momentstem/logs/%x_%j.out
+#SBATCH --output=${CLUSTER_SCRATCH}/momentstem/logs/%x_%j.out
 set -uo pipefail
-source /gpfs/scratch/ub234/momentstem/env.sh
+source ${CLUSTER_SCRATCH}/momentstem/env.sh
 cd "$MS_ROOT/repo"
 # SMOKE ONLY. --out-root is a SCRATCH tree, never $MS_ROOT/runs: a 1-epoch
 # final.json in the real run dir is treated as a completed run by train.py's

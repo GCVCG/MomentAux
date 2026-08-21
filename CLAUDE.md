@@ -7769,3 +7769,24 @@ ported vs corrected and why.
   comparator budget, taxonomy + prospective test, attention/model scale,
   dense + detection, two sensors, referee rounds). The dated Q-entries were
   left verbatim, as the ledger's own rule requires.
+
+## PUBLIC-TREE IDENTIFIER SCRUB, HEAD ONLY (2026-08-21, user: "do only these
+## changes on the GitHub only")
+
+- A credential scan of both public repos (current tree + full history +
+  the published v1.0 release tarballs) found NO passwords, tokens or private
+  keys anywhere. What it did find at HEAD was identifying-but-not-secret
+  material the earlier scrub had missed: the personal BSC login held as a
+  LITERAL pattern inside scripts/scrub_for_release.sh (the one file the
+  scrub excludes from itself -- so the scrub's own source re-leaked the
+  identifier it removes everywhere else); the BSC allocation id and scratch
+  path raw in three slurm stragglers added after the scrub (bsc_r1,
+  bsc_r1b, r1_smoke); the BSC login-node IP in one ssh-timeout line of
+  logs/dense_keeper.log; and a local home path in scripts/refwave_local.sh.
+- FIX: the scrub script now reads its identifiers from an untracked, 0600,
+  gitignored `.scrub_identifiers` file and REFUSES to run without it, so no
+  identifier can live in the tracked tree again; a login-node-IP pattern
+  (-> ${CLUSTER_LOGIN_HOST}) was added; the scrub was run; every residual
+  verified gone by git grep over the whole tracked tree. HISTORY IS
+  UNTOUCHED by user decision (usernames/hostnames/IPs remain in past
+  commits; expunging needs filter-repo + force push, not taken).
