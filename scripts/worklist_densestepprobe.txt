@@ -1,0 +1,6 @@
+python analysis/dense_probe.py --cell diagstep_ade_none_25pct --seeds 0 1 2 --runs "$OUT" --data-root "$DR" --epochs 10
+python analysis/dense_probe.py --cell diagstep_ade_aux_25pct --seeds 0 1 2 --runs "$OUT" --data-root "$DR" --epochs 10
+python analysis/dense_probe.py --cell diagstep_ade_none_10pct --seeds 0 1 2 --runs "$OUT" --data-root "$DR" --epochs 10
+python analysis/dense_probe.py --cell diagstep_ade_aux_10pct --seeds 0 1 2 --runs "$OUT" --data-root "$DR" --epochs 10
+python analysis/dense_probe.py --cell diagstep_ade_none_5pct --seeds 0 1 2 --runs "$OUT" --data-root "$DR" --epochs 10
+python analysis/dense_probe.py --cell diagstep_ade_aux_5pct --seeds 0 1 2 --runs "$OUT" --data-root "$DR" --epochs 10

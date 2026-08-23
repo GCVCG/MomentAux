@@ -7858,6 +7858,32 @@ ported vs corrected and why.
   mechanism; the trajectory cells are the instrument, a mechanism claim
   needs a further experiment.
 
+- OPERATIONAL (2026-08-23, block A shipped): analysis/linear_probe.py gained
+  `--out-suffix` (appended LAST, immediately before .json: linear_probe_ep020.json,
+  linear_probe_shots_ep020.json; default empty => every existing filename
+  byte-unchanged; filename rules live in output_filename(), covered by
+  tests/test_linear_probe_naming.py). 12 configs
+  configs/diagnostics/diagtraj_<parent>.yaml = parent VERBATIM + name +
+  save_every: 20 (diff-verified: 3 header lines + name + save_every, nothing
+  else). LOCAL SMOKE (scratch out-root, temp copy with save_every: 1,
+  --epochs 2, food r18 10% aux): ckpt_ep001.pt + ckpt_ep002.pt + final.json
+  written; linear_probe.py --ckpt ckpt_ep001.pt --shots 25 --shots-only
+  --out-suffix _ep001 -> linear_probe_shots_ep001.json (smoke numbers are not
+  measurements). Suite 120 passed. train.py shipped to BSC is the working copy
+  that also carries the concurrent resume_every work (parses, suite green,
+  1-epoch smoke end-to-end). LANE traj on BSC: worklist.traj 36 lines
+  (food@50 group first: baseline then mag3/mag6o/champion, then mnet food 50
+  pair, path r18 50 pair, mnet path 20 pair, food r18 10% pair; seeds
+  adjacent), slurm/bsc_traj.sbatch from the deployed r1 template, SLOTS=3,
+  24h, claim deadline 14h; 3 nodes submitted = jobs 44958337/38/39 (PENDING
+  behind another project at submission); BSC smoke job 44958291
+  (traj_smoke.sbatch, scratch runs_trajsmoke). PROBES PREPARED, NOT
+  SUBMITTED: scripts/worklist_trajprobe.txt (120 lines = 12 cells x
+  ckpt_ep020..ep200, full-train protocol, --out-suffix _epXXX; each line
+  probes all 3 seeds => 360 probes), shipped to repo/scripts/ on BSC. Submit
+  it as its own lane ONLY after all 36 finals exist (linear_probe.py skips a
+  missing checkpoint silently and would under-seed a cell).
+
 ### B. THE FUSION PREDICATE, DERIVED ON ONE SET AND TESTED ON ANOTHER
 - TWO PHASES, AND THE ORDER IS THE POINT. Phase B-1 (local, no training):
   on every combination already measured (wave 1's 13, the 6 ViT aug|ssl and
@@ -7939,6 +7965,25 @@ ported vs corrected and why.
   pascalcontext -- in which case the limitation stands as written and this
   is the last dense instrument built for it. FALSIFIER: readout clearly
   POSITIVE (> 2 SEM) at a cell with pixAcc < 31.8.
+
+- OPERATIONAL (2026-08-23, block D shipped): configs/dense/diagstep_ade_
+  {none,aux}_{5,10,25}pct.yaml = ade20k parents VERBATIM except name and
+  epochs 200 -> 10/5/2 (subset sizes 1053/2050/5063 images // 16 = 65/128/316
+  steps/epoch => 650/640/632 steps; eval_every stays 20, so ep 0 and the
+  final epoch are evaluated -- train_dense.py always evaluates the last epoch).
+  Epoch changes carry no guard in train_dense.py (only adamw does); the diag
+  prefix is in the name. LOCAL SMOKE (1 epoch, scratch out-root,
+  diagstep_ade_aux_5pct): final.json written, 1053 train images, 78 s (smoke
+  numbers are not measurements). train_dense.py / dense_probe.py /
+  segmentation.py md5-identical local vs BSC; ADE20K on BSC complete
+  (20210 training / 2000 validation masks, asserted by the lane's data guard).
+  LANE densestep: worklist.densestep 18 lines (25% -> 10% -> 5%, arms
+  adjacent, seeds adjacent), slurm/bsc_densestep.sbatch from the deployed
+  dense7 template (SLOTS=4, 4h, claim deadline 2.5h, OUT=runs_dense), 1 node
+  = job 44958332. PROBES PREPARED, NOT SUBMITTED: scripts/worklist_
+  densestepprobe.txt (6 dense_probe.py lines, --epochs 10, best.pt, same form
+  as the ade20k probes), shipped to repo/scripts/; submit after the 18 finals
+  exist.
 
 ### E. THE SELECTION DEFECT, BOUNDED BY A CONFIRMATORY RE-SCORING (LOCAL)
 - Re-score every surviving CIFAR-100 selection-sweep checkpoint (target

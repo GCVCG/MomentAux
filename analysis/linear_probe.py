@@ -154,6 +154,28 @@ def probe(train_f, train_y, test_f, test_y, num_classes, device, max_iter=200):
     return tr, te
 
 
+def output_filename(shots_only, probe_dataset=None, out_suffix=""):
+    """Name of the JSON this probe writes, next to the run's seed dirs.
+
+    Order of tags is fixed and the default (no flags) is byte-unchanged:
+        linear_probe.json
+        linear_probe_shots.json                      (--shots-only)
+        linear_probe_<ds>.json                       (--probe-dataset)
+        linear_probe_shots_<ds>.json                 (both)
+        linear_probe[...]<suffix>.json               (--out-suffix, always last,
+                                                      immediately before .json)
+    shots-only results live in their OWN file: they are same-budget-comparable
+    numbers, not the standard full-train probe, and writing them to
+    linear_probe.json would CLOBBER the recorded G-curve values (caught live
+    2026-08-06 -- the first smoke of --shots-only overwrote abl1_none's probe
+    record, restored immediately after).
+    """
+    base = "linear_probe_shots" if shots_only else "linear_probe"
+    if probe_dataset is not None:
+        base += f"_{probe_dataset}"
+    return f"{base}{out_suffix or ''}.json"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--run", required=True, help="runs/<cell> (probes every seed)")
@@ -185,6 +207,15 @@ def main():
                          "'the probe label space changed the measuring stick'. "
                          "Output goes to linear_probe_<probe-dataset>.json, "
                          "never clobbering the default probe.")
+    ap.add_argument("--out-suffix", default="",
+                    help="appended to the output basename, BEFORE .json and "
+                         "AFTER every other tag (e.g. --ckpt ckpt_ep020.pt "
+                         "--out-suffix _ep020 -> linear_probe_ep020.json; with "
+                         "--shots-only -> linear_probe_shots_ep020.json). "
+                         "Default empty => filenames byte-unchanged. Added "
+                         "2026-08-23 for the block-A trajectory probes so a "
+                         "per-epoch probe can never clobber the recorded "
+                         "linear_probe.json of the same cell.")
     args = ap.parse_args()
 
     with open(args.config) as f:
@@ -263,17 +294,8 @@ def main():
                       flush=True)
         out.append(rec)
 
-    # shots-only results live in their OWN file: they are same-budget-
-    # comparable numbers, not the standard full-train probe, and writing them
-    # to linear_probe.json would CLOBBER the recorded G-curve values (caught
-    # live 2026-08-06 -- the first smoke of --shots-only overwrote
-    # abl1_none's probe record, restored immediately after).
-    if args.shots_only:
-        fname = ("linear_probe_shots.json" if args.probe_dataset is None
-                 else f"linear_probe_shots_{args.probe_dataset}.json")
-    else:
-        fname = ("linear_probe.json" if args.probe_dataset is None
-                 else f"linear_probe_{args.probe_dataset}.json")
+    # filename rules live in output_filename() (tested in tests/test_linear_probe_naming.py)
+    fname = output_filename(args.shots_only, args.probe_dataset, args.out_suffix)
     path = os.path.join(args.run, fname)
     with open(path, "w") as f:
         json.dump({"config": args.config, "ckpt": args.ckpt, "results": out}, f, indent=2)
