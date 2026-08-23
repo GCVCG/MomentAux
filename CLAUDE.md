@@ -7790,3 +7790,240 @@ ported vs corrected and why.
   verified gone by git grep over the whole tracked tree. HISTORY IS
   UNTOUCHED by user decision (usernames/hostnames/IPs remain in past
   commits; expunging needs filter-repo + force push, not taken).
+
+## THE LIMITATIONS CAMPAIGN (2026-08-23, user: "Let's do all the ablations,
+## and based on these results we can start the paper writing")
+
+- WHY, AND THE INTENDED OUTPUT: the manuscript's own Sec. "Limitations and
+  future directions" plus the scope disclosures in Secs. 2/5/6 name eight
+  pieces of open work. The user decided to run ALL of them rather than pick,
+  and to decide what papers they make AFTER the results land. Provisional
+  grouping recorded so the design is not retrofitted later: E+G (+D) are
+  revision items for the current paper; B+C+H is the fusion/currency paper;
+  F+A is the attention/scale paper. Nothing below is written to favour a
+  venue; every block gets bands and falsifiers BEFORE its first cell runs,
+  exactly as every wave in this file.
+- PLACEMENT: BSC for everything that trains (lanes per block, never a
+  worklist swap under live workers, longest-job-first, both arms adjacent);
+  local 3090 for evaluation-only blocks (E, the derivation half of B) and
+  smokes. Another project currently holds 8 BSC nodes, so our lanes may
+  PEND; that costs wall-clock, not validity.
+- RECIPE DISCIPLINE, unchanged: every new cell is its parent config VERBATIM
+  except the one declared variable (verified by diff before queueing); 3
+  seeds; diag prefix wherever the frozen recipe is left; G probes under the
+  identical protocol on both arms, recorded G never overwritten.
+
+### A. THE EXCEPTION CLUSTER: WHEN DO GOOD FEATURES STOP BECOMING ACCURACY?
+- THE SHARPENED OBSERVATION that fixes the design: on food101@50% the
+  CHAMPION aux (8-pair bank) obeys the law (D -1.11, G -0.24, readout
+  -0.86) while the two WIDE 12-channel banks do not (mag3 D -1.30 / G +4.66;
+  mag6o D -0.91 / G +4.97). So the anomaly on food is specific to the wide
+  target, and the champion cell is the natural in-population control.
+- CELLS (trajectory re-runs: parents verbatim + `save_every: 20`, so each
+  run leaves ckpt_ep020..ep200 beside last.pt; 3 seeds):
+    exception arms  grid_mag3_food_50pct, grid_mag6o_food_50pct,
+                    grid_mnet_food_aux_50pct, grid_mnet_path_aux_20pct,
+                    grid_mag3_path_50pct
+    their baselines grid_food_r18_9ee7da_50pct, grid_mnet_food_none_50pct,
+                    grid_mnet_path_none_20pct, grid_path_r18_89e5af_50pct
+    controls        grid_food_r18_axmagnitudeL3_l10to00_hn_8bd74b_50pct
+                    (law holds, same pixels/baseline as the mag3/mag6o arms)
+                    and the food r18 10% champion pair (D +3.18, G +2.80,
+                    readout +0.37: above the crossing and obeying the law)
+  = 12 configs x 3 seeds = 36 runs; trajectory probes at every saved epoch
+  on every run (~360 probes), same full-train linear protocol as the ledger.
+  Named diagtraj_<parent>; the parent cells' recorded finals are untouched.
+- PREDICTIONS RECORDED IN ADVANCE. Let ro(t) = Delta(t) - G(t) along
+  training (e2e from metrics.csv, G from the trajectory probes).
+    (A1) THE DIVERGENCE IS LATE. On the wide-bank food cells ro(t) is near
+      zero through mid-training and opens in the last third, when lambda has
+      decayed to ~0 and training is pure CE: band |ro(ep100)| <= 0.5 x
+      |ro(ep200)| on >= 3 of the 5 exception arms.
+    (A2) G RISES MONOTONICALLY on those arms (the wide target keeps
+      improving the frozen features) while e2e Delta turns negative only
+      late: Delta(ep100) >= 0 on >= 3 of 5.
+    (A3) The controls show ro(t) within +-1.0 of its final value from ep100
+      on (no late opening).
+  FALSIFIER A (the early-shaping account is right after all): ro(t) reaches
+    >= 75% of its final magnitude by ep100 on >= 3 of 5 arms => the readout
+    gap is set during the high-lambda phase, the "late conversion failure"
+    reading dies, and the paper's overshoot account gets its feature-side
+    timing.
+  FALSIFIER B (the cluster is a probe artifact): G(t) at ep200 re-measured
+    here differs from the recorded G by > 1.5 on >= 2 of 5 arms => the
+    recorded exception magnitudes are not reproducible and the cluster must
+    be re-audited before it is written up at all.
+  NOT PREDICTED: which of "classifier overfits the train split late" vs
+  "features specialise away from the linear-separable direction" is the
+  mechanism; the trajectory cells are the instrument, a mechanism claim
+  needs a further experiment.
+
+### B. THE FUSION PREDICATE, DERIVED ON ONE SET AND TESTED ON ANOTHER
+- TWO PHASES, AND THE ORDER IS THE POINT. Phase B-1 (local, no training):
+  on every combination already measured (wave 1's 13, the 6 ViT aug|ssl and
+  prior|aug cells, wave M2's 3 aug|mae, E2's 6 conv prior+aug / prior+SSL,
+  the conv and ViT SSL combos, simsiamaux), compute candidate single-arm
+  predicates -- linear CKA between the two arms' tapped features (each vs
+  baseline and vs each other), probe label-efficiency slope (G at 25/100/
+  full shots), per-class-delta correlation, G magnitude, and an explicit
+  AMPLIFIER flag (own G <= 1.0 while the partner's G is large) -- and score
+  each as a ranking (AUC) against the measured STACK/SUBSTITUTE outcome.
+  The predicate and its threshold are then FIXED IN A FOLLOW-UP ENTRY here,
+  with its in-sample score stated, BEFORE any wave-3 combination trains.
+  Phase B-2 (BSC): ~12 pairs whose combination has NEVER been trained,
+  singles already measured: prior|simclr on dtd@15, esat@10, stl@20, c10@5,
+  tin@5; prior|dino on stl@50, food@25 (ViT); prior|simsiam c100@25;
+  aug|simclr on food@25, esat@10; mae|prior ViT c100@5/10/25 (the "second
+  prospective tranche" the wave-M entry reserved). 3 seeds each, ~36-39 runs,
+  calls computed on the validation carve-outs and committed here first.
+- CRITERION, ONE PER QUESTION (the wave-1 lesson): over wave-3 pairs whose
+  outcome is RESOLVED at 2 SEM, the fixed predicate is SUPPORTED at >= 75%
+  correct, REJECTED at <= 50%, UNRESOLVED between. If no candidate predicate
+  reaches AUC >= 0.80 in phase B-1 out-of-family (leave-one-family-out), the
+  honest result is that NO single-arm predicate exists and wave 3 is run
+  anyway as a pure second held-out test of the three-way taxonomy, scored
+  only on whether every outcome is one of the three.
+- WHAT THIS CANNOT DO: thresholds fit on B-1 pairs we chose; singles exist.
+
+### C. OTHER CURRENCIES: TWO NEW HAND-CRAFTED TARGET FAMILIES
+- FAMILIES, both built from the SAME pinned quadrature bank so the only new
+  variable is WHAT is read off it (pinned in test_bank_regression, additive):
+    energy-phase     local phase per orientation: (cos phi, sin phi) of the
+                     quadrature pair, magnitude DISCARDED -- 16 channels; the
+                     frequency-phase prior the paper names, and the exact
+                     complement of the magnitude target.
+    energy-symmetry  Kovesi phase-symmetry per orientation, sum over octaves
+                     of [|even| - |odd|]_+ normalised by amplitude -- 8
+                     channels; the symmetry prior the paper names.
+- CELLS per family (lambda0=1.0 cosine->0, tap layer3, head_norm, i.e. the
+  reference configuration with only the target swapped): singles on
+  C100@1/2/5/10/25/100, tin@5/10, eurosat@5/10 (10); combos new+moment
+  (two aux heads, two targets, same tap) on c100@5/10 and tin@10 (3);
+  new+SimCLR-init on c100@5/10 (2) = 15 configs x 3 seeds = 45 runs per
+  family, 90 total; probes on the c100@5/10/25 and tin@10 singles and all
+  combos.
+- PREDICTIONS RECORDED IN ADVANCE (C100 champion anchors +1.42/+2.50/+5.15/
+  +3.75/+0.16/+0.15; tin +2.13/+1.65; eurosat +0.84/+1.22):
+    (C1) PHASE IS A POOR TARGET: Delta(phase) <= 0.5 x Delta(magnitude) at
+      every C100 fraction, and NEGATIVE at >= 2 fractions. Reasoning: the
+      signed oriented-edge target (gabor) already scored -0.24 at 10%, and
+      phase discards the one thing the study found mattered (the magnitude
+      scale; cosine loss lost to MSE for the same reason).
+    (C2) SYMMETRY IS A MID-RANKED TARGET: Delta(symmetry) between 0.3x and
+      0.8x of magnitude on C100@5/10 (the structure/steerable band), positive
+      at 1-10%, ~0 at 100%.
+    (C3) THE CURRENCY QUESTION, which is why this block exists: both new
+      families SUBSTITUTE with the moment prior -- combo(new+moment) within
+      +-0.7 of moment alone on c100@5/10 and tin@10 -- because they are read
+      off the same bank at the same tap and fill the same deficit. And both
+      substitute with SimCLR (combo within +-1.0 of SimCLR alone), as every
+      aux target has so far.
+  FALSIFIERS: (F-C1) any new family STACKS with the moment prior by >= +1.0
+    at >= 2 of 3 cells => hand-crafted priors carry DISTINCT currencies and
+    the taxonomy's first row gains a prior-on-prior entry; (F-C2) phase >=
+    magnitude at any C100 fraction >= 5% => "magnitude, not phase, is the
+    ingredient" is wrong and Sec. 5.1 needs restating; (F-C3) symmetry >=
+    magnitude at >= 2 fractions => same.
+
+### D. THE NEGATIVE-BRANCH DENSE CELL, ONE BOUNDED ATTEMPT
+- diagstep_ade_{none,aux}_{5,10,25}pct: ADE20K dense cells at a FIXED
+  ~600-step budget (50/10/5/2 epochs at 1/5/10/25%; the 1% cell at 50
+  epochs IS the archived 50e run, pixAcc 34.0), everything else the dense
+  recipe verbatim; 18 runs + 18 dense probes. Built because the law's
+  negative branch is untested off classification and pascalcontext's Delta
+  was too small to resolve it.
+- PREDICTIONS: trained pixAcc lands 26-36 (below or inside the bracket);
+  Delta +0.1..+0.6 mIoU. Where pixAcc < 31.8 readout must be NEGATIVE.
+  STATED EXPECTATION, against the block: the most likely outcome is that
+  readout is a difference of two numbers near +0.2 and UNRESOLVABLE, as on
+  pascalcontext -- in which case the limitation stands as written and this
+  is the last dense instrument built for it. FALSIFIER: readout clearly
+  POSITIVE (> 2 SEM) at a cell with pixAcc < 31.8.
+
+### E. THE SELECTION DEFECT, BOUNDED BY A CONFIRMATORY RE-SCORING (LOCAL)
+- Re-score every surviving CIFAR-100 selection-sweep checkpoint (target
+  family, tap depth, lambda0, head_norm, loss form; last.pt) on the C100
+  VALIDATION carve-out (data/valcarve/cifar100.json) and re-run the
+  selection: does the val-scored sweep pick the SAME reference
+  configuration? No training.
+- PREDICTION: yes on every axis -- the selection margins (e.g. magnitude
+  +2.7 over the next target at 10%, MSE over cosine by +2.3, layer3 vs
+  layer4 by +1.9) are far larger than the test-vs-val shift measured in B1
+  (~0.3 systematic, <= 1.0 absolute). FALSIFIER: any axis flips on val =>
+  the selection bias is material on that axis and the paper's "selected
+  among a small number of pre-declared alternatives" defence weakens.
+- SCOPE CAVEAT: this bounds the defect, it does not remove it; the
+  checkpoints were still SELECTED on test. Reported that way.
+
+### F. ATTENTION AT SCALE: ViT-L/16 AND CONVERGENCE BUDGETS
+- CELLS: diagin100_vitl_{none,aux} (100 ep) and diagin100e200_vitl_*
+  (200 ep): ViT-L/16 at 224, DeiT aug, AdamW, the diagin100_vitb configs
+  verbatim except backbone and tap blocks.16 (2/3 depth, as blocks.8 of 12);
+  3 seeds each = 12 runs. diagin100e300_{vits,vitb}_{none,aux}: the ViT-S and
+  ViT-B pairs at 300 epochs (convergence arms), 3 seeds = 12 runs. All
+  SLOTS=1 (GPU-bound). ~440 GPU-h; the long pole of the campaign.
+- PREDICTIONS (anchors: ViT-S +13.00@100/+4.52@200; ViT-B +26.01@100/
+  +6.71@200; baselines 65.4->79.5 and 43.3->75.3):
+    (F1) ViT-L's 100-epoch BASELINE is the most under-trained of the three
+      and may be bistable at 126k images: band 20..45, aux 55..70,
+      Delta(100ep) +15..+35 -- the recorded model-scale ordering continues.
+    (F2) AT 200 EPOCHS the ordering still holds: Delta(ViT-L,200) >=
+      Delta(ViT-B,200) = +6.71, band +6..+14.
+    (F3) At 300 epochs both smaller ViTs keep a positive gain with the
+      ordering intact: Delta(ViT-S,300) +2..+4.5, Delta(ViT-B,300)
+      +3.5..+7, each within 2 SEM of its 200-epoch value or lower.
+  FALSIFIERS: (F-F1) Delta(ViT-L,200) < Delta(ViT-B,200) by > 2 SEM => the
+    model-scale trend does NOT continue past ViT-B and must be stated as
+    S->B only; (F-F2) Delta(ViT-S,300) or Delta(ViT-B,300) <= +1 => the
+    attention gain is under-training all the way down and the headline
+    must be restated as a budget statement; (F-F3) ViT-L baseline collapses
+    on >= 2 of 3 seeds at BOTH budgets => ViT-L is bistable under this
+    recipe and carries the swin-style caveat, no Delta claimed.
+
+### G. THE SAR CHANNEL REDUCTION, THREE RADAR-SPECIFIC ALTERNATIVES
+- New energy-stem option `channel_reduce:` with values mean (the current
+  uniform average, unchanged default), perchannel (filter every band
+  separately and average the ENERGIES -- no averaging before filtering),
+  pca1 (first principal component fitted on the calibration batch), and
+  logmean (mean of log-intensity, the standard SAR transform). Cells:
+  diagsarred_{perchannel,pca1,logmean}_so2sat_sar_aux_{1,2,5,10,25}pct,
+  baseline unchanged (sf_so2sat_sar_none_*), 45 runs + probes at 5%.
+- PREDICTIONS (mean-reduction SAR Delta: +1.24/-3.09/+2.59/-0.46/-0.24 at
+  1/2/5/10/25, with both arms unstable at 2%): perchannel is the best of
+  the three and gives a SMOOTHER envelope, +0.5..+2.5 at 1-5% decaying to
+  ~0 by 25%; pca1 close behind; logmean ~ mean. FALSIFIER (the prior is an
+  optical prior): all three reductions stay within +-0.5 of the
+  mean-reduction Delta at every fraction => the null is not the reduction's
+  fault, and every cross-domain claim must name its modality.
+
+### H. THE THIRD MULTI-SOURCE POPULATION: SUN RGB-D (RGB + DEPTH)
+- WHY THIS ONE: the two existing populations confound asymmetry with
+  modality (EuroSAT-MS: same instrument, symmetric; So2Sat: different
+  instruments, asymmetric). SUN RGB-D scene classification (19 classes,
+  official split 4,845/4,659) pairs two DIFFERENT modalities (appearance vs
+  geometry) whose single-source strengths are reported as COMPARABLE, i.e.
+  different-modality AND symmetric -- the missing corner.
+- DATA: the Princeton SUNRGBD.zip (6.4 GB, fetched locally, staged to BSC),
+  squash-resized to 64px like CUB; depth as one normalised channel (no HHA);
+  sources sunrgbd_rgb (3ch), sunrgbd_depth (1ch), sunrgbd_all (4ch); stats
+  pinned from the train split; subsets committed. Every assumption asserted
+  (class count, split sizes, depth/image alignment, EXIF) per the
+  2026-08-11 encoding-trap lesson.
+- CELLS: {rgb,depth,all} x {none,aux} x 1/2/5/10/25/100% x 3 seeds = 108
+  r18 runs, + ViT-tiny pairs on the three sources at 10% (18), + probes at
+  5/10% on every source.
+- PREDICTIONS: (H1) single-source baselines within 8 points of each other at
+  10% (the symmetric corner holds); (H2) the prior transplants to BOTH
+  modalities -- Delta +0.8..+3.0 at 5-10% on rgb AND on depth (oriented
+  energy on a depth map is surface-orientation structure, physically
+  meaningful unlike SAR backscatter); (H3) fused >= better single on the
+  baseline arm, and the prior does not absorb the second source (aux-fused
+  >= aux-better-single by 0..+2). FALSIFIERS: Delta(depth) <= 0 at every
+  fraction => the prior is an appearance prior; fused < better single on
+  the baseline arm => the two modalities interfere under this recipe and
+  the population cannot serve as the symmetric corner.
+
+- WHAT IS NOT IN THIS CAMPAIGN, with reasons: prior-as-warmup for large-ViT
+  pre-training on ImageNet-1k (week-scale, not an ablation); an ImageNet-1k
+  @224 ViT pair (the CVPR-shaped item; decide after F lands); a fifth dense
+  instrument beyond D.
