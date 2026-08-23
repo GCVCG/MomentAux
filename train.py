@@ -421,6 +421,17 @@ def main():
             _tmp = os.path.join(out_dir, "best.pt.tmp")
             torch.save(model.state_dict(), _tmp)
             os.replace(_tmp, os.path.join(out_dir, "best.pt"))
+        # TRAJECTORY CHECKPOINTS (2026-08-23, block A of the limitations
+        # campaign): `save_every: N` writes ckpt_epXXX.pt at every N-th
+        # epoch (1-based, so N=20 over 200 epochs gives ep020..ep200). Off by
+        # default -- no existing cell changes behaviour. These are weights
+        # only (like best/last), intended for linear_probe.py --ckpt, and
+        # they are NOT resume states.
+        _se = int(cfg.get("save_every", 0) or 0)
+        if _se > 0 and (epoch + 1) % _se == 0:
+            _tmp = os.path.join(out_dir, f"ckpt_ep{epoch + 1:03d}.pt.tmp")
+            torch.save(model.state_dict(), _tmp)
+            os.replace(_tmp, os.path.join(out_dir, f"ckpt_ep{epoch + 1:03d}.pt"))
         print(
             f"epoch {epoch + 1}/{cfg['epochs']} loss {loss_sum / max(n_batches, 1):.4f} "
             f"train {train_acc:.4f} test {test_acc:.4f}"
