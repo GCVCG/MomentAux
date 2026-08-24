@@ -1,0 +1,35 @@
+# STABILIZED ViT recipe (2026-08-24, block F). The frozen diag recipe
+# (AdamW lr 1e-3, no warmup) DIVERGES at ViT-L scale: all six ViT-L aux runs
+# and one of six ViT-L baselines reached NaN. The stability diagnostic
+# (slurm/vitl_stabdiag.sbatch, 8 arms) showed warmup ALONE still NaNs and
+# clipping ALONE diverges to loss 181; only warmup AND clipping together
+# stay finite. RECIPE DEVIATION, applied IDENTICALLY to both arms of every
+# pair so Delta stays valid: warmup_epochs 10 + clip_grad 1.0, lr unchanged.
+# Matched vits/vitb pairs run under the SAME deviation so the model-scale
+# comparison is not confounded by a recipe change.
+name: diagin100e200w_vitb_aux
+dataset: imagenet100
+backbone: vit_base
+optimizer: adamw
+epochs: 200
+batch_size: 128
+lr: 0.001
+weight_decay: 0.05
+momentum: 0.9
+num_workers: 5
+small_input: false
+pretrained: false
+subset_pct: 100
+stem: none
+stem_calibrate: true
+augment: deit
+resume_every: 10
+warmup_epochs: 10
+clip_grad: 1.0
+moment_aux:
+  stem: energy-magnitude
+  tap: blocks.8
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine
+  head_norm: true

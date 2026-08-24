@@ -8467,3 +8467,58 @@ ported vs corrected and why.
       criterion attached, because its derivation score is below the bar.
       Predicting it here would be claiming what B-1 just said cannot be
       claimed.
+
+- *** ViT-L DIVERGES UNDER THE FROZEN DIAG RECIPE, AND THE FIX NEEDS **BOTH**
+  WARMUP AND CLIPPING (2026-08-24, block F; 8-arm stability diagnostic,
+  slurm/vitl_stabdiag.sbatch, ~25 epochs each into a scratch out-root).
+  WHAT FAILED, and it was found only because a cluster-wide NODE_FAIL sent me
+  back through the metrics: at 304M params under AdamW lr 1e-3 with no warmup,
+  **all six ViT-L aux runs went NaN** (test pinned at 1.00% = chance) and
+  **one of six ViT-L baselines** did too, while every ViT-B and ViT-S cell
+  under the identical recipe trained normally (vitb_aux 77.5% at epoch 155).
+      arm (ViT-L, ImageNet-100)      first NaN   ep5     ep15    ep24
+      aux, no warmup no clip         epoch ~3    1.16%   1.16%   1.00%
+      aux, warmup 5 only             epoch ~4    1.06%   1.00%   1.00%
+      aux, clip 1.0 only             epoch ~12   2.80%   5.56%   1.26%  (loss 181)
+      aux, warmup 5  + clip 1.0      none        6.88%   5.80%  10.42%
+      aux, warmup 10 + clip 1.0      none       10.54%  25.86%  40.86%
+      aux, warmup 5 + clip + lr 5e-4 none       10.54%  27.68%  43.60%
+      baseline, no fix               none        4.46%   5.92%  10.02%
+      baseline, warmup 5 + clip      none        3.66%   3.50%   3.74%
+  *** I CALLED THIS WRONG FROM EPOCH 2 AND AM CORRECTING IT HERE: at epoch 2
+  the warmup arms simply looked better and I reported "the missing warmup is
+  the cause, not clipping". By epoch 24 warmup ALONE is NaN and clipping ALONE
+  has diverged to loss 181 with accuracy back at chance. NEITHER SUFFICES;
+  only the combination stays finite. The same error class this file keeps
+  recording -- reading a trend off the earliest available point -- caught this
+  time by letting the diagnostic run rather than by a later contradiction.
+  (Two arms are bit-identical at epoch 2 -- warmup-10-at-1e-3 and
+  warmup-5-at-5e-4 pass through the same lr there -- which is an accidental
+  but welcome check that the warmup implementation is correct; they separate
+  later, 40.86 vs 43.60.)
+  DECISION, and it is a RECIPE DEVIATION rather than a bug fix: adopt
+  **warmup_epochs 10 + clip_grad 1.0, lr unchanged at 1e-3**, applied
+  IDENTICALLY to both arms of every pair so Delta stays valid. lr is left
+  alone deliberately -- w10c1 (40.86) and w5c1_lr5 (43.60) are close, and
+  changing lr perturbs the whole trajectory where warmup only shapes its
+  start. train.py implements both keys diag-only and OFF by default, with
+  tests proving the LambdaLR reduces EXACTLY to the original cosine when
+  warmup is absent (suite 149 green).
+  *** AND THE DEVIATION FORCES MATCHED COMPARATORS, which is the part worth
+  stating: the recorded ViT-S/ViT-B cells ran WITHOUT warmup+clip, so
+  comparing a stabilized ViT-L against them would confound MODEL SCALE with a
+  RECIPE CHANGE -- exactly the confound the frozen recipe exists to prevent,
+  and the baseline diagnostic arm shows the fix is not free (none_w5c1 3.74%
+  vs none_ctrl 10.02% at epoch 24). So the model-scale curve is re-run on ONE
+  recipe: diagin100e200w_{vits,vitb,vitl}_{none,aux} at 200 epochs, plus
+  diagin100w_vitl_* at 100 epochs, 3 seeds each = 24 runs. The matched
+  vits/vitb pairs do double duty: they make the comparison legitimate AND
+  they measure how much the stabilizer itself costs at those scales.
+  SCOPE NOTE ON THE PRE-REGISTERED FALSIFIERS: F-F3 concerns the BASELINE
+  collapsing on >= 2 of 3 seeds at both budgets. Here the AUX arm collapsed
+  6/6 while the baseline collapsed 1/6, so F-F3 does NOT fire, and a NaN'd
+  aux arm is a BROKEN CELL, not a Delta of -50. Nothing about the prior may
+  be concluded from the diverged runs; the 7 poisoned run dirs (6 aux seeds +
+  diagin100e200_vitl_none/seed0) are quarantined as seedN.nan.2026-08-24 so
+  nothing can silently resume or probe them. F1/F2 will be scored on the
+  stabilized cells, with the recipe deviation attached to every number.
