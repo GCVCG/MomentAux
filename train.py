@@ -12,6 +12,51 @@ Outputs, per run, under runs/<cell-name>/seed<N>/:
   last.pt      -- final-epoch weights (used for CIFAR-C evaluation)
   best.pt      -- best test-top-1 weights
 No external services required to reproduce anything.
+
+RESUME (`resume_every: N`, diag-only, OFF by default; block F of the
+limitations campaign, 2026-08-23, for ViT-L/16 cells that cannot finish
+inside the cluster's 24h MaxWall). Every N epochs the full training state
+is written ATOMICALLY to <seed_dir>/resume.pt -- model, optimizer,
+scheduler, AMP scaler, the epoch counter, best_acc, the aux-head init norms,
+the elapsed wall clock, the number of metrics.csv rows, and the RNG states
+(python, numpy, torch CPU, torch CUDA, and the sampler generator `gen`). On
+start, if resume.pt exists and final.json does not, training resumes from
+it: metrics.csv is truncated back to the saved row count and re-opened in
+append mode, best.pt is rolled back to the copy that matched the saved
+best_acc (best.pt.resume, a hard link taken at save time), and the epoch
+loop continues. final.json then carries `resumed_from_epoch` (the last
+resume point) and `resume_history` (every resume point). resume.pt is
+deleted once final.json is written.
+WHAT IS AND IS NOT RESTORED, stated honestly. RESTORED EXACTLY: every
+parameter and optimizer moment, the LR schedule, the loss scaler, the
+main-process RNGs (so Mixup/CutMix draws continue the same stream), and the
+DATA ORDER: the sampler generator's state is restored, and with persistent
+workers the DataLoader's one-off worker-base-seed draw is redirected to a
+throwaway generator so the restored `gen` yields exactly the permutations the
+uninterrupted run would have drawn. NOT RESTORED: the dataloader WORKERS'
+own RNG streams (RandomCrop/Flip/RandAugment/RandomErasing draw from them).
+Workers die with the job, and PyTorch seeds fresh workers from the base seed
+only, so they restart at their epoch-0 state rather than at the state they
+had after K epochs of draws. The augmentation stream after a resume is
+therefore an UNBIASED re-draw from the same distribution, not the
+uninterrupted run's draw -- the same status as a num_workers change (see
+CLAUDE.md): Delta stays valid, byte-identity with an uninterrupted run does
+not hold. With num_workers=0 the generator is not swapped (the single-process
+iterator draws its base seed from `gen` every epoch, so leaving it in place
+is what reproduces the uninterrupted sequence) and there are no worker RNGs
+to lose, so a resumed CPU/num_workers=0 run IS byte-identical.
+
+WARMUP / CLIPPING (`warmup_epochs: N`, `clip_grad: X`; diag-only, both OFF by
+default and both leaving the default code path byte-unchanged). The frozen
+recipe has no LR warmup, and the diagnostic `optimizer: adamw` path runs
+lr 1e-3 at batch 128 -- eight times DeiT's batch-scaled lr. ViT-S/16 and
+ViT-B/16 survive that; ViT-L/16 (304M params) does not, and every ViT-L cell
+of block F ended at NaN (2026-08-24). `warmup_epochs` linearly ramps the lr
+over the first N epochs' worth of OPTIMIZER STEPS (per-step, because the
+divergence happens inside the first epoch) on top of the same cosine decay;
+`clip_grad` clips the global grad norm after unscaling. Both are RECIPE
+DEVIATIONS: a cell using either MUST be named diag*, and they must be applied
+IDENTICALLY to both arms of a pair or the Delta is meaningless.
 """
 
 import argparse
@@ -116,6 +161,100 @@ def evaluate(model, loader, device, num_classes):
     return metric.compute().item()
 
 
+def _save_resume_state(path, model, optimizer, scheduler, scaler, train_loader,
+                       epoch_done, best_acc, wall_seconds, resume_history, out_dir):
+    """Atomic full-state checkpoint for `resume_every` (module docstring).
+    `epoch_done` is the number of completed epochs == the next epoch index
+    == the number of metrics.csv data rows written so far."""
+    state = {
+        "epoch": epoch_done,
+        "best_acc": best_acc,
+        "wall_seconds": wall_seconds,
+        "resume_history": list(resume_history),
+        "model": model.state_dict(),
+        "optimizer": optimizer.state_dict(),
+        "scheduler": scheduler.state_dict(),
+        "scaler": scaler.state_dict(),
+        "head_norm0": getattr(model, "_head_norm0", None),
+        "rng": {
+            "python": random.getstate(),
+            "numpy": np.random.get_state(),
+            "torch": torch.get_rng_state(),
+            "cuda": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None,
+            # the SAMPLER's generator (RandomSampler holds `gen` by reference);
+            # loader.generator may have been swapped on a previous resume.
+            "sampler_gen": train_loader.sampler.generator.get_state(),
+        },
+    }
+    tmp = path + ".tmp"
+    torch.save(state, tmp)
+    os.replace(tmp, path)
+    # best.pt at this moment is the checkpoint that scored best_acc; keep a
+    # hard link so a later (post-save, pre-crash) best.pt can be rolled back
+    # on resume and best.pt stays identical to the recorded best_test_acc.
+    best = os.path.join(out_dir, "best.pt")
+    if os.path.exists(best):
+        ltmp = os.path.join(out_dir, "best.pt.resume.tmp")
+        if os.path.exists(ltmp):
+            os.remove(ltmp)
+        os.link(best, ltmp)
+        os.replace(ltmp, os.path.join(out_dir, "best.pt.resume"))
+    print(f"resume state saved at epoch {epoch_done} -> {path}")
+
+
+def _restore_resume_state(state, model, optimizer, scheduler, scaler, train_loader,
+                          seed, out_dir, csv_path, device):
+    """Inverse of _save_resume_state; returns (start_epoch, best_acc,
+    wall_before). See the module docstring for what is and is not restored."""
+    model.load_state_dict(state["model"])
+    optimizer.load_state_dict(state["optimizer"])
+    scheduler.load_state_dict(state["scheduler"])
+    scaler.load_state_dict(state["scaler"])
+    if state.get("head_norm0") is not None and hasattr(model, "_head_norm0"):
+        model._head_norm0 = dict(state["head_norm0"])
+    rng = state["rng"]
+    random.setstate(rng["python"])
+    np.random.set_state(rng["numpy"])
+    torch.set_rng_state(rng["torch"])
+    if rng["cuda"] is not None and torch.cuda.is_available():
+        if len(rng["cuda"]) == torch.cuda.device_count():
+            torch.cuda.set_rng_state_all(rng["cuda"])
+        else:
+            torch.cuda.set_rng_state(rng["cuda"][0], device)
+    gen = train_loader.sampler.generator
+    gen.set_state(rng["sampler_gen"])
+    if train_loader.num_workers > 0 and train_loader.persistent_workers:
+        # The first iter() will create the persistent workers and draw ONE
+        # int64 base seed from loader.generator. In the uninterrupted run
+        # that draw came from the freshly-seeded generator at epoch 0, and
+        # `gen` has since advanced by K permutations. Redirect the draw to a
+        # throwaway generator seeded exactly as the original was, so (a) the
+        # workers get the SAME base seed the original workers got and (b)
+        # `gen` is left at the restored state for the sampler, whose
+        # RandomSampler holds its own reference to `gen` -- the data ORDER
+        # then continues exactly where the uninterrupted run would have.
+        train_loader.generator = torch.Generator().manual_seed(seed)
+    start_epoch = int(state["epoch"])
+    # metrics.csv: keep header + the rows the saved state accounts for; any
+    # rows after it belong to the discarded post-save trajectory.
+    with open(csv_path) as f:
+        lines = f.readlines()
+    keep = lines[: 1 + start_epoch]
+    if len(keep) < 1 + start_epoch:
+        raise RuntimeError(
+            f"{csv_path} has {len(lines) - 1} rows but resume.pt says {start_epoch} "
+            f"epochs completed -- refusing to resume from an inconsistent record")
+    with open(csv_path, "w", newline="") as f:
+        f.writelines(keep)
+    # roll best.pt back to the copy that matched best_acc at save time
+    linked = os.path.join(out_dir, "best.pt.resume")
+    if os.path.exists(linked):
+        os.replace(linked, os.path.join(out_dir, "best.pt"))
+    print(f"RESUME: restored epoch {start_epoch}, best {state['best_acc']:.4f}, "
+          f"{state['wall_seconds']:.0f}s elapsed before this segment")
+    return start_epoch, float(state["best_acc"]), float(state["wall_seconds"])
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", required=True)
@@ -164,6 +303,21 @@ def main():
             f"ABORT: {out_dir} is locked -- another training process is "
             f"live on this exact (config, seed). Refusing to race it.")
     main._run_lock = lock_fd  # keep the lock for the process lifetime
+
+    # resume_every (see module docstring): diag-only, off by default.
+    resume_every = cfg.get("resume_every")
+    if resume_every:
+        resume_every = int(resume_every)
+        if resume_every <= 0:
+            raise ValueError("resume_every must be a positive epoch count")
+        if not cfg["name"].startswith("diag"):
+            raise ValueError("resume_every requires a diag* config name")
+    resume_path = os.path.join(out_dir, "resume.pt")
+    resume_state = None
+    if resume_every and os.path.exists(resume_path):
+        resume_state = torch.load(resume_path, map_location="cpu", weights_only=False)
+        print(f"RESUME: found {resume_path} at epoch {resume_state['epoch']} "
+              f"(best so far {resume_state['best_acc']:.4f}); continuing")
 
     set_seed(args.seed)
     device = torch.device(args.device)
@@ -290,7 +444,35 @@ def main():
         )
     else:
         raise ValueError(f"optimizer must be 'sgd' or 'adamw', got {opt_name!r}")
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=cfg["epochs"])
+    # LR WARMUP + GRADIENT CLIPPING (2026-08-24, block F). Both default OFF and
+    # the default code path is BYTE-UNCHANGED: `warmup_epochs` absent/0 keeps
+    # the original CosineAnnealingLR and never enters the per-step branch;
+    # `clip_grad` absent keeps the original unclipped scaler.step().
+    # WHY THEY EXIST: the frozen recipe has no warmup, and `optimizer: adamw`
+    # runs lr 1e-3 at batch 128 -- 8x DeiT's batch-scaled lr (5e-4 at 512).
+    # ViT-S/16 and ViT-B/16 tolerate that; ViT-L/16 (304M) does not: its
+    # residual stream blows up inside the first 2 epochs and every run ends at
+    # NaN. These are RECIPE DEVIATIONS, so they are diag-gated exactly like
+    # adamw/augment/head, and must be applied to BOTH arms of a pair.
+    warmup_epochs = int(cfg.get("warmup_epochs", 0) or 0)
+    clip_grad = cfg.get("clip_grad")
+    clip_grad = float(clip_grad) if clip_grad else None
+    if (warmup_epochs or clip_grad) and not cfg["name"].startswith("diag"):
+        raise ValueError(
+            "warmup_epochs/clip_grad deviate from the frozen recipe, so the "
+            f"cell name must start with 'diag' (got {cfg['name']!r})."
+        )
+    if warmup_epochs:
+        # Closed form of CosineAnnealingLR(T_max=epochs) -- identical values at
+        # every epoch -- but as a LambdaLR, which recomputes lr from base_lrs on
+        # each step() and is therefore safe to override WITHIN an epoch (the
+        # recursive CosineAnnealingLR is not).
+        _E = max(cfg["epochs"], 1)
+        scheduler = torch.optim.lr_scheduler.LambdaLR(
+            optimizer, lambda e: 0.5 * (1.0 + math.cos(math.pi * min(e, _E) / _E))
+        )
+    else:
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=cfg["epochs"])
     criterion = torch.nn.CrossEntropyLoss()
     # Mixup/CutMix produce SOFT targets, which plain CrossEntropyLoss cannot
     # take; timm's SoftTargetCrossEntropy is the loss DeiT itself uses.
@@ -302,17 +484,27 @@ def main():
     scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
 
     csv_path = os.path.join(out_dir, "metrics.csv")
-    csv_file = open(csv_path, "w", newline="")
-    writer = csv.writer(csv_file)
     norm_cols = ["conv1_identity", "conv1_gabor", "conv1_zernike"]
-    # ce_loss/aux_loss/lambda/tap_std (2026-07-20): loss decomposition and the
-    # tapped-feature std — the scale-collapse diagnostic from the R50 trace,
-    # now logged on every aux run. Empty for non-aux cells; older runs simply
-    # lack the columns (analysis/training_dynamics.py handles both).
-    writer.writerow(
-        ["epoch", "train_loss", "train_acc", "test_acc", "lr", "epoch_seconds"]
-        + norm_cols + ["ce_loss", "aux_loss", "lambda", "tap_std"]
-    )
+    start_epoch, best_acc, wall_before = 0, 0.0, 0.0
+    resume_history = []
+    if resume_state is None:
+        csv_file = open(csv_path, "w", newline="")
+        writer = csv.writer(csv_file)
+        # ce_loss/aux_loss/lambda/tap_std (2026-07-20): loss decomposition and the
+        # tapped-feature std — the scale-collapse diagnostic from the R50 trace,
+        # now logged on every aux run. Empty for non-aux cells; older runs simply
+        # lack the columns (analysis/training_dynamics.py handles both).
+        writer.writerow(
+            ["epoch", "train_loss", "train_acc", "test_acc", "lr", "epoch_seconds"]
+            + norm_cols + ["ce_loss", "aux_loss", "lambda", "tap_std"]
+        )
+    else:
+        start_epoch, best_acc, wall_before = _restore_resume_state(
+            resume_state, model, optimizer, scheduler, scaler, train_loader,
+            args.seed, out_dir, csv_path, device)
+        resume_history = list(resume_state.get("resume_history", [])) + [start_epoch]
+        csv_file = open(csv_path, "a", newline="")
+        writer = csv.writer(csv_file)
 
     # Optional moment-aux lambda SCHEDULE: start strong (prior dominates when
     # the net can't estimate features) and decay (let cross-entropy take over) --
@@ -347,9 +539,14 @@ def main():
             return aux_wT + 0.5 * (aux_w0 - aux_wT) * (1 + math.cos(math.pi * frac))
         raise ValueError(f"unknown weight_schedule {aux_sched!r}")
 
-    best_acc, t_start = 0.0, time.time()
+    t_start = time.time()
+    # warmup is counted in OPTIMIZER STEPS; a resumed run is already past it
+    # (block F resumes at epoch >= 10 while warmup spans <= 10 epochs), so
+    # global_step is seeded from the restored epoch and the branch is inert.
+    warmup_steps = warmup_epochs * len(train_loader)
+    global_step = start_epoch * len(train_loader)
     train_metric = MulticlassAccuracy(num_classes=num_classes, average="micro").to(device)
-    for epoch in range(cfg["epochs"]):
+    for epoch in range(start_epoch, cfg["epochs"]):
         if cfg.get("moment_aux") and hasattr(model, "aux_weight"):
             model.aux_weight = aux_lambda(epoch)
         if unfreeze_at is not None and epoch == unfreeze_at:
@@ -361,7 +558,23 @@ def main():
         loss_sum, n_batches, t0 = 0.0, 0, time.time()
         ce_sum, aux_sum, tapstd_sum = 0.0, 0.0, 0.0
         lr_now = optimizer.param_groups[0]["lr"]
+        if warmup_steps and global_step < warmup_steps:
+            # log the lr actually USED at this epoch's first step, not the
+            # un-warmed cosine value the scheduler happens to hold
+            lr_now *= (global_step + 1) / warmup_steps
+        # per-STEP linear warmup: the divergence this guards against happens
+        # inside the first epoch, so epoch-granular warmup is too coarse. The
+        # cosine factor for THIS epoch is whatever LambdaLR just set; warmup
+        # scales it, and the next scheduler.step() restores it from base_lrs.
+        epoch_lrs = [g["lr"] for g in optimizer.param_groups] if warmup_steps else None
         for x, y in train_loader:
+            if warmup_steps and global_step < warmup_steps:
+                warm = (global_step + 1) / warmup_steps
+                for g, base in zip(optimizer.param_groups, epoch_lrs):
+                    g["lr"] = base * warm
+            elif warmup_steps and global_step == warmup_steps:
+                for g, base in zip(optimizer.param_groups, epoch_lrs):
+                    g["lr"] = base
             x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
             y_hard = y
             if mixup_fn is not None:
@@ -387,8 +600,12 @@ def main():
                             model._feats[model.taps[0]].detach().float().std()
                         )
             scaler.scale(loss).backward()
+            if clip_grad is not None:
+                scaler.unscale_(optimizer)
+                torch.nn.utils.clip_grad_norm_(params, clip_grad)
             scaler.step(optimizer)
             scaler.update()
+            global_step += 1
             # moment-aux: block the scale degeneracy (see aux.py) by restoring
             # the aux head's weight norm after each step.
             if hasattr(model, "project_heads"):
@@ -436,6 +653,12 @@ def main():
             f"epoch {epoch + 1}/{cfg['epochs']} loss {loss_sum / max(n_batches, 1):.4f} "
             f"train {train_acc:.4f} test {test_acc:.4f}"
         )
+        if (resume_every and (epoch + 1) % resume_every == 0
+                and epoch + 1 < cfg["epochs"]):
+            _save_resume_state(
+                resume_path, model, optimizer, scheduler, scaler, train_loader,
+                epoch + 1, best_acc, wall_before + time.time() - t_start,
+                resume_history, out_dir)
     csv_file.close()
     _tmp = os.path.join(out_dir, "last.pt.tmp")
     torch.save(model.state_dict(), _tmp)
@@ -448,14 +671,21 @@ def main():
         "final_test_acc": test_acc,
         "best_test_acc": best_acc,
         "accounting": accounting,
-        "wall_seconds": time.time() - t_start,
+        "wall_seconds": wall_before + time.time() - t_start,
         "torch_version": torch.__version__,
         "device": str(device),
         "gpu_name": torch.cuda.get_device_name(device) if device.type == "cuda" else None,
         "amp": use_amp,
     }
+    if resume_history:
+        final["resumed_from_epoch"] = resume_history[-1]
+        final["resume_history"] = resume_history
     with open(os.path.join(out_dir, "final.json"), "w") as f:
         json.dump(final, f, indent=2)
+    if resume_every:
+        for fn in (resume_path, resume_path + ".tmp", os.path.join(out_dir, "best.pt.resume")):
+            if os.path.exists(fn):
+                os.remove(fn)
     print(f"done: final {test_acc:.4f} best {best_acc:.4f} -> {out_dir}")
 
 

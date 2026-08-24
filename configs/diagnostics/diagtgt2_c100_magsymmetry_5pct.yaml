@@ -1,0 +1,22 @@
+# Block C, limitations campaign (2026-08-24): auxmag_5pct_sched0 VERBATIM except
+# name and moment_aux.stem -> energy-magnitude+symmetry. Only the aux TARGET varies.
+name: diagtgt2_c100_magsymmetry_5pct
+dataset: cifar100
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 8
+small_input: true
+pretrained: false
+subset_pct: 5
+stem: none
+stem_calibrate: true
+moment_aux:
+  stem: energy-magnitude+symmetry
+  tap: layer3
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine

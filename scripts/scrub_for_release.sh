@@ -35,7 +35,7 @@
 #
 #   1. SCOPE. The file list was slurm/ and scripts/ only, so 65 lines of home
 #      path sat in logs/ and shipped inside logs.tar.gz.
-#   2. A MANGLED FORM. "-home-amughrabi-projects-..." inside a scratch path
+#   2. A MANGLED FORM. "-home-${SCRUB_USER}-projects-..." inside a scratch path
 #      is a home path with the slashes replaced by dashes, which "s#/home/..#"
 #      cannot match.
 #   3. A BARE USERNAME. Captured `ls -l` output carries the user as owner and

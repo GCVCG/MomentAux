@@ -19,7 +19,7 @@ from .stem import MomentStem
 
 RESNETS = ("resnet18", "resnet34", "resnet50")
 BACKBONES = RESNETS + ("convnext_tiny", "vit_tiny", "vit_small", "vit_base",
-              "swin_tiny",
+              "vit_large", "swin_tiny",
               "mobilenetv3_small_100")
 
 
@@ -82,7 +82,8 @@ def build_model(
     :param moment_aux use the moments as a training-only auxiliary prior on a
         VANILLA backbone (deployed path has no moment channels). Dict e.g.
         {"stem": "energy-magnitude", "tap": "layer3", "weight": 0.1,
-         "kernel_size": 11, "stem_kwargs": {...}}. Requires stem_name "none".
+         "kernel_size": 11, "stem_kwargs": {...}, "channel_reduce": "mean"}.
+        Requires stem_name "none".
         See aux.py. Mutually exclusive with head_pool.
     """
     # in_channels defaults to 3, so every existing cell is byte-unchanged.
@@ -110,7 +111,7 @@ def build_model(
             img_size=image_size,
             patch_size=image_size // 8,
         )
-    elif backbone in ("vit_small", "vit_base"):
+    elif backbone in ("vit_small", "vit_base", "vit_large"):
         # ViT-S/16 at NATIVE resolution -- deliberately NOT the small-input
         # surgery used for vit_tiny. This is the scale control for MODEL SIZE
         # and RESOLUTION (22M params, 224px, 14x14 token grid), i.e. the
@@ -119,6 +120,11 @@ def build_model(
         # the same depth fraction as every other transformer tap in the study,
         # and aux._to_spatial folds 197 tokens (196 + cls) to (B, C, 14, 14)
         # with no change -- it derives the grid from the token count.
+        # vit_large (ViT-L/16, 304M params, 24 blocks; limitations campaign
+        # block F, 2026-08-23) is the SAME construction one size up: the
+        # model-scale curve's third point. Its depth-fraction tap is
+        # blocks.16 of 24 (2/3 depth, as blocks.8 of 12), set in the config,
+        # and the 197-token tap folds to (B, 1024, 14, 14) by the same rule.
         if small_input:
             raise ValueError(f"{backbone} is the native-resolution path; "
                              "set small_input: false")
@@ -234,12 +240,19 @@ def build_model(
         elif moment_aux.get("hog"):
             target = HOGTarget(n_bins=moment_aux.get("hog_bins", 9))
         else:
+            target_kwargs = dict(moment_aux.get("stem_kwargs") or {})
+            # moment_aux.channel_reduce (2026-08-23): how an energy stem folds
+            # the input channels into its scalar field (mean / perchannel /
+            # pca1 / logmean). Forwarded ONLY when set, so every existing
+            # config builds byte-identically.
+            if moment_aux.get("channel_reduce") is not None:
+                target_kwargs["channel_reduce"] = moment_aux["channel_reduce"]
             target = MomentTarget(build_stem(
                 moment_aux["stem"],
                 in_channels=in_channels,
                 kernel_size=moment_aux.get("kernel_size", 11),
                 seed=stem_seed,
-                **(moment_aux.get("stem_kwargs") or {}),
+                **target_kwargs,
             ))
         return MomentAuxModel(
             net,

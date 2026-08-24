@@ -1,0 +1,3 @@
+python analysis/linear_probe.py --config configs/sensorfusion/diagsarred_perchannel_so2sat_sar_aux_5pct.yaml --run "$OUT"/diagsarred_perchannel_so2sat_sar_aux_5pct --ckpt best.pt --data-root "$DR"
+python analysis/linear_probe.py --config configs/sensorfusion/diagsarred_pca1_so2sat_sar_aux_5pct.yaml --run "$OUT"/diagsarred_pca1_so2sat_sar_aux_5pct --ckpt best.pt --data-root "$DR"
+python analysis/linear_probe.py --config configs/sensorfusion/diagsarred_logmean_so2sat_sar_aux_5pct.yaml --run "$OUT"/diagsarred_logmean_so2sat_sar_aux_5pct --ckpt best.pt --data-root "$DR"

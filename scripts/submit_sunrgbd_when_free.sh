@@ -2,12 +2,12 @@
 # Poll the BSC account submit cap (MaxSubmitPA=20) and submit block H's
 # smoke-gated sunrgbd lane as soon as there is room: smoke + >=1 worker node
 # (2 nodes when room allows). Idempotent: refuses if ms_sunrgbd already queued.
-HOST=ub881905@alogin2.bsc.es
+HOST=${CLUSTER_USER}@alogin2.bsc.es
 for i in $(seq 1 200); do
   OUT=$(ssh -o BatchMode=yes -o ConnectTimeout=30 $HOST '
-    MS=/gpfs/scratch/ub234/momentstem
-    if squeue -A ub234 -h -o "%j" | grep -q "^ms_sunrgbd$"; then echo ALREADY; exit 0; fi
-    N=$(squeue -A ub234 -h | wc -l)
+    MS=${CLUSTER_SCRATCH}/momentstem
+    if squeue -A ${CLUSTER_ACCOUNT} -h -o "%j" | grep -q "^ms_sunrgbd$"; then echo ALREADY; exit 0; fi
+    N=$(squeue -A ${CLUSTER_ACCOUNT} -h | wc -l)
     FREE=$((20 - N))
     if [ "$FREE" -lt 2 ]; then echo "WAIT free=$FREE"; exit 0; fi
     cd $MS/repo

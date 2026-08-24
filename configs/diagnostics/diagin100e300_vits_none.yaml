@@ -1,0 +1,25 @@
+# Block F (limitations campaign, 2026-08-23): 300-epoch CONVERGENCE arm,
+# diagin100e200 verbatim except name and epochs: 300.
+# diag: ImageNet-100 stage, 200 epochs instead of 100.
+# R1, referee-requested: does the model-scale trend (ViT-S +13.0 vs
+# ViT-B +26.0) survive at a budget where BOTH models are trained?
+name: diagin100e300_vits_none
+dataset: imagenet100
+backbone: vit_small
+optimizer: adamw
+epochs: 300
+batch_size: 128
+lr: 0.001
+weight_decay: 0.05
+momentum: 0.9
+num_workers: 5
+small_input: false
+pretrained: false
+subset_pct: 100
+stem: none
+stem_calibrate: true
+augment: deit
+# resume_every (block F): full-state checkpoint every 10 epochs so the run
+# survives the 24h MaxWall and is resumed by a later lane job (train.py docstring:
+# data order restored exactly; worker augmentation RNG re-seeded -- unbiased).
+resume_every: 10

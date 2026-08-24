@@ -8323,3 +8323,62 @@ ported vs corrected and why.
   the defence is "the selected configuration is not a test-split artifact",
   not "the sweep ordering is split-invariant". The scope caveat stands: the
   checkpoints were still SELECTED on test; this bounds the defect.
+
+- *** NODE_FAIL RECOVERY (2026-08-24). A CLUSTER-WIDE NODE_FAIL at 10:36 killed
+  every running job of the campaign. What survived and what did not:
+    lane traj      36/36 finals  COMPLETE (12 diagtraj cells x 3 seeds, and
+                   all 36 seed dirs carry exactly 10 ckpt_epXXX.pt -- verified
+                   file by file, not inferred from the cell count)
+    lane densestep 18/18 finals  COMPLETE (6 diagstep_ade cells, runs_dense)
+    lane sarred    45/45 finals  COMPLETE (15 diagsarred cells)
+    lane sunrgbd  108/108 finals COMPLETE (30 sf_sunrgbd + 6 diagsf_sunrgbd)
+    lane tgt2      85/90         five runs lost to the known ~5% SIGABRT
+    lane vitl       0/24 finals  all killed mid-run; every run left a resume.pt
+  RESUBMITTED, one lane per counter, every counter absent before launch:
+    ms_lprobe  44989283  141 linear_probe tasks in ONE queue (OUT=runs): the
+      120 block-A trajectory probes (--ckpt ckpt_epXXX.pt --out-suffix _epXXX,
+      so no recorded linear_probe.json can be clobbered), the 3 block-G sarred
+      5% cells and the 18 block-H SUN RGB-D cells. One lane rather than three
+      because they share OUT and the command form, and a per-wave lane
+      guarantees the end-of-queue drain recorded 2026-08-11.
+    ms_dprobe  44989299  the 6 block-D dense probes (OUT=runs_dense, which is
+      exactly why they could NOT join the lane above).
+    ms_tgt2fix 44989284  the 5 SIGABRT re-runs. Verified first that none of the
+      five seed dirs holds a final.json (the abort precedes the write), so each
+      is simply an unfinished run and the 85 that finished are protected by
+      train.py's completed-run guard. A NEW lane, never the drained tgt2
+      counter.
+    ms_vitlres 44989285 + 44989286  the 17 healthy block-F resumes, 2 nodes,
+      SLOTS=1, 23h50 wall, claim deadline 14h (the longest REMAINING task is
+      ~7.8h, so a task claimed at the deadline still has >2x its need).
+      Verified per run before launch: resume.pt present AND final.json absent
+      on all 17.
+  RECOVERY SMOKE FIRST (ms_recsmoke 44988910, 5/5 OK, failures=0). Two
+  dependent jobs that fired right after the outage (ms_vitl2/vitl3) had died in
+  15s WITHOUT EVEN CREATING THEIR STDOUT FILES, so "is the machine usable
+  again" was a live question and not a formality. The smoke also exercised each
+  probe code path on a real checkpoint -- including the two that had never run
+  on BSC (the SUN RGB-D 1- and 4-channel probes, and the pca1 reduction whose
+  checkpoints carry extra buffers) -- writing only to --out-suffix _SMOKETEST
+  filenames and a scratch runs tree, both deleted at the end (0 leftovers,
+  asserted by the job). --shots-only kept each check to feature extraction.
+  A 1-epoch dense number appears in that log and is NOT a measurement.
+  *** THE SCRUB SCRIPT IS BLIND TO EXACTLY THE FILES THAT NEED IT, and this is
+  the ninth member of the silent-guard family. scripts/scrub_for_release.sh
+  builds its file list from `git ls-files`, so a NEWLY CREATED lane sbatch --
+  untracked by definition until someone adds it -- is skipped, AND the script's
+  own closing "no enumerated identifier remains" check is computed over the
+  same tracked-only list, so it prints CLEAN while the new file still carries
+  the cluster account and paths. Caught by grepping the pulled files directly
+  rather than trusting the script's exit line. The five new sbatch files were
+  rewritten by hand with the script's own expressions and re-verified; every
+  other untracked file under slurm/ was audited at the same time and was
+  already clean. The script's file list should be widened to include untracked
+  files before the next release pass.
+  COORDINATION HAZARD RECORDED ON THE CLUSTER, not just here: worklist.vitl,
+  .vitl2 and .vitl3 each carry ALL 24 block-F lines, so submitting one while
+  ms_vitlres is live would put a second node on one of the 17 runs already in
+  flight -- and the run lock is flock-based and NODE-LOCAL on GPFS (2026-08-13),
+  so it would not stop the duplicate. A READ_BEFORE_RESUBMITTING_VITL.txt next
+  to the worklists says so and lists which runs the lane does and does not
+  carry. None of the other lanes' files was touched.

@@ -79,6 +79,13 @@ STEM_NAMES = (
     "energy-magnitude",
     "energy-rotinv",
     "energy-structure",
+    # any "energy-<feature_type>" with feature_type in energy.ENERGY_TYPES
+    # builds; block C (2026-08-23) added phase / symmetry and the two
+    # magnitude+<new> concatenations for the prior-on-prior combos.
+    "energy-phase",
+    "energy-symmetry",
+    "energy-magnitude+phase",
+    "energy-magnitude+symmetry",
 )
 
 

@@ -1,0 +1,31 @@
+# diag: ImageNet-100 stage, 200 epochs instead of 100 (block F convergence arm;
+# mirrors diagin100e200_vitb vs diagin100_vitb).
+# Block F (limitations campaign, 2026-08-23): ViT-L/16, the THIRD point of
+# the model-scale curve. diagin100_vitb verbatim except backbone and the
+# depth-fraction tap blocks.16 of 24 (= blocks.8 of 12). Needs resume_every
+# (24h MaxWall). diag-only, never headline.
+# ImageNet-100 @224px NATIVE resolution -- the RESOLUTION + MODEL-SCALE
+# control. Everything else in the study is 32-96px with <=28M params;
+# this is vit_large at the standard 224 pipeline (RandomResizedCrop).
+# DEVIATION: 100 epochs (not the frozen 200) and native-res transforms;
+# both arms identical, so Delta stays valid. diag-only, never headline.
+name: diagin100e200_vitl_none
+dataset: imagenet100
+backbone: vit_large
+optimizer: adamw
+epochs: 200
+batch_size: 128
+lr: 0.001
+weight_decay: 0.05
+momentum: 0.9
+num_workers: 5
+small_input: false
+pretrained: false
+subset_pct: 100
+stem: none
+stem_calibrate: true
+augment: deit
+# resume_every (block F): full-state checkpoint every 10 epochs so the run
+# survives the 24h MaxWall and is resumed by a later lane job (train.py docstring:
+# data order restored exactly; worker augmentation RNG re-seeded -- unbiased).
+resume_every: 10

@@ -189,3 +189,35 @@ def test_aux_on_vit_token_tap():
     m.eval()
     with torch.no_grad():
         assert torch.allclose(m(x), m.net(x), atol=1e-5)
+
+
+def test_aux_on_vit_large_native_token_tap():
+    """ViT-L/16 at native 224 (block F of the limitations campaign): the
+    third point of the model-scale curve uses the SAME native-resolution
+    construction as vit_small/vit_base, tapped at blocks.16 of 24 (the 2/3
+    depth fraction that blocks.8 of 12 gives the smaller ViTs). The 197-token
+    tap (196 + cls) must fold to (B, 1024, 14, 14) with no special casing, a
+    forward/backward through the aux head must run, and the deployed path
+    must stay the bare ViT. CPU, batch 1: ~1 s forward+backward."""
+    from momentstem.aux import _to_spatial
+    from momentstem.backbones import BACKBONES
+    assert "vit_large" in BACKBONES
+    m = build_model("vit_large", "none", num_classes=100, small_input=False,
+                    image_size=224,
+                    moment_aux={"stem": "energy-magnitude", "tap": "blocks.16",
+                                "weight": 1.0, "head_norm": True})
+    assert len(m.net.blocks) == 24
+    m.calibrate(torch.randn(2, 3, 224, 224))
+    m.train()
+    x = torch.randn(1, 3, 224, 224)
+    logits = m(x)
+    raw = m._feats["blocks.16"]
+    assert raw.dim() == 3 and raw.shape[1:] == (197, 1024)  # cls + 14x14
+    assert _to_spatial(raw).shape == (1, 1024, 14, 14)
+    assert m.aux_heads["blocks__16"].in_channels == 1024  # _head_key
+    (torch.nn.functional.cross_entropy(logits, torch.randint(0, 100, (1,)))
+     + m.last_aux).backward()
+    m.project_heads()
+    m.eval()
+    with torch.no_grad():
+        assert torch.allclose(m(x), m.net(x), atol=1e-5)

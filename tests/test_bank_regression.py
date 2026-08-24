@@ -200,7 +200,9 @@ def test_energy_stem_contracts():
 
     x = torch.randn(3, 3, 32, 32)
     expected_ch = {"magnitude": 11, "magnitude3": 15, "magnitude6o": 15, "rotinv": 11, "structure": 12,
-                   "steerable": 12, "invariants": 12}
+                   "steerable": 12, "invariants": 12,
+                   # block C (2026-08-23): 3 + 16 / 3 + 4 / 3 + 24 / 3 + 12
+                   "phase": 19, "symmetry": 7, "magnitude+phase": 27, "magnitude+symmetry": 15}
     for ft in ENERGY_TYPES:
         stem = EnergyStem(feature_type=ft)
         out = stem(x)
@@ -223,3 +225,110 @@ def test_gabor_kernel_formula_reference():
     g *= math.cos((math.pi / 2) * 0.5)
     g /= 2 * math.pi * sigma ** 2
     assert k[5, 5].item() == pytest.approx(g, rel=1e-5)
+
+
+# ---------------------------------------------------------------------------
+# Block C (2026-08-23): phase / symmetry read-outs of the committed magnitude
+# bank, and the two magnitude+<new> concatenations. ADDITIVE pins: the bank
+# itself is the one pinned above (test_energy_kernel_fingerprints), so the
+# magnitude fingerprints cannot move; these pin the RESPONSES of every
+# read-out on a deterministic analytic probe (no RNG, so no torch-version
+# dependence), plus the bounds and the exact-concatenation contract.
+# ---------------------------------------------------------------------------
+
+def _readout_probe():
+    """Deterministic, oriented, multi-frequency probe (2, 3, 32, 32)."""
+    i = torch.arange(32, dtype=torch.float32).view(1, 1, 32, 1)
+    j = torch.arange(32, dtype=torch.float32).view(1, 1, 1, 32)
+    b = torch.arange(2, dtype=torch.float32).view(2, 1, 1, 1)
+    c = torch.arange(3, dtype=torch.float32).view(1, 3, 1, 1)
+    return (torch.sin(0.9 * i + 0.4 * j + b) + 0.5 * torch.cos(0.3 * i - 0.8 * j + 0.5 * c)
+            + 0.25 * torch.sin(1.7 * (i + j))).contiguous()
+
+
+# (sum, abs-mean) of the RAW (pre-calibration) energy channels on _readout_probe.
+READOUT_PINS = {
+    "magnitude":          (1711.05619732, 0.1044345824),
+    "phase":              (32.88487173, 0.6366319713),
+    "symmetry":           (2133.67070281, 0.2604578495),
+    "magnitude+phase":    (1743.94106905, 0.4592328416),
+    "magnitude+symmetry": (3844.72690013, 0.1564423381),
+}
+
+
+def _raw(ft, x):
+    from momentstem import EnergyStem
+    st = EnergyStem(feature_type=ft)
+    return st, st._energy(st._luma(x)).double()
+
+
+def test_energy_readout_fingerprints():
+    x = _readout_probe()
+    for ft, (ssum, amean) in READOUT_PINS.items():
+        _, e = _raw(ft, x)
+        assert e.sum().item() == pytest.approx(ssum, rel=1e-5), ft
+        assert e.abs().mean().item() == pytest.approx(amean, rel=1e-6), ft
+
+
+def test_energy_readouts_share_the_committed_bank():
+    """phase / symmetry / combined must use buffers bitwise-identical to the
+    magnitude bank -- the design's whole point is that only the read-out
+    differs. Also pins the channel counts: 16 phase (2 x 8 pairs), 4 symmetry
+    (one per orientation; the committed bank is 4 orientations x 2 octaves)."""
+    from momentstem import EnergyStem
+    ref = EnergyStem("magnitude")
+    counts = {"phase": 16, "symmetry": 4, "magnitude+phase": 24, "magnitude+symmetry": 12}
+    for ft, n in counts.items():
+        st = EnergyStem(ft)
+        assert torch.equal(st.even, ref.even) and torch.equal(st.odd, ref.odd), ft
+        assert st.n_energy == n, (ft, st.n_energy)
+        assert st.out_channels == 3 + n
+        assert sum(p.numel() for p in st.parameters()) == 0
+
+
+def test_energy_phase_bounded_unit_circle():
+    x = _readout_probe()
+    _, ph = _raw("phase", x)
+    assert ph.shape[1] == 16
+    assert ph.min() >= -1.0 and ph.max() <= 1.0
+    # pair-major interleaved: 2p = cos, 2p+1 = sin  => cos^2 + sin^2 == 1
+    norm = ph[:, 0::2] ** 2 + ph[:, 1::2] ** 2
+    assert torch.allclose(norm, torch.ones_like(norm), atol=1e-5)
+    # the probe has oriented structure, so phase genuinely varies
+    assert ph.std() > 0.3
+    # atan2 convention at zero amplitude: (cos, sin) = (1, 0)
+    _, ph0 = _raw("phase", torch.zeros(1, 3, 16, 16))
+    assert torch.allclose(ph0[:, 0::2], torch.ones_like(ph0[:, 0::2]))
+    assert torch.allclose(ph0[:, 1::2], torch.zeros_like(ph0[:, 1::2]))
+
+
+def test_energy_symmetry_bounded_unit_interval():
+    x = _readout_probe()
+    _, sy = _raw("symmetry", x)
+    assert sy.shape[1] == 4
+    assert sy.min() >= 0.0 and sy.max() <= 1.0
+    assert 0.05 < sy.mean() < 0.95  # neither saturated nor dead on a real signal
+    # pure zero input: numerator 0, denominator eps  =>  exactly 0
+    _, sy0 = _raw("symmetry", torch.zeros(1, 3, 16, 16))
+    assert torch.equal(sy0, torch.zeros_like(sy0))
+
+
+def test_energy_combined_is_exact_concat_before_and_after_calibration():
+    from momentstem import EnergyStem
+    x = _readout_probe()
+    for new in ("phase", "symmetry"):
+        _, m = _raw("magnitude", x)
+        _, n = _raw(new, x)
+        _, c = _raw("magnitude+" + new, x)
+        assert torch.equal(c, torch.cat([m, n], dim=1)), new
+        # calibration is per channel, so the calibrated combined target equals
+        # the concatenation of the two calibrated singles exactly.
+        sm = EnergyStem("magnitude").calibrate(x)
+        sn = EnergyStem(new).calibrate(x)
+        sc = EnergyStem("magnitude+" + new).calibrate(x)
+        assert torch.equal(sc.calib_scale, torch.cat([sm.calib_scale, sn.calib_scale]))
+        out_c = sc(x)[:, 3:]
+        out_s = torch.cat([sm(x)[:, 3:], sn(x)[:, 3:]], dim=1)
+        assert torch.equal(out_c, out_s), new
+        # the magnitude half of the combined target IS the magnitude target
+        assert torch.equal(sc(x)[:, 3:11], sm(x)[:, 3:])
