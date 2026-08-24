@@ -76,6 +76,15 @@ PCTS = {
     # envelope shape rather than the full grid. 1% = 1,267 images (13 per
     # class), still ten batches of 128.
     "imagenet100": (1, 2, 5, 10, 25),
+    # SUN RGB-D scene classification (limitations campaign block H,
+    # 2026-08-23): ONE subset file shared by sunrgbd_{rgb,depth,all} via
+    # SUBSET_ALIAS -- the three sources are the same 4,845 training frames
+    # read through different channels. Sub-one-batch floor: 4,845 train over
+    # 19 classes -> 1% = ~48 images (and 0 for the smallest classes, which
+    # make_subset_indices refuses), 2% = ~97 < 128 -> BOTH impossible under
+    # the frozen recipe (batch 128, drop_last), exactly like stl10/cub @1-2%.
+    # 3% = ~145 is the scarce end that can still train (one batch/epoch).
+    "sunrgbd": (3, 5, 10, 25),
 }
 
 
@@ -126,6 +135,16 @@ def get_labels(dataset, data_root):
         from data import ImageNet100
 
         return ImageNet100(data_root, train=True).targets
+    if dataset == "sunrgbd":
+        # Labels straight from the pack's meta file (scripts/make_sunrgbd.py);
+        # the 677MB image array is never touched.
+        import os
+
+        import numpy as np
+
+        z = np.load(os.path.join(data_root, "sunrgbd_64_meta.npz"),
+                    allow_pickle=False)
+        return [int(t) for t in z["labels"][z["train_idx"]]]
     raise ValueError(f"unknown dataset {dataset!r}")
 
 

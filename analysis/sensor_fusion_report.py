@@ -42,6 +42,14 @@ POPULATIONS = {
         bands=("sar", "opt", "all"),
         label={"sar": "Sentinel-1 SAR (8 ch)", "opt": "Sentinel-2 optical (10 ch)",
                "all": "cross-modality fused (18 ch)"}),
+    # Third population (limitations campaign block H, 2026-08-23): two
+    # DIFFERENT modalities -- appearance and geometry -- whose single-source
+    # strengths are comparable, the different-modality AND symmetric corner.
+    "sunrgbd": dict(
+        prefix="sf_sunrgbd", title="SUN RGB-D (appearance + depth, 19 scenes)",
+        bands=("rgb", "depth", "all"),
+        label={"rgb": "RGB (3 ch)", "depth": "raw depth (1 ch)",
+               "all": "RGB-D fused (4 ch)"}),
 }
 
 

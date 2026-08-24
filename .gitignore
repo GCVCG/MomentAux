@@ -6,6 +6,7 @@ runs_dense/
 runs_det/
 runs_dense_50e/
 runs_turing/
+runs_smoke/
 results/*
 !results/*.csv
 !results/*.md

@@ -35,7 +35,10 @@ TRAIN_SIZE = {"cifar100": 50000, "cifar100super": 50000, "cifar10": 50000,
               "stl10": 5000, "tin": 100000, "tinsuper": 100000,
               "tinsem": 100000, "tin20": 10000, "tin20b": 10000, "cub": 5994,
               "eurosat": 21600, "dtd": 3760, "pathmnist": 89996,
-              "food101": 75750}
+              "food101": 75750,
+              # SUN RGB-D scene classification, official 19-class split
+              # (4,845 train): the three sources are the same images.
+              "sunrgbd_rgb": 4845, "sunrgbd_depth": 4845, "sunrgbd_all": 4845}
 
 
 def load_cells(roots):
@@ -149,6 +152,8 @@ def main():
               "eurosatms_all": 10.0,
               "so2sat_sar": 100.0 / 17, "so2sat_opt": 100.0 / 17,
               "so2sat_all": 100.0 / 17,
+              "sunrgbd_rgb": 100.0 / 19, "sunrgbd_depth": 100.0 / 19,
+              "sunrgbd_all": 100.0 / 19,
               "imagenet64": 0.1, "imagenet100": 1.0}
 
     rows = []

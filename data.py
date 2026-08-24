@@ -83,6 +83,16 @@ STATS = {
     # transform actually sees), by scripts/prepare_imagenet100.py. Mean lands
     # on canonical ImageNet (0.485, 0.456, 0.406) as it should.
     "imagenet100": ((0.4802, 0.4524, 0.4010), (0.2715, 0.2654, 0.2767)),
+    # SUN RGB-D at 64px (squash-resize; scripts/make_sunrgbd.py): 19 scene
+    # classes, official Song et al. 2015 split (4,845 train / 4,659 test).
+    # Channels [R, G, B, depth]; depth is the raw sensor depth (toolbox
+    # 3-bit-rotate decode), clipped at 10 m and scaled to [0, 1], 0 = missing.
+    # Computed 2026-08-23 on the 4,845-image train split at 64px; pinned here
+    # for the record -- the tensor-native loader normalises from the SAME
+    # values stored in sunrgbd_64_meta.npz (a test asserts they match).
+    "sunrgbd_all": ((0.494, 0.4573, 0.4335, 0.2175), (0.2672, 0.2749, 0.2797, 0.1345)),
+    "sunrgbd_rgb": ((0.494, 0.4573, 0.4335), (0.2672, 0.2749, 0.2797)),
+    "sunrgbd_depth": ((0.2175,), (0.1345,)),
 }
 
 NUM_CLASSES = {"cifar100": 100, "cifar100super": 20, "cifar10": 10, "stl10": 10,
@@ -94,7 +104,10 @@ NUM_CLASSES = {"cifar100": 100, "cifar100super": 20, "cifar10": 10, "stl10": 10,
                # Sentinel-2): rgb = the 3 visible bands, nir = the 10
                # non-visible bands, all = both fused.
                "eurosatms_rgb": 10, "eurosatms_nir": 10, "eurosatms_all": 10,
-               "so2sat_sar": 17, "so2sat_opt": 17, "so2sat_all": 17}
+               "so2sat_sar": 17, "so2sat_opt": 17, "so2sat_all": 17,
+               # SUN RGB-D scene classification (Song et al. 2015): 19 scene
+               # categories, appearance (rgb) against geometry (depth), fused (all).
+               "sunrgbd_rgb": 19, "sunrgbd_depth": 19, "sunrgbd_all": 19}
 IMAGE_SIZE = {"cifar100": 32, "cifar100super": 32, "cifar10": 32, "stl10": 96,
               "tin": 64, "tin20": 64, "tin20b": 64, "tinsuper": 64,
               "tinsem": 64, "cub": 64,
@@ -103,13 +116,17 @@ IMAGE_SIZE = {"cifar100": 32, "cifar100super": 32, "cifar10": 32, "stl10": 96,
               "eurosatms_rgb": 64, "eurosatms_nir": 64, "eurosatms_all": 64,
               # So2Sat LCZ42: the CROSS-MODALITY population, 32px patches,
               # Sentinel-1 SAR against Sentinel-2 optical.
-              "so2sat_sar": 32, "so2sat_opt": 32, "so2sat_all": 32}
+              "so2sat_sar": 32, "so2sat_opt": 32, "so2sat_all": 32,
+              # SUN RGB-D: squash-resized to 64px like CUB/DTD/Food-101.
+              "sunrgbd_rgb": 64, "sunrgbd_depth": 64, "sunrgbd_all": 64}
 
 # Input channel count. 3 everywhere except the multispectral sensor-fusion
 # variants, whose whole point is that the sources differ in band coverage.
 INPUT_CHANNELS = {"eurosatms_rgb": 3, "eurosatms_nir": 10, "eurosatms_all": 13,
                   # So2Sat: 8 SAR channels, 10 optical, 18 fused.
-                  "so2sat_sar": 8, "so2sat_opt": 10, "so2sat_all": 18}
+                  "so2sat_sar": 8, "so2sat_opt": 10, "so2sat_all": 18,
+                  # SUN RGB-D: 3 colour channels, 1 depth channel, 4 fused.
+                  "sunrgbd_rgb": 3, "sunrgbd_depth": 1, "sunrgbd_all": 4}
 
 # cifar100super is CIFAR-100's IMAGES with its 20 official coarse labels, and it
 # deliberately reuses CIFAR-100's COMMITTED subset indices (data/subsets/
@@ -119,7 +136,13 @@ INPUT_CHANNELS = {"eurosatms_rgb": 3, "eurosatms_nir": 10, "eurosatms_all": 13,
 # exactly 5 fine classes x n per coarse class). It is the one design that breaks
 # the CIFAR-10-vs-CIFAR-100 confound -- both of those are 50,000 images, so
 # matching per-class count there NECESSARILY unmatches total data/steps by 10x.
-SUBSET_ALIAS = {"cifar100super": "cifar100", "tinsuper": "tin", "tinsem": "tin"}
+SUBSET_ALIAS = {"cifar100super": "cifar100", "tinsuper": "tin", "tinsem": "tin",
+                # The three SUN RGB-D sources are the SAME images read through
+                # different channels, so they share ONE committed subset file
+                # (data/subsets/sunrgbd_<pct>pct.json): the arms differ only in
+                # which modality they see, never in which samples.
+                "sunrgbd_rgb": "sunrgbd", "sunrgbd_depth": "sunrgbd",
+                "sunrgbd_all": "sunrgbd"}
 
 # The 15 standard CIFAR-C corruptions of Hendrycks & Dietterich (ICLR 2019).
 CIFAR_C_CORRUPTIONS = (
@@ -134,7 +157,7 @@ def build_transforms(dataset, train, augment=None):
     # The multispectral EuroSAT variants are tensor-native and carry their own
     # per-band normalisation inside the Dataset, so the PIL pipeline (and its
     # STATS lookup) does not apply to them.
-    if dataset.startswith(("eurosatms_", "so2sat_")):
+    if dataset.startswith(("eurosatms_", "so2sat_", "sunrgbd_")):
         return None
     """Standard crop+flip only (recipe v1: minimal and identical for all).
 
@@ -564,17 +587,23 @@ class So2Sat(Dataset):
     setting than the canonical split.
     """
 
+    # Subclasses (SunRGBD) override these three; the loader body is shared.
+    BANDS = SO2SAT_BANDS
+    PACK = "so2sat_32"
+    BUILDER = "scripts/make_so2sat.py"
+
     def __init__(self, data_root, train=True, band_set="all", transform=None,
-                 pack="so2sat_32"):
+                 pack=None):
+        pack = pack or self.PACK
         img_p = os.path.join(data_root, pack + "_images.npy")
         meta_p = os.path.join(data_root, pack + "_meta.npz")
         if not (os.path.isfile(img_p) and os.path.isfile(meta_p)):
             raise FileNotFoundError(
-                f"{img_p} / {meta_p} not found; build with scripts/make_so2sat.py")
+                f"{img_p} / {meta_p} not found; build with {self.BUILDER}")
         z = np.load(meta_p, allow_pickle=False)
         self._all = np.load(img_p, mmap_mode="r")
         self.index = z["train_idx"] if train else z["test_idx"]
-        self.bands = list(SO2SAT_BANDS[band_set])
+        self.bands = list(self.BANDS[band_set])
         self.targets = z["labels"][self.index].tolist()
         self.mean = torch.tensor(z["mean"][self.bands]).view(-1, 1, 1)
         self.std = torch.tensor(z["std"][self.bands]).view(-1, 1, 1).clamp_min(1e-6)
@@ -589,6 +618,33 @@ class So2Sat(Dataset):
         if self.transform is not None:
             x = self.transform(x)
         return x, self.targets[i]
+
+
+SUNRGBD_BANDS = {
+    "rgb": (0, 1, 2),        # appearance: R, G, B in [0,1]
+    "depth": (3,),           # geometry: raw depth, clip 10 m, scaled to [0,1], 0 = missing
+    "all": (0, 1, 2, 3),     # cross-modality fusion
+}
+
+
+class SunRGBD(So2Sat):
+    """SUN RGB-D scene classification: the study's third multi-source
+    population -- two DIFFERENT modalities (appearance vs geometry) whose
+    single-source strengths are comparable, i.e. the different-modality AND
+    symmetric corner that EuroSAT-MS (same instrument) and So2Sat (different
+    instruments, asymmetric) leave open.
+
+    19 scene categories, the official Song et al. (2015) split (4,845 train /
+    4,659 test) over 10,335 Kinect v1/v2, RealSense and Xtion frames, packed
+    at 64px by scripts/make_sunrgbd.py: channels [R, G, B, depth] in [0,1],
+    per-channel train-split mean/std in the meta file. ``band_set`` selects
+    "rgb" (3 channels), "depth" (1) or "all" (4, fused). The loader body is
+    So2Sat's, unchanged.
+    """
+
+    BANDS = SUNRGBD_BANDS
+    PACK = "sunrgbd_64"
+    BUILDER = "scripts/make_sunrgbd.py"
 
 
 class EuroSATMS(Dataset):
@@ -837,6 +893,10 @@ def build_dataset(dataset, data_root, train, subset_pct=None, download=True,
         ds = So2Sat(data_root, train=train,
                     band_set=dataset.split("_", 1)[1],
                     transform=_ms_transform(train, IMAGE_SIZE[dataset]))
+    elif dataset.startswith("sunrgbd_"):
+        ds = SunRGBD(data_root, train=train,
+                     band_set=dataset.split("_", 1)[1],
+                     transform=_ms_transform(train, IMAGE_SIZE[dataset]))
     elif dataset.startswith("eurosatms_"):
         # tensor-native: the multispectral pack is already a float tensor, so
         # the PIL-based transform pipeline does not apply. Crop and flip are
@@ -884,7 +944,7 @@ def calibration_batch(dataset, data_root, n=1024):
         ds = datasets.ImageFolder(os.path.join(tin_root(data_root), "train"), transform=tf)
     elif dataset == "cub":
         ds = CUB200(data_root, train=True, transform=tf)
-    elif dataset.startswith(("eurosatms_", "so2sat_")):
+    elif dataset.startswith(("eurosatms_", "so2sat_", "sunrgbd_")):
         # tensor-native and already per-band standardised; the calibration
         # batch is just the first n training tiles in index order, as for the
         # other 64px sets.
