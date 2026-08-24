@@ -8222,6 +8222,76 @@ ported vs corrected and why.
   the baseline arm => the two modalities interfere under this recipe and
   the population cannot serve as the symmetric corner.
 
+- OPERATIONAL NOTE (2026-08-24, block H shipped; predictions above untouched):
+  ACQUISITION: SUNRGBD.zip (6.89 GB) + SUNRGBDtoolbox.zip fetched from the
+  Princeton site to /media/HDD_16TB/sunrgbd (8-way range download, zip
+  integrity verified with unzip -t before extraction). Split from the
+  toolbox's traintestSUNRGBD/allsplit.mat (alltrain 5,285 / alltest 5,050),
+  scene label from each sample folder's scene.txt.
+  *** ONE ASSERTION FIRED, AND IT WAS TIGHTENED TO THE FINDING, NOT
+  LOOSENED: 21 scene labels clear the >=80-image bar, not 19 -- the two
+  extras are "idk" (276 images, the annotators' don't-know label, not a
+  scene) and "office_kitchen" (82). The benchmark's own counts adjudicate:
+  filtering to the pinned 19 reproduces the official 4,845/4,659 split
+  EXACTLY, so those two are excluded by the benchmark itself. The packer now
+  asserts pinned ⊆ derived AND extras == {idk, office_kitchen} AND the
+  official counts.
+  *** DEVIATION FROM THE PRE-REGISTERED FRACTIONS: 1% and 2% are IMPOSSIBLE
+  under the frozen recipe -- 4,845 train images over 19 classes give 1% = 0
+  samples for the smallest class (lab: 40 train images; make_subset_indices
+  refuses) and 2% = ~97 images < one batch of 128 under drop_last, the same
+  floor as stl10/cub @1-2%. The envelope runs 3/5/10/25/100% (3% = 145
+  images, one batch/epoch); committed subsets sunrgbd_{3,5,10,25}pct.json
+  (145/245/483/1211 indices), ONE file shared by the three sources via
+  SUBSET_ALIAS. Cell count is therefore 90 r18 runs, not the pre-registered
+  108; +18 ViT-tiny = 108 total tasks.
+  PACK: data/sunrgbd_64_images.npy float32 (9504, 4, 64, 64) in [0,1]
+  (so2sat layout, memmap loader shared via a small base class) + meta with
+  labels/split/mean/std/classes/folder provenance. RGB squash-resized
+  BILINEAR like CUB (EXIF-transposed); depth = RAW depth/ (not the inpainted
+  depth_bfx/), decoded per the toolbox 3-bit rotate ((x>>3)|(x<<13), mm),
+  clipped at 10 m (0.20% of decoded pixels exceed 8 m), scaled to [0,1],
+  resized by VALID-PIXEL-WEIGHTED BOX area averaging so holes (0 = missing)
+  never bleed into neighbouring depth; 0 samples with no valid depth, 345 of
+  9,504 with >50% missing (mean missing fraction 15.7%). Depth HxW == RGB
+  HxW asserted on every sample (none fired). Class histogram printed by the
+  packer; NOTE the official split is NOT class-balanced across train/test
+  (lab: 40 train / 218 test; conference_room 99/191) -- inherited from the
+  benchmark, not a packing artifact. STATS pinned from the train split
+  (R,G,B,depth mean 0.4940/0.4573/0.4335/0.2175, std 0.2672/0.2749/0.2797/
+  0.1345), stored in the meta AND in data.py STATS with a test asserting
+  they match. CAVEAT recorded: for sunrgbd_all the energy stem's scalar
+  field is the uniform 1/4 mean of R,G,B,depth (the documented N-channel
+  deviation in energy.py) -- the aux target on the fused source mixes
+  geometry into the achromatic surrogate; on sunrgbd_depth it is the depth
+  map itself (oriented energy of geometry, physically meaningful).
+  CONFIGS: 42 (sf_sunrgbd_{rgb,depth,all}_{none,aux}_{3,5,10,25,100}pct =
+  sf_so2sat verbatim except name/dataset/pct; diagsf_sunrgbd_*_vit_*_10pct
+  = diagsfvit_eurosatms verbatim except name/dataset: AdamW diag, tap
+  blocks.8, 64px => patch 8). Pairs verified to differ only in moment_aux.
+  TESTS: tests/test_sunrgbd.py (12) -- channel-view CONTENT test (rgb ==
+  all[:3], depth == all[3], both splits), shared-subset test, stratification
+  vs the pack's own labels, calibration channel counts, 1-/4-channel energy
+  stem + aux model build-and-run on r18 AND vit_tiny. Suite 144 green.
+  SMOKES (1-epoch, scratch out-root, NOT measurements): local 3090 -- rgb/
+  depth/all r18 aux @3% and depth ViT aux @10% all wrote final.json with
+  aux_loss live (0.97 @ lambda 1.0) and calibration working at 1/3/4
+  channels. Pack + code + configs + subsets shipped to BSC (md5-verified
+  both sides; pack 623 MB at $MS_DATA).
+  LANE "sunrgbd": worklist.sunrgbd 108 lines (100% first, arms adjacent,
+  seeds adjacent; 90 r18 + 18 ViT), slurm/bsc_sunrgbd.sbatch from the
+  deployed r1 template (SLOTS=3, 64px dataloader-bound), smoke job
+  slurm/sunrgbd_smoke.sbatch exits non-zero on failure and the lane nodes
+  are submitted --dependency=afterok on it (the sarred exit-gate pattern).
+  AT SUBMISSION TIME THE ACCOUNT WAS AT ITS MaxSubmitPA=20 CAP (blocks A/F/G
+  lanes + the user's other project), so submission is armed as a poller that
+  fires the smoke + 2 lane nodes (>=1 if only 2 slots free) as capacity
+  opens; job ids land in the submit log and the lane is idempotent (skip
+  guard + run lock). Probe worklist scripts/worklist_sunrgbdprobe.txt (18
+  lines: r18 5/10% + ViT 10%, all sources/arms, best.pt, so2sat protocol)
+  staged on BSC, DELIBERATELY NOT SUBMITTED until all finals exist
+  (linear_probe skips missing checkpoints silently).
+
 - WHAT IS NOT IN THIS CAMPAIGN, with reasons: prior-as-warmup for large-ViT
   pre-training on ImageNet-1k (week-scale, not an ablation); an ImageNet-1k
   @224 ViT pair (the CVPR-shaped item; decide after F lands); a fifth dense
