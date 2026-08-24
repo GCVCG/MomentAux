@@ -8286,8 +8286,10 @@ ported vs corrected and why.
   AT SUBMISSION TIME THE ACCOUNT WAS AT ITS MaxSubmitPA=20 CAP (blocks A/F/G
   lanes + the user's other project), so submission is armed as a poller that
   fires the smoke + 2 lane nodes (>=1 if only 2 slots free) as capacity
-  opens; job ids land in the submit log and the lane is idempotent (skip
-  guard + run lock). Probe worklist scripts/worklist_sunrgbdprobe.txt (18
+  opens (scripts/submit_sunrgbd_when_free.sh, detached, logs/
+  sunrgbd_submit_wave.log holds the job ids when it fires; earliest expected
+  capacity ~5-6h out, the kg_pt_full 24h walls); the lane is idempotent
+  (skip guard + run lock). Probe worklist scripts/worklist_sunrgbdprobe.txt (18
   lines: r18 5/10% + ViT 10%, all sources/arms, best.pt, so2sat protocol)
   staged on BSC, DELIBERATELY NOT SUBMITTED until all finals exist
   (linear_probe skips missing checkpoints silently).
