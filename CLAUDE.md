@@ -8382,3 +8382,88 @@ ported vs corrected and why.
   so it would not stop the duplicate. A READ_BEFORE_RESUBMITTING_VITL.txt next
   to the worklists says so and lists which runs the lane does and does not
   carry. None of the other lanes' files was touched.
+
+- *** BLOCK B-1 SCORED — NO SINGLE-ARM PREDICATE SEPARATES STACK FROM
+  SUBSTITUTE OUT OF FAMILY, BUT **INTERFERENCE IS ANTICIPATABLE**
+  (2026-08-24, analysis/fusion_predicates.py, one command regenerates
+  results/fusion_predicates.{json,md}). Derivation set: **136 measured
+  combinations across 7 families** (aug|mae 5, aug|simclr 8, prior|aug 22,
+  prior|dino 6, prior|simclr 13, prior|simsiam 5, prior|transfer 77), far
+  above the pre-registered ">= 35"; 53 are checkpoint-complete, which is
+  what the feature-based predicates (CKA, per-class-delta correlation,
+  fix-set overlap, label-efficiency) can use. Outcome labels are the
+  exporter's own 2-SEM rule; family = source-type pair; the honesty
+  criterion is leave-one-FAMILY-out.
+  *** THE PRE-REGISTERED BAR (LOFO AUC >= 0.80 for STACK vs the rest) IS
+  **NOT REACHED**. Best out-of-family predictor is G_absdiff at **LOFO AUC
+  0.793** (in-sample 0.793 [0.67, 0.90], LOFO accuracy 0.59 on 59 core
+  pairs). So the pre-registered fallback fires as written: "the honest
+  result is that NO single-arm predicate exists and wave 3 is run anyway as
+  a pure second held-out test of the three-way taxonomy."
+  THE THREE FAILED PREDICATES OF THE EARLIER WAVES ARE CONFIRMED DEAD AT
+  SCALE, which is worth more than a fourth guess: the PUBLISHED rule
+  (REL, G-magnitude agreement) scores **AUC 0.520** — a coin, on 136 pairs,
+  exactly as wave 1's 1-of-9 implied; fix-set overlap S(A,B) and per-class
+  correlation are no better; and the AMPLIFIER FLAG I proposed in the
+  wave-2 post-mortem scores **0.531**, i.e. the mechanism is real (see
+  prior|aug's 17 STACKs) but does not work as a ranking statistic.
+  *** THE SECONDARY FINDING IS THE USEFUL ONE, AND IT WAS NOT PREDICTED:
+  the taxonomy's THIRD outcome is separable where the first two are not.
+      INTERFERE vs rest (core, n=59):  base_acc  LOFO AUC **0.842**
+                                       leff_min          0.810
+                                       cka_Abase         0.788
+                                       G_max             0.758
+      STACK vs INTERFERE (resolved, n=48): cka_Abase LOFO AUC **0.835**
+                                           cka_base_min        0.808
+  BASELINE ACCURACY ALONE anticipates interference at 0.84 out of family
+  (threshold ~41.7%), and it is mechanistically the currency account rather
+  than a new one: interference is what happens when the partner has already
+  bought the features, and a high baseline is precisely that condition.
+  This is the same variable the sign law uses, now doing a second job.
+  CONSEQUENCE FOR P2: the paper's claim narrows correctly to "which
+  combinations are DESTRUCTIVE is anticipatable from single-source
+  measurements; which of the two constructive outcomes occurs is not."
+
+- WAVE 3 PRE-REGISTERED (2026-08-24), and the calls below are COMMITTED
+  BEFORE ANY COMBINATION TRAINS. 13 pairs whose combination has never been
+  trained; every input computed from the two single arms and their shared
+  baseline only. Rule fixed here: **G_absdiff >= 3.76 -> STACK, else
+  SUBSTITUTE** (the best out-of-family predictor, threshold from the
+  derivation set; recorded WITH its 0.793 score, i.e. below the bar, so
+  this is a calibration test of a known-imperfect rule, not a claim).
+      pair                                 G_absdiff  BEST-RULE   PUBLISHED
+      prior|simclr  dtd@15      r18           7.23     STACK       STACK
+      prior|simclr  eurosat@10  r18           0.81     SUBSTITUTE  N/A
+      prior|simclr  stl10@20    r18           4.61     STACK       STACK
+      prior|simclr  cifar10@5   r18           1.84     SUBSTITUTE  STACK
+      prior|simclr  tin@5       r18           3.57     SUBSTITUTE  STACK
+      prior|dino    stl10@50    vit           5.77     STACK       STACK
+      prior|dino    food101@25  vit           1.75     SUBSTITUTE  SUBSTITUTE
+      prior|simsiam cifar100@25 r18           0.60     SUBSTITUTE  N/A
+      aug|simclr    food101@25  r18           4.75     STACK       N/A
+      aug|simclr    eurosat@10  r18           0.25     SUBSTITUTE  N/A
+      prior|mae     cifar100@5  vit           2.26     SUBSTITUTE  SUBSTITUTE
+      prior|mae     cifar100@10 vit           1.50     SUBSTITUTE  SUBSTITUTE
+      prior|mae     cifar100@25 vit           0.20     SUBSTITUTE  SUBSTITUTE
+  The two rules DISAGREE on 2 of 13 (cifar10@5, tin@5), which is what makes
+  running both worth anything.
+  SECONDARY, and this is the registration that matters most because it is
+  the one the derivation says should work: **the interference predicate
+  base_acc >= 41.7 -> INTERFERE** is applied to the same 13 pairs and
+  scored separately. It predicts INTERFERE on the high-baseline pairs
+  (eurosat@10, cifar10@5, stl10@20/50, food101@25, cifar100@25) and not on
+  the low-baseline ones.
+  CRITERIA, ONE PER QUESTION (the wave-1 lesson about a band and a
+  falsifier that contradict each other):
+    (W3-a) TAXONOMY COVERAGE: every resolved outcome is one of the three.
+      This is the pre-registered fallback's own test and the only claim the
+      failed-bar branch licenses.
+    (W3-b) THE INTERFERENCE PREDICATE: over pairs whose outcome is RESOLVED
+      at 2 SEM, base_acc >= 41.7 calls INTERFERE correctly at >= 75% =>
+      SUPPORTED and it goes in the paper as the one anticipatable outcome;
+      <= 50% => REJECTED and the derivation's 0.842 was family-structure,
+      not signal. Between the two: UNRESOLVED, reported as such.
+    (W3-c) The STACK/SUBSTITUTE rule is scored for the record only, with no
+      criterion attached, because its derivation score is below the bar.
+      Predicting it here would be claiming what B-1 just said cannot be
+      claimed.
