@@ -7951,6 +7951,63 @@ ported vs corrected and why.
     ingredient" is wrong and Sec. 5.1 needs restating; (F-C3) symmetry >=
     magnitude at >= 2 fractions => same.
 
+- OPERATIONAL (2026-08-24, block C shipped; predictions above untouched):
+  CODE: momentstem/energy.py gained feature_types phase / symmetry /
+  magnitude+phase / magnitude+symmetry, ALL reading the SAME committed
+  magnitude quadrature bank (buffers bitwise-identical to "magnitude",
+  asserted by test) -- only the read-out differs. CHANNEL COUNTS, and one
+  DEVIATION from the pre-registration text: phase = 16 (cos,sin per pair,
+  pair-major interleaved; atan2 convention (1,0) at zero amplitude, no
+  amplitude gate -- documented limitation); **symmetry = 4 channels, NOT the
+  8 the pre-registration assumed** -- the committed bank is 4 orientations x
+  2 octaves, and the per-orientation-summed-over-octaves Kovesi definition
+  is kept, so one channel per orientation = 4. Recorded as a deviation, not
+  a redesign. sym eps = _SYM_EPS = 1e-3, fixed: ~1.5% of the median
+  per-orientation amplitude sum on standardised CIFAR-100 (median 0.068,
+  mean 0.097). Combined targets = exact channel concatenation (magnitude
+  first: 8+16 = 24, 8+4 = 12), equal to the concat of the calibrated singles
+  bitwise (calibration is per channel; asserted). Calibration applied
+  uniformly to all families (bounded channels get a constant ~1.4x/3.6x
+  gain, kept so every target is unit-std and the code path is uniform).
+  Registered as stems energy-{phase,symmetry,magnitude+phase,
+  magnitude+symmetry} via the existing energy-* build path; backbones.py
+  and train.py untouched. PINS: response fingerprints of all 5 read-outs of
+  the bank on a deterministic analytic probe (no RNG) added ADDITIVELY to
+  tests/test_bank_regression.py + shared-bank/bounds/exact-concat tests; all
+  existing fingerprints byte-unchanged; suite 132 passed (sunrgbd deselected
+  per block-H coordination).
+  CONFIGS: 30 diagtgt2_* in configs/diagnostics, each its parent VERBATIM
+  except name + moment_aux.stem (verified by diff: exactly 2 non-comment
+  lines differ). PARENTS: c100 singles <- auxmag_{1,2,5,10,25,100}pct_sched0
+  (the champion family; NOTE these carry no head_norm field -- the recorded
+  C100 champion form -- while the esat parents do); tin <- tin_aux_{5,10}pct;
+  esat <- grid_esat_r18_axmagnitudeL3_l10to00_hn_dd367d_{5,10}pct; mag+F
+  combos <- the same c100/tin parents with stem energy-magnitude+F; Fssl@5 <-
+  diagssl_simclraux_5pct (init runs/simclr_pre_5pct, num_workers 8), Fssl@10
+  <- diagprosp_simclraux_c100_10pct (init runs/simclr_pre_c100_10pct,
+  num_workers 2, head_norm true) -- the two recorded simclr+aux combo cells
+  at those fractions, copied verbatim, so the two Fssl fractions differ in
+  those parent fields exactly as their comparators do. The simclr_pre_5pct
+  pretrains (3 seeds) were LOCAL-only and are now shipped to the cluster
+  repo runs dir (md5-verified); simclr_pre_c100_{5,10}pct already there.
+  SMOKE, local (1 epoch, runs_smoke/tgt2, NOT measurements): phase 0.0415 /
+  symmetry 0.0363 / mag+phase 0.0386 / phase+SSL 0.0964 test acc at c100@5%;
+  aux_loss live (0.221 / 0.488 / 0.651 / 0.227, lambda 1.0); target
+  out_channels verified 16 / 4 / 24 / 12 by construction.
+  LANE "tgt2": worklist.tgt2 90 lines (100% -> 25% -> 10% -> 5% -> 2% -> 1%,
+  families interleaved per fraction, tin-first within a fraction, seeds
+  adjacent), slurm/bsc_tgt2.sbatch from the deployed sarred lane (SLOTS=3
+  for the mixed 32/64px queue, 16h wall, 12h claim deadline), smoke
+  tgt2_smoke.sbatch (4 configs incl. the SSL-init path) gating the lane via
+  --dependency=afterok. AT SUBMISSION TIME MaxSubmitPA=20 WAS FULL (our own
+  traj/sarred/vitl queues): a detached submitter on the login node
+  (scripts_tgt2_submit.sh, logs/tgt2_submitter.log cluster-side) polls every
+  5 min and submits smoke + 2 lane nodes as soon as 3 slots free; job ids
+  land in that log. PROBES STAGED, NOT SUBMITTED:
+  scripts/worklist_tgt2probe.txt (18 lines: c100@5/10/25 + tin@10 singles of
+  both families + all 10 combos, full-train protocol, best.pt) -- submit
+  only after all 90 finals exist.
+
 ### D. THE NEGATIVE-BRANCH DENSE CELL, ONE BOUNDED ATTEMPT
 - diagstep_ade_{none,aux}_{5,10,25}pct: ADE20K dense cells at a FIXED
   ~600-step budget (50/10/5/2 epochs at 1/5/10/25%; the 1% cell at 50
@@ -8025,6 +8082,62 @@ ported vs corrected and why.
     on >= 2 of 3 seeds at BOTH budgets => ViT-L is bistable under this
     recipe and carries the swin-style caveat, no Delta claimed.
 
+- OPERATIONAL (2026-08-24, block F shipped; predictions above untouched):
+  CODE: backbones.py gains `vit_large` (timm vit_large_patch16_224, 303M
+  params, the SAME native-resolution construction as vit_small/vit_base;
+  aux._to_spatial folds its 197-token blocks.16 tap to (B,1024,14,14) with
+  no change -- verified by a new CPU forward/backward test in test_aux.py).
+  train.py gains `resume_every: N` (diag-only, OFF by default): every N
+  epochs a full training state (model/optimizer/scheduler/scaler, epoch,
+  best_acc, aux-head init norms, wall clock, metrics.csv row count, and the
+  python/numpy/torch-CPU/CUDA/sampler-generator RNG states) is written
+  ATOMICALLY to <seed_dir>/resume.pt; on start with resume.pt present and
+  final.json absent the run resumes (metrics.csv truncated to the saved row
+  count and reopened append; best.pt rolled back via a hard link taken at
+  save time so it always matches the recorded best_test_acc); final.json
+  carries `resumed_from_epoch` + `resume_history`; resume.pt is deleted on
+  completion. HONESTY CONTRACT, stated in the docstring and MEASURED: the
+  DATA ORDER is restored exactly (the sampler generator is restored and the
+  persistent-worker one-off base-seed draw is redirected to a throwaway
+  generator seeded as the original), but dataloader WORKER RNGs cannot
+  survive the process dying, so the augmentation stream after a resume is an
+  unbiased re-draw, NOT the uninterrupted run's draw -- same status as a
+  num_workers change; Delta stays valid, byte-identity does not hold (except
+  num_workers=0, where it DOES: a killed-and-resumed CPU nw=0 run reproduced
+  the uninterrupted run's metrics.csv and accuracies byte-identically).
+  NO-BEHAVIOUR-CHANGE CHECK: a 4-epoch CPU cell run under the old and new
+  train.py produced identical final.json and metrics.csv except wall/epoch
+  seconds. Suite green (the only red test is block H's in-progress
+  test_sunrgbd.py); 4 new resume tests + the vit_large test added.
+  CONFIGS: diagin100_vitl_{none,aux} (= diagin100_vitb verbatim except name,
+  backbone, tap blocks.16), diagin100e200_vitl_* (epochs 200),
+  diagin100e300_{vits,vitb}_* (= the e200 files except name/epochs 300) --
+  every pair's arms differ ONLY in the moment_aux block (diff-verified).
+  DEVIATION FROM THE REGISTERED "verbatim" DERIVATION, recorded: all eight
+  block-F configs additionally carry `resume_every: 10` (identical in both
+  arms of every pair, so no Delta is touched) -- the 300-epoch ViT-B (~16h)
+  and every ViT-L cell need it to survive the 24h MaxWall.
+  BSC SMOKE (job 44958580, scratch out-root, NOT measurements): 1-epoch
+  diagin100_vitl_aux at the REAL batch 128 trains clean -- peak 28.4GB of
+  65.2GB (no OOM, batch size untouched), 263 s/epoch incl. eval => ~7.3h
+  per 100-epoch run, ~14.6h per 200-epoch run (my 3.5x-FLOPs estimate was
+  ~2.4x pessimistic); and a REAL-MODEL resume round trip on GPFS (epochs 3,
+  resume_every 1, killed after the epoch-2 save) resumed at epoch 2,
+  finished, recorded resumed_from_epoch 2, cleaned up resume.pt.
+  LANE: worklist.vitl = 24 lines (longest first: e200 vitl, vitl, e300 vitb,
+  e300 vits; arms and seeds adjacent), SLOTS=1, --time=23:50, DEADLINE 7h
+  (any claimed task gets >=16.8h). REQUEUE DESIGN, deviating from the
+  "repeat each line in one worklist" sketch for a recorded reason: the run
+  lock is flock-based and NODE-LOCAL on GPFS (2026-08-13), so a repeated
+  line claimed by a slot that frees early could train the same seed dir
+  CONCURRENTLY with the original on another node -- the wrong-epoch race.
+  Instead the SAME 24 lines run as three chained lanes: vitl (6 nodes,
+  44967478-83), vitl2 (2 nodes, 44967484-85, --dependency=afterany on all
+  six), vitl3 (1 node, 44967486, afterany on both vitl2 jobs). A later lane
+  starts only when every job of the previous set has ENDED; finished cells
+  SKIP in seconds, unfinished ones resume from resume.pt. All 9 jobs
+  submitted (pending behind another project's nodes at submission).
+
 ### G. THE SAR CHANNEL REDUCTION, THREE RADAR-SPECIFIC ALTERNATIVES
 - New energy-stem option `channel_reduce:` with values mean (the current
   uniform average, unchanged default), perchannel (filter every band
@@ -8040,6 +8153,47 @@ ported vs corrected and why.
   optical prior): all three reductions stay within +-0.5 of the
   mean-reduction Delta at every fraction => the null is not the reduction's
   fault, and every cross-domain claim must name its modality.
+
+- OPERATIONAL NOTE (2026-08-23, block G shipped; predictions above untouched):
+  CODE: momentstem/energy.py gained `channel_reduce` in {mean, perchannel,
+  pca1, logmean}; default "mean" is byte-identical (bank fingerprints green,
+  the 3-channel path still IS `_energy(_luma(x))`, asserted by test); the pca1
+  buffers (`pc1_w`, `pc1_fitted`) are registered ONLY in pca1 mode so every
+  recorded checkpoint keeps exactly its old state_dict keys. Plumbed as
+  `moment_aux.channel_reduce` in backbones.py (forwarded only when set;
+  build_stem untouched). 8 new tests; suite green (120 at the time, the count
+  includes other blocks' additions). train.py NOT edited.
+  *** logmean SHIPPED WITH A DOCUMENTED DEVIATION FROM "LOG-INTENSITY":
+  scripts/make_so2sat.py stores the 8 SAR bands RAW (linear real/imag parts,
+  the two intensities and the covariance terms, float32 -- NOT dB), but
+  data.py standardises every band (mean/std) before the tensor reaches the
+  stem and the stem cannot recover raw intensities. So logmean computes
+  mean_c log1p(softplus(x_c)) on the STANDARDISED bands: a monotone
+  heavy-tail compression per band before averaging (the functional purpose of
+  the SAR log transform), not the dB of backscatter. Readers of the
+  diagsarred_logmean rows must read it that way; the energy.py docstring says
+  so verbatim. A true dB transform would need raw-band access plumbed through
+  the dataset and is a separate design decision, not taken.
+  CONFIGS: 15 diagsarred_{perchannel,pca1,logmean}_so2sat_sar_aux_{1,2,5,10,
+  25}pct.yaml = sf_so2sat_sar_aux_<pct> verbatim + name + channel_reduce
+  (verified by diff). Baselines stay sf_so2sat_sar_none_* (the exporter's
+  family key puts channel_reduce inside the aux intervention fields, so the
+  pairing is automatic).
+  SMOKE, local (1 epoch, runs_smoke/sarred, NOT measurements): perchannel
+  0.149 / pca1 0.140 / logmean 0.142 test acc at 5%, aux_loss live (0.84,
+  lambda 1.0), pc1_w stored and fitted; a probe of the pca1 smoke cell loads
+  its checkpoint (pc1 buffers present) and runs end to end.
+  BSC: so2sat_32_images.npy (3.56 GB) + so2sat_32_meta.npz shipped to
+  $MS_DATA (data.py already identical on both sides, md5-checked); energy.py
+  and backbones.py md5-identical after rsync; configs/sensorfusion shipped
+  (123 files incl. the 15 new). BSC smoke job ms_sarredsmoke 44958481
+  (PENDING on queue priority at the time of writing -- the QOS group cap is held by other jobs; the smoke sbatch exits non-zero on any SMOKE_FAIL so the lane, submitted with --dependency=afterok on it, CANNOT start unless the smoke passes; a first smoke+lane pair 44958303/44958350 was cancelled unstarted and resubmitted with that exit gate added). Lane "sarred": worklist.sarred 45 lines (25 -> 1%, modes
+  perchannel/pca1/logmean, seeds adjacent), slurm/bsc_sarred.sbatch derived
+  from the deployed r1 lane (SLOTS=5, 8h wall, 6h claim deadline), 1 node,
+  job ms_sarred 44958482 (PD, Dependency). Probe lane staged, NOT submitted: worklist.sarredprobe
+  (3 lines, 5% cells, best.pt, the sf_so2sat probe protocol) +
+  bsc_sarredprobe.sbatch -- submit only after all 9 5% finals exist
+  (linear_probe skips missing checkpoints silently).
 
 ### H. THE THIRD MULTI-SOURCE POPULATION: SUN RGB-D (RGB + DEPTH)
 - WHY THIS ONE: the two existing populations confound asymmetry with
@@ -8072,3 +8226,28 @@ ported vs corrected and why.
   pre-training on ImageNet-1k (week-scale, not an ablation); an ImageNet-1k
   @224 ViT pair (the CVPR-shaped item; decide after F lands); a fifth dense
   instrument beyond D.
+
+- *** BLOCK E SCORED — THE FALSIFIER FIRED ON THE LETTER AND THE SELECTION
+  SURVIVES ON SUBSTANCE, AND BOTH HALVES ARE REPORTED (2026-08-23,
+  analysis/selection_val_rescore.py, 255 checkpoints / 70 cells / 24 axes,
+  last.pt only, identity check 255/255 to <=0.02; 25 missing checkpoints
+  recovered from BSC read-only). The pre-registered prediction was "no axis
+  flips on the validation carve-out"; the falsifier "any axis flips".
+  MEASURED: **5 of 24 axes change numeric winner on val** (tap@10%,
+  lambda-const@25%, endpoint@1/2/5%) -- the falsifier FIRED as written.
+  BUT every flip sits on an axis whose test-scored margin was <= 0.23 points
+  and < 1 SEM -- a statistical tie at selection time -- while **0 of the 10
+  axes with a resolvable (>2 SEM) test margin flip**: target family (both
+  fractions), loss form (both), lambda0 (all four), head_norm (both), the
+  layer4 cliff, the random-fixed null and MSE-over-cosine all reproduce on
+  val. The resolvable/tie distinction was NOT pre-registered, so it
+  QUALIFIES the fired falsifier rather than undoing it; results/
+  selection_val_rescore.md states it that way. Val-vs-test shift on this
+  population: mean +0.33 (fraction-dependent, -0.44@2% -> +0.71@25%) --
+  B1's pooled -0.3 does NOT transfer in sign; noted as data.
+  CONSEQUENCE FOR THE PAPER (P1): the selection paragraph can now say that
+  every resolvable selection decision survives re-scoring on a validation
+  fold, and must ALSO say that the near-tie axes are split-dependent, i.e.
+  the defence is "the selected configuration is not a test-split artifact",
+  not "the sweep ordering is split-invariant". The scope caveat stands: the
+  checkpoints were still SELECTED on test; this bounds the defect.
