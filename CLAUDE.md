@@ -8818,3 +8818,26 @@ ported vs corrected and why.
   for every cell at probe cost only. QUEUED BEHIND THE IDENTITY SWEEP
   DELIBERATELY: the sweep's second pass verifies last.pt too, and probing a
   checkpoint before verifying it is how this whole thread started.
+
+- *** CONSEQUENCE FOR WAVE 3, CAUGHT BEFORE IT LAUNCHED (2026-08-25). The 13
+  wave-3 calls committed on 2026-08-24 are computed from gA/gB, i.e. from
+  RECORDED probes, and those are exactly the quantities the two defects above
+  disturb. Checking the 37 cells the spec names (25 present on the cluster
+  tree), **5 carry a best-minus-final gap > 1.0 point**:
+      +2.96  diaggrid_vit_food101_none_25pct
+      +2.61  diaggrid_dino_food_25pct
+      +2.00  diaggrid_vit_stl_none_50pct
+      +1.77  diaggrid_vit_food101_aux_25pct
+      +1.56  diaggrid_dino_stl_50pct
+  They cluster on BOTH prior|dino pairs (stl10@50 committed STACK, food101@25
+  committed SUBSTITUTE), so those two calls rest on a G whose network is up to
+  3 points from the one its Delta describes. The identity sweep may add more.
+  DECISION: wave 3 does NOT launch until its inputs are re-derived from
+  matched-epoch probes on verified checkpoints. It was queued behind the audit
+  by luck rather than design; recording it so the ordering is deliberate.
+  PRE-REGISTRATION DISCIPLINE FOR THE RE-DERIVATION, fixed now so it cannot be
+  shaped later: the 2026-08-24 calls STAY ON RECORD UNEDITED. Re-derived calls
+  are recorded as a SEPARATE, superseding pre-registration naming which inputs
+  moved and why, and when the combinations finally train **both sets are
+  scored**. A pre-registration whose inputs were silently corrected is not a
+  pre-registration.
