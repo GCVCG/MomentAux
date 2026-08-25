@@ -8841,3 +8841,23 @@ ported vs corrected and why.
   moved and why, and when the combinations finally train **both sets are
   scored**. A pre-registration whose inputs were silently corrected is not a
   pre-registration.
+
+- *** A UNITS ERROR OF MY OWN, CAUGHT THE SAME HOUR, AND THE DENSE SIDE IS
+  CLEAN (2026-08-25). Extending the epoch-mismatch scan to the dense tree I
+  multiplied final_miou by 100 and reported best-minus-final gaps of up to
+  +12.60 mIoU on voc, i.e. larger than every dense Delta in the study, and
+  said so. WRONG: **classification final.json stores accuracy as a FRACTION
+  (0.9398) and dense final.json stores mIoU as a PERCENTAGE (31.72)**, so the
+  dense figures were inflated 100-fold. Corrected:
+      dense best-minus-final gap:            <= **0.13 mIoU** (voc worst)
+      per-pair DIFFERENTIAL gap (what biases G): <= **0.09 mIoU** (voc@25%,
+        against a Delta of +2.34 there, i.e. ~4%)
+  So the dense G corpus and the 9-of-9 dense law cells are NOT affected, and
+  the long-standing "dense best ~ final" claim is confirmed rather than
+  overturned. The CLASSIFICATION numbers in the entry above are unaffected --
+  those files really are fractions, verified against a cell whose e2e is known.
+  SAME ERROR CLASS THIS FILE KEEPS RECORDING (the "13x label-space collapse"
+  that was 1.6x; the retracted "gain tracks the deficit" law): a quantity
+  compared across two populations whose SCALES differ, without checking the
+  scale first. The tell was available and I did not look -- a +12.6 mIoU gap
+  on a cell whose whole Delta is +2.34 is not a subtle inconsistency.
