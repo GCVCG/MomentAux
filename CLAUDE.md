@@ -8522,3 +8522,48 @@ ported vs corrected and why.
   diagin100e200_vitl_none/seed0) are quarantined as seedN.nan.2026-08-24 so
   nothing can silently resume or probe them. F1/F2 will be scored on the
   stabilized cells, with the recipe deviation attached to every number.
+
+- *** BLOCK G SCORED — NO RADAR-SPECIFIC CHANNEL REDUCTION RESCUES THE SAR
+  COLUMN, SO THE RECORDED AMBIGUITY RESOLVES AGAINST THE REDUCTION
+  (2026-08-24/25, 45 runs, 3 seeds/cell, Delta vs the shared
+  sf_so2sat_sar_none baselines):
+      pct  base   mean(uniform)   perchannel      pca1            logmean
+        1  35.00  +1.24+-0.76     +1.39+-1.85    -1.46+-1.99     +1.58+-1.01
+        2  33.69  -3.09+-3.75     -3.05+-4.05    -1.15+-2.71     -6.29+-4.83
+        5  43.52  +2.59+-0.65     +0.80+-0.91    -1.10+-2.43     +0.26+-1.63
+       10  49.12  -0.46+-0.66     -1.14+-0.70    -1.77+-0.45     -0.58+-1.23
+       25  53.49  -0.24+-0.14     +0.81+-0.42    +0.64+-0.39     -0.12+-0.20
+      average over the STABLE fractions (1/5/10/25; 2% excluded, see below):
+        mean +0.78 | perchannel +0.47 | logmean +0.29 | pca1 -0.92
+  MY PREDICTION WAS "perchannel is the best of the three ... +0.5..+2.5 at
+  1-5% decaying to ~0 by 25%; pca1 close behind; logmean ~ mean." WRONG on
+  the ranking: no reduction has a consistent edge (the per-fraction winner is
+  logmean, pca1, perchannel, logmean, perchannel at 1/2/5/10/25), and pca1 --
+  the one I put second -- is the WORST arm on average and negative at three
+  of five fractions. Perchannel's 1% and 5% values do sit in the predicted
+  band, but its 5% value (+0.80) is far BELOW the uniform mean's +2.59, which
+  is the opposite of the point.
+  *** THE SUBSTANTIVE FINDING, and it is what the block was for: **the naive
+  uniform mean is as good as or better than every radar-specific alternative**
+  (+0.78 average against +0.47 / +0.29 / -0.92). The pre-registered falsifier
+  was worded as a PROXIMITY test -- "all three within +-0.5 of the
+  mean-reduction Delta at every fraction" -- and by that letter it does NOT
+  fire (10 of 15 cells differ by more than 0.5). But the differences are
+  SCATTER, not improvement, and the claim the falsifier guards is decided:
+  the weak, sign-flipping SAR envelope is NOT an artifact of averaging
+  backscatter bands, because filtering each band separately, projecting onto
+  the first principal component, and log-compressing all fail to improve it.
+  CONSEQUENCE FOR THE PAPER (P1): the Sec.-5 caveat "any weak or null result
+  on SAR is ambiguous between 'a fixed oriented-energy target does not suit
+  radar statistics' and 'this channel reduction is wrong for radar', and we
+  cannot separate the two" can be REPLACED by a measured statement: three
+  radar-specific reductions were tried and none helps, so the ambiguity is
+  resolved toward the first branch. The honest scope: this tests the CHANNEL
+  REDUCTION, not every possible radar adaptation (a target built from
+  backscatter statistics rather than oriented energy is still untested).
+  THE 2% CELL IS UNINTERPRETABLE AND IS EXCLUDED FROM THE AVERAGE, stated
+  rather than quietly dropped: every arm there has a seed spread of 3.2-7.6
+  points (baseline 29.75/34.97/36.35; logmean 18.63/32.33/31.25) against
+  0.1-1.1 elsewhere in the column, so its Deltas carry SEMs of 2.7-4.8 and
+  cannot order anything. This reproduces the instability the 2026-08-08 entry
+  already recorded for that fraction on both arms.
