@@ -35,12 +35,38 @@ import data as data_mod
 from momentstem import build_model
 
 
+_CFG_DIRS = ("configs/grid", "configs/diagnostics", "configs/ablations_full",
+             "configs/sensorfusion", "configs/dense", "configs")
+
+
 def find_config(cell):
-    for d in ("configs/grid", "configs/diagnostics", "configs"):
+    for d in _CFG_DIRS:
         p = os.path.join(d, f"{cell}.yaml")
         if os.path.exists(p):
             return p
-    return None
+    hits = glob.glob(os.path.join("configs", "**", f"{cell}.yaml"),
+                     recursive=True)
+    return hits[0] if hits else None
+
+
+_LOADERS = {}
+
+
+def _test_loader(ds, data_root):
+    """One test loader per dataset, cached.
+
+    A full-tree sweep verifies thousands of checkpoints; rebuilding the test
+    set for each one dominates the runtime (and on the JPEG datasets it is
+    minutes, not seconds). The loader is read-only and shuffle=False, so
+    sharing it across cells cannot change any result.
+    """
+    key = (ds, data_root)
+    if key not in _LOADERS:
+        test = data_mod.build_dataset(ds, data_root, train=False)
+        _LOADERS[key] = torch.utils.data.DataLoader(
+            test, batch_size=256, shuffle=False,
+            num_workers=int(os.environ.get("MS_VERIFY_WORKERS", "4")))
+    return _LOADERS[key]
 
 
 @torch.no_grad()
@@ -106,6 +132,10 @@ def verify_one(cell, seed, runs, data_root, device, ckpt_name):
         head=cfg.get("head"),
         moment_aux=cfg.get("moment_aux"),
         image_size=data_mod.IMAGE_SIZE[ds],
+        # >3 only for the multispectral sensor-fusion cells; without it their
+        # checkpoints fail to load (conv1 is 8/10/13-channel, not 3) and the
+        # sweep would report a KEYS status for a perfectly good checkpoint.
+        in_channels=data_mod.INPUT_CHANNELS.get(ds, 3),
     ).to(device)
     if any(k.startswith("moment_stem.") for k in state):
         # The early fixed-lambda aux cells (auxmag_*, auxgab_*, auxrand_*) were
@@ -134,9 +164,7 @@ def verify_one(cell, seed, runs, data_root, device, ckpt_name):
                 "detail": str(e).split("\n")[1].strip()[:80] if "\n" in str(e)
                           else str(e)[:80]}
 
-    test = data_mod.build_dataset(ds, data_root, train=False)
-    loader = torch.utils.data.DataLoader(test, batch_size=256, shuffle=False,
-                                         num_workers=4)
+    loader = _test_loader(ds, data_root)
     got = evaluate(model, loader, device)
     return {"cell": cell, "seed": seed, "recorded": recorded, "evaluated": got,
             "diff": got - recorded, "field": key}
@@ -155,10 +183,25 @@ def main():
                     help="allowed |evaluated - recorded| in points")
     ap.add_argument("--device",
                     default="cuda" if torch.cuda.is_available() else "cpu")
+    ap.add_argument("--all-probed", action="store_true",
+                    help="verify every cell that carries a linear_probe*.json. "
+                         "These are exactly the cells whose checkpoints a "
+                         "recorded G rests on, so a wrong-epoch checkpoint "
+                         "among them silently corrupts a measurement rather "
+                         "than merely wasting a run.")
+    ap.add_argument("--all-seeds", action="store_true",
+                    help="verify every seed of each cell, not just --seed-pick")
+    ap.add_argument("--shard", default="0/1",
+                    help="i/n -- verify only cells with index %% n == i, so a "
+                         "sweep can be split across GPUs")
+    ap.add_argument("--out", default=None, help="write a JSON report here")
     a = ap.parse_args()
     device = torch.device(a.device)
 
-    if a.cells:
+    if a.all_probed:
+        cells = sorted({p.split(os.sep)[-2] for p in
+                        glob.glob(os.path.join(a.runs, "*", "linear_probe*.json"))})
+    elif a.cells:
         cells = a.cells
     else:
         # Sample across the tree rather than taking the first N: the first N
@@ -169,27 +212,47 @@ def main():
         random.Random(0).shuffle(have)
         cells = have[:a.sample * 3]     # oversample; many lack a checkpoint
 
+    si, sn = (int(x) for x in a.shard.split("/"))
+    if sn > 1:
+        cells = [c for i, c in enumerate(cells) if i % sn == si]
+    # Group by dataset so the cached test loader is built once per dataset
+    # instead of thrashing between them.
+    cells = sorted(cells, key=lambda c: (
+        (yaml.safe_load(open(find_config(c))).get("dataset", "")
+         if find_config(c) else ""), c))
+    print(f"verifying {len(cells)} cells (shard {a.shard}, "
+          f"{'all seeds' if a.all_seeds else 'seed %d' % a.seed_pick})",
+          flush=True)
+
     checked, bad = [], []
     for cell in cells:
-        r = verify_one(cell, a.seed_pick, a.runs, a.data_root, device, a.ckpt)
-        if r is None:
-            continue
-        checked.append(r)
-        if "status" in r:
-            # CORRUPT is damage and must be re-pulled; KEYS is an old naming
-            # and the recorded number still stands. Counting them together
-            # would hide the one that matters.
-            bad.append(r)
-            print(f"  {r['status']:<4s} {r['cell']:<38s} {r['detail']}",
-                  flush=True)
+        if a.all_seeds:
+            seeds = sorted(int(d[4:]) for d in
+                           os.listdir(os.path.join(a.runs, cell))
+                           if d.startswith("seed") and d[4:].isdigit())
         else:
-            flag = "ok  " if abs(r["diff"]) <= a.tol else "FAIL"
-            if flag == "FAIL":
+            seeds = [a.seed_pick]
+        for sd in seeds:
+            r = verify_one(cell, sd, a.runs, a.data_root, device, a.ckpt)
+            if r is None:
+                continue
+            checked.append(r)
+            if "status" in r:
+                # CORRUPT is damage and must be re-pulled; KEYS is an old
+                # naming and the recorded number still stands. Counting them
+                # together would hide the one that matters.
                 bad.append(r)
-            print(f"  {flag} {r['cell']:<38s} recorded {r['recorded']:6.2f}  "
-                  f"evaluated {r['evaluated']:6.2f}  diff {r['diff']:+.2f}",
-                  flush=True)
-        if not a.cells and len(checked) >= a.sample:
+                print(f"  {r['status']:<4s} {r['cell']:<44s} s{r['seed']} "
+                      f"{r['detail']}", flush=True)
+            else:
+                flag = "ok  " if abs(r["diff"]) <= a.tol else "FAIL"
+                if flag == "FAIL":
+                    bad.append(r)
+                    print(f"  {flag} {r['cell']:<44s} s{r['seed']} "
+                          f"recorded {r['recorded']:6.2f}  "
+                          f"evaluated {r['evaluated']:6.2f}  "
+                          f"diff {r['diff']:+.2f}", flush=True)
+        if not (a.cells or a.all_probed) and len(checked) >= a.sample:
             break
 
     n_corrupt = sum(r.get("status") == "CORRUPT" for r in checked)
@@ -198,6 +261,11 @@ def main():
     print(f"\n{len(checked)} checkpoints examined: "
           f"{len(checked) - len(bad)} verified, {n_drift} outside +-{a.tol}, "
           f"{n_corrupt} CORRUPT, {n_keys} legacy key naming")
+    if a.out:
+        with open(a.out, "w") as f:
+            json.dump({"ckpt": a.ckpt, "tol": a.tol, "shard": a.shard,
+                       "n_checked": len(checked), "results": checked}, f)
+        print(f"wrote {a.out}")
     if bad:
         sys.exit(1)
 

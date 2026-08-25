@@ -8631,3 +8631,190 @@ ported vs corrected and why.
   is a low-data cell in this study's terms; the 1% and 2% fractions are
   impossible under the frozen recipe (the smallest class has 40 train images)
   and 3% replaces them, as the block's operational note records.
+
+## BLOCK A ANSWERED THE WRONG QUESTION AND FOUND SOMETHING WORSE: THE
+## "BETTER FEATURES, WORSE ACCURACY" CLUSTER IS A CORRUPT BASELINE CHECKPOINT
+## (2026-08-25, trajectory probes, 12 cells x 3 seeds x 10 epochs = 360 probes)
+
+- FALSIFIER B FIRED, ON 5 OF 5 ARMS. It read: "G(t) at ep200 re-measured here
+  differs from the recorded G by > 1.5 on >= 2 of 5 arms => the recorded
+  exception magnitudes are not reproducible and the cluster must be re-audited
+  before it is written up at all."
+      arm                 G recorded   G re-run    shift
+      mag3   food@50%       +4.66       -1.01      -5.67
+      mag6o  food@50%       +4.97       -1.02      -5.99
+      mnet   food@50%       +3.70       +0.10      -3.60
+      mnet   path@20%       +1.88       -0.49      -2.37
+      mag3   path@50%       +0.71       -2.75      -3.46
+  The CONTROL reproduces (champion food@10%: recorded +2.80, re-run +3.36),
+  which is what makes the five failures interpretable rather than a protocol
+  difference: the trajectory probes are not systematically shifted.
+- *** THE CAUSE, AND MY FIRST TWO DIAGNOSES WERE BOTH WRONG. I said in turn
+  (a) "the probe head is randomly initialised without a seed, so the fit is
+  non-deterministic" and (b) "LBFGS gets a single 200-iteration step with no
+  convergence check, so the probe under-converges". Both are TRUE statements
+  about analysis/linear_probe.py and NEITHER is the cause. Measured, on the
+  identical features of the food baseline checkpoint:
+      current protocol, 5 unseeded runs:  test 66.23..66.26 (spread 0.02)
+      zero-init, iterated to convergence: test 66.20, loss 4.81 -> 0.98
+  So the fit is reproducible to 0.02 and converging it moves the answer by
+  0.05. The probe is under-converged in the LOSS and that does not matter for
+  the accuracy it reports. I asserted a root cause from code inspection before
+  measuring it, twice.
+- *** THE ACTUAL CAUSE IS A WRONG-EPOCH CHECKPOINT, and the identity check is
+  what found it:
+      runs/grid_food_r18_9ee7da_50pct/seed0/best.pt
+          recorded best_test_acc 71.81   evaluated **52.52**   diff -19.29
+      runs/grid_mag3_food_50pct/seed0/best.pt
+          recorded best_test_acc 70.44   evaluated  70.43      diff  -0.01
+  The BASELINE's stored best.pt is not the network its final.json describes;
+  the aux arm's is. The trajectory settles which epoch it is: the re-run's own
+  probe curve is 62.4/65.4/65.4/65.4/64.6/65.3/70.5/70.9/71.7/71.7 at
+  ep20..200, so a probe of 66.25 is EPOCH ~60 FEATURES, not epoch 190's.
+  Every symptom follows: G(+4.66) was measured against an early-epoch baseline,
+  which probes ~5.9 points low, so the aux arm appeared to have a large feature
+  gain while its accuracy did not move.
+- CONSEQUENCE: the regime the manuscript calls its most interesting open thread
+  -- "better features, worse accuracy at high data", 5 of the 10 sign-law
+  exceptions -- is an artifact of a corrupt baseline checkpoint on food101 and
+  pathmnist at >=20% data. With a genuine baseline the five arms have G ~ 0 and
+  Delta ~ 0 and are unremarkable. **This dissolves the anomaly rather than
+  explaining it.**
+- AND IT RETROSPECTIVELY VOIDS BLOCK C1 (2026-08-17), which tested whether the
+  anomaly is lambda0 overshoot and concluded "the readout penalty is
+  essentially invariant to lambda0, so the three findings do NOT unify". Every
+  G in that entry was computed as probe(new cell) - probe(EXISTING baseline),
+  and the existing baseline is exactly the corrupt one. C1's conclusion is
+  not wrong so much as VACUOUS: there was no anomaly for reduced lambda0 to
+  fix. Its e2e half (reduced lambda0 buys +0.5..+0.7 on food, and costs
+  accuracy on pathmnist) is unaffected -- e2e never touches a checkpoint.
+- WHY IT WAS INVISIBLE FOR MONTHS, and this is the transferable part: final.json
+  is computed IN MEMORY at train time and is correct; the checkpoint loads
+  without error; the probe runs and returns a stable, reproducible number. Every
+  guard in the pipeline passes. Only EVALUATING the checkpoint against its own
+  recorded accuracy catches it -- the rule this study wrote down on 2026-08-07
+  ("verify by IDENTITY, not by loading") and then applied to the 896 LOCAL cells
+  on 2026-08-10 and NEVER TO THE CLUSTER TREE. The rule was right and its scope
+  was not enforced. Tenth member of the silent-guard family.
+- BLOCK A's OWN PREDICTIONS (A1 late divergence, A2 monotone G, A3 flat
+  controls) are NOT SCORED: they presuppose an anomaly to time, and with the
+  corrected G there is no readout gap at any epoch on any of the five arms
+  (|readout(t)| <= 0.11 throughout). The trajectory instrument worked; the
+  phenomenon it was built to time does not exist.
+
+## BLOCK I: THE CLUSTER-TREE CHECKPOINT IDENTITY AUDIT (2026-08-25, launched
+## the same hour, job 45032992, 8 shards x 4 GPUs)
+
+- SCOPE: every cell on the cluster carrying a linear_probe*.json (2,264 cells),
+  EVERY seed, best.pt AND last.pt, evaluated against that seed's own recorded
+  best_test_acc / final_test_acc. These are exactly the checkpoints a recorded
+  G rests on, so a wrong-epoch file among them corrupts a MEASUREMENT rather
+  than merely wasting a run. Cost is one validation pass per checkpoint.
+- CODE: analysis/verify_checkpoints.py gains --all-probed / --all-seeds /
+  --shard i/n / --out, an in_channels argument (without it every sensor-fusion
+  checkpoint reports a spurious KEYS status), a cached per-dataset test loader,
+  and a config search over every config tree. Suite 137 passed. The script
+  already CLASSIFIES rather than raises (ok / FAIL / CORRUPT / KEYS), which is
+  the property that makes a 6,800-checkpoint sweep meaningful -- an audit that
+  aborts on its first finding reports a clean bill for everything it never
+  reached.
+- PREDICTIONS RECORDED IN ADVANCE (no shard has reported):
+    (I1) THE FAILURE RATE IS LOW BUT NOT NEGLIGIBLE: **2-10% of probed cells
+      have at least one wrong-epoch or corrupt best.pt**. Reasoning, and it is
+      a mechanism rather than a guess: this tree suffered three recorded
+      duplicate-execution incidents -- the 2026-08-02 counter REWIND (the whole
+      32-GPU cluster re-running completed cells), the 2026-08-03 worklist swap,
+      and the 2026-08-06 dual-lane race -- and each one puts a second trainer
+      into a seed dir whose original had finished, overwriting best.pt with
+      mid-run weights while final.json survives.
+    (I2) THE DAMAGE IS CONCENTRATED IN THE GRID LANE, not spread uniformly:
+      >= 60% of failures on configs/grid cells, since the diagnostics lanes
+      ran later, under the fixed counter and the run lock.
+    (I3) last.pt IS MOSTLY INTACT WHERE best.pt IS NOT -- >= 70% of the cells
+      failing on best.pt pass on last.pt. Reasoning: last.pt is written only at
+      run COMPLETION, so a killed duplicate never reaches it; this is exactly
+      what saved the 21 ImageNet cells on 2026-08-07 and it is why the sweep
+      checks both. Where it holds, the repair is a re-probe from last.pt at
+      ZERO training cost.
+    (I4) THE SIGN-LAW HEADLINE MOVES BY LESS THAN 2 POINTS: 86.4% of resolvable
+      cells correct becomes 84.5-88.5%. The exceptions are where corrupt
+      baselines land (a spurious G is what makes a cell resolvable AND wrong),
+      so correction should if anything RAISE it.
+    (I5) ALL FIVE "better features, worse accuracy" arms leave the exception
+      list once their baselines are corrected.
+  FALSIFIERS, each costing something specific:
+    (F-I1) > 25% of probed cells fail identity => the recorded G corpus is
+      broadly unreliable, and the feature-side analysis must be RE-DERIVED from
+      corrected probes rather than patched cell by cell. Every G curve, the
+      currency account and the whole law section would need re-measurement
+      before the paper can be submitted.
+    (F-I2) the exception cluster SURVIVES correction on >= 3 of 5 arms => my
+      diagnosis above is wrong, the regime is real, and the C1 verdict stands
+      as written.
+    (F-I3) < 0.5% fail => the food/path cells are an isolated pair of accidents
+      rather than a systematic exposure, and the audit is a clean bill that
+      strengthens every recorded G rather than a repair job.
+  NOTE F-I1 and F-I3 are opposite-signed, so no uniform outcome passes both.
+- REPAIR PROTOCOL, fixed BEFORE the results so it cannot be shaped by them:
+  a cell whose best.pt fails and whose last.pt passes is RE-PROBED from
+  last.pt, both arms of its pair together and under the identical protocol,
+  into linear_probe_fix.json -- never overwriting the recorded file (the rule
+  from the 2026-08-06 near-miss). A cell failing on BOTH is re-trained. Any
+  pair where only ONE arm was repaired must have BOTH arms re-probed, because
+  a G built from one corrected and one uncorrected probe is not a matched
+  measurement.
+- SEPARATELY, AND NOT AS A REPAIR: analysis/linear_probe.py's head fit is
+  under-converged (loss 4.81 where the optimum is 0.98) and its init is
+  unseeded. Neither changes any recorded number by more than ~0.05, measured
+  on two cells, so this is NOT the cause of anything above and fixing it is
+  not urgent. Recorded so that the next person reading that code does not
+  rediscover it and assume, as I did, that it explains a discrepancy.
+
+## A SECOND, INDEPENDENT DEFECT FOUND IN THE SAME PASS: Delta AND G ARE
+## MEASURED ON DIFFERENT EPOCHS (2026-08-25)
+
+- THE MISMATCH, and it is a protocol inconsistency rather than damage:
+      Delta comes from **final_test_acc** (analysis/export_results_csv.py:53)
+      G comes from a probe of **best.pt** (linear_probe.py --ckpt default)
+  So readout = Delta - G subtracts a quantity measured at the best epoch from
+  one measured at the last epoch. Wherever those two epochs are the same
+  network this is harmless, which is why it survived: on CIFAR-100, the study's
+  largest population, the mean best-minus-final gap is **+0.20 points**.
+- WHERE IT IS NOT HARMLESS, measured over all 2,260 probed cells with both
+  fields recorded:
+      cells with best - final > 1.0 point:  **305 (13.5%)**
+      by dataset: pathmnist 174, stl10 30, food101 22, cifar10 17, eurosat 16,
+                  dtd 11, tin 6, tin20b 6, tin20 5, sunrgbd 9, cub 3,
+                  so2sat_sar 3, cifar100 3
+      mean gap by dataset: pathmnist **+3.17** (max +20.52), so2sat_sar +3.04,
+                  sunrgbd_depth +1.33, tin20 +0.87, stl10 +0.68, dtd +0.61,
+                  eurosat +0.53, cifar10 +0.38, food101 +0.37, cub +0.26,
+                  tin +0.26, cifar100 **+0.20**
+  **174 of pathmnist's 193 probed cells are affected**, which is not a
+  coincidence: pathmnist is the one population whose accuracy DECLINES with
+  training (the recorded centre-shifted-test-split anomaly), so its best epoch
+  is systematically early and far from its last.
+- THIS EXPLAINS THE OTHER TWO "better features, worse accuracy" EXCEPTIONS,
+  the ones whose checkpoints pass the identity check. mnet path@20%: the aux
+  arm's best-minus-final gap is +6.07 and the baseline's is +3.98, so the aux
+  arm's probe is taken from a relatively much better epoch than the baseline's
+  while both Deltas are read at the last epoch. That inflates G against Delta
+  by ~2 points -- and the recorded readout there is -2.36. The trajectory
+  re-run, which probes BOTH arms at the same epoch, returns G -0.49 instead of
+  +1.88. Same story at mag3 path@50%.
+  So of the five exception arms: **three are a corrupt baseline checkpoint
+  (food101@50%), two are this epoch mismatch (pathmnist)**. Neither is a
+  feature phenomenon.
+- SCOPE, STATED SO THIS IS NOT READ WIDER THAN IT IS: the paper's core
+  populations are essentially unaffected (cifar100 +0.20, tin +0.26, cub +0.26,
+  food101 +0.37 mean gap), so the sign-law corpus and the G curves are not in
+  question on this account. What is in question is pathmnist -- which the
+  ledger has flagged three times as a "compressed measuring stick" without ever
+  having a mechanism -- and it now has one.
+- THE FIX IS TO MATCH THE EPOCHS, and the natural choice is last.pt: it is the
+  network Delta already describes, it is the deployed model, and it is what
+  dense_probe.py and det_probe.py already use. Re-probing from last.pt into
+  linear_probe_last.json (never touching the recorded file) gives a matched G
+  for every cell at probe cost only. QUEUED BEHIND THE IDENTITY SWEEP
+  DELIBERATELY: the sweep's second pass verifies last.pt too, and probing a
+  checkpoint before verifying it is how this whole thread started.
