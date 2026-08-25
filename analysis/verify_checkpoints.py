@@ -39,14 +39,30 @@ _CFG_DIRS = ("configs/grid", "configs/diagnostics", "configs/ablations_full",
              "configs/sensorfusion", "configs/dense", "configs")
 
 
+_REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
 def find_config(cell):
-    for d in _CFG_DIRS:
-        p = os.path.join(d, f"{cell}.yaml")
-        if os.path.exists(p):
-            return p
-    hits = glob.glob(os.path.join("configs", "**", f"{cell}.yaml"),
-                     recursive=True)
-    return hits[0] if hits else None
+    """Locate a cell's config WITHOUT depending on the current directory.
+
+    The CWD-relative version of this silently broke the first cluster sweep:
+    the job ran from $MS while the configs live under $MS/repo, every lookup
+    returned None, verify_one skipped every cell, and the sweep reported
+    "0 checkpoints examined: 0 verified" -- a clean bill for 2,264 cells it
+    never opened. Same CWD-relative trap as the axteach teacher paths.
+    """
+    for root in ("", _REPO):
+        for d in _CFG_DIRS:
+            p = os.path.join(root, d, f"{cell}.yaml") if root else \
+                os.path.join(d, f"{cell}.yaml")
+            if os.path.exists(p):
+                return p
+    for root in ("", _REPO):
+        hits = glob.glob(os.path.join(root, "configs", "**", f"{cell}.yaml"),
+                         recursive=True)
+        if hits:
+            return hits[0]
+    return None
 
 
 _LOADERS = {}
@@ -226,9 +242,11 @@ def main():
 
     checked, bad = [], []
     for cell in cells:
+        cell_dir = os.path.join(a.runs, cell)
+        if not os.path.isdir(cell_dir):
+            continue
         if a.all_seeds:
-            seeds = sorted(int(d[4:]) for d in
-                           os.listdir(os.path.join(a.runs, cell))
+            seeds = sorted(int(d[4:]) for d in os.listdir(cell_dir)
                            if d.startswith("seed") and d[4:].isdigit())
         else:
             seeds = [a.seed_pick]
@@ -254,6 +272,14 @@ def main():
                           f"diff {r['diff']:+.2f}", flush=True)
         if not (a.cells or a.all_probed) and len(checked) >= a.sample:
             break
+
+    # An audit that examined NOTHING is the most dangerous outcome there is:
+    # it prints "0 outside tolerance" and reads as a clean bill. Fail loudly.
+    if not checked:
+        print(f"\nERROR: 0 checkpoints examined out of {len(cells)} cells -- "
+              f"configs or run dirs were not found, so NOTHING was verified. "
+              f"This is a failure, not a pass.", file=sys.stderr)
+        sys.exit(2)
 
     n_corrupt = sum(r.get("status") == "CORRUPT" for r in checked)
     n_keys = sum(r.get("status") == "KEYS" for r in checked)

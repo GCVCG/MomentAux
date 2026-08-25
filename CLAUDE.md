@@ -8932,3 +8932,64 @@ ported vs corrected and why.
   records, the audit found and repaired them, and the corrected cells obey the
   law. Block C1, which tested the lambda0-overshoot explanation for a
   phenomenon that does not exist, is superseded in full.
+
+## BLOCK F SCORED — THE MODEL-SCALE TREND HOLDS ON ONE RECIPE AT ONE BUDGET,
+## AND ALL THREE PRE-REGISTERED FALSIFIERS ARE DEAD (2026-08-25)
+
+- THE MATCHED CURVE, ImageNet-100 @224, DeiT aug, warmup 10 + clip 1.0 on
+  BOTH arms of every pair, 200 epochs, 3 seeds (vitl none n=2, see below):
+      model   params   baseline        aux             Delta
+      ViT-S   21.7M    80.66 +-0.16   84.11 +-0.17   **+3.45 +-0.23**
+      ViT-B   85.9M    79.83 +-0.56   84.17 +-0.16   **+4.34 +-0.58**
+      ViT-L   303.4M   75.86 +-0.34   83.53 +-0.11   **+7.67 +-0.36**
+  MONOTONE INCREASING IN MODEL SCALE, and for a reason visible in the levels:
+  the BASELINE falls with scale (80.66 -> 79.83 -> 75.86) while the AUX arm is
+  FLAT (84.11 / 84.17 / 83.53). At 126k images the bigger model is a WORSE
+  model without the prior and an equal one with it -- so the prior does not
+  merely help more at scale, it makes model scale nearly irrelevant here.
+  This is the strongest form the model-scale claim has had: previously it
+  rested on ViT-S vs ViT-B at 100 epochs (where ViT-B was demonstrably
+  undertrained) and then on R1's 200-epoch pair with NO stabilizer.
+- PREDICTIONS SCORED:
+    (F1) ViT-L @100ep: Delta band +15..+35 -> **+30.47 +-3.11 IN BAND**. The
+      LEVEL bands both MISSED HIGH (baseline 20..45 -> 49.57; aux 55..70 ->
+      80.03): I under-estimated how well a stabilized ViT-L trains in 100
+      epochs. Delta right, levels wrong.
+    (F2) ViT-L @200ep >= ViT-B @200ep, band +6..+14 -> **+7.67 IN BAND**.
+    (F3) 300-epoch arms: ViT-S **+2.19 +-0.28** (band +2..+4.5) and ViT-B
+      **+3.89 +-0.77** (band +3.5..+7) -- BOTH IN BAND, and each at or below
+      its own 200-epoch value (3.45 -> 2.19; 4.34 -> 3.89) exactly as F3
+      required. The ordering survives at 300 too (ViT-B - ViT-S = +1.70
+      +-0.82 = 2.1 SEM).
+  FALSIFIERS, all three DEAD:
+    (F-F1) "Delta(ViT-L,200) < Delta(ViT-B,200) by > 2 SEM => the trend does
+      NOT continue past ViT-B": measured +7.67 vs +4.34 = **+3.33 +-0.68 =
+      4.9 SEM ABOVE**. The trend continues to 303M parameters.
+    (F-F2) "Delta <= +1 at 300 epochs => the attention gain is under-training
+      all the way down": +2.19 and +3.89. Dead.
+    (F-F3) "ViT-L baseline collapses on >= 2 of 3 seeds at BOTH budgets":
+      no collapse at either (49.57 +-3.07 at 100ep, 75.86 +-0.34 at 200ep).
+- THE STABILIZER IS NOT FREE, AND THE HONEST NUMBER MUST TRAVEL WITH IT:
+  ViT-B's baseline at 200 epochs is **79.83 with warmup+clip vs 75.31
+  without**, so the stabilizer buys the BASELINE +4.5 and Delta correspondingly
+  falls from +6.71 (R1, unstabilized) to +4.34 (matched). Both numbers are
+  real; the matched one is the one that belongs in a model-scale comparison,
+  and every quoted Delta needs its recipe attached as well as its budget.
+- ONE CELL OUTSTANDING: diagin100e200w_vitl_none/seed0 hit the known ~5%
+  SIGABRT at epoch 7, before resume_every's first save at epoch 10, so it has
+  no resume.pt and restarts from scratch (job 45055928, lane vitlfix). Its
+  partial best.pt (epoch ~2 weights) and metrics.csv were QUARANTINED as
+  *.aborted.2026-08-25 first -- an aborted best.pt left in place is precisely
+  the wrong-epoch hazard this day's audit is about. The ViT-L @200ep baseline
+  is therefore n=2 until it lands; the 4.9-SEM F-F1 margin does not depend on
+  the third seed.
+- LANE-DEPLOY NEAR-MISS, recorded because it is the same class as the
+  2026-08-03 worklist-path regression: my first bsc_vitlfix.sbatch was derived
+  with `sed s|worklist.vitl\b|...|`, which does NOT match the deployed lane's
+  `worklist.vitlw` (no word boundary after "vitl"). The submitted job
+  therefore still pointed at the FULL 24-line block-F list. It was harmless
+  only by luck -- that lane's counter is drained at 54 of 24, so every claim
+  would have fallen past the end -- and it was caught by grepping the
+  generated file rather than trusting the sed. Cancelled and resubmitted
+  against worklist.vitlfix with its own counter and lock, verified by grep
+  before submission.
