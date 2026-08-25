@@ -8567,3 +8567,67 @@ ported vs corrected and why.
   0.1-1.1 elsewhere in the column, so its Deltas carry SEMs of 2.7-4.8 and
   cannot order anything. This reproduces the instability the 2026-08-08 entry
   already recorded for that fraction on both arms.
+
+- *** BLOCK H SCORED — SUN RGB-D LANDS AS A CLEAN LAW POPULATION, THE PRIOR
+  TRANSPLANTS TO GEOMETRY, AND MY FUSION FALSIFIER FIRED (2026-08-25, 108
+  runs + 18 probes, 3 seeds/cell, r18 frozen recipe at 64px, 19-way scene):
+      pct    RGB base->aux  Delta        DEPTH base->aux  Delta        FUSED base->aux  Delta
+        3    17.63 -> 17.92 +0.29+-0.25  22.48 -> 22.49  +0.01+-0.12   20.23 -> 20.48  +0.25+-0.48
+        5    21.29 -> 21.30 +0.01+-0.40  24.13 -> 24.19  +0.06+-0.35   22.37 -> 23.98  +1.60+-0.32
+       10    24.78 -> 26.51 +1.72+-0.42  28.38 -> 28.70  +0.32+-0.40   26.59 -> 28.53  +1.94+-0.27
+       25    31.69 -> 33.99 +2.30+-0.19  35.83 -> 37.33  +1.50+-0.41   35.19 -> 37.80  +2.62+-0.59
+      100    43.16 -> 46.32 +3.16+-0.49  48.57 -> 50.15  +1.57+-0.48   47.74 -> 49.12  +1.38+-0.30
+  (H1) **HIT**: at 10% the two single-source baselines are 24.78 (RGB) and
+    28.38 (depth), a 3.59-point gap against the predicted <= 8. The corner is
+    genuinely symmetric -- two DIFFERENT modalities of comparable strength,
+    which neither existing sensor population provides.
+  (H2) **BAND MISSED AT 3 OF 4 CELLS, FALSIFIER DEAD, AND THE LAW EXPLAINS
+    THE MISS.** I predicted Delta +0.8..+3.0 at 5-10% on RGB and on depth;
+    measured +0.01/+0.06 at 5% and +1.72/+0.32 at 10%. But the probes say the
+    features improved on BOTH modalities at BOTH fractions:
+        pct src    base   probe_none->aux      G            Delta        readout
+          5 rgb    21.29  25.63 -> 27.32  +1.70+-0.85   +0.01+-0.40   -1.69
+          5 depth  24.13  27.56 -> 29.25  +1.69+-0.49   +0.06+-0.35   -1.63
+          5 all    22.37  28.45 -> 30.62  +2.17+-0.45   +1.60+-0.32   -0.57
+         10 rgb    24.78  28.72 -> 30.74  +2.02+-0.55   +1.72+-0.42   -0.29
+         10 depth  28.38  32.74 -> 34.61  +1.87+-0.51   +0.32+-0.40   -1.55
+         10 all    26.59  31.10 -> 34.38  +3.28+-0.68   +1.94+-0.27   -1.34
+    ALL SIX BASELINES SIT BELOW THE CROSSING BRACKET [31.8, 40.3] and ALL SIX
+    READOUTS ARE NEGATIVE -- 6 more clean sign-law cells, on a NEW population
+    and, for the depth column, on a NEW INPUT MODALITY. So the near-zero 5%
+    Deltas are the documented left-flank suppression, not an absent effect,
+    and the envelope RISES to +2.30/+3.16 (RGB) and +1.50/+1.57 (depth) at
+    25/100% exactly as the baselines climb through the bracket. The recorded
+    falsifier "Delta(depth) <= 0 at every fraction => the prior is an
+    APPEARANCE prior" is DEAD: depth Delta is >= 0 at all five fractions,
+    clearly positive at 25/100%, and G(depth) is +1.69/+1.87. Oriented energy
+    on a depth map is surface-orientation structure, and it pays.
+    NOTE the whole population is a small, left-flank one: 100% is 4,845
+    images over 19 classes, so a rising envelope through 100% is the CUB@100%
+    situation, not a contradiction of the right-flank rule.
+  (H3) *** THE FALSIFIER FIRED, AS WRITTEN. I predicted "fused >= better
+    single on the baseline arm"; the falsifier was "fused < better single on
+    the baseline arm => the two modalities interfere under this recipe and
+    the population cannot serve as the symmetric corner." Fused is BELOW the
+    better single arm at EVERY fraction on the baseline arm:
+        3%  -2.25 | 5% -1.76 | 10% -1.79 | 25% -0.64 | 100% -0.83
+    So naive channel-stacking early fusion of RGB+depth INTERFERES under the
+    frozen recipe, and this population does not test "does a second sensor
+    stack" the way I designed it to.
+    *** WHAT IT DOES SHOW INSTEAD, and it is worth more than the design I
+    lost: THE PRIOR REPAIRS MOST OF THE FUSION DEFICIT. The same gap on the
+    aux arm is -2.02 / -0.21 / -0.17 / +0.48 / -1.02 at 3/5/10/25/100%, i.e.
+    the 1.8-point early-fusion penalty at 5-10% is cut to ~0.2, and at 25%
+    the fused aux cell BEATS the better single aux cell. The feature side
+    agrees: G(fused) = +3.28 at 10% is the LARGEST of the three sources
+    (RGB +2.02, depth +1.87). Stated conservatively, because it was not
+    pre-registered: the prior is worth MORE on the fused input than on either
+    single input, on both the accuracy and the feature side.
+  ViT-tiny at 10% (AdamW diag, 3 seeds): RGB 20.01 -> 22.16 (+2.15+-0.75),
+    depth 21.48 -> 22.59 (+1.11+-0.59), fused 22.23 -> 24.45 (+2.23+-0.27).
+    The transplant holds on attention too, and again the fused input gains
+    most.
+  SCOPE, recorded with the result: 100% here is 4,845 images, so every cell
+  is a low-data cell in this study's terms; the 1% and 2% fractions are
+  impossible under the frozen recipe (the smallest class has 40 train images)
+  and 3% replaces them, as the block's operational note records.
