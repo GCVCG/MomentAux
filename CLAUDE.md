@@ -8861,3 +8861,32 @@ ported vs corrected and why.
   compared across two populations whose SCALES differ, without checking the
   scale first. The tell was available and I did not look -- a +12.6 mIoU gap
   on a cell whose whole Delta is +2.34 is not a subtle inconsistency.
+
+- *** THE BLAST RADIUS, AND A FOUR-WAY INTERNAL CONFIRMATION (2026-08-25).
+  Six cells in results/all_results.csv are paired AGAINST one of the three
+  confirmed-corrupt food101@50% baselines:
+      diaggrid_simclr_food_50pct    D -0.94  G **+5.00**  ro -5.94
+      diaggrid_simsiam_food_50pct   D -0.82  G **+4.88**  ro -5.70
+      grid_mag3_food_50pct          D -1.30  G **+4.66**  ro -5.96
+      grid_mag6o_food_50pct         D -0.91  G **+4.97**  ro -5.88
+      grid_mnet_food_aux_50pct      D -0.23  G +3.70      ro -3.93
+      grid_food_r18_axmag...50pct   D -1.11  G -0.24      ro -0.86
+  FOUR UNRELATED INTERVENTIONS -- contrastive SSL, negative-free SSL, and two
+  different bank widenings -- all report a feature gain of +4.66..+5.00
+  against the same baseline. Four methods with different currencies do not
+  coincidentally buy the same 5 points; they share a baseline whose probe is
+  5.88 low. Measured directly: that baseline's last.pt probes **71.72 +-0.06**
+  against the recorded **65.84**. This is a stronger confirmation than the
+  identity check alone, because it is visible in the RECORDED TABLE without
+  touching a checkpoint, and nobody noticed.
+  The two SSL rows were never on the exception list only because non-aux
+  interventions sit outside the sign law's derived scope -- so the scope rule
+  that protects the law's headline also hid two instances of this defect.
+- *** AND THE CONTROL I CHOSE FOR BLOCK A WAS ITSELF CORRUPT. The design named
+  grid_food_r18_axmagnitudeL3_l10to00_hn_8bd74b_50pct "the natural
+  in-population control (law holds, same pixels/baseline as the mag3/mag6o
+  arms)". Its G of -0.24 looked law-abiding because BOTH its arms fail identity
+  and are damaged in the SAME direction, so the two errors cancelled in the
+  difference. A control selected for looking well-behaved can be well-behaved
+  for the wrong reason; the check that would have caught it is the one this
+  whole entry is about, run BEFORE choosing the control rather than after.
