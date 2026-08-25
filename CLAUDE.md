@@ -8890,3 +8890,45 @@ ported vs corrected and why.
   difference. A control selected for looking well-behaved can be well-behaved
   for the wrong reason; the check that would have caught it is the one this
   whole entry is about, run BEFORE choosing the control rather than after.
+
+- *** F-I2 SETTLED: THE EXCEPTION CLUSTER DOES NOT SURVIVE CORRECTION -- 0 OF 5
+  (2026-08-25, both arms probed from last.pt, all 30 checkpoints identity-
+  verified first, 3 seeds every cell, local RTX 3090):
+      pair                 Delta    G_new   ro_new  |  G_rec   ro_rec
+      mag3  food@50%       -1.30    -1.19    -0.10  |  +4.66   -5.96
+      mag6o food@50%       -0.91    -0.94    +0.02  |  +4.97   -5.88
+      mnet  food@50%       -0.23    -0.05    -0.18  |  +3.70   -3.93
+      mnet  path@20%       -0.48    +0.08    -0.56  |  +1.88   -2.36
+      mag3  path@50%       -1.36    -1.47    +0.11  |  +0.71   -2.07
+      CTRL  champ food@50% -1.11    -0.98    -0.12  |  -0.24   -0.87
+  **G now TRACKS Delta at every arm** and the readout residual collapses from
+  -2.07..-5.96 to -0.56..+0.11, every one inside ~1 SEM of zero. The recorded
+  FALSIFIER F-I2 ("the cluster SURVIVES correction on >= 3 of 5 arms => the
+  regime is real and the C1 verdict stands") did NOT fire, on 0 of 5.
+  PREDICTION I5 ("all five leave the exception list once their baselines are
+  corrected") HELD.
+  NOTE Delta is BIT-IDENTICAL before and after (D_new == D_rec on all six
+  rows): the e2e records were never in question, and the entire discrepancy
+  lived on the probe side. That is the cleanest possible demonstration that
+  final.json is trustworthy and the checkpoints were not.
+- WHAT THESE CELLS ACTUALLY ARE, now that they are measured properly: cells
+  where the prior costs a little at high data (Delta -0.2..-1.4) and the
+  features are worse by about the same amount (G -0.05..-1.47). That is the
+  long-documented lambda0=1.0 OVERSHOOT at sufficiency, feature-side, with no
+  paradox in it. "Better features, worse accuracy at high data" was never a
+  regime; it was one corrupt baseline and one epoch mismatch.
+  SIGN LAW: all five sit at baselines of 55-90, far above the crossing, where
+  the law predicts a small POSITIVE readout decaying to ~0. Measured -0.10,
+  +0.02, -0.18, -0.56, +0.11 -- all ~0 and none resolvable against its own
+  SEM. So the five move from being **5 of the 10 wrong-side cells** to being
+  unresolvable-and-consistent, which should RAISE the audit's 86.4% rather
+  than lower it (I4 predicted 84.5-88.5%). The exact figure waits on the
+  cluster-wide re-probe; the direction does not.
+- CONSEQUENCE FOR THE MANUSCRIPT, and it is a deletion rather than a rewrite:
+  the passage naming "better features, worse accuracy at sufficiency" as the
+  most interesting open thread, and the five exception rows behind it, come
+  OUT. The honest replacement is one sentence in the limitations: a subset of
+  recorded probes was measured on checkpoints that did not match their own
+  records, the audit found and repaired them, and the corrected cells obey the
+  law. Block C1, which tested the lambda0-overshoot explanation for a
+  phenomenon that does not exist, is superseded in full.
