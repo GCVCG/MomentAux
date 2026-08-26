@@ -9473,3 +9473,30 @@ ported vs corrected and why.
   protocol, not a discrepancy -- best is within 0.2 of final on these cells,
   which is the same agreement seen on tin (41.64 vs 41.47) and abl25_none
   (63.14 vs 63.19).
+
+- *** WHY mnet's POSITIVE BRANCH FAILS: ITS **G IS LARGE**, NOT ITS DELTA SMALL
+  (2026-08-26). readout = Delta - G, so "negative readout above the crossing"
+  and "G exceeds Delta" are the same statement; the informative part is WHICH
+  TERM is unusual. Above the crossing, excluding every identity-suspect cell
+  and pathmnist (the recorded compressed probe):
+      backbone                 cells   mean Delta   mean G   G - Delta
+      mobilenetv3_small_100        8      +1.98     +2.80    **+0.82**
+      resnet18                    65      +1.60     +1.19      -0.41
+      resnet50                     8      -4.40     -5.57      -1.17
+      swin_tiny                    3     +19.41    +18.01      -1.40
+      vit_tiny                    24     +12.28    +10.74      -1.53
+  MobileNetV3 is the ONLY backbone whose features improve MORE than its
+  accuracy does above the crossing. And its Delta is unremarkable -- +1.98
+  against ResNet-18's +1.60 at comparable baselines -- while its G is more
+  than DOUBLE (+2.80 vs +1.19). The prior buys mnet twice the feature gain and
+  mnet realises the same accuracy.
+  That is the capacity account stated as a measurement rather than a reading:
+  a capacity-limited classifier cannot cash feature gain at ANY baseline
+  height, so its readout penalty never turns around. It also sharpens the
+  mnetl pre-registration -- if capacity is the cause, the wider backbone should
+  close the G-minus-Delta gap, not merely flip a sign.
+  NOTE THE CONTRAST AT THE OTHER END: ViT cashes 1.53 points MORE accuracy
+  than its features gained (G-Delta -1.53), the largest of any backbone, which
+  is the same ordering as the positive-branch means (+1.76 for vit down to
+  -1.39 for mnet). Whatever "readout" is, it runs monotonically with capacity
+  headroom across five backbone families.
