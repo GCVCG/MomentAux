@@ -9400,3 +9400,26 @@ ported vs corrected and why.
   fail on BOTH" is an artifact of the missing shards rather than a result. It
   will be scored when the pass completes, and the repair worklist derives from
   it.
+
+- *** THE SIGN LAW SURVIVES BOTH MEASUREMENT DEFECTS, AND THE CHECK IS NOW A
+  COMMITTED SCRIPT (2026-08-26, analysis/law_robustness.py). Both defects
+  damage the FEATURE side -- exactly where the law's G term comes from -- so
+  "does the law survive them?" is the first question a referee will ask once
+  they are disclosed. Re-running the canonical audit under each filter and
+  both together:
+      filter                          cells  resolvable  correct   below    above
+      none                              958      455    86.4%    94.9%   67.4%
+      drop identity-suspect cells       941      438    87.0%    94.9%   67.7%
+      drop epoch gap > 0.25 pt          767      371    86.8%    95.1%   66.0%
+      BOTH (strictest)                  715      361    87.5%    95.1%   67.0%
+  Every reading is within 1.1 points of the released 86.4%, and the
+  below-crossing figure -- where the law's content actually lives -- is
+  94.9-95.1% under all four. The headline moves UP slightly under every
+  filter, which is the direction a damage-removal should move it.
+  STATE BOTH HALVES, because they are opposite and both matter: the identity
+  defect corrupts **85 released G VALUES** (64 flagged is_headline) while
+  touching only 17 of 455 resolvable law cells, so it damages measurements
+  without biasing the conclusion; the epoch mismatch barely moves the headline
+  but enriches the WRONG-SIDE cells 3x, so it biases the exceptions without
+  damaging the conclusion. Neither is a reason to doubt the law; both are
+  reasons to repair the corpus before the G values are quoted individually.
