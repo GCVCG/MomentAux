@@ -1,0 +1,23 @@
+# The CAPACITY test for the readout's positive branch.
+# MobileNetV3-small is 0/11 on the positive branch (readout
+# NEGATIVE at every baseline height 41-92) while every other
+# backbone turns positive above the crossing. This cell is
+# grid_mnet_stl_none_20pct VERBATIM except the backbone
+# (small -> large, 1.53M -> 4.21M deployed params) and the tap,
+# which moves blocks.3 -> blocks.4 to keep the SAME 8x8 spatial
+# stage at 64px (large's blocks.3 is 8x8 too but blocks.4 is the
+# last 8x8 stage, the direct analogue of small's blocks.3).
+name: diagmnetl_stl_none_20pct
+dataset: stl10
+backbone: mobilenetv3_large_100
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 2
+small_input: true
+pretrained: false
+subset_pct: 20
+stem: none
+stem_calibrate: true

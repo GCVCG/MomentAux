@@ -20,7 +20,7 @@ from .stem import MomentStem
 RESNETS = ("resnet18", "resnet34", "resnet50")
 BACKBONES = RESNETS + ("convnext_tiny", "vit_tiny", "vit_small", "vit_base",
               "vit_large", "swin_tiny",
-              "mobilenetv3_small_100")
+              "mobilenetv3_small_100", "mobilenetv3_large_100")
 
 
 class CosineClassifier(nn.Module):
