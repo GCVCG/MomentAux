@@ -12,6 +12,12 @@ results/*
 !results/*.md
 !results/*.tex
 !results/*.json
+# The identity audit's per-shard reports are its INPUT, and results/
+# identity_audit.md names the command that regenerates itself from them --
+# a summary whose inputs are not released cannot be checked by a reader.
+!results/identity/
+!results/identity/*.json
+!results/*.txt
 release/
 slurm/logs/
 logs/*.pid
