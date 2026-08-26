@@ -9192,3 +9192,77 @@ ported vs corrected and why.
   food@25, c100@20, c10@2), which is suggestive of the B3/B4 optimization
   account rather than of a crossing shift, and is left in the UNEXPLAINED pile
   rather than claimed.
+
+- *** BLOCK C LANDED — PHASE IS A REAL BUT POPULATION-DEPENDENT TARGET,
+  SYMMETRY IS A MEASURED NULL, AND NEITHER CARRIES A NEW CURRENCY
+  (2026-08-26, 90 runs on BSC + matched-epoch probes locally, 3 seeds/cell).
+  e2e Delta against each population's own baseline, with the moment magnitude
+  target beside it:
+      cell                       Delta     magnitude   ratio
+      c100 phase @1%            +0.17       +1.42      0.12x
+      c100 phase @2%            +0.44       +2.50      0.18x
+      c100 phase @5%            +1.55       +5.15      0.30x
+      c100 phase @10%           +1.37       +3.75      0.37x
+      c100 phase @25%           +0.45       +0.16      2.81x
+      c100 phase @100%          -0.06       +0.15        --
+      tin  phase @5%            +1.06       +2.12      0.50x
+      tin  phase @10%           +1.39       +1.65      0.84x
+      esat phase @5% / @10%     +0.64 / +0.40
+      c100 symmetry @1..100%   +0.05 -0.16 -0.53 -0.19 -0.39 +0.31
+      tin  symmetry @5% / @10% -0.59 / -0.39
+      esat symmetry @5% / @10% +0.19 / +0.33
+  PREDICTIONS SCORED, and C1 is a MISS in the direction that matters:
+    (C1) "phase <= 0.5x magnitude at EVERY C100 fraction, and NEGATIVE at >= 2
+      fractions". The ratio half HOLDS at 1/2/5/10% (0.12-0.37x) and FAILS at
+      25%. The sign half FAILS outright: phase is POSITIVE at 5 of 6 C100
+      fractions and the only negative is -0.06 at 100%. I predicted a
+      discarded-magnitude target would be actively harmful, on the strength of
+      the oriented-edge (gabor) row at -0.24; it is instead consistently,
+      mildly HELPFUL.
+    (C2) "symmetry between 0.3x and 0.8x of magnitude on C100@5/10" ->
+      measured -0.10x and -0.05x, MISSED LOW. Symmetry is not a mid-ranked
+      target, it is a null that is slightly NEGATIVE at 5 of 8 cells.
+    (F-C2) "phase >= magnitude at any C100 fraction >= 5%" did NOT fire on the
+      substance (phase is 0.30-0.37x at 5/10%); the nominal 2.81x at 25% is a
+      ratio of two numbers near zero (+0.45 against +0.16) and is not a fire.
+    (F-C3) "symmetry >= magnitude at >= 2 fractions" did NOT fire.
+  *** THE FEATURE SIDE, matched-epoch (last.pt, both arms, identical protocol;
+  103 checkpoints identity-verified clean first):
+      tin@10%   magnitude G +1.63  |  phase G +1.59  |  symmetry G -0.06
+      c100@25%                     |  phase G +0.15  |  symmetry G -0.02
+  ON TIN, PHASE AND MAGNITUDE ARE THE SAME TARGET TO WITHIN 0.04 OF FEATURE
+  GAIN, while on C100 phase is ~3x weaker e2e. So the target ranking is
+  POPULATION-DEPENDENT -- the same lesson N1 forced for the eight-target
+  ablation ("the ablation's discriminating power is a CIFAR-100 property"),
+  now reproduced on a target family that did not exist when N1 ran. Symmetry
+  is a measured zero on BOTH sides, which is the cleanest kind of null: no
+  accuracy, no features.
+  *** C3 (THE CURRENCY QUESTION) HELD ON BOTH HALVES, AND THE SSL HALF IS THE
+  SHARPEST RESULT IN THE BLOCK. Combining a second hand-crafted target with
+  the moment prior:
+      c100@5  mag+phase 29.46 vs magnitude-alone 30.51   -1.05
+      c100@10 mag+phase 44.18 vs 44.03                   +0.15
+      c100@5  mag+sym   29.69 vs 30.51                   -0.82
+      c100@10 mag+sym   44.36 vs 44.03                   +0.33
+      tin@10  mag+phase 35.79 vs 35.24                   +0.55
+      tin@10  mag+sym   35.25 vs 35.24                   +0.01
+    F-C1 ("any new family STACKS with the moment prior by >= +1.0 at >= 2 of 3
+    cells") did NOT fire -- the largest gain anywhere is +0.55. Two
+    hand-crafted targets read off the SAME pinned bank at the SAME tap do not
+    stack, which is what the currency account requires and is now measured
+    rather than assumed.
+    ON AN SSL INIT the four combos land within +-0.57 of SimCLR alone, inside
+    the recorded +-1.0 band:
+      @5%   phase+ssl 34.21   sym+ssl 34.33   | SimCLR alone 34.41
+      @10%  phase+ssl 48.47   sym+ssl 48.96   | SimCLR alone 49.04
+    *** AND THE COMPARISON WITH THE STRONG TARGET IS THE POINT: magnitude+SSL
+    costs the same init **-1.51** at 5% and **-1.92** at 10%, while phase and
+    symmetry cost it -0.08..-0.57. THE INTERFERENCE TAX SCALES WITH HOW HARD
+    THE ADDED SOURCE SHAPES, on a new axis -- target STRENGTH rather than
+    lambda0 strength. E3 established that scaling for the transfer tax by
+    turning lambda0 down; this reaches the same place by holding lambda0 at
+    1.0 and making the TARGET weaker. A source that does little does little
+    damage, and that is now shown twice by independent means.
+  PENDING: G for the c100@5/10 singles and for all ten combos. The local 3090
+  is shared with the user's other project (22 GB held); those three probes are
+  queued behind a free-memory wait rather than contending for it.
