@@ -208,7 +208,10 @@ def main():
     ap.add_argument("--seed-pick", type=int, default=0)
     ap.add_argument("--runs", default="runs")
     ap.add_argument("--data-root", default="./data")
-    ap.add_argument("--ckpt", default="best.pt")
+    ap.add_argument("--ckpt", default="best.pt",
+                    help="checkpoint filename, or a comma-separated list "
+                         "(\"best.pt,last.pt\") to verify both in ONE pass so "
+                         "each dataset is built once instead of twice")
     ap.add_argument("--tol", type=float, default=0.5,
                     help="allowed |evaluated - recorded| in points")
     ap.add_argument("--device",
@@ -254,6 +257,10 @@ def main():
           f"{'all seeds' if a.all_seeds else 'seed %d' % a.seed_pick})",
           flush=True)
 
+    # Verifying BOTH checkpoints in one pass builds each dataset ONCE instead
+    # of twice: the first cluster sweep paid a food101 ImageFolder scan (25k
+    # JPEGs on GPFS) 32 times over, and that dominated its wall clock.
+    ckpts = [c.strip() for c in a.ckpt.split(",") if c.strip()]
     checked, bad = [], []
     for cell in cells:
         cell_dir = os.path.join(a.runs, cell)
@@ -264,7 +271,7 @@ def main():
                            if d.startswith("seed") and d[4:].isdigit())
         else:
             seeds = [a.seed_pick]
-        for sd in seeds:
+        for sd, ck in ((sd, ck) for sd in seeds for ck in ckpts):
             # An audit that ABORTS on its first surprise is worse than no
             # audit: it reports a clean bill for every cell it never reached.
             # The checkpoint statuses were already classified rather than
@@ -273,10 +280,12 @@ def main():
             # model builder rejects), so one missing dataset can no longer
             # cost the sweep the other 2,000 cells.
             try:
-                r = verify_one(cell, sd, a.runs, a.data_root, device, a.ckpt)
+                r = verify_one(cell, sd, a.runs, a.data_root, device, ck)
             except Exception as e:                       # noqa: BLE001
                 r = {"cell": cell, "seed": sd, "status": "ERR",
                      "detail": f"{type(e).__name__}: {e}"[:200]}
+            if r is not None and len(ckpts) > 1:
+                r["ckpt"] = ck
             if r is None:
                 continue
             checked.append(r)
