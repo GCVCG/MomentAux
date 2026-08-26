@@ -9557,3 +9557,20 @@ ported vs corrected and why.
   it is "the positive branch's SIGN is real and consistent, established where
   classification has the precision to say only ~0". That is a narrower claim
   and a more useful one.
+
+- SCRUB BLIND SPOT CLOSED, AND IT WAS EXACTLY THE FILES MOST LIKELY TO BE NEW
+  (2026-08-26, the fix for the 2026-08-24 miss). scripts/scrub_for_release.sh
+  built its file list from `git ls-files` alone, so a newly created lane
+  sbatch -- UNTRACKED by definition until someone adds it -- was never
+  rewritten, and the script's own closing "no enumerated identifier remains"
+  check ran over that same tracked-only list and printed CLEAN while the new
+  file still carried the cluster account, the login and the scratch path. Both
+  halves failed together, which is the silent-guard signature: the check's
+  passing condition was satisfied by the failure it exists to catch.
+  FIXED by enumerating `git ls-files --others --exclude-standard` as well, so
+  .gitignore'd files (including .scrub_identifiers itself) stay out while new
+  working files come in. VERIFIED ON A FIXTURE rather than by inspection: an
+  untracked sbatch carrying all three identifiers was created, `--check` listed
+  it, the pass rewrote all three to their placeholders, and the fixture was
+  deleted. A guard without a test of its own failure mode is the thing this
+  ledger keeps recording; this one now has one.
