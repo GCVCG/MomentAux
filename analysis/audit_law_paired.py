@@ -107,6 +107,28 @@ def wilson(k, n, z=1.96):
     return (max(0.0, c - h), min(1.0, c + h))
 
 
+_GAPC = {}
+
+
+def _gap(runs, cell, seed):
+    """best_test_acc - final_test_acc for one run, in accuracy points.
+
+    `seed` is the seed DIRECTORY NAME ("seed0"), matching _accs/_evals."""
+    key = (cell, seed)
+    if key not in _GAPC:
+        f = os.path.join(runs, cell, str(seed), "final.json")
+        v = 0.0
+        try:
+            r = json.load(open(f))
+            b, fi = r.get("best_test_acc"), r.get("final_test_acc")
+            if b is not None and fi is not None:
+                v = 100.0 * (b - fi)
+        except Exception:
+            v = 0.0
+        _GAPC[key] = v
+    return _GAPC[key]
+
+
 def load(runs, csv_path, min_seeds=3):
     ca, ce, rows = {}, {}, []
     for r in csv.DictReader(open(csv_path)):
@@ -131,8 +153,15 @@ def load(runs, csv_path, min_seeds=3):
             ind = math.hypot(float(r["delta_sem"] or 0), float(r["G_sem"] or 0))
         except Exception:
             ind = 0.0
+        # Delta is read from final_test_acc while G is probed from best.pt,
+        # so the two terms describe the same network only when best == final.
+        # The bias enters readout through the DIFFERENTIAL gap between the two
+        # arms (a gap shared by both largely cancels in G), so record it and
+        # let the caller bound the exposure with --epoch-gap-max.
+        egap = abs(statistics.fmean([_gap(runs, r["cell"], s) for s in common])
+                   - statistics.fmean([_gap(runs, b, s) for s in common]))
         rows.append(dict(cell=r["cell"], ds=r["dataset"], bb=r["backbone"],
-                         pct=r["subset_pct"], base=base,
+                         pct=r["subset_pct"], base=base, egap=egap,
                          ro=statistics.fmean(per),
                          sem=statistics.stdev(per) / math.sqrt(len(per)),
                          ind_sem=ind, n=len(per)))
@@ -152,8 +181,17 @@ def main():
     ap.add_argument("--runs", default="runs")
     ap.add_argument("--csv", default="results/all_results.csv")
     ap.add_argument("--k", type=float, default=2.0)
+    ap.add_argument("--epoch-gap-max", type=float, default=None,
+                    help="keep only cells whose paired best-minus-final gap "
+                         "differs by at most this many points between the two "
+                         "arms; bounds the Delta/G epoch-mismatch exposure")
     a = ap.parse_args()
     rows = load(a.runs, a.csv)
+    if a.epoch_gap_max is not None:
+        n0 = len(rows)
+        rows = [x for x in rows if x["egap"] <= a.epoch_gap_max]
+        print(f"# epoch-gap filter <= {a.epoch_gap_max}: "
+              f"{len(rows)} of {n0} cells kept")
 
     ratio = sorted(x["sem"] / x["ind_sem"] for x in rows
                    if x["sem"] > 0 and x["ind_sem"] > 0)

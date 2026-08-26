@@ -9033,3 +9033,38 @@ ported vs corrected and why.
   Also: reports are now flushed every ~50 checkpoints via a tmp+rename, so a
   walltime kill leaves a partial report rather than nothing.
   RELAUNCHED as 16 shards over 2 nodes (45066555 / 45066557); suite 149 green.
+
+- *** THE EPOCH MISMATCH DOES **NOT** DRIVE THE SIGN LAW, AND IT **DOES**
+  CONTRIBUTE TO THE EXCEPTIONS -- BOUNDED WITH NO NEW COMPUTE (2026-08-26).
+  Delta is read from `final_test_acc` and G is probed from `best.pt`, so the
+  two terms describe the same network only when best == final. The bias enters
+  readout through the DIFFERENTIAL gap between the two arms (a gap shared by
+  both largely cancels in G), so analysis/audit_law_paired.py gained
+  `--epoch-gap-max`, which keeps only cells whose per-arm best-minus-final gaps
+  differ by at most that many points. Re-running the canonical audit under
+  progressively tighter filters:
+      filter        cells kept   resolvable   correct        below crossing
+      none            958/958       455       393 (86.4%)    298/314 (94.9%)
+      <= 1.00 pt      882/958       432       378 (87.5%)    295/309 (95.5%)
+      <= 0.50 pt      843/958       413       360 (87.2%)    279/293 (95.2%)
+      <= 0.25 pt      767/958       371       322 (86.8%)    252/265 (95.1%)
+  Restricted to the 767 cells where the mismatch CANNOT matter, the headline is
+  86.8% against 86.4% and the below-crossing figure is 95.1% against 94.9%.
+  The law's evidence is not an artifact of the protocol inconsistency, and that
+  is now a measured statement rather than an argument from "the core
+  populations have small gaps".
+  *** BUT THE EXCEPTION LIST IS A DIFFERENT MATTER, AND THE ENRICHMENT IS 3x:
+      mean differential gap   correct cells 0.203   wrong-side cells 0.635
+      gap > 1.0 pt            correct  15/393 (4%)  wrong-side  8/62 (13%)
+  So high-gap cells are a small minority of the corpus (which is why the
+  aggregate barely moves) and a large minority of the 62 wrong-side cells. The
+  worst offenders are exactly the populations already flagged for other
+  reasons: swin on eurosat (bistable baselines; egap 10-12 points) and
+  pathmnist (the recorded "compressed measuring stick", whose accuracy DECLINES
+  with training so its best epoch is systematically early; egap 0.9-2.7).
+  READING, and it is the honest one: the mismatch is not a threat to the law's
+  headline, it is a partial EXPLANATION of the law's exceptions. Both halves
+  should be stated -- the first defends the claim, the second removes cells
+  from the "unexplained" pile without being able to claim they obey.
+  The definitive version waits on the matched-epoch (last.pt) re-probe now
+  chained behind the identity sweep; this bounds the exposure in the meantime.
