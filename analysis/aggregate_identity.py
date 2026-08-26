@@ -84,6 +84,28 @@ def main():
     print(f"F-I3 (<0.5% => isolated accidents) -> "
           f"{'FIRED' if rate < 0.5 else 'dead'}")
 
+    # ---- how BIG are the failures? --------------------------------------
+    # A wrong-epoch checkpoint misses its record by many points; JPEG decode
+    # drift across library versions costs a few tenths (the recorded tin
+    # re-evaluation offset was -0.06..-0.38 on six independent cells, and
+    # food101/cub/stl are JPEG populations too). Reporting one count for both
+    # would let decode noise inflate the damage rate, so split the magnitudes
+    # and let the reader see where the tolerance bites.
+    diffs = sorted(abs(r["diff"]) for r in best
+                   if "status" not in r and abs(r["diff"]) > a.tol)
+    if diffs:
+        band = collections.Counter()
+        for d in diffs:
+            band["0.5-1" if d < 1 else "1-2" if d < 2 else
+                 "2-5" if d < 5 else "5-15" if d < 15 else ">15"] += 1
+        print("\nFAILURE MAGNITUDES (|recorded - evaluated|, accuracy points)")
+        for k in ("0.5-1", "1-2", "2-5", "5-15", ">15"):
+            if band[k]:
+                print(f"  {band[k]:5d}  {k}")
+        big = sum(1 for d in diffs if d >= 2.0)
+        print(f"  -> {big}/{len(diffs)} seed-level failures are >= 2 points, "
+              f"i.e. beyond any plausible decode drift")
+
     # ---- I2: is the damage concentrated in the grid lane? ---------------
     grid = sum(1 for c in bad_best if c.startswith("grid_")
                or c.startswith("diaggrid_"))
