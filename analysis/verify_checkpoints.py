@@ -79,8 +79,12 @@ def _test_loader(ds, data_root):
     key = (ds, data_root)
     if key not in _LOADERS:
         test = data_mod.build_dataset(ds, data_root, train=False)
+        # MS_VERIFY_BATCH lets a sweep share a GPU with someone else's job:
+        # the audit is read-only and latency-insensitive, so it should yield
+        # memory rather than contend for it.
         _LOADERS[key] = torch.utils.data.DataLoader(
-            test, batch_size=256, shuffle=False,
+            test, batch_size=int(os.environ.get("MS_VERIFY_BATCH", "256")),
+            shuffle=False,
             num_workers=int(os.environ.get("MS_VERIFY_WORKERS", "4")))
     return _LOADERS[key]
 
