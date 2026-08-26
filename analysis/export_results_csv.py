@@ -112,6 +112,14 @@ def main():
     ap.add_argument("--runs-root", action="append", default=None,
                     help="repeatable; later roots win on seed collisions")
     ap.add_argument("--out", default="results/all_results.csv")
+    ap.add_argument("--probe-file", default="linear_probe.json",
+                    help="which probe record supplies G. The default is the "
+                         "recorded best.pt probe; linear_probe_last.json is "
+                         "the MATCHED-EPOCH probe, measured on the same "
+                         "final-epoch network that final_test_acc (and so "
+                         "delta) describes. Mixing the two in one table would "
+                         "make G incomparable across rows, so this switches "
+                         "the WHOLE table rather than falling back per cell.")
     args = ap.parse_args()
     # runs_bscpull is a default root, not an opt-in: cells pulled from the
     # cluster and never mirrored into runs/ were silently absent from the
@@ -128,8 +136,19 @@ def main():
     # different-num_workers re-run is a different augmentation stream); (3)
     # name, as a deterministic last resort. Before (2), equal-seed ties fell
     # to load order -- c10_none_7pct vs its grid twin differ by 0.77.
+    # (0) An INSTRUMENTED DUPLICATE is never a baseline. diagtraj_* cells are
+    # their parent VERBATIM plus save_every, so family_key cannot tell them
+    # apart -- and with equal seeds the tie-break handed 19 released rows to a
+    # diagtraj_ cell that has no probe, silently emptying their G (found
+    # 2026-08-26). An empty G is the LOUD version of this failure; once the
+    # trajectory probes land the same swap would instead substitute a
+    # different baseline's G without any visible symptom, which is why the
+    # rule belongs here rather than in a downstream check.
+    _NEVER_BASELINE = ("diagtraj_",)
+
     def base_rank(cell):
-        return (len(cells[cell]["seeds"]),
+        return (0 if cell.startswith(_NEVER_BASELINE) else 1,
+                len(cells[cell]["seeds"]),
                 0 if cell.startswith("grid_") else 1,
                 cell)
     baselines = {}
@@ -164,7 +183,7 @@ def main():
         pct = cfgget(cfg, "subset_pct") or 100
         n_img = (int(round(TRAIN_SIZE.get(ds, 0) * pct / 100.0))
                  if ds in TRAIN_SIZE else "")
-        probe = rec["probes"].get("linear_probe.json")
+        probe = rec["probes"].get(args.probe_file)
         # BISTABLE cell: >=1 seed collapsed to ~chance while the cell as a
         # whole trains. A mean over a bimodal set misrepresents both modes
         # (ConvNeXt-SGD grid re-runs: seeds {0.84, 42.25, 19.54}); flag it so
@@ -233,7 +252,7 @@ def main():
             row["base_acc"] = fmt(st.mean(baccs))
             row["delta"] = fmt(st.mean(accs) - st.mean(baccs))
             row["delta_sem"] = fmt(sem_of_diff(accs, baccs))
-            bprobe = cells[bcell]["probes"].get("linear_probe.json")
+            bprobe = cells[bcell]["probes"].get(args.probe_file)
             if probe and bprobe:
                 g = st.mean(probe) - st.mean(bprobe)
                 row["G"] = fmt(g)
