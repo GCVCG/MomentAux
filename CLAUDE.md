@@ -9574,3 +9574,28 @@ ported vs corrected and why.
   it, the pass rewrote all three to their placeholders, and the fixture was
   deleted. A guard without a test of its own failure mode is the thing this
   ledger keeps recording; this one now has one.
+
+- HOW MUCH OF THE G CORPUS WILL THE MATCHED-EPOCH REPROBE ACTUALLY MOVE?
+  (2026-08-26, scoped BEFORE the repair runs so the result cannot be framed
+  after the fact). A cell whose best.pt and last.pt are the same network gains
+  nothing from being re-probed, so the movement is bounded by the DIFFERENTIAL
+  best-minus-final gap between the two arms:
+      released rows carrying a G                        1751
+        differential gap > 0.10 pt   664  (38.4%)
+        differential gap > 0.25 pt   309  (17.9%)
+        differential gap > 0.50 pt   179  (10.4%)
+        differential gap > 1.00 pt   118  ( 6.8%)   <- material movement
+        differential gap > 2.00 pt    45  ( 2.6%)
+  So ~7% of the G corpus moves materially, and the largest movers are entirely
+  cells that already carry caveats -- swin and ViT on pathmnist and eurosat,
+  the bistable and compressed-probe populations. The worst is
+  diaggrid_swin_path_aux_50pct at 18.20 points of differential gap against a
+  recorded G of 14.78, i.e. that number is currently meaningless.
+  READ THIS TOGETHER WITH THE DAMAGE SCOPING, because they are different
+  quantities and both are needed: 85 rows have a G measured on a WRONG NETWORK
+  (identity failure, repaired by re-probing or retraining), while 118 rows have
+  a G measured on the RIGHT network at the WRONG EPOCH (protocol mismatch,
+  repaired by re-probing). The two sets overlap only partly. Together they are
+  ~11% of the 1,751 G-carrying rows; the other ~89% will be reproduced to
+  within a few hundredths, as the block-C comparators already demonstrated
+  (tin_aux_10pct 41.64 best vs 41.47 last; abl25_none 63.14 vs 63.19).
