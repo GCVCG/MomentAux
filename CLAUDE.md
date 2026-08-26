@@ -9068,3 +9068,36 @@ ported vs corrected and why.
   from the "unexplained" pile without being able to claim they obey.
   The definitive version waits on the matched-epoch (last.pt) re-probe now
   chained behind the identity sweep; this bounds the exposure in the meantime.
+
+- *** BLOCK A's INSTRUMENTED DUPLICATES SILENTLY STOLE 19 BASELINE PAIRINGS
+  (2026-08-26, found while adding a matched-epoch switch to the exporter, not
+  by any check aimed at it). The diagtraj_* trajectory cells are their parent
+  config VERBATIM plus `save_every`, which is the property that makes them a
+  valid instrument -- and it means the exporter's family key cannot tell them
+  apart from the parent. With equal seed counts the baseline tie-break
+  ((seeds, original-over-grid_, name)) then ranked `diagtraj_grid_food_...`
+  above `grid_food_...`, and 19 released rows had their baseline silently
+  swapped to a cell that carries no probe, emptying their G.
+  THE DANGEROUS VERSION IS THE ONE THAT DID NOT HAPPEN: an empty G is LOUD.
+  Once the block-A trajectory probes land, that same swap would have paired
+  those rows against a DIFFERENT baseline's G with no visible symptom at all
+  -- a silently substituted measurement rather than a missing one. The rule
+  therefore belongs in the exporter (instrumented duplicates are ranked out of
+  baseline candidacy) and not in a downstream sanity check that would only
+  ever see the loud case.
+  GENERAL FORM, and it is the third time this campaign has hit it: adding a
+  cell that is deliberately identical to an existing one except for
+  instrumentation puts it into every downstream grouping that keys on
+  configuration. The same shape as the 2026-08-11 dense re-pin (archived
+  50-epoch runs indistinguishable from current ones by count or checksum) and
+  the 2026-08-06 duplicate-lane race. Any cell created as "the parent verbatim
+  plus X" needs an explicit exclusion wherever the parent is selected FROM.
+  Regenerated after the fix: every previously released row reproduces exactly,
+  105 new cells enter, 24 rows recover a G, and the sign-law audit is
+  byte-unchanged.
+  ALSO SHIPPED: `export_results_csv.py --probe-file`, so the whole table can be
+  regenerated from the matched-epoch `linear_probe_last.json` once the
+  re-probe lands. It switches the ENTIRE table rather than falling back per
+  cell -- a table mixing best.pt and last.pt probes would make G incomparable
+  across its own rows, which is the defect being repaired, not a workaround
+  for it.
