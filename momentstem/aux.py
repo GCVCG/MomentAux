@@ -42,8 +42,13 @@ class MomentTarget(nn.Module):
     def __init__(self, stem):
         super().__init__()
         self.stem = stem
-        self._n_identity = stem.in_channels
-        self.out_channels = stem.out_channels - stem.in_channels
+        # Every moment/energy stem passes its input through alongside the
+        # maps, so the target is everything AFTER those identity channels.
+        # RawPixelStem has none to drop (n_identity = 0) -- the whole output
+        # IS the target. Reading the count off the stem keeps every existing
+        # family on exactly the slice its recorded numbers were measured with.
+        self._n_identity = getattr(stem, "n_identity", stem.in_channels)
+        self.out_channels = stem.out_channels - self._n_identity
 
     def calibrate(self, x):
         if hasattr(self.stem, "calibrate"):

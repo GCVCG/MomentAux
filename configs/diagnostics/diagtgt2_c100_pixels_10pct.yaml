@@ -1,0 +1,27 @@
+# THE RECONSTRUCTION CONTROL for the target-family axis.
+# random-fixed carries NO information about the image, the moment
+# banks carry SELECTED structure, and the raw image carries
+# EVERYTHING with no selection. This is the third point, and the
+# hand-crafted analogue of the masked-reconstruction SSL init that
+# matched contrastive pre-training at low data (wave M).
+# auxmag_10pct_sched0 VERBATIM except the name and moment_aux.stem.
+name: diagtgt2_c100_pixels_10pct
+dataset: cifar100
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 8
+small_input: true
+pretrained: false
+subset_pct: 10
+stem: none
+stem_calibrate: true
+moment_aux:
+  stem: pixels
+  tap: layer3
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine

@@ -332,3 +332,49 @@ def test_energy_combined_is_exact_concat_before_and_after_calibration():
         assert torch.equal(out_c, out_s), new
         # the magnitude half of the combined target IS the magnitude target
         assert torch.equal(sc(x)[:, 3:11], sm(x)[:, 3:])
+
+
+def test_pixel_target_is_the_calibrated_image_and_drops_nothing():
+    """RawPixelStem is the reconstruction target: no identity passthrough to
+    drop, unit-std per channel after calibration, and byte-identical to the
+    input up to that per-channel scale.
+
+    Pinned because it is a TARGET family: if its scale convention ever drifts
+    the MSE changes and the recorded lambda values stop transferring, which is
+    exactly the failure the bank fingerprints exist to prevent."""
+    import torch
+    from momentstem.aux import MomentTarget
+    from momentstem.controls import build_stem
+
+    torch.manual_seed(0)
+    x = torch.randn(16, 3, 32, 32) * 3.0 - 0.5
+    t = MomentTarget(build_stem("pixels", in_channels=3)).calibrate(x)
+
+    assert t.out_channels == 3, "the whole output is the target"
+    y = t(x)
+    assert y.shape == x.shape
+    # unit std per channel, which is what puts it on the moment banks' scale
+    s = y.reshape(16, 3, -1).std(dim=(0, 2))
+    assert torch.allclose(s, torch.ones(3), atol=1e-3), s
+    # and it is the SAME image, only rescaled: perfectly correlated per channel
+    for c in range(3):
+        a, b = x[:, c].flatten(), y[:, c].flatten()
+        r = torch.corrcoef(torch.stack([a, b]))[0, 1]
+        assert r > 0.9999, (c, float(r))
+
+
+def test_existing_targets_keep_their_identity_slice():
+    """The n_identity generalisation must be a no-op for every family whose
+    numbers are already recorded."""
+    import torch
+    from momentstem.aux import MomentTarget
+    from momentstem.controls import build_stem
+
+    for name, n_energy in (("energy-magnitude", 8), ("energy-phase", 16),
+                           ("energy-symmetry", 4), ("moments-cat", None)):
+        st = build_stem(name, in_channels=3, kernel_size=11)
+        t = MomentTarget(st)
+        assert t._n_identity == 3, name
+        assert t.out_channels == st.out_channels - 3, name
+        if n_energy is not None:
+            assert t.out_channels == n_energy, (name, t.out_channels)

@@ -9301,3 +9301,53 @@ ported vs corrected and why.
   queued behind the block-C probes, waiting on free GPU memory rather than
   contending with the user's other project on the shared 3090; it writes
   results/local_identity_{last,best}.json.
+
+## THE RECONSTRUCTION CONTROL (2026-08-26, launched from block C's results)
+
+- WHY IT IS NOW A NECESSARY CONTROL RATHER THAN A CURIOSITY. The target-family
+  ablation spans "no information" (random-fixed maps) and "selected structure"
+  (the moment banks, HOG, the block-C phase/symmetry families), and it has
+  never had the third point: the RAW IMAGE, which carries everything with no
+  selection at all. The obvious referee question -- "why a moment target
+  rather than simply reconstructing the image?" -- had no measured answer.
+  Wave M made it sharper: masked reconstruction as an SSL INIT matched
+  contrastive pre-training at low data on ViT (20.46/29.51/42.65 vs SimCLR's
+  20.34/29.77/43.58), so reconstruction is a demonstrated currency in this
+  study and its hand-crafted analogue must be run.
+- NEW CODE: `RawPixelStem` (momentstem/controls.py), registered as stem
+  `pixels`. Unlike every other stem it has NO identity passthrough to drop, so
+  MomentTarget's slice is now read from `getattr(stem, "n_identity",
+  stem.in_channels)` -- a no-op for every existing family, PINNED by a test
+  asserting `_n_identity == 3` and `out_channels == 8/16/4` for
+  magnitude/phase/symmetry so no recorded number can move. Calibration scales
+  each channel to unit std exactly as the banks do, so the MSE is on the same
+  scale and the recorded lambda values transfer. Both properties pinned in
+  tests/test_bank_regression.py; suite 151 passed; 1-epoch smoke trains with
+  the aux live.
+- CELLS: diagtgt2_{c100_pixels_{1,2,5,10,25}pct, tin_pixels_{5,10}pct} -- the
+  reference configuration VERBATIM with only `moment_aux.stem` changed
+  (diff-verified: exactly two lines, name and stem). 7 cells, 3 seeds.
+- PREDICTIONS RECORDED IN ADVANCE (nothing run). Anchors -- magnitude Delta
+  +1.42/+2.50/+5.15/+3.75/+0.16 at C100 1/2/5/10/25%, +2.12/+1.65 at tin
+  5/10%; random-fixed under the same schedule +0.55/+0.45/.../-0.24; HOG
+  +1.08/+1.27 at C100 5/10%:
+    (R1) PIXELS ARE A WEAK-BUT-REAL TARGET: between 0.15x and 0.6x of
+      magnitude, positive at 1-10% on C100.
+        @1%  +0.2..+0.9   @5%  +0.8..+3.0   @10% +0.6..+2.2
+        @25% -0.5..+0.5   tin@5% +0.3..+1.3   tin@10% +0.3..+1.0
+      REASONING, and it is a mechanism claim rather than a hedge: at an 8x8 tap
+      the target is the image POOLED to 8x8, i.e. dominated by low-frequency
+      colour and illumination -- nuisance, not structure. And there is no
+      inference problem: the tapped features can retain colour trivially, so
+      unlike MAE (which MASKS, forcing inference, and decodes at full
+      resolution) nothing has to be learned to satisfy it.
+    (R2) G tracks Delta, small and positive, as it does for every aux family.
+  FALSIFIER A (the SELECTION is not what matters): pixels >= magnitude at >= 2
+    C100 fractions => any dense informative target would do, "the target is
+    the ingredient" narrows to "a dense target helps", and Sections 2.2/5.1
+    must be rewritten. This is the one that would cost the paper a claim.
+  FALSIFIER B (information alone is not enough, and a target can be worse than
+    nothing): pixels <= 0 at >= 3 fractions => the selection claim STRENGTHENS
+    and connects to the 32px random-target result, which is actively NEGATIVE
+    (-0.70 c10@5%, -1.46 c10@10%).
+  Note A and B are opposite-signed, so no uniform outcome passes both.

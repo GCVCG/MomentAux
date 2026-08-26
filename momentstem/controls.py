@@ -18,6 +18,7 @@ Stem registry (one name per experimental cell):
   filters a feature or a bug?
 """
 
+import torch
 import torch.nn.functional as F
 from torch import nn
 
@@ -69,8 +70,45 @@ class IdentityStem(nn.Module):
         return x
 
 
+class RawPixelStem(nn.Module):
+    """The raw (calibrated) image AS AN AUXILIARY TARGET -- a low-resolution
+    reconstruction objective.
+
+    This completes the target-information axis the ablation already spans at
+    both ends: random-fixed maps carry NO information about the image, the
+    moment banks carry SELECTED structure, and the image itself carries
+    EVERYTHING with no selection at all. It is also the hand-crafted analogue
+    of the masked-reconstruction SSL init (wave M, 2026-08-19), which turned
+    out to match contrastive pre-training at low data -- so "why not just
+    reconstruct the image?" stopped being a rhetorical question.
+
+    Unlike every other stem this one has NO identity passthrough to drop
+    (``n_identity = 0``): the whole output IS the target. Calibration scales
+    each channel to unit standard deviation over the calibration batch, the
+    same treatment the moment banks get, so the MSE is on the same scale as
+    every other target family and the recorded lambda values transfer.
+    """
+
+    def __init__(self, in_channels=3):
+        super().__init__()
+        self.in_channels = in_channels
+        self.n_identity = 0
+        self.out_channels = in_channels
+        self.register_buffer("scale", torch.ones(1, in_channels, 1, 1))
+
+    @torch.no_grad()
+    def calibrate(self, x):
+        std = x.reshape(x.shape[0], x.shape[1], -1).std(dim=(0, 2))
+        self.scale.copy_((1.0 / std.clamp_min(1e-6)).view(1, -1, 1, 1))
+        return self
+
+    def forward(self, x):
+        return x * self.scale
+
+
 STEM_NAMES = (
     "none",
+    "pixels",
     "moments-sum",
     "moments-cat",
     "learned",
@@ -101,6 +139,8 @@ def build_stem(name, in_channels=3, kernel_size=11, seed=0, **stem_kwargs):
     """
     if name == "none":
         return IdentityStem(in_channels)
+    if name == "pixels":
+        return RawPixelStem(in_channels)
     if name == "moments-sum":
         return MomentStem(
             mode="sum", in_channels=in_channels, kernel_size=kernel_size, **stem_kwargs
