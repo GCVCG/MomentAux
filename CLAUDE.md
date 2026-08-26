@@ -9285,3 +9285,19 @@ ported vs corrected and why.
   recorded. Worth stating in the paper: the discipline adopted for a different
   reason (avoiding test-selected checkpoints) happens to have immunised that
   result against a defect discovered a week later.
+
+- THE LOCAL TREE HAS ITS OWN SCOPE GAP, AND IT CONTAINS THE HEADLINE CELLS
+  (2026-08-26). The BSC identity sweep covers the CLUSTER tree only. Comparing
+  the two: **216 probed cells exist locally and not on the cluster**, so
+  nothing in the sweep will ever reach them -- and the list opens with
+  abl5_none, abl10_none, auxmag_{1,2,10,15,25,100}pct_sched0, i.e. exactly the
+  CIFAR-100 champion family the paper's envelope table is built from. Their
+  best.pt was checked by the 2026-08-10 local audit; their last.pt has never
+  been checked by anything, and last.pt is what the matched-epoch re-derivation
+  will probe.
+  THIS IS THE SAME SCOPE FAILURE AS THE ONE THAT LET THE food101 CORRUPTION
+  SURVIVE: the rule ("verify by IDENTITY") was right and was applied to one
+  tree and one checkpoint kind. A local sweep of the 216 on BOTH checkpoints is
+  queued behind the block-C probes, waiting on free GPU memory rather than
+  contending with the user's other project on the shared 3090; it writes
+  results/local_identity_{last,best}.json.
