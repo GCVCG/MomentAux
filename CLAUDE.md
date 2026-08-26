@@ -9266,3 +9266,22 @@ ported vs corrected and why.
   PENDING: G for the c100@5/10 singles and for all ten combos. The local 3090
   is shared with the user's other project (22 GB held); those three probes are
   queued behind a free-memory wait rather than contending for it.
+
+- CHECKED, NOT ASSUMED: THE WAVE-1 WITHDRAWAL IS IMMUNE TO BOTH PROBE DEFECTS
+  (2026-08-26). The prospective fusion result -- the paper's most consequential
+  negative, 1 of 9 held-out calls correct -- could in principle have been an
+  artifact of the same two defects that dissolved the exception cluster, so it
+  was verified at the source rather than argued from the prose:
+    (a) `outcome()` in analysis/prospective_currency.py takes only the three
+        ACCURACY deltas and their SEM (`d_combo, dA, dB, sem`). No probe value
+        enters the measured outcome, so the epoch mismatch between
+        final_test_acc and a best.pt probe cannot touch it.
+    (b) the module's CHECKPOINT POLICY, stated at line 16 and enforced by
+        `measure_cell(..., ckpt="last.pt")`, is last.pt for EVERY arm and
+        EVERY measurement, precisely because best.pt is selected by test
+        accuracy. So even the CALLS -- which do use G -- were already
+        matched-epoch, and validation-scored on the carve-outs.
+  So wave 1 is unaffected on both sides, and the withdrawal stands as
+  recorded. Worth stating in the paper: the discipline adopted for a different
+  reason (avoiding test-selected checkpoints) happens to have immunised that
+  result against a defect discovered a week later.
