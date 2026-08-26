@@ -9152,3 +9152,43 @@ ported vs corrected and why.
   +0.33. FALSIFIER: readout(mnet-large) stays negative at >= 4 of 5 => the
   violation is not capacity but something specific to the depthwise-separable
   family, and "capacity headroom orders the positive branch" must be withdrawn.
+
+- THE EXCEPTION SET IS NOW 39% ATTRIBUTED, AND THE RESIDUE IS 8.4% OF THE
+  RESOLVABLE CORPUS (2026-08-26, zero compute). Triaging the 62 wrong-side
+  cells against every instrument problem now known:
+      10  mnet positive branch (the backbone effect above)
+       6  epoch mismatch > 1.0 pt differential
+       4  pathmnist compressed probe
+       3  verified wrong-network baseline (food101@50%)
+       1  epoch mismatch 0.4-1.0 pt
+      38  UNEXPLAINED  = 8.4% of the 455 resolvable cells
+  So 24 of 62 have an identified instrument cause; the rest do not, and the
+  identity sweep may move more of them. State it as attribution, never as
+  dismissal: an attributed cell is one whose measurement is untrustworthy,
+  not one that has been shown to obey.
+- AND THREE CANDIDATE READOUT COVARIATES ARE TESTED AND DEAD (same method as
+  the audit's own nested-residual section):
+      baseline accuracy alone (5-pt bins)   R^2 = 0.273
+      + dataset      on the residual        R^2 = 0.148  (20 levels)
+      + fraction                            R^2 = 0.015
+      + log10 train images                  R^2 = 0.005
+      + DeiT augmentation (2 levels)        R^2 = 0.001
+      + is-mobilenet (2 levels)             R^2 = 0.000
+      + backbone (7 levels)                 R^2 = 0.007
+  Beyond baseline height only DATASET carries readout. The recipe does not,
+  the absolute data scale does not, and the backbone does not.
+  *** THIS IS THE PROPER SCOPING OF THE mnet FINDING, and it cuts against the
+  size of that claim rather than for it: mnet is a SIGN effect on the 11
+  resolvable cells ABOVE the crossing, not a variance effect across the 958.
+  Its readouts are small (mean -1.39) and the corpus-wide R^2 of "is
+  mobilenet" is 0.000. The finding is "the positive branch does not appear on
+  this backbone", not "the backbone predicts readout".
+  A DEIT SUB-CLUSTER WAS ALSO CHECKED AND REJECTED: 6 deit cells sit below the
+  crossing with positive readout, which looks like a recipe-shifted crossing
+  until the neighbours are read -- at bases 23-30 the deit cells run both
+  -3.85 (stl@5%) and +1.33 (c100@20%), so no single cut separates them, and a
+  per-group crossing fitted for deit gains nothing in-sample (42/48 either
+  way). The six are high-FRACTION low-ACCURACY cells (dtd@50, tin@20/25,
+  food@25, c100@20, c10@2), which is suggestive of the B3/B4 optimization
+  account rather than of a crossing shift, and is left in the UNEXPLAINED pile
+  rather than claimed.
