@@ -9351,3 +9351,52 @@ ported vs corrected and why.
     and connects to the 32px random-target result, which is actively NEGATIVE
     (-0.70 c10@5%, -1.46 c10@10%).
   Note A and B are opposite-signed, so no uniform outcome passes both.
+
+- *** BLOCK I SCORED (best.pt pass complete, 2,262 cells / 5,913 checkpoints;
+  the last.pt pass is still running and I3 is scored provisionally):
+      cells with a best.pt result        : 2262
+      not verifiable (all seeds ERR)     :    0   (the tin staging fix held)
+      at least one bad best.pt seed      :   79  = **3.49%**
+    (I1) band 2-10% -> **HIT** at 3.49%.
+    (F-I1) ">25% => the recorded G corpus is broadly unreliable and the
+      feature-side analysis must be RE-DERIVED" -> **DEAD**.
+    (F-I3) "<0.5% => an isolated pair of accidents rather than a systematic
+      exposure" -> **DEAD**. So it is systematic, and it is bounded.
+    (I2) "concentrated in the GRID LANE, >= 60% of failures" -> **HIT**, and
+      scored against its base rate rather than taken at face value: 88% of the
+      examined cells are grid-prefixed, so 100% of failures being grid-lane is
+      only meaningful beside the per-group damage RATES --
+          grid-prefixed    79/1992 = 3.97% damaged
+          everything else   0/ 270 = 0.00% damaged
+      Zero of 270. The lanes that ran after the counter fix and the run lock
+      are clean; the lane that ran through the 2026-08-02/03/06 duplicate
+      incidents is not. That is the mechanism confirmed, not merely a
+      correlation with a name prefix.
+  *** THE FAILURES ARE NOT DECODE DRIFT, and the split is reported because a
+  single count would let noise inflate the damage rate:
+      |recorded - evaluated|   0.5-1: 27 | 1-2: 14 | 2-5: 17 | 5-15: 38 | >15: 21
+      **76 of 117 seed-level failures are >= 2 points**, far beyond the
+      recorded JPEG re-evaluation offset (-0.06..-0.38 on six tin cells). The
+      largest are -41.39, -34.88, -33.84.
+  *** THE SHAPE OF THE DAMAGE identifies the mechanism precisely: the failures
+  concentrate in `grid_c100_r18_ax*` cells at 20/25/50/100% -- the LONGEST-
+  running cells of the target/tap/lambda ablation grid -- and hit ONE OR TWO
+  SEEDS PER CELL, not all three. That is a per-seed duplicate race, exactly the
+  counter-rewind signature: a duplicate launched later had the most time to
+  overwrite best.pt on a long cell while the original was finishing.
+  *** BLAST RADIUS, and both halves must be stated:
+      released rows with a G measured on a failing arm : **85** (64 flagged
+        is_headline), concentrated at 20/25/50% where G is small anyway
+      of the 455 RESOLVABLE sign-law cells, involving a bad checkpoint : 17
+        of those, on the WRONG side : 5
+    So the corpus has 85 G VALUES that must be repaired or dropped, while the
+    sign law's CONCLUSION is barely touched (17 of 455 = 3.7%, and the
+    wrong-side enrichment is mild: 5/62 = 8% against 12/393 = 3%). The defect
+    corrupts individual measurements without biasing the aggregate claim --
+    the opposite of the epoch mismatch, which biases the exceptions 3x while
+    leaving the headline at 86.8% vs 86.4%.
+  I3 ("last.pt intact where best.pt is not, >= 70%") is NOT scored yet: only 9
+  of 16 last-pass shards have reported, and the aggregator's current "77 cells
+  fail on BOTH" is an artifact of the missing shards rather than a result. It
+  will be scored when the pass completes, and the repair worklist derives from
+  it.
