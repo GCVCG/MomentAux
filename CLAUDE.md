@@ -9423,3 +9423,53 @@ ported vs corrected and why.
   but enriches the WRONG-SIDE cells 3x, so it biases the exceptions without
   damaging the conclusion. Neither is a reason to doubt the law; both are
   reasons to repair the corpus before the G values are quoted individually.
+
+- *** BLOCK C's FEATURE SIDE COMPLETE — THE POPULATION DEPENDENCE IS A FEATURE
+  EFFECT, AND SYMMETRY DEGRADES FEATURES (2026-08-26, matched-epoch last.pt,
+  both arms identical protocol, all 113 checkpoints identity-verified first):
+      cell        target      probe      G      Delta   readout
+      C100 @5%    magnitude   43.33   +6.11    +5.15    -0.96
+      C100 @5%    phase       39.85   +2.63    +1.55    -1.08
+      C100 @5%    symmetry    36.93   -0.29    -0.53    -0.24
+      C100 @5%    mag+phase   42.35   +5.13    +4.09    -1.04
+      C100 @5%    mag+sym     43.04   +5.82    +4.32    -1.50
+      C100 @10%   magnitude   51.57   +3.63    +3.75    +0.12
+      C100 @10%   phase       49.27   +1.33    +1.37    +0.04
+      C100 @10%   symmetry    47.65   -0.29    -0.19    +0.10
+      C100 @10%   mag+phase   52.22   +4.28    +3.90    -0.38
+      C100 @10%   mag+sym     52.15   +4.21    +4.08    -0.13
+      C100 @25%   phase       63.34   +0.15    +0.45    +0.30
+      C100 @25%   symmetry    63.17   -0.02    -0.39    -0.37
+      tin  @10%   magnitude   41.47   +1.63    +1.65    +0.02
+      tin  @10%   phase       41.43   +1.59    +1.39    -0.20
+      tin  @10%   symmetry    39.78   -0.06    -0.39    -0.33
+      tin  @10%   mag+phase   42.02   +2.18    +2.19    +0.01
+      tin  @10%   mag+sym     41.43   +1.59    +1.65    +0.06
+  (1) THE POPULATION DEPENDENCE IS FEATURE-SIDE, not a readout artifact.
+      phase-over-magnitude G ratio: **0.43x @C100-5%, 0.37x @C100-10%, 0.98x
+      @tin-10%**, and the e2e ratios (0.30 / 0.37 / 0.84) track them closely.
+      On tin the two targets are the same target to within 0.04 of feature
+      gain; on C100 phase supplies well under half. So which hand-crafted
+      target is best is a property of the POPULATION, measured on both sides.
+  (2) SYMMETRY IS NEGATIVE ON THE FEATURE SIDE TOO (-0.29 / -0.29 / -0.02 /
+      -0.06), so it is not a null that fails to help -- it very slightly
+      DEGRADES the frozen features, matching its slightly negative Delta at 5
+      of 8 cells. The cleanest form of a dead target: no accuracy, no features,
+      and mildly harmful on both.
+  (3) NO STACKING ON THE FEATURE SIDE EITHER. The combos land BELOW magnitude
+      alone at C100@5% (+5.13 and +5.82 vs +6.11), a little above at C100@10%
+      (+4.28 / +4.21 vs +3.63), and at or barely above on tin (+2.18 / +1.59
+      vs +1.63). Two hand-crafted targets read off the SAME pinned bank at the
+      SAME tap do not compound, on accuracy OR features -- F-C1 is dead twice
+      over.
+  (4) SEVENTEEN NEW LAW CELLS ON TWO NEW TARGET FAMILIES, and the sign law
+      holds on all of them: at C100@5% (base 25.36, below the crossing) every
+      readout is NEGATIVE (-0.24..-1.50); at C100@10% (base 40.28, just above
+      the bracket) and C100@25% (base ~63) they are all ~0; tin@10% (base
+      33.60) sits INSIDE the bracket where the law makes no call, and is
+      recorded as data.
+  PROTOCOL NOTE: magnitude's C100@5% G reads +6.11 here against the ledger's
+  recorded +6.26 (best.pt). The 0.15 difference is the matched-epoch
+  protocol, not a discrepancy -- best is within 0.2 of final on these cells,
+  which is the same agreement seen on tin (41.64 vs 41.47) and abl25_none
+  (63.14 vs 63.19).
