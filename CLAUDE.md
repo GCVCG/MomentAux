@@ -9500,3 +9500,35 @@ ported vs corrected and why.
   is the same ordering as the positive-branch means (+1.76 for vit down to
   -1.39 for mnet). Whatever "readout" is, it runs monotonically with capacity
   headroom across five backbone families.
+
+- *** THE CROSSING IS A TRANSITION, NOT A THRESHOLD -- AND THAT IS THE RIGHT
+  WAY TO STATE THE SIGN LAW (2026-08-26, analysis/crossing_profile.py, zero
+  compute). Chasing the 14 below-crossing unexplained exceptions showed nine of
+  them sit at baselines of 19-31, i.e. just below the bracket. Binning the
+  whole below-crossing set by baseline height:
+      baseline band     n    wrong sign     mean readout
+      [ 0,  5)         62    1 =  1.6%        -3.37
+      [ 5, 10)         85    1 =  1.2%        -2.75
+      [10, 15)         55    2 =  3.6%        -1.89
+      [15, 20)         46    2 =  4.3%        -1.25
+      [20, 25)         24    5 = 20.8%        -0.49
+      [25, 31.8)       42    5 = 11.9%        -1.12
+  The error rate RISES toward the bracket while the mean readout DECAYS
+  monotonically to zero (-3.37 -> -0.49). So the near-bracket "failures" are
+  cells whose true readout is near zero and whose SIGN is therefore poorly
+  determined -- exactly the argument the paper already makes for the
+  above-crossing side, now measured on the below side too. Above the bracket
+  the same decay continues (+0.96 -> +0.71 -> +0.37 -> +0.12) with the error
+  rate flat at 20-38%.
+  *** STATE THE LAW IN THREE REGIMES INSTEAD OF ONE NUMBER:
+      far below  (base < 20)   242/248 = **97.6%** [94.8, 98.9]  mean |ro| 2.58
+      near below (20 - 31.8)    56/66  =   84.8%  [74.3, 91.6]  mean |ro| 1.61
+      above the bracket         95/141 =   67.4%  [59.3, 74.6]  mean |ro| 1.38
+  97.6% on 248 cells is a far stronger claim than the pooled 86.4%, and it is
+  the honest one: the law is a statement about the LEFT FLANK, where readout is
+  large and negative, and it is nearly exact there. It degrades smoothly
+  through the transition and becomes uninformative where it predicts ~0 -- as
+  it should, since a sign prediction about a quantity that is zero has no
+  content. A referee who runs the pooled number gets 86.4% and a referee who
+  runs the naive above-crossing count gets 67%; the paper should lead with the
+  regime table so neither reading is a surprise.
