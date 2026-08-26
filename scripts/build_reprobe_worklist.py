@@ -5,7 +5,7 @@ checkpoint before verifying it is exactly how the food101 exception cluster
 came to exist, so the filter is the point of this script, not a detail.
 """
 import json, glob, os, sys
-MS = "${CLUSTER_SCRATCH}/momentstem"
+MS = os.environ.get("MS") or sys.exit("set MS to the scratch root")
 rep = sorted(glob.glob(os.path.join(MS, "verify", "last_shard*.json")))
 if not rep:
     sys.exit("no verify report found -- run the identity sweep first")
@@ -30,9 +30,10 @@ for c in clean:
     cf = cfg_of(c)
     if not cf:
         nocfg.append(c); continue
-    lines.append("python analysis/linear_probe.py --run %s/runs/%s --config %s "
-                 "--data-root %s/data --ckpt last.pt --out-suffix _last"
-                 % (MS, c, cf, MS))
+    # $DR and $OUT are set by the lane, so tin cells read the /dev/shm
+    # staging the worker built instead of hammering GPFS with 110k JPEGs.
+    lines.append('python analysis/linear_probe.py --run "$OUT/%s" --config %s '
+                 '--data-root "$DR" --ckpt last.pt --out-suffix _last' % (c, cf))
 with open(os.path.join(MS, "worklist.reprobe"), "w") as f:
     f.write("\n".join(lines) + "\n")
 print("clean cells: %d   skipped (last.pt failed identity): %d   no config: %d"
