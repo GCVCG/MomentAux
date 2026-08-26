@@ -9532,3 +9532,28 @@ ported vs corrected and why.
   content. A referee who runs the pooled number gets 86.4% and a referee who
   runs the naive above-crossing count gets 67%; the paper should lead with the
   regime table so neither reading is a surprise.
+
+- *** WHAT THE THREE-REGIME FRAMING COSTS THE DENSE CLAIM, AND WHAT IT BUYS IT
+  (2026-08-26). Under the new framing the dense law result has to be re-read,
+  and the honest reading cuts both ways. All NINE resolvable dense cells sit at
+  baseline pixel accuracy 52.3-77.5, i.e. entirely in the ABOVE-BRACKET regime
+  where the classification law is only 67.4% right and where it predicts a
+  readout of ~+0.4 decaying to ~0:
+      ade20k@5 52.29 +0.10 | ade20k@25 63.71 +0.47 | cityscapes@1 69.24 +0.35
+      swin_voc@1 72.35 +0.22 | @2 73.23 +0.26 | @5 74.62 +0.56 | @10 75.77 +0.24
+      voc@10 76.83 +0.36 | swin_voc@25 77.55 +0.47
+  THE COST: "the law transplants to a new task and a new metric" rests on nine
+  cells in the regime where the law has the LEAST content, and none below the
+  bracket. The E-K limitation already recorded ("no dense population has
+  abundant labels AND low pixel accuracy AND a material Delta") is therefore
+  sharper than it looked -- it is not just that the negative branch is
+  untested on dense, it is that the ONLY branch dense tests is the weak one.
+  THE BUY, and it is real: dense scores **9/9** where classification manages
+  67.4%, and P(9/9 | p = 0.674) = **0.029**. The dense readouts are small
+  (+0.10..+0.56, mean +0.34 -- the same size as the classification
+  above-crossing readouts) but the dense SEMs are far tighter, so these cells
+  RESOLVE a small positive readout that the classification corpus cannot. So
+  segmentation's contribution is not "another population where the law holds",
+  it is "the positive branch's SIGN is real and consistent, established where
+  classification has the precision to say only ~0". That is a narrower claim
+  and a more useful one.
