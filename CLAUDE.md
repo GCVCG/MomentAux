@@ -8993,3 +8993,43 @@ ported vs corrected and why.
   generated file rather than trusting the sed. Cancelled and resubmitted
   against worklist.vitlfix with its own counter and lock, verified by grep
   before submission.
+
+- *** THE IDENTITY SWEEP FAILED TWICE, AND BOTH FAILURES WERE MINE AND OF THE
+  SAME FAMILY (2026-08-26). Block I's cluster-wide checkpoint audit has now
+  been launched three times; the first two reported success having verified
+  almost nothing.
+  FAILURE 1 (recorded 2026-08-25): `find_config()` resolved `configs/...`
+  relative to the CWD while the sbatch ran from `$MS` and the configs live at
+  `$MS/repo`. Every lookup returned None, every cell was skipped, the job
+  printed "0 verified" and EXITED 0 -- which satisfied the `afterok`
+  dependency, so the repair lane then "COMPLETED" in 16 s on an empty
+  worklist. Two green jobs, zero work. Fixed by anchoring config lookup to the
+  script's own repo root and by `sys.exit(2)` when nothing was examined.
+  FAILURE 2 (today): the relaunch ran 1 h 13 m and still verified **114 of
+  ~6,800 checkpoints**. Every one of the 8 shards died on its first
+  Tiny-ImageNet cell with `FileNotFoundError: .../tiny-imagenet-200 missing`
+  -- tin is stored as a ZIP and staged to /dev/shm by the TRAINING lanes, and
+  the audit sbatch never staged it. The exception propagated out of the
+  per-cell loop and killed the shard, and the sbatch printed BEST PASS DONE
+  and VERIFY_COMPLETE regardless because it never checked that the shards had
+  written their reports.
+  *** THE LESSON I HAD ALREADY WRITTEN DOWN AND THEN VIOLATED IN A SECOND
+  DIMENSION. The 2026-08-05 entry says: "An audit that stops on its first
+  finding is worse than no audit -- it reports a clean bill for the 886 cells
+  it never reached. verify_checkpoints.py now CLASSIFIES rather than raises."
+  That fix was applied to the CHECKPOINT axis (ok/FAIL/CORRUPT/KEYS) and to
+  nothing else, so a missing DATASET -- a different way for the same loop to
+  throw -- reopened the identical hole. Classifying one class of failure does
+  not harden a loop; the loop itself must be non-fatal.
+  FIXES SHIPPED, all three: (a) the per-seed call is wrapped and a throw is
+  classified `ERR` with its exception text, so one unstaged dataset can no
+  longer cost the sweep the other 2,000 cells (smoke-tested by pointing
+  --data-root at an empty directory: 10 ERR rows, sweep continues, ERR counted
+  separately from drift); (b) the sbatch stages the tin ZIP to /dev/shm
+  exactly as the training lanes do; (c) the completion marker is now earned --
+  a shard exits 1 when it FINDS damage, so the exit code cannot distinguish a
+  finding from a crash, and the sbatch instead ASSERTS that every shard wrote
+  its report, printing VERIFY_INCOMPLETE and exiting non-zero otherwise.
+  Also: reports are now flushed every ~50 checkpoints via a tmp+rename, so a
+  walltime kill leaves a partial report rather than nothing.
+  RELAUNCHED as 16 shards over 2 nodes (45066555 / 45066557); suite 149 green.

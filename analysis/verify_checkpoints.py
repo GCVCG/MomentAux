@@ -186,6 +186,16 @@ def verify_one(cell, seed, runs, data_root, device, ckpt_name):
             "diff": got - recorded, "field": key}
 
 
+def _dump(a, checked):
+    """Write the shard report atomically, so a kill mid-write cannot leave a
+    truncated JSON that the aggregator would then silently mis-read."""
+    tmp = a.out + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump({"ckpt": a.ckpt, "tol": a.tol, "shard": a.shard,
+                   "n_checked": len(checked), "results": checked}, f)
+    os.replace(tmp, a.out)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--cells", nargs="*", default=None)
@@ -251,7 +261,18 @@ def main():
         else:
             seeds = [a.seed_pick]
         for sd in seeds:
-            r = verify_one(cell, sd, a.runs, a.data_root, device, a.ckpt)
+            # An audit that ABORTS on its first surprise is worse than no
+            # audit: it reports a clean bill for every cell it never reached.
+            # The checkpoint statuses were already classified rather than
+            # raised; this extends the same discipline to everything else
+            # that can throw (a dataset that is not staged, a config the
+            # model builder rejects), so one missing dataset can no longer
+            # cost the sweep the other 2,000 cells.
+            try:
+                r = verify_one(cell, sd, a.runs, a.data_root, device, a.ckpt)
+            except Exception as e:                       # noqa: BLE001
+                r = {"cell": cell, "seed": sd, "status": "ERR",
+                     "detail": f"{type(e).__name__}: {e}"[:200]}
             if r is None:
                 continue
             checked.append(r)
@@ -270,6 +291,10 @@ def main():
                           f"recorded {r['recorded']:6.2f}  "
                           f"evaluated {r['evaluated']:6.2f}  "
                           f"diff {r['diff']:+.2f}", flush=True)
+        # Flush the report as we go: a sweep this long can be killed by a
+        # walltime, and a partial report is worth far more than none.
+        if a.out and len(checked) % 50 < len(seeds):
+            _dump(a, checked)
         if not (a.cells or a.all_probed) and len(checked) >= a.sample:
             break
 
@@ -281,16 +306,16 @@ def main():
               f"This is a failure, not a pass.", file=sys.stderr)
         sys.exit(2)
 
+    n_err = sum(r.get("status") == "ERR" for r in checked)
     n_corrupt = sum(r.get("status") == "CORRUPT" for r in checked)
     n_keys = sum(r.get("status") == "KEYS" for r in checked)
-    n_drift = len(bad) - n_corrupt - n_keys
+    n_drift = len(bad) - n_corrupt - n_keys - n_err
     print(f"\n{len(checked)} checkpoints examined: "
           f"{len(checked) - len(bad)} verified, {n_drift} outside +-{a.tol}, "
-          f"{n_corrupt} CORRUPT, {n_keys} legacy key naming")
+          f"{n_corrupt} CORRUPT, {n_keys} legacy key naming, "
+          f"{n_err} not verifiable (ERR)")
     if a.out:
-        with open(a.out, "w") as f:
-            json.dump({"ckpt": a.ckpt, "tol": a.tol, "shard": a.shard,
-                       "n_checked": len(checked), "results": checked}, f)
+        _dump(a, checked)
         print(f"wrote {a.out}")
     if bad:
         sys.exit(1)
