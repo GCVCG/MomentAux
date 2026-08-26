@@ -74,7 +74,18 @@ CHECK=${1:-}
 # matches nothing while still exiting 0. The older patterns all required a
 # path prefix and so were self-safe by accident, which is why this only
 # became a hazard when the account category was added.
-files=$(git ls-files | grep -E '^(slurm|scripts|logs)/' \
+#
+# THE FILE LIST INCLUDES UNTRACKED FILES, and that is the fix for a real miss:
+# it used to be `git ls-files` alone, so a NEWLY CREATED lane sbatch -- untracked
+# by definition until someone adds it -- was skipped, AND the closing "no
+# enumerated identifier remains" check ran over the same tracked-only list and
+# printed CLEAN while the new file still carried the cluster account and paths
+# (2026-08-24, five lane files). A scrub whose blind spot is exactly the files
+# most likely to be new is not a scrub. Untracked files are enumerated with
+# `git ls-files --others --exclude-standard`, so .gitignore'd files (including
+# .scrub_identifiers itself) stay out.
+files=$( { git ls-files; git ls-files --others --exclude-standard; } \
+        | sort -u | grep -E '^(slurm|scripts|logs)/' \
         | grep -v '^scripts/scrub_for_release.sh$' || true)
 
 # The identifiers themselves are NOT in this file. Holding them here as
