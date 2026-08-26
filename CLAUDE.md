@@ -9599,3 +9599,40 @@ ported vs corrected and why.
   ~11% of the 1,751 G-carrying rows; the other ~89% will be reproduced to
   within a few hundredths, as the block-C comparators already demonstrated
   (tin_aux_10pct 41.64 best vs 41.47 last; abl25_none 63.14 vs 63.19).
+
+- *** BLOCK I FULLY SCORED — 4/4 PREDICTIONS HIT, BOTH FALSIFIERS DEAD, AND
+  **ZERO CELLS NEED RETRAINING** (2026-08-26, both passes complete, 2,262
+  cells, 16 shards over 2 nodes, ~40 min each, VERIFY_COMPLETE earned by the
+  new report assertion rather than printed regardless):
+      cells with a best.pt result   2262    not verifiable  0
+      at least one bad best.pt seed   79  = **3.49%**
+    (I1) band 2-10%                        -> **HIT** (3.49%)
+    (I2) >= 60% of failures in the grid lane -> **HIT** (100%, and 3.97%
+         damaged there against **0.00% of the 270 non-grid cells**)
+    (I3) last.pt intact where best.pt fails, >= 70% -> **HIT at 79/79 = 100%**
+    (F-I1) > 25% => the G corpus is broadly unreliable -> **DEAD**
+    (F-I3) < 0.5% => isolated accidents      -> **DEAD**
+  *** I3 AT 100% IS THE RESULT THAT MATTERS, and its mechanism was already on
+  record: **last.pt is written only at run COMPLETION**, so a duplicate killed
+  mid-run can never touch it, while best.pt is rewritten whenever the duplicate
+  beats its own best-so-far. That insight saved 21 ImageNet runs on 2026-08-07
+  and it now saves all 79 -- the entire repair is a RE-PROBE at zero training
+  cost, and the 1-2 node-days a retrain plan would have cost are not spent.
+  TWO CELLS FAIL THE OTHER WAY (bad last.pt, good best.pt):
+  diaggrid_swin_c10_none_5pct and diaggrid_swin_esat_none_25pct, both swin,
+  both on populations where swin-none is already recorded as seed-bistable.
+  They are excluded from the reprobe rather than repaired.
+  *** THE MATCHED-EPOCH REPROBE IS LAUNCHED (2,261 clean cells, 3 nodes,
+  worklist.reprobe): every cell re-probed from its identity-VERIFIED last.pt
+  into linear_probe_last.json, which repairs BOTH defects at once -- the wrong
+  network AND the wrong epoch -- because last.pt is the network final_test_acc
+  already describes. Recorded probes are never overwritten (the 2026-08-06
+  near-miss), and the table is regenerated with
+  `export_results_csv.py --probe-file linear_probe_last.json`, which switches
+  the WHOLE table so no row's G is comparable to another's on a different
+  checkpoint.
+  NOTE the ImageNet cells are absent from this worklist and that is correct
+  rather than an oversight: they were probed on the LOCAL machine, carry
+  `linear_probe_shots.json` under the fixed-budget protocol, and a full-train
+  LBFGS at 1.28M rows is impractical -- the reason that protocol was
+  pre-registered in the first place. They are covered by the local sweep.
