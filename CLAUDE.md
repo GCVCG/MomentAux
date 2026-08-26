@@ -9636,3 +9636,34 @@ ported vs corrected and why.
   `linear_probe_shots.json` under the fixed-budget protocol, and a full-train
   LBFGS at 1.28M rows is impractical -- the reason that protocol was
   pre-registered in the first place. They are covered by the local sweep.
+
+- *** A THIRD AUDIT SCOPE GAP, AND I MADE IT WITH THE SAME PROXY ERROR AS THE
+  FIRST TWO (2026-08-26). The cluster sweep covers cells that carry a
+  `linear_probe*.json` ON THE CLUSTER; the local sweep covers the 216 cells I
+  computed as "probed locally and NOT PRESENT on the cluster". Those two sets
+  do not cover the corpus, because a cell can EXIST on the cluster (so it is
+  excluded from local-only) and be PROBED only locally (so `--all-probed`
+  never reaches it there). Computing the coverage from the SWEPT set instead
+  of the cluster's directory listing:
+      probed cells across all local trees   2595
+        covered by the cluster sweep        2262
+        queued in the local-only sweep       216
+        **IN NEITHER**                       117
+  I used "exists on the cluster" as a proxy for "was swept on the cluster",
+  which is the same substitution that produced the CWD-relative config lookup
+  ("the script runs from the repo" for "configs resolve from the repo") and
+  the tracked-only scrub list ("tracked" for "in the tree"). Three instances in
+  two days, all of the form: a cheap property standing in for the expensive one
+  that actually matters.
+  THE 117 SPLIT BY WHERE THEIR CHECKPOINTS ARE: 59 in local runs/, 25 in
+  runs_bscpull/, and **33 with no local checkpoint at all** -- those live only
+  on the cluster and include `diagin100_vitb_{none,aux}` (the +26.01 headline
+  and its G +22.89), the eight `diaggrid_swin_c100_*` cells whose G-probe pass
+  was the first time the law predicted a new backbone family in advance, the
+  three `grid_mnet_*` cells behind the 2026-07-29 MobileNet fork, and the
+  ConvNeXt and `diagtransfer2_path` pairs. Every one of those is load-bearing.
+  CLOSED: the 33 go to a dedicated cluster job (ms_gapverify, both checkpoints
+  in ONE pass via the new --ckpt best.pt,last.pt so each dataset builds once);
+  the 84 with local checkpoints are appended to the local queue. Coverage is
+  now computed from what was SWEPT, and that computation should be the standard
+  check before any future audit is called complete.
