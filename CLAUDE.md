@@ -9101,3 +9101,54 @@ ported vs corrected and why.
   cell -- a table mixing best.pt and last.pt probes would make G incomparable
   across its own rows, which is the defect being repaired, not a workaround
   for it.
+
+- *** THE READOUT'S POSITIVE BRANCH IS BACKBONE-DEPENDENT, AND ON MOBILENETV3
+  IT DOES NOT EXIST (2026-08-26, zero new compute, from the released table).
+  Triaging the sign law's 62 wrong-side cells surfaced a clustering that a
+  per-group crossing does NOT explain -- fitting one threshold per backbone
+  and scoring it LEAVE-ONE-OUT gives 388/450 = 86.2% against the single global
+  bracket's 389/450 = 86.4%, i.e. no improvement, so "the crossing shifts per
+  group" is dead as a general claim and is recorded here as tested-and-
+  rejected rather than quietly dropped. ONE group is the exception, and it is
+  large:
+      backbone            above-crossing resolvable cells   positive readout   mean ro
+      vit_tiny                        28                      **28/28**         +1.76
+      resnet50                         8                          6/8           +1.17
+      swin_tiny                        8                          6/8           +0.34
+      resnet18                        86                         55/86          +0.33
+      mobilenetv3_small_100           11                      ****0/11****      -1.39
+  Every other backbone turns positive above the crossing, as the law requires.
+  MobileNetV3 does not, at ANY baseline height measured (41 to 92), and the
+  BELOW-crossing branch is fine for it (12/15 negative) -- so it is
+  specifically the positive branch that fails.
+  ROBUST TO EVERY FILTER I COULD APPLY: 9/9 still negative after excluding
+  pathmnist (the recorded compressed-probe population) AND after excluding
+  every cell with a differential epoch gap above 0.4 pt, spanning eurosat,
+  food101 and stl10.
+  AND IT IS NOT A DATASET CONFOUND, which was the obvious objection since
+  mnet's above-crossing cells sit on eurosat/food101/stl10/pathmnist. At
+  MATCHED dataset AND fraction the two backbones split:
+      stl10 @10%    mnet base 41.41 ro -0.75   |  r18 base 41.58 ro +1.38
+      eurosat@1%    mnet base 61.47 ro -1.17   |  r18 base 67.47 ro +0.88..+1.13
+      eurosat@2%    mnet base 71.59 ro -1.15   |  r18 base 77.98 ro +0.74..+1.43
+      eurosat@3%    mnet base 70.70 ro -1.09   |  r18 base 83.90 ro +1.09..+1.36
+      pathmnist@3%  mnet base 80.00 ro -2.40   |  vit base 73.72 ro +4.66
+  The stl10@10% pair is the cleanest: baselines 41.41 and 41.58, a difference
+  of 0.17 points, and readouts of opposite sign.
+  THE READING, and it is a reading rather than a measurement: the ordering
+  vit +1.76 > r50 +1.17 > swin/r18 +0.33 > mnet -1.39 tracks CAPACITY
+  HEADROOM. A capacity-limited network cannot cash feature gain into logits at
+  any baseline height, so its readout penalty never turns around. That
+  connects to the 2026-07-29 mnet fork, where the two candidate accounts were
+  "no deficit to fill" and "capacity-limited"; C2's shots sweep resolved the
+  tin CELL toward the first, but this is a corpus-wide signature located in
+  the READOUT term rather than in G, which the shots sweep could not see.
+  CHEAP FALSIFIABLE FOLLOW-UP, pre-registered here and NOT yet run: if the
+  negative branch is capacity, a WIDER efficient backbone should recover the
+  positive branch. mobilenetv3_large_100 (5.5M params vs small's 2.5M) pairs
+  on eurosat@1/2/3% and stl10@10/20% -- the five cleanest mnet violations --
+  10 cells, 3 seeds, probes on all. PREDICTION: readout(mnet-large) turns
+  POSITIVE (0.0..+1.0) at >= 3 of 5, i.e. between small's -1.39 and r18's
+  +0.33. FALSIFIER: readout(mnet-large) stays negative at >= 4 of 5 => the
+  violation is not capacity but something specific to the depthwise-separable
+  family, and "capacity headroom orders the positive branch" must be withdrawn.
