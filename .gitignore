@@ -18,6 +18,16 @@ results/*
 !results/identity/
 !results/identity/*.json
 !results/*.txt
+
+# The matched-epoch corpus: every G re-measured on last.pt, the network its
+# own Delta describes, after the 2026-08-25 audit found best.pt probes that
+# were the wrong network (identity damage) or the right network at the wrong
+# epoch. It is a SEPARATE directory rather than a replacement so both
+# protocols stay inspectable; a table mixing the two would make G
+# incomparable across its own rows, which is the defect being repaired.
+!results/matched_epoch/
+!results/matched_epoch/*.csv
+!results/matched_epoch/*.md
 release/
 slurm/logs/
 logs/*.pid
