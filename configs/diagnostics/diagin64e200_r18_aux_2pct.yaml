@@ -1,0 +1,34 @@
+# 200-EPOCH RE-RUN of diagin64_r18_aux_2pct (2026-09-05, user directive:
+# "We should have the same evaluation protocol applied for all, so we don't
+# want to justify why we have less epochs").
+#
+# The parent ran 40 epochs purely because the ImageNet stages were expensive.
+# Both arms of every pair shared that budget, so each parent Delta is valid on
+# its own -- what the reduced budget cost is ACROSS-population comparability,
+# and B3/B4 showed the envelope's right flank is an optimization effect, so a
+# budget that differs from the rest of the study is not a neutral difference.
+# This cell is the parent VERBATIM except epochs 40 -> 200 and resume_every
+# (checkpointing only, identical in both arms, so Delta is untouched).
+# diag-only: NEVER mixed into frozen-recipe headline tables.
+name: diagin64e200_r18_aux_2pct
+dataset: imagenet64
+backbone: resnet18
+epochs: 200
+batch_size: 128
+lr: 0.1
+weight_decay: 0.0005
+momentum: 0.9
+num_workers: 3
+small_input: true
+pretrained: false
+subset_pct: 2
+stem: none
+stem_calibrate: true
+resume_every: 10
+moment_aux:
+  stem: energy-magnitude
+  tap: layer3
+  weight: 1.0
+  weight_final: 0.0
+  weight_schedule: cosine
+  head_norm: true

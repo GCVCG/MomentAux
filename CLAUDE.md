@@ -9667,3 +9667,780 @@ ported vs corrected and why.
   the 84 with local checkpoints are appended to the local queue. Coverage is
   now computed from what was SWEPT, and that computation should be the standard
   check before any future audit is called complete.
+
+## THE COVERAGE QUESTION CLOSED, AND A FOURTH PROXY ERROR CAUGHT BEFORE IT WAS
+## RECORDED (2026-08-26)
+
+- *** THE 33 GAP CELLS ARE CLEAN, AND THEY WERE THE LOAD-BEARING ONES.
+  ms_gapverify completed in 4 minutes: 186 checkpoints, both best.pt AND
+  last.pt, **0 outside +-0.5**, worst |diff| **0.070**. That clears every cell
+  the gap analysis flagged as high-stakes: `diagin100_vitb_{none,aux}` (the
+  +26.01 headline and its G +22.89, worst 0.040), all eight
+  `diaggrid_swin_c100_*` (the first advance prediction of a new backbone
+  family's G), the three `grid_mnet_*` behind the 2026-07-29 MobileNet fork,
+  the ConvNeXt cells, and the `diagtransfer2_path` pair.
+- *** BUT THE JOB REACHED 31 OF THE 33 CELLS AND SAID NOTHING. `verify_one`
+  returns None when a checkpoint is absent, so two cells contributed zero rows
+  while the summary line read "186 checkpoints examined: 186 verified, 0
+  outside +-0.5". Requested-cells and reached-cells were never compared.
+  ELEVENTH member of the silent-guard family, and it is mine twice over: I had
+  just hardened this same sbatch to ASSERT that every shard wrote a report,
+  and did not extend the same reasoning one level down to whether every
+  requested cell produced a row. A count of what was examined is not a check
+  that what was asked for was examined.
+- *** THE FOURTH PROXY ERROR, AND THIS TIME IT WAS CAUGHT BEFORE THE LEDGER
+  ENTRY RATHER THAN AFTER. Enumerating every probed cell and testing for a
+  checkpoint in the local trees and on the cluster gave **45 cells with a
+  probe and no checkpoint anywhere**, which I was about to record as
+  permanently unverifiable. THERE IS A THIRD MACHINE. solarflare holds **33 of
+  the 45**, and the reason they looked absent is that
+  `scripts/sync_sf_so2sat.sh` pulls with `--exclude '*.pt'` BY DESIGN: the
+  checkpoints were never meant to come local. So "not in the two trees I
+  enumerated" stood in for "does not exist", exactly as "exists on the
+  cluster" stood in for "was swept on the cluster", "the script runs from the
+  repo" for "configs resolve from the repo", and "tracked" for "in the tree".
+  Four instances in three days. The habit that finally caught it was writing
+  the lesson down an hour earlier and then applying it to my own next claim.
+- *** THE TRUE UNVERIFIABLE SET IS **12 CELLS**, and it splits cleanly by
+  cause rather than scattering:
+      6 ImageNet   diagin100_vits_{aux,none}, diagin64_{r18_none, vit_aux,
+                   mnet_aux, mnet_none}. Huge checkpoints (ViT-S at 224,
+                   ImageNet64 at 1.28M images) deleted as housekeeping after
+                   probing. The in64 cells were PRE-REGISTERED as a fixed-shots
+                   protocol ("compared only within budget"), so they were never
+                   part of the full-train G corpus and lose nothing by sitting
+                   outside a full-train reprobe.
+      6 tin        diagdeit_{aux,none}_tin_10pct, diagdeitssl_tin_simclr_10pct,
+                   diagssl_tin_simclr_{5,10}pct, diagsslvit_tin_simclr_10pct.
+                   These ran on turing, which is now **no route to host**.
+  WHAT IS ACTUALLY LOST: six released G values that can never be
+  identity-verified nor re-probed at matched epoch, carrying the genssl Track
+  A/B/C feature-side statements on tin (G(deit-aux) +19.72 > G(deit-ssl)
+  +18.53; G(simclr-ViT,tin) +16.77) and the S1 ViT-S cell (G +11.95).
+  THE ONE PIECE OF LUCK, and it is luck rather than design: the ViT-S in100
+  probe was RUN REDUNDANTLY on solarflare when the cell landed (G +11.91 vs
+  +11.95 local, agreeing to 0.04). So the single most load-bearing member of
+  the unverifiable set has cross-machine reproduction standing in for
+  verifiability. Nothing else in the twelve does.
+  DISCLOSURE RULE: after the corpus is regenerated with
+  `--probe-file linear_probe_last.json`, these six rows will carry NO G. That
+  is the honest outcome and must not be papered over by leaving their best.pt
+  values in a table whose other rows are matched-epoch, which would make G
+  incomparable across the table's own rows.
+- A STRAY ROOT-LEVEL PROBE OUTPUT, found and removed: `runs_bscpull/
+  linear_probe.json` sat at the TREE ROOT rather than inside a cell directory,
+  a block-G so2sat probe written by an invocation whose --run already pointed
+  at the cell dir. It is byte-identical to the properly placed
+  `runs_bscpull/diagsarred_logmean_so2sat_sar_aux_5pct/linear_probe.json`
+  (50.074/50.327/49.979 on both), so no measurement was lost, and it is the
+  only stray in the whole corpus (checked across all five run trees for
+  linear_probe/dense_probe/det_probe). Removed, because a probe json at a run
+  tree's root is a trap for any enumerator: it cost one phantom "cell" in a
+  46-item audit list before I looked at it.
+- STATUS OF THE OTHER SWEEPS AT THE TIME OF WRITING: the local sweep is clean
+  at 129 cells on best.pt and 96 on last.pt, **0 over tolerance**, including
+  the whole C100 champion family; solarflare's 33-cell pass is 16 cells in,
+  **0 over tolerance**, worst 0.050, with the budget cells (including
+  `diagsslbudget_simclr800_c100_10pct`, whose positive readout is a recorded
+  open thread) verifying clean on both checkpoints.
+
+- *** mnetl LANDED 30/30, AND THE PRE-REGISTERED TEST IS BADLY DAMAGED BY ITS
+  OWN CELLS (2026-08-26, e2e only; the readout test needs the probes, which
+  are now running). The prediction was that a WIDER efficient backbone
+  recovers the readout's positive branch, on five cells chosen as the cleanest
+  MobileNetV3-small violations. Measured:
+      cell                       baseline            aux                Delta
+      esat@1%   37.59 +-13.53 [11.11 55.69 45.96] | 49.70 +-6.93       +12.11
+      esat@2%   71.88 +- 1.16                     | 68.30 +-3.04        -3.58
+      esat@3%   69.66 +- 2.17                     | 52.94 +-20.92 [11.11] -16.72
+      stl@10%   38.70 +- 0.98                     | 45.65 +-2.15        +6.95
+      stl@20%   50.64 +- 2.66                     | 56.16 +-0.34        +5.52
+  *** MobileNetV3-LARGE IS SEED-BISTABLE ON EUROSAT UNDER THE FROZEN SGD
+  RECIPE: `esat_none_1pct` seed0 and `esat_aux_3pct` seed0 both sit at
+  **11.11%**, which is exactly chance on eurosat's 9 classes. Same failure
+  family as ConvNeXt-SGD, R50-no-head_norm and Swin, now on a wider efficient
+  conv, and NOTE the direction is mixed rather than the usual stabilization
+  signature: one collapsed seed is in the baseline arm and one is in the aux
+  arm. Per the standing bistable rule those two cells are reported and
+  EXCLUDED from any Delta claim.
+  AND THE SURVIVORS MOSTLY CANNOT TEST THE PREDICTION EITHER, because readout
+  has no predicted sign inside the crossing bracket [31.8, 40.3]: esat@1%
+  (base 37.59) and stl@10% (base 38.70) are both INSIDE it, which is the
+  no-call rule that MobileNetV3-small itself established. So of five
+  pre-registered cells, **two are bistable, two are inside the bracket, and
+  exactly one (stl@20%, base 50.64) plus esat@2% (base 71.88) can carry the
+  test**. A prediction registered on "at least 3 of 5" cannot be scored on 2,
+  and I am recording that now rather than after seeing the probes.
+  THE DESIGN ERROR IS MINE AND IT IS SPECIFIC: I chose the five cells from
+  MobileNetV3-SMALL's baseline heights (61.47/71.59/70.70 on eurosat, 41.41 on
+  stl@10%) and assumed the wider model would land near them. It does not.
+  mnet-large at eurosat@1% reads 37.59 against small's 61.47, i.e. the bigger
+  model trains WORSE at 270 images, which in hindsight is the same
+  capacity-versus-data story the prediction was about. Choosing test cells by
+  a comparator's baseline is choosing them by a quantity the intervention
+  changes.
+  NOT SCORED YET: the readout test itself. 20 probe lines (both checkpoints,
+  all ten cells) were appended to the live mnetl lane behind 129 pad lines
+  matching the drained counter, and the workers logged "worklist grew 30 ->
+  179, resuming" and began them immediately. That resume path is the fix
+  shipped after the 2026-08-03 swap-under-running-workers incident, working
+  as designed on a lane it was not written for.
+
+- *** THE mnetl READOUT TEST SCORED: WIDENING THE EFFICIENT BACKBONE DOES NOT
+  RECOVER THE POSITIVE BRANCH, AND THE TRIPWIRE'S FIRING DEPENDS ON THE PROBE
+  PROTOCOL (2026-08-26, 30 runs + 20 probes, both checkpoints, 3 seeds/cell):
+      cell        base    Delta  |  G(best)  readout(best) | readout(last)
+      esat@1%    37.59   +12.11  |   +6.15      +5.96      |    -3.20   bistable, in bracket
+      esat@2%    71.88    -3.58  |   -2.95      -0.63      |    -0.65   TESTABLE
+      esat@3%    69.66   -16.72  |  -17.50      +0.78      |    +0.81   bistable
+      stl@10%    38.70    +6.95  |   +8.62      -1.67      |    -1.42   in bracket, no call
+      stl@20%    50.64    +5.52  |   +6.65      -1.13      |    -0.92   TESTABLE
+  ON THE TWO CELLS THAT CAN CARRY THE TEST, readout is NEGATIVE on both
+  protocols (-0.63 and -1.13 on best.pt; -0.65 and -0.92 matched-epoch),
+  squarely in MobileNetV3-small's range (mean -1.39) and nowhere near the
+  predicted +0.0..+1.0. **0 of 2.** The prediction was "positive at >= 3 of 5"
+  and cannot be met by 2 qualifying cells, so it fails on availability as well
+  as on value.
+  *** THE FALSIFIER FIRES OR NOT DEPENDING ON WHICH CHECKPOINT IS PROBED, and
+  that must be stated rather than resolved by picking one. It read "readout
+  stays negative at >= 4 of 5". Counting all five: **3 of 5 negative on
+  best.pt** (does NOT fire) and **4 of 5 negative on matched-epoch last.pt**
+  (FIRES, exactly at the threshold). The entire difference is esat@1%, whose
+  readout swings from +5.96 to -3.20 between the two protocols -- and esat@1%
+  is one of the bistable cells, with a chance seed in its baseline arm. A
+  tripwire whose verdict turns on a cell that should have been excluded is not
+  a tripwire; the pre-registration should have said "of the cells that are
+  neither bistable nor inside the bracket", and it did not.
+  WHAT IS ACTUALLY SUPPORTED, and it is the falsifier's conclusion regardless
+  of the counting: widening MobileNetV3 from small (2.5M) to large (5.5M) does
+  NOT recover the readout's positive branch on either testable cell, so
+  **"capacity headroom orders the positive branch" is not supported and must
+  be withdrawn as an explanation of the MobileNet violation.** Whatever is
+  specific to this backbone survives a 2.2x widening.
+  THE SIGNATURE ITSELF TRANSPLANTS, which sharpens the negative: G EXCEEDS
+  Delta on both testable-or-not stl cells (+8.62 vs +6.95, +6.65 vs +5.52) and
+  on esat@2% the prior is negative on BOTH terms (Delta -3.58, G -2.95). The
+  "features improve more than accuracy does" shape measured for mnet-small
+  (G - Delta = +0.82 above the crossing) reproduces on mnet-large, so it is a
+  property of the depthwise-separable family rather than of model width.
+  RECORDED AS A DESIGN FAILURE TOO, since two of five cells were wasted: I
+  selected the five test cells by MobileNetV3-SMALL's baseline heights and
+  assumed the wider model would land near them. It does not (esat@1% reads
+  37.59 against small's 61.47), so two cells fell inside the crossing bracket
+  where the law makes no call and two more went bistable. Choosing test cells
+  by a comparator's baseline is choosing them by a quantity the intervention
+  changes.
+
+- *** THE LOCAL SWEEP'S ONLY FINDING IS THE tin DECODE DRIFT, RESCALED, AND IT
+  EXPOSES A FLAW IN THE RULE I WROTE FOR IT (2026-08-26). The 2026-08-10 entry
+  records "a <=0.4 residual when re-verifying a tin cell is expected; treat
+  >0.5, or any residual on a non-tin cell, as damage." The local sweep now
+  reports 17 rows over the 0.5 tolerance, and EVERY ONE is tin20 or tin20b:
+      rows                          n     mean diff   max |diff|   over 0.5
+      tin20 / tin20b  (best.pt)    40      -0.447       1.30          17
+      full tin        (best.pt)   107      -0.099       0.44           0
+      everything else (best.pt)   656          --         --           0
+      tin20 / tin20b  (last.pt)    40      -0.120       0.70           6
+      full tin        (last.pt)    77      -0.080       0.40           0
+  THE RULE'S THRESHOLD WAS A POINT VALUE WHEN IT SHOULD HAVE BEEN A COUNT.
+  tin's validation set is 200 classes x 50 = 10,000 images, so one flipped
+  prediction moves accuracy by 0.01 points; tin20's is 20 x 50 = **1,000**, so
+  one flip moves it by 0.10. The observed means are -0.099 on tin (about 10
+  flipped images) and -0.447 on tin20 (about 4.5). The FLIP COUNTS are the
+  same order; only the points differ, by exactly the 10x the test-set sizes
+  differ. And the direction matches the recorded account: 35 of 40 tin20 rows
+  are NEGATIVE, as the six full-tin cells were 6 of 6 negative. A tolerance
+  expressed in accuracy points silently tightens as a test set shrinks.
+  RESTATED RULE: re-evaluation drift on a JPEG-decoded dataset is a few
+  MISCLASSIFIED IMAGES, so the tolerance must be 100 * k / |test set| with
+  k ~ 10, not a fixed 0.4-0.5 points. On full tin that is ~0.10; on tin20 it
+  is ~1.0, and every observed residual fits under it.
+  *** AND A SECOND EFFECT I HAD NOT ACCOUNTED FOR: best.pt DRIFT IS BIASED
+  DOWNWARD BY SELECTION. On the same 40 tin20 rows the mean residual is -0.447
+  against best.pt and only -0.120 against last.pt, and the over-tolerance
+  count falls 17 -> 6. That is not noise, it is the argmax: `best_test_acc` is
+  the MAXIMUM over epochs, chosen under the ORIGINAL decoding, so re-scoring
+  that same checkpoint under slightly different decoding can only move off a
+  selected peak, and on average moves down. `final_test_acc` is a single
+  unselected value and carries no such bias (full tin: -0.099 best vs -0.080
+  last, the same direction and much weaker). CONSEQUENCE: an identity check
+  against best.pt is systematically pessimistic and an identity check against
+  last.pt is not, which is one more reason the matched-epoch (last.pt)
+  protocol is the right one for the corpus and not merely the convenient one.
+  NET: 656 non-tin20 checkpoints on best.pt and 614 on last.pt are clean at
+  the released tolerance, the local tree shows NO damage, and the one apparent
+  exception is a measurement-resolution artifact whose magnitude, direction
+  and count all reconcile.
+
+- *** COVERAGE, COMPUTED FROM WHAT WAS SWEPT (2026-08-26, the standard check
+  the third scope gap called for). 2,596 probed cells exist across every tree
+  on every machine:
+      BSC main sweep       2262 cells   79 damaged (3.49%), all re-probable
+      BSC gapverify          31 cells    0 damaged  (186 ckpts, worst 0.070)
+      solarflare             33 cells    0 damaged  (204 ckpts, worst 0.050)
+      local (last.pt pass)  179 cells    0 damaged outside the tin20 artifact
+      UNVERIFIABLE           12 cells    no checkpoint on any machine
+  The three machines together leave twelve cells, and every one of them has a
+  reason rather than being an oversight: six ImageNet cells whose checkpoints
+  were deleted as housekeeping (ViT-S at 224, ImageNet64 at 1.28M images), and
+  six tin cells that lived on turing, which is now unreachable.
+
+- A CHAINED JOB WAITED FOREVER ON A GATE THAT COULD NEVER OPEN (2026-08-26).
+  The 84-cell local gap verify was chained behind the 216-cell sweep with
+  `while ! grep -q LOCAL_VERIFY_COMPLETE logs/local_identity.log; do sleep 60;
+  done`. That log is **0 bytes** -- the sweep's output never reached it -- so
+  the waiter polled indefinitely while the work it was waiting for had long
+  since finished, and nothing anywhere reported a problem. The sweep itself was
+  fine: 696 checkpoints on best.pt and 684 on last.pt, 183 and 179 cells, zero
+  damage outside the tin20 measurement artifact.
+  TWELFTH member of the silent-guard family, and the general form is worth
+  naming because it is not the usual one: this guard's condition was a STRING
+  IN A LOG, i.e. a side effect of the work rather than the work's product. A
+  side effect can fail to appear for reasons that have nothing to do with
+  whether the work succeeded, and when it does the waiter cannot tell "not
+  finished" from "finished, and I am watching the wrong thing".
+  RULE: gate on the ARTIFACT, not on a log line. The relaunched script checks
+  that both result JSONs exist and are non-empty, and exits 2 with
+  "GATE FAILED" if they do not, so a genuinely unmet precondition is loud
+  instead of an infinite sleep.
+
+- A SIXTH SILENTLY-CORRUPT LOCAL CHECKPOINT, IN THE SAME POCKET AS THE OTHER
+  FIVE (2026-08-26, found by the local gap verify): `runs/
+  grid_c100_cnx_64bc90_1pct/seed2/last.pt` failed torch.load with the familiar
+  "PytorchStreamReader failed reading file data/13: invalid header or archive
+  is corrupted", at a size BYTE-IDENTICAL to the cluster original
+  (111,639,448). Same `grid_c100_cnx_*` ConvNeXt family as the five found on
+  2026-08-05, and it survived that sweep only because that sweep scanned 205
+  cells and this was not among them.
+  THE CORRUPTION IS PER-FILE, NOT PER-CELL: the same seed's `best.pt` loads
+  fine. So a cell can be half-damaged, and checking one checkpoint per cell is
+  not enough -- which is the argument for the `--ckpt best.pt,last.pt` form
+  this sweep uses. Repaired by re-pull; both files now load and the cell
+  passes the IDENTITY check (5 checkpoints verified, 0 outside +-0.5). The
+  originals are quarantined as *.corrupt.2026-08-26 rather than deleted.
+
+- *** THE UNVERIFIABLE COUNT IS **6**, NOT 12 AND NOT 45, AND THE TWO EARLIER
+  NUMBERS WERE BOTH MY OWN SHELL BUG (2026-08-26). The existence test I used on
+  every machine was
+      ls $t/$c/seed*/{best,last}.pt >/dev/null 2>&1
+  and `ls` exits NON-ZERO when ANY of its arguments is missing, even if the
+  others exist. So **every cell holding only last.pt was recorded as holding no
+  checkpoint at all** -- and last.pt-only is not a rare state here, it is
+  exactly what the 2026-08-07 wrong-epoch quarantine left behind on the
+  ImageNet cells. Caught not by re-reading the code but because the running
+  sweep verified `diagin100_vits_{aux,none}` to 0.00-0.04 on all six seeds
+  while my list called them unverifiable.
+  Corrected with `ls A || ls B`, on all three machines:
+      probed cells                                     2596
+      no checkpoint locally      1931 (buggy) ->       1823
+      nor on the cluster           46 (buggy) ->         36
+      nor on solarflare            12 (buggy) ->      ** 6 **
+  THE SIX, and they are one family with one cause: diagdeit_{aux,none}_
+  tin_10pct, diagdeitssl_tin_simclr_10pct, diagssl_tin_simclr_{5,10}pct,
+  diagsslvit_tin_simclr_10pct -- the genssl Track A/B/C cells, all trained on
+  turing, which is now unreachable. THE IMAGENET CELLS ARE NOT LOST: every
+  diagin64_* and diagin100_vits_* holds its last.pt locally, which is the
+  matched-epoch checkpoint the corpus wants anyway, and the ViT-S pair has now
+  been verified exactly (recorded 78.52/78.40/78.24 and 65.82/65.08/65.26,
+  evaluated to within 0.04). So the S1 headline cell is verified after all, and
+  the earlier note that it survives only by cross-machine probe reproduction is
+  superseded: it survives by identity, like everything else.
+  FIFTH INSTANCE of the same shape in three days, and the first that was a
+  literal shell-semantics trap rather than a reasoning shortcut: a cheap test
+  standing in for the expensive one, where the cheap test is silently wrong in
+  a direction that OVERSTATES the problem. The previous four overstated safety;
+  this one overstated damage. Both are failures of the same kind, and only
+  running the real check found either.
+
+- *** THE WEDGED R50 CELL HAS A WRONG-EPOCH best.pt, AND THE RECORDED G IS SAFE
+  BECAUSE OF A CHOICE MADE FOR A DIFFERENT REASON (2026-08-26, local gap
+  verify): `diagin100_r50_none/seed0/best.pt` evaluates **54.12** against its
+  recorded best of 85.88, a **-31.76** identity failure -- while the SAME
+  seed's last.pt evaluates 85.68 against a recorded 85.68, exact to two
+  decimals. That is the 2026-08-07 signature precisely, and this is the cell
+  that wedged on 8 of 8 starts: a restart wrote an early-epoch best.pt over the
+  original's, and last.pt, written only at completion, was never touched.
+  NOTHING RECORDED MOVES, and it is worth saying why rather than asserting it:
+  the S2 Delta comes from final_test_acc (computed in memory at train time),
+  and the ImageNet G values were measured on last.pt after the wrong-epoch
+  quarantine -- a decision taken then because best.pt had been damaged
+  elsewhere, not because anyone suspected this cell. Verified rather than
+  argued: all six diagin100_r50_aux checkpoints and all three r50_none last.pt
+  files verify to within 0.04.
+  The other two over-tolerance rows in that pass are not damage either:
+  `grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_7pct` seed2 reads 0.42 recorded
+  against 0.97 evaluated, i.e. a 0.55 "drift" between two CHANCE-LEVEL numbers
+  on a collapsed ConvNeXt cell whose other two seeds sit at exactly 1.00.
+
+- *** BLOCK F CLOSED AT 3v3 ON ALL THREE MODELS (2026-08-26, the wedged ViT-L
+  baseline seed0 completed after a 14h15 restart; job COMPLETED 0:0):
+      model            baseline          aux            Delta
+      ViT-S  21.7M    80.66 +-0.16   84.11 +-0.17   **+3.45 +-0.23**
+      ViT-B  85.9M    79.83 +-0.56   84.17 +-0.16   **+4.34 +-0.58**
+      ViT-L 303.4M    76.09 +-0.30   83.53 +-0.11   **+7.44 +-0.32**
+  The third seed moved ViT-L's baseline 75.86 (n=2) -> 76.09 (n=3) and its
+  Delta +7.67 -> **+7.44**, so the number quoted in the earlier block-F entry
+  is superseded by this one; nothing else in that entry moves.
+  ViT-L - ViT-B = **+3.10 +-0.66 = +4.7 SEM**, so F-F1 ("Delta(ViT-L,200) <
+  Delta(ViT-B,200) by > 2 SEM => the model-scale trend does NOT continue past
+  ViT-B") stays DEAD at full power, and F2's band (+6..+14) still HITS.
+  NOTE ViT-B - ViT-S is only +0.89 +-0.63 = 1.4 SEM, i.e. NOT resolved at 3v3
+  -- the trend's evidence is carried by the ViT-L point, not by the S-to-B
+  step. State the curve as monotone with one resolved step, not as three
+  separated points.
+  The levels are the sharper statement and they are unchanged: the BASELINE
+  falls with scale (80.66 -> 79.83 -> 76.09) while the AUX arm is FLAT
+  (84.11 / 84.17 / 83.53). At 126k images the bigger model is a worse model
+  without the prior and an equal one with it.
+
+- *** THE tin20 TOLERANCE BUG COST A CELL, WHICH IS HOW THE RESTATED RULE GOT
+  ITS FIRST TEST (2026-08-26). The first local matched-epoch pass excluded
+  `tin20b_aux` from probing because two of its ten seeds exceeded the flat
+  0.5-point identity tolerance (-0.60, -0.50). Under the size-aware rule
+  restated hours earlier -- tolerance = 100*k/|test set| with k ~ 10, i.e.
+  **1.0 points on tin20b's 1,000-image val set** -- neither is damage. All ten
+  seeds sit within +-0.60 = 6 images, and the mean residual is -0.05, so this
+  cell shows no consistent bias at all.
+  The exclusion was silent in the direction that matters least (a missing
+  probe is loud) but it is the same failure the rule was written to prevent,
+  committed by the script that predates it. The 116-cell chain now applies the
+  size-aware tolerance from a table of per-dataset val sizes rather than a
+  scalar, and tin20b_aux is back in the probe list.
+
+- *** THE LOCAL MATCHED-EPOCH GAP WAS UNDER-DERIVED, AND THE MISSING SET
+  CONTAINS BASELINES THE ENVELOPE TABLE USES (2026-08-26). After the cluster
+  reprobe and the first local pass, recomputing the gap directly -- cells with
+  a recorded `linear_probe.json` minus cells with a `linear_probe_last.json`,
+  over both local trees -- gives **188 cells still missing**, not the handful
+  the earlier accounting implied:
+      cells with a recorded probe : 2559
+      cells with matched-epoch    : 2411
+      still missing               :  188
+        local last.pt present     :  116   <- probable here, now running
+        no local last.pt          :   72   <- BSC (the ver434 lane) or gone
+  My earlier "117 local" list was derived from which cells were missing from
+  the matched-epoch TABLE, not from which cells carry a recorded probe, so it
+  silently omitted every cell whose G is recorded but which the exporter did
+  not surface as a row. Among the 116 are `abl1_none` and `abl2_none`, i.e.
+  CIFAR-100 champion-family baselines, and the ViT/DeiT/ConvNeXt `*_none`
+  columns. `abl5_none`, `abl10_none` and the auxmag champions were already
+  covered.
+  SIXTH INSTANCE of the campaign's recurring shape: a cheap derived list stood
+  in for the expensive direct enumeration. The direct form -- enumerate the
+  artifact you actually need, and diff it against the artifact you have -- is
+  three lines of Python and should have been the first thing run.
+
+- *** HOW MUCH THE MATCHED-EPOCH REPAIR ACTUALLY MOVES G, MEASURED ON 2,356
+  CELLS THAT NOW CARRY BOTH PROBES (2026-08-26, no new compute -- both files
+  exist side by side, seed-matched, identical protocol):
+      probe(last.pt) - probe(best.pt)   mean **-0.181**   median **-0.023**
+        |shift| > 0.10 : 1052  (44.7%)
+        |shift| > 0.25 :  541  (23.0%)
+        |shift| > 0.50 :  364  (15.4%)
+        |shift| > 1.00 :  221  ( 9.4%)   <- material
+        |shift| > 2.00 :  128  ( 5.4%)
+        |shift| > 5.00 :   22  ( 0.9%)
+  THE TYPICAL CELL BARELY MOVES, and it moves slightly DOWN, which is the
+  direction a genuine best.pt should produce (it is a better network than
+  last.pt by construction). The earlier estimate from differential epoch gaps
+  -- "~7% of the G corpus moves materially" -- lands close to the measured
+  9.4%.
+  *** THE TAIL IS THE REPAIR, AND IT LANDS EXACTLY WHERE THE DIAGNOSES SAID:
+      -19.20  diaggrid_swin_path_none_50pct     76.84 -> 57.64
+      -11.96  diaggrid_swin_path_none_25pct     69.64 -> 57.68
+      +10.92  grid_c100_r18_axmagnitudeL3_l20_017c1a_20pct   48.97 -> 59.89
+       +9.10  grid_c100_r18_axmagnitudeL3_l05_86a99d_25pct   54.60 -> 63.70
+       -8.86  diaggrid_swin_esat_none_1pct      42.96 -> 34.10
+       -7.26  diagtransfer2_tin_none_20pct      62.09 -> 54.84
+       +5.89  grid_food_r18_9ee7da_50pct        65.84 -> 71.73
+  The movers are swin and pathmnist (bistable baselines and the compressed
+  probe, both already flagged), the transfer cells, and the identity-damaged
+  `grid_c100_r18_ax*` family at 20-25% that the BSC sweep found.
+  *** AND THE food101 CELL IS AN EXACT INDEPENDENT CONFIRMATION: its shift is
+  **+5.89**, against the **+5.88** I measured directly when diagnosing the
+  corrupt baseline behind the "better features, worse accuracy" cluster
+  (recorded 65.84, last.pt 71.72). Two different routes to the same number on
+  the cell that started the whole audit.
+  NOTE the shift MIXES the two defects deliberately, because one move repairs
+  both: a wrong-network best.pt and a right-network-wrong-epoch best.pt are
+  indistinguishable in this statistic and are both fixed by probing the
+  checkpoint the Delta already describes.
+
+- A CONFIG-GLOB BUG IN MY OWN PROBE-LIST BUILDER, CAUGHT BY ITS OWN NOCONFIG
+  LINE (2026-08-26): the builder searched `configs/*/{cell}.yaml`, which misses
+  the **114 configs that live at the top level of configs/**. It printed
+  NOCONFIG and skipped the cell rather than failing silently, which is why the
+  blast radius is knowable and small: exactly **2 cells** (cub_none_25pct,
+  cub_none_100pct) have a top-level config, a recorded probe, and no
+  matched-epoch probe. Both are queued in the fixup batch.
+  Worth contrasting with the day's other misses: this one ANNOUNCED itself. A
+  builder that prints what it could not handle costs one grep to bound; the
+  `ls A B` existence test that silently reported cells as checkpoint-less cost
+  two wrong counts and a false "unverifiable" list.
+
+- TRANSIENT OOM IS NOT DAMAGE, AND THE AUDIT NOW SAYS SO SEPARATELY
+  (2026-08-26): 9 of the 411 checkpoints in the 116-cell identity pass came
+  back **ERR = CUDA out of memory**, because another project's process on the
+  shared 3090 spiked to 21.4 GB mid-pass. Those are `diagin100_r50_{none,aux}`
+  and `stl_none_10pct`. They are NOT failures, and the `ERR` class added after
+  the tin-staging incident is what keeps them from being counted as drift --
+  the pass reports "394 verified, 8 outside +-0.5, 0 CORRUPT, 9 not verifiable
+  (ERR)" rather than folding the last number into the second.
+  The two r50 cells needed no retry at all: the earlier gap pass had ALREADY
+  verified their last.pt (diffs +-0.04 and 0.000) in the same sweep that found
+  seed0's best.pt was a wrong-epoch checkpoint at -31.76. Only stl_none_10pct
+  is genuinely unverified, and the fixup batch re-verifies it before probing
+  rather than probing it on the assumption that OOM implies innocence.
+
+- *** THE AUDIT BYPASSES THE TABLE, SO THE MATCHED-EPOCH REPAIR COULD NEVER
+  HAVE REACHED THE PAPER'S CENTRAL NUMBER (2026-08-26). export_results_csv.py
+  gained `--probe-file` so the whole corpus could be regenerated from
+  matched-epoch (last.pt) probes. Running the canonical audit against that
+  regenerated table returned a **byte-identical** result -- 958 cells, 455
+  resolvable, 393 correct, 86.4% -- on a table whose G differs from the
+  released one on **1,589 cells**. That coincidence was the tell.
+  CAUSE: analysis/audit_law_paired.py reads the CSV only for SCOPE and
+  PAIRING (which cells are in law scope, which baseline each pairs against)
+  and then RECOMPUTES every readout per seed from the run directories, with
+  `linear_probe.json` HARDCODED in `_evals`. So `--probe-file` switched the
+  table and nothing else, and a reader following the released regeneration
+  command would have gotten the old numbers from the new corpus without any
+  error.
+  Same family as the 2026-08-17 exporter incident (`aggregate.py` writes
+  summary.md while `export_results_csv.py` writes all_results.csv, so running
+  the former and expecting the latter exits 0 and leaves the stale file):
+  a repair applied at one layer that a second layer silently ignores.
+  FIX: `--probe-file` added to the audit, threaded through `load()` into
+  `_evals`, and PRINTED in the report header with an explicit
+  "(MATCHED-EPOCH corpus, not the released best.pt one)" marker so a report
+  can never be mistaken for the other. It switches the WHOLE audit or none of
+  it, for the same reason the exporter does: a run mixing best.pt and last.pt
+  probes would make readout incomparable across its own rows, which is the
+  defect being repaired. VERIFIED behaviour-preserving -- the default path
+  reproduces 958/455/393 = 86.4% exactly. Suite 142 passed.
+
+- PROVISIONAL MATCHED-EPOCH AUDIT (2026-08-26, **907 of 958 law cells** --
+  72 cells still lack a matched-epoch probe, so this is NOT the final number
+  and must not be quoted as one):
+      quantity              released (best.pt)   matched-epoch (last.pt)
+      law-scope cells              958                    907
+      SEM(paired)/SEM(ind)         0.601                  0.540
+      RESOLVABLE                   455                    470
+      sign as predicted        393 (86.4%)            398 (84.7%)
+      below crossing           298/314 = 94.9%        315/330 = **95.5%**
+      above crossing            95/141 = 67.4%         83/140 = **59.3%**
+  THE TWO BRANCHES MOVE IN OPPOSITE DIRECTIONS, and the mechanism is the one
+  the three-regime framing already predicts. Below the crossing -- where
+  readout is large, negative, and the law has content -- the repair IMPROVES
+  the result (94.9 -> 95.5). Above it, where the law predicts ~0 and a sign
+  prediction about zero has no content, it DEGRADES (67.4 -> 59.3), and that
+  is what pulls the pooled headline down 1.7 points.
+  WHY, and it is not that the repair made anything worse: matched-epoch
+  probes are a TIGHTER measurement (paired/independent SEM ratio 0.601 ->
+  0.540), so the resolvable count RISES 455 -> 470 even as the cell count
+  falls. The cells newly admitted are near-zero above-crossing ones whose
+  signs are coin flips. Exactly the same mechanism that took the headline
+  from 96% to 85.2% when the audit became seed-paired: a better error bar
+  admits more cells into the set where the law makes no real prediction.
+  CONSEQUENCE FOR THE PAPER, if this survives the last 72 cells: lead with
+  the below-crossing figure, which is the claim's actual content and which
+  the repair strengthens, and report the pooled number with the regime table
+  beside it so the above-crossing 59% is read as "predicting the sign of
+  zero" rather than as a failure.
+
+- *** THE 451-CELL CLUSTER IDENTITY PASS IS CLEAN, AND SO IS SOLARFLARE'S 33
+  (2026-08-27). ms_ver434 completed in **6:50**, all 8 shards reported (the
+  earned-marker assertion held), **451 cells reached of 451 requested**, 1,353
+  checkpoints, status ok on every one -- 0 CORRUPT, 0 ERR:
+      outside +-0.5 : **2 checkpoints, both known bistable swin cells**
+        diaggrid_swin_c10_none_5pct   s1  10.90 -> 9.92   (chance = 10.0)
+        diaggrid_swin_esat_none_25pct s2  11.11 -> 11.72  (chance = 11.11)
+  Both "drifts" are between two CHANCE-LEVEL numbers on collapsed seeds, the
+  same non-finding as the ConvNeXt 0.42-vs-0.97 cell. And they are the SAME
+  TWO CELLS the earlier BSC sweep flagged as "bad last.pt, good best.pt", so
+  the two passes agree cell for cell. Excluded from the reprobe, as before:
+  probing a collapsed checkpoint measures a training failure, not features.
+  SOLARFLARE: 33 cells, 102 checkpoints, **0 outside +-0.5, 0 CORRUPT, 0 ERR**,
+  all 33 probed. Its sensor packs live in a PARENT data dir while repo/data
+  holds the photo sets; using the parent as --data-root is safe because
+  data.py resolves SUBSET_DIR repo-relative, so the committed subset indices
+  are untouched by the choice. Checked, not assumed.
+  THE ACCOUNTING NOW CLOSES EXACTLY. Of the 72 cells that could not be probed
+  locally: 16 were already in the ver434 list, 17 more were found on BSC and
+  appended (list 434 -> 451, safe because a PENDING job reads its cell list at
+  start), 33 are solarflare's, and **6 no machine has** -- and those 6 are
+  exactly the genssl tin cells from the dead turing box, reached here by a
+  completely different route than the earlier count. 16+17+33+6 = 72.
+
+- A THIRD sed NEAR-MISS IN THE SAME FAMILY, CAUGHT BY GREP RATHER THAN BY
+  LUCK (2026-08-27). Deriving the 449-cell probe lane I replaced
+  `^#SBATCH -J .*` with the new job name. That template writes
+  `#SBATCH --job-name=`, so the substitution matched NOTHING and the lane
+  would have run under the old drained lane's name -- indistinguishable in
+  squeue and sacct from the jobs whose counter it must not share.
+  Third instance: 2026-08-03 shipped the repo copy of a lane over a newer
+  deployed one (worklist path silently reverted); 2026-08-26's
+  `worklist.vitl\b` did not match the deployed `worklist.vitlw`; now this.
+  The habit that catches all three is the same and costs one command: after
+  generating a file by substitution, GREP THE RESULT for every field the
+  substitution was supposed to change, and for any bare form it was supposed
+  to remove. Here that also confirmed 27/28/29 all point at reprobe2, that no
+  bare `.reprobe` survived, and that both counter and lock were ABSENT so the
+  lane starts fresh.
+  ALSO on record for this lane: the obvious template (`bsc_reprobe.sbatch`)
+  REBUILDS its worklist from the identity report on line 18, which would have
+  silently overwritten the 449 lines built here. `bsc_reprobe2.sbatch` was
+  used instead -- it carries the bounded-claim fix and no rebuild step.
+  Worklist reordered LONGEST-FIRST (the 4 ImageNet-100 @224 cells lead) with
+  an assert that the sorted task SET is unchanged, so a reorder can neither
+  add nor drop a task. 2 nodes, MS_SLOTS=3 for the 224px members.
+
+## THE MATCHED-EPOCH CORPUS IS COMPLETE, AND THE LAW'S CONTENT SURVIVES IT
+## (2026-08-31)
+
+- COVERAGE CLOSED. ms_rp2 (2 nodes, 449 probes, longest-first) COMPLETED with
+  **449 of 449 artifacts present** -- verified by checking the artifact for
+  every worklist line, not by trusting the drained counter (claims are atomic,
+  execution is not). 0 FAIL, 0 Traceback in either lane log.
+      recorded probes : 2559
+      matched-epoch   : 2591
+      still missing   :    8   -- and every one is accounted for:
+        6 genssl tin cells from the dead turing box (no machine has them)
+        2 collapsed swin cells DELIBERATELY excluded (probing a bistable
+          checkpoint measures a training failure, not features)
+  So every G in the corpus that CAN be measured at matched epoch now is.
+
+- *** THE FINAL AUDIT, released best.pt corpus vs matched-epoch last.pt:
+      quantity                  released        matched-epoch
+      law-scope cells              958               931
+      SEM(paired)/SEM(ind)         0.601             0.535
+      RESOLVABLE                   455               485
+      sign as predicted        393 (86.4%)       408 (**84.1%**)
+      below crossing           298/314 = 94.9%   320/337 = **95.0%**
+      above crossing            95/141 = 67.4%    88/148 = **59.5%**
+  And the three-regime table, which is where the law has content:
+      regime                    released          matched-epoch
+      far below (base < 20)   242/248 = 97.6%   254/261 = **97.3%**
+      near below (20-31.8)     56/66  = 84.8%    66/76  = **86.8%**
+      above the bracket        95/141 = 67.4%    88/148 = **59.5%**
+      mean |readout| above         1.38              **1.09**
+  *** THE CORE CLAIM IS UNMOVED: far below the crossing, where readout is
+  large and negative and the sign law actually predicts something, the repair
+  changes 97.6% to 97.3% on 261 cells -- inside the CI, on a corpus with 79
+  identity-damaged cells removed and the Delta/G epoch mismatch eliminated.
+  Near-below IMPROVES (84.8 -> 86.8). Only the above-bracket branch falls.
+  *** AND THE TWO ABOVE-BRACKET FACTS ARE THE SAME FACT, which is the reading
+  that matters: the matched-epoch measurement pulls those readouts CLOSER TO
+  ZERO (mean |readout| 1.38 -> 1.09), which is exactly what the law predicts
+  there, and that is precisely why their SIGNS become coin flips (67.4% ->
+  59.5%). A better measurement of a quantity the law says is zero makes the
+  law's sign prediction there less checkable, not more wrong. The tighter
+  error bar (SEM ratio 0.601 -> 0.535) then admits 30 MORE cells into the
+  resolvable set (455 -> 485), and the newly admitted ones are near-zero
+  above-bracket cells scoring at chance -- the same mechanism that took the
+  headline from 96% to 85.2% when the audit first became seed-paired.
+  CONSEQUENCE FOR THE PAPER: lead with the regime table, not the pooled
+  number. "97.3% on 261 cells where readout is resolvably large" is both the
+  claim's actual content and robust to the repair; "84.1% pooled" mixes it
+  with 148 cells where the law predicts zero and gets zero.
+  DECISION NOT TAKEN: the released results/all_results.csv and law_audit.md
+  are still the best.pt corpus. Swapping them wholesale moves numbers
+  throughout the manuscript and is the user's call, not mine.
+
+- A FOURTH SILENTLY-IGNORED-ARGUMENT INCIDENT, AND THE WORST OF THE FAMILY
+  (2026-08-31): analysis/crossing_profile.py had **no argparse at all** -- it
+  hardcoded `A.load("runs", "results/all_results.csv")` -- so the --csv and
+  --probe-file I passed were dropped by Python without complaint and it
+  printed the RELEASED best.pt numbers over a matched-epoch corpus. It looked
+  like a result. The audit's version of this bug at least ERRORED on an
+  unrecognized flag before I threaded the option through; a script with no
+  argparse cannot even do that.
+  Caught only because I already knew what the matched-epoch numbers should
+  look like from the provisional run, and these were byte-identical to the
+  released ones -- the same tell as the audit bypass two days ago.
+  FIXED: argparse added with --runs/--csv/--probe-file defaulting to current
+  behaviour, and the corpus and probe file are now PRINTED in the first line
+  of output so a report can never be mistaken for the other. Verified the
+  default path reproduces the released 242/248, 56/66, 95/141 exactly.
+  Suite 142 passed.
+  RULE: a script that takes no arguments must still SAY what it read. Printing
+  the inputs costs one line and is the only thing that distinguishes "ran on
+  the corpus you meant" from "ran on the default and ignored you".
+
+## THE 200-EPOCH IMAGENET RE-RUN (2026-09-05, user directive: "We should have
+## the same evaluation protocol applied for all, so we don't want to justify
+## why we have less epochs. However, this is also for fair comparisons")
+
+- THE DISTINCTION THAT DECIDES THE SCOPE, because not every non-200-epoch cell
+  is a concession. Of the 3,215 configs at the frozen 200 epochs, the
+  deviations split in two:
+    THE BUDGET IS THE VARIABLE -- diaggrid_c100_r18_e{20,100,400,800}_* (66),
+      diagstep_* at a fixed ~600 steps (10), diagin100e{200,300}_* (10).
+      Unifying these DELETES the experiment: B4 measured Delta +5.92 at
+      C100@25% under 582 steps against +0.16 under 19,400, and B3 measured
+      G +7.40 against +0.44 on the same cells. The finding that the envelope's
+      right flank is an OPTIMIZATION effect exists only because those budgets
+      differ. They stay.
+    THE BUDGET WAS CUT FOR COST -- diagin64_* at 40 epochs and diagin100_* at
+      100. These are the only cells the paper has to justify, and they are what
+      this block re-runs.
+  THE USER'S "however" IS EXACTLY RIGHT ABOUT WHY THEY WERE DEFENSIBLE: both
+  arms of every one of those pairs got the identical budget, so each Delta is
+  valid on its own. What the reduced budget cost is ACROSS-POPULATION
+  COMPARABILITY -- and since B3/B4 show the envelope's shape moves with the
+  step budget, a budget that differs from the rest of the study is not a
+  neutral difference. The re-run is therefore scientifically motivated, not
+  cosmetic, and it is the same argument as the 2026-08-11 dense re-pin.
+- CELLS: 92 configs x 3 seeds = **276 runs**. diagin64e200_{r18,vit,mnet}_
+  {none,aux}_{1,2,3,5,7,10,15,20,25,100}pct (60) and diagin100e200_
+  {vits,vitb}_{none,aux}_{1,2,5,10,25}pct + r50_{none,aux}_{1,2,5,10,25,100}
+  (32). The vits/vitb 100% cells at 200 epochs ALREADY EXIST (block F/R1) and
+  are not re-run.
+  TWO DELIBERATE EXCLUSIONS: diagin64_swin (its 100% baseline is bistable at
+  chance {16.12, 0.10, 0.10}, so a re-run measures a training failure -- the
+  same scope rule that kept it out of the original envelope), and the ViT-L
+  fractions (vitl exists at 100% only; extending it across the envelope is a
+  new experiment, not a consistency repair).
+- ONE VARIABLE ONLY, verified by diff on all 92: each config is its parent
+  VERBATIM except `name`, `epochs` 40/100 -> 200, and `resume_every: 10`
+  (checkpointing only, identical in both arms, needed because the ImageNet64
+  100% cells run past the 24h MaxWall at 200 epochs). Every pair's two arms
+  differ only in `name` and the moment_aux block, also diff-verified.
+  *** THE STABILIZER IS DELIBERATELY NOT PROPAGATED, and this is a judgment
+  worth stating. Block F established warmup 10 + clip 1.0 because ViT-L
+  DIVERGES without it (6/6 aux runs NaN), and that deviation has a MEASURED
+  justification (the 8-arm stability diagnostic). The reduced epoch budget has
+  a COST justification. Adding the stabilizer to cells that do not need it
+  would trade one thing needing justification for another, and ViT-S and ViT-B
+  are both known to train fine unstabilized at 200 epochs (R1: 79.47/83.99 and
+  75.31/82.02). So the uniform statement this block buys is ONE BUDGET
+  EVERYWHERE, not one recipe everywhere -- the ViT-L stabilizer stays the
+  single documented exception, justified by data rather than by cost.
+  RISK ACCEPTED AND GATED: ViT-tiny on ImageNet64 has never run 200 epochs, so
+  a 15-epoch stability smoke gates the lane (--dependency=afterok). If it
+  diverges, the stabilizer is added to that cell with the same measured
+  justification ViT-L has, and that is recorded rather than quietly applied.
+- COST, from the recorded per-cell wall clocks (in64 100%: r18 7.9, vit 4.4,
+  mnet 5.6 h/seed-pair at 40 ep; in100 100%: vits 6.1, vitb 10.6, r50 11.9 at
+  100 ep), scaling linearly in epochs and in fraction: ImageNet64 ~505 GPU-h,
+  ImageNet-100 ~145, **~650 GPU-hours total**.
+- ANCHORS (the values being superseded), Delta by fraction:
+      in64 @40ep   1%    2%    3%    5%    7%   10%   15%   20%   25%  100%
+        r18      +1.90 +1.59 +1.38 +0.56 +0.42 +0.08 -0.01 +0.19 -0.07 +0.04
+        vit      +2.14 +3.80 +4.76 +5.22 +5.63 +6.31 +6.72 +6.86 +7.75 +3.24
+        mnet     -0.52 +0.01 +0.49 +1.46 +2.28 +2.61 +2.75 +2.98 +3.45 +1.95
+      in100@100ep  1%    2%    5%   10%   25%  100%
+        vits     +2.31 +7.59 +14.15 +14.23 +30.39 +13.00
+        vitb     +0.69 +5.11  +4.47  +2.30  +7.36 +26.01
+        r50      +0.54 +1.21  +1.84  +1.74  +2.30  +0.04
+- PREDICTIONS RECORDED IN ADVANCE (nothing from any re-run cell seen). THE
+  MECHANISM, and it is measured rather than assumed: more steps let the
+  BASELINE catch up. B4 measured that on C100 (Delta +5.92 -> +0.16 for 33x
+  steps) and block F measured it at ImageNet scale (ViT-B in100 100 -> 200 ep:
+  baseline +31.98, Delta +26.01 -> +6.71, a 3.9x fall for 2x the budget).
+  ImageNet64 gets 5x the steps and ImageNet-100 gets 2x, so:
+    (J1) EVERY BACKBONE'S DELTA FALLS, at every fraction, on both stages.
+    (J2) THE CONV RIGHT FLANK REACHES ZERO EARLIER. r18 on in64 is already
+      ~zero from 10% up at 40 epochs; at 200 it should be ~zero from 5%.
+      BANDS: @1% **+0.3..+1.5** | @2% +0.2..+1.2 | @3% +0.1..+1.0 |
+      @5% **-0.3..+0.6** | @10% and above **-0.4..+0.4**.
+    (J3) THE ATTENTION ENVELOPE COMPRESSES BUT STAYS POSITIVE AND STAYS THE
+      LARGEST OF THE THREE BACKBONES. BANDS for vit on in64:
+      @1% +0.5..+2.0 | @10% **+1.5..+4.0** | @25% **+2.0..+5.0** |
+      @100% **+0.5..+2.5**.
+    (J4) mnet: @10% +0.8..+2.0 | @25% +1.0..+2.5 | @100% +0.3..+1.5.
+    (J5) in100, 2x budget so a smaller fall than in64's: vits @5% +3..+8,
+      @10% +3..+8, @25% +6..+16; vitb @5% +1..+3.5, @10% +0.3..+2.0,
+      @25% +2..+5; r50 @5% +0.5..+1.8, @10% +0.3..+1.5, @25% +0.5..+2.0,
+      @100% **-0.5..+0.5** (conv neutrality at sufficiency must survive the
+      budget change; it is the most-replicated result in the study).
+    PEAK LOCATION IS DELIBERATELY NOT PREDICTED on any envelope. E1 was
+    falsified for exactly that, and the post-mortem (predict the axis you can
+    measure, not the one you assume) is worth applying rather than re-learning.
+  FALSIFIERS, each costing something specific:
+    (F-J1) Any backbone's Delta INCREASES by > 1.0 at >= 2 fractions under a
+      larger budget => "the extra steps let the baseline catch up" does NOT
+      transplant to 1000-way ImageNet scale, and B3/B4's optimization reading
+      of the right flank must be scoped to <= 100k images.
+    (F-J2) r18 on in64 develops an INTERIOR PEAK at 200 epochs (some fraction
+      exceeding both 1% and 100% by >= 0.5) => E1's "the conv envelope is
+      monotone falling because its peak sits below the smallest runnable
+      fraction" was a 40-epoch artifact and must be withdrawn.
+    (F-J3) The backbone ORDERING inverts (conv Delta above ViT Delta at any
+      in64 fraction >= 5%) => the attention deficit at ImageNet scale is a
+      budget artifact, and Section 7's scale story needs restating.
+    (F-J4) Delta(r50, in100@100%) outside -0.5..+0.5 => conv neutrality at
+      sufficiency is budget-dependent, which would touch the single most
+      replicated claim in the study (10 populations, 500 images to 1.28M).
+  NOTE F-J1 and F-J2 are reachable from the same measurement in opposite
+  directions, and F-J3/F-J4 guard claims the re-run was NOT run to test -- so
+  no uniform outcome passes the block.
+- THE PROBE HALF OF THE SAME DIRECTIVE, and it is already done: the
+  matched-epoch corpus completed 2026-08-31 (2,591 of the 2,599 measurable
+  cells), so every G now comes from last.pt -- the network its own Delta
+  describes -- instead of a mix of best.pt and last.pt. Regenerated and moved
+  off /tmp into results/matched_epoch/ (all_results_last.csv,
+  results_by_portion_last.csv, law_audit_last.md); the regeneration reproduces
+  the 31 August build byte-identically. 1,673 of 3,182 cells have a different
+  G; 25 lose G entirely (6 genssl tin cells from the dead turing box, 2
+  collapsed swin, the rest unmeasurable), which is the honest cost of one
+  protocol and is preferable to leaving a best.pt value no other row is
+  comparable to.
+  ONE PROBE DEVIATION WILL REMAIN AFTER THE RE-RUN: ImageNet64's G is
+  FIXED-SHOTS (25/100/250 per class), pre-registered 2026-08-05 as "compared
+  only within budget", because full-train LBFGS at 1.28M rows was called
+  impractical. The re-run's probe pass should attempt the full-train protocol
+  there so that column stops needing its own caveat; if it is genuinely
+  intractable, that is a measured statement rather than an assumed one.
+
+- OPERATIONAL (2026-09-05, block shipped and queued; the predictions above are
+  untouched and precede every cell):
+  CONFIGS: 92 in configs/diagnostics, each verified by diff to differ from its
+  parent in exactly {name, epochs, resume_every} and each pair's arms verified
+  to differ only in {name, moment_aux}. Both checks are scripted, not eyeballed.
+  LANES, both fed from worklists ordered LONGEST-JOB-FIRST with arms and seeds
+  adjacent (the 2026-08-11 end-of-queue drain; the reorder asserts the task SET
+  is unchanged, so it can neither add nor drop a task):
+      in64e200   180 tasks  SLOTS=3  ~505 run-hours  (64px, dataloader-bound,
+                 ~19.5GB/cell so 3 fit a 63GiB card)
+      in100e200   96 tasks  SLOTS=1  ~145 run-hours  (224px, GPU-bound: the
+                 ViT-B E4 pair measured 5.3h/run alone vs 11.3h/run shared, so
+                 sharing bought nothing and doubled the wall clock)
+  COST MODEL CORRECTED BEFORE USE, and it mattered by 2x: the ledger's
+  "h/seed-pair" is the time for ONE SEED'S PAIR (both arms), not per run. The
+  cross-check is exact -- those rates over 14 cells x 3 seeds give 164 GPU-h,
+  the recorded 100%-stage cost, and over the envelope fractions give 85 h, the
+  recorded envelope estimate. A first pass read it as per-run and reported
+  1,300 hours; the reconciliation is what caught it.
+  THE GATE: slurm/in_e200_smoke.sbatch runs the two AdamW/ViT cells for ~55 min
+  each and the three others briefly, into a SCRATCH out-root (train.py's
+  completed-run guard makes re-runs safe and smoke tests dangerous), then
+  asserts finite train_loss and test_acc at every epoch, accuracy above 2x
+  chance, and a live lambda and aux_loss. It EXITS NON-ZERO on failure and
+  every lane is submitted --dependency=afterok on it, so the lanes cannot start
+  unless it passes.
+  THE CHAIN, and it is separate lanes rather than repeated lines because the
+  run lock is flock-based and NODE-LOCAL on GPFS (2026-08-13): in64e200 ->
+  in64e200b -> in64e200c and in100e200 -> in100e200b, each with its OWN counter
+  and lock, each --dependency=afterany on every job of the previous set, so a
+  later lane cannot start until the previous set has fully ended. Finished
+  cells SKIP in seconds; anything the 23:50 wall cut off resumes from
+  resume.pt. *** DO NOT submit two lanes of a chain at once.
+  JOBS: smoke 45445798; in64e200 45445799-801; in100e200 45445802-803;
+  in64e200b 45445804-806; in64e200c 45445807-809; in100e200b 45445810-811.
+  All PENDING at submission (the smoke on queue priority, the rest on their
+  dependency); our account held no running jobs, so the wait is the shared
+  QOSGrpNodeLimit, not us.
+  A sed NEAR-MISS CAUGHT BY ITS OWN VERIFIER, fourth in the family: the lane
+  derivation substituted the job name and the SLOTS/DEADLINE lines but silently
+  failed on WORKLIST/CTR/LOCK, so all five lanes would have run against the
+  vitlres queue -- a DRAINED counter, i.e. they would have started, claimed
+  nothing and exited clean. The grep-verify step (added after 2026-08-27)
+  reported wl=BAD ctr=BAD lock=BAD before anything was shipped. The habit is
+  now paying for itself rather than merely being recorded.
+  PROBES ARE DELIBERATELY NOT QUEUED. linear_probe.py SKIPS a missing
+  checkpoint rather than failing, so probing before all 276 finals exist
+  silently under-seeds cells. The probe pass is built after the finals are
+  verified per worklist line -- not by trusting a drained counter -- and it
+  probes last.pt so the new G values join the matched-epoch corpus rather than
+  reopening the best.pt/last.pt split this campaign just closed.
