@@ -10619,3 +10619,49 @@ ported vs corrected and why.
   MEASURED AS THE QUEUE ADVANCES, not estimated: the E4 precedent (ViT-B @224,
   16.7 h/run at 200 epochs) puts ImageNet-100 at roughly a week; ImageNet64 is
   dataloader-bound on 16 cores and is the long pole, likely several weeks.
+
+- *** 75 FINALS EXISTED ONLY ON BSC, AND THREE MANUSCRIPT CLAIMS RESTED ON THEM
+  (2026-09-09, user: "I feel there are some gaps in your expectations and what
+  we already have"). A full BSC-vs-local diff of every final.json (8,302 on
+  the cluster, 9,782 across the three local trees) found 27 cells / 75 seeds
+  never pulled: the whole block-F stabilized curve (diagin100e200w_{vits,vitb,
+  vitl}_* and diagin100w_vitl_*, 24 finals plus the missing vitb_none seeds),
+  the last diagin100e300_vitb_aux seed, all 30 block-mnetl runs, and all 21
+  runs of the pixels reconstruction control. The ledger had SCORED block F
+  and mnetl by reading BSC directly, so the manuscript's Section 7 curve
+  (+3.45/+4.34/+7.44, ViT-L 100-ep +30.47) and the released table disagreed:
+  the release shipped no record for them, and the release tarballs built two
+  days ago could not reproduce those numbers. Pulled (final.json + probes,
+  the runs_bscpull convention); every cell now carries 3 seeds locally.
+  *** AND THE EXPORTER THEN PAIRED THEM WRONGLY: the family key carried no
+  warmup_epochs / clip_grad, so the stabilized aux arms paired against the
+  UNSTABILIZED baselines (6 seeds beat 3 in the tie-break) and the regenerated
+  table read ViT-S +4.64 and ViT-B +8.85 where the matched pairs give +3.45
+  and +4.34. Both keys added to config_fields (defaults = train.py's "off");
+  exactly 6 rows moved (the two aux arms to their matched baselines, and four
+  spurious baseline-against-baseline rows unpaired), nothing else. Same
+  family as the diagtraj instrumented-duplicate leak: a recipe field the
+  exporter does not key on is a field it will silently pair across.
+  RULE, third time and now with a one-line check: BEFORE any release build,
+  diff the cluster's final.json list against the local trees. "The ledger
+  scored it" is not "the release ships it".
+- *** THE RECONSTRUCTION CONTROL SCORED -- FALSIFIER B FIRED, THE SELECTION
+  CLAIM STRENGTHENS (2026-09-09, the 21 runs landed 2026-08-26 on BSC and sat
+  unscored until the diff above found them; 3 seeds/cell, reference schedule,
+  Delta vs each population's own baseline):
+      c100 @1%  +0.25 +-0.05 | @2% -0.07 +-0.14 | @5% -0.80 +-0.19 |
+      @10% -1.28 +-0.19 | @25% -0.52 +-0.38 | tin @5% -0.20 +-0.16 | @10% -0.39 +-0.16
+  (R1) "pixels are a weak-but-real target, 0.15-0.6x magnitude, positive at
+    1-10%" -> MISSED at 5 of 6 banded cells (only c100@1% +0.25 lands in its
+    +0.2..+0.9 band). The raw image as a target is NEGATIVE at 6 of 7 cells.
+  (F-A) "pixels >= magnitude at >= 2 C100 fractions" -> DEAD by a wide margin.
+  (F-B) "pixels <= 0 at >= 3 fractions => the selection claim STRENGTHENS and
+    connects to the 32px random-target result" -> FIRED, 6 of 7. A target
+    carrying ALL the information helps no more than one carrying none, and
+    at 32px both are an active cost (random -0.70/-1.46 on c10; pixels
+    -0.80/-1.28 on c100). The mechanism I registered for the small size
+    (an 8x8-pooled image is colour and illumination, and nothing has to be
+    inferred to satisfy it) is consistent with the sign but was not the
+    prediction; recorded as a miss with the right reasoning behind it.
+  (R2) G probes were never run; not scored. Added to the manuscript as one
+    sentence beside the random control (Sec. 5.1).

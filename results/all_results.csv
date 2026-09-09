@@ -1304,11 +1304,18 @@ diagin100e200_vitb_none,imagenet100,vit_base,adamw,200,linear,none,,,,,,,100,,6,
 diagin100e200_vitl_none,imagenet100,vit_large,adamw,200,linear,none,,,,,,,100,,2,73.06,0.37,,,,no,,,,,,,,
 diagin100e200_vits_aux,imagenet100,vit_small,adamw,200,linear,none,,,energy-magnitude,blocks.8,1.0,0.0,100,,6,83.99,0.20,,,,no,,diagin100e200_vits_none,79.47,4.52,0.18,,,
 diagin100e200_vits_none,imagenet100,vit_small,adamw,200,linear,none,,,,,,,100,,6,79.47,0.40,,,,no,,,,,,,,
-diagin100e200w_vitb_none,imagenet100,vit_base,adamw,200,linear,none,,,,,,,100,,1,80.06,0.00,,,,no,,diagin100e200_vitb_none,75.31,4.75,,,,
-diagin100e300_vitb_aux,imagenet100,vit_base,adamw,300,linear,none,,,energy-magnitude,blocks.8,1.0,0.0,100,,2,85.11,0.98,,,,no,,diagin100e300_vitb_none,80.91,4.20,0.90,,,
+diagin100e200w_vitb_aux,imagenet100,vit_base,adamw,200,linear,none,,,energy-magnitude,blocks.8,1.0,0.0,100,,3,84.17,0.27,,,,no,,diagin100e200w_vitb_none,79.83,4.34,0.58,,,
+diagin100e200w_vitb_none,imagenet100,vit_base,adamw,200,linear,none,,,,,,,100,,3,79.83,0.97,,,,no,,,,,,,,
+diagin100e200w_vitl_aux,imagenet100,vit_large,adamw,200,linear,none,,,energy-magnitude,blocks.16,1.0,0.0,100,,3,83.53,0.19,,,,no,,diagin100e200w_vitl_none,76.09,7.44,0.32,,,
+diagin100e200w_vitl_none,imagenet100,vit_large,adamw,200,linear,none,,,,,,,100,,3,76.09,0.52,,,,no,,,,,,,,
+diagin100e200w_vits_aux,imagenet100,vit_small,adamw,200,linear,none,,,energy-magnitude,blocks.8,1.0,0.0,100,,3,84.11,0.29,,,,no,,diagin100e200w_vits_none,80.66,3.45,0.23,,,
+diagin100e200w_vits_none,imagenet100,vit_small,adamw,200,linear,none,,,,,,,100,,3,80.66,0.27,,,,no,,,,,,,,
+diagin100e300_vitb_aux,imagenet100,vit_base,adamw,300,linear,none,,,energy-magnitude,blocks.8,1.0,0.0,100,,3,84.81,0.87,,,,no,,diagin100e300_vitb_none,80.91,3.89,0.77,,,
 diagin100e300_vitb_none,imagenet100,vit_base,adamw,300,linear,none,,,,,,,100,,3,80.91,1.01,,,,no,,,,,,,,
 diagin100e300_vits_aux,imagenet100,vit_small,adamw,300,linear,none,,,energy-magnitude,blocks.8,1.0,0.0,100,,3,85.07,0.10,,,,no,,diagin100e300_vits_none,82.88,2.19,0.28,,,
 diagin100e300_vits_none,imagenet100,vit_small,adamw,300,linear,none,,,,,,,100,,3,82.88,0.47,,,,no,,,,,,,,
+diagin100w_vitl_aux,imagenet100,vit_large,adamw,100,linear,none,,,energy-magnitude,blocks.16,1.0,0.0,100,,3,80.03,0.87,,,,no,,diagin100w_vitl_none,49.57,30.47,3.11,,,
+diagin100w_vitl_none,imagenet100,vit_large,adamw,100,linear,none,,,,,,,100,,3,49.57,5.31,,,,no,,,,,,,,
 diagin64_mnet_aux,imagenet64,mobilenetv3_small_100,sgd,40,linear,none,,,energy-magnitude,blocks.3,1.0,0.0,100,,3,34.88,0.12,,,,no,,diagin64_mnet_none,32.93,1.95,0.40,,,
 diagin64_mnet_aux_10pct,imagenet64,mobilenetv3_small_100,sgd,40,linear,none,,,energy-magnitude,blocks.3,1.0,0.0,10,,3,21.22,0.32,,,,no,,diagin64_mnet_none_10pct,18.60,2.61,0.21,,,
 diagin64_mnet_aux_15pct,imagenet64,mobilenetv3_small_100,sgd,40,linear,none,,,energy-magnitude,blocks.3,1.0,0.0,15,,3,25.24,0.05,,,,no,,diagin64_mnet_none_15pct,22.49,2.75,0.25,,,
@@ -1376,6 +1383,16 @@ diagmae_vit_1pct,cifar100,vit_tiny,adamw,200,linear,none,yes,,,,,,1,500,3,6.46,0
 diagmae_vit_25pct,cifar100,vit_tiny,adamw,200,linear,none,yes,,,,,,25,12500,3,42.65,1.73,47.72,1.80,3,no,,diagvit_none_25pct,28.50,14.16,1.06,13.97,1.08,0.19
 diagmae_vit_2pct,cifar100,vit_tiny,adamw,200,linear,none,yes,,,,,,2,1000,3,10.37,0.62,20.97,0.61,3,no,,diagvit_none_2pct,8.91,1.46,0.44,2.57,0.51,-1.10
 diagmae_vit_5pct,cifar100,vit_tiny,adamw,200,linear,none,yes,,,,,,5,2500,3,20.46,2.14,30.83,2.90,3,no,,diagvit_none_5pct,12.25,8.21,1.32,10.44,1.76,-2.23
+diagmnetl_esat_aux_1pct,eurosat,mobilenetv3_large_100,sgd,200,linear,none,,,energy-magnitude,blocks.4,1.0,0.0,1,216,3,49.70,12.01,58.44,13.85,3,no,,diagmnetl_esat_none_1pct,37.59,12.11,15.20,15.31,18.08,-3.20
+diagmnetl_esat_aux_2pct,eurosat,mobilenetv3_large_100,sgd,200,linear,none,,,energy-magnitude,blocks.4,1.0,0.0,2,432,3,68.30,5.26,73.66,5.56,3,no,,diagmnetl_esat_none_2pct,71.88,-3.58,3.25,-2.93,3.44,-0.65
+diagmnetl_esat_aux_3pct,eurosat,mobilenetv3_large_100,sgd,200,linear,none,,,energy-magnitude,blocks.4,1.0,0.0,3,648,3,52.94,36.23,55.53,38.47,3,no,1/3 seeds at chance,diagmnetl_esat_none_3pct,69.66,-16.72,21.03,-17.52,22.36,0.81
+diagmnetl_esat_none_1pct,eurosat,mobilenetv3_large_100,sgd,200,linear,none,,,,,,,1,216,3,37.59,23.44,43.13,28.08,3,no,1/3 seeds at chance,,,,,,,
+diagmnetl_esat_none_2pct,eurosat,mobilenetv3_large_100,sgd,200,linear,none,,,,,,,2,432,3,71.88,2.02,76.59,2.14,3,no,,,,,,,,
+diagmnetl_esat_none_3pct,eurosat,mobilenetv3_large_100,sgd,200,linear,none,,,,,,,3,648,3,69.66,3.76,73.06,4.51,3,no,,,,,,,,
+diagmnetl_stl_aux_10pct,stl10,mobilenetv3_large_100,sgd,200,linear,none,,,energy-magnitude,blocks.4,1.0,0.0,10,500,3,45.65,3.72,52.89,3.37,3,no,,diagmnetl_stl_none_10pct,38.70,6.95,2.36,8.37,2.27,-1.42
+diagmnetl_stl_aux_20pct,stl10,mobilenetv3_large_100,sgd,200,linear,none,,,energy-magnitude,blocks.4,1.0,0.0,20,1000,3,56.16,0.59,60.06,0.83,3,no,,diagmnetl_stl_none_20pct,50.64,5.52,2.69,6.44,2.94,-0.92
+diagmnetl_stl_none_10pct,stl10,mobilenetv3_large_100,sgd,200,linear,none,,,,,,,10,500,3,38.70,1.70,44.52,2.04,3,no,,,,,,,,
+diagmnetl_stl_none_20pct,stl10,mobilenetv3_large_100,sgd,200,linear,none,,,,,,,20,1000,3,50.64,4.61,53.62,5.03,3,no,,,,,,,,
 diagprosp_augssl_esat_5pct,eurosat,resnet18,sgd,200,linear,none,yes,,,,,,5,1080,3,89.14,0.73,,,,no,,diagfuse_esat_aug_5pct,83.12,6.02,1.08,,,
 diagprosp_augssl_food_10pct,food101,resnet18,sgd,200,linear,none,yes,,,,,,10,7575,3,47.57,1.27,,,,no,,diagfuse_food_aug_10pct,50.99,-3.42,0.78,,,
 diagprosp_augssl_food_5pct,food101,resnet18,sgd,200,linear,none,yes,,,,,,5,3788,3,35.96,0.34,,,,no,,diagfuse_food_aug_5pct,31.37,4.59,0.38,,,
@@ -1503,6 +1520,11 @@ diagtgt2_c100_phase_2pct,cifar100,resnet18,sgd,200,linear,none,,,energy-phase,la
 diagtgt2_c100_phase_5pct,cifar100,resnet18,sgd,200,linear,none,,,energy-phase,layer3,1.0,0.0,5,2500,3,26.91,0.30,39.85,0.53,3,no,,abl5_none,25.36,1.55,0.25,2.63,0.34,-1.08
 diagtgt2_c100_phasessl_10pct,cifar100,resnet18,sgd,200,linear,none,yes,,energy-phase,layer3,1.0,0.0,10,5000,3,48.47,0.26,54.72,0.09,3,no,,abl10_none,40.28,8.19,0.24,6.78,0.16,1.41
 diagtgt2_c100_phasessl_5pct,cifar100,resnet18,sgd,200,linear,none,yes,,energy-phase,layer3,1.0,0.0,5,2500,3,34.21,0.32,46.32,0.39,3,no,,abl5_none,25.36,8.85,0.25,9.10,0.27,-0.25
+diagtgt2_c100_pixels_10pct,cifar100,resnet18,sgd,200,linear,none,,,pixels,layer3,1.0,0.0,10,5000,3,39.00,0.10,,,,no,,abl10_none,40.28,-1.28,0.19,,,
+diagtgt2_c100_pixels_1pct,cifar100,resnet18,sgd,200,linear,none,,,pixels,layer3,1.0,0.0,1,500,3,9.20,0.06,,,,no,,abl1_none,8.95,0.25,0.05,,,
+diagtgt2_c100_pixels_25pct,cifar100,resnet18,sgd,200,linear,none,,,pixels,layer3,1.0,0.0,25,12500,3,60.83,0.47,,,,no,,abl25_none,61.35,-0.52,0.38,,,
+diagtgt2_c100_pixels_2pct,cifar100,resnet18,sgd,200,linear,none,,,pixels,layer3,1.0,0.0,2,1000,3,14.10,0.19,,,,no,,abl2_none,14.17,-0.07,0.14,,,
+diagtgt2_c100_pixels_5pct,cifar100,resnet18,sgd,200,linear,none,,,pixels,layer3,1.0,0.0,5,2500,3,24.57,0.14,,,,no,,abl5_none,25.36,-0.80,0.19,,,
 diagtgt2_c100_symmetry_100pct,cifar100,resnet18,sgd,200,linear,none,,,energy-symmetry,layer3,1.0,0.0,100,50000,3,78.83,0.40,,,,no,,ablf_none,78.52,0.31,0.25,,,
 diagtgt2_c100_symmetry_10pct,cifar100,resnet18,sgd,200,linear,none,,,energy-symmetry,layer3,1.0,0.0,10,5000,3,40.09,0.81,47.65,0.78,3,no,,abl10_none,40.28,-0.19,0.50,-0.29,0.48,0.10
 diagtgt2_c100_symmetry_1pct,cifar100,resnet18,sgd,200,linear,none,,,energy-symmetry,layer3,1.0,0.0,1,500,3,9.00,0.37,,,,no,,abl1_none,8.95,0.05,0.21,,,
@@ -1519,6 +1541,8 @@ diagtgt2_tin_magphase_10pct,tin,resnet18,sgd,200,linear,none,,,energy-magnitude+
 diagtgt2_tin_magsymmetry_10pct,tin,resnet18,sgd,200,linear,none,,,energy-magnitude+symmetry,layer3,1.0,0.0,10,10000,3,35.25,0.48,41.43,0.46,3,no,,tin_none_10pct,33.60,1.65,0.32,1.59,0.34,0.06
 diagtgt2_tin_phase_10pct,tin,resnet18,sgd,200,linear,none,,,energy-phase,layer3,1.0,0.0,10,10000,3,34.98,0.12,41.43,0.22,3,no,,tin_none_10pct,33.60,1.39,0.17,1.59,0.25,-0.21
 diagtgt2_tin_phase_5pct,tin,resnet18,sgd,200,linear,none,,,energy-phase,layer3,1.0,0.0,5,5000,3,22.14,0.20,,,,no,,tin_none_5pct,21.08,1.06,0.14,,,
+diagtgt2_tin_pixels_10pct,tin,resnet18,sgd,200,linear,none,,,pixels,layer3,1.0,0.0,10,10000,3,33.21,0.07,,,,no,,tin_none_10pct,33.60,-0.39,0.16,,,
+diagtgt2_tin_pixels_5pct,tin,resnet18,sgd,200,linear,none,,,pixels,layer3,1.0,0.0,5,5000,3,20.88,0.25,,,,no,,tin_none_5pct,21.08,-0.20,0.16,,,
 diagtgt2_tin_symmetry_10pct,tin,resnet18,sgd,200,linear,none,,,energy-symmetry,layer3,1.0,0.0,10,10000,3,33.21,0.17,39.78,0.34,3,no,,tin_none_10pct,33.60,-0.39,0.19,-0.06,0.29,-0.33
 diagtgt2_tin_symmetry_5pct,tin,resnet18,sgd,200,linear,none,,,energy-symmetry,layer3,1.0,0.0,5,5000,3,20.49,0.23,,,,no,,tin_none_5pct,21.08,-0.59,0.15,,,
 diagtgt_c10_mag_10pct,cifar10,resnet18,sgd,200,linear,none,,,energy-magnitude,layer3,0.3,,10,5000,2,81.21,0.12,,,,no,,c10_none_10pct,80.71,0.50,0.57,,,

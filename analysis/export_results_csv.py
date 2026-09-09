@@ -338,6 +338,13 @@ def config_fields(cfg):
         "head": cfgget(cfg, "head") or "linear",
         "head_pool": cfgget(cfg, "head_pool") or None,
         "augment": cfgget(cfg, "augment") or None,
+        # The ViT-L stabilizer (block F, 2026-08-24) is a RECIPE change applied
+        # to both arms; without these two keys the stabilized aux arms paired
+        # against the unstabilized baselines (more seeds won the tie-break) and
+        # the table read +4.64/+8.85 where the matched pairs give +3.45/+4.34
+        # (found 2026-09-09). Defaults match train.py's "off".
+        "warmup_epochs": cfgget(cfg, "warmup_epochs", 0) or 0,
+        "clip_grad": cfgget(cfg, "clip_grad") or None,
         "init_from": init,
         "aux_kind": kind,
         "aux": {k: (str(v) if k in ("tap",) else v)
