@@ -1,0 +1,21 @@
+{
+  "config": "configs/grid/grid_mag6o_food_50pct.yaml",
+  "ckpt": "last.pt",
+  "results": [
+    {
+      "seed": "seed0",
+      "probe_train": 0.8582310080528259,
+      "probe_test": 0.7080396413803101
+    },
+    {
+      "seed": "seed1",
+      "probe_train": 0.8598811626434326,
+      "probe_test": 0.7076435685157776
+    },
+    {
+      "seed": "seed2",
+      "probe_train": 0.8610957264900208,
+      "probe_test": 0.7079604268074036
+    }
+  ]
+}

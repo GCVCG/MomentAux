@@ -1,0 +1,12 @@
+diagcos_tin_none_1pct seed0: probe train 26.87  test 15.81
+diagcos_tin_none_1pct seed1: probe train 27.22  test 16.34
+diagcos_tin_none_1pct seed2: probe train 26.48  test 15.80
+PROBE_RESULT diagcos_tin_none_1pct test 15.98+/-0.31 over 3 seeds -> runs/diagcos_tin_none_1pct/linear_probe_last.json
+stl_none_10pct seed0: probe train 78.88  test 53.84
+stl_none_10pct seed1: probe train 77.82  test 52.63
+stl_none_10pct seed2: probe train 77.58  test 53.15
+PROBE_RESULT stl_none_10pct test 53.20+/-0.61 over 3 seeds -> runs/stl_none_10pct/linear_probe_last.json
+diagin100_r50_aux seed0: probe train 99.51  test 84.78
+diagin100_r50_aux seed1: probe train 99.55  test 85.22
+diagin100_r50_aux seed2: probe train 99.50  test 85.24
+PROBE_RESULT diagin100_r50_aux test 85.08+/-0.26 over 3 seeds -> runs/diagin100_r50_aux/linear_probe_last.json

@@ -1,0 +1,17 @@
+=== gap cells in runs ===
+verifying 59 cells (shard 0/1, all seeds)
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+  CORRUPT grid_c100_cnx_64bc90_1pct                    s2 PytorchStreamReader failed reading file data/13: invalid header or archive is co
+  CORRUPT grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_7pct s1 PytorchStreamReader failed reading file data/16: invalid header or archive is co
+  FAIL grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_7pct s2 recorded   0.42  evaluated   0.97  diff +0.55
+  FAIL grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_7pct s2 recorded   0.42  evaluated   0.97  diff +0.55
+  FAIL diagin100_r50_none                           s0 recorded  85.88  evaluated  54.12  diff -31.76
+
+414 checkpoints examined: 409 verified, 3 outside +-0.5, 2 CORRUPT, 0 legacy key naming, 0 not verifiable (ERR)
+wrote results/local_identity_gap_runs.json
+=== gap cells in runs_bscpull ===
+verifying 25 cells (shard 0/1, all seeds)
+
+150 checkpoints examined: 150 verified, 0 outside +-0.5, 0 CORRUPT, 0 legacy key naming, 0 not verifiable (ERR)
+wrote results/local_identity_gap_runs_bscpull.json
+GAP_LOCAL_COMPLETE

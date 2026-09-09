@@ -1,0 +1,82 @@
+=== IDENTITY PASS (last.pt) ===
+verifying 18 cells (shard 0/1, all seeds)
+
+54 checkpoints examined: 54 verified, 0 outside +-0.5, 0 CORRUPT, 0 legacy key naming, 0 not verifiable (ERR)
+wrote /tmp/blockC_verify.json
+verifying 7 cells (shard 0/1, all seeds)
+
+49 checkpoints examined: 49 verified, 0 outside +-0.5, 0 CORRUPT, 0 legacy key naming, 0 not verifiable (ERR)
+wrote /tmp/blockC_verify_comp.json
+=== PROBE PASS (last.pt, matched epoch) ===
+--- diagtgt2_c100_phase_5pct
+diagtgt2_c100_phase_5pct seed2: probe train 55.18  test 39.54
+PROBE_RESULT diagtgt2_c100_phase_5pct test 39.85+/-0.53 over 3 seeds -> runs_bscpull/diagtgt2_c100_phase_5pct/linear_probe_last.json
+--- diagtgt2_c100_phase_10pct
+diagtgt2_c100_phase_10pct seed2: probe train 66.36  test 49.67
+PROBE_RESULT diagtgt2_c100_phase_10pct test 49.27+/-0.51 over 3 seeds -> runs_bscpull/diagtgt2_c100_phase_10pct/linear_probe_last.json
+--- diagtgt2_c100_phase_25pct
+diagtgt2_c100_phase_25pct seed2: probe train 80.78  test 63.87
+PROBE_RESULT diagtgt2_c100_phase_25pct test 63.34+/-0.48 over 3 seeds -> runs_bscpull/diagtgt2_c100_phase_25pct/linear_probe_last.json
+--- diagtgt2_c100_symmetry_5pct
+diagtgt2_c100_symmetry_5pct seed2: probe train 52.13  test 36.96
+PROBE_RESULT diagtgt2_c100_symmetry_5pct test 36.93+/-0.03 over 3 seeds -> runs_bscpull/diagtgt2_c100_symmetry_5pct/linear_probe_last.json
+--- diagtgt2_c100_symmetry_10pct
+diagtgt2_c100_symmetry_10pct seed2: probe train 65.20  test 48.50
+PROBE_RESULT diagtgt2_c100_symmetry_10pct test 47.65+/-0.78 over 3 seeds -> runs_bscpull/diagtgt2_c100_symmetry_10pct/linear_probe_last.json
+--- diagtgt2_c100_symmetry_25pct
+diagtgt2_c100_symmetry_25pct seed2: probe train 80.98  test 63.11
+PROBE_RESULT diagtgt2_c100_symmetry_25pct test 63.17+/-0.43 over 3 seeds -> runs_bscpull/diagtgt2_c100_symmetry_25pct/linear_probe_last.json
+--- diagtgt2_tin_phase_10pct
+diagtgt2_tin_phase_10pct seed2: probe train 56.51  test 41.63
+PROBE_RESULT diagtgt2_tin_phase_10pct test 41.43+/-0.22 over 3 seeds -> runs_bscpull/diagtgt2_tin_phase_10pct/linear_probe_last.json
+--- diagtgt2_tin_symmetry_10pct
+diagtgt2_tin_symmetry_10pct seed2: probe train 55.02  test 39.47
+PROBE_RESULT diagtgt2_tin_symmetry_10pct test 39.78+/-0.34 over 3 seeds -> runs_bscpull/diagtgt2_tin_symmetry_10pct/linear_probe_last.json
+--- diagtgt2_c100_magphase_5pct
+diagtgt2_c100_magphase_5pct seed2: probe train 57.91  test 42.54
+PROBE_RESULT diagtgt2_c100_magphase_5pct test 42.35+/-0.37 over 3 seeds -> runs_bscpull/diagtgt2_c100_magphase_5pct/linear_probe_last.json
+--- diagtgt2_c100_magphase_10pct
+diagtgt2_c100_magphase_10pct seed2: probe train 68.95  test 52.41
+PROBE_RESULT diagtgt2_c100_magphase_10pct test 52.22+/-0.30 over 3 seeds -> runs_bscpull/diagtgt2_c100_magphase_10pct/linear_probe_last.json
+--- diagtgt2_c100_magsymmetry_5pct
+diagtgt2_c100_magsymmetry_5pct seed2: probe train 58.30  test 42.90
+PROBE_RESULT diagtgt2_c100_magsymmetry_5pct test 43.04+/-0.43 over 3 seeds -> runs_bscpull/diagtgt2_c100_magsymmetry_5pct/linear_probe_last.json
+--- diagtgt2_c100_magsymmetry_10pct
+diagtgt2_c100_magsymmetry_10pct seed2: probe train 68.09  test 51.75
+PROBE_RESULT diagtgt2_c100_magsymmetry_10pct test 52.15+/-0.41 over 3 seeds -> runs_bscpull/diagtgt2_c100_magsymmetry_10pct/linear_probe_last.json
+--- diagtgt2_tin_magphase_10pct
+diagtgt2_tin_magphase_10pct seed2: probe train 57.01  test 42.28
+PROBE_RESULT diagtgt2_tin_magphase_10pct test 42.02+/-0.46 over 3 seeds -> runs_bscpull/diagtgt2_tin_magphase_10pct/linear_probe_last.json
+--- diagtgt2_tin_magsymmetry_10pct
+diagtgt2_tin_magsymmetry_10pct seed2: probe train 56.73  test 40.91
+PROBE_RESULT diagtgt2_tin_magsymmetry_10pct test 41.43+/-0.46 over 3 seeds -> runs_bscpull/diagtgt2_tin_magsymmetry_10pct/linear_probe_last.json
+--- diagtgt2_c100_phasessl_5pct
+diagtgt2_c100_phasessl_5pct seed2: probe train 61.69  test 46.09
+PROBE_RESULT diagtgt2_c100_phasessl_5pct test 46.32+/-0.39 over 3 seeds -> runs_bscpull/diagtgt2_c100_phasessl_5pct/linear_probe_last.json
+--- diagtgt2_c100_phasessl_10pct
+diagtgt2_c100_phasessl_10pct seed2: probe train 70.17  test 54.78
+PROBE_RESULT diagtgt2_c100_phasessl_10pct test 54.72+/-0.09 over 3 seeds -> runs_bscpull/diagtgt2_c100_phasessl_10pct/linear_probe_last.json
+--- diagtgt2_c100_symmetryssl_5pct
+diagtgt2_c100_symmetryssl_5pct seed2: probe train 60.45  test 45.33
+PROBE_RESULT diagtgt2_c100_symmetryssl_5pct test 45.67+/-0.42 over 3 seeds -> runs_bscpull/diagtgt2_c100_symmetryssl_5pct/linear_probe_last.json
+--- diagtgt2_c100_symmetryssl_10pct
+diagtgt2_c100_symmetryssl_10pct seed2: probe train 70.42  test 55.28
+PROBE_RESULT diagtgt2_c100_symmetryssl_10pct test 55.19+/-0.40 over 3 seeds -> runs_bscpull/diagtgt2_c100_symmetryssl_10pct/linear_probe_last.json
+NOCFG abl5_none
+NOCFG abl10_none
+--- abl25_none
+abl25_none seed2: probe train 80.64  test 62.97
+PROBE_RESULT abl25_none test 63.19+/-0.20 over 3 seeds -> runs/abl25_none/linear_probe_last.json
+--- tin_none_10pct
+tin_none_10pct seed2: probe train 55.37  test 40.24
+PROBE_RESULT tin_none_10pct test 39.84+/-0.36 over 3 seeds -> runs/tin_none_10pct/linear_probe_last.json
+--- auxmag_5pct_sched0
+auxmag_5pct_sched0 seed9: probe train 58.67  test 43.32
+PROBE_RESULT auxmag_5pct_sched0 test 43.33+/-0.40 over 10 seeds -> runs/auxmag_5pct_sched0/linear_probe_last.json
+--- auxmag_10pct_sched0
+           ^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 64.00 MiB. GPU 0 has a total capacity of 23.56 GiB of which 16.06 MiB is free. Process 2865409 has 364.00 MiB memory in use. Process 2874183 has 22.58 GiB memory in use. Including non-PyTorch memory, this process has 558.00 MiB memory in use. Of the allocated memory 241.08 MiB is allocated by PyTorch, and 14.92 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+--- tin_aux_10pct
+tin_aux_10pct seed2: probe train 56.65  test 41.42
+PROBE_RESULT tin_aux_10pct test 41.47+/-0.04 over 3 seeds -> runs/tin_aux_10pct/linear_probe_last.json
+BLOCKC_PROBE_COMPLETE

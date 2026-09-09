@@ -1,0 +1,21 @@
+{
+  "config": "configs/grid/grid_path_r18_89e5af_50pct.yaml",
+  "ckpt": "last.pt",
+  "results": [
+    {
+      "seed": "seed0",
+      "probe_train": 0.9995332956314087,
+      "probe_test": 0.8922005891799927
+    },
+    {
+      "seed": "seed1",
+      "probe_train": 0.999477744102478,
+      "probe_test": 0.8871866464614868
+    },
+    {
+      "seed": "seed2",
+      "probe_train": 0.9995332956314087,
+      "probe_test": 0.8877437710762024
+    }
+  ]
+}

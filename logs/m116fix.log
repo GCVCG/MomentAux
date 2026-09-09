@@ -1,0 +1,45 @@
+waiting for the m116 chain to finish its probe list
+chain gone with 1 still missing; proceeding anyway
+gate open
+=== re-verify stl_none_10pct (was OOM, not damage) ===
+verifying 1 cells (shard 0/1, all seeds)
+
+3 checkpoints examined: 3 verified, 0 outside +-0.5, 0 CORRUPT, 0 legacy key naming, 0 not verifiable (ERR)
+wrote results/local_identity_m116_stlretry.json
+=== probes ===
+  done runs/cub_none_100pct
+  done runs/cub_none_25pct
+  done runs/tin20b_none
+  done runs/grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_7pct
+  done runs/diagin100_r50_none
+  done runs/diagin100_r50_aux
+Traceback (most recent call last):
+  File "${HOME}/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 317, in <module>
+    main()
+  File "${HOME}/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 270, in main
+    trf, trY = extract(model, tr_loader, device)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 68, in extract
+    f = model.net.forward_features(model.stem(x))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/timm/models/resnet.py", line 746, in forward_features
+    x = self.bn1(x)
+        ^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/batchnorm.py", line 193, in forward
+    return F.batch_norm(
+           ^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/nn/functional.py", line 2822, in batch_norm
+    return torch.batch_norm(
+           ^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 576.00 MiB. GPU 0 has a total capacity of 23.56 GiB of which 215.44 MiB is free. Process 3081482 has 22.32 GiB memory in use. Including non-PyTorch memory, this process has 996.00 MiB memory in use. Of the allocated memory 672.68 MiB is allocated by PyTorch, and 21.32 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+stl_none_10pct identity: PASS
+M116FIX_COMPLETE

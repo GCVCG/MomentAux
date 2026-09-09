@@ -1,0 +1,55 @@
+cub_none_100pct seed0: probe train 100.00  test 42.80
+cub_none_100pct seed1: probe train 100.00  test 42.18
+cub_none_100pct seed2: probe train 100.00  test 43.72
+PROBE_RESULT cub_none_100pct test 42.90+/-0.77 over 3 seeds -> runs/cub_none_100pct/linear_probe_last.json
+cub_none_25pct seed0: probe train 99.98  test 9.58
+cub_none_25pct seed1: probe train 100.00  test 8.75
+cub_none_25pct seed2: probe train 100.00  test 9.23
+PROBE_RESULT cub_none_25pct test 9.19+/-0.42 over 3 seeds -> runs/cub_none_25pct/linear_probe_last.json
+tin20b_none seed0: probe train 74.96  test 53.70
+tin20b_none seed1: probe train 74.80  test 52.00
+tin20b_none seed2: probe train 75.38  test 55.10
+tin20b_none seed3: probe train 75.05  test 53.10
+tin20b_none seed4: probe train 75.32  test 53.70
+tin20b_none seed5: probe train 75.89  test 53.60
+tin20b_none seed6: probe train 75.97  test 53.20
+tin20b_none seed7: probe train 74.38  test 52.60
+tin20b_none seed8: probe train 75.17  test 52.50
+tin20b_none seed9: probe train 74.42  test 52.70
+PROBE_RESULT tin20b_none test 53.22+/-0.87 over 10 seeds -> runs/tin20b_none/linear_probe_last.json
+grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_7pct seed0: probe train 4.86  test 4.59
+grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_7pct seed1: probe train 1.00  test 1.00
+grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_7pct seed2: probe train 1.00  test 1.00
+PROBE_RESULT grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_7pct test 2.20+/-2.07 over 3 seeds -> runs/grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_7pct/linear_probe_last.json
+diagin100_r50_none seed0: probe train 99.53  test 84.74
+diagin100_r50_none seed1: probe train 99.51  test 84.60
+diagin100_r50_none seed2: probe train 99.55  test 85.40
+PROBE_RESULT diagin100_r50_none test 84.91+/-0.43 over 3 seeds -> runs/diagin100_r50_none/linear_probe_last.json
+Traceback (most recent call last):
+  File "${HOME}/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 317, in <module>
+    main()
+  File "${HOME}/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 270, in main
+    trf, trY = extract(model, tr_loader, device)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 68, in extract
+    f = model.net.forward_features(model.stem(x))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/timm/models/resnet.py", line 745, in forward_features
+    x = self.conv1(x)
+        ^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/conv.py", line 554, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/conv.py", line 549, in _conv_forward
+    return F.conv2d(
+           ^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 784.00 MiB. GPU 0 has a total capacity of 23.56 GiB of which 351.44 MiB is free. Process 3081482 has 22.32 GiB memory in use. Including non-PyTorch memory, this process has 860.00 MiB memory in use. Of the allocated memory 532.75 MiB is allocated by PyTorch, and 29.25 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)

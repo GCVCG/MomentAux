@@ -1,0 +1,19 @@
+--- abl5_none
+verifying 1 cells (shard 0/1, all seeds)
+
+10 checkpoints examined: 10 verified, 0 outside +-0.5, 0 CORRUPT, 0 legacy key naming, 0 not verifiable (ERR)
+abl5_none seed9: probe train 52.62  test 37.32
+PROBE_RESULT abl5_none test 37.22+/-0.48 over 10 seeds -> runs/abl5_none/linear_probe_last.json
+--- abl10_none
+verifying 1 cells (shard 0/1, all seeds)
+
+10 checkpoints examined: 10 verified, 0 outside +-0.5, 0 CORRUPT, 0 legacy key naming, 0 not verifiable (ERR)
+abl10_none seed9: probe train 65.06  test 47.63
+PROBE_RESULT abl10_none test 47.94+/-0.49 over 10 seeds -> runs/abl10_none/linear_probe_last.json
+--- auxmag_10pct_sched0
+verifying 1 cells (shard 0/1, all seeds)
+
+10 checkpoints examined: 10 verified, 0 outside +-0.5, 0 CORRUPT, 0 legacy key naming, 0 not verifiable (ERR)
+auxmag_10pct_sched0 seed9: probe train 67.84  test 51.21
+PROBE_RESULT auxmag_10pct_sched0 test 51.57+/-0.45 over 10 seeds -> runs/auxmag_10pct_sched0/linear_probe_last.json
+BLOCKC_TAIL_COMPLETE

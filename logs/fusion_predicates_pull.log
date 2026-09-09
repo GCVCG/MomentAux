@@ -1,0 +1,9 @@
+load bsc/1.0 (PATH, MANPATH)
+done diaggrid_simsiam_c100_10pct 3
+load bsc/1.0 (PATH, MANPATH)
+done diaggrid_simsiam_tin_5pct 3
+load bsc/1.0 (PATH, MANPATH)
+done diaggrid_dino_vit_5pct 3
+load bsc/1.0 (PATH, MANPATH)
+done diaggrid_dino_vit_10pct 3
+PULL_COMPLETE

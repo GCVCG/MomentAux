@@ -1,0 +1,21 @@
+{
+  "config": "configs/grid/grid_mnet_food_aux_50pct.yaml",
+  "ckpt": "last.pt",
+  "results": [
+    {
+      "seed": "seed0",
+      "probe_train": 0.7082904577255249,
+      "probe_test": 0.5625346899032593
+    },
+    {
+      "seed": "seed1",
+      "probe_train": 0.7106006741523743,
+      "probe_test": 0.5633663535118103
+    },
+    {
+      "seed": "seed2",
+      "probe_train": 0.7121320366859436,
+      "probe_test": 0.5674851536750793
+    }
+  ]
+}

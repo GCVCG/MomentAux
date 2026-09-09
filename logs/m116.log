@@ -1,0 +1,35 @@
+=== identity pass (last.pt) ===
+verifying 109 cells (shard 0/1, all seeds)
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+  FAIL grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_7pct s2 recorded   0.42  evaluated   0.97  diff +0.55
+  ERR  diagin100_r50_aux                            s0 OutOfMemoryError: CUDA out of memory. Tried to allocate 392.00 MiB. GPU 0 has a total capacity of 23.56 GiB of which 191.44 MiB is free. Including non-PyTorch memory, this process has 1.94 GiB memory 
+  ERR  diagin100_r50_aux                            s1 OutOfMemoryError: CUDA out of memory. Tried to allocate 392.00 MiB. GPU 0 has a total capacity of 23.56 GiB of which 173.44 MiB is free. Including non-PyTorch memory, this process has 1.96 GiB memory 
+  ERR  diagin100_r50_aux                            s2 OutOfMemoryError: CUDA out of memory. Tried to allocate 392.00 MiB. GPU 0 has a total capacity of 23.56 GiB of which 173.44 MiB is free. Including non-PyTorch memory, this process has 1.96 GiB memory 
+  ERR  diagin100_r50_none                           s0 OutOfMemoryError: CUDA out of memory. Tried to allocate 392.00 MiB. GPU 0 has a total capacity of 23.56 GiB of which 173.44 MiB is free. Including non-PyTorch memory, this process has 1.96 GiB memory 
+  ERR  diagin100_r50_none                           s1 OutOfMemoryError: CUDA out of memory. Tried to allocate 392.00 MiB. GPU 0 has a total capacity of 23.56 GiB of which 173.44 MiB is free. Including non-PyTorch memory, this process has 1.96 GiB memory 
+  ERR  diagin100_r50_none                           s2 OutOfMemoryError: CUDA out of memory. Tried to allocate 392.00 MiB. GPU 0 has a total capacity of 23.56 GiB of which 173.44 MiB is free. Including non-PyTorch memory, this process has 1.96 GiB memory 
+  ERR  stl_none_10pct                               s0 OutOfMemoryError: CUDA out of memory. Tried to allocate 288.00 MiB. GPU 0 has a total capacity of 23.56 GiB of which 185.44 MiB is free. Including non-PyTorch memory, this process has 1.95 GiB memory 
+  ERR  stl_none_10pct                               s1 OutOfMemoryError: CUDA out of memory. Tried to allocate 288.00 MiB. GPU 0 has a total capacity of 23.56 GiB of which 185.44 MiB is free. Including non-PyTorch memory, this process has 1.95 GiB memory 
+  ERR  stl_none_10pct                               s2 OutOfMemoryError: CUDA out of memory. Tried to allocate 288.00 MiB. GPU 0 has a total capacity of 23.56 GiB of which 185.44 MiB is free. Including non-PyTorch memory, this process has 1.95 GiB memory 
+  FAIL tin20_none                                   s0 recorded  43.20  evaluated  42.70  diff -0.50
+  FAIL tin20_none                                   s4 recorded  41.10  evaluated  42.00  diff +0.90
+  FAIL tin20b_aux                                   s2 recorded  50.00  evaluated  49.40  diff -0.60
+  FAIL tin20b_aux                                   s8 recorded  50.80  evaluated  50.30  diff -0.50
+  FAIL tin20b_none                                  s0 recorded  44.80  evaluated  44.10  diff -0.70
+  FAIL tin20b_none                                  s1 recorded  43.40  evaluated  44.40  diff +1.00
+  FAIL tin20b_none                                  s2 recorded  43.30  evaluated  42.60  diff -0.70
+
+411 checkpoints examined: 394 verified, 8 outside +-0.5, 0 CORRUPT, 0 legacy key naming, 9 not verifiable (ERR)
+wrote results/local_identity_m116_runs.json
+verifying 7 cells (shard 0/1, all seeds)
+
+21 checkpoints examined: 21 verified, 0 outside +-0.5, 0 CORRUPT, 0 legacy key naming, 0 not verifiable (ERR)
+wrote results/local_identity_m116_pull.json
+=== building probe list from cells that PASSED identity ===
+  EXCLUDE grid_c100_cnx_axmagnitudes2_l10to00_4a79ac_7pct s2 diff +0.55 (tol 0.50, ds=cifar100)
+  EXCLUDE tin20b_none s1 diff +1.00 (tol 1.00, ds=tin20b)
+  NOCONFIG cub_none_100pct
+  NOCONFIG cub_none_25pct
+queued 109 probe commands; excluded 5 on identity
+=== probes ===
+M116_COMPLETE

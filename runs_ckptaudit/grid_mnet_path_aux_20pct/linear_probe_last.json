@@ -1,0 +1,21 @@
+{
+  "config": "configs/grid/grid_mnet_path_aux_20pct.yaml",
+  "ckpt": "last.pt",
+  "results": [
+    {
+      "seed": "seed0",
+      "probe_train": 0.9901329278945923,
+      "probe_test": 0.8756267428398132
+    },
+    {
+      "seed": "seed1",
+      "probe_train": 0.9910107254981995,
+      "probe_test": 0.8912256360054016
+    },
+    {
+      "seed": "seed2",
+      "probe_train": 0.9913662672042847,
+      "probe_test": 0.8874651789665222
+    }
+  ]
+}

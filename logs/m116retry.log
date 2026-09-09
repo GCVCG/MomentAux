@@ -1,0 +1,11 @@
+[try 1] runs/diagcos_tin_none_1pct (free 24079 MiB, need 8000)
+  OK after 1
+[try 1] runs/stl_none_10pct (free 24079 MiB, need 8000)
+  OK after 1
+[try 1] runs/diagin100_r50_aux (free 24079 MiB, need 14000)
+  OK after 1
+=== final artifact check ===
+  diagcos_tin_none_1pct              OK
+  stl_none_10pct                     OK
+  diagin100_r50_aux                  OK
+M116RETRY_COMPLETE

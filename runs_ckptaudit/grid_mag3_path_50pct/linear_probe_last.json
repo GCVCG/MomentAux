@@ -1,0 +1,21 @@
+{
+  "config": "configs/grid/grid_mag3_path_50pct.yaml",
+  "ckpt": "last.pt",
+  "results": [
+    {
+      "seed": "seed0",
+      "probe_train": 0.9994444251060486,
+      "probe_test": 0.8761838674545288
+    },
+    {
+      "seed": "seed1",
+      "probe_train": 0.999488890171051,
+      "probe_test": 0.8662952780723572
+    },
+    {
+      "seed": "seed2",
+      "probe_train": 0.9994111061096191,
+      "probe_test": 0.880501389503479
+    }
+  ]
+}

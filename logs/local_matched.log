@@ -1,0 +1,11 @@
+=== identity pass (last.pt) over 117 cells ===
+verifying 117 cells (shard 0/1, all seeds)
+  FAIL tin20b_aux                                   s2 recorded  50.00  evaluated  49.40  diff -0.60
+  FAIL tin20b_aux                                   s8 recorded  50.80  evaluated  50.30  diff -0.50
+
+428 checkpoints examined: 426 verified, 2 outside +-0.5, 0 CORRUPT, 0 legacy key naming, 0 not verifiable (ERR)
+wrote results/local_identity_m117.json
+=== matched-epoch probes, ONLY on cells whose last.pt verified ===
+probing 116 cells, skipping 1 that failed identity
+queued 116 probe commands
+LOCAL_MATCHED_COMPLETE

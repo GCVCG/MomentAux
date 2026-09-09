@@ -1,0 +1,37 @@
+[cifar10] all 10 cells cached
+[cifar100] extracting 7 cells
+  abl5_none seed0 [last.pt]: acc 25.06
+  abl5_none seed1 [last.pt]: acc 24.80
+  abl5_none seed2 [last.pt]: acc 25.84
+  auxmag_5pct_sched0 seed0 [last.pt]: acc 30.40
+  auxmag_5pct_sched0 seed1 [last.pt]: acc 30.80
+  auxmag_5pct_sched0 seed2 [last.pt]: acc 30.39
+  diaggrid_dino_vit_10pct seed0 [last.pt]: acc 25.45
+  diaggrid_dino_vit_10pct seed1 [last.pt]: acc 23.64
+  diaggrid_dino_vit_10pct seed2 [last.pt]: acc 24.73
+  diaggrid_dino_vit_5pct seed0 [last.pt]: acc 15.04
+  diaggrid_dino_vit_5pct seed1 [last.pt]: acc 14.82
+  diaggrid_dino_vit_5pct seed2 [last.pt]: acc 15.84
+  diaggrid_simclr_c100_5pct seed0 [last.pt]: acc 34.78
+  diaggrid_simclr_c100_5pct seed1 [last.pt]: acc 34.68
+  diaggrid_simclr_c100_5pct seed2 [last.pt]: acc 34.55
+  diaggrid_simsiam_c100_10pct seed0 [last.pt]: acc 41.10
+  diaggrid_simsiam_c100_10pct seed1 [last.pt]: acc 40.74
+  diaggrid_simsiam_c100_10pct seed2 [last.pt]: acc 40.81
+  diaggrid_simsiam_c100_5pct seed0 [last.pt]: acc 25.36
+  diaggrid_simsiam_c100_5pct seed1 [last.pt]: acc 25.30
+  diaggrid_simsiam_c100_5pct seed2 [last.pt]: acc 25.85
+[dtd] all 3 cells cached
+[eurosat] all 12 cells cached
+[food101] all 15 cells cached
+[stl10] all 3 cells cached
+[tin] extracting 3 cells
+  diaggrid_simsiam_tin_5pct seed0 [last.pt]: acc 22.36
+  diaggrid_simsiam_tin_5pct seed1 [last.pt]: acc 21.74
+  diaggrid_simsiam_tin_5pct seed2 [last.pt]: acc 21.90
+  tin_aux_5pct seed0 [last.pt]: acc 22.90
+  tin_aux_5pct seed1 [last.pt]: acc 23.23
+  tin_aux_5pct seed2 [last.pt]: acc 22.71
+  tin_none_5pct seed0 [last.pt]: acc 21.16
+  tin_none_5pct seed1 [last.pt]: acc 21.07
+  tin_none_5pct seed2 [last.pt]: acc 20.60

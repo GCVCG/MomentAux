@@ -91,26 +91,31 @@ worker () {                              # $1 = GPU index
         # whole 32-GPU cluster spent ~20h re-running already-finished cells
         # (sampled 12/13 redundant). A claim we cannot make safely must FAIL,
         # never silently restart the queue from the top.
+        # The claim is BOUNDED BY THE LIVE WORKLIST, read under the same lock.
+        # A worker that finds no work must not consume an index: the old form
+        # incremented unconditionally and then decided it was out of range, so
+        # every idling worker burned one index per poll and the shared counter
+        # ran away from the file (observed 2026-08-26 at 396 against a 299-line
+        # worklist). Two consequences, both silent: appended tasks landed below
+        # the counter and were never claimed, and any claim taken just before
+        # an append was DISCARDED rather than run, losing one task per live
+        # worker. Same family as the 2026-08-03 skip -- claims are atomic,
+        # execution is not. Reading the length inside the claim also makes
+        # appends work with no padding and no cached N.
         i=$(flock "$LOCK" bash -c "
                 v=\$(cat '$CTR' 2>/dev/null)
                 case \"\$v\" in ''|*[!0-9]*) exit 1 ;; esac
+                n=\$(wc -l < '$WORKLIST' 2>/dev/null || echo 0)
+                if [ \"\$v\" -ge \"\$n\" ]; then echo DRAINED; exit 0; fi
                 echo \$((v+1)) > '$CTR'
                 echo \$v") \
             || { echo "[gpu$1] counter unreadable/corrupt, backing off"; sleep 10; continue; }
-        i=$((i+1))
-        if [ "$i" -gt "$N" ]; then
-            # Queue empty. Do NOT exit immediately: on 2026-08-05 two of four
-            # GPUs sat at 0% for hours because their workers drained while
-            # stragglers ran on the others, and an exited worker never comes
-            # back even when new tasks are APPENDED (which happens often).
-            # Poll for a bounded window instead, then give up so the keeper's
-            # "no workers live -> reconcile" path can still fire.
-            NEWN=$(wc -l < "$WORKLIST" 2>/dev/null || echo 0)
-            if [ "$NEWN" -gt "$N" ]; then
-                echo "[gpu$1] worklist grew $N -> $NEWN, resuming"
-                N=$NEWN
-                continue
-            fi
+        if [ "$i" = DRAINED ]; then
+            # Do NOT exit immediately: on 2026-08-05 two of four GPUs sat at 0%
+            # for hours because their workers drained while stragglers ran on
+            # the others, and an exited worker never comes back even when new
+            # tasks are appended. Poll for a bounded window instead, then give
+            # up so the keeper's "no workers live -> reconcile" path can fire.
             IDLE=$((IDLE + 1))
             if [ "$IDLE" -ge "$IDLE_MAX" ]; then
                 echo "[gpu$1] queue drained (idled ${IDLE}x)"; break
@@ -118,6 +123,7 @@ worker () {                              # $1 = GPU index
             sleep 60
             continue
         fi
+        i=$((i+1))
         IDLE=0
         cmd=$(sed -n "${i}p" "$WORKLIST")
         if [ -z "$cmd" ]; then

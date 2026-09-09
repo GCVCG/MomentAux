@@ -1,0 +1,21 @@
+{
+  "config": "configs/grid/grid_food_r18_axmagnitudeL3_l10to00_hn_8bd74b_50pct.yaml",
+  "ckpt": "last.pt",
+  "results": [
+    {
+      "seed": "seed0",
+      "probe_train": 0.858402669429779,
+      "probe_test": 0.7105742692947388
+    },
+    {
+      "seed": "seed1",
+      "probe_train": 0.8592343330383301,
+      "probe_test": 0.7039999961853027
+    },
+    {
+      "seed": "seed2",
+      "probe_train": 0.8596171736717224,
+      "probe_test": 0.7076039910316467
+    }
+  ]
+}

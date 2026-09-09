@@ -319,6 +319,20 @@ def main():
               f"This is a failure, not a pass.", file=sys.stderr)
         sys.exit(2)
 
+    # A count of what WAS examined is not a check that what was ASKED FOR was
+    # examined.  verify_one returns None when a checkpoint is absent, so a
+    # requested cell can contribute zero rows while the summary below still
+    # reads "N verified, 0 outside tolerance".  That is how ms_gapverify
+    # reported success on 31 of the 33 cells it was given (2026-08-26).
+    reached = {r["cell"] for r in checked}
+    unreached = [c for c in cells if c not in reached]
+    if unreached:
+        print(f"\nWARNING: {len(unreached)} of {len(cells)} requested cells "
+              f"produced NO result (no checkpoint on disk under --runs). "
+              f"They are NOT verified:", file=sys.stderr)
+        for c in unreached:
+            print(f"  UNREACHED {c}", file=sys.stderr)
+
     n_err = sum(r.get("status") == "ERR" for r in checked)
     n_corrupt = sum(r.get("status") == "CORRUPT" for r in checked)
     n_keys = sum(r.get("status") == "KEYS" for r in checked)

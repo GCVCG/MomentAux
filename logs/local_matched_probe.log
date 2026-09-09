@@ -1,0 +1,582 @@
+auxmag3_c100_5pct seed0: probe train 58.26  test 42.70
+auxmag3_c100_5pct seed1: probe train 58.97  test 43.21
+auxmag3_c100_5pct seed2: probe train 58.91  test 44.49
+PROBE_RESULT auxmag3_c100_5pct test 43.47+/-0.92 over 3 seeds -> runs/auxmag3_c100_5pct/linear_probe_last.json
+auxmag3_tin_10pct seed0: probe train 56.58  test 41.88
+auxmag3_tin_10pct seed1: probe train 56.66  test 41.89
+auxmag3_tin_10pct seed2: probe train 56.79  test 41.95
+PROBE_RESULT auxmag3_tin_10pct test 41.91+/-0.04 over 3 seeds -> runs/auxmag3_tin_10pct/linear_probe_last.json
+auxmag3_tin_1pct seed0: probe train 31.12  test 24.04
+auxmag3_tin_1pct seed1: probe train 30.85  test 23.60
+auxmag3_tin_1pct seed2: probe train 30.88  test 23.38
+PROBE_RESULT auxmag3_tin_1pct test 23.67+/-0.34 over 3 seeds -> runs/auxmag3_tin_1pct/linear_probe_last.json
+auxmag3_tin_5pct seed0: probe train 47.51  test 34.58
+auxmag3_tin_5pct seed1: probe train 47.85  test 35.17
+auxmag3_tin_5pct seed2: probe train 47.20  test 34.69
+auxmag3_tin_5pct seed3: probe train 47.37  test 35.25
+auxmag3_tin_5pct seed4: probe train 47.83  test 35.50
+auxmag3_tin_5pct seed5: probe train 47.58  test 34.63
+auxmag3_tin_5pct seed6: probe train 47.34  test 35.43
+auxmag3_tin_5pct seed7: probe train 47.60  test 35.07
+auxmag3_tin_5pct seed8: probe train 47.67  test 34.70
+auxmag3_tin_5pct seed9: probe train 47.31  test 34.51
+PROBE_RESULT auxmag3_tin_5pct test 34.95+/-0.37 over 10 seeds -> runs/auxmag3_tin_5pct/linear_probe_last.json
+auxmag6o_tin_5pct seed0: probe train 47.44  test 34.91
+auxmag6o_tin_5pct seed1: probe train 47.74  test 35.31
+auxmag6o_tin_5pct seed2: probe train 47.45  test 34.25
+auxmag6o_tin_5pct seed3: probe train 47.50  test 34.63
+auxmag6o_tin_5pct seed4: probe train 47.62  test 34.91
+auxmag6o_tin_5pct seed5: probe train 47.71  test 34.99
+auxmag6o_tin_5pct seed6: probe train 47.80  test 35.05
+auxmag6o_tin_5pct seed7: probe train 47.48  test 34.44
+auxmag6o_tin_5pct seed8: probe train 47.79  test 34.90
+auxmag6o_tin_5pct seed9: probe train 47.70  test 35.15
+PROBE_RESULT auxmag6o_tin_5pct test 34.85+/-0.32 over 10 seeds -> runs/auxmag6o_tin_5pct/linear_probe_last.json
+auxmag_15pct_sched0 seed0: probe train 73.96  test 57.09
+auxmag_15pct_sched0 seed1: probe train 73.68  test 57.48
+auxmag_15pct_sched0 seed2: probe train 74.37  test 57.48
+PROBE_RESULT auxmag_15pct_sched0 test 57.35+/-0.23 over 3 seeds -> runs/auxmag_15pct_sched0/linear_probe_last.json
+auxmag_1pct_sched0 seed0: probe train 42.11  test 31.40
+auxmag_1pct_sched0 seed1: probe train 41.98  test 29.97
+auxmag_1pct_sched0 seed2: probe train 42.18  test 30.91
+auxmag_1pct_sched0 seed3: probe train 41.62  test 30.87
+auxmag_1pct_sched0 seed4: probe train 42.28  test 30.72
+auxmag_1pct_sched0 seed5: probe train 41.93  test 30.88
+auxmag_1pct_sched0 seed6: probe train 42.13  test 31.35
+auxmag_1pct_sched0 seed7: probe train 42.70  test 31.18
+auxmag_1pct_sched0 seed8: probe train 41.74  test 30.55
+auxmag_1pct_sched0 seed9: probe train 41.86  test 30.35
+PROBE_RESULT auxmag_1pct_sched0 test 30.82+/-0.45 over 10 seeds -> runs/auxmag_1pct_sched0/linear_probe_last.json
+auxmag_1pct_sched2 seed0: probe train 42.59  test 31.48
+auxmag_1pct_sched2 seed1: probe train 42.29  test 31.36
+auxmag_1pct_sched2 seed2: probe train 42.58  test 31.21
+PROBE_RESULT auxmag_1pct_sched2 test 31.35+/-0.14 over 3 seeds -> runs/auxmag_1pct_sched2/linear_probe_last.json
+auxmag_1pct_sched2_tap1 seed0: probe train 43.04  test 31.56
+auxmag_1pct_sched2_tap1 seed1: probe train 43.24  test 31.49
+auxmag_1pct_sched2_tap1 seed2: probe train 42.90  test 31.54
+PROBE_RESULT auxmag_1pct_sched2_tap1 test 31.53+/-0.04 over 3 seeds -> runs/auxmag_1pct_sched2_tap1/linear_probe_last.json
+auxmag_1pct_sched2_tap2 seed0: probe train 42.38  test 30.78
+auxmag_1pct_sched2_tap2 seed1: probe train 41.82  test 30.46
+auxmag_1pct_sched2_tap2 seed2: probe train 42.58  test 31.76
+PROBE_RESULT auxmag_1pct_sched2_tap2 test 31.00+/-0.68 over 3 seeds -> runs/auxmag_1pct_sched2_tap2/linear_probe_last.json
+auxmag_25pct_sched0 seed0: probe train 81.23  test 63.74
+auxmag_25pct_sched0 seed1: probe train 81.09  test 63.22
+auxmag_25pct_sched0 seed2: probe train 80.85  test 63.92
+PROBE_RESULT auxmag_25pct_sched0 test 63.63+/-0.36 over 3 seeds -> runs/auxmag_25pct_sched0/linear_probe_last.json
+auxmag_2pct_sched0 seed0: probe train 47.89  test 35.24
+auxmag_2pct_sched0 seed1: probe train 47.80  test 34.50
+auxmag_2pct_sched0 seed2: probe train 47.83  test 34.89
+PROBE_RESULT auxmag_2pct_sched0 test 34.88+/-0.37 over 3 seeds -> runs/auxmag_2pct_sched0/linear_probe_last.json
+auxmag_3pct_sched0 seed0: probe train 52.61  test 38.78
+auxmag_3pct_sched0 seed1: probe train 52.23  test 37.96
+auxmag_3pct_sched0 seed2: probe train 52.50  test 38.70
+PROBE_RESULT auxmag_3pct_sched0 test 38.48+/-0.45 over 3 seeds -> runs/auxmag_3pct_sched0/linear_probe_last.json
+auxmag_7pct_sched0 seed0: probe train 63.34  test 46.84
+auxmag_7pct_sched0 seed1: probe train 63.10  test 47.12
+auxmag_7pct_sched0 seed2: probe train 63.52  test 47.24
+PROBE_RESULT auxmag_7pct_sched0 test 47.07+/-0.21 over 3 seeds -> runs/auxmag_7pct_sched0/linear_probe_last.json
+auxrand_1pct_sched2 seed0: probe train 38.97  test 28.35
+auxrand_1pct_sched2 seed1: probe train 38.10  test 27.41
+auxrand_1pct_sched2 seed2: probe train 38.37  test 27.88
+PROBE_RESULT auxrand_1pct_sched2 test 27.88+/-0.47 over 3 seeds -> runs/auxrand_1pct_sched2/linear_probe_last.json
+c10_aux_10pct seed0: probe train 86.08  test 83.35
+c10_aux_10pct seed1: probe train 86.23  test 83.12
+c10_aux_10pct seed2: probe train 86.12  test 82.98
+PROBE_RESULT c10_aux_10pct test 83.15+/-0.19 over 3 seeds -> runs/c10_aux_10pct/linear_probe_last.json
+c10_aux_1pct seed0: probe train 62.47  test 59.04
+c10_aux_1pct seed1: probe train 62.75  test 58.25
+c10_aux_1pct seed2: probe train 62.78  test 58.93
+c10_aux_1pct seed3: probe train 62.22  test 57.95
+c10_aux_1pct seed4: probe train 62.69  test 58.71
+c10_aux_1pct seed5: probe train 62.35  test 58.46
+c10_aux_1pct seed6: probe train 61.99  test 58.45
+c10_aux_1pct seed7: probe train 62.40  test 58.65
+c10_aux_1pct seed8: probe train 62.51  test 58.85
+c10_aux_1pct seed9: probe train 62.44  test 58.78
+PROBE_RESULT c10_aux_1pct test 58.61+/-0.33 over 10 seeds -> runs/c10_aux_1pct/linear_probe_last.json
+c10_aux_2pct seed0: probe train 69.83  test 66.42
+c10_aux_2pct seed1: probe train 70.01  test 67.09
+c10_aux_2pct seed2: probe train 70.11  test 65.79
+c10_aux_2pct seed3: probe train 69.99  test 66.13
+c10_aux_2pct seed4: probe train 70.37  test 67.20
+c10_aux_2pct seed5: probe train 70.02  test 66.84
+c10_aux_2pct seed6: probe train 69.24  test 65.66
+c10_aux_2pct seed7: probe train 69.26  test 66.42
+c10_aux_2pct seed8: probe train 69.93  test 66.47
+c10_aux_2pct seed9: probe train 70.14  test 66.87
+PROBE_RESULT c10_aux_2pct test 66.49+/-0.52 over 10 seeds -> runs/c10_aux_2pct/linear_probe_last.json
+c10_aux_5pct seed0: probe train 80.47  test 77.25
+c10_aux_5pct seed1: probe train 80.55  test 76.35
+c10_aux_5pct seed2: probe train 80.26  test 76.57
+PROBE_RESULT c10_aux_5pct test 76.72+/-0.47 over 3 seeds -> runs/c10_aux_5pct/linear_probe_last.json
+cub_aux_100pct seed0: probe train 100.00  test 46.72
+cub_aux_100pct seed1: probe train 100.00  test 45.77
+cub_aux_100pct seed2: probe train 100.00  test 45.18
+PROBE_RESULT cub_aux_100pct test 45.89+/-0.78 over 3 seeds -> runs/cub_aux_100pct/linear_probe_last.json
+cub_aux_25pct seed0: probe train 100.00  test 10.41
+cub_aux_25pct seed1: probe train 100.00  test 9.92
+cub_aux_25pct seed2: probe train 100.00  test 9.72
+PROBE_RESULT cub_aux_25pct test 10.02+/-0.35 over 3 seeds -> runs/cub_aux_25pct/linear_probe_last.json
+diagcnxadamw_aux_10pct seed0: probe train 59.85  test 45.51
+diagcnxadamw_aux_10pct seed1: probe train 57.92  test 45.50
+diagcnxadamw_aux_10pct seed2: probe train 56.20  test 44.44
+PROBE_RESULT diagcnxadamw_aux_10pct test 45.15+/-0.61 over 3 seeds -> runs/diagcnxadamw_aux_10pct/linear_probe_last.json
+diagcos_c100_aux_1pct seed0: probe train 42.18  test 28.75
+diagcos_c100_aux_1pct seed1: probe train 42.46  test 29.15
+diagcos_c100_aux_1pct seed2: probe train 42.75  test 29.15
+PROBE_RESULT diagcos_c100_aux_1pct test 29.02+/-0.23 over 3 seeds -> runs/diagcos_c100_aux_1pct/linear_probe_last.json
+diagcos_tin_aux_1pct seed0: probe train 31.80  test 20.01
+diagcos_tin_aux_1pct seed1: probe train 31.71  test 20.23
+diagcos_tin_aux_1pct seed2: probe train 31.41  test 19.96
+PROBE_RESULT diagcos_tin_aux_1pct test 20.07+/-0.14 over 3 seeds -> runs/diagcos_tin_aux_1pct/linear_probe_last.json
+diagdeit_aux_100pct seed0: probe train 98.25  test 74.70
+diagdeit_aux_100pct seed1: probe train 98.52  test 74.66
+diagdeit_aux_100pct seed2: probe train 97.91  test 74.70
+PROBE_RESULT diagdeit_aux_100pct test 74.69+/-0.02 over 3 seeds -> runs/diagdeit_aux_100pct/linear_probe_last.json
+diagdeit_aux_10pct seed0: probe train 58.53  test 49.93
+diagdeit_aux_10pct seed1: probe train 58.71  test 50.37
+diagdeit_aux_10pct seed2: probe train 58.97  test 50.64
+PROBE_RESULT diagdeit_aux_10pct test 50.31+/-0.36 over 3 seeds -> runs/diagdeit_aux_10pct/linear_probe_last.json
+diagdeit_aux_15pct seed0: probe train 65.53  test 56.12
+diagdeit_aux_15pct seed1: probe train 64.49  test 54.28
+diagdeit_aux_15pct seed2: probe train 64.95  test 55.37
+PROBE_RESULT diagdeit_aux_15pct test 55.26+/-0.93 over 3 seeds -> runs/diagdeit_aux_15pct/linear_probe_last.json
+diagdeit_aux_1pct seed0: probe train 26.95  test 24.68
+diagdeit_aux_1pct seed1: probe train 27.16  test 24.93
+diagdeit_aux_1pct seed2: probe train 27.43  test 25.19
+PROBE_RESULT diagdeit_aux_1pct test 24.93+/-0.26 over 3 seeds -> runs/diagdeit_aux_1pct/linear_probe_last.json
+diagdeit_aux_25pct seed0: probe train 74.13  test 61.50
+diagdeit_aux_25pct seed1: probe train 73.67  test 61.04
+diagdeit_aux_25pct seed2: probe train 73.88  test 61.29
+PROBE_RESULT diagdeit_aux_25pct test 61.28+/-0.23 over 3 seeds -> runs/diagdeit_aux_25pct/linear_probe_last.json
+diagdeit_aux_2pct seed0: probe train 36.36  test 32.73
+diagdeit_aux_2pct seed1: probe train 35.38  test 31.29
+diagdeit_aux_2pct seed2: probe train 35.49  test 31.39
+PROBE_RESULT diagdeit_aux_2pct test 31.80+/-0.80 over 3 seeds -> runs/diagdeit_aux_2pct/linear_probe_last.json
+diagdeit_aux_3pct seed0: probe train 40.03  test 35.79
+diagdeit_aux_3pct seed1: probe train 39.99  test 35.71
+diagdeit_aux_3pct seed2: probe train 39.49  test 35.57
+PROBE_RESULT diagdeit_aux_3pct test 35.69+/-0.11 over 3 seeds -> runs/diagdeit_aux_3pct/linear_probe_last.json
+diagdeit_aux_5pct seed0: probe train 46.90  test 41.53
+diagdeit_aux_5pct seed1: probe train 47.79  test 41.92
+diagdeit_aux_5pct seed2: probe train 47.23  test 41.59
+PROBE_RESULT diagdeit_aux_5pct test 41.68+/-0.21 over 3 seeds -> runs/diagdeit_aux_5pct/linear_probe_last.json
+diagdeit_aux_7pct seed0: probe train 52.18  test 45.49
+diagdeit_aux_7pct seed1: probe train 52.15  test 44.91
+diagdeit_aux_7pct seed2: probe train 52.58  test 45.84
+PROBE_RESULT diagdeit_aux_7pct test 45.41+/-0.47 over 3 seeds -> runs/diagdeit_aux_7pct/linear_probe_last.json
+diagdeitssl_simclr_10pct seed0: probe train 55.20  test 46.23
+diagdeitssl_simclr_10pct seed1: probe train 55.34  test 45.66
+diagdeitssl_simclr_10pct seed2: probe train 53.46  test 44.24
+PROBE_RESULT diagdeitssl_simclr_10pct test 45.38+/-1.02 over 3 seeds -> runs/diagdeitssl_simclr_10pct/linear_probe_last.json
+diagdeitssl_simclr_25pct seed0: probe train 70.38  test 56.18
+diagdeitssl_simclr_25pct seed1: probe train 70.98  test 56.65
+diagdeitssl_simclr_25pct seed2: probe train 70.66  test 55.96
+PROBE_RESULT diagdeitssl_simclr_25pct test 56.26+/-0.35 over 3 seeds -> runs/diagdeitssl_simclr_25pct/linear_probe_last.json
+diagdeitssl_simclr_5pct seed0: probe train 32.23  test 28.86
+diagdeitssl_simclr_5pct seed1: probe train 40.38  test 35.43
+diagdeitssl_simclr_5pct seed2: probe train 40.05  test 35.46
+PROBE_RESULT diagdeitssl_simclr_5pct test 33.25+/-3.80 over 3 seeds -> runs/diagdeitssl_simclr_5pct/linear_probe_last.json
+diagdeitsslbudget_simclr800_vit_10pct seed0: probe train 59.34  test 48.94
+diagdeitsslbudget_simclr800_vit_10pct seed1: probe train 59.94  test 50.07
+diagdeitsslbudget_simclr800_vit_10pct seed2: probe train 58.91  test 48.70
+PROBE_RESULT diagdeitsslbudget_simclr800_vit_10pct test 49.24+/-0.73 over 3 seeds -> runs/diagdeitsslbudget_simclr800_vit_10pct/linear_probe_last.json
+diagdeitsslbudget_simclr800_vit_tin_25pct seed0: probe train 54.07  test 40.42
+diagdeitsslbudget_simclr800_vit_tin_25pct seed1: probe train 54.40  test 40.20
+diagdeitsslbudget_simclr800_vit_tin_25pct seed2: probe train 55.17  test 40.74
+PROBE_RESULT diagdeitsslbudget_simclr800_vit_tin_25pct test 40.45+/-0.27 over 3 seeds -> runs/diagdeitsslbudget_simclr800_vit_tin_25pct/linear_probe_last.json
+diagdeitsslbudget_simclr800_vit_tin_5pct seed0: probe train 38.36  test 31.09
+diagdeitsslbudget_simclr800_vit_tin_5pct seed1: probe train 37.91  test 30.76
+diagdeitsslbudget_simclr800_vit_tin_5pct seed2: probe train 39.04  test 31.73
+PROBE_RESULT diagdeitsslbudget_simclr800_vit_tin_5pct test 31.19+/-0.49 over 3 seeds -> runs/diagdeitsslbudget_simclr800_vit_tin_5pct/linear_probe_last.json
+diagdeitsslsv_simclr_10pct seed0: probe train 39.04  test 33.47
+diagdeitsslsv_simclr_10pct seed1: probe train 41.18  test 35.36
+diagdeitsslsv_simclr_10pct seed2: probe train 39.97  test 33.97
+PROBE_RESULT diagdeitsslsv_simclr_10pct test 34.27+/-0.98 over 3 seeds -> runs/diagdeitsslsv_simclr_10pct/linear_probe_last.json
+diagdeitsslsv_simclr_25pct seed0: probe train 57.48  test 45.27
+diagdeitsslsv_simclr_25pct seed1: probe train 56.48  test 44.53
+diagdeitsslsv_simclr_25pct seed2: probe train 61.32  test 48.87
+PROBE_RESULT diagdeitsslsv_simclr_25pct test 46.22+/-2.32 over 3 seeds -> runs/diagdeitsslsv_simclr_25pct/linear_probe_last.json
+diagdeitsslsv_simclr_5pct seed0: probe train 29.94  test 26.42
+diagdeitsslsv_simclr_5pct seed1: probe train 32.53  test 28.25
+diagdeitsslsv_simclr_5pct seed2: probe train 28.06  test 24.90
+PROBE_RESULT diagdeitsslsv_simclr_5pct test 26.52+/-1.68 over 3 seeds -> runs/diagdeitsslsv_simclr_5pct/linear_probe_last.json
+diagfuse_esat_prioraug_10pct seed0: probe train 98.40  test 96.39
+diagfuse_esat_prioraug_10pct seed1: probe train 98.58  test 96.59
+diagfuse_esat_prioraug_10pct seed2: probe train 98.41  test 96.48
+PROBE_RESULT diagfuse_esat_prioraug_10pct test 96.49+/-0.10 over 3 seeds -> runs/diagfuse_esat_prioraug_10pct/linear_probe_last.json
+diagfuse_esat_prioraug_25pct seed0: probe train 99.39  test 97.91
+diagfuse_esat_prioraug_25pct seed1: probe train 99.34  test 98.06
+diagfuse_esat_prioraug_25pct seed2: probe train 99.31  test 98.13
+PROBE_RESULT diagfuse_esat_prioraug_25pct test 98.03+/-0.11 over 3 seeds -> runs/diagfuse_esat_prioraug_25pct/linear_probe_last.json
+diagfuse_esat_prioraug_5pct seed0: probe train 96.43  test 93.96
+diagfuse_esat_prioraug_5pct seed1: probe train 96.97  test 94.54
+diagfuse_esat_prioraug_5pct seed2: probe train 96.88  test 94.59
+PROBE_RESULT diagfuse_esat_prioraug_5pct test 94.36+/-0.35 over 3 seeds -> runs/diagfuse_esat_prioraug_5pct/linear_probe_last.json
+diagfuse_esat_priorssl_10pct seed0: probe train 97.81  test 96.13
+diagfuse_esat_priorssl_10pct seed1: probe train 97.80  test 96.20
+diagfuse_esat_priorssl_10pct seed2: probe train 97.48  test 95.83
+PROBE_RESULT diagfuse_esat_priorssl_10pct test 96.06+/-0.20 over 3 seeds -> runs/diagfuse_esat_priorssl_10pct/linear_probe_last.json
+diagfuse_esat_priorssl_25pct seed0: probe train 98.97  test 97.63
+diagfuse_esat_priorssl_25pct seed1: probe train 98.96  test 97.52
+diagfuse_esat_priorssl_25pct seed2: probe train 99.02  test 97.85
+PROBE_RESULT diagfuse_esat_priorssl_25pct test 97.67+/-0.17 over 3 seeds -> runs/diagfuse_esat_priorssl_25pct/linear_probe_last.json
+diagfuse_esat_priorssl_5pct seed0: probe train 96.17  test 94.09
+diagfuse_esat_priorssl_5pct seed1: probe train 96.25  test 94.00
+diagfuse_esat_priorssl_5pct seed2: probe train 96.05  test 93.94
+PROBE_RESULT diagfuse_esat_priorssl_5pct test 94.01+/-0.07 over 3 seeds -> runs/diagfuse_esat_priorssl_5pct/linear_probe_last.json
+diagfuse_food_prioraug_10pct seed0: probe train 63.84  test 56.06
+diagfuse_food_prioraug_10pct seed1: probe train 63.94  test 56.17
+diagfuse_food_prioraug_10pct seed2: probe train 64.10  test 56.06
+PROBE_RESULT diagfuse_food_prioraug_10pct test 56.09+/-0.06 over 3 seeds -> runs/diagfuse_food_prioraug_10pct/linear_probe_last.json
+diagfuse_food_prioraug_25pct seed0: probe train 77.95  test 66.30
+diagfuse_food_prioraug_25pct seed1: probe train 77.98  test 66.94
+diagfuse_food_prioraug_25pct seed2: probe train 77.78  test 66.33
+PROBE_RESULT diagfuse_food_prioraug_25pct test 66.52+/-0.36 over 3 seeds -> runs/diagfuse_food_prioraug_25pct/linear_probe_last.json
+diagfuse_food_prioraug_5pct seed0: probe train 53.31  test 48.48
+diagfuse_food_prioraug_5pct seed1: probe train 52.89  test 47.89
+diagfuse_food_prioraug_5pct seed2: probe train 53.04  test 48.16
+PROBE_RESULT diagfuse_food_prioraug_5pct test 48.18+/-0.30 over 3 seeds -> runs/diagfuse_food_prioraug_5pct/linear_probe_last.json
+diagfuse_food_priorssl_10pct seed0: probe train 56.25  test 48.70
+diagfuse_food_priorssl_10pct seed1: probe train 56.57  test 49.60
+diagfuse_food_priorssl_10pct seed2: probe train 56.03  test 48.61
+PROBE_RESULT diagfuse_food_priorssl_10pct test 48.97+/-0.54 over 3 seeds -> runs/diagfuse_food_priorssl_10pct/linear_probe_last.json
+diagfuse_food_priorssl_25pct seed0: probe train 71.95  test 62.55
+diagfuse_food_priorssl_25pct seed1: probe train 72.47  test 62.53
+diagfuse_food_priorssl_25pct seed2: probe train 72.38  test 62.28
+PROBE_RESULT diagfuse_food_priorssl_25pct test 62.45+/-0.15 over 3 seeds -> runs/diagfuse_food_priorssl_25pct/linear_probe_last.json
+diagfuse_food_priorssl_5pct seed0: probe train 46.84  test 39.54
+diagfuse_food_priorssl_5pct seed1: probe train 45.19  test 37.46
+diagfuse_food_priorssl_5pct seed2: probe train 46.28  test 39.35
+PROBE_RESULT diagfuse_food_priorssl_5pct test 38.78+/-1.15 over 3 seeds -> runs/diagfuse_food_priorssl_5pct/linear_probe_last.json
+diagsfvit_eurosatms_all_aux_5pct seed0: probe train 93.97  test 93.20
+diagsfvit_eurosatms_all_aux_5pct seed1: probe train 94.07  test 93.31
+diagsfvit_eurosatms_all_aux_5pct seed2: probe train 94.28  test 93.39
+PROBE_RESULT diagsfvit_eurosatms_all_aux_5pct test 93.30+/-0.09 over 3 seeds -> runs/diagsfvit_eurosatms_all_aux_5pct/linear_probe_last.json
+diagsfvit_eurosatms_nir_aux_5pct seed0: probe train 93.37  test 92.31
+diagsfvit_eurosatms_nir_aux_5pct seed1: probe train 93.50  test 92.78
+diagsfvit_eurosatms_nir_aux_5pct seed2: probe train 93.34  test 92.35
+PROBE_RESULT diagsfvit_eurosatms_nir_aux_5pct test 92.48+/-0.26 over 3 seeds -> runs/diagsfvit_eurosatms_nir_aux_5pct/linear_probe_last.json
+diagsfvit_eurosatms_rgb_aux_5pct seed0: probe train 90.29  test 88.72
+diagsfvit_eurosatms_rgb_aux_5pct seed1: probe train 90.20  test 88.87
+diagsfvit_eurosatms_rgb_aux_5pct seed2: probe train 90.67  test 88.83
+PROBE_RESULT diagsfvit_eurosatms_rgb_aux_5pct test 88.81+/-0.08 over 3 seeds -> runs/diagsfvit_eurosatms_rgb_aux_5pct/linear_probe_last.json
+diagssl_simclr50_5pct seed0: probe train 59.08  test 44.20
+diagssl_simclr50_5pct seed1: probe train 59.50  test 44.24
+diagssl_simclr50_5pct seed2: probe train 58.72  test 44.13
+PROBE_RESULT diagssl_simclr50_5pct test 44.19+/-0.06 over 3 seeds -> runs/diagssl_simclr50_5pct/linear_probe_last.json
+diagssl_simclr_10pct seed0: probe train 69.92  test 55.26
+diagssl_simclr_10pct seed1: probe train 71.39  test 55.75
+diagssl_simclr_10pct seed2: probe train 70.54  test 55.09
+PROBE_RESULT diagssl_simclr_10pct test 55.37+/-0.34 over 3 seeds -> runs/diagssl_simclr_10pct/linear_probe_last.json
+diagssl_simclr_1pct seed0: probe train 42.87  test 33.64
+diagssl_simclr_1pct seed1: probe train 41.81  test 32.31
+diagssl_simclr_1pct seed2: probe train 42.14  test 32.74
+PROBE_RESULT diagssl_simclr_1pct test 32.90+/-0.68 over 3 seeds -> runs/diagssl_simclr_1pct/linear_probe_last.json
+diagssl_simclr_2pct seed0: probe train 50.17  test 38.33
+diagssl_simclr_2pct seed1: probe train 50.18  test 38.85
+diagssl_simclr_2pct seed2: probe train 50.89  test 38.89
+PROBE_RESULT diagssl_simclr_2pct test 38.69+/-0.31 over 3 seeds -> runs/diagssl_simclr_2pct/linear_probe_last.json
+diagssl_simclr_5pct seed0: probe train 61.14  test 46.19
+diagssl_simclr_5pct seed1: probe train 61.06  test 46.06
+diagssl_simclr_5pct seed2: probe train 60.88  test 45.39
+PROBE_RESULT diagssl_simclr_5pct test 45.88+/-0.43 over 3 seeds -> runs/diagssl_simclr_5pct/linear_probe_last.json
+diagssl_simclraux_5pct seed0: probe train 60.80  test 45.23
+diagssl_simclraux_5pct seed1: probe train 60.52  test 45.04
+diagssl_simclraux_5pct seed2: probe train 60.27  test 45.09
+PROBE_RESULT diagssl_simclraux_5pct test 45.12+/-0.10 over 3 seeds -> runs/diagssl_simclraux_5pct/linear_probe_last.json
+diagsslbudget_simclr800_c100_15pct seed0: probe train 75.48  test 60.84
+diagsslbudget_simclr800_c100_15pct seed1: probe train 74.71  test 61.99
+diagsslbudget_simclr800_c100_15pct seed2: probe train 74.98  test 61.04
+PROBE_RESULT diagsslbudget_simclr800_c100_15pct test 61.29+/-0.61 over 3 seeds -> runs/diagsslbudget_simclr800_c100_15pct/linear_probe_last.json
+diagsslbudget_simclr800_c100_1pct seed0: probe train 50.22  test 37.44
+diagsslbudget_simclr800_c100_1pct seed1: probe train 49.48  test 37.40
+diagsslbudget_simclr800_c100_1pct seed2: probe train 49.91  test 37.17
+PROBE_RESULT diagsslbudget_simclr800_c100_1pct test 37.34+/-0.15 over 3 seeds -> runs/diagsslbudget_simclr800_c100_1pct/linear_probe_last.json
+diagsslbudget_simclr800_c100_25pct seed0: probe train 81.53  test 65.91
+diagsslbudget_simclr800_c100_25pct seed1: probe train 81.04  test 65.73
+diagsslbudget_simclr800_c100_25pct seed2: probe train 81.85  test 65.18
+PROBE_RESULT diagsslbudget_simclr800_c100_25pct test 65.61+/-0.38 over 3 seeds -> runs/diagsslbudget_simclr800_c100_25pct/linear_probe_last.json
+diagsslbudget_simclr800_c100_2pct seed0: probe train 55.25  test 39.40
+diagsslbudget_simclr800_c100_2pct seed1: probe train 55.01  test 39.44
+diagsslbudget_simclr800_c100_2pct seed2: probe train 55.37  test 39.31
+PROBE_RESULT diagsslbudget_simclr800_c100_2pct test 39.38+/-0.07 over 3 seeds -> runs/diagsslbudget_simclr800_c100_2pct/linear_probe_last.json
+diagsslbudget_simclr800_c100_3pct seed0: probe train 57.97  test 42.09
+diagsslbudget_simclr800_c100_3pct seed1: probe train 58.13  test 42.42
+diagsslbudget_simclr800_c100_3pct seed2: probe train 58.08  test 42.16
+PROBE_RESULT diagsslbudget_simclr800_c100_3pct test 42.22+/-0.17 over 3 seeds -> runs/diagsslbudget_simclr800_c100_3pct/linear_probe_last.json
+diagsslbudget_simclr800_c100_5pct seed0: probe train 64.20  test 48.24
+diagsslbudget_simclr800_c100_5pct seed1: probe train 64.72  test 48.79
+diagsslbudget_simclr800_c100_5pct seed2: probe train 63.62  test 48.59
+PROBE_RESULT diagsslbudget_simclr800_c100_5pct test 48.54+/-0.28 over 3 seeds -> runs/diagsslbudget_simclr800_c100_5pct/linear_probe_last.json
+diagsslbudget_simclr800_c100_7pct seed0: probe train 67.91  test 51.71
+diagsslbudget_simclr800_c100_7pct seed1: probe train 67.47  test 52.94
+diagsslbudget_simclr800_c100_7pct seed2: probe train 67.64  test 52.88
+PROBE_RESULT diagsslbudget_simclr800_c100_7pct test 52.51+/-0.69 over 3 seeds -> runs/diagsslbudget_simclr800_c100_7pct/linear_probe_last.json
+diagsslbudget_simsiam800_c100_5pct seed0: probe train 54.06  test 39.86
+diagsslbudget_simsiam800_c100_5pct seed1: probe train 53.00  test 37.83
+diagsslbudget_simsiam800_c100_5pct seed2: probe train 53.91  test 39.44
+PROBE_RESULT diagsslbudget_simsiam800_c100_5pct test 39.04+/-1.07 over 3 seeds -> runs/diagsslbudget_simsiam800_c100_5pct/linear_probe_last.json
+diagsslvit_simclr_10pct seed0: probe train 48.92  test 38.99
+diagsslvit_simclr_10pct seed1: probe train 49.46  test 38.31
+diagsslvit_simclr_10pct seed2: probe train 47.59  test 37.44
+PROBE_RESULT diagsslvit_simclr_10pct test 38.25+/-0.78 over 3 seeds -> runs/diagsslvit_simclr_10pct/linear_probe_last.json
+diagsslvit_simclr_1pct seed0: probe train 21.52  test 17.88
+diagsslvit_simclr_1pct seed1: probe train 22.50  test 18.89
+diagsslvit_simclr_1pct seed2: probe train 21.81  test 18.44
+PROBE_RESULT diagsslvit_simclr_1pct test 18.40+/-0.51 over 3 seeds -> runs/diagsslvit_simclr_1pct/linear_probe_last.json
+diagsslvit_simclr_25pct seed0: probe train 66.15  test 48.01
+diagsslvit_simclr_25pct seed1: probe train 66.01  test 48.13
+diagsslvit_simclr_25pct seed2: probe train 66.43  test 47.82
+PROBE_RESULT diagsslvit_simclr_25pct test 47.99+/-0.16 over 3 seeds -> runs/diagsslvit_simclr_25pct/linear_probe_last.json
+diagsslvit_simclr_5pct seed0: probe train 37.65  test 30.53
+diagsslvit_simclr_5pct seed1: probe train 37.89  test 31.09
+diagsslvit_simclr_5pct seed2: probe train 36.66  test 29.25
+PROBE_RESULT diagsslvit_simclr_5pct test 30.29+/-0.94 over 3 seeds -> runs/diagsslvit_simclr_5pct/linear_probe_last.json
+diagsslvitaux_10pct seed0: probe train 50.42  test 39.82
+diagsslvitaux_10pct seed1: probe train 50.21  test 39.73
+diagsslvitaux_10pct seed2: probe train 48.54  test 36.98
+PROBE_RESULT diagsslvitaux_10pct test 38.84+/-1.61 over 3 seeds -> runs/diagsslvitaux_10pct/linear_probe_last.json
+diagstep_c100_aux_10pct seed0: probe train 49.88  test 37.58
+diagstep_c100_aux_10pct seed1: probe train 49.70  test 37.35
+diagstep_c100_aux_10pct seed2: probe train 49.32  test 37.47
+PROBE_RESULT diagstep_c100_aux_10pct test 37.47+/-0.12 over 3 seeds -> runs/diagstep_c100_aux_10pct/linear_probe_last.json
+diagstep_c100_aux_1pct seed0: probe train 42.20  test 30.68
+diagstep_c100_aux_1pct seed1: probe train 41.70  test 30.20
+diagstep_c100_aux_1pct seed2: probe train 41.89  test 30.89
+PROBE_RESULT diagstep_c100_aux_1pct test 30.59+/-0.35 over 3 seeds -> runs/diagstep_c100_aux_1pct/linear_probe_last.json
+diagstep_c100_aux_25pct seed0: probe train 50.77  test 39.64
+diagstep_c100_aux_25pct seed1: probe train 50.06  test 38.27
+diagstep_c100_aux_25pct seed2: probe train 50.77  test 39.08
+PROBE_RESULT diagstep_c100_aux_25pct test 39.00+/-0.69 over 3 seeds -> runs/diagstep_c100_aux_25pct/linear_probe_last.json
+diagstep_c100_aux_2pct seed0: probe train 45.43  test 32.57
+diagstep_c100_aux_2pct seed1: probe train 45.24  test 32.97
+diagstep_c100_aux_2pct seed2: probe train 45.68  test 33.43
+PROBE_RESULT diagstep_c100_aux_2pct test 32.99+/-0.43 over 3 seeds -> runs/diagstep_c100_aux_2pct/linear_probe_last.json
+diagstep_c100_aux_5pct seed0: probe train 49.49  test 37.30
+diagstep_c100_aux_5pct seed1: probe train 48.98  test 36.59
+diagstep_c100_aux_5pct seed2: probe train 49.77  test 37.22
+PROBE_RESULT diagstep_c100_aux_5pct test 37.04+/-0.39 over 3 seeds -> runs/diagstep_c100_aux_5pct/linear_probe_last.json
+diagstep_c100_none_1pct seed0: probe train 37.25  test 26.69
+diagstep_c100_none_1pct seed1: probe train 36.91  test 26.84
+diagstep_c100_none_1pct seed2: probe train 37.55  test 27.53
+PROBE_RESULT diagstep_c100_none_1pct test 27.02+/-0.45 over 3 seeds -> runs/diagstep_c100_none_1pct/linear_probe_last.json
+diagvit_aux_100pct seed0: probe train 99.98  test 60.96
+diagvit_aux_100pct seed1: probe train 99.98  test 60.91
+diagvit_aux_100pct seed2: probe train 99.98  test 59.99
+PROBE_RESULT diagvit_aux_100pct test 60.62+/-0.55 over 3 seeds -> runs/diagvit_aux_100pct/linear_probe_last.json
+diagvit_aux_10pct seed0: probe train 49.76  test 39.20
+diagvit_aux_10pct seed1: probe train 50.25  test 39.67
+diagvit_aux_10pct seed2: probe train 49.40  test 39.46
+PROBE_RESULT diagvit_aux_10pct test 39.44+/-0.24 over 3 seeds -> runs/diagvit_aux_10pct/linear_probe_last.json
+diagvit_aux_15pct seed0: probe train 56.42  test 43.06
+diagvit_aux_15pct seed1: probe train 56.55  test 43.29
+diagvit_aux_15pct seed2: probe train 56.20  test 43.48
+PROBE_RESULT diagvit_aux_15pct test 43.28+/-0.21 over 3 seeds -> runs/diagvit_aux_15pct/linear_probe_last.json
+diagvit_aux_1pct seed0: probe train 26.19  test 21.71
+diagvit_aux_1pct seed1: probe train 26.72  test 22.67
+diagvit_aux_1pct seed2: probe train 25.30  test 20.89
+PROBE_RESULT diagvit_aux_1pct test 21.76+/-0.89 over 3 seeds -> runs/diagvit_aux_1pct/linear_probe_last.json
+diagvit_aux_25pct seed0: probe train 65.35  test 47.36
+diagvit_aux_25pct seed1: probe train 65.27  test 47.67
+diagvit_aux_25pct seed2: probe train 65.64  test 47.86
+PROBE_RESULT diagvit_aux_25pct test 47.63+/-0.25 over 3 seeds -> runs/diagvit_aux_25pct/linear_probe_last.json
+diagvit_aux_2pct seed0: probe train 29.62  test 24.76
+diagvit_aux_2pct seed1: probe train 30.95  test 25.46
+diagvit_aux_2pct seed2: probe train 30.36  test 25.25
+PROBE_RESULT diagvit_aux_2pct test 25.16+/-0.36 over 3 seeds -> runs/diagvit_aux_2pct/linear_probe_last.json
+diagvit_aux_3pct seed0: probe train 35.05  test 29.06
+diagvit_aux_3pct seed1: probe train 34.03  test 28.06
+diagvit_aux_3pct seed2: probe train 34.60  test 28.56
+PROBE_RESULT diagvit_aux_3pct test 28.56+/-0.50 over 3 seeds -> runs/diagvit_aux_3pct/linear_probe_last.json
+diagvit_aux_5pct seed0: probe train 40.58  test 33.25
+diagvit_aux_5pct seed1: probe train 40.08  test 33.19
+diagvit_aux_5pct seed2: probe train 40.51  test 33.61
+PROBE_RESULT diagvit_aux_5pct test 33.35+/-0.23 over 3 seeds -> runs/diagvit_aux_5pct/linear_probe_last.json
+diagvit_aux_7pct seed0: probe train 44.82  test 36.24
+diagvit_aux_7pct seed1: probe train 44.21  test 35.41
+diagvit_aux_7pct seed2: probe train 44.67  test 36.27
+PROBE_RESULT diagvit_aux_7pct test 35.97+/-0.49 over 3 seeds -> runs/diagvit_aux_7pct/linear_probe_last.json
+diagvit_aux_tin_10pct seed0: probe train 36.51  test 25.74
+diagvit_aux_tin_10pct seed1: probe train 36.85  test 26.41
+diagvit_aux_tin_10pct seed2: probe train 36.25  test 25.59
+PROBE_RESULT diagvit_aux_tin_10pct test 25.91+/-0.44 over 3 seeds -> runs/diagvit_aux_tin_10pct/linear_probe_last.json
+r34_aux_10pct seed0: probe train 66.66  test 51.56
+r34_aux_10pct seed1: probe train 65.90  test 51.04
+r34_aux_10pct seed2: probe train 66.21  test 51.85
+PROBE_RESULT r34_aux_10pct test 51.48+/-0.41 over 3 seeds -> runs/r34_aux_10pct/linear_probe_last.json
+r50_aux_10pct seed0: probe train 91.14  test 51.84
+r50_aux_10pct seed1: probe train 92.52  test 46.90
+r50_aux_10pct seed2: probe train 90.90  test 52.79
+PROBE_RESULT r50_aux_10pct test 50.51+/-3.16 over 3 seeds -> runs/r50_aux_10pct/linear_probe_last.json
+sf_eurosatms_all_aux_25pct seed0: probe train 99.30  test 98.91
+sf_eurosatms_all_aux_25pct seed1: probe train 99.31  test 99.02
+sf_eurosatms_all_aux_25pct seed2: probe train 99.30  test 98.80
+PROBE_RESULT sf_eurosatms_all_aux_25pct test 98.91+/-0.11 over 3 seeds -> runs/sf_eurosatms_all_aux_25pct/linear_probe_last.json
+sf_eurosatms_nir_aux_25pct seed0: probe train 99.13  test 98.19
+sf_eurosatms_nir_aux_25pct seed1: probe train 99.16  test 98.31
+sf_eurosatms_nir_aux_25pct seed2: probe train 99.12  test 98.22
+PROBE_RESULT sf_eurosatms_nir_aux_25pct test 98.24+/-0.07 over 3 seeds -> runs/sf_eurosatms_nir_aux_25pct/linear_probe_last.json
+sf_eurosatms_rgb_aux_25pct seed0: probe train 98.86  test 98.11
+sf_eurosatms_rgb_aux_25pct seed1: probe train 98.84  test 98.00
+sf_eurosatms_rgb_aux_25pct seed2: probe train 98.98  test 98.11
+PROBE_RESULT sf_eurosatms_rgb_aux_25pct test 98.07+/-0.06 over 3 seeds -> runs/sf_eurosatms_rgb_aux_25pct/linear_probe_last.json
+sf_so2sat_all_aux_5pct seed0: probe train 96.54  test 77.00
+sf_so2sat_all_aux_5pct seed1: probe train 96.61  test 76.90
+sf_so2sat_all_aux_5pct seed2: probe train 96.48  test 77.39
+PROBE_RESULT sf_so2sat_all_aux_5pct test 77.09+/-0.26 over 3 seeds -> runs/sf_so2sat_all_aux_5pct/linear_probe_last.json
+sf_so2sat_opt_aux_5pct seed0: probe train 96.77  test 77.80
+sf_so2sat_opt_aux_5pct seed1: probe train 96.74  test 78.56
+sf_so2sat_opt_aux_5pct seed2: probe train 96.84  test 78.10
+PROBE_RESULT sf_so2sat_opt_aux_5pct test 78.15+/-0.39 over 3 seeds -> runs/sf_so2sat_opt_aux_5pct/linear_probe_last.json
+sf_so2sat_sar_aux_5pct seed0: probe train 67.95  test 49.95
+sf_so2sat_sar_aux_5pct seed1: probe train 68.94  test 51.23
+sf_so2sat_sar_aux_5pct seed2: probe train 68.25  test 50.56
+PROBE_RESULT sf_so2sat_sar_aux_5pct test 50.58+/-0.64 over 3 seeds -> runs/sf_so2sat_sar_aux_5pct/linear_probe_last.json
+stl_aux_10pct seed0: probe train 82.96  test 57.96
+stl_aux_10pct seed1: probe train 83.16  test 56.83
+stl_aux_10pct seed2: probe train 83.06  test 58.61
+PROBE_RESULT stl_aux_10pct test 57.80+/-0.90 over 3 seeds -> runs/stl_aux_10pct/linear_probe_last.json
+stl_aux_20pct seed0: probe train 89.60  test 64.24
+stl_aux_20pct seed1: probe train 89.46  test 64.98
+stl_aux_20pct seed2: probe train 90.42  test 65.68
+PROBE_RESULT stl_aux_20pct test 64.96+/-0.72 over 3 seeds -> runs/stl_aux_20pct/linear_probe_last.json
+stl_aux_50pct seed0: probe train 98.56  test 76.63
+stl_aux_50pct seed1: probe train 98.32  test 76.83
+stl_aux_50pct seed2: probe train 98.58  test 76.88
+PROBE_RESULT stl_aux_50pct test 76.78+/-0.13 over 3 seeds -> runs/stl_aux_50pct/linear_probe_last.json
+super100_aux seed0: probe train 99.99  test 85.91
+super100_aux seed1: probe train 99.99  test 85.75
+super100_aux seed2: probe train 99.99  test 85.70
+PROBE_RESULT super100_aux test 85.79+/-0.11 over 3 seeds -> runs/super100_aux/linear_probe_last.json
+super10_aux seed0: probe train 69.79  test 63.07
+super10_aux seed1: probe train 70.10  test 62.72
+super10_aux seed2: probe train 70.68  test 63.19
+PROBE_RESULT super10_aux test 62.99+/-0.24 over 3 seeds -> runs/super10_aux/linear_probe_last.json
+super1_aux seed0: probe train 46.08  test 41.48
+super1_aux seed1: probe train 45.94  test 41.25
+super1_aux seed2: probe train 46.18  test 40.63
+PROBE_RESULT super1_aux test 41.12+/-0.44 over 3 seeds -> runs/super1_aux/linear_probe_last.json
+super25_aux seed0: probe train 82.26  test 73.21
+super25_aux seed1: probe train 82.74  test 74.29
+super25_aux seed2: probe train 82.77  test 74.05
+PROBE_RESULT super25_aux test 73.85+/-0.57 over 3 seeds -> runs/super25_aux/linear_probe_last.json
+super2_aux seed0: probe train 52.53  test 47.42
+super2_aux seed1: probe train 52.26  test 46.85
+super2_aux seed2: probe train 51.90  test 46.35
+PROBE_RESULT super2_aux test 46.87+/-0.54 over 3 seeds -> runs/super2_aux/linear_probe_last.json
+super5_aux seed0: probe train 60.87  test 54.67
+super5_aux seed1: probe train 61.73  test 54.41
+super5_aux seed2: probe train 61.88  test 55.66
+PROBE_RESULT super5_aux test 54.91+/-0.66 over 3 seeds -> runs/super5_aux/linear_probe_last.json
+tin20_aux seed0: probe train 77.75  test 56.60
+tin20_aux seed1: probe train 78.09  test 53.90
+tin20_aux seed2: probe train 77.69  test 53.50
+tin20_aux seed3: probe train 78.32  test 55.70
+tin20_aux seed4: probe train 78.18  test 53.50
+tin20_aux seed5: probe train 77.67  test 54.10
+tin20_aux seed6: probe train 77.47  test 52.00
+tin20_aux seed7: probe train 77.45  test 56.40
+tin20_aux seed8: probe train 77.71  test 50.40
+tin20_aux seed9: probe train 77.53  test 52.90
+PROBE_RESULT tin20_aux test 53.90+/-1.94 over 10 seeds -> runs/tin20_aux/linear_probe_last.json
+tin_aux_1pct seed0: probe train 30.71  test 23.34
+tin_aux_1pct seed1: probe train 30.32  test 22.98
+tin_aux_1pct seed2: probe train 30.57  test 23.03
+tin_aux_1pct seed3: probe train 30.41  test 23.85
+tin_aux_1pct seed4: probe train 30.87  test 23.43
+tin_aux_1pct seed5: probe train 30.53  test 23.24
+tin_aux_1pct seed6: probe train 30.45  test 23.29
+tin_aux_1pct seed7: probe train 30.75  test 23.20
+tin_aux_1pct seed8: probe train 30.35  test 22.88
+tin_aux_1pct seed9: probe train 30.64  test 23.50
+PROBE_RESULT tin_aux_1pct test 23.27+/-0.28 over 10 seeds -> runs/tin_aux_1pct/linear_probe_last.json
+tin_aux_25pct seed0: probe train 69.21  test 50.68
+tin_aux_25pct seed1: probe train 69.31  test 51.38
+tin_aux_25pct seed2: probe train 69.38  test 51.06
+PROBE_RESULT tin_aux_25pct test 51.04+/-0.35 over 3 seeds -> runs/tin_aux_25pct/linear_probe_last.json
+tin_aux_2pct seed0: probe train 36.22  test 26.56
+tin_aux_2pct seed1: probe train 35.59  test 26.59
+tin_aux_2pct seed2: probe train 35.64  test 26.33
+PROBE_RESULT tin_aux_2pct test 26.49+/-0.14 over 3 seeds -> runs/tin_aux_2pct/linear_probe_last.json
+tin_aux_5pct seed0: probe train 47.23  test 34.62
+tin_aux_5pct seed1: probe train 47.06  test 34.94
+tin_aux_5pct seed2: probe train 46.86  test 34.17
+tin_aux_5pct seed3: probe train 47.08  test 34.24
+tin_aux_5pct seed4: probe train 46.92  test 34.39
+tin_aux_5pct seed5: probe train 46.84  test 34.51
+tin_aux_5pct seed6: probe train 47.39  test 34.88
+tin_aux_5pct seed7: probe train 47.16  test 34.75
+tin_aux_5pct seed8: probe train 47.42  test 34.93
+tin_aux_5pct seed9: probe train 47.15  test 35.04
+PROBE_RESULT tin_aux_5pct test 34.65+/-0.31 over 10 seeds -> runs/tin_aux_5pct/linear_probe_last.json
+tinsem_aux_1pct seed0: probe train 31.97  test 29.06
+tinsem_aux_1pct seed1: probe train 32.22  test 29.86
+tinsem_aux_1pct seed2: probe train 32.19  test 29.54
+tinsem_aux_1pct seed3: probe train 32.17  test 28.93
+tinsem_aux_1pct seed4: probe train 31.78  test 29.20
+tinsem_aux_1pct seed5: probe train 32.08  test 28.87
+tinsem_aux_1pct seed6: probe train 32.47  test 29.42
+tinsem_aux_1pct seed7: probe train 31.98  test 29.79
+tinsem_aux_1pct seed8: probe train 32.44  test 29.69
+tinsem_aux_1pct seed9: probe train 31.89  test 28.94
+PROBE_RESULT tinsem_aux_1pct test 29.33+/-0.38 over 10 seeds -> runs/tinsem_aux_1pct/linear_probe_last.json
+tinsuper_aux_1pct seed0: probe train 27.67  test 24.63
+tinsuper_aux_1pct seed1: probe train 27.72  test 24.24
+tinsuper_aux_1pct seed2: probe train 27.57  test 23.93
+tinsuper_aux_1pct seed3: probe train 28.00  test 25.07
+tinsuper_aux_1pct seed4: probe train 27.87  test 25.54
+tinsuper_aux_1pct seed5: probe train 27.70  test 24.86
+tinsuper_aux_1pct seed6: probe train 27.58  test 23.73
+tinsuper_aux_1pct seed7: probe train 27.61  test 24.07
+tinsuper_aux_1pct seed8: probe train 27.59  test 25.18
+tinsuper_aux_1pct seed9: probe train 27.81  test 24.83
+PROBE_RESULT tinsuper_aux_1pct test 24.61+/-0.59 over 10 seeds -> runs/tinsuper_aux_1pct/linear_probe_last.json
+tin20b_aux seed0: probe train 78.18  test 56.00
+tin20b_aux seed1: probe train 78.28  test 55.50
+Traceback (most recent call last):
+  File "${HOME}/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 317, in <module>
+    main()
+  File "${HOME}/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 270, in main
+    trf, trY = extract(model, tr_loader, device)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/projects/MomentsCNNEncoder/analysis/linear_probe.py", line 68, in extract
+    f = model.net.forward_features(model.stem(x))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/timm/models/resnet.py", line 753, in forward_features
+    x = self.layer1(x)
+        ^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/container.py", line 240, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/timm/models/resnet.py", line 132, in forward
+    x = self.bn1(x)
+        ^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/nn/modules/batchnorm.py", line 193, in forward
+    return F.batch_norm(
+           ^^^^^^^^^^^^^
+  File "${HOME}/venvs/momentstem/lib/python3.12/site-packages/torch/nn/functional.py", line 2822, in batch_norm
+    return torch.batch_norm(
+           ^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 256.00 MiB. GPU 0 has a total capacity of 23.56 GiB of which 227.44 MiB is free. Process 2981886 has 21.37 GiB memory in use. Including non-PyTorch memory, this process has 1.91 GiB memory in use. Of the allocated memory 1022.89 MiB is allocated by PyTorch, and 611.11 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)

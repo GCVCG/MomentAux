@@ -1,0 +1,21 @@
+{
+  "config": "configs/grid/grid_food_r18_9ee7da_50pct.yaml",
+  "ckpt": "last.pt",
+  "results": [
+    {
+      "seed": "seed0",
+      "probe_train": 0.8598943948745728,
+      "probe_test": 0.7172673344612122
+    },
+    {
+      "seed": "seed1",
+      "probe_train": 0.8589438796043396,
+      "probe_test": 0.7165940999984741
+    },
+    {
+      "seed": "seed2",
+      "probe_train": 0.8599867820739746,
+      "probe_test": 0.7178614139556885
+    }
+  ]
+}

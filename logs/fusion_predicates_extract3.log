@@ -1,0 +1,26 @@
+[cifar10] all 10 cells cached
+[cifar100] all 55 cells cached
+[dtd] all 3 cells cached
+[eurosat] all 12 cells cached
+[food101] all 15 cells cached
+[stl10] all 3 cells cached
+[tin] all 6 cells cached
+[cifar100] all 9 cells cached
+[eurosat] all 4 cells cached
+[food101] all 3 cells cached
+
+best rule: G_max >= 10.340 -> STACK else SUBSTITUTE
+pair                                   dA     dB     gA     gB      G_max  best-rule   published  ckpt carve missing
+prior|simclr:dtd@15:resnet18         2.15   8.99   2.52   9.75      9.750 SUBSTITUTE       STACK  False True
+prior|simclr:eurosat@10:resnet18     1.23   0.46   0.55  -0.26      0.550 SUBSTITUTE         N/A  True True
+prior|simclr:stl10@20:resnet18       4.36  11.24   4.98   9.59      9.590 SUBSTITUTE       STACK  False True
+prior|simclr:cifar10@5:resnet18      4.41   6.36   3.97   5.81      5.810 SUBSTITUTE       STACK  False True
+prior|simclr:tin@5:resnet18          2.12   6.71   2.66   6.23      6.230 SUBSTITUTE       STACK  False True
+prior|dino:stl10@50:vit_tiny        10.12   2.94   8.43   2.66      8.430 SUBSTITUTE       STACK  False True
+prior|dino:food101@25:vit_tiny       9.81  11.51   9.67  11.42     11.420      STACK  SUBSTITUTE  False True
+prior|simsiam:cifar100@25:resnet18   0.16  -0.03   0.44  -0.16      0.440 SUBSTITUTE         N/A  False True
+aug|simclr:food101@25:resnet18       3.05  -0.53   5.34   0.59      5.340 SUBSTITUTE         N/A  True True
+aug|simclr:eurosat@10:resnet18      -0.13   0.46  -0.01  -0.26     -0.010 SUBSTITUTE         N/A  True True
+prior|mae:cifar100@5:vit_tiny        9.35   8.21  13.17  10.91     13.170      STACK  SUBSTITUTE  True True
+prior|mae:cifar100@10:vit_tiny      13.27  13.04  14.83  13.33     14.830      STACK  SUBSTITUTE  True True
+prior|mae:cifar100@25:vit_tiny      13.67  14.15  14.03  13.83     14.030      STACK  SUBSTITUTE  True True
