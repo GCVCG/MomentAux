@@ -10692,4 +10692,5 @@ ported vs corrected and why.
   before claiming (MIN_FREE), so the R50 block serializes itself and the
   ImageNet64 block (4.6 GB) runs two-wide with no manual restart. The two
   partial R50 seed dirs were removed and re-queued; seed0 was never touched.
-  Measured: R50 @224 ~150 s/epoch alone => ~8.5 h/run, ~2 days for the pair.
+  Measured (epochs 3-4, card to itself): R50 @224 152 s/epoch => 8.4 h/run,
+  ~2 days for the six-run pair.
