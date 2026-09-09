@@ -10596,3 +10596,26 @@ ported vs corrected and why.
   tab:inenv / fig:inenv) is therefore OPEN with no compute behind it; the
   pre-registered predictions above stand untouched, and Table 15 / Fig. 9
   keep the 40/100-epoch values with their budget caveat.
+
+- *** THE 200-EPOCH IMAGENET RE-RUN MOVED TO THE LOCAL 3090 (2026-09-09, user:
+  "we can free up the local machine and run the needed experiments"). The
+  foodmacro webapp holding 17 GB (uvicorn, idle at 0% util for 1d21h) was
+  killed to free the card. SAME 276 tasks and SAME configs as the cancelled BSC
+  chain; the pre-registered J1-J5 / F-J1..F-J4 above are untouched and precede
+  every cell. RUNNER: scripts/in_e200_local_wave.sh (SLOTS streams claim
+  lines from scripts/worklist_in_e200_local.txt under a local flock -- real on
+  one node -- per-run logs in logs/in_e200/, marker IN_E200_LOCAL_COMPLETE,
+  PID logs/in_e200_wave.pid). ORDER IS CHEAPEST CELL FIRST, arms and seeds
+  adjacent, so partial results are scorable early: in100 vits/vitb 1-2% ->
+  in64 1-3% -> ... -> the in64 100% cells last. ImageNet64's 16 GB array was
+  copied to NVMe and data/imagenet64 relinked (size-checked) so the
+  dataloader-bound cells do not page a spinning disk. THE BSC SMOKE GATE IS
+  REPLACED BY WATCHING THE REAL RUNS: ViT-tiny in64 at 200 epochs still has
+  never run; if it diverges the stabilizer is added with the same measured
+  justification ViT-L has, and recorded. First measurements: ViT-S in100 @1%
+  8.3 GB and ~10 s/epoch per stream with two streams sharing (GPU 100%), i.e.
+  ~35 min/run. SLOTS=2; the in64 100% cells were 19.5 GB each on the H100 and
+  may need SLOTS=1 when the queue reaches them. Cost on this card is
+  MEASURED AS THE QUEUE ADVANCES, not estimated: the E4 precedent (ViT-B @224,
+  16.7 h/run at 200 epochs) puts ImageNet-100 at roughly a week; ImageNet64 is
+  dataloader-bound on 16 cores and is the long pole, likely several weeks.
