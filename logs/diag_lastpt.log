@@ -1,0 +1,121 @@
++ cd ${HOME}/projects/MomentsCNNEncoder
++ P=${HOME}/venvs/momentstem/bin/python
++ ${HOME}/venvs/momentstem/bin/python analysis/imprint_specificity.py --ckpt last.pt --out results/imprint_specificity.json
+27 cells across 4 families
+  SKIP grid_c100_r18_axhog_l03_fc141d_1pct: FileNotFoundError: [Errno 2] No such file or directory: 'configs/ablations_full/grid_c100_r18_axhog_l03_fc141d_1pct.yaml'
+  SKIP grid_c100_r18_axhog_l03_fc141d_15pct: FileNotFoundError: [Errno 2] No such file or directory: 'configs/ablations_full/grid_c100_r18_axhog_l03_fc141d_15pct.yaml'
+  SimCLR init        1%  G= +6.28  align -0.088 -> -0.286   gap -0.198   diagssl_simclr_1pct
+  SKIP diagsslbudget_simclr800_c100_1pct: FileNotFoundError: [Errno 2] No such file or directory: 'configs/ablations_full/diagsslbudget_simclr800_c100_1pct.yaml'
+  SimCLR init        2%  G= +8.86  align +0.058 -> -0.149   gap -0.207   diagssl_simclr_2pct
+  SKIP diagsslbudget_simclr800_c100_2pct: FileNotFoundError: [Errno 2] No such file or directory: 'configs/ablations_full/diagsslbudget_simclr800_c100_2pct.yaml'
+  SKIP diagsslbudget_simclr800_c100_3pct: FileNotFoundError: [Errno 2] No such file or directory: 'configs/ablations_full/diagsslbudget_simclr800_c100_3pct.yaml'
+  SimCLR init        5%  G= +6.97  align +0.197 -> +0.021   gap -0.176   diagssl_simclr50_5pct
+  SimCLR init        5%  G= +8.66  align +0.197 -> +0.072   gap -0.125   diagssl_simclr_5pct
+  SimCLR init        5%  G= +7.90  align +0.197 -> +0.681   gap +0.484   diagssl_simclraux_5pct
+  SKIP diagsslbudget_simclr800_c100_5pct: FileNotFoundError: [Errno 2] No such file or directory: 'configs/ablations_full/diagsslbudget_simclr800_c100_5pct.yaml'
+  SKIP diagsslbudget_simclr800_c100_7pct: FileNotFoundError: [Errno 2] No such file or directory: 'configs/ablations_full/diagsslbudget_simclr800_c100_7pct.yaml'
+  SimCLR init       10%  G= +7.43  align +0.208 -> +0.096   gap -0.112   diagssl_simclr_10pct
+  SKIP diagsslbudget_simclr800_c100_15pct: FileNotFoundError: [Errno 2] No such file or directory: 'configs/ablations_full/diagsslbudget_simclr800_c100_15pct.yaml'
+  SKIP diagsslbudget_simclr800_c100_25pct: FileNotFoundError: [Errno 2] No such file or directory: 'configs/ablations_full/diagsslbudget_simclr800_c100_25pct.yaml'
+  moment prior       1%  G= +4.20  align -0.088 -> +0.257   gap +0.345   auxmag_1pct_sched0
+  moment prior       1%  G= +4.73  align -0.088 -> +0.320   gap +0.408   auxmag_1pct_sched2
+  moment prior       1%  G= +4.91  align -0.088 -> -0.194   gap -0.106   auxmag_1pct_sched2_tap1
+  moment prior       1%  G= +4.38  align -0.088 -> -0.329   gap -0.241   auxmag_1pct_sched2_tap2
+  moment prior       2%  G= +5.05  align +0.058 -> +0.364   gap +0.306   auxmag_2pct_sched0
+  moment prior       3%  G= +5.71  align +0.126 -> +0.440   gap +0.314   auxmag_3pct_sched0
+  moment prior       5%  G= +6.11  align +0.197 -> +0.503   gap +0.306   auxmag_5pct_sched0
+  moment prior       7%  G= +4.82  align +0.181 -> +0.593   gap +0.412   auxmag_7pct_sched0
+  moment prior      10%  G= +3.63  align +0.208 -> +0.604   gap +0.397   auxmag_10pct_sched0
+  moment prior      15%  G= +2.72  align +0.208 -> +0.697   gap +0.489   auxmag_15pct_sched0
+  moment prior      25%  G= +0.44  align +0.196 -> +0.676   gap +0.480   auxmag_25pct_sched0
+  random target      1%  G= +1.26  align -0.088 -> -0.130   gap -0.042   auxrand_1pct_sched2
+
+wrote results/imprint_specificity.json (18 cells)
+
+family             n   mean G   mean gap         gap range
+moment prior      11    +4.25     +0.283  [-0.241, +0.489]
+SimCLR init        6    +7.68     -0.056  [-0.207, +0.484]
+random target      1    +1.26     -0.042  [-0.042, -0.042]
++ echo IMPRINT_OK
+IMPRINT_OK
++ ${HOME}/venvs/momentstem/bin/python analysis/currency_evidence.py --spec analysis/currency_spec_vit.json --out results/currency_vit_c100_10pct.json --ckpt last.pt
+baseline: diagvit_none_10pct
+  diagvit_none_10pct/seed0: acc 16.90
+  diagvit_none_10pct/seed1: acc 15.90
+  diagvit_none_10pct/seed2: acc 16.61
+arm prior: diagvit_aux_10pct
+  diagvit_aux_10pct/seed0: acc 29.63
+  diagvit_aux_10pct/seed1: acc 29.54
+  diagvit_aux_10pct/seed2: acc 30.04
+arm simclr: diagsslvit_simclr_10pct
+  diagsslvit_simclr_10pct/seed0: acc 30.62
+  diagsslvit_simclr_10pct/seed1: acc 30.03
+  diagsslvit_simclr_10pct/seed2: acc 28.68
+arm augmentation: diagdeit_none_10pct
+  diagdeit_none_10pct/seed0: acc 18.96
+  diagdeit_none_10pct/seed1: acc 21.94
+  diagdeit_none_10pct/seed2: acc 19.93
+
+=== accuracy ===
+  baseline 16.47
+  prior           29.74  delta +13.27  fixes 1758 images
+  simclr          29.78  delta +13.31  fixes 1783 images
+  augmentation    20.28  delta  +3.81  fixes 1085 images
+
+=== within-intervention (seed-to-seed) agreement ===
+  prior          fixed-J 0.308   CKA 0.428
+  simclr         fixed-J 0.295   CKA 0.398
+  augmentation   fixed-J 0.266   CKA 0.680
+
+=== across-intervention, normalized by the above ===
+  prior|simclr           fixed-sim 1.067  ovl-sim 1.042  lift 2.73 (sim 1.044)  CKA-sim 0.846
+  prior|augmentation     fixed-sim 0.674  ovl-sim 0.900  lift 2.40 (sim 0.740)  CKA-sim 0.523
+  simclr|augmentation    fixed-sim 0.703  ovl-sim 0.928  lift 2.42 (sim 0.767)  CKA-sim 0.564
+
+wrote results/currency_vit_c100_10pct.json
++ echo CURRENCY_OK
+CURRENCY_OK
++ ${HOME}/venvs/momentstem/bin/python analysis/attention_locality.py --spec analysis/attention_spec_vit.json --out results/attention_locality_vit.json --ckpt last.pt
+arm baseline: diagvit_none_10pct
+  diagvit_none_10pct/seed0: block means [3.67 3.83 3.93 3.97 4.14 4.26 4.18 4.2  4.19 4.06 4.06 4.05]
+  diagvit_none_10pct/seed1: block means [3.88 3.92 4.   4.07 4.16 4.15 4.09 4.09 4.08 4.28 4.22 4.11]
+  diagvit_none_10pct/seed2: block means [3.72 4.07 4.27 4.09 4.13 4.09 4.25 4.3  4.27 4.06 4.12 4.08]
+arm prior: diagvit_aux_10pct
+  diagvit_aux_10pct/seed0: block means [4.02 3.83 3.06 2.74 3.75 3.4  3.72 3.95 3.8  3.92 4.09 4.13]
+  diagvit_aux_10pct/seed1: block means [4.04 3.45 2.95 3.86 3.38 3.45 3.78 3.88 3.76 4.03 4.13 4.17]
+  diagvit_aux_10pct/seed2: block means [4.02 3.75 3.81 3.81 2.5  3.72 3.24 3.51 3.82 4.15 4.21 4.09]
+arm simclr: diagsslvit_simclr_10pct
+  diagsslvit_simclr_10pct/seed0: block means [4.1  3.96 3.52 3.65 3.94 3.96 4.02 3.92 4.07 4.12 4.03 4.07]
+  diagsslvit_simclr_10pct/seed1: block means [4.12 3.87 3.58 3.66 3.93 3.85 3.74 3.83 3.85 3.83 3.96 4.1 ]
+  diagsslvit_simclr_10pct/seed2: block means [3.8  3.82 4.02 3.82 3.91 4.   4.01 3.89 4.04 4.03 3.96 4.04]
+
+=== mean attention distance (patch units), by block ===
+  baseline        3.76  3.94  4.07  4.04  4.15  4.16  4.17  4.19  4.18  4.13  4.13  4.08
+  prior           4.03  3.68  3.27  3.47  3.21  3.52  3.58  3.78  3.79  4.03  4.14  4.13
+  simclr          4.01  3.88  3.71  3.71  3.92  3.94  3.92  3.88  3.99  3.99  3.99  4.07
+
+=== most local head in each block ===
+  baseline        3.59  3.82  3.86  3.85  4.07  4.10  3.98  4.09  4.09  4.02  4.01  3.98
+  prior           3.99  3.20  2.63  3.01  2.75  2.97  3.14  3.56  3.64  3.82  3.96  4.09
+  simclr          3.80  3.60  3.33  3.56  3.66  3.71  3.80  3.81  3.78  3.89  3.86  3.99
+
+wrote results/attention_locality_vit.json
++ echo ATTENTION_OK
+ATTENTION_OK
++ ${HOME}/venvs/momentstem/bin/python analysis/visualize_features.py --pair abl5_none auxmag_5pct_sched0 --out /tmp/claude-1000/-home-user-projects-MomentsCNNEncoder/e38f17b3-402c-460b-9952-2748cf364f30/scratchpad/viz --ckpt last.pt
+bank figure: sample = stl10 test index 613 (deer)
+bank figure: sample = eurosat test index 1945 (highway)
+${HOME}/projects/MomentsCNNEncoder/analysis/visualize_features.py:391: DeprecationWarning: __array__ implementation doesn't accept a copy keyword, so passing copy=False failed. __array__ must implement 'dtype' and 'copy' keyword arguments. To learn more, see the migration guide https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword
+  m = np.array(torch.nn.functional.interpolate(
+ALIGNMENT auxmag_5pct_sched0: baseline +0.215 aux +0.546
+VIZ_DONE auxmag_5pct_sched0 -> /tmp/claude-1000/-home-user-projects-MomentsCNNEncoder/e38f17b3-402c-460b-9952-2748cf364f30/scratchpad/viz
++ echo VIZ_OK
+VIZ_OK
++ ${HOME}/venvs/momentstem/bin/python analysis/cam_concentration.py --pairs abl5_none:auxmag_5pct_sched0 --ckpt last.pt --out results/cam_concentration.json
+  auxmag_5pct_sched0
+    baseline Gini 0.2526 +-0.0017   prior 0.2679 +-0.0016   delta +0.0153  (n=2000 images)
+wrote results/cam_concentration.json
++ echo CAM_OK
+CAM_OK
++ echo DIAG_LASTPT_COMPLETE
+DIAG_LASTPT_COMPLETE

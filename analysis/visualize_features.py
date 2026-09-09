@@ -49,7 +49,7 @@ OKABE_ITO = ["#E69F00", "#56B4E9", "#009E73", "#F0E442",
              "#0072B2", "#D55E00", "#CC79A7", "#999999"]
 
 
-def load_pair(none_cell, aux_cell, seed_dir, device):
+def load_pair(none_cell, aux_cell, seed_dir, device, ckpt="best.pt"):
     models = {}
     for cell in (none_cell, aux_cell):
         for d in ("diagnostics", "ablations_full"):
@@ -65,8 +65,8 @@ def load_pair(none_cell, aux_cell, seed_dir, device):
             stem_kwargs=cfg.get("stem_kwargs"),
             moment_aux=cfg.get("moment_aux"),
         ).to(device)
-        ckpt = f"runs/{cell}/{seed_dir}/best.pt"
-        m.load_state_dict(torch.load(ckpt, map_location=device))
+        path = f"runs/{cell}/{seed_dir}/{ckpt}"
+        m.load_state_dict(torch.load(path, map_location=device))
         m.eval()
         models[cell] = (m, cfg)
     return models
@@ -602,6 +602,8 @@ def main():
                     help="write bank_gabor.png only (no checkpoints needed)")
     ap.add_argument("--bank-dataset", default="stl10",
                     help="dataset supplying the bank figure's sample image")
+    ap.add_argument("--ckpt", default="best.pt",
+                    help="checkpoint per seed dir; last.pt = the final-epoch network")
     args = ap.parse_args()
 
     os.makedirs(args.out, exist_ok=True)
@@ -614,7 +616,7 @@ def main():
     if args.pair is None:
         ap.error("--pair is required unless --bank-only is given")
     none_cell, aux_cell = args.pair
-    models = load_pair(none_cell, aux_cell, args.seed_dir, device)
+    models = load_pair(none_cell, aux_cell, args.seed_dir, device, args.ckpt)
     dataset = models[aux_cell][1]["dataset"]
 
     # calibrate the aux target exactly as train.py does

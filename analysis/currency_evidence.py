@@ -147,6 +147,8 @@ def main():
     ap.add_argument("--run-root", default="runs")
     ap.add_argument("--data-root", default="./data")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--ckpt", default="best.pt",
+                    help="checkpoint per seed dir; last.pt = the final-epoch network")
     args = ap.parse_args()
 
     with open(args.spec) as f:
@@ -156,13 +158,13 @@ def main():
     print("baseline:", spec["baseline"]["cell"], flush=True)
     base_correct, base_feats, base_accs = load_arm(
         spec["baseline"]["cell"], spec["baseline"]["config"],
-        args.run_root, args.data_root, device)
+        args.run_root, args.data_root, device, args.ckpt)
 
     arms = {}
     for label, d in spec["arms"].items():
         print(f"arm {label}: {d['cell']}", flush=True)
         c, f, a = load_arm(d["cell"], d["config"], args.run_root,
-                           args.data_root, device)
+                           args.data_root, device, args.ckpt)
         # FIXED set, seed-matched to the baseline: correct here, wrong there.
         n = min(len(c), len(base_correct))
         fixed = np.array([np.logical_and(c[i], ~base_correct[i]) for i in range(n)])

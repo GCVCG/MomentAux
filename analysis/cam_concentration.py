@@ -73,6 +73,8 @@ def main():
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", default="results/cam_concentration.json")
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    ap.add_argument("--ckpt", default="best.pt",
+                    help="checkpoint per seed dir; last.pt = the final-epoch network")
     a = ap.parse_args()
 
     dev = torch.device(a.device)
@@ -80,10 +82,10 @@ def main():
     recs = []
     for pair in a.pairs:
         base, aux = pair.split(":")
-        models = VF.load_pair(base, aux, f"seed{a.seed}", dev)
+        models = VF.load_pair(base, aux, f"seed{a.seed}", dev, a.ckpt)
         gb, sb = cam_gini(models[base][0], ds, dev, a.n)
         ga, sa = cam_gini(models[aux][0], ds, dev, a.n)
-        recs.append({"baseline": base, "aux": aux, "n_images": a.n,
+        recs.append({"baseline": base, "aux": aux, "n_images": a.n, "ckpt": a.ckpt,
                      "gini_base": gb, "gini_base_sem": sb,
                      "gini_aux": ga, "gini_aux_sem": sa, "delta": ga - gb})
         print(f"  {aux}\n    baseline Gini {gb:.4f} +-{sb:.4f}   "

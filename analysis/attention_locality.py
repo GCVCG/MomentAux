@@ -138,16 +138,19 @@ def main():
     ap.add_argument("--run-root", default="runs")
     ap.add_argument("--data-root", default="./data")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--ckpt", default="best.pt",
+                    help="checkpoint per seed dir; last.pt = the final-epoch network")
     args = ap.parse_args()
 
     with open(args.spec) as f:
         spec = json.load(f)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    res = {"_spec": spec, "arms": {}}
+    res = {"_spec": spec, "_ckpt": args.ckpt, "arms": {}}
     for label, d in spec["arms"].items():
         print(f"arm {label}: {d['cell']}", flush=True)
-        a = run_cell(d["cell"], d["config"], args.run_root, args.data_root, device)
+        a = run_cell(d["cell"], d["config"], args.run_root, args.data_root, device,
+                     args.ckpt)
         res["arms"][label] = {
             "cell": d["cell"],
             "per_seed_block_head": a.tolist(),

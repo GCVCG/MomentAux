@@ -68,6 +68,9 @@ def main():
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", default="results/imprint_specificity.json")
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    ap.add_argument("--ckpt", default="best.pt",
+                    help="checkpoint file per seed dir; last.pt is the final-epoch "
+                         "network the paper's Delta and matched-epoch G describe")
     a = ap.parse_args()
 
     rows = [r for r in csv.DictReader(open(a.results))
@@ -78,8 +81,8 @@ def main():
         fam = family_of(r["cell"])
         if fam is None:
             continue
-        ck_a = os.path.join(a.runs, r["cell"], f"seed{a.seed}", "best.pt")
-        ck_b = os.path.join(a.runs, r["baseline_cell"], f"seed{a.seed}", "best.pt")
+        ck_a = os.path.join(a.runs, r["cell"], f"seed{a.seed}", a.ckpt)
+        ck_b = os.path.join(a.runs, r["baseline_cell"], f"seed{a.seed}", a.ckpt)
         if os.path.exists(ck_a) and os.path.exists(ck_b):
             todo.append((fam, r))
     print(f"{len(todo)} cells across {len({t[0] for t in todo})} families")

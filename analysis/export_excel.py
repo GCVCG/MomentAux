@@ -173,7 +173,11 @@ def main():
                          "linear_probe.json = archived best-epoch corpus")
     args = ap.parse_args()
     PROBE_FILE = args.probe_file
-    roots = [r for r in (args.runs_root or ["runs", "runs_turing"])
+    # The same three roots as export_results_csv.py, in the same order: with
+    # runs_bscpull absent the workbook carried 3,130 cells against the released
+    # table's 3,207 (found 2026-09-09), i.e. every cell pulled from the cluster
+    # and never mirrored into runs/ was missing from the spreadsheet only.
+    roots = [r for r in (args.runs_root or ["runs", "runs_turing", "runs_bscpull"])
              if os.path.isdir(r)]
     cells = load_cells(roots)
 

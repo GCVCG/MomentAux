@@ -52,6 +52,14 @@ def load_cells(roots):
             rec = cells.setdefault(cell, {"seeds": {}, "cfg": {}, "probes": {}})
             rec["seeds"][final.get("seed", path)] = 100.0 * final["final_test_acc"]
             rec["cfg"] = final.get("config", final)
+    # Probes are attached in a SECOND pass over the roots, after every run
+    # record is known. A single pass skipped any probe whose cell had not yet
+    # been loaded from the SAME or an EARLIER root, so a probe-only directory
+    # under runs/ (the local matched-epoch pass writes those) whose run records
+    # live in runs_bscpull was silently dropped: 38 cells lost their
+    # linear_probe_last.json this way (2026-09-09), among them every SUN RGB-D
+    # probe, the reduced-strength exception arms and the SAR-reduction cells.
+    for root in roots:
         for path in sorted(glob.glob(os.path.join(root, "*", "linear_probe*.json"))):
             cell = path.split(os.sep)[-2]
             if cell not in cells:

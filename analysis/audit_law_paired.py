@@ -19,17 +19,39 @@ import argparse, csv, json, math, os, statistics, collections
 LO, HI = 31.8, 40.3
 
 
+# The run trees the exporter reads, in its precedence order (later wins on a
+# seed collision). THE AUDIT MUST RESOLVE CELLS ACROSS THE SAME ROOTS: until
+# 2026-09-09 _accs/_evals/_gap read `--runs` alone, so any law-scope cell whose
+# run records or matched-epoch probe lived only in runs_bscpull (block C's 14
+# target-family cells, the reduced-strength exception arms, the SAR-reduction
+# and SUN RGB-D cells, 48 in all) was silently absent from the audit while the
+# released table placed it in scope with a G -- two loaders, one corpus.
+_EXTRA_ROOTS = ("runs_turing", "runs_bscpull")
+
+
+def _roots(runs):
+    """`runs` first, then its sibling mirrors; siblings are resolved next to
+    the given runs directory, not the working directory, because callers pass
+    absolute paths from other directories (paper/figs/make_figs.py)."""
+    parent = os.path.dirname(os.path.abspath(runs))
+    sib = [os.path.join(parent, x) for x in _EXTRA_ROOTS
+           if os.path.basename(os.path.abspath(runs)) != x]
+    return [r for r in [runs] + sib if os.path.isdir(r)]
+
+
 def _accs(runs, cell):
-    d, out = os.path.join(runs, cell), {}
-    if not os.path.isdir(d):
-        return out
-    for sd in sorted(os.listdir(d)):
-        f = os.path.join(d, sd, "final.json")
-        if os.path.isfile(f):
-            try:
-                out[sd] = 100.0 * json.load(open(f))["final_test_acc"]
-            except Exception:
-                pass
+    out = {}
+    for root in _roots(runs):
+        d = os.path.join(root, cell)
+        if not os.path.isdir(d):
+            continue
+        for sd in sorted(os.listdir(d)):
+            f = os.path.join(d, sd, "final.json")
+            if os.path.isfile(f):
+                try:
+                    out[sd] = 100.0 * json.load(open(f))["final_test_acc"]
+                except Exception:
+                    pass
     return out
 
 
@@ -46,15 +68,18 @@ def _evals(runs, cell, probe_file="linear_probe_last.json"):
     none of it: a run mixing best.pt and last.pt probes would make readout
     incomparable across its own rows, which is the defect being repaired.
     """
-    f = os.path.join(runs, cell, probe_file)
-    if not os.path.isfile(f):
-        return {}
-    try:
-        p = json.load(open(f))
-    except Exception:
-        return {}
-    return {r["seed"]: 100.0 * r["probe_test"]
-            for r in p.get("results", []) if "probe_test" in r}
+    out = {}
+    for root in _roots(runs):
+        f = os.path.join(root, cell, probe_file)
+        if not os.path.isfile(f):
+            continue
+        try:
+            p = json.load(open(f))
+        except Exception:
+            continue
+        out.update({r["seed"]: 100.0 * r["probe_test"]
+                    for r in p.get("results", []) if "probe_test" in r})
+    return out
 
 
 def in_scope(r):
@@ -104,6 +129,12 @@ def in_scope(r):
             return False
     except ValueError:
         return False
+    # An instrumented duplicate (diagtraj_*: its parent verbatim plus
+    # save_every, run again for the trajectory probes) is the same
+    # configuration measured twice; the exporter already bars it from
+    # baseline candidacy, and it must not vote twice here either.
+    if r.get("cell", "").startswith("diagtraj_"):
+        return False
     return (r.get("aux_target") and not r.get("init_from")
             and not r.get("pretrained")
             and (r.get("stem") or "none") == "none")
@@ -128,15 +159,16 @@ def _gap(runs, cell, seed):
     `seed` is the seed DIRECTORY NAME ("seed0"), matching _accs/_evals."""
     key = (cell, seed)
     if key not in _GAPC:
-        f = os.path.join(runs, cell, str(seed), "final.json")
         v = 0.0
-        try:
-            r = json.load(open(f))
-            b, fi = r.get("best_test_acc"), r.get("final_test_acc")
-            if b is not None and fi is not None:
-                v = 100.0 * (b - fi)
-        except Exception:
-            v = 0.0
+        for root in _roots(runs):          # later root wins, as in _accs
+            f = os.path.join(root, cell, str(seed), "final.json")
+            try:
+                r = json.load(open(f))
+                b, fi = r.get("best_test_acc"), r.get("final_test_acc")
+                if b is not None and fi is not None:
+                    v = 100.0 * (b - fi)
+            except Exception:
+                pass
         _GAPC[key] = v
     return _GAPC[key]
 

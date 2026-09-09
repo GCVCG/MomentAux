@@ -2,8 +2,6 @@
 
 **Ahmad AlMughrabi**<sup>1,\*</sup>
 ([0000-0002-9336-3200](https://orcid.org/0000-0002-9336-3200)) ·
-**Albert Clop**<sup>1</sup>
-([0000-0002-0187-6288](https://orcid.org/0000-0002-0187-6288)) ·
 **Benjamin Busam**<sup>2</sup>
 ([0000-0002-0620-5774](https://orcid.org/0000-0002-0620-5774)) ·
 **Ricardo Marques**<sup>3</sup>
@@ -26,8 +24,8 @@ self-supervised pre-training (SimCLR, SimSiam, DINO, masked
 reconstruction), ImageNet transfer,
 DeiT-strength augmentation, and learned FitNets teachers — each reported
 against a **declared multiple of baseline training compute**, and every
-pairwise combination measured. 3,182<!--computeCells--> classification
-configurations over 9,782<!--computeRuns--> runs, on 13 datasets and 9
+pairwise combination measured. 3,208<!--computeCells--> classification
+configurations over 9,860<!--computeRuns--> runs, on 14 datasets and 11
 backbones from 150 to 1.28M images and 32 to 224 px, plus segmentation and
 detection transplants.
 
@@ -79,9 +77,9 @@ and exporters released here.
 The law behind every cell: **Δ = G(features) + readout(baseline accuracy)**
 — `G` measured by linear probes on frozen features, readout negative below
 the measured crossing bracket `[31.8, 40.3]` and positive above it. Of the
-485<!--auditResolvable--> cells whose readout is resolvable against its own
-seed-paired uncertainty, **408<!--auditCorrect--> (84.1<!--auditRate-->%)
-fall on the predicted side** — 95.0<!--auditBelowRate-->% below the crossing,
+494<!--auditResolvable--> cells whose readout is resolvable against its own
+seed-paired uncertainty, **415<!--auditCorrect--> (84.0<!--auditRate-->%)
+fall on the predicted side** — 95.1<!--auditBelowRate-->% below the crossing,
 where the account makes a strong prediction. Machine-verified by
 `analysis/audit_law_paired.py`, which is the canonical audit; the older
 `audit_sign_law.py` uses an independent-SEM formula the paper withdrew, and

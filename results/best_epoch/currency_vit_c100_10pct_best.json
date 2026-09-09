@@ -1,0 +1,100 @@
+{
+  "baseline": {
+    "cell": "diagvit_none_10pct",
+    "acc_mean": 17.013333333333332,
+    "accs": [
+      17.299999999999997,
+      16.63,
+      17.11
+    ]
+  },
+  "arms": {
+    "prior": {
+      "cell": "diagvit_aux_10pct",
+      "acc_mean": 29.986666666666668,
+      "accs": [
+        29.9,
+        29.720000000000002,
+        30.34
+      ],
+      "delta": 12.973333333333336,
+      "n_fixed_mean": 1792.6666666666667
+    },
+    "simclr": {
+      "cell": "diagsslvit_simclr_10pct",
+      "acc_mean": 29.886666666666667,
+      "accs": [
+        30.620000000000005,
+        30.11,
+        28.93
+      ],
+      "delta": 12.873333333333335,
+      "n_fixed_mean": 1794.3333333333333
+    },
+    "augmentation": {
+      "cell": "diagdeit_none_10pct",
+      "acc_mean": 20.41,
+      "accs": [
+        18.96,
+        22.11,
+        20.16
+      ],
+      "delta": 3.3966666666666683,
+      "n_fixed_mean": 1057.3333333333333
+    }
+  },
+  "within": {
+    "fixed_jaccard": {
+      "prior": 0.2728585380154825,
+      "simclr": 0.26673508005276225,
+      "augmentation": 0.21782058044798033
+    },
+    "overlap_coef": {
+      "prior": 0.4372558860597138,
+      "simclr": 0.4364440441527304,
+      "augmentation": 0.3811496182201159
+    },
+    "lift": {
+      "prior": 2.392473363446946,
+      "simclr": 2.3513235881613066,
+      "augmentation": 3.4025180655059777
+    },
+    "cka": {
+      "prior": 0.43552912652263664,
+      "simclr": 0.3996849362078236,
+      "augmentation": 0.6806199900508584
+    }
+  },
+  "pairwise": {
+    "prior|simclr": {
+      "fixed_jaccard_across": 0.3037822635512943,
+      "fixed_similarity": 1.1260393611926363,
+      "overlap_coef_across": 0.47124648376157147,
+      "overlap_similarity": 1.0787380676273342,
+      "lift_across": 2.5717551493665383,
+      "lift_similarity": 1.0843010095324808,
+      "cka_across": 0.3547800074318511,
+      "cka_similarity": 0.8503381152252065
+    },
+    "prior|augmentation": {
+      "fixed_jaccard_across": 0.17452712227711942,
+      "fixed_similarity": 0.7158873665404283,
+      "overlap_coef_across": 0.3951532375415103,
+      "overlap_similarity": 0.9679434108767312,
+      "lift_across": 2.205222994891396,
+      "lift_similarity": 0.7729096629769467,
+      "cka_across": 0.2912403937521416,
+      "cka_similarity": 0.5349222433035298
+    },
+    "simclr|augmentation": {
+      "fixed_jaccard_across": 0.1768463553505086,
+      "fixed_similarity": 0.7336798474631786,
+      "overlap_coef_across": 0.400066878043441,
+      "overlap_similarity": 0.9808905871091591,
+      "lift_across": 2.232054965968034,
+      "lift_similarity": 0.7891298381652536,
+      "cka_across": 0.30001714438367943,
+      "cka_similarity": 0.5752211323659904
+    }
+  }
+}

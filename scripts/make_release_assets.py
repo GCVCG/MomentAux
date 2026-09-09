@@ -204,7 +204,7 @@ def write_readme(outdir, rows, sums):
         "",
         "Supplementary material for *When does fusing hand-crafted knowledge with "
         "learned representations pay? A cost-normalized benchmark of stacking, "
-        "substitution and interference* (AlMughrabi, Clop, Busam, Marques, "
+        "substitution and interference* (AlMughrabi, Busam, Marques, "
         "Radeva).",
         "",
         "**These files are also published on GitHub.** They are the assets of "

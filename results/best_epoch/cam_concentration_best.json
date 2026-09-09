@@ -1,0 +1,12 @@
+[
+  {
+    "baseline": "abl5_none",
+    "aux": "auxmag_5pct_sched0",
+    "n_images": 2000,
+    "gini_base": 0.25292650432288183,
+    "gini_base_sem": 0.0016931823999686187,
+    "gini_aux": 0.273463204812833,
+    "gini_aux_sem": 0.0016656696850857705,
+    "delta": 0.020536700489951154
+  }
+]

@@ -14,8 +14,8 @@ recipe with committed data subsets**.
 
 | | |
 |---|---|
-| experimental cells | 3,182<!--computeCells--> |
-| training runs | 9,782<!--computeRuns--> (4,195<!--computeGpuHours--> run-hours; workers share a GPU, so this is not device occupancy) |
+| experimental cells | 3,208<!--computeCells--> |
+| training runs | 9,860<!--computeRuns--> (4,408<!--computeGpuHours--> run-hours; workers share a GPU, so this is not device occupancy) |
 | datasets | 13, across six visual domains |
 | backbone families | 9 (ResNet-18/34/50, MobileNetV3, ConvNeXt-T, ViT-tiny/S/B, Swin-T) |
 | data scale | 150 to 1,281,167 images; 10 to 1000 classes |
@@ -52,18 +52,18 @@ overstates the uncertainty by a median factor of 1.8.
 
 | | |
 |---|---|
-| cells with paired `Δ` and `G` | 1,744<!--auditAllPaired--> |
-| in law scope (prior, from scratch, ≥3 seeds per arm) | 955<!--auditScope--> |
-| inside the crossing bracket (no prediction made) | 93<!--auditBracket--> |
-| unresolved (`|readout| ≤ 2·SEM`) | 377<!--auditUnresolved--> |
-| **resolvable, these test the law** | **485<!--auditResolvable-->** |
-| sign as predicted | **408<!--auditCorrect--> (84.1<!--auditRate-->%)** |
-| wrong side | 77<!--auditWrong--> |
+| cells with paired `Δ` and `G` | 1,778<!--auditAllPaired--> |
+| in law scope (prior, from scratch, ≥3 seeds per arm) | 991<!--auditScope--> |
+| inside the crossing bracket (no prediction made) | 103<!--auditBracket--> |
+| unresolved (`|readout| ≤ 2·SEM`) | 394<!--auditUnresolved--> |
+| **resolvable, these test the law** | **494<!--auditResolvable-->** |
+| sign as predicted | **415<!--auditCorrect--> (84.0<!--auditRate-->%)** |
+| wrong side | 79<!--auditWrong--> |
 
 Two earlier figures for this table are superseded and we name them so nobody
 cites them from an old copy. **96%** came from an independent-SEM audit
 (`analysis/audit_sign_law.py`, still in the tree because it answers a
-different question) whose uncertainty formula the paper withdrew. **77.2<!--auditPrevRate-->%**
+different question) whose uncertainty formula the paper withdrew. **77.1<!--auditPrevRate-->%**
 came from before the scope filter was repaired: it tested the exported
 `pretrained` field against the strings `true`/`1` while the exporter writes
 `yes`, so the ImageNet-transfer cells leaked into an audit whose scope has
@@ -74,7 +74,7 @@ discloses this in full.
 
 Above the crossing the term is small and its sign is close to a coin flip
 (67.4% of resolvable cells); below it, where the term is large and negative,
-the sign is right 95.0<!--auditBelowRate-->% of the time. "Law" is used in the
+the sign is right 95.1<!--auditBelowRate-->% of the time. "Law" is used in the
 paper's bounded sense, a measured-regime regularity, never a theorem. Its
 mechanism is a label-budget effect: re-probed at each cell's *own* label
 budget, the readout term shrinks by more than half on 19 of 30 cells and the
@@ -288,8 +288,8 @@ slurm/                    cluster work-queue: worker, big lane, probe lane
 
 ```bibtex
 @article{almughrabi2026momentaux,
-  author  = {AlMughrabi, Ahmad and Clop, Albert and Busam, Benjamin
-             and Marques, Ricardo and Radeva, Petia},
+  author  = {AlMughrabi, Ahmad and Busam, Benjamin and Marques, Ricardo
+             and Radeva, Petia},
   title   = {When does fusing hand-crafted knowledge with learned
              representations pay? A cost-normalized benchmark of stacking,
              substitution, and interference},
