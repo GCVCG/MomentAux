@@ -10584,3 +10584,15 @@ ported vs corrected and why.
   the time of writing; the 13 lane jobs behind it. When the 276 finals exist
   (verified per worklist line), probe last.pt so the new G values join the
   matched-epoch corpus, score J1-J5, and replace Table 15 / Fig. 9 in place.
+
+- *** THE 200-EPOCH IMAGENET CHAIN IS CANCELLED UNSTARTED (2026-09-09, user:
+  "I think BSC is dead, we need to cancel all jobs there"). BSC itself
+  answered squeue; what was dead was the queue position: smoke 45617325 sat
+  on Priority for four days with 0 of 276 finals, and the 13 lane jobs
+  (45617326-38) behind it on Dependency. All 14 scancel'd; the user's other
+  project's vlm_qwen3vl235 was left running. Counters/locks for the
+  in64e200/in100e200 lanes were never created (nothing claimed), so a
+  resubmission starts clean. STEP 5 (probe last.pt, score J1-J5, replace
+  tab:inenv / fig:inenv) is therefore OPEN with no compute behind it; the
+  pre-registered predictions above stand untouched, and Table 15 / Fig. 9
+  keep the 40/100-epoch values with their budget caveat.
