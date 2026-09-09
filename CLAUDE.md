@@ -10686,3 +10686,10 @@ ported vs corrected and why.
   logs/in_e200_wave.pid alone let them claim two more tasks. Kill the workers
   by `pgrep -f 'in_e200_local_wav[e]'` (the bracket keeps the pattern from
   matching the shell that issues it, which killed my own command three times).
+  R50 @224 IS 15.2 GB PER STREAM, so two OOM'd in the first minutes and the
+  runner moved on to the next seed rather than retrying (a failed run is not
+  re-queued). FIX: streams now wait until nvidia-smi reports >= 16 GB free
+  before claiming (MIN_FREE), so the R50 block serializes itself and the
+  ImageNet64 block (4.6 GB) runs two-wide with no manual restart. The two
+  partial R50 seed dirs were removed and re-queued; seed0 was never touched.
+  Measured: R50 @224 ~150 s/epoch alone => ~8.5 h/run, ~2 days for the pair.

@@ -25,6 +25,8 @@ worker() {
     [ "$i" -ge "$N" ] && return 0
     read -r cell seed < <(sed -n "$((i+1))p" $WL)
     if [ -f runs/$cell/seed$seed/final.json ]; then echo "SKIP $cell s$seed"; continue; fi
+    # R50 @224 takes 15.2 GB and two streams OOM'd (2026-09-09); wait for room instead of failing.
+    until [ "$(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits)" -ge "${MIN_FREE:-16000}" ]; do sleep 60; done
     echo "START $cell s$seed slot$1 $(date -Is)"
     $PY train.py --config configs/diagnostics/$cell.yaml --seed $seed > logs/in_e200/${cell}_s$seed.log 2>&1
     echo "END   $cell s$seed rc=$? $(date -Is)"
