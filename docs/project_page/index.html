@@ -253,19 +253,36 @@
         </div>
     </div>
 
-    <!-- VIDEO OVERVIEW. Uncomment once the NotebookLM video exists and replace
-         VIDEO_URL with its share or embed link (for a YouTube upload use
-         https://www.youtube.com/embed/<id>). The brief the video was generated
-         from is paper/notebooklm_video_brief.md in the private tree.
+    <!-- VIDEO OVERVIEW. The NotebookLM share link cannot be used here: it
+         redirects to a Google sign-in and is served with X-Frame-Options DENY,
+         so it neither embeds nor opens for visitors. Host the video instead.
+         Option A (self-hosted): download the MP4 from NotebookLM, save it as
+         MomentAux/video/overview.mp4 in this site repository (keep it under
+         ~50 MB; GitHub refuses files over 100 MB), then uncomment block A.
+         Option B (YouTube, lighter): upload it, take the video id from the
+         URL, and uncomment block B with https://www.youtube.com/embed/<id>.
+         The brief the video was generated from is
+         paper/notebooklm_video_brief.md in the private tree.
+
     <h2>Video overview</h2>
-    <div class="embed-responsive embed-responsive-16by9 mb-4">
-        <iframe class="embed-responsive-item" src="VIDEO_URL"
+    <!-- block A: self-hosted file
+    <video class="w-100 mb-3" controls preload="metadata"
+           poster="imgs/overview.png" src="video/overview.mp4">
+        Your browser does not play MP4; <a href="video/overview.mp4">download the video</a>.
+    </video>
+    -->
+    <!-- block B: YouTube
+    <div class="embed-responsive embed-responsive-16by9 mb-3">
+        <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/VIDEO_ID"
                 title="MomentAux video overview" allowfullscreen loading="lazy"></iframe>
     </div>
-    <p class="text-muted"><small>A short narrated overview of the paper. Every number in it
-        carries its condition (backbone, dataset, data fraction, training budget); where it
-        and the article differ, the article is right.</small></p>
     -->
+    <p class="text-muted"><small>A short narrated overview of the paper, generated with
+        NotebookLM from the article and a brief. Every number in it carries its condition
+        (backbone, dataset, data fraction, training budget); where it and the article differ,
+        the article is right.</small></p>
+    -->
+
 
     <h2>The rule</h2>
     <figure>
