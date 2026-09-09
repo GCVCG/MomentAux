@@ -10665,3 +10665,24 @@ ported vs corrected and why.
     prediction; recorded as a miss with the right reasoning behind it.
   (R2) G probes were never run; not scored. Added to the manuscript as one
     sentence beside the random control (Sec. 5.1).
+
+- *** THE LOCAL RE-RUN IS CUT TO THE 24 ANCHOR RUNS (2026-09-09, user: "let's
+  focus on what can strengthen the paper and make it clear for the readers",
+  after asking why all 276 were needed). The fraction envelopes (252 runs,
+  Table 15 / Fig. 9) carry no falsifier the paper leans on and each pair's
+  Delta is already valid at its own budget, so they stay at 40/100 epochs
+  with their caveat sentence. What remains at a reduced budget among the
+  HEADLINE anchors is exactly four pairs: R50 at ImageNet-100 100% (S2, the
+  last 100-epoch anchor) and R18 / ViT-tiny / MobileNet at ImageNet64 100%
+  (P2, P3). scripts/worklist_in_e200_local.txt is now those 24 lines, R50
+  first; SLOTS=2 (an ImageNet64 cell is 4.6 GB on this card, not the 19.5 GB
+  the cluster reported). MEASURED COST on this card: ViT-S 85 s/epoch, ViT-B
+  100 alone, so R50 ~8 h/run and ImageNet64 100% 20-30 h/run alone; the 24
+  runs are roughly one to two weeks. The J1-J5 bands above are scored ONLY at
+  the 100% cells; the fraction bands and F-J2 (interior peak) cannot be scored
+  and are recorded as not run. The three finished ViT-S 1% runs (none, seeds
+  0-1) stay on disk as valid one-armed records; every partial dir was removed.
+  OPERATIONAL: the runner's worker subshells outlive the runner PID -- killing
+  logs/in_e200_wave.pid alone let them claim two more tasks. Kill the workers
+  by `pgrep -f 'in_e200_local_wav[e]'` (the bracket keeps the pattern from
+  matching the shell that issues it, which killed my own command three times).
