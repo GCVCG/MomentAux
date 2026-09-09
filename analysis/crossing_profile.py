@@ -10,10 +10,24 @@ failures.
 
 Run:  python analysis/crossing_profile.py
 """
-import sys, collections, statistics as st
+import sys, argparse, collections, statistics as st
 sys.path.insert(0, "analysis")
 import audit_law_paired as A
-rows = A.load("runs", "results/all_results.csv")
+
+# THIS SCRIPT HAD NO ARGPARSE, so a --csv/--probe-file passed on the command
+# line was SILENTLY IGNORED and it printed the released best.pt numbers over a
+# matched-epoch corpus with no error (2026-08-31). Same family as the audit
+# bypass: a repair applied at one layer that a second layer ignores, except
+# worse -- argparse at least rejects an unrecognized flag.
+_ap = argparse.ArgumentParser()
+_ap.add_argument("--runs", default="runs")
+_ap.add_argument("--csv", default="results/all_results.csv")
+_ap.add_argument("--probe-file", default="linear_probe_last.json",
+                 help="probe json per cell; linear_probe_last.json for the "
+                      "matched-epoch corpus (mirrors the audit and exporter)")
+_a = _ap.parse_args()
+print(f"# corpus: {_a.csv}   probe: {_a.probe_file}")
+rows = A.load(_a.runs, _a.csv, probe_file=_a.probe_file)
 n, ok, res = A.audit(rows, 2.0)
 lo = [x for x in res if x["base"] < A.LO]
 bins = [(0, 5), (5, 10), (10, 15), (15, 20), (20, 25), (25, 31.8)]

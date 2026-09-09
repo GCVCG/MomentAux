@@ -987,9 +987,11 @@ and `results/det_*.csv`.
 
 **The law at scale (2026-08-05 → 08-18).** The sign law was audited over
 the whole grid with seed-paired uncertainty (`analysis/audit_law_paired.py`):
-958 cells in scope, 455 resolvable, **393 (86.4%)** on the predicted side,
-94.9% below the crossing bracket [31.8, 40.3] and 67.4% above it, where the
-term is near zero. An earlier 96% (independent-SEM audit) and 78.9%
+955 cells in scope, 485 resolvable, **408 (84.1%)** on the predicted side,
+95.0% below the crossing bracket [31.8, 40.3] (97.3% on the 261 cells far
+below it) and 59.5% above it, where the term is near zero; since the
+2026-09-09 corpus swap every G is measured on the final-epoch checkpoint
+(86.4% on the archived best-epoch corpus). An earlier 96% (independent-SEM audit) and 78.9%
 (pretrained-cell leak) are superseded and named as such. Predicted in
 advance from baselines alone: Swin-T's feature gain (4 of 4 in band), eight
 cells on four new domains (8 of 8 in sign), and the ImageNet-scale residual

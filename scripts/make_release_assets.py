@@ -135,8 +135,12 @@ def collect(pred):
     # runs_det added 2026-08-17: the detection task's records were unreachable
     # from here, so no predicate could ship them however it was written.
     # EXCLUDED_RUN_TREES still governs which "runs*" trees may ship.
-    tops = ("results", "runs", "runs_turing", "runs_dense", "runs_det",
-            "runs_ckptfix", "configs", "data", "logs")
+    # runs_bscpull added 2026-09-09: 125 cells (the prospective fusion
+    # combinations, the phase/symmetry targets, SUN RGB-D, MAE) exist ONLY
+    # there, and results/all_results.csv already reports them -- so the
+    # release cited cells whose records it did not ship.
+    tops = ("results", "runs", "runs_turing", "runs_bscpull", "runs_dense",
+            "runs_det", "runs_ckptfix", "configs", "data", "logs")
     out = []
     for t in tops:
         d = os.path.join(ROOT, t)

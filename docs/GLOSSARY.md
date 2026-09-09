@@ -144,9 +144,7 @@ test accuracy is below a crossing bracketed at **[31.8, 40.3]** points (few
 labels → the classifier can't exploit better features, so realized gain < G)
 and small and *positive* above it (aux features are easier to read —
 realized gain > G). Audited scope-wide by `analysis/audit_law_paired.py`
-(the canonical, seed-paired audit): 958 cells in scope, 455 resolvable
-against their own uncertainty, **393 (86.4%)** on the predicted side, 94.9%
-below the crossing and 67.4% above it, where the term is near zero and its
+(the canonical, seed-paired audit): 955 cells in scope, 485 resolvable against their own uncertainty, **408 (84.1%)** on the predicted side, 95.0% below the crossing (97.3% on the 261 cells far below it, where the term is large) and 59.5% above it, where the term is near zero and its
 sign barely tests anything. Its mechanism is a label-budget effect:
 re-probed at the cell's own label budget the term mostly vanishes and the
 frozen-feature gain tracks the end-to-end gain to 0.17 points (30 cells),

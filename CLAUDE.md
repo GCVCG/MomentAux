@@ -10444,3 +10444,129 @@ ported vs corrected and why.
   verified per worklist line -- not by trusting a drained counter -- and it
   probes last.pt so the new G values join the matched-epoch corpus rather than
   reopening the best.pt/last.pt split this campaign just closed.
+
+## SPACE ROUND BEFORE THE RESULTS UPDATE (2026-09-09, user: "please do")
+
+- THE LOCAL paper/ TREE WAS SYNCED TO THE USER'S MomentAux_latest.zip
+  (9 September): six files newer in the zip (main.tex gains the second RES
+  allocation IM-2026-1-0077 and loses a stray trailing character; main.abs;
+  s3b_budget; s3_results figure widths; cover_letter.md; SUBMISSION_FILES.md),
+  every zip file now byte-identical locally, backups in the scratchpad. The
+  new title carries an Oxford comma, which broke the cover-letter title check;
+  cover_letter.md, cover_letter.pdf and the README citation were reconciled.
+- CUTS APPLIED, gate green, **35 -> 34 pages** with the last page ~80% full,
+  i.e. ~1.2 pages freed against the ~2.8 I estimated. The estimate was
+  optimistic twice over: the text I ADDED back (the measurement-integrity
+  paragraph, the regime rows in tab:robust, the rewritten exceptions
+  paragraph) cost ~0.35 page, and the figure/table removals reflowed into
+  denser pages rather than into blank ones. Record the actual number, not
+  the estimate.
+    Sec. 14.1 "Better features, worse accuracy" + fig:exceptions: DELETED
+      (the regime is a corrupt-checkpoint artifact, 2026-08-25). Replaced by a
+      "Measurement integrity" paragraph in the limitations: identity audit
+      (2,262 cells, 3.5% damaged best.pt, last.pt intact 79/79), the
+      Delta/G epoch mismatch, the five cells re-measured with G tracking Delta,
+      and the law_robustness numbers (86.4 -> 87.5% over 361 under both
+      filters, below-crossing 94.9 -> 95.1). The RELEASED tables stay the
+      best.pt corpus as measured; the swap remains the user's decision.
+    tab:exceptions: DELETED. tab:robust's two flank rows became the three
+      regime rows (far below 242/248 = 97.6%, near below 56/66, above 95/141),
+      and Sec. 5.2's exceptions paragraph now leads with the regime split.
+    fig:cam: DELETED; its five cam* macros survive in one prose sentence.
+    tab:inenv: the ten baseline sub-rows removed (baselines now in the
+      fig:inenv(b) pointer and the caption). The table itself stays because
+      the ImageNet-100 fraction columns exist nowhere else; it is superseded
+      wholesale by the 200-epoch re-run anyway.
+    Sec. 9.2 decision-level fusion: the two definition equations folded into
+      prose; eq:ensgain KEPT because Sec. 9.1 and the Algorithm caption cite
+      it. Sec. 8.4 compressed to one paragraph. Appendix A.2 and A.5 deleted
+      (no \ref pointed at them; s6's Appendix~\ref{app:law} pointer removed).
+    Cross-references the first grep missed and the second caught: the intro
+      contribution list pointed at sec:exceptions; s5 and the Algorithm
+      caption at eq:ensgain; s6 at app:law. GREP EVERY LABEL BEFORE DELETING
+      A FLOAT, including equation labels.
+- *** FIFTH SILENTLY-IGNORED-PATH INCIDENT: analysis/law_robustness.py
+  defaulted its identity reports to a directory named `verify`, which was
+  moved to results/identity when the audit was released (d99da2e). The glob
+  matched nothing, the identity filter dropped ZERO cells, and the script
+  printed a complete-looking table in which "excluding identity-suspect" was
+  identical to "ALL". Caught only because the ledger's 87.5%/361 did not
+  reproduce. FIXED: default is results/identity and the script now EXITS
+  if no shard report is found. The ledger numbers reproduce exactly
+  (438/381 = 87.0%; 361/316 = 87.5%; below 251/264 = 95.1%).
+
+## THE CORPUS SWAP: EVERY RELEASED G NOW COMES FROM last.pt (2026-09-09,
+## user: "please do" on the recommendation; steps 1-4 of the plan)
+
+- STEP 1, THE GATE RELAUNCHED. The `lam > 0` assertion was removed from
+  slurm/in_e200_smoke.sbatch (repo copy) and from the deployed copy by
+  pulling it, editing locally and scp-ing it back (the remote sed had died
+  on the helper's quoting). The 13 DependencyNeverSatisfied jobs were
+  cancelled and the chain resubmitted with fresh dependencies: smoke
+  45617325; in64e200 45617326-28; in100e200 45617329-30; in64e200b
+  45617331-33 (afterany on the three in64e200); in64e200c 45617334-36;
+  in100e200b 45617337-38. Counters and locks were absent, the smoke scratch
+  dir gone. Four days of wall clock were lost to the assertion; nothing else.
+  "Do it locally" was read as "edit the file locally and ship it" -- running
+  ~650 GPU-hours on the shared 3090 would take months and was not done.
+- STEP 2, THE SWAP. results/all_results.csv, results_by_portion.csv,
+  law_audit.md and MomentStem_results.xlsx are now the MATCHED-EPOCH corpus
+  (every G from linear_probe_last.json); the best-epoch corpus is archived
+  as results/best_epoch/{all_results_best.csv, results_by_portion_best.csv,
+  law_audit_best.md} and results/matched_epoch/ is gone. The script DEFAULTS
+  flipped with it -- audit_law_paired.py, export_results_csv.py,
+  crossing_profile.py, export_excel.py (new PROBE_FILE constant and
+  --probe-file flag), law_robustness.py through the audit -- so "regenerate
+  with the default command" now yields the released corpus, and the audit
+  header names which corpus it read. The regenerated table was byte-identical
+  to the 31 August matched build before the duplicate directory was removed.
+  HEADLINE: 955 in scope (24 more than the 8/31 build, see below), 485
+  resolvable, 408 = 84.1% [80.6, 87.1]; below 320/337 = 95.0%; far below
+  254/261 = 97.3%; near below 66/76 = 86.8%; above 88/148 = 59.5%; one-vote
+  194/245 = 79.2%; held-out 341/389 = 87.7%; SEM ratio 0.541.
+  *** THE ONE-SEED BASELINE THE SWAP EXPOSED: abl25_none carried a
+  matched-epoch probe on seed0 only (all three last.pt identity-verified),
+  so every CIFAR-100 25% G paired against a one-seed baseline. Re-probed
+  locally (63.19 +-0.21, 3 seeds): 24 cells entered scope, no rate moved.
+  auxmag_25 G is +0.44 on both protocols, so the B3 25% divergence stays
+  +6.96 (+-0.53 now).
+  *** THE MANUSCRIPT PASS. Every hard-coded audit figure (tab:robust rows,
+  the held-out arithmetic 389+75+21, the CIFAR-100 LODO bracket [27.1, 71.7],
+  PathMNIST LODO 44.4%), every quoted G that moved (tab:tax, tab:scale, the
+  budget feature-side numbers, the So2Sat/EuroSAT-MS sensor G values, the
+  DINO and stack/substitute G values, the imprint +6.1, the MobileNet +0.14),
+  and the one-vote count in the methods were brought to the released
+  records; a probe-protocol sentence in Sec. 3.4 states that every
+  evaluation reads the final-epoch checkpoint; the prediction episodes keep
+  their AS-SCORED values with the matched-epoch values beside them (Swin
+  10.3/9.2/10.2/7.6, all in band; the PathMNIST domain cell MOVES INTO its
+  band, its miss having been the epoch mismatch, 8/8 now); the
+  measurement-integrity paragraph now states the swap and its mechanism
+  (86.4 -> 84.1 pooled because matched-epoch pulls above-bracket readouts
+  toward zero, 1.38 -> 1.09, and tighter paired SEM admits 30 more such
+  cells; 97.6 -> 97.3 far below; 94.9 -> 95.0 below). Two facts the swap
+  cost: the Tiny-ImageNet 10% budget pair has no matched-epoch G (turing
+  cells), so "six of six" became "five of five, and the sixth agreed under
+  the archived protocol"; and SimSiam-5x's feature ordering now matches e2e
+  at 6 of 8 (level at 10 AND 25%). Compute macros rose to 3,182 cells /
+  9,782 runs because the release now carries the limitations-campaign cells;
+  highlights.txt updated to match.
+  *** A SILENT GUARD, THE THIRTEENTH: scripts/check_table_numbers.py had
+  matched ZERO rows since tab:budget was transposed on 2026-08-19 and printed
+  "0 typed table values checked, 0 mismatched" -- a pass. Rewritten for the
+  transposed layout, table-scoped by \label, extended to tab:envelope, and
+  it now EXITS 1 when it checks nothing. First real run: 83 values, and
+  FIVE mismatches, all in the 1% row, all exactly 0.02 -- abl1_none's seed0
+  is a cluster H100 re-run of the local GeForce original (the 07-22 grid
+  re-run replaced it; the original survives in runs_turing) and the released
+  table had said +1.40 since at least 20 August while the paper said +1.42.
+  The paper now follows the records: C100@1% is +1.40 +-0.08 in tab:envelope,
+  tab:budget, the fixed-step comparison and both dense references.
+- STEP 3. Section 7 gained "The curve extended to ViT-L/16, on one recipe"
+  (the stabilizer, why the three models were re-run on it, +3.45/+4.34/+7.44,
+  ViT-L over ViT-B 4.7 SEM, S-to-B 1.4 SEM unresolved, flat aux arm, falling
+  baseline, bands and falsifiers), echoed in the intro, decision guide,
+  future directions and conclusion. Sec. 9.1's SAR channel-reduction caveat
+  is replaced by the block-G measurement (three reductions, none beats the
+  uniform mean). Article at exactly 35 pages, gate green, page 35 about half
+  full.

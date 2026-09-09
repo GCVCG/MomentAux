@@ -33,8 +33,20 @@ def _accs(runs, cell):
     return out
 
 
-def _evals(runs, cell):
-    f = os.path.join(runs, cell, "linear_probe.json")
+def _evals(runs, cell, probe_file="linear_probe_last.json"):
+    """Per-seed probe accuracy for `cell`.
+
+    THE PROBE FILENAME IS A PARAMETER BECAUSE THE AUDIT BYPASSES THE TABLE.
+    export_results_csv.py gained --probe-file so the whole corpus could be
+    regenerated from matched-epoch (last.pt) probes, but this script reads the
+    CSV only for SCOPE and PAIRING and recomputes every readout from the run
+    directories -- so with the filename hardcoded the repair could never reach
+    the paper's central number, and the audit returned a byte-identical result
+    on a table whose G differed on 1,589 cells.  Switch the WHOLE audit or
+    none of it: a run mixing best.pt and last.pt probes would make readout
+    incomparable across its own rows, which is the defect being repaired.
+    """
+    f = os.path.join(runs, cell, probe_file)
     if not os.path.isfile(f):
         return {}
     try:
@@ -129,7 +141,7 @@ def _gap(runs, cell, seed):
     return _GAPC[key]
 
 
-def load(runs, csv_path, min_seeds=3):
+def load(runs, csv_path, min_seeds=3, probe_file="linear_probe_last.json"):
     ca, ce, rows = {}, {}, []
     for r in csv.DictReader(open(csv_path)):
         if not in_scope(r):
@@ -143,7 +155,7 @@ def load(runs, csv_path, min_seeds=3):
             continue
         for c in (r["cell"], b):
             ca.setdefault(c, _accs(runs, c))
-            ce.setdefault(c, _evals(runs, c))
+            ce.setdefault(c, _evals(runs, c, probe_file))
         aa, ba, ae, be = ca[r["cell"]], ca[b], ce[r["cell"]], ce[b]
         common = sorted(set(aa) & set(ba) & set(ae) & set(be))
         if len(common) < min_seeds:
@@ -181,12 +193,16 @@ def main():
     ap.add_argument("--runs", default="runs")
     ap.add_argument("--csv", default="results/all_results.csv")
     ap.add_argument("--k", type=float, default=2.0)
+    ap.add_argument("--probe-file", default="linear_probe_last.json",
+                    help="probe json to read per cell; use "
+                         "linear_probe_last.json for the matched-epoch corpus "
+                         "(mirrors export_results_csv.py --probe-file)")
     ap.add_argument("--epoch-gap-max", type=float, default=None,
                     help="keep only cells whose paired best-minus-final gap "
                          "differs by at most this many points between the two "
                          "arms; bounds the Delta/G epoch-mismatch exposure")
     a = ap.parse_args()
-    rows = load(a.runs, a.csv)
+    rows = load(a.runs, a.csv, probe_file=a.probe_file)
     if a.epoch_gap_max is not None:
         n0 = len(rows)
         rows = [x for x in rows if x["egap"] <= a.epoch_gap_max]
@@ -205,6 +221,10 @@ def main():
           "the paper.")
     print("Uncertainty is seed-paired. Regenerate with the command in the "
           "title line.")
+    print(f"Probe file: {a.probe_file}"
+          + ("   (matched-epoch corpus: the released one, every G from last.pt)"
+             if a.probe_file == "linear_probe_last.json" else
+             "   (ARCHIVED best-epoch corpus, NOT the released one)"))
     print("Scope excludes 100% cells: the probe-ceiling rule refuses the "
           "G/readout split")
     print("where the evaluation's labels are the cell's own "

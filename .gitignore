@@ -25,9 +25,9 @@ results/*
 # epoch. It is a SEPARATE directory rather than a replacement so both
 # protocols stay inspectable; a table mixing the two would make G
 # incomparable across its own rows, which is the defect being repaired.
-!results/matched_epoch/
-!results/matched_epoch/*.csv
-!results/matched_epoch/*.md
+!results/best_epoch/
+!results/best_epoch/*.csv
+!results/best_epoch/*.md
 release/
 slurm/logs/
 logs/*.pid

@@ -158,11 +158,21 @@ def sheet_readme(wb, stats):
     return ws
 
 
+# One evaluation protocol: G comes from the final-epoch checkpoint, the network
+# whose accuracy Delta describes. The best-epoch probes are the archived corpus.
+PROBE_FILE = "linear_probe_last.json"
+
+
 def main():
+    global PROBE_FILE
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs-root", action="append", default=None)
     ap.add_argument("--out", default="results/MomentStem_results.xlsx")
+    ap.add_argument("--probe-file", default=PROBE_FILE,
+                    help="linear_probe_last.json = matched-epoch (released); "
+                         "linear_probe.json = archived best-epoch corpus")
     args = ap.parse_args()
+    PROBE_FILE = args.probe_file
     roots = [r for r in (args.runs_root or ["runs", "runs_turing"])
              if os.path.isdir(r)]
     cells = load_cells(roots)
@@ -191,7 +201,7 @@ def main():
         cfg, accs = rec["cfg"], list(rec["seeds"].values())
         aux = cfgget(cfg, "moment_aux") or {}
         ds, pct = cfgget(cfg, "dataset"), cfgget(cfg, "subset_pct") or 100
-        probe = rec["probes"].get("linear_probe.json")
+        probe = rec["probes"].get(PROBE_FILE)
         ch = CHANCE.get(ds, 1.0)
         n_coll = sum(1 for v in accs if v <= ch * 1.5)
         bistable = n_coll > 0 and st.mean(accs) > ch * 3
@@ -228,7 +238,7 @@ def main():
             d["delta"] = round(st.mean(accs) - st.mean(baccs), 3)
             s = sem_of_diff(accs, baccs)
             d["delta_sem"] = round(s, 3) if s != "" else None
-            bp = cells[b]["probes"].get("linear_probe.json")
+            bp = cells[b]["probes"].get(PROBE_FILE)
             if probe and bp:
                 g = st.mean(probe) - st.mean(bp)
                 d["G"] = round(g, 3)

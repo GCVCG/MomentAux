@@ -112,7 +112,7 @@ def main():
     ap.add_argument("--runs-root", action="append", default=None,
                     help="repeatable; later roots win on seed collisions")
     ap.add_argument("--out", default="results/all_results.csv")
-    ap.add_argument("--probe-file", default="linear_probe.json",
+    ap.add_argument("--probe-file", default="linear_probe_last.json",
                     help="which probe record supplies G. The default is the "
                          "recorded best.pt probe; linear_probe_last.json is "
                          "the MATCHED-EPOCH probe, measured on the same "

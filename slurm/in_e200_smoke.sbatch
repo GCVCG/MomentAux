@@ -81,7 +81,7 @@ aux  = float(last.get("aux_loss") or 0.0)
 n    = len(rows)
 # chance is 0.1% on ImageNet64 (1000-way) and 1% on ImageNet-100 (100-way)
 chance = 0.1 if "in64" in cell else 1.0
-ok = (not bad) and acc > 2 * chance and lam > 0 and aux > 0
+ok = (not bad) and acc > 2 * chance and aux > 0
 print(f"{'PASS' if ok else 'FAIL'} {cell} :: {n} epochs, test_acc {acc:.2f}% "
       f"(chance {chance}%), lambda {lam:.3f}, aux_loss {aux:.4f}"
       + (f", NON-FINITE at epochs {bad[:5]}" if bad else ""))

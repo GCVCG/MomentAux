@@ -82,7 +82,7 @@ flowchart TD
     readout < 0 below the crossing
     readout ≳ 0 above it
     crossing bracketed in [31.8, 40.3]
-    455 resolvable cells, 393 (86.4%) as predicted"]
+    485 resolvable cells, 408 (84.1%) as predicted"]
 ```
 
 Guard rails: the decomposition is valid only while the probe holds far more

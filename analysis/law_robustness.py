@@ -11,7 +11,7 @@ audit under each filter and both together:
              best-minus-final, so the Delta/G epoch mismatch cannot bias it
 
 Usage:  python analysis/law_robustness.py [--verify-dir DIR]
-The verify directory holds the identity sweep's best_shard*.json reports.
+The verify directory (default results/identity, the released audit) holds the identity sweep's best_shard*.json reports.
 """
 import sys, os, csv, json, glob
 sys.path.insert(0, "analysis")
@@ -19,8 +19,11 @@ import audit_law_paired as A
 
 bad = set()
 VDIR = (sys.argv[sys.argv.index("--verify-dir") + 1]
-        if "--verify-dir" in sys.argv else "verify")
-for f in glob.glob(os.path.join(VDIR, "best_shard*.json")):
+        if "--verify-dir" in sys.argv else "results/identity")
+_shards = glob.glob(os.path.join(VDIR, "best_shard*.json"))
+if not _shards:
+    sys.exit(f"no best_shard*.json under {VDIR!r}; pass --verify-dir")
+for f in _shards:
     for r in json.load(open(f))["results"]:
         st = r.get("status") or ("ok" if abs(r["diff"]) <= 0.5 else "FAIL")
         if st in ("FAIL", "CORRUPT"):

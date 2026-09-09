@@ -26,8 +26,8 @@ self-supervised pre-training (SimCLR, SimSiam, DINO, masked
 reconstruction), ImageNet transfer,
 DeiT-strength augmentation, and learned FitNets teachers — each reported
 against a **declared multiple of baseline training compute**, and every
-pairwise combination measured. 3,077<!--computeCells--> classification
-configurations over 9,471<!--computeRuns--> runs, on 13 datasets and 9
+pairwise combination measured. 3,182<!--computeCells--> classification
+configurations over 9,782<!--computeRuns--> runs, on 13 datasets and 9
 backbones from 150 to 1.28M images and 32 to 224 px, plus segmentation and
 detection transplants.
 
@@ -79,9 +79,9 @@ and exporters released here.
 The law behind every cell: **Δ = G(features) + readout(baseline accuracy)**
 — `G` measured by linear probes on frozen features, readout negative below
 the measured crossing bracket `[31.8, 40.3]` and positive above it. Of the
-455<!--auditResolvable--> cells whose readout is resolvable against its own
-seed-paired uncertainty, **393<!--auditCorrect--> (86.4<!--auditRate-->%)
-fall on the predicted side** — 94.9<!--auditBelowRate-->% below the crossing,
+485<!--auditResolvable--> cells whose readout is resolvable against its own
+seed-paired uncertainty, **408<!--auditCorrect--> (84.1<!--auditRate-->%)
+fall on the predicted side** — 95.0<!--auditBelowRate-->% below the crossing,
 where the account makes a strong prediction. Machine-verified by
 `analysis/audit_law_paired.py`, which is the canonical audit; the older
 `audit_sign_law.py` uses an independent-SEM formula the paper withdrew, and

@@ -158,7 +158,7 @@
                 compute cost declared. The gain then decomposes as
                 &Delta;&nbsp;=&nbsp;<em>G</em>&nbsp;+&nbsp;readout(base): what a source does to the
                 features, plus what the classifier can cash in. The sign of that second
-                term is correct on 86.4<!--auditRate-->% of the cells that
+                term is correct on 84.1<!--auditRate-->% of the cells that
                 can test it. Sources supplying the <em>same</em> currency substitute; sources
                 supplying different ones can stack; fusing a strong shaping
                 prior into an already-informed initialization interferes in proportion to what
@@ -177,8 +177,8 @@
                 ImageNet transfer, augmentation, learned teachers) under one frozen recipe
                 with fixed subsets: 13 datasets, 9 backbones, 150 to 1.28M images,
                 32&ndash;224&nbsp;px, 2.5M&ndash;86M parameters
-                (3,077<!--computeCells--> classification configurations over
-                9,471<!--computeRuns--> runs, plus segmentation and detection
+                (3,182<!--computeCells--> classification configurations over
+                9,782<!--computeRuns--> runs, plus segmentation and detection
                 transplants).</p>
 
                 <p>Every pairwise combination we measure at training time follows one rule
@@ -196,7 +196,7 @@
                 gain predicts the end-to-end gain to within 0.17 points across 30 cells and
                 seven datasets; the underlying decomposition,
                 &Delta;&nbsp;=&nbsp;<em>G</em>&nbsp;+&nbsp;readout(base), holds in sign on
-                86.4<!--auditRate-->% of testable cells and called an unseen backbone family's
+                84.1<!--auditRate-->% of testable cells and called an unseen backbone family's
                 feature gain in advance.</p>
             </div>
 
@@ -264,8 +264,8 @@
         intervention decomposes into what it does to the <em>features</em> (<em>G</em>,
         measured by an identical linear evaluation on frozen representations) and a
         <em>readout</em> term set by how well the baseline already performs. The sign is
-        correct on 86.4<!--auditRate-->% of the cells where it is statistically resolvable
-        (393<!--auditCorrect--> of 455<!--auditResolvable-->, and 94.9<!--auditBelowRate-->%
+        correct on 84.1<!--auditRate-->% of the cells where it is statistically resolvable
+        (408<!--auditCorrect--> of 485<!--auditResolvable-->, and 95.0<!--auditBelowRate-->%
         on the scarce-data flank). It is informative on
         the scarce-data flank, where the readout term is large and negative, and close to
         uninformative once that term has decayed to nothing, and we say so rather than
@@ -414,7 +414,7 @@
     <div class="table-responsive">
     <table class="table table-sm">
         <tbody>
-        <tr><th style="width:34%">Scale</th><td>3,077<!--computeCells--> classification configurations over 9,471<!--computeRuns--> training runs, plus 216<!--denseCells--> segmentation and 36<!--detCells--> detection runs</td></tr>
+        <tr><th style="width:34%">Scale</th><td>3,182<!--computeCells--> classification configurations over 9,782<!--computeRuns--> training runs, plus 216<!--denseCells--> segmentation and 36<!--detCells--> detection runs</td></tr>
         <tr><th>Datasets</th><td>13, spanning natural images, satellite, texture, fine-grained,
             food and histopathology, plus multi-sensor Sentinel-1/2 pairs</td></tr>
         <tr><th>Backbones</th><td>9 across 5 families: ResNet-18/34/50, ConvNeXt, MobileNetV3,

@@ -2,50 +2,51 @@
 
 This is the canonical audit and the source of every law number in the paper.
 Uncertainty is seed-paired. Regenerate with the command in the title line.
+Probe file: linear_probe_last.json   (matched-epoch corpus: the released one, every G from last.pt)
 Scope excludes 100% cells: the probe-ceiling rule refuses the G/readout split
 where the evaluation's labels are the cell's own (Section: statistical protocol).
 
 ==============================================================
-law-scope cells with >=3 seed-matched arms : 958
-SEM(paired)/SEM(independent) median        : 0.601  (independent overstates in 82%)
-inside crossing bracket (no prediction)    : 94
-unresolved (|readout| <= 2.0 SEM)            : 409
-RESOLVABLE (these test the law)            : 455
-  sign as predicted                        : 393 (86.4%)
-  wrong side                               : 62
-  Wilson 95% CI                            : [82.9, 89.2]
-  majority-sign baseline                   : 75.6%  (always predict the commoner sign)
+law-scope cells with >=3 seed-matched arms : 955
+SEM(paired)/SEM(independent) median        : 0.541  (independent overstates in 86%)
+inside crossing bracket (no prediction)    : 93
+unresolved (|readout| <= 2.0 SEM)            : 377
+RESOLVABLE (these test the law)            : 485
+  sign as predicted                        : 408 (84.1%)
+  wrong side                               : 77
+  Wilson 95% CI                            : [80.6, 87.1]
+  majority-sign baseline                   : 78.4%  (always predict the commoner sign)
 ==============================================================
 
 THRESHOLD SENSITIVITY
-  >1.0 SEM :  509/629  = 80.9%  [77.7, 83.8]
-  >1.5 SEM :  446/531  = 84.0%  [80.6, 86.9]
-  >2.0 SEM :  393/455  = 86.4%  [82.9, 89.2]
-  >2.5 SEM :  343/384  = 89.3%  [85.8, 92.0]
-  >3.0 SEM :  304/342  = 88.9%  [85.1, 91.8]
+  >1.0 SEM :  502/635  = 79.1%  [75.7, 82.0]
+  >1.5 SEM :  456/553  = 82.5%  [79.1, 85.4]
+  >2.0 SEM :  408/485  = 84.1%  [80.6, 87.1]
+  >2.5 SEM :  362/425  = 85.2%  [81.5, 88.2]
+  >3.0 SEM :  323/371  = 87.1%  [83.3, 90.1]
 
 BY FLANK
-  below crossing :  298/314  = 94.9%  [91.9, 96.8]
-  above crossing :   95/141  = 67.4%  [59.3, 74.6]
+  below crossing :  320/337  = 95.0%  [92.1, 96.8]
+  above crossing :   88/148  = 59.5%  [51.4, 67.0]
 
 CLUSTERED (one vote per dataset,backbone,fraction)
-  192/235 = 81.7%  [76.3, 86.1]   (455 cells, 235 groups)
+  194/245 = 79.2%  [73.7, 83.8]   (485 cells, 245 groups)
 
 LEAVE-ONE-DATASET-OUT (bracket re-estimated without that dataset)
-  cifar10      [ 23.3, 50.1]   17/20  = 85.0%
-  cifar100     [ 29.5, 71.0]  129/134 = 96.3%
-  cub          [ 30.0, 55.5]   35/37  = 94.6%
-  dtd          [ 29.6, 54.4]   25/26  = 96.2%
-  eurosat      [ 27.4, 49.7]   26/35  = 74.3%
-  food101      [ 28.5, 50.1]   41/47  = 87.2%
-  pathmnist    [ 27.2, 43.3]   10/19  = 52.6%
-  stl10        [ 27.5, 50.7]   10/11  = 90.9%
-  tin          [ 32.2, 54.5]   54/62  = 87.1%
-  POOLED HELD-OUT: 347/391 = 88.7%  [85.2, 91.5]
+  cifar10      [ 22.7, 59.8]   10/13  = 76.9%
+  cifar100     [ 27.1, 71.7]  131/151 = 86.8%
+  cub          [ 26.1, 71.8]   41/43  = 95.3%
+  dtd          [ 25.2, 71.8]   25/26  = 96.2%
+  eurosat      [ 23.2, 58.5]   24/30  = 80.0%
+  food101      [ 24.4, 71.8]   39/40  = 97.5%
+  pathmnist    [ 23.9, 50.5]    8/18  = 44.4%
+  stl10        [ 24.7, 71.8]    8/9   = 88.9%
+  tin          [ 27.8, 71.8]   55/59  = 93.2%
+  POOLED HELD-OUT: 341/389 = 87.7%  [84.0, 90.6]
 
 WHAT THE READOUT DEPENDS ON (variance explained)
-  baseline accuracy alone (5-point bins) : R^2 = 0.268
-  + dataset   on the residual            : R^2 = 0.133  (20 levels)
-  + backbone  on the residual            : R^2 = 0.003  (7 levels)
-  + fraction  on the residual            : R^2 = 0.015  (10 levels)
-  residual SD at fixed baseline          : 1.95 points
+  baseline accuracy alone (5-point bins) : R^2 = 0.300
+  + dataset   on the residual            : R^2 = 0.151  (20 levels)
+  + backbone  on the residual            : R^2 = 0.010  (7 levels)
+  + fraction  on the residual            : R^2 = 0.012  (10 levels)
+  residual SD at fixed baseline          : 1.71 points
