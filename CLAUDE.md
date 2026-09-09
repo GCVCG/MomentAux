@@ -10570,3 +10570,17 @@ ported vs corrected and why.
   is replaced by the block-G measurement (three reductions, none beats the
   uniform mean). Article at exactly 35 pages, gate green, page 35 about half
   full.
+- STEP 4. scripts/run_checks.sh green (suite, public-numbers drift, strict
+  submission gate); release assets rebuilt into dist/ with SHA256SUMS, now
+  INCLUDING runs_bscpull (125 reported cells lived only there and the
+  release cited them without shipping their records; runs_bscpull as a git
+  tree stays untracked like runs/, since 8,113 finals is the whole cluster
+  mirror and records ship via the tarballs). Two commits: 1557104 (the
+  bounded-claim propagation to every lane, the campaign lanes, identity
+  records and logs) and 12223fe (the corpus swap and everything above).
+  NOT PUSHED and the GitHub release NOT re-tagged: both are the user's
+  actions, and the dist/ tarballs are what a re-tag should upload.
+- STEP 5 WAITS ON THE CLUSTER: smoke 45617325 pending on queue priority at
+  the time of writing; the 13 lane jobs behind it. When the 276 finals exist
+  (verified per worklist line), probe last.pt so the new G values join the
+  matched-epoch corpus, score J1-J5, and replace Table 15 / Fig. 9 in place.
