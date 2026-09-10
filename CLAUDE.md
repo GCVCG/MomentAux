@@ -10694,3 +10694,32 @@ ported vs corrected and why.
   partial R50 seed dirs were removed and re-queued; seed0 was never touched.
   Measured (epochs 3-4, card to itself): R50 @224 152 s/epoch => 8.4 h/run,
   ~2 days for the six-run pair.
+
+- *** BLOCK D SCORED (2026-09-10; the 18 finals and 6 probes had sat on the
+  cluster since the 2026-08-24 NODE_FAIL recovery, unpulled and unscored;
+  pulled to runs_dense/ today, probes on best.pt as the lane was written):
+      pct  epochs  base_mIoU  aux    Delta         base_pixAcc   G            readout
+        5     10     1.58    1.75   +0.17+-0.01     35.06      +0.16+-0.01   +0.01
+       10      5     1.58    1.73   +0.15+-0.02     35.11      +0.20+-0.02   -0.05
+       25      2     1.51    1.70   +0.19+-0.07     34.39      +0.23+-0.02   -0.04
+  Delta lands in its +0.1..+0.6 band at all three; trained pixel accuracy
+  lands in the predicted 26-36 range but INSIDE the crossing bracket
+  [31.8, 40.3] at every fraction, so the pre-registered no-call rule applies
+  and the falsifier (readout clearly positive at a cell BELOW 31.8) cannot
+  fire; readout is a difference of two numbers near +0.2 and unresolvable,
+  the outcome the block's own "stated expectation" named as most likely. The
+  E-K limitation stands and is now stated in Sec. 11.4 as the last dense
+  instrument built for it. aggregate_dense.py enumerates populations by name,
+  so these diag cells do not enter the dense grid tables; the release
+  collector ships runs_dense wholesale, so their records ship.
+- *** B-1 REGENERATED ON THE MATCHED-EPOCH CORPUS AND ADDED TO THE PAPER
+  (2026-09-10). results/fusion_predicates.md now scores 134 pairs (two lost
+  their matched-epoch G), core n=57: best STACK-vs-rest predicate G_max at
+  LOFO AUC 0.777 (G_absdiff 0.774), bar 0.80 NOT reached, REL 0.502 = chance,
+  amp_flag 0.525; INTERFERE-vs-rest base_acc LOFO AUC 0.834 at threshold
+  41.7 (0.867 on resolved STACK-vs-INTERFERE). Same verdict as the 2026-08-24
+  build (0.793 / 0.842). Sec. 9.3 gained one paragraph stating it, with the
+  amplifier account (augmentation's own G on ViT-tiny -0.2/+3.6/+4.8 at
+  5/10/25%, matched-epoch, against +7.3/+11.6/+15.2 added to the prior) and
+  the strength rule's 8/9 -> 1/6 -> 0/2 record. Wave 3 never ran, so the
+  interference predicate is retrospective leave-one-family-out, stated so.
